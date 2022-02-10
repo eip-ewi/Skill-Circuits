@@ -1,0 +1,111 @@
+#
+# Skill Circuits
+# Copyright (C) 2022 - Delft University of Technology
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+
+spring:
+  profiles:
+    active: dev
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+
+  liquibase:
+    change-log: "classpath:/changelog-master.yaml"
+
+  datasource:
+    url: jdbc:h2:mem:devdb
+
+  h2:
+    console:
+      enabled: true
+
+  mail:
+    default-encoding: UTF-8
+    host: smtp.server
+    port: 587
+    username: email@addre.ss
+    password: password
+    protocol: smtp
+    properties.mail.smtp:
+      auth: true
+      starttls.enable: true
+      ssl.trust: smtp.server
+
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
+
+logging:
+  level:
+    ROOT: info
+
+server:
+  port: 8084
+
+labrador:
+  core:
+    url: http://localhost:8082
+    apiKey: cc060386-8a24-40ab-8008-31eace667a04
+    apiSecret: MCpu0dKaUYTwrxHMWZKmO5NgTxOh2r3B0oA1L5odv7U0TlOuQvv1pqMAZFfxsrQe5iEBDQGgi39WJFaHdVfX1Qy9
+  sso:
+    type: in_memory
+    login-path: /auth/login
+    # logout-path should not be overridden in a controller! logout-path will logout the user and redirect to success-url.
+    logout-path: /auth/logout
+    mem:
+      # If this field is true, it redirects you to last attempted page before login, otherwise to success-url.
+      saved-request-aware: true
+      # This field holds the url that the user is redirected to after successful login as well as after the logout.
+      # Therefore, check if a url is accessible without authentication before setting it to be the success-url.
+      success-url: /
+
+# For the SAML security configurations, we refer to documentation here:
+# https://github.com/ulisesbocchio/spring-boot-security-saml
+
+# The following configuration is taken from our test setup for LabraDoor:
+saml:
+  sso:
+    authentication-provider:
+      force-principal-as-string: false
+    metadata-generator:
+      entity-id: <eid>
+      entity-base-url: http://localhost:8084
+    key-manager:
+      store-location: classpath:/security/testKeystore.jks
+      default-key: 1
+      store-pass: <pwd>
+      key-passwords:
+        1: <pwd>
+
+    extended-delegate:
+      metadata-require-signature: false
+      metadata-trust-check: true
+
+    extended-metadata:
+      idp-discovery-enabled: false
+
+    idp:
+      metadata-location: https://eipdev.ewi.tudelft.nl/saml/saml2/idp/metadata.php
+
+    context-provider:
+      lb:
+        scheme: http
+        server-name: localhost
+        server-port: 8084
+        include-server-port-in-request-url: true

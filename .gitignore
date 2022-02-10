@@ -1,0 +1,38 @@
+generated
+# Gradle
+.gradle/
+
+build/
+bin/
+out/
+
+# Maven
+target/
+
+# IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse
+.classpath
+.project
+.settings/
+.springBeans
+
+src/main/resources/application.yaml
+log4j.properties
+sentry.properties
+
+# h2 databases
+*.db
+
+# MacOS
+*.DS_Store
+
+# zsh autocompletion
+.gradletasknamecache
+
+# css
+/src/main/resources/static/css
