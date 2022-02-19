@@ -17,39 +17,41 @@
  */
 package nl.tudelft.skills.controller;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.transaction.Transactional;
-
-import nl.tudelft.skills.model.SCModule;
+import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.repository.ModuleRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-public class HomeController {
+@RequestMapping("module")
+public class ModuleController {
 
 	private ModuleRepository moduleRepository;
 
 	@Autowired
-	public HomeController(ModuleRepository moduleRepository) {
+	public ModuleController(ModuleRepository moduleRepository) {
 		this.moduleRepository = moduleRepository;
 	}
 
-	@Transactional
-	@GetMapping("/")
-	public String getHomePage(Model model) {
-		// Temporarily put all modules on the home page
-		List<SCModule> allModules = moduleRepository.findAll();
-		model.addAttribute("moduleIds", allModules.stream().map(SCModule::getId).toList());
-		model.addAttribute("moduleNames",
-				allModules.stream().collect(Collectors.toMap(SCModule::getId, SCModule::getName)));
-
-		return "index";
+	/**
+	 * Gets the page for a single module. This page contains a circuit with all submodules, skills, and tasks
+	 * in the module.
+	 *
+	 * @param  id    The id of the module
+	 * @param  model The model to add data to
+	 * @return       The page to load
+	 */
+	@GetMapping("{id}")
+	public String getModulePage(@PathVariable Long id, Model model) {
+		model.addAttribute("module",
+				View.convert(moduleRepository.findByIdOrThrow(id), ModuleLevelModuleViewDTO.class));
+		return "module/view";
 	}
 
 }

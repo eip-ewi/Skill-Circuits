@@ -15,61 +15,31 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.model;
+package nl.tudelft.skills.dto.view.module;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
-import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
+import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.model.SCModule;
 
 @Data
-@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Skill {
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private Long id;
+@EqualsAndHashCode(callSuper = false)
+public class ModuleLevelModuleViewDTO extends View<SCModule> {
 
 	@NotNull
-	@ManyToOne
-	private Submodule submodule;
-
+	private Long id;
+	@NotNull
+	private Long edition;
 	@NotBlank
 	private String name;
-
 	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany
-	private Set<Skill> parents = new HashSet<>();
-
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany(mappedBy = "parents")
-	private Set<Skill> children = new HashSet<>();
-
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@OneToMany(mappedBy = "skill")
-	private Set<Task> tasks = new HashSet<>();
-
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany(mappedBy = "skills")
-	private Set<Checkpoint> checkpoints = new HashSet<>();
+	private List<ModuleLevelSubmoduleViewDTO> submodules;
 
 }

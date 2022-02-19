@@ -15,33 +15,37 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.config;
+package nl.tudelft.skills.controller;
 
-import static org.modelmapper.convention.MatchingStrategies.STRICT;
+import java.util.Random;
 
-import nl.tudelft.librador.EnableLibrador;
-import nl.tudelft.librador.LibradorConfigAdapter;
-import nl.tudelft.librador.dto.id.IdMapperBuilder;
+import nl.tudelft.skills.test.TestDatabaseLoader;
 
+import org.junit.jupiter.api.TestInstance;
 import org.modelmapper.ModelMapper;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.MockMvc;
 
-@Configuration
-@EnableLibrador
-public class LibradorConfiguration extends LibradorConfigAdapter {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public abstract class ControllerTest {
 
-	@Override
-	protected void configure(IdMapperBuilder builder) {
-		//		builder.register(IdDTO.class, Model.class);
+	private static final Random random = new Random(42L);
+
+	@Autowired
+	private ModelMapper mapper;
+
+	@Autowired
+	protected TestDatabaseLoader db;
+
+	@Autowired
+	protected MockMvc mvc;
+
+	protected Long randomId() {
+		return random.nextLong(1000000000L);
 	}
 
-	@Bean
-	@Override
-	public ModelMapper modelMapper() {
-		ModelMapper modelMapper = super.modelMapper();
-		modelMapper.getConfiguration().setMatchingStrategy(STRICT);
-		return modelMapper;
+	protected <T> T map(Object source, Class<T> dest) {
+		return mapper.map(source, dest);
 	}
 
 }

@@ -15,14 +15,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills;
+package nl.tudelft.skills.test;
 
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import nl.tudelft.labracore.api.EditionControllerApi;
-import nl.tudelft.labracore.api.dto.*;
+import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Submodule;
@@ -33,13 +32,12 @@ import nl.tudelft.skills.repository.SubmoduleRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
+@Primary
 @Service
-@Profile("dev")
-@SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection") // Can be disabled as this class is not tested.
-public class DevDatabaseLoader {
+public class TestDatabaseLoader {
 
 	@Autowired
 	private ModuleRepository moduleRepository;
@@ -50,42 +48,43 @@ public class DevDatabaseLoader {
 	@Autowired
 	private TaskRepository taskRepository;
 
-	@Autowired
-	private EditionControllerApi editionApi;
-
-	private EditionDetailsDTO edition;
+	public EditionDetailsDTO edition;
 
 	private SCModule moduleProofTechniques;
 
-	private Submodule submoduleLogicBasics;
-	private Submodule submoduleGeneralisation;
-	private Submodule submoduleCases;
-	private Submodule submoduleContradiction;
-	private Submodule submoduleContrapositive;
-	private Submodule submoduleInduction;
+	public Submodule submoduleLogicBasics;
+	public Submodule submoduleGeneralisation;
+	public Submodule submoduleCases;
+	public Submodule submoduleContradiction;
+	public Submodule submoduleContrapositive;
+	public Submodule submoduleInduction;
 
-	private Skill skillImplication;
-	private Skill skillNegation;
+	public Skill skillImplication;
+	public Skill skillNegation;
 
-	private Skill skillVariables;
-	private Skill skillProofOutline;
-	private Skill skillGeneralisationPractice;
-	private Skill skillAssumption;
+	public Skill skillVariables;
+	public Skill skillProofOutline;
+	public Skill skillGeneralisationPractice;
+	public Skill skillAssumption;
 
-	private Skill skillDividingIntoCases;
-	private Skill skillCasesPractice;
+	public Skill skillDividingIntoCases;
+	public Skill skillCasesPractice;
 
-	private Skill skillContradictionPractice;
+	public Skill skillContradictionPractice;
 
-	private Skill skillNegateImplications;
-	private Skill skillContrapositivePractice;
+	public Skill skillNegateImplications;
+	public Skill skillContrapositivePractice;
 
-	private Skill skillTransitiveProperty;
-	private Skill skillInductionPractice;
+	public Skill skillTransitiveProperty;
+	public Skill skillInductionPractice;
+
+	public SCModule getModuleProofTechniques() {
+		return moduleRepository.findByIdOrThrow(moduleProofTechniques.getId());
+	}
 
 	@PostConstruct
 	private void init() {
-		edition = editionApi.getAllEditions().blockFirst();
+		edition = new EditionDetailsDTO().id(69L).name("Reasoning and Logic");
 
 		initModules();
 		initSubmodules();

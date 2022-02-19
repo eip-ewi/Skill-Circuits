@@ -20,18 +20,30 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
-    <title>Skill Circuits</title>
+    <title th:text="${module.name}"></title>
 </head>
 
 <body>
 
 <div>
 
-    <h1>Welcome to Skill Circuits</h1>
+    <h1 th:text="${module.name}"></h1>
 
-    <ul>
-        <li th:each="moduleId : ${moduleIds}"><a th:href="@{|/module/${moduleId}|}" th:text="${moduleNames.get(moduleId)}"></a></li>
-    </ul>
+    <div th:each="submodule : ${module.submodules}">
+
+        <h2 th:text="${submodule.name}"></h2>
+
+        <div th:each="skill : ${submodule.skills}">
+
+            <h3 th:text="${skill.name}"></h3>
+
+            <ul>
+                <li th:each="task : ${skill.tasks}" th:text="${task.name}"></li>
+            </ul>
+
+        </div>
+
+    </div>
 
 </div>
 
