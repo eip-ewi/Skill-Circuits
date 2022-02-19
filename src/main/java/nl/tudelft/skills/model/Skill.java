@@ -73,6 +73,20 @@ public class Skill {
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
+	@ManyToMany
+	private Set<Skill> parents = new HashSet<>();
+
+	@NotNull
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@ManyToMany(mappedBy = "parents")
+	private Set<Skill> children = new HashSet<>();
+
+	@NotNull
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
 	@OneToMany(mappedBy = "skill")
 	private Set<Task> tasks = new HashSet<>();
 
