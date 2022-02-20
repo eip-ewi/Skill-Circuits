@@ -24,14 +24,11 @@ import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.repository.ModuleRepository;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.ExtendedModelMap;
-import org.springframework.ui.Model;
 
 @Transactional
 @AutoConfigureMockMvc
