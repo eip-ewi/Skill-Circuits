@@ -46,6 +46,13 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import nl.tudelft.skills.TestSkillCircuitsApplication;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithUserDetails;
+
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
 public class AuthorisationServiceTest {
 
@@ -98,6 +105,7 @@ public class AuthorisationServiceTest {
 		assertThat(authorisationService.isAuthenticated()).isTrue();
 	}
 
+<<<<<<< HEAD
 	@Test
 	@WithUserDetails("admin")
 	void isAdmin() {
