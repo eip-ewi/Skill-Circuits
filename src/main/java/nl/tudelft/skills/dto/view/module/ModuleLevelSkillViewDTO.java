@@ -38,6 +38,10 @@ public class ModuleLevelSkillViewDTO extends View<Skill> {
 	@NotBlank
 	private String name;
 	@NotNull
+	private Integer row;
+	@NotNull
+	private Integer column;
+	@NotNull
 	private List<TaskViewDTO> tasks;
 
 }

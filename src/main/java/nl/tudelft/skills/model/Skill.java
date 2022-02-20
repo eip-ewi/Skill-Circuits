@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -43,6 +44,16 @@ public class Skill {
 
 	@NotBlank
 	private String name;
+
+	@Min(0)
+	@NotNull
+	@Column(name = "yPos")
+	private Integer row;
+
+	@Min(0)
+	@NotNull
+	@Column(name = "xPos")
+	private Integer column;
 
 	@NotNull
 	@Builder.Default

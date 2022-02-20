@@ -19,22 +19,18 @@
 -->
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{container}">
-<head>
-    <title>Skill Circuits</title>
-</head>
+      layout:decorate="~{layout}">
 
 <body>
 
-<div layout:fragment="content">
-
-    <h1>Welcome to Skill Circuits</h1>
-
-    <ul>
-        <li th:each="moduleId : ${moduleIds}"><a th:href="@{|/module/${moduleId}|}" th:text="${moduleNames.get(moduleId)}"></a></li>
-    </ul>
-
-</div>
+    <div class="container" layout:fragment="container">
+        <main class="main-section">
+            <th:block layout:fragment="content" class="content">
+                Content goes here.
+            </th:block>
+        </main>
+    </div>
 
 </body>
+
 </html>
