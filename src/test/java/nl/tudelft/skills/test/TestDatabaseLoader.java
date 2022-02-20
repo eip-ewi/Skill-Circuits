@@ -130,118 +130,79 @@ public class TestDatabaseLoader {
 		skillImplication = skillRepository.save(Skill.builder()
 				.name("Implication")
 				.submodule(submoduleLogicBasics)
-<<<<<<< HEAD
 				.row(0).column(0)
-=======
->>>>>>> 9b97c29 (Add module endpoint)
 				.build());
 		skillNegation = skillRepository.save(Skill.builder()
 				.name("Negation")
 				.submodule(submoduleLogicBasics)
-<<<<<<< HEAD
 				.row(0).column(2)
-=======
->>>>>>> 9b97c29 (Add module endpoint)
 				.build());
 		skillVariables = skillRepository.save(Skill.builder()
 				.name("Variables")
 				.submodule(submoduleLogicBasics)
-<<<<<<< HEAD
 				.row(0).column(4)
-=======
->>>>>>> 9b97c29 (Add module endpoint)
 				.build());
 
 		skillProofOutline = skillRepository.save(Skill.builder()
 				.name("Proof Outline")
 				.submodule(submoduleGeneralisation)
-<<<<<<< HEAD
 				.row(1).column(3)
-=======
->>>>>>> 9b97c29 (Add module endpoint)
 				.build());
 		skillAssumption = skillRepository.save(Skill.builder()
 				.name("Assumption")
 				.submodule(submoduleGeneralisation)
-<<<<<<< HEAD
 				.row(1).column(1)
 				.parents(Set.of(skillImplication))
-=======
->>>>>>> 9b97c29 (Add module endpoint)
 				.build());
 		skillGeneralisationPractice = skillRepository.save(Skill.builder()
 				.name("Generalisation Practice")
 				.submodule(submoduleGeneralisation)
-<<<<<<< HEAD
 				.row(2).column(3)
-=======
->>>>>>> 9b97c29 (Add module endpoint)
 				.parents(Set.of(skillAssumption, skillProofOutline, skillVariables))
 				.build());
 
 		skillDividingIntoCases = skillRepository.save(Skill.builder()
 				.name("Dividing into Cases")
 				.submodule(submoduleCases)
-<<<<<<< HEAD
 				.row(2).column(1)
-=======
->>>>>>> 9b97c29 (Add module endpoint)
 				.build());
 		skillCasesPractice = skillRepository.save(Skill.builder()
 				.name("Cases Practice")
 				.submodule(submoduleCases)
-<<<<<<< HEAD
 				.row(3).column(2)
-=======
->>>>>>> 9b97c29 (Add module endpoint)
 				.parents(Set.of(skillProofOutline, skillDividingIntoCases))
 				.build());
 
 		skillContradictionPractice = skillRepository.save(Skill.builder()
 				.name("Contradiction Practice")
 				.submodule(submoduleContradiction)
-<<<<<<< HEAD
 				.row(3).column(3)
-=======
->>>>>>> 9b97c29 (Add module endpoint)
 				.parents(Set.of(skillProofOutline, skillNegation))
 				.build());
 
 		skillNegateImplications = skillRepository.save(Skill.builder()
 				.name("Negate Implications")
 				.submodule(submoduleContrapositive)
-<<<<<<< HEAD
 				.row(4).column(1)
-=======
->>>>>>> 9b97c29 (Add module endpoint)
 				.parents(Set.of(skillNegation, skillImplication))
 				.build());
 		skillContrapositivePractice = skillRepository.save(Skill.builder()
 				.name("Contrapositive Practice")
 				.submodule(submoduleContrapositive)
-<<<<<<< HEAD
 				.row(5).column(1)
-=======
->>>>>>> 9b97c29 (Add module endpoint)
 				.parents(Set.of(skillProofOutline, skillNegateImplications))
 				.build());
 
 		skillTransitiveProperty = skillRepository.save(Skill.builder()
 				.name("Transitive Property")
 				.submodule(submoduleInduction)
-<<<<<<< HEAD
 				.row(3).column(0)
-=======
->>>>>>> 9b97c29 (Add module endpoint)
 				.parents(Set.of(skillImplication))
 				.build());
 		skillInductionPractice = skillRepository.save(Skill.builder()
 				.name("Induction Practice")
 				.submodule(submoduleInduction)
-<<<<<<< HEAD
 				.row(6).column(2)
-=======
->>>>>>> 9b97c29 (Add module endpoint)
 				.parents(Set.of(skillTransitiveProperty, skillProofOutline, skillDividingIntoCases))
 				.build());
 	}

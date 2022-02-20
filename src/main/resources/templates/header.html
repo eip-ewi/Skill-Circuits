@@ -19,19 +19,26 @@
 -->
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}">
+      layout:decorate="~{container}">
 
-<body>
+<header layout:fragment="header" class="header">
 
-    <div class="container" layout:fragment="container">
-        <div layout:replace="~{header :: header}"></div>
-        <main class="main-section">
-            <th:block layout:fragment="content" class="content">
-                Content goes here.
-            </th:block>
-        </main>
-    </div>
+    <h1 class="header__title"><a th:href="@{/}">Skill Circuits</a></h1>
 
-</body>
+    <nav aria-label="primary" class="header__links">
+
+    </nav>
+
+    <ul class="header__icons">
+        <li class="header__icon" th:unless="${@authorisationService.isAuthenticated()}"><a class="fa-solid fa-right-to-bracket" th:href="@{/auth/login}"></a></li>
+        <li class="header__icon" th:if="${@authorisationService.isAuthenticated()}"><a class="fa-solid fa-user" th:href="@{/}"></a></li>
+        <li class="header__icon" th:if="${@authorisationService.isAuthenticated()}">
+            <form th:action="@{/auth/logout}" method="post">
+                <button type="submit" class="fa-solid fa-right-from-bracket"></button>
+            </form>
+        </li>
+    </ul>
+
+</header>
 
 </html>

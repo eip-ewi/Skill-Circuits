@@ -52,4 +52,14 @@ public class HomeController {
 		return "index";
 	}
 
+	/**
+	 * Gets the page for logging in (development/LDAP only).
+	 *
+	 * @return The page to load
+	 */
+	@GetMapping("auth/login")
+	public String getLoginPage() {
+		return "login";
+	}
+
 }

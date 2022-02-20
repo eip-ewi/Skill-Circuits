@@ -17,9 +17,33 @@
  */
 package nl.tudelft.skills.security;
 
+import nl.tudelft.labracore.lib.security.LabradorUserDetails;
+import nl.tudelft.labracore.lib.security.user.Person;
+
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AuthorizationService {
+public class AuthorisationService {
+
+	/**
+	 * Gets the currently authenticated person.
+	 *
+	 * @return The currently authenticated person
+	 */
+	public Person getAuthPerson() {
+		return ((LabradorUserDetails) SecurityContextHolder.getContext()
+				.getAuthentication().getPrincipal()).getUser();
+	}
+
+	/**
+	 * Gets whether the user is authenticated.
+	 *
+	 * @return True iff the user is authenticated
+	 */
+	public boolean isAuthenticated() {
+		return SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal() instanceof LabradorUserDetails;
+	}
 
 }

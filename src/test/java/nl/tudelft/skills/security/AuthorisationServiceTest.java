@@ -15,39 +15,37 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.controller;
+package nl.tudelft.skills.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
-import nl.tudelft.skills.repository.ModuleRepository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.test.context.support.WithUserDetails;
 
-@Transactional
-@AutoConfigureMockMvc
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
-public class ModuleControllerTest extends ControllerTest {
+public class AuthorisationServiceTest {
 
-	private final ModuleController moduleController;
+	private final AuthorisationService authorisationService;
 
 	@Autowired
-	public ModuleControllerTest(ModuleRepository moduleRepository) {
-		this.moduleController = new ModuleController(moduleRepository);
+	public AuthorisationServiceTest(AuthorisationService authorisationService) {
+		this.authorisationService = authorisationService;
 	}
 
 	@Test
-	void getModulePage() {
-		String page = moduleController.getModulePage(db.getModuleProofTechniques().getId(), model);
-		assertThat(page).isEqualTo("module/view");
-		assertThat(model.getAttribute("module"))
-				.isEqualTo(View.convert(db.getModuleProofTechniques(), ModuleLevelModuleViewDTO.class));
+	@WithUserDetails("username")
+	void getAuthPerson() {
+		assertThat(authorisationService.getAuthPerson().getUsername()).isEqualTo("username");
+	}
+
+	@Test
+	@WithUserDetails("username")
+	void isAuthenticated() {
+		assertThat(authorisationService.isAuthenticated()).isTrue();
 	}
 
 }

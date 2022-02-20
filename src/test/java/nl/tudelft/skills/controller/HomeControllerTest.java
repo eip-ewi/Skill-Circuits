@@ -17,45 +17,30 @@
  */
 package nl.tudelft.skills.controller;
 
-import java.util.Random;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import nl.tudelft.skills.test.TestDatabaseLoader;
+import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.repository.ModuleRepository;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.TestInstance;
-import org.modelmapper.ModelMapper;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.ui.ExtendedModelMap;
-import org.springframework.ui.Model;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public abstract class ControllerTest {
+@AutoConfigureMockMvc
+@SpringBootTest(classes = TestSkillCircuitsApplication.class)
+public class HomeControllerTest extends ControllerTest {
 
-	private static final Random random = new Random(42L);
-
-	@Autowired
-	private ModelMapper mapper;
+	private final HomeController moduleController;
 
 	@Autowired
-	protected TestDatabaseLoader db;
-
-	@Autowired
-	protected MockMvc mvc;
-
-	protected Model model;
-
-	@BeforeEach
-	void createModel() {
-		model = new ExtendedModelMap();
+	public HomeControllerTest(ModuleRepository moduleRepository) {
+		this.moduleController = new HomeController(moduleRepository);
 	}
 
-	protected Long randomId() {
-		return random.nextLong(1000000000L);
-	}
-
-	protected <T> T map(Object source, Class<T> dest) {
-		return mapper.map(source, dest);
+	@Test
+	void getLoginPage() {
+		assertThat(moduleController.getLoginPage()).isEqualTo("login");
 	}
 
 }
