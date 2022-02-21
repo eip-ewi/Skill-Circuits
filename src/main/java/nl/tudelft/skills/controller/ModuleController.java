@@ -17,11 +17,16 @@
  */
 package nl.tudelft.skills.controller;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.repository.ModuleRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,8 +54,22 @@ public class ModuleController {
 	 */
 	@GetMapping("{id}")
 	public String getModulePage(@PathVariable Long id, Model model) {
-		model.addAttribute("module",
-				View.convert(moduleRepository.findByIdOrThrow(id), ModuleLevelModuleViewDTO.class));
+		ModuleLevelModuleViewDTO module = View.convert(moduleRepository.findByIdOrThrow(id),
+				ModuleLevelModuleViewDTO.class);
+		Set<Pair<Integer, Integer>> positions = module.getSubmodules().stream()
+				.flatMap(s -> s.getSkills().stream())
+				.map(s -> Pair.of(s.getColumn(), s.getRow())).collect(Collectors.toSet());
+		int columns = positions.stream().mapToInt(Pair::getFirst).max().orElse(-1) + 1;
+		int rows = positions.stream().mapToInt(Pair::getSecond).max().orElse(-1) + 1;
+
+		model.addAttribute("module", module);
+		model.addAttribute("columns", columns);
+		model.addAttribute("rows", rows);
+		model.addAttribute("spaces", IntStream.range(0, rows).boxed()
+				.flatMap(row -> IntStream.range(0, columns).mapToObj(col -> Pair.of(col, row)))
+				.filter(pos -> !positions.contains(pos))
+				.toList());
+
 		return "module/view";
 	}
 
