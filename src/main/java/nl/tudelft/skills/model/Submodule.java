@@ -39,7 +39,7 @@ public class Submodule {
 
 	@NotNull
 	@ManyToOne
-	private ScModule module;
+	private SCModule module;
 
 	@NotBlank
 	private String name;

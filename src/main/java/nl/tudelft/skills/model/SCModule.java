@@ -31,7 +31,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ScModule {
+public class SCModule {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)

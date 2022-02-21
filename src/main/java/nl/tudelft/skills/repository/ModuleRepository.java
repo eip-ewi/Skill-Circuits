@@ -17,14 +17,14 @@
  */
 package nl.tudelft.skills.repository;
 
-import nl.tudelft.skills.model.ScModule;
+import nl.tudelft.skills.model.SCModule;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
-public interface ModuleRepository extends JpaRepository<ScModule, Long> {
+public interface ModuleRepository extends JpaRepository<SCModule, Long> {
 
-	default ScModule findByIdOrThrow(Long id) {
+	default SCModule findByIdOrThrow(Long id) {
 		return findById(id).orElseThrow(() -> new ResourceNotFoundException("Module was not found: " + id));
 	}
 
