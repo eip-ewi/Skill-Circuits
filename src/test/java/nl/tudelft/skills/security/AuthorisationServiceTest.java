@@ -46,12 +46,24 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import nl.tudelft.labracore.api.RoleControllerApi;
+import nl.tudelft.labracore.api.dto.Id;
+import nl.tudelft.labracore.api.dto.PersonSummaryDTO;
+import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.repository.SkillRepository;
+import nl.tudelft.skills.test.TestDatabaseLoader;
+import nl.tudelft.skills.test.TestUserDetailsService;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithUserDetails;
+import org.springframework.transaction.annotation.Transactional;
+
+import reactor.core.publisher.Flux;
 
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
 public class AuthorisationServiceTest {
@@ -105,7 +117,6 @@ public class AuthorisationServiceTest {
 		assertThat(authorisationService.isAuthenticated()).isTrue();
 	}
 
-<<<<<<< HEAD
 	@Test
 	@WithUserDetails("admin")
 	void isAdmin() {
