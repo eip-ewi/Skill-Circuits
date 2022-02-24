@@ -63,6 +63,7 @@ public class DevDatabaseLoader {
 
 	private SCModule moduleProofTechniques;
 	private SCModule modulePropositionalLogic;
+	private SCModule moduleSimple;
 
 	private Submodule submoduleLogicBasics;
 	private Submodule submoduleGeneralisation;
@@ -70,6 +71,7 @@ public class DevDatabaseLoader {
 	private Submodule submoduleContradiction;
 	private Submodule submoduleContrapositive;
 	private Submodule submoduleInduction;
+	private Submodule submoduleSimple;
 
 	private Skill skillImplication;
 	private Skill skillNegation;
@@ -89,6 +91,13 @@ public class DevDatabaseLoader {
 
 	private Skill skillTransitiveProperty;
 	private Skill skillInductionPractice;
+
+	private Skill skillSimpleA;
+	private Skill skillSimpleB;
+	private Skill skillSimpleC;
+	private Skill skillSimpleD;
+	private Skill skillSimpleE;
+	private Skill skillSimpleF;
 
 	@PostConstruct
 	private void init() {
@@ -124,6 +133,10 @@ public class DevDatabaseLoader {
 				.name("Propositional Logic")
 				.edition(scEdition)
 				.build());
+		moduleSimple = moduleRepository.save(SCModule.builder()
+				.name("Simple Module")
+				.edition(scEdition)
+				.build());
 	}
 
 	private void initSubmodules() {
@@ -150,6 +163,10 @@ public class DevDatabaseLoader {
 		submoduleInduction = submoduleRepository.save(Submodule.builder()
 				.name("Induction")
 				.module(moduleProofTechniques)
+				.build());
+		submoduleSimple = submoduleRepository.save(Submodule.builder()
+				.name("Simple Module")
+				.module(moduleSimple)
 				.build());
 	}
 
@@ -232,6 +249,42 @@ public class DevDatabaseLoader {
 				.row(6).column(2)
 				.parents(Set.of(skillTransitiveProperty, skillProofOutline, skillDividingIntoCases))
 				.build());
+
+		skillSimpleA = skillRepository.save(Skill.builder()
+				.name("Skill A")
+				.submodule(submoduleSimple)
+				.row(0).column(1)
+				.build());
+		skillSimpleB = skillRepository.save(Skill.builder()
+				.name("Skill B")
+				.submodule(submoduleSimple)
+				.row(1).column(0)
+				.parents(Set.of(skillSimpleA))
+				.build());
+		skillSimpleC = skillRepository.save(Skill.builder()
+				.name("Skill C")
+				.submodule(submoduleSimple)
+				.row(1).column(2)
+				.parents(Set.of(skillSimpleA))
+				.build());
+		skillSimpleD = skillRepository.save(Skill.builder()
+				.name("Skill D")
+				.submodule(submoduleSimple)
+				.row(2).column(0)
+				.parents(Set.of(skillSimpleB))
+				.build());
+		skillSimpleE = skillRepository.save(Skill.builder()
+				.name("Skill E")
+				.submodule(submoduleSimple)
+				.row(2).column(1)
+				.parents(Set.of(skillSimpleB))
+				.build());
+		skillSimpleF = skillRepository.save(Skill.builder()
+				.name("Skill F")
+				.submodule(submoduleSimple)
+				.row(2).column(2)
+				.parents(Set.of(skillSimpleB))
+				.build());
 	}
 
 	private void initTasks() {
@@ -274,6 +327,24 @@ public class DevDatabaseLoader {
 
 		taskRepository.save(Task.builder().name("Watch lecture 4").skill(skillInductionPractice).build());
 		taskRepository.save(Task.builder().name("Do exercise 2.5b-d").skill(skillInductionPractice).build());
+
+		taskRepository.save(Task.builder().name("Task 1").skill(skillSimpleA).build());
+		taskRepository.save(Task.builder().name("Task 2").skill(skillSimpleA).build());
+
+		taskRepository.save(Task.builder().name("Task 3").skill(skillSimpleB).build());
+		taskRepository.save(Task.builder().name("Task 4").skill(skillSimpleB).build());
+
+		taskRepository.save(Task.builder().name("Task 5").skill(skillSimpleC).build());
+		taskRepository.save(Task.builder().name("Task 6").skill(skillSimpleC).build());
+
+		taskRepository.save(Task.builder().name("Task 7").skill(skillSimpleD).build());
+		taskRepository.save(Task.builder().name("Task 8").skill(skillSimpleD).build());
+
+		taskRepository.save(Task.builder().name("Task 9").skill(skillSimpleE).build());
+		taskRepository.save(Task.builder().name("Task 10").skill(skillSimpleE).build());
+
+		taskRepository.save(Task.builder().name("Task 11").skill(skillSimpleF).build());
+		taskRepository.save(Task.builder().name("Task 12").skill(skillSimpleF).build());
 	}
 
 }

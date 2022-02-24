@@ -40,6 +40,7 @@ public class ModuleLevelModuleViewDTO extends View<SCModule> {
 	@NotBlank
 	private String name;
 	@NotNull
+	@PostApply
 	private List<ModuleLevelSubmoduleViewDTO> submodules;
 
 }
