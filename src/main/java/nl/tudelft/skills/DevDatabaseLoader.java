@@ -131,65 +131,79 @@ public class DevDatabaseLoader {
 		skillImplication = skillRepository.save(Skill.builder()
 				.name("Implication")
 				.submodule(submoduleLogicBasics)
+				.row(0).column(0)
 				.build());
 		skillNegation = skillRepository.save(Skill.builder()
 				.name("Negation")
 				.submodule(submoduleLogicBasics)
+				.row(0).column(2)
 				.build());
 		skillVariables = skillRepository.save(Skill.builder()
 				.name("Variables")
 				.submodule(submoduleLogicBasics)
+				.row(0).column(4)
 				.build());
 
 		skillProofOutline = skillRepository.save(Skill.builder()
 				.name("Proof Outline")
 				.submodule(submoduleGeneralisation)
+				.row(1).column(3)
 				.build());
 		skillAssumption = skillRepository.save(Skill.builder()
 				.name("Assumption")
 				.submodule(submoduleGeneralisation)
+				.row(1).column(1)
+				.parents(Set.of(skillImplication))
 				.build());
 		skillGeneralisationPractice = skillRepository.save(Skill.builder()
 				.name("Generalisation Practice")
 				.submodule(submoduleGeneralisation)
+				.row(2).column(3)
 				.parents(Set.of(skillAssumption, skillProofOutline, skillVariables))
 				.build());
 
 		skillDividingIntoCases = skillRepository.save(Skill.builder()
 				.name("Dividing into Cases")
 				.submodule(submoduleCases)
+				.row(2).column(1)
 				.build());
 		skillCasesPractice = skillRepository.save(Skill.builder()
 				.name("Cases Practice")
 				.submodule(submoduleCases)
+				.row(3).column(2)
 				.parents(Set.of(skillProofOutline, skillDividingIntoCases))
 				.build());
 
 		skillContradictionPractice = skillRepository.save(Skill.builder()
 				.name("Contradiction Practice")
 				.submodule(submoduleContradiction)
+				.row(3).column(3)
 				.parents(Set.of(skillProofOutline, skillNegation))
 				.build());
 
 		skillNegateImplications = skillRepository.save(Skill.builder()
 				.name("Negate Implications")
 				.submodule(submoduleContrapositive)
+				.row(4).column(1)
 				.parents(Set.of(skillNegation, skillImplication))
 				.build());
 		skillContrapositivePractice = skillRepository.save(Skill.builder()
 				.name("Contrapositive Practice")
 				.submodule(submoduleContrapositive)
+				.row(5).column(1)
 				.parents(Set.of(skillProofOutline, skillNegateImplications))
 				.build());
 
 		skillTransitiveProperty = skillRepository.save(Skill.builder()
 				.name("Transitive Property")
 				.submodule(submoduleInduction)
+				.row(3).column(0)
 				.parents(Set.of(skillImplication))
 				.build());
 		skillInductionPractice = skillRepository.save(Skill.builder()
 				.name("Induction Practice")
 				.submodule(submoduleInduction)
+				.row(6).column(2)
 				.parents(Set.of(skillTransitiveProperty, skillProofOutline, skillDividingIntoCases))
 				.build());
 	}

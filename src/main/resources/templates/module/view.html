@@ -18,31 +18,39 @@
 
 -->
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{container}">
 <head>
+    <link rel="stylesheet" th:href="@{/css/circuit.css}">
+
     <title th:text="${module.name}"></title>
 </head>
 
 <body>
 
-<div>
+<div layout:fragment="content">
 
     <h1 th:text="${module.name}"></h1>
 
-    <div th:each="submodule : ${module.submodules}">
+    <div class="circuit">
+        <div class="checkpoint" style="grid-row: 2;">Checkpoint example</div>
+        <div class="checkpoint" style="grid-row: 5;">Checkpoint example</div>
 
-        <h2 th:text="${submodule.name}"></h2>
+        <th:block th:each="submodule : ${module.submodules}">
+            <th:block th:each="skill : ${submodule.skills}">
 
-        <div th:each="skill : ${submodule.skills}">
+                <div class="skill" th:style="|grid-row: ${skill.row + 1}; grid-column: ${skill.column + 1}|">
+                    <h2 th:text="${skill.name}"></h2>
+                    <ul class="tasks">
+                        <li class="task" th:each="task : ${skill.tasks}">
+                            <button class="task__button">0</button>
+                            <span th:text="${task.name}"></span>
+                        </li>
+                    </ul>
+                </div>
 
-            <h3 th:text="${skill.name}"></h3>
-
-            <ul>
-                <li th:each="task : ${skill.tasks}" th:text="${task.name}"></li>
-            </ul>
-
-        </div>
-
+            </th:block>
+        </th:block>
     </div>
 
 </div>
