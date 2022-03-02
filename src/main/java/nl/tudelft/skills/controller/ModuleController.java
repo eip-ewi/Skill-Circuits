@@ -21,9 +21,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
+import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.repository.ModuleRepository;
+import nl.tudelft.skills.service.ModuleService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -38,24 +41,32 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class ModuleController {
 
 	private ModuleRepository moduleRepository;
+	private ModuleService moduleService;
 
 	@Autowired
-	public ModuleController(ModuleRepository moduleRepository) {
+	public ModuleController(ModuleRepository moduleRepository, ModuleService moduleService) {
 		this.moduleRepository = moduleRepository;
+		this.moduleService = moduleService;
 	}
 
 	/**
 	 * Gets the page for a single module. This page contains a circuit with all submodules, skills, and tasks
-	 * in the module.
+	 * in the module. If a person is authenticated, marks the tasks they've completed as completed.
 	 *
-	 * @param  id    The id of the module
-	 * @param  model The model to add data to
-	 * @return       The page to load
+	 * @param  person The currently authenticated person. Null if no authenticated person.
+	 * @param  id     The id of the module
+	 * @param  model  The model to add data to
+	 * @return        The page to load
 	 */
 	@GetMapping("{id}")
-	public String getModulePage(@PathVariable Long id, Model model) {
+	public String getModulePage(@AuthenticatedPerson(required = false) Person person, @PathVariable Long id, Model model) {
 		ModuleLevelModuleViewDTO module = View.convert(moduleRepository.findByIdOrThrow(id),
 				ModuleLevelModuleViewDTO.class);
+
+//		if (person != null) {
+//			moduleService.setCompletedTasksForPerson(module, person.getId());
+//		}
+
 		Set<Pair<Integer, Integer>> positions = module.getSubmodules().stream()
 				.flatMap(s -> s.getSkills().stream())
 				.map(s -> Pair.of(s.getColumn(), s.getRow())).collect(Collectors.toSet());
@@ -69,6 +80,7 @@ public class ModuleController {
 				.flatMap(row -> IntStream.range(0, columns).mapToObj(col -> Pair.of(col, row)))
 				.filter(pos -> !positions.contains(pos))
 				.toList());
+
 
 		return "module/view";
 	}

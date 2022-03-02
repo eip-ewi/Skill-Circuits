@@ -50,11 +50,26 @@ public class AuthorisationService {
 	/**
 	 * Gets the currently authenticated user.
 	 *
-	 * @return The currently authenticated user
+	 * @return The currently authenticated person, and null if no such person exists.
 	 */
 	public Person getAuthPerson() {
+		if (!isAuthenticated()) {
+			return null;
+		}
 		return ((LabradorUserDetails) SecurityContextHolder.getContext()
 				.getAuthentication().getPrincipal()).getUser();
+	}
+
+	/**
+	 * Gets the currently authenticated persons id.
+	 *
+	 * @return The currently authenticated persons id, and null if no such person exists.
+	 */
+	public Long getAuthPersonId() {
+		if (!isAuthenticated()) {
+			return null;
+		}
+		return getAuthPerson().getId();
 	}
 
 	/**

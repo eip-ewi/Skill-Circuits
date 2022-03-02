@@ -19,6 +19,8 @@ package nl.tudelft.skills.security;
 
 import nl.tudelft.labracore.lib.security.LabradorUserHandler;
 import nl.tudelft.labracore.lib.security.user.Person;
+import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.repository.labracore.SCPersonRepository;
 
 import org.springframework.stereotype.Service;
 
@@ -35,6 +37,12 @@ import io.sentry.protocol.User;
 @Service
 public class LoginUserHandler implements LabradorUserHandler {
 
+	private final SCPersonRepository scPersonRepository;
+
+	public LoginUserHandler(SCPersonRepository scPersonRepository) {
+		this.scPersonRepository = scPersonRepository;
+	}
+
 	/**
 	 * Makes changes to the DB when someone logs in.
 	 *
@@ -47,6 +55,10 @@ public class LoginUserHandler implements LabradorUserHandler {
 			user.setUsername(person.getUsername());
 			scope.setTag("DefaultRole", person.getDefaultRole().toString());
 		});
+		if (!scPersonRepository.existsById(person.getId())) {
+			scPersonRepository.save(SCPerson.builder().id(person.getId()).build());
+		}
+
 	}
 
 }

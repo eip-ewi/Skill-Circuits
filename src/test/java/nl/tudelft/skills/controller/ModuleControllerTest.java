@@ -23,6 +23,7 @@ import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.repository.ModuleRepository;
+import nl.tudelft.skills.service.ModuleService;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,13 +39,13 @@ public class ModuleControllerTest extends ControllerTest {
 	private final ModuleController moduleController;
 
 	@Autowired
-	public ModuleControllerTest(ModuleRepository moduleRepository) {
-		this.moduleController = new ModuleController(moduleRepository);
+	public ModuleControllerTest(ModuleRepository moduleRepository, ModuleService moduleService) {
+		this.moduleController = new ModuleController(moduleRepository, moduleService);
 	}
 
 	@Test
 	void getModulePage() {
-		String page = moduleController.getModulePage(db.getModuleProofTechniques().getId(), model);
+		String page = moduleController.getModulePage(null, db.getModuleProofTechniques().getId(), model);
 		assertThat(page).isEqualTo("module/view");
 		assertThat(model.getAttribute("module"))
 				.isEqualTo(View.convert(db.getModuleProofTechniques(), ModuleLevelModuleViewDTO.class));

@@ -15,29 +15,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view.module;
+package nl.tudelft.skills.repository.labracore;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import nl.tudelft.skills.model.labracore.SCPerson;
 
-import lombok.*;
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.model.TaskType;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class TaskViewDTO extends View<Task> {
+public interface SCPersonRepository extends JpaRepository<SCPerson, Long> {
 
-	@NotNull
-	private Long id;
-	@NotBlank
-	private String name;
-	private TaskType type;
-	@Builder.Default
-	private boolean completed = false;
-
+	default SCPerson findByIdOrThrow(Long id) {
+		return findById(id).orElseThrow(() -> new ResourceNotFoundException("SCPerson was not found: " + id));
+	}
 }
