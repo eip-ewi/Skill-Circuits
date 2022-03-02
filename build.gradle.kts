@@ -237,7 +237,7 @@ dependencies {
     //// Websockets
     //implementation("org.webjars:sockjs-client:1.5.1")
     //implementation("org.webjars:stomp-websocket:2.3.4")
-    implementation("org.webjars:font-awesome:5.15.3")
+    implementation("org.webjars:font-awesome:6.0.0")
     implementation("org.webjars:chartjs:3.6.0")
 
     // Jaeger

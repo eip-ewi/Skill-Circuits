@@ -19,19 +19,26 @@
 -->
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}">
+      layout:decorate="~{container}">
+<head>
+    <title>Login</title>
+</head>
 
 <body>
 
-    <div class="container" layout:fragment="container">
-        <div layout:replace="~{header :: header}"></div>
-        <main class="main-section">
-            <th:block layout:fragment="content" class="content">
-                Content goes here.
-            </th:block>
-        </main>
-    </div>
+<div layout:fragment="content">
+
+    <h1>Login</h1>
+
+    <form th:action="@{/perform-login}" method="post">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username"/>
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password"/>
+        <button type="submit">Log in</button>
+    </form>
+
+</div>
 
 </body>
-
 </html>
