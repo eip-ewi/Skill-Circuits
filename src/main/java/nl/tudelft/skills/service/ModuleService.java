@@ -22,7 +22,7 @@ import java.util.List;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.ModuleRepository;
-import nl.tudelft.skills.repository.labracore.SCPersonRepository;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 import org.springframework.stereotype.Service;
 
@@ -30,9 +30,9 @@ import org.springframework.stereotype.Service;
 public class ModuleService {
 
 	private final ModuleRepository moduleRepository;
-	private final SCPersonRepository personRepository;
+	private final PersonRepository personRepository;
 
-	public ModuleService(ModuleRepository moduleRepository, SCPersonRepository personRepository) {
+	public ModuleService(ModuleRepository moduleRepository, PersonRepository personRepository) {
 		this.moduleRepository = moduleRepository;
 		this.personRepository = personRepository;
 	}

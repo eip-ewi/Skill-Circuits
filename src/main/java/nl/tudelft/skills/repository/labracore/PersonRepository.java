@@ -22,7 +22,7 @@ import nl.tudelft.skills.model.labracore.SCPerson;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
-public interface SCPersonRepository extends JpaRepository<SCPerson, Long> {
+public interface PersonRepository extends JpaRepository<SCPerson, Long> {
 
 	default SCPerson findByIdOrThrow(Long id) {
 		return findById(id).orElseThrow(() -> new ResourceNotFoundException("SCPerson was not found: " + id));

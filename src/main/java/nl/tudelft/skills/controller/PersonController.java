@@ -24,18 +24,18 @@ import javax.transaction.Transactional;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.TaskRepository;
-import nl.tudelft.skills.repository.labracore.SCPersonRepository;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/person")
-public class SCPersonController {
+public class PersonController {
 
 	private final TaskRepository taskRepository;
-	private final SCPersonRepository scPersonRepository;
+	private final PersonRepository scPersonRepository;
 
-	public SCPersonController(TaskRepository taskRepository, SCPersonRepository scPersonRepository) {
+	public PersonController(TaskRepository taskRepository, PersonRepository scPersonRepository) {
 		this.taskRepository = taskRepository;
 		this.scPersonRepository = scPersonRepository;
 	}

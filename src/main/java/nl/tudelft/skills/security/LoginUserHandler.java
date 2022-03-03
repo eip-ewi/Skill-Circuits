@@ -20,7 +20,7 @@ package nl.tudelft.skills.security;
 import nl.tudelft.labracore.lib.security.LabradorUserHandler;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.model.labracore.SCPerson;
-import nl.tudelft.skills.repository.labracore.SCPersonRepository;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 import org.springframework.stereotype.Service;
 
@@ -37,10 +37,10 @@ import io.sentry.protocol.User;
 @Service
 public class LoginUserHandler implements LabradorUserHandler {
 
-	private final SCPersonRepository scPersonRepository;
+	private final PersonRepository scPersonRepository;
 
-	public LoginUserHandler(SCPersonRepository scPersonRepository) {
-		this.scPersonRepository = scPersonRepository;
+	public LoginUserHandler(PersonRepository personRepository) {
+		this.scPersonRepository = personRepository;
 	}
 
 	/**
