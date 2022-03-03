@@ -100,8 +100,6 @@ public class TestDatabaseLoader {
 	private void initEdition() {
 		editionRL = editionRepository.save(SCEdition.builder()
 				.id(edition.getId())
-				.name(edition.getName())
-				.course(course.getId())
 				.build());
 	}
 

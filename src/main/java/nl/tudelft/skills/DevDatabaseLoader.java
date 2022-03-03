@@ -100,8 +100,6 @@ public class DevDatabaseLoader {
 
 	private void initEdition() {
 		scEdition = editionRepository.save(SCEdition.builder()
-				.course(edition.getCourse().getId())
-				.name(edition.getName())
 				.id(edition.getId())
 				.build());
 	}

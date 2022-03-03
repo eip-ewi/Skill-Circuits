@@ -18,11 +18,14 @@
 package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
 
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.edition.EditionLevelEditionViewDTO;
 import nl.tudelft.skills.repository.EditionRepository;
+import nl.tudelft.skills.service.EditionService;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,18 +39,30 @@ import org.springframework.transaction.annotation.Transactional;
 public class EditionControllerTest extends ControllerTest {
 
 	private final EditionController editionController;
+	private final EditionService editionService;
 
 	@Autowired
 	public EditionControllerTest(EditionRepository editionRepository) {
-		this.editionController = new EditionController(editionRepository);
+		this.editionService = mock(EditionService.class);
+		this.editionController = new EditionController(editionRepository, editionService);
 	}
 
 	@Test
 	void getEditionPage() {
-		String page = editionController.getEditionPage(db.getEditionRL().getId(), model);
-		assertThat(page).isEqualTo("edition/view");
-		assertThat(model.getAttribute("edition"))
-				.isEqualTo(View.convert(db.getEditionRL(), EditionLevelEditionViewDTO.class));
+		EditionLevelEditionViewDTO mockEditionView = View.convert(db.getEditionRL(),
+				EditionLevelEditionViewDTO.class);
+		mockEditionView.setCourse(10L);
+		mockEditionView.setName("RL");
+
+		when(editionService.getEditionView(anyLong())).thenReturn(mockEditionView);
+
+		Long editionId = db.getEditionRL().getId();
+
+		editionController.getEditionPage(editionId, model);
+
+		assertThat(model.getAttribute("edition")).isEqualTo(mockEditionView);
+
+		verify(editionService).getEditionView(editionId);
 	}
 
 }

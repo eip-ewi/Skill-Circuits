@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
@@ -37,10 +36,8 @@ public class SCEdition {
 	private Long id;
 
 	@NotNull
-	private Long course;
-
-	@NotBlank
-	private String name;
+	@Builder.Default
+	private boolean isVisible = true; // TODO default should be false
 
 	@NotNull
 	@Builder.Default

@@ -8,7 +8,7 @@
   background-color: var(--primary-light);
   border: 1px solid var(--primary-dark);
   padding: 1rem;
-}
-.block:hover, .block:focus-visible{
-  background-color: var(--secondary-green);
+  &:hover, &:focus-visible {
+    background-color: var(--secondary-green);
+  }
 }

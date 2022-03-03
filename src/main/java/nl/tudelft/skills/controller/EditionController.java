@@ -17,9 +17,8 @@
  */
 package nl.tudelft.skills.controller;
 
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.edition.EditionLevelEditionViewDTO;
 import nl.tudelft.skills.repository.EditionRepository;
+import nl.tudelft.skills.service.EditionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -32,10 +31,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("edition")
 public class EditionController {
 	private EditionRepository editionRepository;
+	private EditionService editionService;
 
 	@Autowired
-	public EditionController(EditionRepository editionRepository) {
+	public EditionController(EditionRepository editionRepository, EditionService editionService) {
 		this.editionRepository = editionRepository;
+		this.editionService = editionService;
 	}
 
 	/**
@@ -47,8 +48,8 @@ public class EditionController {
 	 */
 	@GetMapping("{id}")
 	public String getEditionPage(@PathVariable Long id, Model model) {
-		model.addAttribute("edition",
-				View.convert(editionRepository.findByIdOrThrow(id), EditionLevelEditionViewDTO.class));
+		model.addAttribute("edition", editionService.getEditionView(id));
+
 		return "edition/view";
 	}
 
