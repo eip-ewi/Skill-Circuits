@@ -21,15 +21,10 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
-import nl.tudelft.skills.model.SCModule;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Submodule;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.repository.ModuleRepository;
-import nl.tudelft.skills.repository.SkillRepository;
-import nl.tudelft.skills.repository.SubmoduleRepository;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.model.*;
+import nl.tudelft.skills.repository.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -40,6 +35,8 @@ import org.springframework.stereotype.Service;
 public class TestDatabaseLoader {
 
 	@Autowired
+	private EditionRepository editionRepository;
+	@Autowired
 	private ModuleRepository moduleRepository;
 	@Autowired
 	private SubmoduleRepository submoduleRepository;
@@ -48,8 +45,10 @@ public class TestDatabaseLoader {
 	@Autowired
 	private TaskRepository taskRepository;
 
+	public CourseSummaryDTO course;
 	public EditionDetailsDTO edition;
 
+	private SCEdition editionRL;
 	private SCModule moduleProofTechniques;
 
 	public Submodule submoduleLogicBasics;
@@ -82,14 +81,28 @@ public class TestDatabaseLoader {
 		return moduleRepository.findByIdOrThrow(moduleProofTechniques.getId());
 	}
 
+	public SCEdition getEditionRL() {
+		return editionRepository.findByIdOrThrow(editionRL.getId());
+	}
+
 	@PostConstruct
 	private void init() {
+		course = new CourseSummaryDTO().id(30L).name("RL");
 		edition = new EditionDetailsDTO().id(69L).name("Reasoning and Logic");
 
+		initEdition();
 		initModules();
 		initSubmodules();
 		initSkills();
 		initTasks();
+	}
+
+	private void initEdition() {
+		editionRL = editionRepository.save(SCEdition.builder()
+				.id(edition.getId())
+				.name(edition.getName())
+				.course(course.getId())
+				.build());
 	}
 
 	private void initModules() {

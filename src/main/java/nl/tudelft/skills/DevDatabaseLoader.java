@@ -21,16 +21,11 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.*;
-import nl.tudelft.skills.model.SCModule;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Submodule;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.repository.ModuleRepository;
-import nl.tudelft.skills.repository.SkillRepository;
-import nl.tudelft.skills.repository.SubmoduleRepository;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.model.*;
+import nl.tudelft.skills.repository.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -42,6 +37,8 @@ import org.springframework.stereotype.Service;
 public class DevDatabaseLoader {
 
 	@Autowired
+	private EditionRepository editionRepository;
+	@Autowired
 	private ModuleRepository moduleRepository;
 	@Autowired
 	private SubmoduleRepository submoduleRepository;
@@ -51,11 +48,17 @@ public class DevDatabaseLoader {
 	private TaskRepository taskRepository;
 
 	@Autowired
+	private CourseControllerApi courseControllerApi;
+	@Autowired
 	private EditionControllerApi editionApi;
 
 	private EditionDetailsDTO edition;
 
+	private CourseSummaryDTO course;
+	private SCEdition scEdition;
+
 	private SCModule moduleProofTechniques;
+	private SCModule modulePropositionalLogic;
 
 	private Submodule submoduleLogicBasics;
 	private Submodule submoduleGeneralisation;
@@ -85,17 +88,31 @@ public class DevDatabaseLoader {
 
 	@PostConstruct
 	private void init() {
+		course = courseControllerApi.getAllCourses().blockFirst();
 		edition = editionApi.getAllEditions().blockFirst();
 
+		initEdition();
 		initModules();
 		initSubmodules();
 		initSkills();
 		initTasks();
 	}
 
+	private void initEdition() {
+		scEdition = editionRepository.save(SCEdition.builder()
+				.course(edition.getCourse().getId())
+				.name(edition.getName())
+				.id(edition.getId())
+				.build());
+	}
+
 	private void initModules() {
 		moduleProofTechniques = moduleRepository.save(SCModule.builder()
 				.name("Proof Techniques")
+				.edition(edition.getId())
+				.build());
+		modulePropositionalLogic = moduleRepository.save(SCModule.builder()
+				.name("Propositional Logic")
 				.edition(edition.getId())
 				.build());
 	}
