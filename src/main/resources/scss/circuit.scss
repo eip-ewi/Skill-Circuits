@@ -1,13 +1,22 @@
+:root {
+  --columns: 5;
+}
+
 .circuit {
   display: grid;
   gap: 2rem;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(var(--columns), 1fr);
 }
 
 .skill {
   background-color: var(--primary-light);
   border: 1px solid var(--primary-dark);
   padding: 1rem;
+  z-index: 10;
+
+  &.draggable {
+    cursor: grab;
+  }
 }
 
 .tasks {
@@ -34,10 +43,21 @@
   }
 }
 
+.ghost_skill {
+  min-height: 2rem;
+  min-width: 2rem;
+  &.drag_over {
+    border: 1px dashed var(--primary-dark);
+  }
+}
+.circuit.editing > .ghost_skill {
+  background-color: var(--grey-700);
+}
+
 .checkpoint {
   align-self: end;
   border-top: 1px dashed var(--primary-dark);
-  grid-column: 1 / span 5;
+  grid-column: 1 / span var(--columns);
   max-height: 1px;
   transform: translateY(1rem);
 }

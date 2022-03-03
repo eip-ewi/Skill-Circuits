@@ -15,21 +15,38 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.test;
+package nl.tudelft.skills.dto.patch;
 
-import nl.tudelft.labracore.api.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Configuration;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import nl.tudelft.librador.dto.patch.Patch;
+import nl.tudelft.skills.model.Skill;
 
-@Configuration
-public class TestConfig {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class SkillPositionPatch extends Patch<Skill> {
 
-	@MockBean
-	private EditionControllerApi editionApi;
-	@MockBean
-	private PersonControllerApi personApi;
-	@MockBean
-	private RoleControllerApi roleApi;
+	@Min(0)
+	@NotNull
+	private Integer column;
+	@Min(0)
+	@NotNull
+	private Integer row;
 
+	@Override
+	protected void applyOneToOne() {
+		updateNonNull(column, data::setColumn);
+		updateNonNull(row, data::setRow);
+	}
+
+	@Override
+	protected void validate() {
+	}
 }
