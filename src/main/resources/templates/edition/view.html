@@ -34,11 +34,11 @@
 
     <div class="blocks">
 
-                <div class="block" th:each="module : ${edition.modules}">
+                <a class="block" th:each="module : ${edition.modules}" th:href="@{|/module/${module.id}|}">
 
                     <h2 th:text="${module.name}"></h2>
 
-                </div>
+                </a>
 
     </div>
 
