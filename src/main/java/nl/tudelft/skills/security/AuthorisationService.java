@@ -85,7 +85,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can edit the skills in the edition
 	 */
 	public boolean canEditSkills(Long editionId) {
-		return isAdmin() || isAtLeastTeacherInEdition(editionId);
+		return isAtLeastTeacherInEdition(editionId);
 	}
 
 	/**
