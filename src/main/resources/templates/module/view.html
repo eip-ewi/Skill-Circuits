@@ -62,14 +62,17 @@
                 <div th:if="${@authorisationService.canEditSkills(module.edition)}"
                      th:each="pos : ${spaces}" class="ghost_skill"
                      th:style="|grid-row: ${pos.second + 1}; grid-column: ${pos.first + 1}|">
+                    <span class="fa-solid fa-plus"></span>
                 </div>
                 <div th:if="${@authorisationService.canEditSkills(module.edition)}"
                      th:each="col : ${#numbers.sequence(0, columns - 1)}" class="ghost_skill"
                      th:style="|grid-row: ${rows + 1}; grid-column: ${col + 1}|">
+                    <span class="fa-solid fa-plus"></span>
                 </div>
                 <div th:if="${@authorisationService.canEditSkills(module.edition)}"
                      th:each="row : ${#numbers.sequence(0, rows)}" class="ghost_skill"
                      th:style="|grid-row: ${row + 1}; grid-column: ${columns + 1}|">
+                    <span class="fa-solid fa-plus"></span>
                 </div>
 
             </th:block>
@@ -145,6 +148,22 @@
             }
 
         }
+    </script>
+
+    <div layout:replace="~{skill/create :: form}"></div>
+
+    <script th:if="${@authorisationService.canCreateSkills(module.edition)}">
+        document.addEventListener("DOMContentLoaded", function () {
+            $(".ghost_skill").click(function () {
+                let col = parseInt($(this).css("gridColumn").split(" / ")[0]) - 1;
+                let row = parseInt($(this).css("gridRow").split(" / ")[0]) - 1;
+                setNewSkillPosition(row, col);
+                let form = $("#create-skill");
+                form.css("gridColumn", (col + 1).toString());
+                form.css("gridRow", (row + 1).toString());
+                $(this).replaceWith(form);
+            });
+        });
     </script>
 
     <script th:if="${@authorisationService.canEditSkills(module.edition)}">

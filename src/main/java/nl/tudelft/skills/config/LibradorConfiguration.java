@@ -22,6 +22,8 @@ import static org.modelmapper.convention.MatchingStrategies.STRICT;
 import nl.tudelft.librador.EnableLibrador;
 import nl.tudelft.librador.LibradorConfigAdapter;
 import nl.tudelft.librador.dto.id.IdMapperBuilder;
+import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
+import nl.tudelft.skills.model.Submodule;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
@@ -33,7 +35,7 @@ public class LibradorConfiguration extends LibradorConfigAdapter {
 
 	@Override
 	protected void configure(IdMapperBuilder builder) {
-		//		builder.register(IdDTO.class, Model.class);
+		builder.register(SubmoduleIdDTO.class, Submodule.class);
 	}
 
 	@Bean

@@ -28,6 +28,7 @@ import nl.tudelft.labracore.lib.security.user.DefaultRole;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.cache.RoleCacheManager;
 import nl.tudelft.skills.repository.SkillRepository;
+import nl.tudelft.skills.repository.SubmoduleRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,11 +41,14 @@ public class AuthorisationService {
 	private RoleCacheManager roleCache;
 
 	private SkillRepository skillRepository;
+	private SubmoduleRepository submoduleRepository;
 
 	@Autowired
-	public AuthorisationService(RoleCacheManager roleCache, SkillRepository skillRepository) {
+	public AuthorisationService(RoleCacheManager roleCache, SkillRepository skillRepository,
+			SubmoduleRepository submoduleRepository) {
 		this.roleCache = roleCache;
 		this.skillRepository = skillRepository;
+		this.submoduleRepository = submoduleRepository;
 	}
 
 	/**
@@ -88,7 +92,28 @@ public class AuthorisationService {
 	 * @return          True iff the user can view all the editions of a course by id.
 	 */
 	public boolean canViewAllEditions(Long courseId) {
-		return isAtLeastTeacherInEdition(courseId);
+        return isAtLeastTeacherInEdition(courseId);
+    }
+
+    /**
+	 * Gets whether the authenticated user can create skills in an edition.
+	 *
+	 * @param  editionId The id of the edition
+	 * @return           True iff the user can create skills in the edition
+	 */
+	public boolean canCreateSkills(Long editionId) {
+		return isAtLeastTeacherInEdition(editionId);
+	}
+
+	/**
+	 * Gets whether the authenticated user can create a skill in a submodule.
+	 *
+	 * @param  submoduleId The id of the submodule
+	 * @return             True iff the user can create skills in the submodule
+	 */
+	public boolean canCreateSkill(Long submoduleId) {
+		return isAtLeastTeacherInEdition(
+				submoduleRepository.findByIdOrThrow(submoduleId).getModule().getEdition());
 	}
 
 	/**

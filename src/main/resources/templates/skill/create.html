@@ -1,0 +1,69 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<div th:if="${@authorisationService.canCreateSkills(module.edition)}" layout:fragment="form" id="create-skill">
+
+    <form id="create-skill-form" class="create_skill">
+
+        <input id="create-skill-row" name="row" type="hidden"/>
+        <input id="create-skill-column" name="column" type="hidden"/>
+
+        <label for="create-skill-name">Name</label>
+        <input id="create-skill-name" name="name" type="text" required/>
+
+        <label for="create-skill-submodule">Submodule</label>
+        <select id="create-skill-submodule" name="submodule.id" required>
+            <option th:each="submodule : ${module.submodules}" th:value="${submodule.id}" th:text="${submodule.name}"></option>
+        </select>
+
+        <div class="create_skill__buttons">
+            <button type="button" id="create-skill-cancel">Cancel</button>
+            <button type="submit">Create Skill</button>
+        </div>
+
+    </form>
+
+    <script>
+        function setNewSkillPosition(row, column) {
+            document.getElementById("create-skill-row").value = row;
+            document.getElementById("create-skill-column").value = column;
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            $("#create-skill-form").submit(function (event) {
+                event.preventDefault();
+                $.post("/skill", $("#create-skill-form").serialize(), element => {
+                    $("#circuit").append($("<div/>").append(element).children()[0]);
+                    $(".content").append($("#create-skill"));
+                    $("#create-skill-name").val("");
+                });
+            });
+            $("#create-skill-cancel").click(function () {
+                $(".content").append($("#create-skill"));
+                $("#create-skill-name").val("");
+            });
+        });
+    </script>
+
+</div>
+
+</html>

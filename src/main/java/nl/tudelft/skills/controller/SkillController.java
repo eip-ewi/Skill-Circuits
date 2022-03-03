@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.controller;
 
+import nl.tudelft.skills.dto.create.SkillCreateDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatch;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.SkillRepository;
@@ -25,6 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -36,6 +39,21 @@ public class SkillController {
 	@Autowired
 	public SkillController(SkillRepository skillRepository) {
 		this.skillRepository = skillRepository;
+	}
+
+	/**
+	 * Creates a skill.
+	 *
+	 * @param  create The DTO with information to create the skill
+	 * @return        A new skill html element
+	 */
+	@PostMapping
+	@Transactional
+	@PreAuthorize("@authorisationService.canCreateSkill(#create.submodule.id)")
+	public String createSkill(SkillCreateDTO create, Model model) {
+		Skill skill = skillRepository.save(create.apply());
+		model.addAttribute("skill", skill);
+		return "skill/view";
 	}
 
 	/**
