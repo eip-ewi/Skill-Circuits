@@ -47,7 +47,7 @@ public class PersonController {
 	 * @param taskId    the id of the task
 	 * @param completed whether the task has been completed or uncompleted
 	 */
-	@PutMapping("/{personId}/completion/{taskId}")
+	@PutMapping("{personId}/completion/{taskId}")
 	@Transactional
 	public void updateTaskCompletedForPerson(@PathVariable Long personId, @PathVariable Long taskId,
 			@RequestBody boolean completed) {
@@ -66,7 +66,7 @@ public class PersonController {
 	 * @param personId       the id of the person
 	 * @param completedTasks a list of ids of completed tasks
 	 */
-	@PutMapping("/{personId}/complete/")
+	@PutMapping("{personId}/complete/")
 	@Transactional
 	public void updateTaskCompletedForPerson(@PathVariable Long personId,
 			@RequestBody List<Long> completedTasks) {
