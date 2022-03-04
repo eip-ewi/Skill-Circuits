@@ -59,13 +59,14 @@ public class ModuleController {
 	 * @return        The page to load
 	 */
 	@GetMapping("{id}")
-	public String getModulePage(@AuthenticatedPerson(required = false) Person person, @PathVariable Long id, Model model) {
+	public String getModulePage(@AuthenticatedPerson(required = false) Person person, @PathVariable Long id,
+			Model model) {
 		ModuleLevelModuleViewDTO module = View.convert(moduleRepository.findByIdOrThrow(id),
 				ModuleLevelModuleViewDTO.class);
 
-//		if (person != null) {
-//			moduleService.setCompletedTasksForPerson(module, person.getId());
-//		}
+		if (person != null) {
+			moduleService.setCompletedTasksForPerson(module, person.getId());
+		}
 
 		Set<Pair<Integer, Integer>> positions = module.getSubmodules().stream()
 				.flatMap(s -> s.getSkills().stream())
@@ -80,7 +81,6 @@ public class ModuleController {
 				.flatMap(row -> IntStream.range(0, columns).mapToObj(col -> Pair.of(col, row)))
 				.filter(pos -> !positions.contains(pos))
 				.toList());
-
 
 		return "module/view";
 	}

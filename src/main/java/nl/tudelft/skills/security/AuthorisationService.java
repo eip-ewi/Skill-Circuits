@@ -61,18 +61,6 @@ public class AuthorisationService {
 	}
 
 	/**
-	 * Gets the currently authenticated persons id.
-	 *
-	 * @return The currently authenticated persons id, and null if no such person exists.
-	 */
-	public Long getAuthPersonId() {
-		if (!isAuthenticated()) {
-			return null;
-		}
-		return getAuthPerson().getId();
-	}
-
-	/**
 	 * Gets whether the user is authenticated.
 	 *
 	 * @return True iff the user is authenticated

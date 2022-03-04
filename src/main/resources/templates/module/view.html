@@ -36,77 +36,6 @@
 
 <body>
 <div layout:fragment="content">
-    <script defer th:inline="javascript">
-        addEventListener('DOMContentLoaded', function () {
-            if (localStorage.getItem('completedTasks') !== null) {
-                // if we have tasks completed in local storage but not yet in the dom, also mark them completed
-                const completedInLocalStorage = JSON.parse(localStorage.getItem("completedTasks"))
-                const completedInDOM = Array.from(document.getElementsByClassName("task completed"), e => parseInt(e.id.split('')[1]))
-
-                const toUpdate = completedInLocalStorage.filter(t => !completedInDOM.includes(t));
-
-                if (!toUpdate.length) {
-                    return
-                }
-
-                toUpdate.forEach(taskId => {
-                    const task = document.getElementById(`task-${taskId}`)
-                    task.classList.add('completed')
-                })
-
-                //send update to server if user is authenticated
-                /*<![CDATA[*/
-                const person = /*[[${@authorisationService.authPerson}]]*/ null
-                /*]]>*/
-                if (person !== null) {
-                    $.ajax({
-                        type: "PUT",
-                        url: "/person/" + person.id + "/complete/",
-                        data: JSON.stringify(toUpdate),
-                        processData: false,
-                        contentType: "application/json",
-                        success : () => {localStorage.removeItem('completedTasks')}
-                    })
-                }
-            }
-        })
-    </script>
-    <script defer th:inline="javascript">
-        function toggleCompleted(taskId) {
-            const task = document.getElementById(`task-${taskId}`)
-            task.classList.toggle('completed')
-
-            const completed = task.classList.contains('completed')
-            //send update to server if user is authenticated
-            /*<![CDATA[*/
-            const person = /*[[${@authorisationService.authPerson}]]*/ null
-            /*]]>*/
-            if (person !== null){
-                // If there is an authenticated person, also update on the server.
-                $.ajax({
-                    type: "PUT",
-                    url: "/person/" + person.id + "/completion/" + taskId,
-                    data: JSON.stringify(completed),
-                    processData: false,
-                    contentType: "application/json",
-                    success : () => {}
-                })
-            } else {
-                // If there is no authenticated person, also store in cookie storage
-                if (localStorage.getItem('completedTasks') === null) {
-                    localStorage.setItem('completedTasks', JSON.stringify([]))
-                }
-                if (completed) {
-                    localStorage.setItem('completedTasks',
-                        JSON.stringify([taskId, ...JSON.parse(localStorage.getItem('completedTasks'))]))
-                } else {
-                    localStorage.setItem('completedTasks',
-                        JSON.stringify(JSON.parse(localStorage.getItem('completedTasks')).filter(e => e !== taskId)))
-                }
-            }
-
-        }
-    </script>
 
     <h1 th:text="${module.name}"></h1>
 
@@ -146,6 +75,77 @@
             </th:block>
         </th:block>
     </div>
+
+    <script th:inline="javascript">
+        addEventListener('DOMContentLoaded', function () {
+            if (localStorage.getItem('completedTasks') !== null) {
+                // if we have tasks completed in local storage but not yet in the dom, also mark them completed
+                const completedInLocalStorage = JSON.parse(localStorage.getItem("completedTasks"))
+                const completedInDOM = Array.from(document.getElementsByClassName("task completed"), e => parseInt(e.id.split('')[1]))
+
+                const toUpdate = completedInLocalStorage.filter(t => !completedInDOM.includes(t));
+
+                if (!toUpdate.length) {
+                    return
+                }
+
+                toUpdate.forEach(taskId => {
+                    const task = document.getElementById(`task-${taskId}`)
+                    task.classList.add('completed')
+                })
+
+                //send update to server if user is authenticated
+                /*<![CDATA[*/
+                const personId = /*[[${@authorisationService.authPerson?.id}]]*/ null
+                /*]]>*/
+                if (personId !== null) {
+                    $.ajax({
+                        type: "PUT",
+                        url: "/person/" + personId.id + "/complete/",
+                        data: JSON.stringify(toUpdate),
+                        processData: false,
+                        contentType: "application/json",
+                        success : () => {localStorage.removeItem('completedTasks')}
+                    })
+                }
+            }
+        })
+
+        function toggleCompleted(taskId) {
+            const task = document.getElementById(`task-${taskId}`)
+            task.classList.toggle('completed')
+
+            const completed = task.classList.contains('completed')
+            //send update to server if user is authenticated
+            /*<![CDATA[*/
+            const personId = /*[[${@authorisationService.authPerson?.id}]]*/ null
+            /*]]>*/
+            if (personId !== null){
+                // If there is an authenticated person, also update on the server.
+                $.ajax({
+                    type: "PUT",
+                    url: "/person/" + person.id + "/completion/" + taskId,
+                    data: JSON.stringify(completed),
+                    processData: false,
+                    contentType: "application/json",
+                    success : () => {}
+                })
+            } else {
+                // If there is no authenticated person, also store in cookie storage
+                if (localStorage.getItem('completedTasks') === null) {
+                    localStorage.setItem('completedTasks', JSON.stringify([]))
+                }
+                if (completed) {
+                    localStorage.setItem('completedTasks',
+                        JSON.stringify([taskId, ...JSON.parse(localStorage.getItem('completedTasks'))]))
+                } else {
+                    localStorage.setItem('completedTasks',
+                        JSON.stringify(JSON.parse(localStorage.getItem('completedTasks')).filter(e => e !== taskId)))
+                }
+            }
+
+        }
+    </script>
 
     <script th:if="${@authorisationService.canEditSkills(module.edition)}">
         let draggingSkill = false;
@@ -270,7 +270,6 @@
             }
         }, false);
     </script>
-
 </div>
 
 
