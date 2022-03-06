@@ -35,11 +35,11 @@
 
     <div class="blocks">
 
-<!--        <a class="block" th:each="module : ${course.editions}" th:href="@{|/edition/${edition.id}|}">-->
+        <a class="block" th:each="edition : ${course.editions}" th:href="@{|/edition/${edition.id}|}">
 
-<!--            <h2 th:text="${edition.name}"></h2>-->
+            <h2 th:text="${edition.name}"></h2>
 
-<!--        </a>-->
+        </a>
 
     </div>
 

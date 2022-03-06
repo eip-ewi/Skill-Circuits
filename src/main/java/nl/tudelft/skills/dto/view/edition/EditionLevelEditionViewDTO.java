@@ -32,13 +32,13 @@ import nl.tudelft.skills.model.SCEdition;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class EditionLevelEditionViewDTO extends View<SCEdition> {
+
 	@NotNull
 	private Long id;
 	@NotNull
-	private Long course;
+	private CourseViewDTO course;
 	@NotBlank
 	private String name;
 	@NotNull
 	private List<EditionLevelModuleViewDTO> modules;
-
 }

@@ -105,7 +105,7 @@ public class DevDatabaseLoader {
 
 	private void initCourse() {
 		scCourse = courseRepository.save(SCCourse.builder()
-				.id(course.getId())
+				.id(edition.getCourse().getId())
 				.build());
 	}
 

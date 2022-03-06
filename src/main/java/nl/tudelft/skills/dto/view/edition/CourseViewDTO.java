@@ -15,20 +15,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.model;
+package nl.tudelft.skills.dto.view.edition;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
 
 import lombok.*;
+import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.model.SCCourse;
 
 @Data
-@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SCCourse {
+@EqualsAndHashCode(callSuper = false)
+public class CourseViewDTO extends View<SCCourse> {
 
-	@Id
+	@NotNull
 	private Long id;
+	@NotNull
+	private String name;
 }

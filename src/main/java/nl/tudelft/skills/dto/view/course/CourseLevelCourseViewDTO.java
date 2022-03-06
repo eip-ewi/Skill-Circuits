@@ -17,6 +17,8 @@
  */
 package nl.tudelft.skills.dto.view.course;
 
+import java.util.List;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -30,14 +32,13 @@ import nl.tudelft.skills.model.SCCourse;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class CourseLevelCourseViewDTO extends View<SCCourse> {
+
 	@NotNull
 	private Long id;
 	@NotBlank
 	private String name;
 	@NotBlank
 	private String code;
-
-	// TODO Some are hidden based on user
-	//    @NotNull
-	//    private List<CourseLevelEditionViewDTO> editions;
+	@NotNull
+	private List<CourseLevelEditionViewDTO> editions;
 }

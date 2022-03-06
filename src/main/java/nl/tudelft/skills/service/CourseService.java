@@ -21,6 +21,7 @@ import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.course.CourseLevelCourseViewDTO;
+import nl.tudelft.skills.dto.view.course.CourseLevelEditionViewDTO;
 import nl.tudelft.skills.repository.CourseRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +54,10 @@ public class CourseService {
 		view.setName(course.getName());
 
 		view.setCode(course.getCode());
+
+		view.setEditions(course.getEditions().stream()
+				.map(e -> new CourseLevelEditionViewDTO(e.getId(), e.getName())).toList());
+
 		return view;
 	}
 
