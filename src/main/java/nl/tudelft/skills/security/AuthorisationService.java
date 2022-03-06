@@ -79,6 +79,16 @@ public class AuthorisationService {
 	}
 
 	/**
+	 * Gets whether the authenticated user can view all the editions of a course.
+	 *
+	 * @param  courseId The id of the course.
+	 * @return          True iff the user can view all the editions of a course by id.
+	 */
+	public boolean canViewAllEditions(Long courseId) {
+		return isAtLeastTeacherInEdition(courseId);
+	}
+
+	/**
 	 * Gets whether the authenticated user can edit the skills in an edition.
 	 *
 	 * @param  editionId The id of the edition

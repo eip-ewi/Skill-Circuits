@@ -21,6 +21,7 @@ import nl.tudelft.skills.repository.CourseRepository;
 import nl.tudelft.skills.service.CourseService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,6 +50,7 @@ public class CourseController {
 	 * @return       The page to load
 	 */
 	@GetMapping("{id}")
+	@PreAuthorize("@authorisationService.canViewAllEditions(#id)")
 	public String getCoursePage(@PathVariable Long id, Model model) {
 		model.addAttribute("course", courseService.getCourseView(id));
 
