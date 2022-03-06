@@ -23,6 +23,7 @@ import static org.mockito.Mockito.*;
 
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.dto.view.edition.CourseViewDTO;
 import nl.tudelft.skills.dto.view.edition.EditionLevelEditionViewDTO;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.service.EditionService;
@@ -51,7 +52,7 @@ public class EditionControllerTest extends ControllerTest {
 	void getEditionPage() {
 		EditionLevelEditionViewDTO mockEditionView = View.convert(db.getEditionRL(),
 				EditionLevelEditionViewDTO.class);
-		mockEditionView.setCourse(10L);
+		mockEditionView.setCourse(new CourseViewDTO(10L, "RL"));
 		mockEditionView.setName("RL");
 
 		when(editionService.getEditionView(anyLong())).thenReturn(mockEditionView);

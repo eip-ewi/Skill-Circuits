@@ -35,6 +35,8 @@ import org.springframework.stereotype.Service;
 public class TestDatabaseLoader {
 
 	@Autowired
+	private CourseRepository courseRepository;
+	@Autowired
 	private EditionRepository editionRepository;
 	@Autowired
 	private ModuleRepository moduleRepository;
@@ -48,6 +50,7 @@ public class TestDatabaseLoader {
 	public CourseSummaryDTO course;
 	public EditionDetailsDTO edition;
 
+	private SCCourse scCourse;
 	private SCEdition editionRL;
 	private SCModule moduleProofTechniques;
 
@@ -85,16 +88,27 @@ public class TestDatabaseLoader {
 		return editionRepository.findByIdOrThrow(editionRL.getId());
 	}
 
+	public SCCourse getCourseRL() {
+		return courseRepository.findByIdOrThrow(course.getId());
+	}
+
 	@PostConstruct
 	private void init() {
 		course = new CourseSummaryDTO().id(30L).name("RL");
 		edition = new EditionDetailsDTO().id(69L).name("Reasoning and Logic");
 
+		initCourse();
 		initEdition();
 		initModules();
 		initSubmodules();
 		initSkills();
 		initTasks();
+	}
+
+	private void initCourse() {
+		scCourse = courseRepository.save(SCCourse.builder()
+				.id(30L)
+				.build());
 	}
 
 	private void initEdition() {
