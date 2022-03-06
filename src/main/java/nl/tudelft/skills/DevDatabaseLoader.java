@@ -37,6 +37,8 @@ import org.springframework.stereotype.Service;
 public class DevDatabaseLoader {
 
 	@Autowired
+	private CourseRepository courseRepository;
+	@Autowired
 	private EditionRepository editionRepository;
 	@Autowired
 	private ModuleRepository moduleRepository;
@@ -56,6 +58,8 @@ public class DevDatabaseLoader {
 
 	private CourseSummaryDTO course;
 	private SCEdition scEdition;
+
+	private SCCourse scCourse;
 
 	private SCModule moduleProofTechniques;
 	private SCModule modulePropositionalLogic;
@@ -91,11 +95,18 @@ public class DevDatabaseLoader {
 		course = courseControllerApi.getAllCourses().blockFirst();
 		edition = editionApi.getAllEditions().blockFirst();
 
+		initCourse();
 		initEdition();
 		initModules();
 		initSubmodules();
 		initSkills();
 		initTasks();
+	}
+
+	private void initCourse() {
+		scCourse = courseRepository.save(SCCourse.builder()
+				.id(course.getId())
+				.build());
 	}
 
 	private void initEdition() {
