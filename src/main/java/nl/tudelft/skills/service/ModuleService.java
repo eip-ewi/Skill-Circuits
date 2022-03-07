@@ -47,8 +47,11 @@ public class ModuleService {
 	public void setCompletedTasksForPerson(ModuleLevelModuleViewDTO moduleViewDTO, Long personId) {
 		List<Long> completedTasks = personRepository.getById(personId).getTasksCompleted().stream()
 				.map(Task::getId).toList();
-		moduleViewDTO.getSubmodules().forEach(sub -> sub.getSkills().forEach(skill -> skill.getTasks()
-				.forEach(task -> task.setCompleted(completedTasks.contains(task.getId())))));
+
+		moduleViewDTO.getSubmodules().stream()
+				.flatMap(sub -> sub.getSkills().stream())
+				.flatMap(skill -> skill.getTasks().stream())
+				.forEach(task -> task.setCompleted(completedTasks.contains(task.getId())));
 	}
 
 }
