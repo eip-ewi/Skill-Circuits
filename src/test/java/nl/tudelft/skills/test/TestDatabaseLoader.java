@@ -103,6 +103,7 @@ public class TestDatabaseLoader {
 	public SCCourse getCourseRL() {
 		return courseRepository.findByIdOrThrow(course.getId());
 	}
+
 	public SCPerson getPerson() {
 		return personRepository.findByIdOrThrow(person.getId());
 	}
