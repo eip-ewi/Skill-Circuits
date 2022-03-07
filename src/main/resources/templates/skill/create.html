@@ -24,7 +24,7 @@
 
     <div id="create-skill">
 
-        <form id="create-skill-form" class="create_skill">
+        <form id="create-skill-form" class="create skill__form">
 
             <input id="create-skill-row" name="row" type="hidden"/>
             <input id="create-skill-column" name="column" type="hidden"/>
@@ -37,7 +37,7 @@
                 <option th:each="submodule : ${module.submodules}" th:value="${submodule.id}" th:text="${submodule.name}"></option>
             </select>
 
-            <div class="create_skill__buttons">
+            <div class="skill__form__buttons">
                 <button type="button" id="create-skill-cancel">Cancel</button>
                 <button type="submit">Create Skill</button>
             </div>
@@ -57,10 +57,15 @@
     document.addEventListener("DOMContentLoaded", function () {
         $("#create-skill-form").submit(function (event) {
             event.preventDefault();
-            $.post("/skill", $("#create-skill-form").serialize(), element => {
-                $("#circuit").append($("<div/>").append(element).children()[0]);
-                $(".content").append($("#create-skill"));
+            $.post("/skill", $("#create-skill-form").serialize(), html => {
+                let element = $("<div/>").append(html).children()[0]
+
+                $("#circuit").append(element);
+                $("#create-skill-wrapper").append($("#create-skill"));
                 $("#create-skill-name").val("");
+
+                $(`#${element.id} > .skill__buttons > .skill__edit`).click(editSkill);
+                $(`#${element.id} > .skill__buttons > .skill__delete`).click(deleteSkill);
             });
         });
 

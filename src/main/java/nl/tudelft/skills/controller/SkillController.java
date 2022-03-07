@@ -18,7 +18,8 @@
 package nl.tudelft.skills.controller;
 
 import nl.tudelft.skills.dto.create.SkillCreateDTO;
-import nl.tudelft.skills.dto.patch.SkillPositionPatch;
+import nl.tudelft.skills.dto.patch.SkillPatchDTO;
+import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.SkillRepository;
 
@@ -53,6 +54,8 @@ public class SkillController {
 	public String createSkill(SkillCreateDTO create, Model model) {
 		Skill skill = skillRepository.save(create.apply());
 		model.addAttribute("skill", skill);
+		model.addAttribute("submodule", skill.getSubmodule());
+		model.addAttribute("module", skill.getSubmodule().getModule());
 		return "skill/view";
 	}
 
@@ -73,16 +76,30 @@ public class SkillController {
 	}
 
 	/**
+	 * Patches a skill.
+	 *
+	 * @param  patch The patch containing the new data
+	 * @return       Empty 200 response
+	 */
+	@PatchMapping
+	@PreAuthorize("@authorisationService.canEditSkill(#patch.id)")
+	public ResponseEntity<Void> patchSkill(SkillPatchDTO patch) {
+		Skill skill = skillRepository.findByIdOrThrow(patch.getId());
+		skillRepository.save(patch.apply(skill));
+		return ResponseEntity.ok().build();
+	}
+
+	/**
 	 * Updates a skill's position.
 	 *
 	 * @param  id    The id of the skill to update
 	 * @param  patch The patch containing the new position
 	 * @return       Empty 200 response
 	 */
-	@PatchMapping("{id}")
+	@PatchMapping("{id}/position")
 	@PreAuthorize("@authorisationService.canEditSkill(#id)")
 	public ResponseEntity<Void> updateSkillPosition(@PathVariable Long id,
-			@RequestBody SkillPositionPatch patch) {
+			@RequestBody SkillPositionPatchDTO patch) {
 		Skill skill = skillRepository.findByIdOrThrow(id);
 		skillRepository.save(patch.apply(skill));
 		return ResponseEntity.ok().build();

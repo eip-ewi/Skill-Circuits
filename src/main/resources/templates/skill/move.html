@@ -1,0 +1,147 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<script th:if="${@authorisationService.canEditSkills(module.edition)}" layout:fragment="script">
+    let draggingSkill = false;
+    let circuit = document.getElementById("circuit");
+
+    document.addEventListener("dragstart", function (event) {
+        if (event.target.classList.contains("skill")) {
+            event.dataTransfer.setData('text/plain', event.target.id);
+            event.dataTransfer.dropEffect = "move";
+            event.target.style.opacity = .5;
+            draggingSkill = true;
+            circuit.classList.add("editing");
+        }
+    }, false);
+    document.addEventListener("dragend", function (event) {
+        if (event.target.classList.contains("skill")) {
+            event.target.style.opacity = "";
+            draggingSkill = false;
+            circuit.classList.remove("editing");
+        }
+    }, false);
+
+    document.addEventListener("dragenter", function (event) {
+        if (event.target.classList.contains("ghost_skill") && draggingSkill) {
+            event.target.classList.add("drag_over");
+        }
+    }, false);
+    document.addEventListener("dragleave", function (event) {
+        if (event.target.classList.contains("ghost_skill")) {
+            event.target.classList.remove("drag_over");
+        }
+    }, false);
+
+    document.addEventListener("dragover", function (event) {
+        if (event.target.classList.contains("ghost_skill") && draggingSkill) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "move";
+        }
+    }, false);
+    document.addEventListener("drop", function (event) {
+        if (event.target.classList.contains("ghost_skill") && draggingSkill) {
+            event.preventDefault();
+            event.target.classList.remove("drag_over");
+
+            let moved = document.getElementById(event.dataTransfer.getData("text/plain"));
+
+            // Swap elements
+            let newCol = event.target.style.gridColumn;
+            let newRow = event.target.style.gridRow;
+            event.target.style.gridColumn = moved.style.gridColumn;
+            event.target.style.gridRow = moved.style.gridRow;
+            moved.style.gridColumn = newCol;
+            moved.style.gridRow = newRow;
+
+            // Sent update to server
+            let id = moved.id.split("-")[1];
+            let col = parseInt(newCol.split(" / ")[0]) - 1;
+            let row = parseInt(newRow.split(" / ")[0]) - 1;
+
+            $.ajax({
+                type: "PATCH",
+                url: `/skill/${id}/position`,
+                data: JSON.stringify({"column": col, "row": row}),
+                processData: false,
+                contentType: "application/json",
+                success : () => {}
+            })
+
+            // Update amount of columns and rows
+            let newColumns = 0;
+            let newRows = 0
+            for (let skill of document.getElementsByClassName("skill")) {
+                let col = parseInt(skill.style.gridColumn.split(" / ")[0]);
+                if (col > newColumns) newColumns = col;
+                let row = parseInt(skill.style.gridRow.split(" / ")[0]);
+                if (row > newRows) newRows = row;
+            }
+            document.documentElement.style.setProperty("--columns", newColumns.toString());
+
+            // Remove spaces if necessary, keep track of the highest row and column
+            let spaceMaxCol = 0;
+            let spaceMaxRow = 0;
+            let toRemove = [];
+            for (let space of document.getElementsByClassName("ghost_skill")) {
+                let col = parseInt(space.style.gridColumn.split(" / ")[0]);
+                if (col > newColumns + 1) {
+                    toRemove.push(space);
+                    continue;
+                }
+                let row = parseInt(space.style.gridRow.split(" / ")[0]);
+                if (row > newRows + 1) {
+                    toRemove.push(space);
+                    continue;
+                }
+                spaceMaxCol = Math.max(spaceMaxCol, col);
+                spaceMaxRow = Math.max(spaceMaxRow, row);
+            }
+            for (let space of toRemove) {
+                space.remove();
+            }
+
+            // Add spaces if necessary
+            if (spaceMaxCol <= newColumns) {
+                for (let row = 0; row <= newRows; row++) {
+                    let space = document.createElement("div");
+                    space.classList.add("ghost_skill");
+                    space.style.gridRow = (row + 1).toString();
+                    space.style.gridColumn = (newColumns + 1).toString();
+                    circuit.appendChild(space);
+                }
+            }
+            if (spaceMaxRow <= newRows) {
+                for (let col = 0; col <= (spaceMaxCol <= newColumns ? newColumns - 1 : newColumns); col++) {
+                    let space = document.createElement("div");
+                    space.classList.add("ghost_skill");
+                    space.style.gridRow = (newRows + 1).toString();
+                    space.style.gridColumn = (col + 1).toString();
+                    circuit.appendChild(space);
+                }
+                window.scrollTo(0,document.body.scrollHeight);
+            }
+        }
+    }, false);
+</script>
+
+</html>

@@ -46,25 +46,7 @@
         <th:block th:each="submodule : ${module.submodules}">
             <th:block th:each="skill : ${submodule.skills}">
 
-                <div th:id="|skill-${skill.id}|" class="skill"
-                     th:style="|grid-row: ${skill.row + 1}; grid-column: ${skill.column + 1}|"
-                     th:draggable="${@authorisationService.canEditSkills(module.edition)}"
-                     th:classappend="${@authorisationService.canEditSkills(module.edition)} ? 'draggable' : ''">
-                    <h2 th:id="|skill-${skill.id}-name|" th:text="${skill.name}"></h2>
-                    <ul class="tasks">
-                        <li class="task" th:each="task : ${skill.tasks}" th:id="|task-${task.id}|" th:classappend="${task.completed ? 'completed' : ''}">
-                            <button class="task__button" th:onclick="|toggleCompleted(${task.id})|">0</button>
-                            <span th:text="${task.name}"></span>
-                        </li>
-                    </ul>
-                    <div class="skill__buttons">
-                        <button class="fa-solid fa-pen"
-                                th:if="${@authorisationService.canEditSkill(skill.id)}"></button>
-                        <button class="fa-solid fa-trash skill__delete"
-                                th:if="${@authorisationService.canDeleteSkill(skill.id)}"
-                                th:data-skill="${skill.id}"></button>
-                    </div>
-                </div>
+                <div layout:replace="~{skill/view :: block}"></div>
 
                 <div th:if="${@authorisationService.canEditSkills(module.edition)}"
                      th:each="pos : ${spaces}" class="ghost_skill"
@@ -85,6 +67,10 @@
             </th:block>
         </th:block>
     </div>
+
+    <div layout:replace="~{skill/create :: form}"></div>
+    <div layout:replace="~{skill/edit :: form}"></div>
+    <div layout:replace="~{skill/delete :: overlay}"></div>
 
     <script th:inline="javascript">
         addEventListener('DOMContentLoaded', function () {
@@ -157,136 +143,11 @@
         }
     </script>
 
-    <div layout:replace="~{skill/create :: form}"></div>
-    <div layout:replace="~{skill/delete :: overlay}"></div>
-
-
     <div layout:replace="~{skill/create :: script}"></div>
+    <div layout:replace="~{skill/edit :: script}"></div>
     <div layout:replace="~{skill/delete :: script}"></div>
+    <div layout:replace="~{skill/move :: script}"></div>
 
-    <script th:if="${@authorisationService.canEditSkills(module.edition)}">
-        let draggingSkill = false;
-        let circuit = document.getElementById("circuit");
-
-        document.addEventListener("dragstart", function (event) {
-            if (event.target.classList.contains("skill")) {
-                event.dataTransfer.setData('text/plain', event.target.id);
-                event.dataTransfer.dropEffect = "move";
-                event.target.style.opacity = .5;
-                draggingSkill = true;
-                circuit.classList.add("editing");
-            }
-        }, false);
-        document.addEventListener("dragend", function (event) {
-            if (event.target.classList.contains("skill")) {
-                event.target.style.opacity = "";
-                draggingSkill = false;
-                circuit.classList.remove("editing");
-            }
-        }, false);
-
-        document.addEventListener("dragenter", function (event) {
-            if (event.target.classList.contains("ghost_skill") && draggingSkill) {
-                event.target.classList.add("drag_over");
-            }
-        }, false);
-        document.addEventListener("dragleave", function (event) {
-            if (event.target.classList.contains("ghost_skill")) {
-                event.target.classList.remove("drag_over");
-            }
-        }, false);
-
-        document.addEventListener("dragover", function (event) {
-            if (event.target.classList.contains("ghost_skill") && draggingSkill) {
-                event.preventDefault();
-                event.dataTransfer.dropEffect = "move";
-            }
-        }, false);
-        document.addEventListener("drop", function (event) {
-            if (event.target.classList.contains("ghost_skill") && draggingSkill) {
-                event.preventDefault();
-                event.target.classList.remove("drag_over");
-
-                let moved = document.getElementById(event.dataTransfer.getData("text/plain"));
-
-                // Swap elements
-                let newCol = event.target.style.gridColumn;
-                let newRow = event.target.style.gridRow;
-                event.target.style.gridColumn = moved.style.gridColumn;
-                event.target.style.gridRow = moved.style.gridRow;
-                moved.style.gridColumn = newCol;
-                moved.style.gridRow = newRow;
-
-                // Sent update to server
-                let id = moved.id.split("-")[1];
-                let col = parseInt(newCol.split(" / ")[0]) - 1;
-                let row = parseInt(newRow.split(" / ")[0]) - 1;
-
-                $.ajax({
-                    type: "PATCH",
-                    url: "/skill/" + id,
-                    data: JSON.stringify({"column": col, "row": row}),
-                    processData: false,
-                    contentType: "application/json",
-                    success : () => {}
-                })
-
-                // Update amount of columns and rows
-                let newColumns = 0;
-                let newRows = 0
-                for (let skill of document.getElementsByClassName("skill")) {
-                    let col = parseInt(skill.style.gridColumn.split(" / ")[0]);
-                    if (col > newColumns) newColumns = col;
-                    let row = parseInt(skill.style.gridRow.split(" / ")[0]);
-                    if (row > newRows) newRows = row;
-                }
-                document.documentElement.style.setProperty("--columns", newColumns.toString());
-
-                // Remove spaces if necessary, keep track of the highest row and column
-                let spaceMaxCol = 0;
-                let spaceMaxRow = 0;
-                let toRemove = [];
-                for (let space of document.getElementsByClassName("ghost_skill")) {
-                    let col = parseInt(space.style.gridColumn.split(" / ")[0]);
-                    if (col > newColumns + 1) {
-                        toRemove.push(space);
-                        continue;
-                    }
-                    let row = parseInt(space.style.gridRow.split(" / ")[0]);
-                    if (row > newRows + 1) {
-                        toRemove.push(space);
-                        continue;
-                    }
-                    spaceMaxCol = Math.max(spaceMaxCol, col);
-                    spaceMaxRow = Math.max(spaceMaxRow, row);
-                }
-                for (let space of toRemove) {
-                    space.remove();
-                }
-
-                // Add spaces if necessary
-                if (spaceMaxCol <= newColumns) {
-                    for (let row = 0; row <= newRows; row++) {
-                        let space = document.createElement("div");
-                        space.classList.add("ghost_skill");
-                        space.style.gridRow = (row + 1).toString();
-                        space.style.gridColumn = (newColumns + 1).toString();
-                        circuit.appendChild(space);
-                    }
-                }
-                if (spaceMaxRow <= newRows) {
-                    for (let col = 0; col <= (spaceMaxCol <= newColumns ? newColumns - 1 : newColumns); col++) {
-                        let space = document.createElement("div");
-                        space.classList.add("ghost_skill");
-                        space.style.gridRow = (newRows + 1).toString();
-                        space.style.gridColumn = (col + 1).toString();
-                        circuit.appendChild(space);
-                    }
-                    window.scrollTo(0,document.body.scrollHeight);
-                }
-            }
-        }, false);
-    </script>
 </div>
 
 

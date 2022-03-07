@@ -92,10 +92,10 @@ public class AuthorisationService {
 	 * @return          True iff the user can view all the editions of a course by id.
 	 */
 	public boolean canViewAllEditions(Long courseId) {
-        return isAtLeastTeacherInEdition(courseId);
-    }
+		return isAtLeastTeacherInEdition(courseId);
+	}
 
-    /**
+	/**
 	 * Gets whether the authenticated user can create skills in an edition.
 	 *
 	 * @param  editionId The id of the edition

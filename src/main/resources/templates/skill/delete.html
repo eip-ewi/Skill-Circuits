@@ -38,13 +38,15 @@
 </div>
 
 <script th:if="${@authorisationService.canDeleteSkills(module.edition)}" layout:fragment="script">
+    function deleteSkill() {
+        toggleOverlay("delete-skill-overlay");
+        let skillId = $(this).data("skill");
+        $("#delete-skill-id").val(skillId);
+        $("#delete-skill-name").text($(`#skill-${skillId}-name`).text());
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
-        $(".skill__delete").click(function () {
-            toggleOverlay("delete-skill-overlay");
-            let skillId = $(this).data("skill");
-            $("#delete-skill-id").val(skillId);
-            $("#delete-skill-name").text($(`#skill-${skillId}-name`).text());
-        });
+        $(".skill__delete").click(deleteSkill);
     });
 </script>
 

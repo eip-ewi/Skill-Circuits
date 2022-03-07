@@ -17,15 +17,32 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 -->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
 <div th:id="|skill-${skill.id}|" class="skill"
      th:style="|grid-row: ${skill.row + 1}; grid-column: ${skill.column + 1}|"
-     th:draggable="${@authorisationService.canEditSkills(skill.submodule.module.edition)}"
-     th:classappend="${@authorisationService.canEditSkills(skill.submodule.module.edition)} ? 'draggable' : ''">
-    <h2 th:text="${skill.name}"></h2>
+     th:draggable="${@authorisationService.canEditSkills(module.edition)}"
+     th:classappend="${@authorisationService.canEditSkills(module.edition)} ? 'draggable' : ''"
+     th:data-submodule="${submodule.id}"
+     layout:fragment="block">
+    <div th:id="|skill-${skill.id}-header|">
+        <h2 th:id="|skill-${skill.id}-name|" th:text="${skill.name}"></h2>
+    </div>
     <ul class="tasks">
-        <li class="task" th:each="task : ${skill.tasks}">
-            <button class="task__button">0</button>
+        <li class="task" th:each="task : ${skill.tasks}" th:id="|task-${task.id}|" th:classappend="${task.completed ? 'completed' : ''}">
+            <button class="task__button" th:onclick="|toggleCompleted(${task.id})|">0</button>
             <span th:text="${task.name}"></span>
         </li>
     </ul>
+    <div class="skill__buttons">
+        <button class="fa-solid fa-pen skill__edit"
+                th:if="${@authorisationService.canEditSkill(skill.id)}"
+                th:data-skill="${skill.id}"></button>
+        <button class="fa-solid fa-trash skill__delete"
+                th:if="${@authorisationService.canDeleteSkill(skill.id)}"
+                th:data-skill="${skill.id}"></button>
+    </div>
 </div>
+
+</html>

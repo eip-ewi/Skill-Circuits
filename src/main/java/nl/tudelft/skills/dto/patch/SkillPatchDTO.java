@@ -17,7 +17,7 @@
  */
 package nl.tudelft.skills.dto.patch;
 
-import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
@@ -25,25 +25,26 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import nl.tudelft.librador.dto.patch.Patch;
+import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
 import nl.tudelft.skills.model.Skill;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SkillPositionPatch extends Patch<Skill> {
+public class SkillPatchDTO extends Patch<Skill> {
 
-	@Min(0)
 	@NotNull
-	private Integer column;
-	@Min(0)
+	private Long id;
+	@NotBlank
+	private String name;
 	@NotNull
-	private Integer row;
+	private SubmoduleIdDTO submodule;
 
 	@Override
 	protected void applyOneToOne() {
-		updateNonNull(column, data::setColumn);
-		updateNonNull(row, data::setRow);
+		updateNonNull(name, data::setName);
+		updateNonNullId(submodule, data::setSubmodule);
 	}
 
 	@Override

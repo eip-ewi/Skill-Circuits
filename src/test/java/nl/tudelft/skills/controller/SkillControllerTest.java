@@ -27,7 +27,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.dto.patch.SkillPositionPatch;
+import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
+import nl.tudelft.skills.dto.patch.SkillPatchDTO;
+import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.SkillRepository;
 
@@ -76,13 +78,26 @@ public class SkillControllerTest extends ControllerTest {
 		assertThat(skillRepository.existsById(id)).isTrue();
 
 		assertThat(element)
-				.contains("<h2>Skill</h2>")
+				.contains("<h2 id=\"skill-" + id + "-name\">Skill</h2>")
 				.contains("style=\"grid-row: 11; grid-column: 12");
 	}
 
 	@Test
 	void patchSkill() {
-		skillController.updateSkillPosition(db.skillVariables.getId(), SkillPositionPatch.builder()
+		skillController.patchSkill(SkillPatchDTO.builder()
+				.id(db.skillVariables.getId())
+				.name("Updated")
+				.submodule(new SubmoduleIdDTO(db.submoduleCases.getId()))
+				.build());
+
+		Skill skill = skillRepository.findByIdOrThrow(db.skillVariables.getId());
+		assertThat(skill.getName()).isEqualTo("Updated");
+		assertThat(skill.getSubmodule()).isEqualTo(db.submoduleCases);
+	}
+
+	@Test
+	void updateSkillPosition() {
+		skillController.updateSkillPosition(db.skillVariables.getId(), SkillPositionPatchDTO.builder()
 				.column(10)
 				.row(11)
 				.build());
