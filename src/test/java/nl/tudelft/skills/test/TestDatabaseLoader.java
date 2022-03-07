@@ -24,7 +24,9 @@ import javax.annotation.PostConstruct;
 import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.skills.model.*;
+import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.*;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -46,6 +48,8 @@ public class TestDatabaseLoader {
 	private SkillRepository skillRepository;
 	@Autowired
 	private TaskRepository taskRepository;
+	@Autowired
+	private PersonRepository personRepository;
 
 	public CourseSummaryDTO course;
 	public EditionDetailsDTO edition;
@@ -53,6 +57,7 @@ public class TestDatabaseLoader {
 	private SCCourse scCourse;
 	private SCEdition editionRL;
 	private SCModule moduleProofTechniques;
+	private SCPerson person;
 
 	public Submodule submoduleLogicBasics;
 	public Submodule submoduleGeneralisation;
@@ -80,6 +85,11 @@ public class TestDatabaseLoader {
 	public Skill skillTransitiveProperty;
 	public Skill skillInductionPractice;
 
+	public Task taskRead12;
+	public Task taskDo12ae;
+	public Task taskRead11;
+	public Task taskDo11ad;
+
 	public SCModule getModuleProofTechniques() {
 		return moduleRepository.findByIdOrThrow(moduleProofTechniques.getId());
 	}
@@ -90,6 +100,9 @@ public class TestDatabaseLoader {
 
 	public SCCourse getCourseRL() {
 		return courseRepository.findByIdOrThrow(course.getId());
+	}
+	public SCPerson getPerson() {
+		return personRepository.findByIdOrThrow(person.getId());
 	}
 
 	@PostConstruct
@@ -103,6 +116,7 @@ public class TestDatabaseLoader {
 		initSubmodules();
 		initSkills();
 		initTasks();
+		initPerson();
 	}
 
 	private void initCourse() {
@@ -121,6 +135,13 @@ public class TestDatabaseLoader {
 		moduleProofTechniques = moduleRepository.save(SCModule.builder()
 				.name("Proof Techniques")
 				.edition(edition.getId())
+				.build());
+	}
+
+	private void initPerson() {
+		person = personRepository.save(SCPerson.builder()
+				.id(TestUserDetailsService.id)
+				.tasksCompleted(Set.of(taskRead11, taskDo11ad, taskRead12, taskDo12ae))
 				.build());
 	}
 
@@ -233,10 +254,14 @@ public class TestDatabaseLoader {
 	}
 
 	private void initTasks() {
-		taskRepository.save(Task.builder().name("Read chapter 1.2").skill(skillImplication).build());
-		taskRepository.save(Task.builder().name("Do exercise 1.2a-e").skill(skillImplication).build());
-		taskRepository.save(Task.builder().name("Read chapter 1.1").skill(skillNegation).build());
-		taskRepository.save(Task.builder().name("Do exercise 1.1a-d").skill(skillNegation).build());
+		taskRead12 = taskRepository
+				.save(Task.builder().name("Read chapter 1.2").skill(skillImplication).build());
+		taskDo12ae = taskRepository
+				.save(Task.builder().name("Do exercise 1.2a-e").skill(skillImplication).build());
+		taskRead11 = taskRepository
+				.save(Task.builder().name("Read chapter 1.1").skill(skillNegation).build());
+		taskDo11ad = taskRepository
+				.save(Task.builder().name("Do exercise 1.1a-d").skill(skillNegation).build());
 		taskRepository.save(Task.builder().name("Read chapter 1.0").skill(skillVariables).build());
 		taskRepository.save(Task.builder().name("Do exercise 1.0a").skill(skillVariables).build());
 

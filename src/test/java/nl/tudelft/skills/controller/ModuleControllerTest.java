@@ -18,29 +18,40 @@
 package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
+import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
-import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.service.ModuleService;
+import nl.tudelft.skills.test.TestUserDetailsService;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
+
+import reactor.core.publisher.Flux;
 
 @Transactional
 @AutoConfigureMockMvc
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
 public class ModuleControllerTest extends ControllerTest {
 
+	@MockBean
+	private ModuleService moduleService;
 	private final ModuleController moduleController;
+	private final RoleControllerApi roleControllerApi;
 
 	@Autowired
-	public ModuleControllerTest(ModuleRepository moduleRepository, ModuleService moduleService) {
-		this.moduleController = new ModuleController(moduleRepository, moduleService);
+	public ModuleControllerTest(ModuleController moduleController, RoleControllerApi roleControllerApi) {
+		this.moduleController = moduleController;
+		this.roleControllerApi = roleControllerApi;
 	}
 
 	@Test
@@ -49,6 +60,17 @@ public class ModuleControllerTest extends ControllerTest {
 		assertThat(page).isEqualTo("module/view");
 		assertThat(model.getAttribute("module"))
 				.isEqualTo(View.convert(db.getModuleProofTechniques(), ModuleLevelModuleViewDTO.class));
+	}
+
+	@Test
+	@WithUserDetails("username")
+	void getModulePageCallsTasksCompleted() throws Exception {
+		when(roleControllerApi.getRolesById(any(), any())).thenReturn(Flux.empty());
+
+		mvc.perform(get("/module/{id}", db.getModuleProofTechniques().getId()));
+		verify(moduleService).setCompletedTasksForPerson(
+				View.convert(db.getModuleProofTechniques(), ModuleLevelModuleViewDTO.class),
+				TestUserDetailsService.id);
 	}
 
 }
