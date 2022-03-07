@@ -68,7 +68,7 @@ public class PersonController {
 	 */
 	@PutMapping("{personId}/complete/")
 	@Transactional
-	public void updateTaskCompletedForPerson(@PathVariable Long personId,
+	public void setTasksCompletedForPerson(@PathVariable Long personId,
 			@RequestBody List<Long> completedTasks) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(personId);
 		person.getTasksCompleted().addAll(taskRepository.findAllById(completedTasks));

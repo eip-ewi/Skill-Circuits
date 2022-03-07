@@ -89,6 +89,8 @@ public class TestDatabaseLoader {
 	public Task taskDo12ae;
 	public Task taskRead11;
 	public Task taskDo11ad;
+	public Task taskRead10;
+	public Task taskDo10a;
 
 	public SCModule getModuleProofTechniques() {
 		return moduleRepository.findByIdOrThrow(moduleProofTechniques.getId());
@@ -262,8 +264,10 @@ public class TestDatabaseLoader {
 				.save(Task.builder().name("Read chapter 1.1").skill(skillNegation).build());
 		taskDo11ad = taskRepository
 				.save(Task.builder().name("Do exercise 1.1a-d").skill(skillNegation).build());
-		taskRepository.save(Task.builder().name("Read chapter 1.0").skill(skillVariables).build());
-		taskRepository.save(Task.builder().name("Do exercise 1.0a").skill(skillVariables).build());
+		taskRead10 = taskRepository
+				.save(Task.builder().name("Read chapter 1.0").skill(skillVariables).build());
+		taskDo10a = taskRepository
+				.save(Task.builder().name("Do exercise 1.0a").skill(skillVariables).build());
 
 		taskRepository.save(Task.builder().name("Read chapter 2.0").skill(skillProofOutline).build());
 		taskRepository.save(Task.builder().name("Do exercise 2.0a-f").skill(skillProofOutline).build());
