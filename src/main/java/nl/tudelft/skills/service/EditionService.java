@@ -20,7 +20,7 @@ package nl.tudelft.skills.service;
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.edition.CourseViewDTO;
+import nl.tudelft.skills.dto.view.edition.EditionLevelCourseViewDTO;
 import nl.tudelft.skills.dto.view.edition.EditionLevelEditionViewDTO;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.EditionRepository;
@@ -55,7 +55,8 @@ public class EditionService {
 				EditionLevelEditionViewDTO.class);
 
 		view.setName(edition.getName());
-		view.setCourse(new CourseViewDTO(edition.getCourse().getId(), edition.getCourse().getName()));
+		view.setCourse(
+				new EditionLevelCourseViewDTO(edition.getCourse().getId(), edition.getCourse().getName()));
 		return view;
 	}
 

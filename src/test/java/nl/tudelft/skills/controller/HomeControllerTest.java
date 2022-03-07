@@ -18,7 +18,13 @@
 package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import java.util.List;
+
+import nl.tudelft.labracore.api.CourseControllerApi;
+import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.repository.ModuleRepository;
 
@@ -27,20 +33,37 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import reactor.core.publisher.Flux;
+
 @AutoConfigureMockMvc
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
 public class HomeControllerTest extends ControllerTest {
 
-	private final HomeController moduleController;
+	private final HomeController homeController;
+	private final CourseControllerApi courseApi;
 
 	@Autowired
-	public HomeControllerTest(ModuleRepository moduleRepository) {
-		this.moduleController = new HomeController(moduleRepository);
+	public HomeControllerTest(ModuleRepository moduleRepository, CourseControllerApi courseApi) {
+		this.courseApi = courseApi;
+		this.homeController = new HomeController(moduleRepository, courseApi);
 	}
 
 	@Test
 	void getLoginPage() {
-		assertThat(moduleController.getLoginPage()).isEqualTo("login");
+		assertThat(homeController.getLoginPage()).isEqualTo("login");
 	}
 
+	@Test
+	@SuppressWarnings("unchecked")
+	void getHomePage() {
+		CourseSummaryDTO course = new CourseSummaryDTO();
+
+		when(courseApi.getAllCourses()).thenReturn(Flux.just(course));
+
+		homeController.getHomePage(model);
+
+		assertThat((List<CourseSummaryDTO>) model.getAttribute("courses")).containsExactly(course);
+
+		verify(courseApi).getAllCourses();
+	}
 }

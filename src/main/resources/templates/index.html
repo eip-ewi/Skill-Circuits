@@ -21,6 +21,8 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{container}">
 <head>
+    <link rel="stylesheet" th:href="@{/css/blocks.css}">
+
     <title>Skill Circuits</title>
 </head>
 
@@ -29,6 +31,41 @@
 <div layout:fragment="content">
 
     <h1>Welcome to Skill Circuits</h1>
+
+    <h2>Courses</h2>
+
+    <h2>Courses</h2>
+
+    <div class="blocks">
+        <th:block  th:each="course : ${courses}">
+
+            <th:block th:if="not${@authorisationService.isAuthenticated()}">
+                <a class="block" th:href="@{|/edition/${@courseService.getLastEditionForCourse(course.id)}|}">
+                    <h2 th:text="${course.name}"></h2>
+                </a>
+            </th:block>
+
+            <th:block th:if="${@authorisationService.isAuthenticated()} and not ${@authorisationService.canViewAllEditions(course.id)}">
+                <a class="block" th:href="@{|/edition/${@courseService.getLastStudentEditionForCourseOrLast(course.id)}|}">
+                    <h2 th:text="${course.name}"></h2>
+                </a>
+            </th:block>
+
+            <th:block th:if="${@authorisationService.canViewAllEditions(course.id)}">
+                <a class="block" th:href="@{|/course/${course.id}|}">
+                    <h2 th:text="${course.name}"></h2>
+                </a>
+            </th:block>
+
+        </th:block>
+
+    </div>
+
+    <br>
+
+    <h2>Modules</h2>
+
+
 
     <ul>
         <li th:each="moduleId : ${moduleIds}"><a th:href="@{|/module/${moduleId}|}" th:text="${moduleNames.get(moduleId)}"></a></li>

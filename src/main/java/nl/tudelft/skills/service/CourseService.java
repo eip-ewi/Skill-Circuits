@@ -17,26 +17,35 @@
  */
 package nl.tudelft.skills.service;
 
+import java.util.Comparator;
+
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
+import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.course.CourseLevelCourseViewDTO;
 import nl.tudelft.skills.dto.view.course.CourseLevelEditionViewDTO;
+import nl.tudelft.skills.model.SCCourse;
 import nl.tudelft.skills.repository.CourseRepository;
+import nl.tudelft.skills.security.AuthorisationService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CourseService {
 
 	private CourseControllerApi courseApi;
 	private CourseRepository courseRepository;
+	private AuthorisationService authorisationService;
 
 	@Autowired
-	public CourseService(CourseControllerApi courseApi, CourseRepository courseRepository) {
+	public CourseService(CourseControllerApi courseApi, CourseRepository courseRepository,
+			AuthorisationService authorisationService) {
 		this.courseApi = courseApi;
 		this.courseRepository = courseRepository;
+		this.authorisationService = authorisationService;
 	}
 
 	/**
@@ -48,7 +57,7 @@ public class CourseService {
 	public CourseLevelCourseViewDTO getCourseView(Long id) {
 		CourseDetailsDTO course = courseApi.getCourseById(id).block();
 
-		CourseLevelCourseViewDTO view = View.convert(courseRepository.findByIdOrThrow(id),
+		CourseLevelCourseViewDTO view = View.convert(getOrCreateSCCourse(id),
 				CourseLevelCourseViewDTO.class);
 
 		view.setName(course.getName());
@@ -61,4 +70,47 @@ public class CourseService {
 		return view;
 	}
 
+	/**
+	 * Returns the most recent edition for a course with id.
+	 *
+	 * @param  id Id of the course.
+	 * @return    The most recent edition for the course.
+	 */
+	public Long getLastEditionForCourse(Long id) {
+		CourseDetailsDTO course = courseApi.getCourseById(id).block();
+
+		return course.getEditions().stream()
+				.max(Comparator.comparing(EditionSummaryDTO::getStartDate))
+				.map(EditionSummaryDTO::getId)
+				.orElse(null);
+	}
+
+	/**
+	 * Returns the most recent edition in a course that a student is enrolled in. If none is found the most
+	 * recent edition is returned.
+	 *
+	 * @param  id Id of the course.
+	 * @return    The most recent edition in a course in which a student is enrolled.
+	 */
+	public Long getLastStudentEditionForCourseOrLast(Long id) {
+		CourseDetailsDTO course = courseApi.getCourseById(id).block();
+
+		return course.getEditions().stream()
+				.filter(e -> authorisationService.isStudentInEdition(e.getId()))
+				.max(Comparator.comparing(EditionSummaryDTO::getStartDate))
+				.map(EditionSummaryDTO::getId)
+				.orElseGet(() -> getLastEditionForCourse(id));
+	}
+
+	/**
+	 * Returns a SCCourse by course id. If it doesn't exist, creates one.
+	 *
+	 * @param  id The id of the course
+	 * @return    The SCCourse with id.
+	 */
+	@Transactional
+	public SCCourse getOrCreateSCCourse(Long id) {
+		return courseRepository.findById(id)
+				.orElseGet(() -> courseRepository.save(SCCourse.builder().id(id).build()));
+	}
 }

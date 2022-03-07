@@ -22,10 +22,11 @@ import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
+import nl.tudelft.labracore.api.CourseControllerApi;
+import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
 import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.repository.ModuleRepository;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,16 +34,23 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class HomeController {
 
+	private CourseControllerApi courseApi;
+
 	private ModuleRepository moduleRepository;
 
-	@Autowired
-	public HomeController(ModuleRepository moduleRepository) {
+	public HomeController(ModuleRepository moduleRepository, CourseControllerApi courseApi) {
 		this.moduleRepository = moduleRepository;
+		this.courseApi = courseApi;
 	}
 
 	@Transactional
 	@GetMapping("/")
 	public String getHomePage(Model model) {
+		List<CourseSummaryDTO> allCourses = courseApi.getAllCourses().collectList().block();
+		model.addAttribute("courses", allCourses);
+
+		// Temporarily put all modules on the home page
+
 		// Temporarily put all modules on the home page
 		List<SCModule> allModules = moduleRepository.findAll();
 		model.addAttribute("moduleIds", allModules.stream().map(SCModule::getId).toList());
