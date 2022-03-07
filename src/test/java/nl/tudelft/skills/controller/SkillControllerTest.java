@@ -19,8 +19,7 @@ package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
@@ -94,10 +93,18 @@ public class SkillControllerTest extends ControllerTest {
 	}
 
 	@Test
+	void deleteSkill() {
+		skillController.deleteSkill(db.skillVariables.getId());
+		assertThat(skillRepository.existsById(db.skillVariables.getId())).isFalse();
+	}
+
+	@Test
 	void endpointsAreProtected() throws Exception {
 		mvc.perform(patch("/skill/{id}", db.skillVariables.getId()))
 				.andExpect(status().isForbidden());
 		mvc.perform(post("/skill"))
+				.andExpect(status().isForbidden());
+		mvc.perform(delete("/skill/1"))
 				.andExpect(status().isForbidden());
 	}
 

@@ -12,10 +12,38 @@
   background-color: var(--primary-light);
   border: 1px solid var(--primary-dark);
   padding: 1rem;
+  position: relative;
   z-index: 10;
 
   &.draggable {
     cursor: grab;
+  }
+
+  &__buttons {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    right: 0;
+    top: -1px;
+
+    button {
+      background-color: var(--primary-light);
+      border: 1px solid var(--primary-dark);
+      color: var(--primary-green);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0.5rem;
+      transform: translateX(100%);
+      z-index: 11;
+      &:hover, &:focus-visible {
+        background-color: var(--primary-green);
+        color: var(--primary-light);
+      }
+    }
+  }
+  &:hover > .skill__buttons,
+  &:focus-within > .skill__buttons {
+    display: flex;
   }
 }
 

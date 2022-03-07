@@ -20,50 +20,65 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
-<div th:if="${@authorisationService.canCreateSkills(module.edition)}" layout:fragment="form" id="create-skill">
+<div th:if="${@authorisationService.canCreateSkills(module.edition)}" layout:fragment="form" class="hidden" id="create-skill-wrapper">
 
-    <form id="create-skill-form" class="create_skill">
+    <div id="create-skill">
 
-        <input id="create-skill-row" name="row" type="hidden"/>
-        <input id="create-skill-column" name="column" type="hidden"/>
+        <form id="create-skill-form" class="create_skill">
 
-        <label for="create-skill-name">Name</label>
-        <input id="create-skill-name" name="name" type="text" required/>
+            <input id="create-skill-row" name="row" type="hidden"/>
+            <input id="create-skill-column" name="column" type="hidden"/>
 
-        <label for="create-skill-submodule">Submodule</label>
-        <select id="create-skill-submodule" name="submodule.id" required>
-            <option th:each="submodule : ${module.submodules}" th:value="${submodule.id}" th:text="${submodule.name}"></option>
-        </select>
+            <label for="create-skill-name">Name</label>
+            <input id="create-skill-name" name="name" type="text" required/>
 
-        <div class="create_skill__buttons">
-            <button type="button" id="create-skill-cancel">Cancel</button>
-            <button type="submit">Create Skill</button>
-        </div>
+            <label for="create-skill-submodule">Submodule</label>
+            <select id="create-skill-submodule" name="submodule.id" required>
+                <option th:each="submodule : ${module.submodules}" th:value="${submodule.id}" th:text="${submodule.name}"></option>
+            </select>
 
-    </form>
+            <div class="create_skill__buttons">
+                <button type="button" id="create-skill-cancel">Cancel</button>
+                <button type="submit">Create Skill</button>
+            </div>
 
-    <script>
-        function setNewSkillPosition(row, column) {
-            document.getElementById("create-skill-row").value = row;
-            document.getElementById("create-skill-column").value = column;
-        }
+        </form>
 
-        document.addEventListener("DOMContentLoaded", function () {
-            $("#create-skill-form").submit(function (event) {
-                event.preventDefault();
-                $.post("/skill", $("#create-skill-form").serialize(), element => {
-                    $("#circuit").append($("<div/>").append(element).children()[0]);
-                    $(".content").append($("#create-skill"));
-                    $("#create-skill-name").val("");
-                });
-            });
-            $("#create-skill-cancel").click(function () {
+    </div>
+
+</div>
+
+<script th:if="${@authorisationService.canCreateSkills(module.edition)}" layout:fragment="script">
+    function setNewSkillPosition(row, column) {
+        document.getElementById("create-skill-row").value = row;
+        document.getElementById("create-skill-column").value = column;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        $("#create-skill-form").submit(function (event) {
+            event.preventDefault();
+            $.post("/skill", $("#create-skill-form").serialize(), element => {
+                $("#circuit").append($("<div/>").append(element).children()[0]);
                 $(".content").append($("#create-skill"));
                 $("#create-skill-name").val("");
             });
         });
-    </script>
 
-</div>
+        $("#create-skill-cancel").click(function () {
+            $("#create-skill-wrapper").append($("#create-skill"));
+            $("#create-skill-name").val("");
+        });
+
+        $(".ghost_skill").click(function () {
+            let col = parseInt($(this).css("gridColumn").split(" / ")[0]) - 1;
+            let row = parseInt($(this).css("gridRow").split(" / ")[0]) - 1;
+            setNewSkillPosition(row, col);
+            let form = $("#create-skill");
+            form.css("gridColumn", (col + 1).toString());
+            form.css("gridRow", (row + 1).toString());
+            $(this).replaceWith(form);
+        });
+    });
+</script>
 
 </html>

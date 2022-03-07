@@ -50,13 +50,20 @@
                      th:style="|grid-row: ${skill.row + 1}; grid-column: ${skill.column + 1}|"
                      th:draggable="${@authorisationService.canEditSkills(module.edition)}"
                      th:classappend="${@authorisationService.canEditSkills(module.edition)} ? 'draggable' : ''">
-                    <h2 th:text="${skill.name}"></h2>
+                    <h2 th:id="|skill-${skill.id}-name|" th:text="${skill.name}"></h2>
                     <ul class="tasks">
                         <li class="task" th:each="task : ${skill.tasks}" th:id="|task-${task.id}|" th:classappend="${task.completed ? 'completed' : ''}">
                             <button class="task__button" th:onclick="|toggleCompleted(${task.id})|">0</button>
                             <span th:text="${task.name}"></span>
                         </li>
                     </ul>
+                    <div class="skill__buttons">
+                        <button class="fa-solid fa-pen"
+                                th:if="${@authorisationService.canEditSkill(skill.id)}"></button>
+                        <button class="fa-solid fa-trash skill__delete"
+                                th:if="${@authorisationService.canDeleteSkill(skill.id)}"
+                                th:data-skill="${skill.id}"></button>
+                    </div>
                 </div>
 
                 <div th:if="${@authorisationService.canEditSkills(module.edition)}"
@@ -151,20 +158,11 @@
     </script>
 
     <div layout:replace="~{skill/create :: form}"></div>
+    <div layout:replace="~{skill/delete :: overlay}"></div>
 
-    <script th:if="${@authorisationService.canCreateSkills(module.edition)}">
-        document.addEventListener("DOMContentLoaded", function () {
-            $(".ghost_skill").click(function () {
-                let col = parseInt($(this).css("gridColumn").split(" / ")[0]) - 1;
-                let row = parseInt($(this).css("gridRow").split(" / ")[0]) - 1;
-                setNewSkillPosition(row, col);
-                let form = $("#create-skill");
-                form.css("gridColumn", (col + 1).toString());
-                form.css("gridRow", (row + 1).toString());
-                $(this).replaceWith(form);
-            });
-        });
-    </script>
+
+    <div layout:replace="~{skill/create :: script}"></div>
+    <div layout:replace="~{skill/delete :: script}"></div>
 
     <script th:if="${@authorisationService.canEditSkills(module.edition)}">
         let draggingSkill = false;

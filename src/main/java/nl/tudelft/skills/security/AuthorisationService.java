@@ -112,7 +112,7 @@ public class AuthorisationService {
 	 * @return             True iff the user can create skills in the submodule
 	 */
 	public boolean canCreateSkill(Long submoduleId) {
-		return isAtLeastTeacherInEdition(
+		return canCreateSkills(
 				submoduleRepository.findByIdOrThrow(submoduleId).getModule().getEdition());
 	}
 
@@ -135,6 +135,27 @@ public class AuthorisationService {
 	@Transactional
 	public boolean canEditSkill(Long skillId) {
 		return canEditSkills(
+				skillRepository.findByIdOrThrow(skillId).getSubmodule().getModule().getEdition());
+	}
+
+	/**
+	 * Gets whether the authenticated user can delete skills in an edition.
+	 *
+	 * @param  editionId The id of the edition
+	 * @return           True iff the user can delete skills in the edition
+	 */
+	public boolean canDeleteSkills(Long editionId) {
+		return isAtLeastTeacherInEdition(editionId);
+	}
+
+	/**
+	 * Gets whether the authenticated user can delete a skill.
+	 *
+	 * @param  skillId The id of the skill
+	 * @return         True iff the user can delete the skill
+	 */
+	public boolean canDeleteSkill(Long skillId) {
+		return canDeleteSkills(
 				skillRepository.findByIdOrThrow(skillId).getSubmodule().getModule().getEdition());
 	}
 
