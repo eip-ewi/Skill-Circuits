@@ -30,19 +30,28 @@
 
 <div layout:fragment="content">
 
-<!--    ${edition.course.name}-->
     <h1 th:text="${edition.course.name}"></h1>
     <h1 th:text="${edition.name}"></h1>
 
     <div class="blocks">
 
-                <a class="block" th:each="module : ${edition.modules}" th:href="@{|/module/${module.id}|}">
+        <th:block th:each="module: ${edition.modules}">
+            <div class="block" th:id="|module-${module.id}|" th:data-module="${module.id}" >
+                <a th:href="@{|/module/${module.id}|}"><h2 th:id="|module-${module.id}-name|" th:text="${module.name}"></h2></a>
 
-                    <h2 th:text="${module.name}"></h2>
+                <div class="block__buttons">
+                    <button class="fa-solid fa-trash block__delete"
+                            th:if="${@authorisationService.canDeleteModule(module.id)}"
+                            th:data-module="${module.id}"></button>
+                </div>
+            </div>
 
-                </a>
+        </th:block>
+
+        <div layout:replace="~{module/delete :: overlay}"></div>
 
     </div>
+    <div layout:replace="~{module/delete :: script}"></div>
 
 </div>
 

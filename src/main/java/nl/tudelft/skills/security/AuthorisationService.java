@@ -27,6 +27,7 @@ import nl.tudelft.labracore.lib.security.LabradorUserDetails;
 import nl.tudelft.labracore.lib.security.user.DefaultRole;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.cache.RoleCacheManager;
+import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.SubmoduleRepository;
 
@@ -40,6 +41,7 @@ public class AuthorisationService {
 
 	private RoleCacheManager roleCache;
 
+	private ModuleRepository moduleRepository;
 	private SkillRepository skillRepository;
 	private SubmoduleRepository submoduleRepository;
 
@@ -47,6 +49,7 @@ public class AuthorisationService {
 	public AuthorisationService(RoleCacheManager roleCache, SkillRepository skillRepository,
 			SubmoduleRepository submoduleRepository) {
 		this.roleCache = roleCache;
+		this.moduleRepository = moduleRepository;
 		this.skillRepository = skillRepository;
 		this.submoduleRepository = submoduleRepository;
 	}
@@ -93,6 +96,26 @@ public class AuthorisationService {
 	 */
 	public boolean canViewAllEditions(Long courseId) {
 		return isAtLeastTeacherInEdition(courseId);
+	}
+
+	/**
+	 * Gets whether the authenticated user can delete a module in the edition.
+	 *
+	 * @param   editionId The edition id.
+	 * @returnn           True iff the user can delete a module in the edition.
+	 */
+	public boolean canDeleteModuleInEdition(Long editionId) {
+		return isAtLeastTeacherInEdition(editionId);
+	}
+
+	/**
+	 * Gets whether the authenticated user can delete a module.
+	 *
+	 * @param   moduleId The module id.
+	 * @returnn          True iff the user can delete a module.
+	 */
+	public boolean canDeleteModule(Long moduleId) {
+		return canDeleteModuleInEdition(moduleRepository.findByIdOrThrow(moduleId).getEdition());
 	}
 
 	/**

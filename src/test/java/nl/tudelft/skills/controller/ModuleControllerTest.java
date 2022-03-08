@@ -25,6 +25,7 @@ import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
+import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.service.ModuleService;
 import nl.tudelft.skills.test.TestUserDetailsService;
 
@@ -47,11 +48,14 @@ public class ModuleControllerTest extends ControllerTest {
 	private ModuleService moduleService;
 	private final ModuleController moduleController;
 	private final RoleControllerApi roleControllerApi;
+	private ModuleRepository moduleRepository;
 
 	@Autowired
-	public ModuleControllerTest(ModuleController moduleController, RoleControllerApi roleControllerApi) {
+	public ModuleControllerTest(ModuleController moduleController, RoleControllerApi roleControllerApi,
+			ModuleRepository moduleRepository) {
 		this.moduleController = moduleController;
 		this.roleControllerApi = roleControllerApi;
+		this.moduleRepository = moduleRepository;
 	}
 
 	@Test
@@ -71,6 +75,17 @@ public class ModuleControllerTest extends ControllerTest {
 		verify(moduleService).setCompletedTasksForPerson(
 				View.convert(db.getModuleProofTechniques(), ModuleLevelModuleViewDTO.class),
 				TestUserDetailsService.id);
+	}
+
+	@Test
+	void deleteModule() {
+		Long moduleId = db.getModuleProofTechniques().getId();
+
+		assertThat(moduleRepository.existsById(moduleId)).isTrue();
+
+		new ModuleController(moduleRepository, moduleService).deleteModule(moduleId);
+
+		assertThat(moduleRepository.existsById(moduleId)).isFalse();
 	}
 
 }

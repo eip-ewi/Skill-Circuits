@@ -76,6 +76,7 @@ public class Skill {
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
+	@Cascade(CascadeType.DELETE)
 	@OneToMany(mappedBy = "skill")
 	@Cascade(CascadeType.DELETE)
 	private Set<Task> tasks = new HashSet<>();

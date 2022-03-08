@@ -89,6 +89,31 @@ public class AuthorisationServiceTest {
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canViewAllEditions(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canViewAllEditions(db.edition.getId())).isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canDeleteModuleInEdition(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canDeleteModuleInEdition(db.edition.getId())).isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canDeleteModule(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canDeleteModule(db.getModuleProofTechniques().getId()))
+				.isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canCreateSkills(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canCreateSkills(db.edition.getId())).isEqualTo(expected);

@@ -25,16 +25,17 @@ import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
+import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.service.ModuleService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("module")
@@ -83,6 +84,26 @@ public class ModuleController {
 				.toList());
 
 		return "module/view";
+	}
+
+	/**
+	 * Deletes a module.
+	 *
+	 * @param  id The id of the module to delete
+	 * @return    A redirect to the edition page
+	 */
+	@DeleteMapping
+	@Transactional
+	@PreAuthorize("@authorisationService.canDeleteModule(#id)")
+	public String deleteModule(@RequestParam Long id) {
+		SCModule module = moduleRepository.findByIdOrThrow(id);
+		module.getSubmodules().stream()
+				.flatMap(s -> s.getSkills().stream())
+				.flatMap(s -> s.getTasks().stream())
+				.forEach(t -> t.getPersons()
+						.forEach(p -> p.getTasksCompleted().remove(t)));
+		moduleRepository.delete(module);
+		return "redirect:/edition/" + module.getEdition();
 	}
 
 }

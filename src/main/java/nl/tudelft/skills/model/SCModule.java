@@ -26,6 +26,9 @@ import javax.validation.constraints.NotNull;
 
 import lombok.*;
 
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
+
 @Data
 @Entity
 @Builder
@@ -47,6 +50,7 @@ public class SCModule {
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
+	@Cascade(CascadeType.DELETE)
 	@OneToMany(mappedBy = "module")
 	private Set<Submodule> submodules = new HashSet<>();
 
