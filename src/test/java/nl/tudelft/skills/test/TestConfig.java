@@ -26,6 +26,8 @@ import org.springframework.context.annotation.Configuration;
 public class TestConfig {
 
 	@MockBean
+	private CourseControllerApi courseApi;
+	@MockBean
 	private EditionControllerApi editionApi;
 	@MockBean
 	private PersonControllerApi personApi;

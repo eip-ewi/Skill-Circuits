@@ -28,7 +28,7 @@ import nl.tudelft.skills.model.SCCourse;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class CourseViewDTO extends View<SCCourse> {
+public class EditionLevelCourseViewDTO extends View<SCCourse> {
 
 	@NotNull
 	private Long id;

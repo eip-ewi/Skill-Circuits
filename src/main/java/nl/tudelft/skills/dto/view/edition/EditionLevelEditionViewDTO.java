@@ -36,7 +36,7 @@ public class EditionLevelEditionViewDTO extends View<SCEdition> {
 	@NotNull
 	private Long id;
 	@NotNull
-	private CourseViewDTO course;
+	private EditionLevelCourseViewDTO course;
 	@NotBlank
 	private String name;
 	@NotNull
