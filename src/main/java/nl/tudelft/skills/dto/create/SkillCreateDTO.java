@@ -15,38 +15,38 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.patch;
+package nl.tudelft.skills.dto.create;
 
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import nl.tudelft.librador.dto.patch.Patch;
+import lombok.*;
+import nl.tudelft.librador.dto.create.Create;
+import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
 import nl.tudelft.skills.model.Skill;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SkillPositionPatch extends Patch<Skill> {
+@EqualsAndHashCode(callSuper = false)
+public class SkillCreateDTO extends Create<Skill> {
 
-	@Min(0)
+	@NotBlank
+	private String name;
 	@NotNull
-	private Integer column;
+	private SubmoduleIdDTO submodule;
 	@Min(0)
 	@NotNull
 	private Integer row;
+	@Min(0)
+	@NotNull
+	private Integer column;
 
 	@Override
-	protected void applyOneToOne() {
-		updateNonNull(column, data::setColumn);
-		updateNonNull(row, data::setRow);
+	public Class<Skill> clazz() {
+		return Skill.class;
 	}
 
-	@Override
-	protected void validate() {
-	}
 }

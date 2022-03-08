@@ -18,18 +18,30 @@
 package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.dto.patch.SkillPositionPatch;
+import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
+import nl.tudelft.skills.dto.patch.SkillPatchDTO;
+import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.SkillRepository;
 
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
@@ -47,8 +59,45 @@ public class SkillControllerTest extends ControllerTest {
 	}
 
 	@Test
+	@WithUserDetails("admin")
+	void createSkill() throws Exception {
+		String element = mvc.perform(post("/skill").with(csrf())
+				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
+						new BasicNameValuePair("name", "Skill"),
+						new BasicNameValuePair("submodule.id", Long.toString(db.submoduleCases.getId())),
+						new BasicNameValuePair("row", "10"),
+						new BasicNameValuePair("column", "11")))))
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+				.andExpect(status().isOk())
+				.andReturn().getResponse().getContentAsString();
+
+		Matcher idMatcher = Pattern.compile("id=\"skill-(\\d+)\"").matcher(element);
+		assertThat(idMatcher.find()).isTrue();
+
+		Long id = Long.parseLong(idMatcher.group(1));
+		assertThat(skillRepository.existsById(id)).isTrue();
+
+		assertThat(element)
+				.contains("<h2 id=\"skill-" + id + "-name\">Skill</h2>")
+				.contains("style=\"grid-row: 11; grid-column: 12");
+	}
+
+	@Test
 	void patchSkill() {
-		skillController.updateSkillPosition(db.skillVariables.getId(), SkillPositionPatch.builder()
+		skillController.patchSkill(SkillPatchDTO.builder()
+				.id(db.skillVariables.getId())
+				.name("Updated")
+				.submodule(new SubmoduleIdDTO(db.submoduleCases.getId()))
+				.build());
+
+		Skill skill = skillRepository.findByIdOrThrow(db.skillVariables.getId());
+		assertThat(skill.getName()).isEqualTo("Updated");
+		assertThat(skill.getSubmodule()).isEqualTo(db.submoduleCases);
+	}
+
+	@Test
+	void updateSkillPosition() {
+		skillController.updateSkillPosition(db.skillVariables.getId(), SkillPositionPatchDTO.builder()
 				.column(10)
 				.row(11)
 				.build());
@@ -59,8 +108,18 @@ public class SkillControllerTest extends ControllerTest {
 	}
 
 	@Test
-	void patchSkillIsProtected() throws Exception {
+	void deleteSkill() {
+		skillController.deleteSkill(db.skillVariables.getId());
+		assertThat(skillRepository.existsById(db.skillVariables.getId())).isFalse();
+	}
+
+	@Test
+	void endpointsAreProtected() throws Exception {
 		mvc.perform(patch("/skill/{id}", db.skillVariables.getId()))
+				.andExpect(status().isForbidden());
+		mvc.perform(post("/skill"))
+				.andExpect(status().isForbidden());
+		mvc.perform(delete("/skill/1"))
 				.andExpect(status().isForbidden());
 	}
 

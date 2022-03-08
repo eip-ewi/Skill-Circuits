@@ -28,6 +28,7 @@ import nl.tudelft.labracore.lib.security.user.DefaultRole;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.cache.RoleCacheManager;
 import nl.tudelft.skills.repository.SkillRepository;
+import nl.tudelft.skills.repository.SubmoduleRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,11 +41,14 @@ public class AuthorisationService {
 	private RoleCacheManager roleCache;
 
 	private SkillRepository skillRepository;
+	private SubmoduleRepository submoduleRepository;
 
 	@Autowired
-	public AuthorisationService(RoleCacheManager roleCache, SkillRepository skillRepository) {
+	public AuthorisationService(RoleCacheManager roleCache, SkillRepository skillRepository,
+			SubmoduleRepository submoduleRepository) {
 		this.roleCache = roleCache;
 		this.skillRepository = skillRepository;
+		this.submoduleRepository = submoduleRepository;
 	}
 
 	/**
@@ -92,6 +96,27 @@ public class AuthorisationService {
 	}
 
 	/**
+	 * Gets whether the authenticated user can create skills in an edition.
+	 *
+	 * @param  editionId The id of the edition
+	 * @return           True iff the user can create skills in the edition
+	 */
+	public boolean canCreateSkills(Long editionId) {
+		return isAtLeastTeacherInEdition(editionId);
+	}
+
+	/**
+	 * Gets whether the authenticated user can create a skill in a submodule.
+	 *
+	 * @param  submoduleId The id of the submodule
+	 * @return             True iff the user can create skills in the submodule
+	 */
+	public boolean canCreateSkill(Long submoduleId) {
+		return canCreateSkills(
+				submoduleRepository.findByIdOrThrow(submoduleId).getModule().getEdition());
+	}
+
+	/**
 	 * Gets whether the authenticated user can edit the skills in an edition.
 	 *
 	 * @param  editionId The id of the edition
@@ -110,6 +135,27 @@ public class AuthorisationService {
 	@Transactional
 	public boolean canEditSkill(Long skillId) {
 		return canEditSkills(
+				skillRepository.findByIdOrThrow(skillId).getSubmodule().getModule().getEdition());
+	}
+
+	/**
+	 * Gets whether the authenticated user can delete skills in an edition.
+	 *
+	 * @param  editionId The id of the edition
+	 * @return           True iff the user can delete skills in the edition
+	 */
+	public boolean canDeleteSkills(Long editionId) {
+		return isAtLeastTeacherInEdition(editionId);
+	}
+
+	/**
+	 * Gets whether the authenticated user can delete a skill.
+	 *
+	 * @param  skillId The id of the skill
+	 * @return         True iff the user can delete the skill
+	 */
+	public boolean canDeleteSkill(Long skillId) {
+		return canDeleteSkills(
 				skillRepository.findByIdOrThrow(skillId).getSubmodule().getModule().getEdition());
 	}
 

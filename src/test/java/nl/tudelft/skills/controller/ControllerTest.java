@@ -29,6 +29,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class ControllerTest {
 
@@ -44,10 +46,12 @@ public abstract class ControllerTest {
 	protected MockMvc mvc;
 
 	protected Model model;
+	protected ObjectMapper objectMapper;
 
 	@BeforeEach
-	void createModel() {
+	void initFields() {
 		model = new ExtendedModelMap();
+		objectMapper = new ObjectMapper();
 	}
 
 	protected Long randomId() {

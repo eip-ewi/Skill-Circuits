@@ -27,6 +27,9 @@ import javax.validation.constraints.NotNull;
 
 import lombok.*;
 
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
+
 @Data
 @Entity
 @Builder
@@ -74,6 +77,7 @@ public class Skill {
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@OneToMany(mappedBy = "skill")
+	@Cascade(CascadeType.DELETE)
 	private Set<Task> tasks = new HashSet<>();
 
 	@NotNull

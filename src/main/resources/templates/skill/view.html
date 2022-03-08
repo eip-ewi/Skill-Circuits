@@ -1,0 +1,48 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<div th:id="|skill-${skill.id}|" class="skill"
+     th:style="|grid-row: ${skill.row + 1}; grid-column: ${skill.column + 1}|"
+     th:draggable="${@authorisationService.canEditSkills(module.edition)}"
+     th:classappend="${@authorisationService.canEditSkills(module.edition)} ? 'draggable' : ''"
+     th:data-submodule="${submodule.id}"
+     layout:fragment="block">
+    <div th:id="|skill-${skill.id}-header|">
+        <h2 th:id="|skill-${skill.id}-name|" th:text="${skill.name}"></h2>
+    </div>
+    <ul class="tasks">
+        <li class="task" th:each="task : ${skill.tasks}" th:id="|task-${task.id}|" th:classappend="${task.completed ? 'completed' : ''}">
+            <button class="task__button" th:onclick="|toggleCompleted(${task.id})|">0</button>
+            <span th:text="${task.name}"></span>
+        </li>
+    </ul>
+    <div class="skill__buttons">
+        <button class="fa-solid fa-pen skill__edit"
+                th:if="${@authorisationService.canEditSkill(skill.id)}"
+                th:data-skill="${skill.id}"></button>
+        <button class="fa-solid fa-trash skill__delete"
+                th:if="${@authorisationService.canDeleteSkill(skill.id)}"
+                th:data-skill="${skill.id}"></button>
+    </div>
+</div>
+
+</html>

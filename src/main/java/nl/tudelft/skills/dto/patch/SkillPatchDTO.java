@@ -15,35 +15,39 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.config;
+package nl.tudelft.skills.dto.patch;
 
-import static org.modelmapper.convention.MatchingStrategies.STRICT;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
-import nl.tudelft.librador.EnableLibrador;
-import nl.tudelft.librador.LibradorConfigAdapter;
-import nl.tudelft.librador.dto.id.IdMapperBuilder;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import nl.tudelft.librador.dto.patch.Patch;
 import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
-import nl.tudelft.skills.model.Submodule;
+import nl.tudelft.skills.model.Skill;
 
-import org.modelmapper.ModelMapper;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class SkillPatchDTO extends Patch<Skill> {
 
-@Configuration
-@EnableLibrador
-public class LibradorConfiguration extends LibradorConfigAdapter {
+	@NotNull
+	private Long id;
+	@NotBlank
+	private String name;
+	@NotNull
+	private SubmoduleIdDTO submodule;
 
 	@Override
-	protected void configure(IdMapperBuilder builder) {
-		builder.register(SubmoduleIdDTO.class, Submodule.class);
+	protected void applyOneToOne() {
+		updateNonNull(name, data::setName);
+		updateNonNullId(submodule, data::setSubmodule);
 	}
 
-	@Bean
 	@Override
-	public ModelMapper modelMapper() {
-		ModelMapper modelMapper = super.modelMapper();
-		modelMapper.getConfiguration().setMatchingStrategy(STRICT);
-		return modelMapper;
+	protected void validate() {
 	}
-
 }

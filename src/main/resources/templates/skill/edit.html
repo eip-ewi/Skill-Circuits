@@ -1,0 +1,88 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<div th:if="${@authorisationService.canEditSkills(module.edition)}" layout:fragment="form" class="hidden" id="edit-skill-wrapper">
+
+    <div id="edit-skill">
+
+        <form id="edit-skill-form" class="edit skill__form">
+            <input id="edit-skill-id" name="id" type="hidden"/>
+
+            <label for="edit-skill-name">Name</label>
+            <input id="edit-skill-name" name="name" type="text" required/>
+
+            <label for="edit-skill-submodule">Submodule</label>
+            <select id="edit-skill-submodule" name="submodule.id" required>
+                <option th:each="submodule : ${module.submodules}" th:value="${submodule.id}" th:text="${submodule.name}"></option>
+            </select>
+
+            <div class="skill__form__buttons">
+                <button type="button" id="edit-skill-cancel">Cancel</button>
+                <button type="submit">Edit Skill</button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script th:if="${@authorisationService.canEditSkills(module.edition)}" layout:fragment="script">
+    function editSkill() {
+        let skillId = $(this).data("skill");
+        let skillName = $(`#skill-${skillId}-name`);
+        $("#edit-skill-id").val(skillId);
+        $("#edit-skill-name").val(skillName.text());
+        $("#edit-skill-submodule").val($(`#skill-${skillId}`).data("submodule"));
+        $(`#skill-${skillId}-header`).append($("#edit-skill"));
+        skillName.addClass("hidden");
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        $("#edit-skill-form").submit(function (event) {
+            event.preventDefault();
+            $.ajax({
+                type: "PATCH",
+                url: "/skill",
+                data: $("#edit-skill-form").serialize(),
+                success: () => {
+                    let skillId = $("#edit-skill-id").val();
+                    let skillName = $(`#skill-${skillId}-name`);
+                    $("#edit-skill-wrapper").append($("#edit-skill"));
+                    skillName.removeClass("hidden");
+                    skillName.text($("#edit-skill-name").val());
+                    $(`#skill-${skillId}`).data("submodule", $("#edit-skill-submodule").val())
+                }
+            });
+        });
+
+        $(".skill__edit").click(editSkill);
+
+        $("#edit-skill-cancel").click(function () {
+            let skillId = $("#edit-skill-id").val();
+            $("#edit-skill-wrapper").append($("#edit-skill"));
+            $(`#skill-${skillId}-name`).removeClass("hidden");
+        });
+    });
+</script>
+
+</html>
