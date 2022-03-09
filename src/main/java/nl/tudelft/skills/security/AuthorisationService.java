@@ -42,16 +42,18 @@ public class AuthorisationService {
 	private RoleCacheManager roleCache;
 
 	private ModuleRepository moduleRepository;
-	private SkillRepository skillRepository;
 	private SubmoduleRepository submoduleRepository;
+	private SkillRepository skillRepository;
 
 	@Autowired
-	public AuthorisationService(RoleCacheManager roleCache, SkillRepository skillRepository,
+	public AuthorisationService(RoleCacheManager roleCache,
+			ModuleRepository moduleRepository,
+			SkillRepository skillRepository,
 			SubmoduleRepository submoduleRepository) {
 		this.roleCache = roleCache;
 		this.moduleRepository = moduleRepository;
-		this.skillRepository = skillRepository;
 		this.submoduleRepository = submoduleRepository;
+		this.skillRepository = skillRepository;
 	}
 
 	/**
