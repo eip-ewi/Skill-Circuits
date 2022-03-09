@@ -20,33 +20,33 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
-<div th:if="${@authorisationService.canDeleteSkillInEdition(module.edition.id)}" layout:fragment="overlay" class="hidden overlay" id="delete-skill-overlay">
+<div th:if="${@authorisationService.canEditSkillInEdition(module.edition.id)}" layout:fragment="overlay" class="hidden overlay" id="delete-task-overlay">
 
-    <form id="delete-skill-form" class="confirmation" th:action="@{/skill}" th:method="delete">
+    <form id="delete-task-form" class="confirmation" th:action="@{/task}" th:method="delete">
 
-        <input id="delete-skill-id" name="id" type="hidden"/>
+        <input id="delete-task-id" name="id" type="hidden"/>
 
-        <p>Are you sure you want to delete <span id="delete-skill-name"></span>?</p>
+        <p>Are you sure you want to delete "<span id="delete-task-name"></span>"?</p>
 
         <div class="confirmation__buttons">
-            <button type="button" onclick="toggleOverlay('delete-skill-overlay')">Cancel</button>
-            <button type="submit">Delete Skill</button>
+            <button type="button" onclick="toggleOverlay('delete-task-overlay')">Cancel</button>
+            <button type="submit">Delete Task</button>
         </div>
 
     </form>
 
 </div>
 
-<script th:if="${@authorisationService.canDeleteSkillInEdition(module.edition.id)}" layout:fragment="script">
-    function deleteSkill() {
-        toggleOverlay("delete-skill-overlay");
-        let skillId = $(this).data("skill");
-        $("#delete-skill-id").val(skillId);
-        $("#delete-skill-name").text($(`#skill-${skillId}-name`).text());
+<script th:if="${@authorisationService.canEditSkillInEdition(module.edition.id)}" layout:fragment="script">
+    function deleteTask() {
+        toggleOverlay("delete-task-overlay");
+        let taskId = $(this).data("task");
+        $("#delete-task-id").val(taskId);
+        $("#delete-task-name").text($(`#task-${taskId}-name`).text());
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-        $(".skill__delete").click(deleteSkill);
+        $(".task__delete").click(deleteTask);
     });
 </script>
 

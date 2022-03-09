@@ -27,11 +27,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
-import nl.tudelft.skills.dto.patch.SkillPatchDTO;
-import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.repository.SkillRepository;
+import nl.tudelft.skills.dto.patch.TaskPatchDTO;
+import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.repository.TaskRepository;
 
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
@@ -47,79 +45,62 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @AutoConfigureMockMvc
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
-public class SkillControllerTest extends ControllerTest {
+public class TaskControllerTest extends ControllerTest {
 
-	private final SkillController skillController;
-	private final SkillRepository skillRepository;
+	private final TaskController taskController;
+	private final TaskRepository taskRepository;
 
 	@Autowired
-	public SkillControllerTest(SkillRepository skillRepository) {
-		this.skillController = new SkillController(skillRepository);
-		this.skillRepository = skillRepository;
+	public TaskControllerTest(TaskRepository taskRepository) {
+		this.taskController = new TaskController(taskRepository);
+		this.taskRepository = taskRepository;
 	}
 
 	@Test
 	@WithUserDetails("admin")
-	void createSkill() throws Exception {
-		String element = mvc.perform(post("/skill").with(csrf())
+	void createTask() throws Exception {
+		String element = mvc.perform(post("/task").with(csrf())
 				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
-						new BasicNameValuePair("name", "Skill"),
-						new BasicNameValuePair("submodule.id", Long.toString(db.submoduleCases.getId())),
-						new BasicNameValuePair("row", "10"),
-						new BasicNameValuePair("column", "11")))))
+						new BasicNameValuePair("name", "Task"),
+						new BasicNameValuePair("skill.id", Long.toString(db.skillVariables.getId()))))))
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isOk())
 				.andReturn().getResponse().getContentAsString();
 
-		Matcher idMatcher = Pattern.compile("id=\"skill-(\\d+)\"").matcher(element);
+		Matcher idMatcher = Pattern.compile("id=\"task-(\\d+)\"").matcher(element);
 		assertThat(idMatcher.find()).isTrue();
 
 		Long id = Long.parseLong(idMatcher.group(1));
-		assertThat(skillRepository.existsById(id)).isTrue();
+		assertThat(taskRepository.existsById(id)).isTrue();
 
 		assertThat(element)
-				.contains("<h2 id=\"skill-" + id + "-name\" class=\"skill__name\">Skill</h2>")
-				.contains("style=\"grid-row: 11; grid-column: 12");
+				.contains("<span id=\"task-" + id + "-name\" class=\"task__name\">Task</span>");
 	}
 
 	@Test
-	void patchSkill() {
-		skillController.patchSkill(SkillPatchDTO.builder()
-				.id(db.skillVariables.getId())
+	void patchTask() {
+		taskController.patchTask(TaskPatchDTO.builder()
+				.id(db.taskDo10a.getId())
 				.name("Updated")
-				.submodule(new SubmoduleIdDTO(db.submoduleCases.getId()))
 				.build());
 
-		Skill skill = skillRepository.findByIdOrThrow(db.skillVariables.getId());
-		assertThat(skill.getName()).isEqualTo("Updated");
-		assertThat(skill.getSubmodule()).isEqualTo(db.submoduleCases);
+		Task task = taskRepository.findByIdOrThrow(db.taskDo10a.getId());
+		assertThat(task.getName()).isEqualTo("Updated");
 	}
 
 	@Test
-	void updateSkillPosition() {
-		skillController.updateSkillPosition(db.skillVariables.getId(), SkillPositionPatchDTO.builder()
-				.column(10)
-				.row(11)
-				.build());
-
-		Skill skill = skillRepository.findByIdOrThrow(db.skillVariables.getId());
-		assertThat(skill.getColumn()).isEqualTo(10);
-		assertThat(skill.getRow()).isEqualTo(11);
-	}
-
-	@Test
-	void deleteSkill() {
-		skillController.deleteSkill(db.skillVariables.getId());
-		assertThat(skillRepository.existsById(db.skillVariables.getId())).isFalse();
+	void deleteTask() {
+		taskController.deleteTask(db.taskDo10a.getId());
+		assertThat(taskRepository.existsById(db.taskDo10a.getId())).isFalse();
 	}
 
 	@Test
 	void endpointsAreProtected() throws Exception {
-		mvc.perform(patch("/skill/{id}", db.skillVariables.getId()))
+		mvc.perform(patch("/task/{id}", db.taskDo10a.getId()))
 				.andExpect(status().isForbidden());
-		mvc.perform(post("/skill"))
+		mvc.perform(post("/task"))
 				.andExpect(status().isForbidden());
-		mvc.perform(delete("/skill?id=1"))
+		mvc.perform(delete("/task?id=1"))
 				.andExpect(status().isForbidden());
 	}
 

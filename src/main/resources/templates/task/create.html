@@ -1,0 +1,77 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<div th:if="${@authorisationService.canEditSkillInEdition(module.edition.id)}" layout:fragment="form" class="hidden" id="create-task-wrapper">
+
+    <div id="create-task">
+
+        <form id="create-task-form" class="create task__form">
+
+            <input id="create-task-skill" name="skill.id" type="hidden"/>
+
+            <input id="create-task-name" aria-label="Name" name="name" type="text" required/>
+
+            <button type="button" id="create-task-cancel" class="fa-solid fa-xmark"></button>
+            <button type="submit" class="fa-solid fa-check"></button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script th:if="${@authorisationService.canEditSkillInEdition(module.edition.id)}" layout:fragment="script">
+    function createTask() {
+        let skillId = $(this).data("skill");
+        $("#create-task-skill").val(skillId);
+
+        $("#create-task-name").val("");
+        $(this).addClass("hidden");
+        $(this).after($("#create-task"));
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        $("#create-task-form").submit(function (event) {
+            event.preventDefault();
+            $.post("/task", $("#create-task-form").serialize(), html => {
+                let skillId = $("#create-task-skill").val();
+                let element = $("<div/>").append(html).children()[0]
+                $(`#create-task-${skillId}-button`).before(element);
+
+                $(".task__create").removeClass("hidden");
+                $("#create-task-wrapper").append($("#create-task"));
+
+                $(`#${element.id} > .task__buttons > .task__edit`).click(editTask);
+                $(`#${element.id} > .task__buttons > .task__delete`).click(deleteTask);
+            });
+        });
+
+        $(".task__create").click(createTask);
+
+        $("#create-task-cancel").click(function () {
+            $(".task__create").removeClass("hidden");
+            $("#create-task-wrapper").append($("#create-task"));
+        });
+    });
+</script>
+
+</html>

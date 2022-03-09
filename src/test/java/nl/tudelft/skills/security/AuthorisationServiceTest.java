@@ -173,9 +173,9 @@ public class AuthorisationServiceTest {
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
-	void canDeleteSkills(String role, boolean expected) {
+	void canDeleteSkillInEdition(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canDeleteSkills(db.edition.getId())).isEqualTo(expected);
+		assertThat(authorisationService.canDeleteSkillInEdition(db.edition.getId())).isEqualTo(expected);
 	}
 
 	@Transactional
@@ -185,6 +185,24 @@ public class AuthorisationServiceTest {
 	void canDeleteSkill(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canDeleteSkill(db.skillAssumption.getId())).isEqualTo(expected);
+	}
+
+	@Transactional
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canEditTask(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canEditTask(db.taskDo10a.getId())).isEqualTo(expected);
+	}
+
+	@Transactional
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canDeleteTask(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canDeleteTask(db.taskDo10a.getId())).isEqualTo(expected);
 	}
 
 	@ParameterizedTest

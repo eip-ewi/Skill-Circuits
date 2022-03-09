@@ -48,6 +48,7 @@
 
 <script th:if="${@authorisationService.canEditSkillInEdition(module.edition.id)}" layout:fragment="script">
     function editSkill() {
+        $(".skill__name").removeClass("hidden");
         let skillId = $(this).data("skill");
         let skillName = $(`#skill-${skillId}-name`);
         $("#edit-skill-id").val(skillId);
