@@ -41,7 +41,8 @@ public class SCModule {
 	private Long id;
 
 	@NotNull
-	private Long edition;
+	@ManyToOne
+	private SCEdition edition;
 
 	@NotBlank
 	private String name;

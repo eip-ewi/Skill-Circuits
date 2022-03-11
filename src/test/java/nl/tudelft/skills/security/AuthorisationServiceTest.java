@@ -97,6 +97,14 @@ public class AuthorisationServiceTest {
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canDeleteCreateInEdition(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canCreateModuleInEdition(db.edition.getId())).isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canDeleteModuleInEdition(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canDeleteModuleInEdition(db.edition.getId())).isEqualTo(expected);
@@ -114,9 +122,9 @@ public class AuthorisationServiceTest {
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
-	void canCreateSkills(String role, boolean expected) {
+	void canCreateSkillInEdition(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canCreateSkills(db.edition.getId())).isEqualTo(expected);
+		assertThat(authorisationService.canCreateSkillInEdition(db.edition.getId())).isEqualTo(expected);
 	}
 
 	@Transactional

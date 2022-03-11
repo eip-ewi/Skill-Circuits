@@ -24,6 +24,7 @@ import java.util.stream.IntStream;
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.dto.create.SCModuleCreateDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.repository.ModuleRepository;
@@ -87,6 +88,22 @@ public class ModuleController {
 	}
 
 	/**
+	 * Creates a module.
+	 *
+	 * @param  create The DTO with information to create the module
+	 * @return        A new module html element
+	 */
+	@PostMapping
+	@Transactional
+	@PreAuthorize("@authorisationService.canCreateModuleInEdition(#create.edition.id)")
+	public String createModule(SCModuleCreateDTO create, Model model) {
+		SCModule module = moduleRepository.save(create.apply());
+		model.addAttribute("module", module);
+		model.addAttribute("edition", module.getEdition());
+		return "module/block";
+	}
+
+	/**
 	 * Deletes a module.
 	 *
 	 * @param  id The id of the module to delete
@@ -103,7 +120,7 @@ public class ModuleController {
 				.forEach(t -> t.getPersons()
 						.forEach(p -> p.getTasksCompleted().remove(t)));
 		moduleRepository.delete(module);
-		return "redirect:/edition/" + module.getEdition();
+		return "redirect:/edition/" + module.getEdition().getId();
 	}
 
 }

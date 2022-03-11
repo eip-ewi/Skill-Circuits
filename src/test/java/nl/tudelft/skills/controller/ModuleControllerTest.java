@@ -19,7 +19,13 @@ package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.librador.dto.view.View;
@@ -29,11 +35,15 @@ import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.service.ModuleService;
 import nl.tudelft.skills.test.TestUserDetailsService;
 
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,6 +88,28 @@ public class ModuleControllerTest extends ControllerTest {
 	}
 
 	@Test
+	@WithUserDetails("admin")
+	void createModule() throws Exception {
+		String element = mvc.perform(post("/module").with(csrf())
+				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
+						new BasicNameValuePair("name", "Module"),
+						new BasicNameValuePair("edition.id", Long.toString(db.edition.getId()))
+				))))
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+				.andExpect(status().isOk())
+				.andReturn().getResponse().getContentAsString();
+
+		Matcher idMatcher = Pattern.compile("id=\"module-(\\d+)\"").matcher(element);
+		assertThat(idMatcher.find()).isTrue();
+
+				Long id = Long.parseLong(idMatcher.group(1));
+				assertThat(moduleRepository.existsById(id)).isTrue();
+
+		assertThat(element)
+				.contains("<h2 id=\"module-" + id + "-name\">Module</h2>");
+	}
+
+	@Test
 	void deleteModule() {
 		Long moduleId = db.getModuleProofTechniques().getId();
 
@@ -87,5 +119,16 @@ public class ModuleControllerTest extends ControllerTest {
 
 		assertThat(moduleRepository.existsById(moduleId)).isFalse();
 	}
+
+		@Test
+		@WithUserDetails("admin")
+		void deleteModuleRedirects() throws Exception {
+			Long moduleId = db.getModuleProofTechniques().getId();
+			assertThat(moduleRepository.existsById(moduleId)).isTrue();
+
+			mvc.perform(delete("/module/{id}", moduleId)).andExpect(status().is3xxRedirection());
+
+			assertThat(moduleRepository.existsById(moduleId)).isFalse();
+		}
 
 }

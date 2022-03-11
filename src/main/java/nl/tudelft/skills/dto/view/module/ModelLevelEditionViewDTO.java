@@ -17,29 +17,18 @@
  */
 package nl.tudelft.skills.dto.view.module;
 
-import java.util.List;
-
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
 import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.model.SCModule;
+import nl.tudelft.skills.model.SCEdition;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class ModuleLevelModuleViewDTO extends View<SCModule> {
-
+public class ModelLevelEditionViewDTO extends View<SCEdition> {
 	@NotNull
 	private Long id;
-	@NotNull
-	private ModelLevelEditionViewDTO edition;
-	@NotBlank
-	private String name;
-	@NotNull
-	private List<ModuleLevelSubmoduleViewDTO> submodules;
-
 }

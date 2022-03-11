@@ -15,15 +15,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view.module;
-
-import java.util.List;
+package nl.tudelft.skills.dto.create;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
-import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.librador.dto.create.Create;
+import nl.tudelft.skills.dto.id.SCEditionIdDTO;
 import nl.tudelft.skills.model.SCModule;
 
 @Data
@@ -31,15 +30,15 @@ import nl.tudelft.skills.model.SCModule;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class ModuleLevelModuleViewDTO extends View<SCModule> {
+public class SCModuleCreateDTO extends Create<SCModule> {
 
-	@NotNull
-	private Long id;
-	@NotNull
-	private ModelLevelEditionViewDTO edition;
 	@NotBlank
 	private String name;
 	@NotNull
-	private List<ModuleLevelSubmoduleViewDTO> submodules;
+	private SCEditionIdDTO edition;
 
+	@Override
+	public Class<SCModule> clazz() {
+		return SCModule.class;
+	}
 }

@@ -20,7 +20,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
-<div th:if="${@authorisationService.canDeleteSkills(module.edition)}" layout:fragment="overlay" class="hidden overlay" id="delete-skill-overlay">
+<div th:if="${@authorisationService.canDeleteSkills(module.edition.id)}" layout:fragment="overlay" class="hidden overlay" id="delete-skill-overlay">
 
     <form id="delete-skill-form" class="confirmation" th:action="@{/skill}" th:method="delete">
 
@@ -37,7 +37,7 @@
 
 </div>
 
-<script th:if="${@authorisationService.canDeleteSkills(module.edition)}" layout:fragment="script">
+<script th:if="${@authorisationService.canDeleteSkills(module.edition.id)}" layout:fragment="script">
     function deleteSkill() {
         toggleOverlay("delete-skill-overlay");
         let skillId = $(this).data("skill");

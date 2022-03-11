@@ -48,17 +48,17 @@
 
                 <div layout:replace="~{skill/view :: block}"></div>
 
-                <div th:if="${@authorisationService.canEditSkills(module.edition)}"
+                <div th:if="${@authorisationService.canEditSkills(module.edition.id)}"
                      th:each="pos : ${spaces}" class="ghost_skill"
                      th:style="|grid-row: ${pos.second + 1}; grid-column: ${pos.first + 1}|">
                     <span class="fa-solid fa-plus"></span>
                 </div>
-                <div th:if="${@authorisationService.canEditSkills(module.edition)}"
+                <div th:if="${@authorisationService.canEditSkills(module.edition.id)}"
                      th:each="col : ${#numbers.sequence(0, columns - 1)}" class="ghost_skill"
                      th:style="|grid-row: ${rows + 1}; grid-column: ${col + 1}|">
                     <span class="fa-solid fa-plus"></span>
                 </div>
-                <div th:if="${@authorisationService.canEditSkills(module.edition)}"
+                <div th:if="${@authorisationService.canEditSkills(module.edition.id)}"
                      th:each="row : ${#numbers.sequence(0, rows)}" class="ghost_skill"
                      th:style="|grid-row: ${row + 1}; grid-column: ${columns + 1}|">
                     <span class="fa-solid fa-plus"></span>

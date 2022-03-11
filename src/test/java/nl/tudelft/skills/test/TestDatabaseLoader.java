@@ -137,7 +137,7 @@ public class TestDatabaseLoader {
 	private void initModules() {
 		moduleProofTechniques = moduleRepository.save(SCModule.builder()
 				.name("Proof Techniques")
-				.edition(edition.getId())
+				.edition(editionRL)
 				.build());
 	}
 
