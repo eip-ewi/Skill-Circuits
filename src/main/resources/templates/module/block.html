@@ -24,13 +24,18 @@
 
      layout:fragment="moduleblock">
 
-                <a th:href="@{|/module/${module.id}|}"><h2 th:id="|module-${module.id}-name|" th:text="${module.name}"></h2></a>
+        <div th:id="|module-${module.id}-header|">
+            <a style="text-decoration: none; color: black" th:href="@{|/module/${module.id}|}"><h2 th:id="|module-${module.id}-name|" th:text="${module.name}"></h2></a>
+        </div>
 
-                <div class="block__buttons">
-                        <button class="fa-solid fa-trash block__delete"
-                                th:if="${@authorisationService.canDeleteModule(module.id)}"
-                                th:data-module="${module.id}"></button>
-                </div>
+        <div class="block__buttons">
+            <button class="fa-solid fa-edit block__edit"
+                    th:if="${@authorisationService.canEditModule(module.id)}"
+                    th:data-module="${module.id}"></button>
+            <button class="fa-solid fa-trash block__delete"
+                        th:if="${@authorisationService.canDeleteModule(module.id)}"
+                        th:data-module="${module.id}"></button>
+        </div>
 </div>
 
 </html>

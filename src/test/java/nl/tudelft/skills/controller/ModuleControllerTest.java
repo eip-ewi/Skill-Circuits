@@ -30,7 +30,10 @@ import java.util.regex.Pattern;
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.dto.id.SCEditionIdDTO;
+import nl.tudelft.skills.dto.patch.SCModulePatchDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
+import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.service.ModuleService;
 import nl.tudelft.skills.test.TestUserDetailsService;
@@ -93,8 +96,7 @@ public class ModuleControllerTest extends ControllerTest {
 		String element = mvc.perform(post("/module").with(csrf())
 				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
 						new BasicNameValuePair("name", "Module"),
-						new BasicNameValuePair("edition.id", Long.toString(db.edition.getId()))
-				))))
+						new BasicNameValuePair("edition.id", Long.toString(db.edition.getId()))))))
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isOk())
 				.andReturn().getResponse().getContentAsString();
@@ -102,8 +104,8 @@ public class ModuleControllerTest extends ControllerTest {
 		Matcher idMatcher = Pattern.compile("id=\"module-(\\d+)\"").matcher(element);
 		assertThat(idMatcher.find()).isTrue();
 
-				Long id = Long.parseLong(idMatcher.group(1));
-				assertThat(moduleRepository.existsById(id)).isTrue();
+		Long id = Long.parseLong(idMatcher.group(1));
+		assertThat(moduleRepository.existsById(id)).isTrue();
 
 		assertThat(element)
 				.contains("<h2 id=\"module-" + id + "-name\">Module</h2>");
@@ -120,15 +122,16 @@ public class ModuleControllerTest extends ControllerTest {
 		assertThat(moduleRepository.existsById(moduleId)).isFalse();
 	}
 
-		@Test
-		@WithUserDetails("admin")
-		void deleteModuleRedirects() throws Exception {
-			Long moduleId = db.getModuleProofTechniques().getId();
-			assertThat(moduleRepository.existsById(moduleId)).isTrue();
+	@Test
+	void patchModule() {
+		new ModuleController(moduleRepository, moduleService).patchModule(SCModulePatchDTO.builder()
+				.id(db.getModuleProofTechniques().getId())
+				.name("Module 2.0")
+				.edition(new SCEditionIdDTO(db.getModuleProofTechniques().getEdition().getId()))
+				.build());
 
-			mvc.perform(delete("/module/{id}", moduleId)).andExpect(status().is3xxRedirection());
+		SCModule module = moduleRepository.findByIdOrThrow(db.getModuleProofTechniques().getId());
 
-			assertThat(moduleRepository.existsById(moduleId)).isFalse();
-		}
-
+		assertThat(module.getName()).isEqualTo("Module 2.0");
+	}
 }

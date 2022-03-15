@@ -58,8 +58,9 @@
                 $("#create-module-wrapper").append($("#create-module"));
                 $("#create-module-name").val("");
 
-                // $(`#${element.id} > .skill__buttons > .skill__edit`).click(editSkill);
+                $(`#${element.id} > .block__buttons > .block__edit`).click(editModule);
                 $(`#${element.id} > .block__buttons > .block__delete`).click(deleteModule);
+
                 $("#blocks").append($("<div class=\"ghost_block fa-solid fa-plus\"></div>"))
                 $(".ghost_block").click(clickOnBlockGhost);
             });

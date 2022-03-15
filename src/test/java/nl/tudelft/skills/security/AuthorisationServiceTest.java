@@ -122,6 +122,23 @@ public class AuthorisationServiceTest {
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canEditModuleInEdition(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canEditModuleInEdition(db.edition.getId())).isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canEditModule(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canEditModule(db.getModuleProofTechniques().getId()))
+				.isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canCreateSkillInEdition(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canCreateSkillInEdition(db.edition.getId())).isEqualTo(expected);
@@ -139,9 +156,9 @@ public class AuthorisationServiceTest {
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
-	void canEditSkills(String role, boolean expected) {
+	void canEditSkillInEdition(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canEditSkills(db.edition.getId())).isEqualTo(expected);
+		assertThat(authorisationService.canEditSkillInEdition(db.edition.getId())).isEqualTo(expected);
 	}
 
 	@Transactional

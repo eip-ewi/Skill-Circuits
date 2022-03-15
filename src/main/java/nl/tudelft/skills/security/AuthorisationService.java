@@ -131,6 +131,29 @@ public class AuthorisationService {
 	}
 
 	/**
+	 * Gets whether the authenticated user can edit a module in a edition.
+	 *
+	 * @param  editionId The id of the edition
+	 * @return           True iff the user can edit the module in edition
+	 */
+	@Transactional
+	public boolean canEditModuleInEdition(Long editionId) {
+		return isAtLeastTeacherInEdition(editionId);
+	}
+
+	/**
+	 * Gets whether the authenticated user can edit a module.
+	 *
+	 * @param  moduleId The id of the module
+	 * @return          True iff the user can edit the moduel
+	 */
+	@Transactional
+	public boolean canEditModule(Long moduleId) {
+		return canEditModuleInEdition(
+				moduleRepository.findByIdOrThrow(moduleId).getEdition().getId());
+	}
+
+	/**
 	 * Gets whether the authenticated user can create skills in an edition.
 	 *
 	 * @param  editionId The id of the edition
@@ -157,7 +180,7 @@ public class AuthorisationService {
 	 * @param  editionId The id of the edition
 	 * @return           True iff the user can edit the skills in the edition
 	 */
-	public boolean canEditSkills(Long editionId) {
+	public boolean canEditSkillInEdition(Long editionId) {
 		return isAtLeastTeacherInEdition(editionId);
 	}
 
@@ -169,7 +192,7 @@ public class AuthorisationService {
 	 */
 	@Transactional
 	public boolean canEditSkill(Long skillId) {
-		return canEditSkills(
+		return canEditSkillInEdition(
 				skillRepository.findByIdOrThrow(skillId).getSubmodule().getModule().getEdition().getId());
 	}
 

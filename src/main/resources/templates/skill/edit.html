@@ -20,7 +20,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
-<div th:if="${@authorisationService.canEditSkills(module.edition.id)}" layout:fragment="form" class="hidden" id="edit-skill-wrapper">
+<div th:if="${@authorisationService.canEditSkillInEdition(module.edition.id)}" layout:fragment="form" class="hidden" id="edit-skill-wrapper">
 
     <div id="edit-skill">
 
@@ -46,7 +46,7 @@
 
 </div>
 
-<script th:if="${@authorisationService.canEditSkills(module.edition.id)}" layout:fragment="script">
+<script th:if="${@authorisationService.canEditSkillInEdition(module.edition.id)}" layout:fragment="script">
     function editSkill() {
         let skillId = $(this).data("skill");
         let skillName = $(`#skill-${skillId}-name`);

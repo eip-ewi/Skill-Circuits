@@ -25,6 +25,7 @@ import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.SCModuleCreateDTO;
+import nl.tudelft.skills.dto.patch.SCModulePatchDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.repository.ModuleRepository;
@@ -32,6 +33,7 @@ import nl.tudelft.skills.service.ModuleService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -121,6 +123,20 @@ public class ModuleController {
 						.forEach(p -> p.getTasksCompleted().remove(t)));
 		moduleRepository.delete(module);
 		return "redirect:/edition/" + module.getEdition().getId();
+	}
+
+	/**
+	 * Patches a module.
+	 *
+	 * @param  patch The patch containing the new data
+	 * @return       Empty 200 response
+	 */
+	@PatchMapping
+	@PreAuthorize("@authorisationService.canEditModule(#patch.id)")
+	public ResponseEntity<Void> patchModule(SCModulePatchDTO patch) {
+		SCModule module = moduleRepository.findByIdOrThrow(patch.getId());
+		moduleRepository.save(patch.apply(module));
+		return ResponseEntity.ok().build();
 	}
 
 }

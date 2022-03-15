@@ -22,8 +22,8 @@
 
 <div th:id="|skill-${skill.id}|" class="skill"
      th:style="|grid-row: ${skill.row + 1}; grid-column: ${skill.column + 1}|"
-     th:draggable="${@authorisationService.canEditSkills(module.edition.id)}"
-     th:classappend="${@authorisationService.canEditSkills(module.edition.id)} ? 'draggable' : ''"
+     th:draggable="${@authorisationService.canEditSkillInEdition(module.edition.id)}"
+     th:classappend="${@authorisationService.canEditSkillInEdition(module.edition.id)} ? 'draggable' : ''"
      th:data-submodule="${submodule.id}"
      layout:fragment="block">
     <div th:id="|skill-${skill.id}-header|">
