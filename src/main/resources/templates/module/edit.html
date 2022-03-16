@@ -44,12 +44,12 @@
 
 <script th:if="${@authorisationService.canEditModuleInEdition(edition.id)}" layout:fragment="script">
     function editModule() {
+        $(".module-title").removeClass("hidden");
         let moduleId = $(this).data("module");
         let moduleName = $(`#module-${moduleId}-name`);
         $("#edit-module-id").val(moduleId);
         $("#edit-module-name").val(moduleName.text());
         $(`#module-${moduleId}-header`).append($("#edit-module"));
-
         moduleName.addClass("hidden");
     }
 
@@ -66,7 +66,6 @@
                     $("#edit-module-wrapper").append($("#edit-module"));
                     moduleName.removeClass("hidden");
                     moduleName.text($("#edit-module-name").val());
-                    $(`#module-${moduleId}`).data("edition", $("#edit-module-edition").val())
                 }
             });
         });

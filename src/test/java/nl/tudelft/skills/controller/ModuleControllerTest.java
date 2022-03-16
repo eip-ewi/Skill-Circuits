@@ -108,7 +108,7 @@ public class ModuleControllerTest extends ControllerTest {
 		assertThat(moduleRepository.existsById(id)).isTrue();
 
 		assertThat(element)
-				.contains("<h2 id=\"module-" + id + "-name\">Module</h2>");
+				.contains("<h2 id=\"module-49-name\" class=\"module-title\">Module</h2>");
 	}
 
 	@Test
