@@ -123,7 +123,7 @@
   }
 
   &.completed {
-    & > .task__button {
+    & > .task__content > .task__button {
       background-color: var(--primary-green);
       &:hover, &:focus-visible {
         background-color: var(--primary-light);
@@ -132,6 +132,61 @@
       }
     }
   }
+
+  &__buttons {
+    cursor: pointer;
+    display: none;
+    gap: .5rem;
+    & > *:hover {
+      color: var(--primary-green);
+    }
+  }
+  &:hover > .task__buttons {
+    display: flex;
+  }
+
+  &__content {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  &__form {
+    display: flex;
+    gap: .5rem;
+    & > * {
+      font-size: 1rem;
+    }
+    & > input[type=text] {
+      max-width: 12rem;
+    }
+    & > button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      &:hover {
+        color: var(--primary-green);
+      }
+    }
+  }
+
+  &__create {
+    background-color: var(--primary-dark);
+    border: 1px solid var(--primary-light);
+    color: var(--primary-light);
+    cursor: pointer;
+    display: none;
+    min-width: 2.5rem;
+    padding: .25rem .5rem;
+    &:hover, &:focus-visible {
+      background-color: var(--primary-light);
+      border: 1px solid var(--primary-dark);
+      color: var(--primary-green);
+    }
+  }
+}
+.skill:hover .task__create,
+.skill:focus-within .task__create {
+  display: initial;
 }
 
 .ghost_skill {
@@ -147,7 +202,7 @@
   & > * {
     display: none;
   }
-  &:hover {
+  &:hover, &:focus-visible {
     background-color: var(--primary-light);
     border: 1px dotted var(--primary-dark);
     cursor: pointer;

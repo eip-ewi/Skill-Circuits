@@ -30,8 +30,8 @@ import nl.tudelft.skills.cache.RoleCacheManager;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.SubmoduleRepository;
+import nl.tudelft.skills.repository.TaskRepository;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,18 +42,18 @@ public class AuthorisationService {
 	private RoleCacheManager roleCache;
 
 	private ModuleRepository moduleRepository;
-	private SubmoduleRepository submoduleRepository;
+	private TaskRepository taskRepository;
 	private SkillRepository skillRepository;
+	private SubmoduleRepository submoduleRepository;
 
-	@Autowired
-	public AuthorisationService(RoleCacheManager roleCache,
-			ModuleRepository moduleRepository,
-			SkillRepository skillRepository,
+	public AuthorisationService(RoleCacheManager roleCache, ModuleRepository moduleRepository,
+			TaskRepository taskRepository, SkillRepository skillRepository,
 			SubmoduleRepository submoduleRepository) {
 		this.roleCache = roleCache;
 		this.moduleRepository = moduleRepository;
-		this.submoduleRepository = submoduleRepository;
+		this.taskRepository = taskRepository;
 		this.skillRepository = skillRepository;
+		this.submoduleRepository = submoduleRepository;
 	}
 
 	/**
@@ -202,7 +202,7 @@ public class AuthorisationService {
 	 * @param  editionId The id of the edition
 	 * @return           True iff the user can delete skills in the edition
 	 */
-	public boolean canDeleteSkills(Long editionId) {
+	public boolean canDeleteSkillInEdition(Long editionId) {
 		return isAtLeastTeacherInEdition(editionId);
 	}
 
@@ -213,8 +213,28 @@ public class AuthorisationService {
 	 * @return         True iff the user can delete the skill
 	 */
 	public boolean canDeleteSkill(Long skillId) {
-		return canDeleteSkills(
+		return canDeleteSkillInEdition(
 				skillRepository.findByIdOrThrow(skillId).getSubmodule().getModule().getEdition().getId());
+	}
+
+	/**
+	 * Gets whether the authenticated user can edit a task.
+	 *
+	 * @param  taskId The id of the task
+	 * @return        True iff the user can edit the task
+	 */
+	public boolean canEditTask(Long taskId) {
+		return canEditSkill(taskRepository.findByIdOrThrow(taskId).getSkill().getId());
+	}
+
+	/**
+	 * Gets whether the authenticated user can delete a task.
+	 *
+	 * @param  taskId The id of the task
+	 * @return        True iff the user can delete the task
+	 */
+	public boolean canDeleteTask(Long taskId) {
+		return canEditSkill(taskRepository.findByIdOrThrow(taskId).getSkill().getId());
 	}
 
 	/**

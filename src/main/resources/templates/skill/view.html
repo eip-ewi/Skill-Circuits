@@ -27,14 +27,18 @@
      th:data-submodule="${submodule.id}"
      layout:fragment="block">
     <div th:id="|skill-${skill.id}-header|">
-        <h2 th:id="|skill-${skill.id}-name|" th:text="${skill.name}"></h2>
+        <h2 th:id="|skill-${skill.id}-name|" class="skill__name" th:text="${skill.name}"></h2>
     </div>
+
     <ul class="tasks">
-        <li class="task" th:each="task : ${skill.tasks}" th:id="|task-${task.id}|" th:classappend="${task.completed ? 'completed' : ''}">
-            <button class="task__button" th:onclick="|toggleCompleted(${task.id})|">0</button>
-            <span th:text="${task.name}"></span>
+        <th:block th:each="task : ${skill.tasks}">
+            <li layout:replace="~{task/view :: item}"></li>
+        </th:block>
+        <li th:if="${@authorisationService.canEditSkill(skill.id)}">
+            <button th:id="|create-task-${skill.id}-button|" class="task__create fa-solid fa-plus" th:data-skill="${skill.id}"></button>
         </li>
     </ul>
+
     <div class="skill__buttons">
         <button class="fa-solid fa-pen skill__edit"
                 th:if="${@authorisationService.canEditSkill(skill.id)}"
