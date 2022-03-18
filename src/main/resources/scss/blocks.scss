@@ -118,3 +118,10 @@
     }
   }
 }
+.btn-publish, .btn-unpublish {
+  border: 3px solid var(--primary-green);
+  cursor: pointer;
+  float: right;
+  min-width: 10rem;
+  padding: 1rem;
+}

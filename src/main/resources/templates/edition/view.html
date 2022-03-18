@@ -30,6 +30,23 @@
 
 <div layout:fragment="content">
 
+    <form method="post" id="publish-edition-form" th:action="@{|/edition/${edition.id}/publish|}"
+          th:if="${@authorisationService.canPublishEdition(edition.id)}">
+        <button name="publish" id="publishEdition"
+                th:if="!${@editionRepository.findByIdOrThrow(edition.id).isVisible()}"
+                class="fa-solid btn-publish" title="publish" type="submit">
+            Publish
+        </button>
+    </form>
+    <form method="post" id="unpublish-edition-form" th:action="@{|/edition/${edition.id}/unpublish|}"
+          th:if="${@authorisationService.canPublishEdition(edition.id)}">
+        <button name="unpublish" id="unpublishEdition"
+                th:if="${@editionRepository.findByIdOrThrow(edition.id).isVisible()}"
+                class="fa-solid btn-unpublish" title="unpublish" type="submit">
+            Unpublish
+        </button>
+    </form>
+
     <h1 th:text="${edition.course.name}"></h1>
     <h1 th:text="${edition.name}"></h1>
 

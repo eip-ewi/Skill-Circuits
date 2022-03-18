@@ -26,7 +26,10 @@ import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
 import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.repository.ModuleRepository;
+import nl.tudelft.skills.security.AuthorisationService;
+import nl.tudelft.skills.service.CourseService;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,20 +39,30 @@ public class HomeController {
 
 	private CourseControllerApi courseApi;
 
+	private CourseService courseService;
+	private AuthorisationService authorisationService;
+
 	private ModuleRepository moduleRepository;
 
-	public HomeController(ModuleRepository moduleRepository, CourseControllerApi courseApi) {
+	@Autowired
+	public HomeController(ModuleRepository moduleRepository, CourseService courseService,
+			CourseControllerApi courseApi, AuthorisationService authorisationService) {
 		this.moduleRepository = moduleRepository;
+		this.courseService = courseService;
 		this.courseApi = courseApi;
+		this.authorisationService = authorisationService;
 	}
 
 	@Transactional
 	@GetMapping("/")
 	public String getHomePage(Model model) {
-		List<CourseSummaryDTO> allCourses = courseApi.getAllCourses().collectList().block();
-		model.addAttribute("courses", allCourses);
+		List<CourseSummaryDTO> allCourses = courseApi.getAllCourses().collectList().block()
+				.stream()
+				.filter(c -> authorisationService.canViewCourse(c.getId())
+						|| courseService.hasAtLeastOneEditionVisibleToStudents(c.getId()))
+				.toList();
 
-		// Temporarily put all modules on the home page
+		model.addAttribute("courses", allCourses);
 
 		// Temporarily put all modules on the home page
 		List<SCModule> allModules = moduleRepository.findAll();

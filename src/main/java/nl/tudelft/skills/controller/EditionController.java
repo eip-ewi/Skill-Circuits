@@ -17,15 +17,17 @@
  */
 package nl.tudelft.skills.controller;
 
+import javax.transaction.Transactional;
+
+import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.service.EditionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("edition")
@@ -47,10 +49,46 @@ public class EditionController {
 	 * @return       The page to load
 	 */
 	@GetMapping("{id}")
+	@PreAuthorize("@authorisationService.canViewEdition(#id)")
 	public String getEditionPage(@PathVariable Long id, Model model) {
 		model.addAttribute("edition", editionService.getEditionView(id));
-
 		return "edition/view";
 	}
 
+	/**
+	 * Sets the edition to visible for students.
+	 *
+	 * @param  id The id of the edition
+	 * @return    The page to load
+	 */
+	@PostMapping("{id}/publish")
+	@Transactional
+	@PreAuthorize("@authorisationService.canPublishEdition(#id)")
+	public String publishEdition(@PathVariable Long id) {
+		SCEdition edition = editionRepository.findByIdOrThrow(id);
+		edition.setVisible(true);
+		editionRepository.save(edition);
+
+		return "redirect:/edition/" + id.toString();
+	}
+
+	/**
+	 * Sets the edition to invisible for students.
+	 *
+	 * @param  id The id of the edition
+	 * @return    The page to load
+	 */
+
+	@PostMapping("{id}/unpublish")
+	@Transactional
+	@PreAuthorize("@authorisationService.canPublishEdition(#id)")
+	public String unpublishEdition(@PathVariable Long id) {
+
+		SCEdition edition = editionRepository.findByIdOrThrow(id);
+
+		edition.setVisible(false);
+		editionRepository.save(edition);
+
+		return "redirect:/edition/" + id.toString();
+	}
 }

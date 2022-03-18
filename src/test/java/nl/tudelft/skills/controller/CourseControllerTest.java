@@ -24,8 +24,11 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Collections;
 import java.util.LinkedList;
 
+import nl.tudelft.labracore.api.CourseControllerApi;
+import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.course.CourseLevelCourseViewDTO;
@@ -38,6 +41,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import reactor.core.publisher.Mono;
+
 @Transactional
 @AutoConfigureMockMvc
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
@@ -45,6 +50,9 @@ public class CourseControllerTest extends ControllerTest {
 
 	private final CourseController courseController;
 	private final CourseService courseService;
+
+	@Autowired
+	private CourseControllerApi courseApi;
 
 	@Autowired
 	public CourseControllerTest(CourseRepository courseRepository) {
@@ -75,6 +83,8 @@ public class CourseControllerTest extends ControllerTest {
 
 	@Test
 	void viewAllEditionsIsForbiddenForNonTeacher() throws Exception {
+		when(courseApi.getCourseById(anyLong()))
+				.thenReturn(Mono.just(new CourseDetailsDTO().editions(Collections.emptyList())));
 		mvc.perform(get("/course/{id}", db.course.getId()))
 				.andExpect(status().is3xxRedirection());
 	}

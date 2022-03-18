@@ -43,13 +43,13 @@
                 </a>
             </th:block>
 
-            <th:block th:if="${@authorisationService.isAuthenticated()} and not ${@authorisationService.canViewAllEditions(course.id)}">
+            <th:block th:if="${@authorisationService.isAuthenticated()} and not ${@authorisationService.canViewCourse(course.id)}">
                 <a class="block" th:href="@{|/edition/${@courseService.getLastStudentEditionForCourseOrLast(course.id)}|}">
                     <h2 th:text="${course.name}"></h2>
                 </a>
             </th:block>
 
-            <th:block th:if="${@authorisationService.canViewAllEditions(course.id)}">
+            <th:block th:if="${@authorisationService.canViewCourse(course.id)}">
                 <a class="block" th:href="@{|/course/${course.id}|}">
                     <h2 th:text="${course.name}"></h2>
                 </a>

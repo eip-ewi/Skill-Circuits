@@ -18,15 +18,20 @@
 package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+
+import javax.transaction.Transactional;
 
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.repository.ModuleRepository;
+import nl.tudelft.skills.security.AuthorisationService;
+import nl.tudelft.skills.service.CourseService;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,16 +41,22 @@ import org.springframework.boot.test.context.SpringBootTest;
 import reactor.core.publisher.Flux;
 
 @AutoConfigureMockMvc
+@Transactional
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
 public class HomeControllerTest extends ControllerTest {
 
 	private final HomeController homeController;
 	private final CourseControllerApi courseApi;
+	private final CourseService courseService;
+	private final AuthorisationService authorisationService;
 
 	@Autowired
 	public HomeControllerTest(ModuleRepository moduleRepository, CourseControllerApi courseApi) {
 		this.courseApi = courseApi;
-		this.homeController = new HomeController(moduleRepository, courseApi);
+		this.authorisationService = mock(AuthorisationService.class);
+		this.courseService = mock(CourseService.class);
+		this.homeController = new HomeController(moduleRepository, courseService, courseApi,
+				authorisationService);
 	}
 
 	@Test
@@ -56,10 +67,11 @@ public class HomeControllerTest extends ControllerTest {
 	@Test
 	@SuppressWarnings("unchecked")
 	void getHomePage() {
-		CourseSummaryDTO course = new CourseSummaryDTO();
+		CourseSummaryDTO course = new CourseSummaryDTO().id(randomId());
 
 		when(courseApi.getAllCourses()).thenReturn(Flux.just(course));
 
+		when(authorisationService.canViewCourse(anyLong())).thenReturn(true);
 		homeController.getHomePage(model);
 
 		assertThat((List<CourseSummaryDTO>) model.getAttribute("courses")).containsExactly(course);
