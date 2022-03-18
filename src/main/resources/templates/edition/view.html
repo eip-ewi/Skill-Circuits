@@ -30,19 +30,30 @@
 
 <div layout:fragment="content">
 
-<!--    ${edition.course.name}-->
     <h1 th:text="${edition.course.name}"></h1>
     <h1 th:text="${edition.name}"></h1>
 
-    <div class="blocks">
+    <div class="blocks" id="blocks">
 
-                <a class="block" th:each="module : ${edition.modules}" th:href="@{|/module/${module.id}|}">
+        <th:block th:each="module: ${edition.modules}">
+            <div layout:replace="~{module/block :: moduleblock}"></div>
+        </th:block>
 
-                    <h2 th:text="${module.name}"></h2>
 
-                </a>
+        <div th:if="${@authorisationService.canCreateModuleInEdition(edition.id)}"
+            class="ghost_block fa-solid fa-plus">
+        </div>
+
+
+        <div layout:replace="~{module/create :: form}"></div>
+        <div layout:replace="~{module/delete :: overlay}"></div>
+        <div layout:replace="~{module/edit :: form}"></div>
 
     </div>
+
+    <div layout:replace="~{module/create :: script}"></div>
+    <div layout:replace="~{module/delete :: script}"></div>
+    <div layout:replace="~{module/edit :: script}"></div>
 
 </div>
 

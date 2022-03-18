@@ -118,11 +118,11 @@ public class DevDatabaseLoader {
 	private void initModules() {
 		moduleProofTechniques = moduleRepository.save(SCModule.builder()
 				.name("Proof Techniques")
-				.edition(edition.getId())
+				.edition(scEdition)
 				.build());
 		modulePropositionalLogic = moduleRepository.save(SCModule.builder()
 				.name("Propositional Logic")
-				.edition(edition.getId())
+				.edition(scEdition)
 				.build());
 	}
 

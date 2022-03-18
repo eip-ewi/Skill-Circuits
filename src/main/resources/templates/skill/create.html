@@ -20,7 +20,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
-<div th:if="${@authorisationService.canCreateSkills(module.edition)}" layout:fragment="form" class="hidden" id="create-skill-wrapper">
+<div th:if="${@authorisationService.canCreateSkillInEdition(module.edition.id)}" layout:fragment="form" class="hidden" id="create-skill-wrapper">
 
     <div id="create-skill">
 
@@ -48,7 +48,7 @@
 
 </div>
 
-<script th:if="${@authorisationService.canCreateSkills(module.edition)}" layout:fragment="script">
+<script th:if="${@authorisationService.canCreateSkillInEdition(module.edition.id)}" layout:fragment="script">
     function setNewSkillPosition(row, column) {
         document.getElementById("create-skill-row").value = row;
         document.getElementById("create-skill-column").value = column;

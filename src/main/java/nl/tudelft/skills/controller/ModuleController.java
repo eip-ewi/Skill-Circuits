@@ -24,17 +24,21 @@ import java.util.stream.IntStream;
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.dto.create.SCModuleCreateDTO;
+import nl.tudelft.skills.dto.patch.SCModulePatchDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
+import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.service.ModuleService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("module")
@@ -83,6 +87,56 @@ public class ModuleController {
 				.toList());
 
 		return "module/view";
+	}
+
+	/**
+	 * Creates a module.
+	 *
+	 * @param  create The DTO with information to create the module
+	 * @return        A new module html element
+	 */
+	@PostMapping
+	@Transactional
+	@PreAuthorize("@authorisationService.canCreateModuleInEdition(#create.edition.id)")
+	public String createModule(SCModuleCreateDTO create, Model model) {
+		SCModule module = moduleRepository.save(create.apply());
+		model.addAttribute("module", module);
+		model.addAttribute("edition", module.getEdition());
+		return "module/block";
+	}
+
+	/**
+	 * Deletes a module.
+	 *
+	 * @param  id The id of the module to delete
+	 * @return    A redirect to the edition page
+	 */
+	@DeleteMapping
+	@Transactional
+	@PreAuthorize("@authorisationService.canDeleteModule(#id)")
+	public String deleteModule(@RequestParam Long id) {
+		SCModule module = moduleRepository.findByIdOrThrow(id);
+		module.getSubmodules().stream()
+				.flatMap(s -> s.getSkills().stream())
+				.flatMap(s -> s.getTasks().stream())
+				.forEach(t -> t.getPersons()
+						.forEach(p -> p.getTasksCompleted().remove(t)));
+		moduleRepository.delete(module);
+		return "redirect:/edition/" + module.getEdition().getId();
+	}
+
+	/**
+	 * Patches a module.
+	 *
+	 * @param  patch The patch containing the new data
+	 * @return       Empty 200 response
+	 */
+	@PatchMapping
+	@PreAuthorize("@authorisationService.canEditModule(#patch.id)")
+	public ResponseEntity<Void> patchModule(SCModulePatchDTO patch) {
+		SCModule module = moduleRepository.findByIdOrThrow(patch.getId());
+		moduleRepository.save(patch.apply(module));
+		return ResponseEntity.ok().build();
 	}
 
 }

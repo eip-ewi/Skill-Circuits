@@ -27,6 +27,7 @@ import nl.tudelft.labracore.lib.security.LabradorUserDetails;
 import nl.tudelft.labracore.lib.security.user.DefaultRole;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.cache.RoleCacheManager;
+import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.SubmoduleRepository;
 
@@ -40,15 +41,19 @@ public class AuthorisationService {
 
 	private RoleCacheManager roleCache;
 
-	private SkillRepository skillRepository;
+	private ModuleRepository moduleRepository;
 	private SubmoduleRepository submoduleRepository;
+	private SkillRepository skillRepository;
 
 	@Autowired
-	public AuthorisationService(RoleCacheManager roleCache, SkillRepository skillRepository,
+	public AuthorisationService(RoleCacheManager roleCache,
+			ModuleRepository moduleRepository,
+			SkillRepository skillRepository,
 			SubmoduleRepository submoduleRepository) {
 		this.roleCache = roleCache;
-		this.skillRepository = skillRepository;
+		this.moduleRepository = moduleRepository;
 		this.submoduleRepository = submoduleRepository;
+		this.skillRepository = skillRepository;
 	}
 
 	/**
@@ -96,12 +101,65 @@ public class AuthorisationService {
 	}
 
 	/**
+	 * Gets whether the authenticated user can create a module in the edition.
+	 *
+	 * @param   editionId The edition id.
+	 * @returnn           True iff the user can create a module in the edition.
+	 */
+	public boolean canCreateModuleInEdition(Long editionId) {
+		return isAtLeastTeacherInEdition(editionId);
+	}
+
+	/**
+	 * Gets whether the authenticated user can delete a module in the edition.
+	 *
+	 * @param   editionId The edition id.
+	 * @returnn           True iff the user can delete a module in the edition.
+	 */
+	public boolean canDeleteModuleInEdition(Long editionId) {
+		return isAtLeastTeacherInEdition(editionId);
+	}
+
+	/**
+	 * Gets whether the authenticated user can delete a module.
+	 *
+	 * @param   moduleId The module id.
+	 * @returnn          True iff the user can delete a module.
+	 */
+	public boolean canDeleteModule(Long moduleId) {
+		return canDeleteModuleInEdition(moduleRepository.findByIdOrThrow(moduleId).getEdition().getId());
+	}
+
+	/**
+	 * Gets whether the authenticated user can edit a module in a edition.
+	 *
+	 * @param  editionId The id of the edition
+	 * @return           True iff the user can edit the module in edition
+	 */
+	@Transactional
+	public boolean canEditModuleInEdition(Long editionId) {
+		return isAtLeastTeacherInEdition(editionId);
+	}
+
+	/**
+	 * Gets whether the authenticated user can edit a module.
+	 *
+	 * @param  moduleId The id of the module
+	 * @return          True iff the user can edit the moduel
+	 */
+	@Transactional
+	public boolean canEditModule(Long moduleId) {
+		return canEditModuleInEdition(
+				moduleRepository.findByIdOrThrow(moduleId).getEdition().getId());
+	}
+
+	/**
 	 * Gets whether the authenticated user can create skills in an edition.
 	 *
 	 * @param  editionId The id of the edition
 	 * @return           True iff the user can create skills in the edition
 	 */
-	public boolean canCreateSkills(Long editionId) {
+	public boolean canCreateSkillInEdition(Long editionId) {
 		return isAtLeastTeacherInEdition(editionId);
 	}
 
@@ -112,8 +170,8 @@ public class AuthorisationService {
 	 * @return             True iff the user can create skills in the submodule
 	 */
 	public boolean canCreateSkill(Long submoduleId) {
-		return canCreateSkills(
-				submoduleRepository.findByIdOrThrow(submoduleId).getModule().getEdition());
+		return canCreateSkillInEdition(
+				submoduleRepository.findByIdOrThrow(submoduleId).getModule().getEdition().getId());
 	}
 
 	/**
@@ -122,7 +180,7 @@ public class AuthorisationService {
 	 * @param  editionId The id of the edition
 	 * @return           True iff the user can edit the skills in the edition
 	 */
-	public boolean canEditSkills(Long editionId) {
+	public boolean canEditSkillInEdition(Long editionId) {
 		return isAtLeastTeacherInEdition(editionId);
 	}
 
@@ -134,8 +192,8 @@ public class AuthorisationService {
 	 */
 	@Transactional
 	public boolean canEditSkill(Long skillId) {
-		return canEditSkills(
-				skillRepository.findByIdOrThrow(skillId).getSubmodule().getModule().getEdition());
+		return canEditSkillInEdition(
+				skillRepository.findByIdOrThrow(skillId).getSubmodule().getModule().getEdition().getId());
 	}
 
 	/**
@@ -156,7 +214,7 @@ public class AuthorisationService {
 	 */
 	public boolean canDeleteSkill(Long skillId) {
 		return canDeleteSkills(
-				skillRepository.findByIdOrThrow(skillId).getSubmodule().getModule().getEdition());
+				skillRepository.findByIdOrThrow(skillId).getSubmodule().getModule().getEdition().getId());
 	}
 
 	/**

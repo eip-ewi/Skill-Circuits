@@ -20,7 +20,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
-<script th:if="${@authorisationService.canEditSkills(module.edition)}" layout:fragment="script">
+<script th:if="${@authorisationService.canEditSkillInEdition(module.edition.id)}" layout:fragment="script">
     let draggingSkill = false;
     let circuit = document.getElementById("circuit");
 
