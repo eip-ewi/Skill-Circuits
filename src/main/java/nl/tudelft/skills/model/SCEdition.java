@@ -37,7 +37,7 @@ public class SCEdition {
 
 	@NotNull
 	@Builder.Default
-	private boolean isVisible = true; // TODO default should be false
+	private boolean isVisible = false;
 
 	@NotNull
 	@Builder.Default

@@ -21,12 +21,16 @@ import static nl.tudelft.labracore.api.dto.RoleDetailsDTO.TypeEnum.*;
 
 import javax.annotation.Nullable;
 
+import nl.tudelft.labracore.api.CourseControllerApi;
+import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
+import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
 import nl.tudelft.labracore.api.dto.Id;
 import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
 import nl.tudelft.labracore.lib.security.LabradorUserDetails;
 import nl.tudelft.labracore.lib.security.user.DefaultRole;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.cache.RoleCacheManager;
+import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.SubmoduleRepository;
@@ -43,17 +47,25 @@ public class AuthorisationService {
 
 	private ModuleRepository moduleRepository;
 	private TaskRepository taskRepository;
+	private EditionRepository editionRepository;
 	private SkillRepository skillRepository;
 	private SubmoduleRepository submoduleRepository;
+	private CourseControllerApi courseApi;
 
+	@Autowired
+	public AuthorisationService(RoleCacheManager roleCache, EditionRepository editionRepository,
+			SkillRepository skillRepository,
+			SubmoduleRepository submoduleRepository, CourseControllerApi courseControllerApi) {
 	public AuthorisationService(RoleCacheManager roleCache, ModuleRepository moduleRepository,
 			TaskRepository taskRepository, SkillRepository skillRepository,
 			SubmoduleRepository submoduleRepository) {
 		this.roleCache = roleCache;
 		this.moduleRepository = moduleRepository;
 		this.taskRepository = taskRepository;
+		this.editionRepository = editionRepository;
 		this.skillRepository = skillRepository;
 		this.submoduleRepository = submoduleRepository;
+		this.courseApi = courseControllerApi;
 	}
 
 	/**
@@ -96,8 +108,29 @@ public class AuthorisationService {
 	 * @param  courseId The id of the course.
 	 * @return          True iff the user can view all the editions of a course by id.
 	 */
-	public boolean canViewAllEditions(Long courseId) {
-		return isAtLeastTeacherInEdition(courseId);
+	public boolean canViewCourse(Long courseId) {
+		return isAtLeastTeacherInCourse(courseId);
+	}
+
+	/**
+	 * Gets whether the authenticated user can view an edition.
+	 *
+	 * @param  editionId The id of the course.
+	 * @return           True iff the user can view the edition.
+	 */
+	public boolean canViewEdition(Long editionId) {
+		return isAtLeastTeacherInEdition(editionId)
+				|| editionRepository.findByIdOrThrow(editionId).isVisible();
+	}
+
+	/**
+	 * Gets whether the authenticated user can publish the edition for students.
+	 *
+	 * @param  editionId The id of the edition.
+	 * @return           True iff the user can publish the edition.
+	 */
+	public boolean canPublishEdition(Long editionId) {
+		return isAtLeastTeacherInEdition(editionId);
 	}
 
 	/**
@@ -248,6 +281,25 @@ public class AuthorisationService {
 			return null;
 		return roleCache.get(new Id().editionId(editionId).personId(getAuthPerson().getId()))
 				.map(RoleDetailsDTO::getType).orElse(null);
+	}
+
+	/**
+	 * Checks whether the authenticated user is at least a teacher in a course.
+	 *
+	 * @param  courseId The id of the course
+	 * @return          True iff the user is an admin or teacher in the course
+	 */
+	public boolean isAtLeastTeacherInCourse(Long courseId) {
+		if (isAdmin()) {
+			return true;
+		}
+		CourseDetailsDTO course = courseApi.getCourseById(courseId).block();
+		for (EditionSummaryDTO edition : course.getEditions()) {
+			if (getRoleInEdition(edition.getId()) == TEACHER)
+				return true;
+		}
+
+		return false;
 	}
 
 	/**

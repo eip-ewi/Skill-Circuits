@@ -27,6 +27,7 @@ import nl.tudelft.skills.dto.view.course.CourseLevelCourseViewDTO;
 import nl.tudelft.skills.dto.view.course.CourseLevelEditionViewDTO;
 import nl.tudelft.skills.model.SCCourse;
 import nl.tudelft.skills.repository.CourseRepository;
+import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.security.AuthorisationService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,14 +39,16 @@ public class CourseService {
 
 	private CourseControllerApi courseApi;
 	private CourseRepository courseRepository;
+	private EditionRepository editionRepository;
 	private AuthorisationService authorisationService;
 
 	@Autowired
 	public CourseService(CourseControllerApi courseApi, CourseRepository courseRepository,
-			AuthorisationService authorisationService) {
+			EditionRepository editionRepository, AuthorisationService authorisationService) {
 		this.courseApi = courseApi;
 		this.courseRepository = courseRepository;
 		this.authorisationService = authorisationService;
+		this.editionRepository = editionRepository;
 	}
 
 	/**
@@ -71,7 +74,7 @@ public class CourseService {
 	}
 
 	/**
-	 * Returns the most recent edition for a course with id.
+	 * Returns the most recent edition that is visible for a course with id.
 	 *
 	 * @param  id Id of the course.
 	 * @return    The most recent edition for the course.
@@ -80,6 +83,9 @@ public class CourseService {
 		CourseDetailsDTO course = courseApi.getCourseById(id).block();
 
 		return course.getEditions().stream()
+				.filter(e -> editionRepository.findById(e.getId()).isPresent()
+						? editionRepository.findById(e.getId()).get().isVisible()
+						: false)
 				.max(Comparator.comparing(EditionSummaryDTO::getStartDate))
 				.map(EditionSummaryDTO::getId)
 				.orElse(null);
@@ -96,10 +102,29 @@ public class CourseService {
 		CourseDetailsDTO course = courseApi.getCourseById(id).block();
 
 		return course.getEditions().stream()
+				.filter(e -> editionRepository.findById(e.getId()).isPresent()
+						? editionRepository.findById(e.getId()).get().isVisible()
+						: false)
 				.filter(e -> authorisationService.isStudentInEdition(e.getId()))
 				.max(Comparator.comparing(EditionSummaryDTO::getStartDate))
 				.map(EditionSummaryDTO::getId)
 				.orElseGet(() -> getLastEditionForCourse(id));
+	}
+
+	/**
+	 * Returns whwter the course has any visible editions.
+	 *
+	 * @param  id Id of the course.
+	 * @return    True if the course has any editions set to visible for students.
+	 */
+	public boolean hasAtLeastOneEditionVisibleToStudents(Long id) {
+		CourseDetailsDTO course = courseApi.getCourseById(id).block();
+
+		return course.getEditions().stream()
+				.filter(e -> editionRepository.findById(e.getId()).isPresent()
+						? editionRepository.findById(e.getId()).get().isVisible()
+						: false)
+				.toList().size() > 0;
 	}
 
 	/**

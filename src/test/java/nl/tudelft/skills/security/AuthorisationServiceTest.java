@@ -19,14 +19,21 @@ package nl.tudelft.skills.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
+import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.RoleControllerApi;
-import nl.tudelft.labracore.api.dto.Id;
-import nl.tudelft.labracore.api.dto.PersonSummaryDTO;
-import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
+import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.cache.RoleCacheManager;
+import nl.tudelft.skills.model.SCEdition;
+import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.SkillRepository;
+import nl.tudelft.skills.repository.SubmoduleRepository;
 import nl.tudelft.skills.test.TestDatabaseLoader;
 import nl.tudelft.skills.test.TestUserDetailsService;
 
@@ -39,6 +46,7 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
 public class AuthorisationServiceTest {
@@ -48,16 +56,28 @@ public class AuthorisationServiceTest {
 
 	private final AuthorisationService authorisationService;
 
+	private final RoleCacheManager roleCacheManager;
 	private final RoleControllerApi roleApi;
+	private final CourseControllerApi courseApi;
 
+	private final EditionRepository editionRepository;
+	private final SubmoduleRepository submoduleRepository;
 	private final SkillRepository skillRepository;
 
 	@Autowired
-	public AuthorisationServiceTest(AuthorisationService authorisationService, RoleControllerApi roleApi,
+	public AuthorisationServiceTest(RoleCacheManager roleCacheManager,
+			AuthorisationService authorisationService,
+			RoleControllerApi roleApi,
+			EditionRepository editionRepository,
+			SubmoduleRepository submoduleRepository,
 			SkillRepository skillRepository) {
 		this.authorisationService = authorisationService;
+		this.roleCacheManager = roleCacheManager;
 		this.roleApi = roleApi;
+		this.editionRepository = editionRepository;
+		this.submoduleRepository = submoduleRepository;
 		this.skillRepository = skillRepository;
+		this.courseApi = mock(CourseControllerApi.class);
 	}
 
 	@Test
@@ -84,6 +104,57 @@ public class AuthorisationServiceTest {
 	void isNotAdmin(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.isAdmin()).isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canViewCourse(String role, boolean expected) {
+		mockRole(role);
+
+		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
+				editionRepository, skillRepository, submoduleRepository, courseApi);
+		when(courseApi.getCourseById(anyLong()))
+				.thenReturn(Mono.just(new CourseDetailsDTO().id(db.getCourseRL().getId())
+						.editions(List.of(new EditionSummaryDTO().id(db.edition.getId())))));
+
+		assertThat(authorisationService.canViewCourse(db.getCourseRL().getId())).isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canViewEdition(String role, boolean expected) {
+		mockRole(role);
+
+		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
+				editionRepository, skillRepository, submoduleRepository, courseApi);
+
+		assertThat(authorisationService.canViewEdition(db.edition.getId())).isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,true", "STUDENT,true", ",true" })
+	void canViewEditionWithVisibility(String role, boolean expected) {
+		mockRole(role);
+
+		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
+				editionRepository, skillRepository, submoduleRepository, courseApi);
+
+		SCEdition edition = db.getEditionRL();
+		edition.setVisible(true);
+		editionRepository.save(edition);
+
+		assertThat(authorisationService.canViewEdition(edition.getId())).isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canPublishEdition(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canPublishEdition(db.edition.getId())).isEqualTo(expected);
 	}
 
 	@ParameterizedTest
@@ -219,6 +290,20 @@ public class AuthorisationServiceTest {
 	void getNoRoleInEdition() {
 		mockRole(null);
 		assertThat(authorisationService.getRoleInEdition(db.edition.getId())).isEqualTo(null);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void isAtLeastTeacherInCourse(String role, boolean expected) {
+		mockRole(role);
+		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
+				editionRepository, skillRepository, submoduleRepository, courseApi);
+		when(courseApi.getCourseById(anyLong()))
+				.thenReturn(Mono.just(new CourseDetailsDTO().id(db.getCourseRL().getId())
+						.editions(List.of(new EditionSummaryDTO().id(db.edition.getId())))));
+		assertThat(authorisationService.isAtLeastTeacherInCourse(db.getCourseRL().getId()))
+				.isEqualTo(expected);
 	}
 
 	@ParameterizedTest

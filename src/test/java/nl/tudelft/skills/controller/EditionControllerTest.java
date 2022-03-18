@@ -25,6 +25,7 @@ import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.edition.EditionLevelCourseViewDTO;
 import nl.tudelft.skills.dto.view.edition.EditionLevelEditionViewDTO;
+import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.service.EditionService;
 
@@ -32,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
@@ -41,9 +43,11 @@ public class EditionControllerTest extends ControllerTest {
 
 	private final EditionController editionController;
 	private final EditionService editionService;
+	private final EditionRepository editionRepository;
 
 	@Autowired
 	public EditionControllerTest(EditionRepository editionRepository) {
+		this.editionRepository = editionRepository;
 		this.editionService = mock(EditionService.class);
 		this.editionController = new EditionController(editionRepository, editionService);
 	}
@@ -64,6 +68,36 @@ public class EditionControllerTest extends ControllerTest {
 		assertThat(model.getAttribute("edition")).isEqualTo(mockEditionView);
 
 		verify(editionService).getEditionView(editionId);
+	}
+
+	@Test
+	@WithUserDetails("admin")
+	void publishEdition() {
+		Long editionId = db.getEditionRL().getId();
+
+		assertThat(!editionRepository.findByIdOrThrow(editionId).isVisible());
+
+		editionController.publishEdition(editionId);
+
+		assertThat(editionRepository.findByIdOrThrow(editionId).isVisible());
+
+	}
+
+	@Test
+	@WithUserDetails("admin")
+	void unpublishEdition() {
+		SCEdition edition = db.getEditionRL();
+		edition.setVisible(true);
+		editionRepository.save(edition);
+
+		Long editionId = db.getEditionRL().getId();
+
+		assertThat(editionRepository.findByIdOrThrow(editionId).isVisible());
+
+		editionController.publishEdition(editionId);
+
+		assertThat(!editionRepository.findByIdOrThrow(editionId).isVisible());
+
 	}
 
 }

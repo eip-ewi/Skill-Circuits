@@ -50,7 +50,7 @@ public class CourseController {
 	 * @return       The page to load
 	 */
 	@GetMapping("{id}")
-	@PreAuthorize("@authorisationService.canViewAllEditions(#id)")
+	@PreAuthorize("@authorisationService.canViewCourse(#id)")
 	public String getCoursePage(@PathVariable Long id, Model model) {
 		model.addAttribute("course", courseService.getCourseView(id));
 
