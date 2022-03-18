@@ -50,11 +50,6 @@
     <h1 th:text="${edition.course.name}"></h1>
     <h1 th:text="${edition.name}"></h1>
 
-    <div class="blocks">
-                <a class="block" th:each="module : ${edition.modules}" th:href="@{|/module/${module.id}|}">
-                    <h2 th:text="${module.name}"></h2>
-                </a>
-    </div>
     <div class="blocks" id="blocks">
 
         <th:block th:each="module: ${edition.modules}">

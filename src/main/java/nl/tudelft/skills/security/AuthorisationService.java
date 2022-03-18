@@ -35,6 +35,7 @@ import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.SubmoduleRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,26 +45,27 @@ public class AuthorisationService {
 
 	private RoleCacheManager roleCache;
 
-	private ModuleRepository moduleRepository;
-	private TaskRepository taskRepository;
 	private EditionRepository editionRepository;
-	private SkillRepository skillRepository;
+	private ModuleRepository moduleRepository;
 	private SubmoduleRepository submoduleRepository;
+	private SkillRepository skillRepository;
+	private TaskRepository taskRepository;
+
 	private CourseControllerApi courseApi;
 
 	@Autowired
 	public AuthorisationService(RoleCacheManager roleCache, EditionRepository editionRepository,
-			SkillRepository skillRepository,
-			SubmoduleRepository submoduleRepository, CourseControllerApi courseControllerApi) {
-	public AuthorisationService(RoleCacheManager roleCache, ModuleRepository moduleRepository,
-			TaskRepository taskRepository, SkillRepository skillRepository,
-			SubmoduleRepository submoduleRepository) {
+			ModuleRepository moduleRepository, SubmoduleRepository submoduleRepository,
+			SkillRepository skillRepository, TaskRepository taskRepository,
+			CourseControllerApi courseControllerApi) {
 		this.roleCache = roleCache;
-		this.moduleRepository = moduleRepository;
-		this.taskRepository = taskRepository;
+
 		this.editionRepository = editionRepository;
-		this.skillRepository = skillRepository;
+		this.moduleRepository = moduleRepository;
 		this.submoduleRepository = submoduleRepository;
+		this.skillRepository = skillRepository;
+		this.taskRepository = taskRepository;
+
 		this.courseApi = courseControllerApi;
 	}
 

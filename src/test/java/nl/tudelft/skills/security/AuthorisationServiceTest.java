@@ -31,9 +31,7 @@ import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.cache.RoleCacheManager;
 import nl.tudelft.skills.model.SCEdition;
-import nl.tudelft.skills.repository.EditionRepository;
-import nl.tudelft.skills.repository.SkillRepository;
-import nl.tudelft.skills.repository.SubmoduleRepository;
+import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.test.TestDatabaseLoader;
 import nl.tudelft.skills.test.TestUserDetailsService;
 
@@ -61,22 +59,30 @@ public class AuthorisationServiceTest {
 	private final CourseControllerApi courseApi;
 
 	private final EditionRepository editionRepository;
+	private final ModuleRepository moduleRepository;
 	private final SubmoduleRepository submoduleRepository;
 	private final SkillRepository skillRepository;
+	private final TaskRepository taskRepository;
 
 	@Autowired
 	public AuthorisationServiceTest(RoleCacheManager roleCacheManager,
 			AuthorisationService authorisationService,
 			RoleControllerApi roleApi,
 			EditionRepository editionRepository,
+			ModuleRepository moduleRepository,
 			SubmoduleRepository submoduleRepository,
-			SkillRepository skillRepository) {
+			SkillRepository skillRepository,
+			TaskRepository taskRepository) {
 		this.authorisationService = authorisationService;
 		this.roleCacheManager = roleCacheManager;
 		this.roleApi = roleApi;
+
 		this.editionRepository = editionRepository;
+		this.moduleRepository = moduleRepository;
 		this.submoduleRepository = submoduleRepository;
 		this.skillRepository = skillRepository;
+		this.taskRepository = taskRepository;
+
 		this.courseApi = mock(CourseControllerApi.class);
 	}
 
@@ -113,7 +119,8 @@ public class AuthorisationServiceTest {
 		mockRole(role);
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
-				editionRepository, skillRepository, submoduleRepository, courseApi);
+				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
+				courseApi);
 		when(courseApi.getCourseById(anyLong()))
 				.thenReturn(Mono.just(new CourseDetailsDTO().id(db.getCourseRL().getId())
 						.editions(List.of(new EditionSummaryDTO().id(db.edition.getId())))));
@@ -128,7 +135,8 @@ public class AuthorisationServiceTest {
 		mockRole(role);
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
-				editionRepository, skillRepository, submoduleRepository, courseApi);
+				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
+				courseApi);
 
 		assertThat(authorisationService.canViewEdition(db.edition.getId())).isEqualTo(expected);
 	}
@@ -140,7 +148,8 @@ public class AuthorisationServiceTest {
 		mockRole(role);
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
-				editionRepository, skillRepository, submoduleRepository, courseApi);
+				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
+				courseApi);
 
 		SCEdition edition = db.getEditionRL();
 		edition.setVisible(true);
@@ -155,14 +164,6 @@ public class AuthorisationServiceTest {
 	void canPublishEdition(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canPublishEdition(db.edition.getId())).isEqualTo(expected);
-	}
-
-	@ParameterizedTest
-	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
-	void canViewAllEditions(String role, boolean expected) {
-		mockRole(role);
-		assertThat(authorisationService.canViewAllEditions(db.edition.getId())).isEqualTo(expected);
 	}
 
 	@ParameterizedTest
@@ -297,8 +298,11 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void isAtLeastTeacherInCourse(String role, boolean expected) {
 		mockRole(role);
+
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
-				editionRepository, skillRepository, submoduleRepository, courseApi);
+				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
+				courseApi);
+
 		when(courseApi.getCourseById(anyLong()))
 				.thenReturn(Mono.just(new CourseDetailsDTO().id(db.getCourseRL().getId())
 						.editions(List.of(new EditionSummaryDTO().id(db.edition.getId())))));
