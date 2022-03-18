@@ -56,9 +56,8 @@ public class HomeController {
 	@Transactional
 	@GetMapping("/")
 	public String getHomePage(Model model) {
-		List<CourseSummaryDTO> allCourses = courseApi.getAllCourses().collectList().block();
-
-		allCourses = allCourses.stream()
+		List<CourseSummaryDTO> allCourses = courseApi.getAllCourses().collectList().block()
+				.stream()
 				.filter(c -> authorisationService.canViewCourse(c.getId())
 						|| courseService.hasAtLeastOneEditionVisibleToStudents(c.getId()))
 				.toList();

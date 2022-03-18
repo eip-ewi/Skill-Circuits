@@ -46,7 +46,7 @@
         <button name="unpublish" id="unpublishEdition"
                 th:if="${@editionRepository.findByIdOrThrow(edition.id).isVisible()}"
                 class="fa-solid btn-unpublish" title="unpublish" type="submit">
-            Un-publish
+            Unpublish
         </button>
     </form>
 

@@ -26,6 +26,7 @@ import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.course.CourseLevelCourseViewDTO;
 import nl.tudelft.skills.dto.view.course.CourseLevelEditionViewDTO;
 import nl.tudelft.skills.model.SCCourse;
+import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.CourseRepository;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.security.AuthorisationService;
@@ -83,9 +84,7 @@ public class CourseService {
 		CourseDetailsDTO course = courseApi.getCourseById(id).block();
 
 		return course.getEditions().stream()
-				.filter(e -> editionRepository.findById(e.getId()).isPresent()
-						? editionRepository.findById(e.getId()).get().isVisible()
-						: false)
+				.filter(e -> editionRepository.findById(e.getId()).map(SCEdition::isVisible).orElse(false))
 				.max(Comparator.comparing(EditionSummaryDTO::getStartDate))
 				.map(EditionSummaryDTO::getId)
 				.orElse(null);
@@ -102,9 +101,7 @@ public class CourseService {
 		CourseDetailsDTO course = courseApi.getCourseById(id).block();
 
 		return course.getEditions().stream()
-				.filter(e -> editionRepository.findById(e.getId()).isPresent()
-						? editionRepository.findById(e.getId()).get().isVisible()
-						: false)
+				.filter(e -> editionRepository.findById(e.getId()).map(SCEdition::isVisible).orElse(false))
 				.filter(e -> authorisationService.isStudentInEdition(e.getId()))
 				.max(Comparator.comparing(EditionSummaryDTO::getStartDate))
 				.map(EditionSummaryDTO::getId)
@@ -121,9 +118,7 @@ public class CourseService {
 		CourseDetailsDTO course = courseApi.getCourseById(id).block();
 
 		return course.getEditions().stream()
-				.filter(e -> editionRepository.findById(e.getId()).isPresent()
-						? editionRepository.findById(e.getId()).get().isVisible()
-						: false)
+				.filter(e -> editionRepository.findById(e.getId()).map(SCEdition::isVisible).orElse(false))
 				.toList().size() > 0;
 	}
 

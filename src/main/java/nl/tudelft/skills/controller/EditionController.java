@@ -17,6 +17,8 @@
  */
 package nl.tudelft.skills.controller;
 
+import javax.transaction.Transactional;
+
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.service.EditionService;
@@ -60,6 +62,7 @@ public class EditionController {
 	 * @return    The page to load
 	 */
 	@PostMapping("{id}/publish")
+	@Transactional
 	@PreAuthorize("@authorisationService.canPublishEdition(#id)")
 	public String publishEdition(@PathVariable Long id) {
 		SCEdition edition = editionRepository.findByIdOrThrow(id);
@@ -77,6 +80,7 @@ public class EditionController {
 	 */
 
 	@PostMapping("{id}/unpublish")
+	@Transactional
 	@PreAuthorize("@authorisationService.canPublishEdition(#id)")
 	public String unpublishEdition(@PathVariable Long id) {
 

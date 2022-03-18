@@ -23,6 +23,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import nl.tudelft.labracore.api.CourseControllerApi;
@@ -79,6 +80,24 @@ public class CourseServiceTest {
 		CourseLevelCourseViewDTO view = new CourseLevelCourseViewDTO(1L, "course", "code", List.of());
 
 		assertThat(courseService.getCourseView(1L)).isEqualTo(view);
+	}
+
+	@Test
+	public void hasAtLeastOneEditionVisibleToStudents() {
+		when(courseApi.getCourseById(anyLong())).thenReturn(
+				Mono.just(new CourseDetailsDTO().editions(List.of(new EditionSummaryDTO().id(1L)))));
+		SCEdition edition = new SCEdition(1L, true, Collections.emptySet());
+		editionRepository.save(edition);
+
+		assertThat(courseService.hasAtLeastOneEditionVisibleToStudents(1L));
+	}
+
+	@Test
+	public void hasAtLeastOneEditionVisibleToStudentsFalse() {
+		when(courseApi.getCourseById(anyLong()))
+				.thenReturn(Mono.just(new CourseDetailsDTO().editions(Collections.emptyList())));
+
+		assertThat(!courseService.hasAtLeastOneEditionVisibleToStudents(1L));
 	}
 
 	@Test

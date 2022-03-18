@@ -23,7 +23,6 @@ import javax.annotation.Nullable;
 
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
-import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
 import nl.tudelft.labracore.api.dto.Id;
 import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
 import nl.tudelft.labracore.lib.security.LabradorUserDetails;
@@ -294,12 +293,8 @@ public class AuthorisationService {
 			return true;
 		}
 		CourseDetailsDTO course = courseApi.getCourseById(courseId).block();
-		for (EditionSummaryDTO edition : course.getEditions()) {
-			if (getRoleInEdition(edition.getId()) == TEACHER)
-				return true;
-		}
 
-		return false;
+		return course.getEditions().stream().anyMatch(e -> getRoleInEdition(e.getId()) == TEACHER);
 	}
 
 	/**
