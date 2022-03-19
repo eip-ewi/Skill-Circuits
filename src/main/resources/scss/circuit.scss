@@ -15,6 +15,10 @@
   position: relative;
   z-index: 10;
 
+  &.highlighted{
+    outline: 2px solid var(--primary-green)
+  }
+
   &.draggable {
     cursor: grab;
   }
@@ -97,6 +101,21 @@
       }
     }
   }
+  &__header{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  &__submodule__name{
+    color: var(--secondary-green);
+    &:hover {
+      color: var(--primary-green);
+      border-color: var(--primary-green);
+
+    }
+  }
+
 }
 
 .tasks {

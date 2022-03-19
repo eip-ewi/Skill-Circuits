@@ -26,8 +26,9 @@
      th:classappend="${@authorisationService.canEditSkillInEdition(module.edition.id)} ? 'draggable' : ''"
      th:data-submodule="${submodule.id}"
      layout:fragment="block">
-    <div th:id="|skill-${skill.id}-header|">
+    <div th:id="|skill-${skill.id}-header|" class="skill__header">
         <h2 th:id="|skill-${skill.id}-name|" class="skill__name" th:text="${skill.name}"></h2>
+        <p th:id="|skill-${skill.id}-submodule|" class="skill__submodule__name" th:text="${submodule.name}"></p>
     </div>
 
     <ul class="tasks">
@@ -48,5 +49,22 @@
                 th:data-skill="${skill.id}"></button>
     </div>
 </div>
+
+<script layout:fragment="script">
+    function highlightSkillsWithSubmodule(submoduleId) {
+        $(`.skill[data-submodule='${submoduleId}']`).addClass("highlighted");
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        $(".skill__submodule__name").mouseenter(function (){
+            let submoduleId = $(this).parent().parent().data("submodule");
+            $(`.skill[data-submodule='${submoduleId}']`).addClass("highlighted");
+        });
+
+        $(".skill__submodule__name").mouseleave(function (){
+            $(".skill").removeClass("highlighted");
+        });
+    });
+</script>
 
 </html>
