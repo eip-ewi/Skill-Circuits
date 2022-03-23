@@ -17,9 +17,11 @@
  */
 package nl.tudelft.skills.controller;
 
+import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.SkillCreateDTO;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
+import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.SkillRepository;
 
@@ -53,10 +55,12 @@ public class SkillController {
 	@PreAuthorize("@authorisationService.canCreateSkill(#create.submodule.id)")
 	public String createSkill(SkillCreateDTO create, Model model) {
 		Skill skill = skillRepository.save(create.apply());
-		model.addAttribute("skill", skill);
-		model.addAttribute("submodule", skill.getSubmodule());
-		model.addAttribute("module", skill.getSubmodule().getModule());
-		return "skill/view";
+		model.addAttribute("block", View.convert(skill, ModuleLevelSkillViewDTO.class));
+		model.addAttribute("group", skill.getSubmodule());
+		model.addAttribute("circuit", skill.getSubmodule().getModule());
+		model.addAttribute("canEdit", true);
+		model.addAttribute("canDelete", true);
+		return "block/view";
 	}
 
 	/**

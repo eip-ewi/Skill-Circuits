@@ -42,13 +42,13 @@
 <script th:if="${@authorisationService.canEditSkillInEdition(module.edition.id)}" layout:fragment="script">
     function editTask() {
         $(".task__name").removeClass("hidden");
-        let taskId = $(this).data("task");
-        let taskName = $(`#task-${taskId}-name`);
+        let taskId = $(this).data("item");
+        let taskName = $(`#item-${taskId}-name`);
         $("#edit-task-id").val(taskId);
         $("#edit-task-name").val(taskName.text());
-        $(`#task-${taskId}-content`).append($("#edit-task"));
+        $(`#item-${taskId}-content`).append($("#edit-task"));
         taskName.addClass("hidden");
-        $(`#task-${taskId}-buttons`).addClass("hidden");
+        $(`#item-${taskId}-buttons`).addClass("hidden");
     }
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -60,11 +60,11 @@
                 data: $("#edit-task-form").serialize(),
                 success: () => {
                     let taskId = $("#edit-task-id").val();
-                    let taskName = $(`#task-${taskId}-name`);
+                    let taskName = $(`#item-${taskId}-name`);
                     $("#edit-task-wrapper").append($("#edit-task"));
                     taskName.removeClass("hidden");
                     taskName.text($("#edit-task-name").val());
-                    $(`#task-${taskId}-buttons`).removeClass("hidden");
+                    $(`#item-${taskId}-buttons`).removeClass("hidden");
                 }
             });
         });
@@ -74,8 +74,8 @@
         $("#edit-task-cancel").click(function () {
             let taskId = $("#edit-task-id").val();
             $("#edit-task-wrapper").append($("#edit-task"));
-            $(`#task-${taskId}-name`).removeClass("hidden");
-            $(`#task-${taskId}-buttons`).removeClass("hidden");
+            $(`#item-${taskId}-name`).removeClass("hidden");
+            $(`#item-${taskId}-buttons`).removeClass("hidden");
         });
     });
 </script>

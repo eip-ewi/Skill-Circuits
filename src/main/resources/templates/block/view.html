@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<div th:id="|block-${block.id}|" class="skill"
+     th:style="|grid-row: ${block.row + 1}; grid-column: ${block.column + 1}|"
+     th:draggable="${canEdit}"
+     th:classappend="${canEdit} ? 'draggable' : ''"
+     th:data-group="${group.id}"
+     layout:fragment="block">
+    <div th:id="|block-${block.id}-header|" class="skill__header">
+        <h2 th:id="|block-${block.id}-name|" class="skill__name" th:text="${block.name}"></h2>
+        <p th:id="|block-${block.id}-group|" class="skill__submodule__name" th:text="${group.name}"></p>
+    </div>
+
+    <ul class="tasks">
+        <th:block th:each="item : ${block.items}">
+            <li layout:replace="~{item/view :: item}"></li>
+        </th:block>
+        <li th:if="${canEdit}">
+            <button th:id="|create-item-${block.id}-button|" class="task__create fa-solid fa-plus" th:data-block="${block.id}"></button>
+        </li>
+    </ul>
+
+    <div class="skill__buttons">
+        <button class="fa-solid fa-pen skill__edit" th:if="${canEdit}"
+                th:data-block="${block.id}"></button>
+        <button class="fa-solid fa-trash block__delete" th:if="${canDelete}"
+                th:data-block="${block.id}"></button>
+    </div>
+</div>
+
+<script layout:fragment="script">
+    document.addEventListener("DOMContentLoaded", function () {
+        $(".skill__submodule__name").mouseenter(function (){
+            let submoduleId = $(this).parent().parent().data("group");
+            $(`.skill[data-group='${submoduleId}']`).addClass("highlighted");
+        });
+
+        $(".skill__submodule__name").mouseleave(function (){
+            $(".skill").removeClass("highlighted");
+        });
+    });
+</script>

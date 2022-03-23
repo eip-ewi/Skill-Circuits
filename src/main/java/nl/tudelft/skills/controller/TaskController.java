@@ -53,11 +53,11 @@ public class TaskController {
 	@Transactional
 	@PreAuthorize("@authorisationService.canEditSkill(#create.skill.id)")
 	public String createTask(TaskCreateDTO create, Model model) {
-		System.out.println(create);
 		Task task = taskRepository.save(create.apply());
-		model.addAttribute("task", View.convert(task, TaskViewDTO.class));
-		model.addAttribute("skill", task.getSkill());
-		return "task/view";
+		model.addAttribute("level", "module");
+		model.addAttribute("item", View.convert(task, TaskViewDTO.class));
+		model.addAttribute("block", task.getSkill());
+		return "item/view";
 	}
 
 	/**

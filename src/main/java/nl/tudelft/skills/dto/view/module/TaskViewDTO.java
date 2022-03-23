@@ -23,6 +23,7 @@ import javax.validation.constraints.NotNull;
 
 import lombok.*;
 import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.dto.view.ItemView;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskType;
 
@@ -31,7 +32,7 @@ import nl.tudelft.skills.model.TaskType;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class TaskViewDTO extends View<Task> {
+public class TaskViewDTO extends View<Task> implements ItemView {
 
 	@NotNull
 	private Long id;

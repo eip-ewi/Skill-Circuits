@@ -81,7 +81,7 @@
             $("#essential-checkbox").prop('checked', true);
         });
 
-        $(".ghost_skill").click(function () {
+        $(".ghost_block").click(function () {
             let col = parseInt($(this).css("gridColumn").split(" / ")[0]) - 1;
             let row = parseInt($(this).css("gridRow").split(" / ")[0]) - 1;
             setNewSkillPosition(row, col);

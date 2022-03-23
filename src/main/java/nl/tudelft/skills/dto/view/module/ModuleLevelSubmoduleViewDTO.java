@@ -18,12 +18,15 @@
 package nl.tudelft.skills.dto.view.module;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
 import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.dto.view.BlockView;
+import nl.tudelft.skills.dto.view.GroupView;
 import nl.tudelft.skills.model.Submodule;
 
 @Data
@@ -31,7 +34,7 @@ import nl.tudelft.skills.model.Submodule;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class ModuleLevelSubmoduleViewDTO extends View<Submodule> {
+public class ModuleLevelSubmoduleViewDTO extends View<Submodule> implements GroupView {
 
 	@NotNull
 	private Long id;
@@ -41,4 +44,8 @@ public class ModuleLevelSubmoduleViewDTO extends View<Submodule> {
 	@PostApply
 	private List<ModuleLevelSkillViewDTO> skills;
 
+    @Override
+    public List<? extends BlockView> getBlocks() {
+        return skills;
+    }
 }

@@ -20,7 +20,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
-<script th:if="${@authorisationService.canEditSkillInEdition(module.edition.id)}" layout:fragment="script">
+<script th:if="${canEdit}" layout:fragment="script">
     let draggingSkill = false;
     let circuit = document.getElementById("circuit");
 
@@ -42,24 +42,24 @@
     }, false);
 
     document.addEventListener("dragenter", function (event) {
-        if (event.target.classList.contains("ghost_skill") && draggingSkill) {
+        if (event.target.classList.contains("ghost_block") && draggingSkill) {
             event.target.classList.add("drag_over");
         }
     }, false);
     document.addEventListener("dragleave", function (event) {
-        if (event.target.classList.contains("ghost_skill")) {
+        if (event.target.classList.contains("ghost_block")) {
             event.target.classList.remove("drag_over");
         }
     }, false);
 
     document.addEventListener("dragover", function (event) {
-        if (event.target.classList.contains("ghost_skill") && draggingSkill) {
+        if (event.target.classList.contains("ghost_block") && draggingSkill) {
             event.preventDefault();
             event.dataTransfer.dropEffect = "move";
         }
     }, false);
     document.addEventListener("drop", function (event) {
-        if (event.target.classList.contains("ghost_skill") && draggingSkill) {
+        if (event.target.classList.contains("ghost_block") && draggingSkill) {
             event.preventDefault();
             event.target.classList.remove("drag_over");
 
@@ -80,7 +80,7 @@
 
             $.ajax({
                 type: "PATCH",
-                url: `/skill/${id}/position`,
+                url: `/${blockType}/${id}/position`,
                 data: JSON.stringify({"column": col, "row": row}),
                 processData: false,
                 contentType: "application/json",
@@ -102,7 +102,7 @@
             let spaceMaxCol = 0;
             let spaceMaxRow = 0;
             let toRemove = [];
-            for (let space of document.getElementsByClassName("ghost_skill")) {
+            for (let space of document.getElementsByClassName("ghost_block")) {
                 let col = parseInt(space.style.gridColumn.split(" / ")[0]);
                 if (col > newColumns + 1) {
                     toRemove.push(space);
@@ -124,7 +124,7 @@
             if (spaceMaxCol <= newColumns) {
                 for (let row = 0; row <= newRows; row++) {
                     let space = document.createElement("div");
-                    space.classList.add("ghost_skill");
+                    space.classList.add("ghost_block");
                     space.style.gridRow = (row + 1).toString();
                     space.style.gridColumn = (newColumns + 1).toString();
                     circuit.appendChild(space);
@@ -133,7 +133,7 @@
             if (spaceMaxRow <= newRows) {
                 for (let col = 0; col <= (spaceMaxCol <= newColumns ? newColumns - 1 : newColumns); col++) {
                     let space = document.createElement("div");
-                    space.classList.add("ghost_skill");
+                    space.classList.add("ghost_block");
                     space.style.gridRow = (newRows + 1).toString();
                     space.style.gridColumn = (col + 1).toString();
                     circuit.appendChild(space);

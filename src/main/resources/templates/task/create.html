@@ -41,7 +41,7 @@
 
 <script th:if="${@authorisationService.canEditSkillInEdition(module.edition.id)}" layout:fragment="script">
     function createTask() {
-        let skillId = $(this).data("skill");
+        let skillId = $(this).data("block");
         $("#create-task-skill").val(skillId);
 
         $("#create-task-name").val("");
@@ -55,7 +55,7 @@
             $.post("/task", $("#create-task-form").serialize(), html => {
                 let skillId = $("#create-task-skill").val();
                 let element = $("<div/>").append(html).children()[0]
-                $(`#create-task-${skillId}-button`).before(element);
+                $(`#create-item-${skillId}-button`).before(element);
 
                 $(".task__create").removeClass("hidden");
                 $("#create-task-wrapper").append($("#create-task"));

@@ -55,16 +55,17 @@
 <script th:if="${@authorisationService.canEditSkillInEdition(module.edition.id)}" layout:fragment="script">
     function editSkill() {
         $(".skill__name").removeClass("hidden");
-        let skillId = $(this).data("skill");
-        let skillName = $(`#skill-${skillId}-name`);
+        let skillId = $(this).data("block");
+        let skillName = $(`#block-${skillId}-name`);
         $("#edit-skill-id").val(skillId);
         $("#edit-skill-name").val(skillName.text());
-        let skill = $(`#skill-${skillId}`);
-        $("#edit-skill-submodule").val(skill.data("submodule"));
-        $(`#skill-${skillId}-header`).append($("#edit-skill"));
-        skillName.addClass("hidden");
-        $("#edit-essential-checkbox").prop('checked', skill.data("essential"));
 
+        let skill = $(`#block-${skillId}`);
+        $("#edit-skill-submodule").val(skill.data("submodule"));
+        $(`#block-${skillId}-header`).append($("#edit-skill"));
+        skillName.addClass("hidden");
+        $(`#block-${skillId}-group`).addClass("hidden");
+        $("#edit-essential-checkbox").prop('checked', skill.data("essential"));
     }
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -76,16 +77,25 @@
                 data: $("#edit-skill-form").serialize(),
                 success: () => {
                     let skillId = $("#edit-skill-id").val();
-                    let skillName = $(`#skill-${skillId}-name`);
+                    let skillName = $(`#block-${skillId}-name`);
                     $("#edit-skill-wrapper").append($("#edit-skill"));
-                    skillName.removeClass("hidden");
                     skillName.text($("#edit-skill-name").val());
+
                     let skill = $(`#skill-${skillId}`);
                     skill.data("submodule", $("#edit-skill-submodule").val());
 
                     let essential = $("#edit-essential-checkbox").prop("checked");
                     skill.data("essential", essential);
                     skill.attr("data-essential",essential);
+
+                    skillName.removeClass("hidden");
+                    let group = $("#edit-skill-submodule option:selected");
+                    let block = $(`#block-${skillId}`);
+                    block.attr("data-group", group.val());
+                    block.data("group", group.val());
+                    let blockGroup = $(`#block-${skillId}-group`);
+                    blockGroup.text(group.text());
+                    blockGroup.removeClass("hidden");
                 }
             });
         });
@@ -95,7 +105,8 @@
         $("#edit-skill-cancel").click(function () {
             let skillId = $("#edit-skill-id").val();
             $("#edit-skill-wrapper").append($("#edit-skill"));
-            $(`#skill-${skillId}-name`).removeClass("hidden");
+            $(`#block-${skillId}-name`).removeClass("hidden");
+            $(`#block-${skillId}-group`).removeClass("hidden");
         });
     });
 </script>
