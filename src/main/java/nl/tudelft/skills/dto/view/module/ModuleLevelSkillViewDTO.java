@@ -43,5 +43,12 @@ public class ModuleLevelSkillViewDTO extends View<Skill> {
 	private Integer column;
 	@NotNull
 	private List<TaskViewDTO> tasks;
+	@NotNull
+	private List<Long> childIds;
 
+	@Override
+	public void postApply() {
+		super.postApply();
+		this.childIds = data.getChildren().stream().map(Skill::getId).toList();
+	}
 }

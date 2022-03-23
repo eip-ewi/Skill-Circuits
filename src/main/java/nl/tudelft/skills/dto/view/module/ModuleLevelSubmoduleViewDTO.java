@@ -38,6 +38,7 @@ public class ModuleLevelSubmoduleViewDTO extends View<Submodule> {
 	@NotBlank
 	private String name;
 	@NotNull
+	@PostApply
 	private List<ModuleLevelSkillViewDTO> skills;
 
 }

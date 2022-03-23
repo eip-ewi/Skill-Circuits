@@ -3,8 +3,10 @@
 }
 
 .circuit {
+  --circuit-gap: 3rem;
+
   display: grid;
-  gap: 2rem;
+  gap: var(--circuit-gap);
   grid-template-columns: repeat(var(--columns), 1fr);
 }
 
@@ -235,10 +237,44 @@
   background-color: var(--grey-700);
 }
 
+.connection {
+  align-self: end;
+  justify-self: center;
+  background-color: var(--grey-500);
+  z-index: 0;
+
+  &.horizontal {
+    --width: 1;
+    --x-diff: 0;
+    height: 2px;
+    width: calc((100% + var(--circuit-gap)) * (var(--width) - 1) / var(--width) + var(--x-diff));
+  }
+
+  &.vertical {
+    --y-offset: 0;
+    height: calc(var(--circuit-gap) / 2);
+    width: 2px;
+    &.in {
+      align-self: start;
+      height: calc(var(--circuit-gap) / 2 - var(--y-offset));
+    }
+    &.out {
+      --height: 1;
+      height: calc(100% + var(--y-offset) + var(--circuit-gap) * 1.5);
+    }
+  }
+
+  &.highlighted {
+    background-color: #0000ff;
+    z-index: 1;
+  }
+}
+
 .checkpoint {
   align-self: end;
   border-top: 1px dashed var(--primary-dark);
   grid-column: 1 / span var(--columns);
   max-height: 1px;
   transform: translateY(1rem);
+  z-index: 10;
 }
