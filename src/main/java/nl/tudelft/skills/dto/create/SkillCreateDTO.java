@@ -36,6 +36,9 @@ public class SkillCreateDTO extends Create<Skill> {
 	@NotBlank
 	private String name;
 	@NotNull
+	@Builder.Default
+	private Boolean essential = false;
+	@NotNull
 	private SubmoduleIdDTO submodule;
 	@Min(0)
 	@NotNull

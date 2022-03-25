@@ -48,6 +48,10 @@ public class Skill {
 	@NotBlank
 	private String name;
 
+	@NotNull
+	@Builder.Default
+	private boolean essential = true;
+
 	@Min(0)
 	@NotNull
 	@Column(name = "yPos")

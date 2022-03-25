@@ -78,7 +78,7 @@ public class SkillControllerTest extends ControllerTest {
 		assertThat(skillRepository.existsById(id)).isTrue();
 
 		assertThat(element)
-				.contains("<h2 id=\"skill-" + id + "-name\" class=\"skill__name\">Skill</h2>")
+				.contains("<span id=\"skill-" + id + "-name\">Skill</span>\n")
 				.contains("style=\"grid-row: 11; grid-column: 12");
 	}
 
