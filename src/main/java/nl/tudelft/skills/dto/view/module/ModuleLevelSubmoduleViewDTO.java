@@ -18,7 +18,6 @@
 package nl.tudelft.skills.dto.view.module;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -44,8 +43,8 @@ public class ModuleLevelSubmoduleViewDTO extends View<Submodule> implements Grou
 	@PostApply
 	private List<ModuleLevelSkillViewDTO> skills;
 
-    @Override
-    public List<? extends BlockView> getBlocks() {
-        return skills;
-    }
+	@Override
+	public List<? extends BlockView> getBlocks() {
+		return skills;
+	}
 }

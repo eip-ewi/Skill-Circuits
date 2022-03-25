@@ -42,36 +42,33 @@
     <h1 th:text="${module.name}"></h1>
 
     <th:block th:with="circuit = ${module},
+                       canCreate = ${@authorisationService.canCreateSkillInEdition(module.edition.id)},
                        canEdit = ${@authorisationService.canEditSkillInEdition(module.edition.id)},
                        canDelete = ${@authorisationService.canDeleteSkillInEdition(module.edition.id)},
+                       groupType = ${'submodule'},
                        blockType = ${'skill'},
                        itemType = ${'task'}">
         <div layout:replace="~{circuit/view :: grid}"></div>
         <div layout:replace="~{circuit/view :: additional}"></div>
     </th:block>
 
-    <div layout:replace="~{skill/create :: form}"></div>
-    <div layout:replace="~{skill/edit :: form}"></div>
-
     <div layout:replace="~{task/create :: form}"></div>
-    <div layout:replace="~{task/edit :: form}"></div>
 
     <th:block th:with="circuit = ${module},
+                       canCreate = ${@authorisationService.canCreateSkillInEdition(module.edition.id)},
                        canEdit = ${@authorisationService.canEditSkillInEdition(module.edition.id)},
                        canDelete = ${@authorisationService.canDeleteSkillInEdition(module.edition.id)},
+                       groupType = ${'submodule'},
                        blockType = ${'skill'},
                        itemType = ${'task'}">
         <script>
             const blockType = "skill";
+            const itemType = "task";
         </script>
         <div layout:replace="~{circuit/view :: script}"></div>
     </th:block>
 
-    <div layout:replace="~{skill/create :: script}"></div>
-    <div layout:replace="~{skill/edit :: script}"></div>
-
     <div layout:replace="~{task/create :: script}"></div>
-    <div layout:replace="~{task/edit :: script}"></div>
     <div layout:replace="~{task/mark :: script}"></div>
 
     <script>

@@ -119,10 +119,10 @@
 
   &__submodule__name{
     color: var(--secondary-green);
+    text-decoration: none;
     &:hover {
       color: var(--primary-green);
       border-color: var(--primary-green);
-
     }
   }
 

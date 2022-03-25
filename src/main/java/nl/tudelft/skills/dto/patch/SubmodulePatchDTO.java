@@ -15,38 +15,39 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view.module;
-
-import java.util.List;
+package nl.tudelft.skills.dto.patch;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import lombok.*;
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.CircuitView;
-import nl.tudelft.skills.dto.view.GroupView;
-import nl.tudelft.skills.model.SCModule;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import nl.tudelft.librador.dto.patch.Patch;
+import nl.tudelft.skills.dto.id.SCModuleIdDTO;
+import nl.tudelft.skills.model.Submodule;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitView {
+public class SubmodulePatchDTO extends Patch<Submodule> {
 
 	@NotNull
 	private Long id;
-	@NotNull
-	private ModelLevelEditionViewDTO edition;
 	@NotBlank
 	private String name;
 	@NotNull
-	@PostApply
-	private List<ModuleLevelSubmoduleViewDTO> submodules;
+	private SCModuleIdDTO module;
 
 	@Override
-	public List<? extends GroupView> getGroups() {
-		return submodules;
+	protected void applyOneToOne() {
+		updateNonNull(name, data::setName);
+		updateNonNullId(module, data::setModule);
+	}
+
+	@Override
+	protected void validate() {
 	}
 }

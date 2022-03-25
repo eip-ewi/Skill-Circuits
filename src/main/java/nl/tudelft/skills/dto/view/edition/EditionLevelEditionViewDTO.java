@@ -24,6 +24,8 @@ import javax.validation.constraints.NotNull;
 
 import lombok.*;
 import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.dto.view.CircuitView;
+import nl.tudelft.skills.dto.view.GroupView;
 import nl.tudelft.skills.model.SCEdition;
 
 @Data
@@ -31,7 +33,7 @@ import nl.tudelft.skills.model.SCEdition;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class EditionLevelEditionViewDTO extends View<SCEdition> {
+public class EditionLevelEditionViewDTO extends View<SCEdition> implements CircuitView {
 
 	@NotNull
 	private Long id;
@@ -41,4 +43,9 @@ public class EditionLevelEditionViewDTO extends View<SCEdition> {
 	private String name;
 	@NotNull
 	private List<EditionLevelModuleViewDTO> modules;
+
+	@Override
+	public List<? extends GroupView> getGroups() {
+		return modules;
+	}
 }

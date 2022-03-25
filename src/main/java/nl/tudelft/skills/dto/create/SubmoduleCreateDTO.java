@@ -15,38 +15,38 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view.module;
+package nl.tudelft.skills.dto.create;
 
-import java.util.List;
-
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.CircuitView;
-import nl.tudelft.skills.dto.view.GroupView;
-import nl.tudelft.skills.model.SCModule;
+import nl.tudelft.librador.dto.create.Create;
+import nl.tudelft.skills.dto.id.SCModuleIdDTO;
+import nl.tudelft.skills.model.Submodule;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitView {
+public class SubmoduleCreateDTO extends Create<Submodule> {
 
-	@NotNull
-	private Long id;
-	@NotNull
-	private ModelLevelEditionViewDTO edition;
 	@NotBlank
 	private String name;
 	@NotNull
-	@PostApply
-	private List<ModuleLevelSubmoduleViewDTO> submodules;
+	private SCModuleIdDTO module;
+	@Min(0)
+	@NotNull
+	private Integer row;
+	@Min(0)
+	@NotNull
+	private Integer column;
 
 	@Override
-	public List<? extends GroupView> getGroups() {
-		return submodules;
+	public Class<Submodule> clazz() {
+		return Submodule.class;
 	}
+
 }

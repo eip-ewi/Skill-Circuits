@@ -1,0 +1,96 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<div th:if="${canCreate}" layout:fragment="form" class="hidden" id="create-block-wrapper">
+
+    <div id="create-block">
+
+        <form id="create-block-form" class="create skill__form">
+
+            <input id="create-block-row" name="row" type="hidden"/>
+            <input id="create-block-column" name="column" type="hidden"/>
+
+            <label for="create-block-name">Name</label>
+            <input id="create-block-name" name="name" type="text" required/>
+
+            <label for="create-block-group" th:text="#{|level.${groupType}|}"></label>
+            <select id="create-block-group" th:name="|${groupType}.id|" required>
+                <option th:each="group : ${circuit.groups}" th:value="${group.id}" th:text="${group.name}"></option>
+            </select>
+
+            <div class="skill__form__buttons">
+                <button type="button" id="create-block-cancel">Cancel</button>
+                <button type="submit">Create</button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script th:if="${canCreate}" layout:fragment="script">
+    function setNewSkillPosition(row, column) {
+        document.getElementById("create-block-row").value = row;
+        document.getElementById("create-block-column").value = column;
+    }
+
+    function clickGhost() {
+        let col = parseInt($(this).css("gridColumn").split(" / ")[0]) - 1;
+        let row = parseInt($(this).css("gridRow").split(" / ")[0]) - 1;
+        setNewSkillPosition(row, col);
+        let form = $("#create-block");
+        form.css("gridColumn", (col + 1).toString());
+        form.css("gridRow", (row + 1).toString());
+        $(this).replaceWith(form);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        $("#create-block-form").submit(function (event) {
+            event.preventDefault();
+            $.post(`/${blockType}`, $("#create-block-form").serialize(), html => {
+                let element = $("<div/>").append(html).children()[0]
+
+                $("#circuit").append(element);
+                $("#create-block-wrapper").append($("#create-block"));
+                $("#create-block-name").val("");
+
+                $(`#${element.id} > .skill__buttons > .block__edit`).click(editBlock);
+                $(`#${element.id} > .skill__buttons > .block__delete`).click(deleteBlock);
+            });
+        });
+
+        $("#create-block-cancel").click(function () {
+            let row = parseInt($("#create-block-row").val());
+            let col = parseInt($("#create-block-column").val());
+            $("#create-block-wrapper").append($("#create-block"));
+            $("#create-block-name").val("");
+            let ghost = $(`<div class="ghost_block" style="grid-row: ${row + 1}; grid-column: ${col + 1}"><span class="fa-solid fa-plus"></span></div>`);
+            ghost.click(clickGhost);
+            $("#circuit").append(ghost);
+        });
+
+        $(".ghost_block").click(clickGhost);
+    });
+</script>
+
+</html>

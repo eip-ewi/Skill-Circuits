@@ -41,7 +41,6 @@ public class SkillPatchDTO extends Patch<Skill> {
 	@NotNull
 	@Builder.Default
 	private Boolean essential = false;
-	@NotNull
 	private SubmoduleIdDTO submodule;
 
 	@Override

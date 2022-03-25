@@ -67,16 +67,17 @@ public class SkillController {
 	 * Deletes a skill.
 	 *
 	 * @param  id The id of the skill to delete
-	 * @return    A redirect to the module page
+	 * @return    A redirect to the correct page
 	 */
 	@DeleteMapping
 	@Transactional
 	@PreAuthorize("@authorisationService.canDeleteSkill(#id)")
-	public String deleteSkill(@RequestParam Long id) {
+	public String deleteSkill(@RequestParam Long id, @RequestParam String page) {
 		Skill skill = skillRepository.findByIdOrThrow(id);
 		skill.getChildren().forEach(c -> c.getParents().remove(skill));
 		skillRepository.delete(skill);
-		return "redirect:/module/" + skill.getSubmodule().getModule().getId();
+		return page.equals("block") ? "redirect:/module/" + skill.getSubmodule().getModule().getId()
+				: "redirect:/edition/" + skill.getSubmodule().getModule().getEdition().getId();
 	}
 
 	/**

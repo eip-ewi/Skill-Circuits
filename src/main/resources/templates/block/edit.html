@@ -1,0 +1,97 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<div th:if="${canEdit}" layout:fragment="form" class="hidden" id="edit-block-wrapper">
+
+    <div id="edit-block">
+
+        <form id="edit-block-form" class="edit skill__form">
+            <input id="edit-block-id" name="id" type="hidden"/>
+
+            <label for="edit-block-name">Name</label>
+            <input id="edit-block-name" name="name" type="text" required/>
+
+            <label for="edit-block-group" th:text="#{|level.${groupType}|}"></label>
+            <select id="edit-block-group" th:name="|${groupType}.id|" required>
+                <option th:each="group : ${circuit.groups}" th:value="${group.id}" th:text="${group.name}"></option>
+            </select>
+
+            <div class="skill__form__buttons">
+                <button type="button" id="edit-block-cancel">Cancel</button>
+                <button type="submit">Edit</button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script th:if="${canEdit}" layout:fragment="script">
+    function editBlock() {
+        $(".skill__name").removeClass("hidden");
+        let blockId = $(this).data("block");
+        let blockName = $(`#block-${blockId}-name`);
+        $("#edit-block-id").val(blockId);
+        $("#edit-block-name").val(blockName.text());
+        $("#edit-block-group").val($(`#block-${blockId}`).data("group"));
+        $(`#block-${blockId}-header`).append($("#edit-block"));
+        blockName.addClass("hidden");
+        $(`#block-${blockId}-group`).addClass("hidden");
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        $("#edit-block-form").submit(function (event) {
+            event.preventDefault();
+            $.ajax({
+                type: "PATCH",
+                url: `/${blockType}`,
+                data: $("#edit-block-form").serialize(),
+                success: () => {
+                    let blockId = $("#edit-block-id").val();
+                    let blockName = $(`#block-${blockId}-name`);
+                    $("#edit-block-wrapper").append($("#edit-block"));
+                    blockName.text($("#edit-block-name").val());
+                    blockName.removeClass("hidden");
+                    let group = $("#edit-block-group option:selected");
+                    let block = $(`#block-${blockId}`);
+                    block.attr("data-group", group.val());
+                    block.data("group", group.val());
+                    let blockGroup = $(`#block-${blockId}-group`);
+                    blockGroup.text(group.text());
+                    blockGroup.removeClass("hidden");
+                }
+            });
+        });
+
+        $(".block__edit").click(editBlock);
+
+        $("#edit-block-cancel").click(function () {
+            let blockId = $("#edit-block-id").val();
+            $("#edit-block-wrapper").append($("#edit-block"));
+            $(`#block-${blockId}-name`).removeClass("hidden");
+            $(`#block-${blockId}-group`).removeClass("hidden");
+        });
+    });
+</script>
+
+</html>

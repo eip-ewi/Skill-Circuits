@@ -15,38 +15,38 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view.module;
+package nl.tudelft.skills.dto.patch;
 
-import java.util.List;
-
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
-import lombok.*;
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.CircuitView;
-import nl.tudelft.skills.dto.view.GroupView;
-import nl.tudelft.skills.model.SCModule;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import nl.tudelft.librador.dto.patch.Patch;
+import nl.tudelft.skills.model.Submodule;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitView {
+public class SubmodulePositionPatchDTO extends Patch<Submodule> {
 
+	@Min(0)
 	@NotNull
-	private Long id;
+	private Integer column;
+	@Min(0)
 	@NotNull
-	private ModelLevelEditionViewDTO edition;
-	@NotBlank
-	private String name;
-	@NotNull
-	@PostApply
-	private List<ModuleLevelSubmoduleViewDTO> submodules;
+	private Integer row;
 
 	@Override
-	public List<? extends GroupView> getGroups() {
-		return submodules;
+	protected void applyOneToOne() {
+		updateNonNull(column, data::setColumn);
+		updateNonNull(row, data::setRow);
+	}
+
+	@Override
+	protected void validate() {
 	}
 }

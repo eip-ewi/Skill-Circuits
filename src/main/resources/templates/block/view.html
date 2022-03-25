@@ -9,20 +9,21 @@
      layout:fragment="block">
     <div th:id="|block-${block.id}-header|" class="skill__header">
         <h2 th:id="|block-${block.id}-name|" class="skill__name" th:text="${block.name}"></h2>
-        <p th:id="|block-${block.id}-group|" class="skill__submodule__name" th:text="${group.name}"></p>
+        <p th:if="${level == 'module'}" th:id="|block-${block.id}-group|" class="skill__submodule__name" th:text="${group.name}"></p>
+        <a th:unless="${level == 'module'}" th:id="|block-${block.id}-group|" class="skill__submodule__name" th:href="@{|/${groupType}/${group.id}|}" th:text="${group.name}"></a>
     </div>
 
     <ul class="tasks">
         <th:block th:each="item : ${block.items}">
             <li layout:replace="~{item/view :: item}"></li>
         </th:block>
-        <li th:if="${canEdit}">
+        <li th:if="${canEdit and level == 'module'}">
             <button th:id="|create-item-${block.id}-button|" class="task__create fa-solid fa-plus" th:data-block="${block.id}"></button>
         </li>
     </ul>
 
     <div class="skill__buttons">
-        <button class="fa-solid fa-pen skill__edit" th:if="${canEdit}"
+        <button class="fa-solid fa-pen block__edit" th:if="${canEdit}"
                 th:data-block="${block.id}"></button>
         <button class="fa-solid fa-trash block__delete" th:if="${canDelete}"
                 th:data-block="${block.id}"></button>

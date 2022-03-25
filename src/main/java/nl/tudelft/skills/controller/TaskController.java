@@ -57,6 +57,7 @@ public class TaskController {
 		model.addAttribute("level", "module");
 		model.addAttribute("item", View.convert(task, TaskViewDTO.class));
 		model.addAttribute("block", task.getSkill());
+		model.addAttribute("canEdit", true);
 		return "item/view";
 	}
 

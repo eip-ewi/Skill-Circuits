@@ -15,38 +15,36 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view.module;
+package nl.tudelft.skills.dto.id;
 
-import java.util.List;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
-import lombok.*;
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.CircuitView;
-import nl.tudelft.skills.dto.view.GroupView;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+import nl.tudelft.librador.dto.id.IdDTO;
 import nl.tudelft.skills.model.SCModule;
+import nl.tudelft.skills.repository.ModuleRepository;
+
+import org.springframework.data.repository.CrudRepository;
 
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitView {
+@EqualsAndHashCode(callSuper = true)
+public class SCModuleIdDTO extends IdDTO<SCModule, Long> {
 
-	@NotNull
-	private Long id;
-	@NotNull
-	private ModelLevelEditionViewDTO edition;
-	@NotBlank
-	private String name;
-	@NotNull
-	@PostApply
-	private List<ModuleLevelSubmoduleViewDTO> submodules;
+	public SCModuleIdDTO(Long id) {
+		super(id);
+	}
 
 	@Override
-	public List<? extends GroupView> getGroups() {
-		return submodules;
+	public Class<? extends CrudRepository<SCModule, Long>> repositoryClass() {
+		return ModuleRepository.class;
 	}
+
+	@Override
+	public Class<? extends SCModule> targetClass() {
+		return SCModule.class;
+	}
+
 }

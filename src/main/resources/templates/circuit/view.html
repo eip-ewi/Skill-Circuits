@@ -2,9 +2,6 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
 <div class="circuit" id="circuit" layout:fragment="grid">
-<!--    <div class="checkpoint" style="grid-row: 2;">Checkpoint example</div>-->
-<!--    <div class="checkpoint" style="grid-row: 5;">Checkpoint example</div>-->
-
     <th:block th:each="group : ${circuit.groups}">
         <th:block th:each="block : ${group.blocks}">
             <div layout:replace="~{block/view :: block}"></div>
@@ -28,15 +25,21 @@
 </div>
 
 <div layout:fragment="additional">
+    <div layout:replace="~{block/create :: form}"></div>
+    <div layout:replace="~{block/edit :: form}"></div>
     <div layout:replace="~{block/delete :: overlay}"></div>
 
+    <div layout:replace="~{item/edit :: form}"></div>
     <div layout:replace="~{item/delete :: overlay}"></div>
 </div>
 
 <th:block layout:fragment="script">
+    <div layout:replace="~{block/create :: script}"></div>
+    <div layout:replace="~{block/edit :: script}"></div>
     <div layout:replace="~{block/view :: script}"></div>
     <div layout:replace="~{block/move :: script}"></div>
     <div layout:replace="~{block/delete :: script}"></div>
 
+    <div layout:replace="~{item/edit :: script}"></div>
     <div layout:replace="~{item/delete :: script}"></div>
 </th:block>

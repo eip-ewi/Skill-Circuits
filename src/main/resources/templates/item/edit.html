@@ -1,0 +1,83 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<div th:if="${canEdit}" layout:fragment="form" class="hidden" id="edit-item-wrapper">
+
+    <div id="edit-item">
+
+        <form id="edit-item-form" class="edit task__form">
+
+            <input id="edit-item-id" name="id" type="hidden"/>
+
+            <input id="edit-item-name" aria-label="Name" name="name" type="text" required/>
+
+            <button type="button" id="edit-item-cancel" class="fa-solid fa-xmark"></button>
+            <button type="submit" class="fa-solid fa-check"></button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script th:if="${canEdit}" layout:fragment="script">
+    function editItem() {
+        $(".task__name").removeClass("hidden");
+        let itemId = $(this).data("item");
+        let itemName = $(`#item-${itemId}-name`);
+        $("#edit-item-id").val(itemId);
+        $("#edit-item-name").val(itemName.text());
+        $(`#item-${itemId}-content`).append($("#edit-item"));
+        itemName.addClass("hidden");
+        $(`#item-${itemId}-buttons`).addClass("hidden");
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        $("#edit-item-form").submit(function (event) {
+            event.preventDefault();
+            $.ajax({
+                type: "PATCH",
+                url: `/${itemType}`,
+                data: $("#edit-item-form").serialize(),
+                success: () => {
+                    let itemId = $("#edit-item-id").val();
+                    let itemName = $(`#item-${itemId}-name`);
+                    $("#edit-item-wrapper").append($("#edit-item"));
+                    itemName.removeClass("hidden");
+                    itemName.text($("#edit-item-name").val());
+                    $(`#item-${itemId}-buttons`).removeClass("hidden");
+                }
+            });
+        });
+
+        $(".item__edit").click(editItem);
+
+        $("#edit-item-cancel").click(function () {
+            let itemId = $("#edit-item-id").val();
+            $("#edit-item-wrapper").append($("#edit-item"));
+            $(`#item-${itemId}-name`).removeClass("hidden");
+            $(`#item-${itemId}-buttons`).removeClass("hidden");
+        });
+    });
+</script>
+
+</html>

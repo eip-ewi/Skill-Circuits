@@ -67,14 +67,14 @@ public class TaskControllerTest extends ControllerTest {
 				.andExpect(status().isOk())
 				.andReturn().getResponse().getContentAsString();
 
-		Matcher idMatcher = Pattern.compile("id=\"task-(\\d+)\"").matcher(element);
+		Matcher idMatcher = Pattern.compile("id=\"item-(\\d+)\"").matcher(element);
 		assertThat(idMatcher.find()).isTrue();
 
 		Long id = Long.parseLong(idMatcher.group(1));
 		assertThat(taskRepository.existsById(id)).isTrue();
 
 		assertThat(element)
-				.contains("<span id=\"task-" + id + "-name\" class=\"task__name\">Task</span>");
+				.contains("<span id=\"item-" + id + "-name\" class=\"task__name\">Task</span>");
 	}
 
 	@Test
