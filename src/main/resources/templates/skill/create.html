@@ -37,6 +37,12 @@
                 <option th:each="submodule : ${module.submodules}" th:value="${submodule.id}" th:text="${submodule.name}"></option>
             </select>
 
+            <label for="essential-checkbox">Essential
+                <sup class="info_icon fa-info-circle">
+                    <span class="info_icon__text">Mark optional materials as non-essential.</span></sup>
+            </label>
+            <input style="max-width: 20px" type="checkbox" id="essential-checkbox" name="essential" value="true" checked>
+
             <div class="skill__form__buttons">
                 <button type="button" id="create-skill-cancel">Cancel</button>
                 <button type="submit">Create Skill</button>
@@ -72,6 +78,7 @@
         $("#create-skill-cancel").click(function () {
             $("#create-skill-wrapper").append($("#create-skill"));
             $("#create-skill-name").val("");
+            $("#essential-checkbox").prop('checked', true);
         });
 
         $(".ghost_skill").click(function () {

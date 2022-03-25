@@ -39,11 +39,15 @@ public class SkillPatchDTO extends Patch<Skill> {
 	@NotBlank
 	private String name;
 	@NotNull
+	@Builder.Default
+	private Boolean essential = false;
+	@NotNull
 	private SubmoduleIdDTO submodule;
 
 	@Override
 	protected void applyOneToOne() {
 		updateNonNull(name, data::setName);
+		updateNonNull(essential, data::setEssential);
 		updateNonNullId(submodule, data::setSubmodule);
 	}
 

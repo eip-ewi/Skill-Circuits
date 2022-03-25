@@ -35,6 +35,12 @@
                 <option th:each="submodule : ${module.submodules}" th:value="${submodule.id}" th:text="${submodule.name}"></option>
             </select>
 
+            <label for="edit-essential-checkbox">Essential
+                <sup class="info_icon fa-info-circle">
+                    <span class="info_icon__text">Mark optional materials as non-essential.</span></sup>
+            </label>
+            <input style="max-width: 20px" type="checkbox" id="edit-essential-checkbox" name="essential">
+
             <div class="skill__form__buttons">
                 <button type="button" id="edit-skill-cancel">Cancel</button>
                 <button type="submit">Edit Skill</button>
@@ -53,9 +59,12 @@
         let skillName = $(`#skill-${skillId}-name`);
         $("#edit-skill-id").val(skillId);
         $("#edit-skill-name").val(skillName.text());
-        $("#edit-skill-submodule").val($(`#skill-${skillId}`).data("submodule"));
+        let skill = $(`#skill-${skillId}`);
+        $("#edit-skill-submodule").val(skill.data("submodule"));
         $(`#skill-${skillId}-header`).append($("#edit-skill"));
         skillName.addClass("hidden");
+        $("#edit-essential-checkbox").prop('checked', skill.data("essential"));
+
     }
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -71,7 +80,12 @@
                     $("#edit-skill-wrapper").append($("#edit-skill"));
                     skillName.removeClass("hidden");
                     skillName.text($("#edit-skill-name").val());
-                    $(`#skill-${skillId}`).data("submodule", $("#edit-skill-submodule").val())
+                    let skill = $(`#skill-${skillId}`);
+                    skill.data("submodule", $("#edit-skill-submodule").val());
+
+                    let essential = $("#edit-essential-checkbox").prop("checked");
+                    skill.data("essential", essential);
+                    skill.attr("data-essential",essential);
                 }
             });
         });

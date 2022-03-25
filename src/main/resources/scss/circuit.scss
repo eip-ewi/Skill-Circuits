@@ -12,13 +12,19 @@
 
 .skill {
   background-color: var(--primary-light);
-  border: 1px solid var(--primary-dark);
+  --border-colour: var(--primary-dark);
+  border: 1px solid var(--border-colour);
   padding: 1rem;
   position: relative;
   z-index: 10;
 
   &.highlighted{
-    outline: 2px solid var(--primary-green)
+    --border-colour: var(--primary-green);
+    outline: 2px solid var(--border-colour);
+  }
+
+  &[data-essential="false"] {
+    --border-colour: #FF00FF;
   }
 
   &.draggable {
@@ -68,6 +74,8 @@
       background-color: var(--primary-light);
       border: 1px solid var(--primary-dark);
       padding: 1rem;
+      z-index: 10;
+      position: relative;
     }
 
     &.edit {
@@ -278,3 +286,33 @@
   transform: translateY(1rem);
   z-index: 10;
 }
+
+.info_icon {
+  position: relative;
+  display: inline-block;
+
+  &:hover .info_icon__text {
+    transform: scale(1, 1);
+  }
+  &__text {
+    transform: scale(0, 0);
+    transform-origin: top left;
+    transition: transform 150ms ease-in-out;
+    width: 120px;
+    background-color: var(--grey-700);
+    color: var(--primary-dark);
+    text-align: center;
+    padding: 0.2rem;
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+  }
+
+}
+@media(prefers-reduced-motion) {
+  .info_icon__text {
+    transition: none;
+  }
+}
+

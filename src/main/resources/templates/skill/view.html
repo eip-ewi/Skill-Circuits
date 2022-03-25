@@ -25,11 +25,14 @@
      th:draggable="${@authorisationService.canEditSkillInEdition(module.edition.id)}"
      th:classappend="${@authorisationService.canEditSkillInEdition(module.edition.id)} ? 'draggable' : ''"
      th:data-submodule="${submodule.id}"
+     th:data-essential="${skill.essential}"
      th:with="childIds = ${skill instanceof T(nl.tudelft.skills.model.Skill)} ? ${{}} : ${skill.childIds}"
      th:data-children="${childIds}"
      layout:fragment="block">
     <div th:id="|skill-${skill.id}-header|" class="skill__header">
-        <h2 th:id="|skill-${skill.id}-name|" class="skill__name" th:text="${skill.name}"></h2>
+        <h2 class="skill__name">
+            <span th:id="|skill-${skill.id}-name|" th:text="${skill.name}"></span>
+        </h2>
         <p th:id="|skill-${skill.id}-submodule|" class="skill__submodule__name" th:text="${submodule.name}"></p>
     </div>
 
