@@ -42,6 +42,7 @@ public class EditionLevelEditionViewDTO extends View<SCEdition> implements Circu
 	@NotBlank
 	private String name;
 	@NotNull
+	@PostApply
 	private List<EditionLevelModuleViewDTO> modules;
 
 	@Override

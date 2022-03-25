@@ -22,8 +22,10 @@ import nl.tudelft.skills.dto.create.SubmoduleCreateDTO;
 import nl.tudelft.skills.dto.patch.SubmodulePatchDTO;
 import nl.tudelft.skills.dto.patch.SubmodulePositionPatchDTO;
 import nl.tudelft.skills.dto.view.edition.EditionLevelSubmoduleViewDTO;
+import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Submodule;
 import nl.tudelft.skills.repository.SubmoduleRepository;
+import nl.tudelft.skills.service.SkillService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -37,11 +39,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("submodule")
 public class SubmoduleController {
 
-	private SubmoduleRepository submoduleRepository;
+	private final SubmoduleRepository submoduleRepository;
+	private final SkillService skillService;
 
 	@Autowired
-	public SubmoduleController(SubmoduleRepository submoduleRepository) {
+	public SubmoduleController(SubmoduleRepository submoduleRepository, SkillService skillService) {
 		this.submoduleRepository = submoduleRepository;
+		this.skillService = skillService;
 	}
 
 	/**
@@ -75,6 +79,7 @@ public class SubmoduleController {
 	@PreAuthorize("@authorisationService.canDeleteSubmodule(#id)")
 	public String deleteSubmodule(@RequestParam Long id, @RequestParam String page) {
 		Submodule submodule = submoduleRepository.findByIdOrThrow(id);
+		submodule.getSkills().stream().map(Skill::getId).forEach(skillService::deleteSkill);
 		submoduleRepository.delete(submodule);
 		return "redirect:/edition/" + submodule.getModule().getEdition().getId(); // TODO redirect to track page
 	}

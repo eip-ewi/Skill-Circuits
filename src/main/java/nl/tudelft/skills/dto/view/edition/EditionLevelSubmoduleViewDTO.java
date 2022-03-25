@@ -45,9 +45,27 @@ public class EditionLevelSubmoduleViewDTO extends View<Submodule> implements Blo
 	private Integer column;
 	@NotNull
 	private List<EditionLevelSkillViewDTO> skills;
+	@NotNull
+	private List<Long> childIds;
+
+	@Override
+	public void postApply() {
+		super.postApply();
+		this.childIds = data.getSkills().stream()
+				.flatMap(s -> s.getChildren().stream())
+				.map(s -> s.getSubmodule().getId())
+				.filter(id -> !this.id.equals(id))
+				.distinct().toList();
+	}
 
 	@Override
 	public List<? extends ItemView> getItems() {
 		return skills;
 	}
+
+	@Override
+	public List<Long> getChildIds() {
+		return childIds;
+	}
+
 }

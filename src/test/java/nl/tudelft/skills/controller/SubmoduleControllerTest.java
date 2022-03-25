@@ -27,11 +27,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
-import nl.tudelft.skills.dto.patch.SkillPatchDTO;
-import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.repository.SkillRepository;
+import nl.tudelft.skills.dto.id.SCModuleIdDTO;
+import nl.tudelft.skills.dto.patch.SubmodulePatchDTO;
+import nl.tudelft.skills.dto.patch.SubmodulePositionPatchDTO;
+import nl.tudelft.skills.model.Submodule;
+import nl.tudelft.skills.repository.SubmoduleRepository;
 import nl.tudelft.skills.service.SkillService;
 
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -48,24 +48,24 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @AutoConfigureMockMvc
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
-public class SkillControllerTest extends ControllerTest {
+public class SubmoduleControllerTest extends ControllerTest {
 
-	private final SkillController skillController;
-	private final SkillRepository skillRepository;
+	private final SubmoduleController submoduleController;
+	private final SubmoduleRepository submoduleRepository;
 
 	@Autowired
-	public SkillControllerTest(SkillRepository skillRepository, SkillService skillService) {
-		this.skillController = new SkillController(skillRepository, skillService);
-		this.skillRepository = skillRepository;
+	public SubmoduleControllerTest(SubmoduleRepository submoduleRepository, SkillService skillService) {
+		this.submoduleController = new SubmoduleController(submoduleRepository, skillService);
+		this.submoduleRepository = submoduleRepository;
 	}
 
 	@Test
 	@WithUserDetails("admin")
-	void createSkill() throws Exception {
-		String element = mvc.perform(post("/skill").with(csrf())
+	void createSubmodule() throws Exception {
+		String element = mvc.perform(post("/submodule").with(csrf())
 				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
-						new BasicNameValuePair("name", "Skill"),
-						new BasicNameValuePair("submodule.id", Long.toString(db.submoduleCases.getId())),
+						new BasicNameValuePair("name", "Submodule"),
+						new BasicNameValuePair("module.id", Long.toString(db.moduleProofTechniques.getId())),
 						new BasicNameValuePair("row", "10"),
 						new BasicNameValuePair("column", "11")))))
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
@@ -76,51 +76,52 @@ public class SkillControllerTest extends ControllerTest {
 		assertThat(idMatcher.find()).isTrue();
 
 		Long id = Long.parseLong(idMatcher.group(1));
-		assertThat(skillRepository.existsById(id)).isTrue();
+		assertThat(submoduleRepository.existsById(id)).isTrue();
 
 		assertThat(element)
-				.contains("<span id=\"block-" + id + "-name\">Skill</span>")
+				.contains("<span id=\"block-" + id + "-name\">Submodule</span>")
 				.contains("style=\"grid-row: 11; grid-column: 12");
 	}
 
 	@Test
-	void patchSkill() {
-		skillController.patchSkill(SkillPatchDTO.builder()
-				.id(db.skillVariables.getId())
+	void patchSubmodule() {
+		submoduleController.patchSubmodule(SubmodulePatchDTO.builder()
+				.id(db.submoduleCases.getId())
 				.name("Updated")
-				.submodule(new SubmoduleIdDTO(db.submoduleCases.getId()))
+				.module(new SCModuleIdDTO(db.moduleProofTechniques.getId()))
 				.build());
 
-		Skill skill = skillRepository.findByIdOrThrow(db.skillVariables.getId());
-		assertThat(skill.getName()).isEqualTo("Updated");
-		assertThat(skill.getSubmodule()).isEqualTo(db.submoduleCases);
+		Submodule submodule = submoduleRepository.findByIdOrThrow(db.submoduleCases.getId());
+		assertThat(submodule.getName()).isEqualTo("Updated");
+		assertThat(submodule.getModule()).isEqualTo(db.moduleProofTechniques);
 	}
 
 	@Test
-	void updateSkillPosition() {
-		skillController.updateSkillPosition(db.skillVariables.getId(), SkillPositionPatchDTO.builder()
-				.column(10)
-				.row(11)
-				.build());
+	void updateSubmodulePosition() {
+		submoduleController.updateSubmodulePosition(db.submoduleCases.getId(),
+				SubmodulePositionPatchDTO.builder()
+						.column(10)
+						.row(11)
+						.build());
 
-		Skill skill = skillRepository.findByIdOrThrow(db.skillVariables.getId());
-		assertThat(skill.getColumn()).isEqualTo(10);
-		assertThat(skill.getRow()).isEqualTo(11);
+		Submodule submodule = submoduleRepository.findByIdOrThrow(db.submoduleCases.getId());
+		assertThat(submodule.getColumn()).isEqualTo(10);
+		assertThat(submodule.getRow()).isEqualTo(11);
 	}
 
 	@Test
 	void deleteSkill() {
-		skillController.deleteSkill(db.skillVariables.getId(), "block");
-		assertThat(skillRepository.existsById(db.skillVariables.getId())).isFalse();
+		submoduleController.deleteSubmodule(db.submoduleCases.getId(), "block");
+		assertThat(submoduleRepository.existsById(db.submoduleCases.getId())).isFalse();
 	}
 
 	@Test
 	void endpointsAreProtected() throws Exception {
-		mvc.perform(patch("/skill/{id}", db.skillVariables.getId()))
+		mvc.perform(patch("/submodule/{id}", db.submoduleCases.getId()))
 				.andExpect(status().isForbidden());
-		mvc.perform(post("/skill"))
+		mvc.perform(post("/submodule"))
 				.andExpect(status().isForbidden());
-		mvc.perform(delete("/skill?id=1"))
+		mvc.perform(delete("/submodule?id=1"))
 				.andExpect(status().isForbidden());
 	}
 

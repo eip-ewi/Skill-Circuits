@@ -211,6 +211,58 @@ public class AuthorisationServiceTest {
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canCreateSubmoduleInEdition(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canCreateSubmoduleInEdition(db.edition.getId())).isEqualTo(expected);
+	}
+
+	@Transactional
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canCreateSubmodule(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canCreateSubmodule(db.moduleProofTechniques.getId()))
+				.isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canEditSubmoduleInEdition(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canEditSubmoduleInEdition(db.edition.getId())).isEqualTo(expected);
+	}
+
+	@Transactional
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canEditSubmodule(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canEditSubmodule(db.submoduleCases.getId())).isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canDeleteSubmoduleInEdition(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canDeleteSubmoduleInEdition(db.edition.getId())).isEqualTo(expected);
+	}
+
+	@Transactional
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canDeleteSubmodule(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canDeleteSubmodule(db.submoduleCases.getId())).isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canCreateSkillInEdition(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canCreateSkillInEdition(db.edition.getId())).isEqualTo(expected);

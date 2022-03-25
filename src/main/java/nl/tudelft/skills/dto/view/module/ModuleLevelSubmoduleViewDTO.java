@@ -42,6 +42,8 @@ public class ModuleLevelSubmoduleViewDTO extends View<Submodule> implements Grou
 	@NotNull
 	@PostApply
 	private List<ModuleLevelSkillViewDTO> skills;
+	@NotNull
+	private List<Long> childIds;
 
 	@Override
 	public List<? extends BlockView> getBlocks() {

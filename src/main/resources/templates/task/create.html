@@ -60,8 +60,8 @@
                 $(".task__create").removeClass("hidden");
                 $("#create-task-wrapper").append($("#create-task"));
 
-                $(`#${element.id} > .task__buttons > .task__edit`).click(editTask);
-                $(`#${element.id} > .task__buttons > .item__delete`).click(deleteTask);
+                $(`#${element.id} > .task__buttons > .item__edit`).click(editItem);
+                $(`#${element.id} > .task__buttons > .item__delete`).click(deleteItem);
             });
         });
 

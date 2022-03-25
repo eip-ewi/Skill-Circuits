@@ -35,6 +35,17 @@
                 <option th:each="group : ${circuit.groups}" th:value="${group.id}" th:text="${group.name}"></option>
             </select>
 
+            <th:block th:if="${level == 'module'}">
+                <div>
+                    <label for="edit-essential-checkbox">Essential</label>
+                    <div class="info_icon">
+                        <sup class="fa-solid fa-info-circle"></sup>
+                        <span class="info_icon__text">Mark optional materials as non-essential.</span>
+                    </div>
+                </div>
+                <input style="max-width: 20px" type="checkbox" id="edit-essential-checkbox" name="essential" value="true" checked>
+            </th:block>
+
             <div class="skill__form__buttons">
                 <button type="button" id="edit-block-cancel">Cancel</button>
                 <button type="submit">Edit</button>
@@ -53,10 +64,16 @@
         let blockName = $(`#block-${blockId}-name`);
         $("#edit-block-id").val(blockId);
         $("#edit-block-name").val(blockName.text());
-        $("#edit-block-group").val($(`#block-${blockId}`).data("group"));
+
+        let block = $(`#block-${blockId}`);
+        $("#edit-block-group").val(block.data("group"));
         $(`#block-${blockId}-header`).append($("#edit-block"));
         blockName.addClass("hidden");
         $(`#block-${blockId}-group`).addClass("hidden");
+
+        if (blockType === "skill") {
+            $("#edit-essential-checkbox").prop("checked", block.data("essential"));
+        }
     }
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -79,6 +96,12 @@
                     let blockGroup = $(`#block-${blockId}-group`);
                     blockGroup.text(group.text());
                     blockGroup.removeClass("hidden");
+
+                    if (blockType === "skill") {
+                        let essential = $("#edit-essential-checkbox").prop("checked");
+                        block.data("essential", essential);
+                        block.attr("data-essential",essential);
+                    }
                 }
             });
         });

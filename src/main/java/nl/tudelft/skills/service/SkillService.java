@@ -15,14 +15,35 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view;
+package nl.tudelft.skills.service;
 
-import java.util.List;
+import nl.tudelft.skills.model.Skill;
+import nl.tudelft.skills.repository.SkillRepository;
 
-public interface BlockView {
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-	List<? extends ItemView> getItems();
+@Service
+public class SkillService {
 
-	List<Long> getChildIds();
+	private final SkillRepository skillRepository;
+
+	@Autowired
+	public SkillService(SkillRepository skillRepository) {
+		this.skillRepository = skillRepository;
+	}
+
+	/**
+	 * Deletes a skill.
+	 *
+	 * @param  id The id of the skill
+	 * @return    The deleted skill
+	 */
+	public Skill deleteSkill(Long id) {
+		Skill skill = skillRepository.findByIdOrThrow(id);
+		skill.getChildren().forEach(c -> c.getParents().remove(skill));
+		skillRepository.delete(skill);
+		return skill;
+	}
 
 }

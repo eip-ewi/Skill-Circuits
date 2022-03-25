@@ -39,7 +39,7 @@
 </div>
 
 <script th:if="${canEdit}" layout:fragment="script">
-    function deleteTask() {
+    function deleteItem() {
         toggleOverlay("delete-item-overlay");
         let taskId = $(this).data("item");
         $("#delete-item-id").val(taskId);
@@ -47,7 +47,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-        $(".item__delete").click(deleteTask);
+        $(".item__delete").click(deleteItem);
     });
 </script>
 

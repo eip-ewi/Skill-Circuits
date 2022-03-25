@@ -56,7 +56,7 @@ public class TestDatabaseLoader {
 
 	private SCCourse scCourse;
 	private SCEdition editionRL;
-	private SCModule moduleProofTechniques;
+	public SCModule moduleProofTechniques;
 	private SCPerson person;
 
 	public Submodule submoduleLogicBasics;

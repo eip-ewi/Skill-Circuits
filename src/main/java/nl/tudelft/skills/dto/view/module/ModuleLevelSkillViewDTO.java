@@ -56,9 +56,12 @@ public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
 		this.childIds = data.getChildren().stream().map(Skill::getId).toList();
 	}
 
-    @Override
-    public List<? extends ItemView> getItems() {
-        return tasks;
-    }
+	@Override
+	public List<? extends ItemView> getItems() {
+		return tasks;
+	}
 
+	public List<Long> getChildIds() {
+		return childIds;
+	}
 }

@@ -40,6 +40,7 @@ public class EditionLevelModuleViewDTO extends View<SCModule> implements GroupVi
 	@NotBlank
 	private String name;
 	@NotNull
+	@PostApply
 	private List<EditionLevelSubmoduleViewDTO> submodules;
 
 	@Override

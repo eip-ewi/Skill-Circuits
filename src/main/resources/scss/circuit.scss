@@ -295,14 +295,15 @@
     transform: scale(1, 1);
   }
   &__text {
+    color: var(--primary-dark);
+    background-color: var(--grey-700);
+    padding: 0.2rem;
+    font-size: 0.8rem;
+    text-align: center;
     transform: scale(0, 0);
     transform-origin: top left;
     transition: transform 150ms ease-in-out;
     width: 120px;
-    background-color: var(--grey-700);
-    color: var(--primary-dark);
-    text-align: center;
-    padding: 0.2rem;
 
     /* Position the tooltip */
     position: absolute;

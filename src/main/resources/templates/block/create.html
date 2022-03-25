@@ -37,6 +37,17 @@
                 <option th:each="group : ${circuit.groups}" th:value="${group.id}" th:text="${group.name}"></option>
             </select>
 
+            <th:block th:if="${level == 'module'}">
+                <div>
+                    <label for="essential-checkbox">Essential</label>
+                    <div class="info_icon">
+                        <sup class="fa-solid fa-info-circle"></sup>
+                        <span class="info_icon__text">Mark optional materials as non-essential.</span>
+                    </div>
+                </div>
+                <input style="max-width: 20px" type="checkbox" id="essential-checkbox" name="essential" value="true" checked>
+            </th:block>
+
             <div class="skill__form__buttons">
                 <button type="button" id="create-block-cancel">Cancel</button>
                 <button type="submit">Create</button>
@@ -76,6 +87,9 @@
 
                 $(`#${element.id} > .skill__buttons > .block__edit`).click(editBlock);
                 $(`#${element.id} > .skill__buttons > .block__delete`).click(deleteBlock);
+                if (blockType === "skill") {
+                    $(`#${element.id} > .tasks > li > .task__create`).click(createTask);
+                }
             });
         });
 
@@ -87,6 +101,10 @@
             let ghost = $(`<div class="ghost_block" style="grid-row: ${row + 1}; grid-column: ${col + 1}"><span class="fa-solid fa-plus"></span></div>`);
             ghost.click(clickGhost);
             $("#circuit").append(ghost);
+
+            if (blockType === "skill") {
+                $("#essential-checkbox").prop('checked', true);
+            }
         });
 
         $(".ghost_block").click(clickGhost);
