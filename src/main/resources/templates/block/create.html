@@ -88,8 +88,8 @@
                 let groupName = $(`#${element.id} > .block__header > .block__group__name`);
                 groupName.mouseenter(mouseEnterGroup);
                 groupName.mouseleave(mouseLeaveGroup);
-                $(`#${element.id} > .skill__buttons > .block__edit`).click(editBlock);
-                $(`#${element.id} > .skill__buttons > .block__delete`).click(deleteBlock);
+                $(`#${element.id} > .block__buttons > .block__edit`).click(editBlock);
+                $(`#${element.id} > .block__buttons > .block__delete`).click(deleteBlock);
                 if (blockType === "skill") {
                     $(`#${element.id} > .items > li > .item__create`).click(createTask);
                 }

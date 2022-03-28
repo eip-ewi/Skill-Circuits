@@ -39,10 +39,9 @@ public class TaskViewDTO extends View<Task> implements ItemView {
 	@NotBlank
 	private String name;
 	private TaskType type;
-
 	@Min(0)
 	private Integer time;
-
+	private String link;
 	@Builder.Default
 	private boolean completed = false;
 

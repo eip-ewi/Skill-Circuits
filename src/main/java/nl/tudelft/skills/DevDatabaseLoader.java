@@ -331,7 +331,8 @@ public class DevDatabaseLoader {
 		taskRepository.save(Task.builder().name("TA Check 2").skill(skillContradictionPractice).build());
 
 		taskRepository.save(Task.builder().name("Read chapter 2.5").skill(skillNegateImplications).build());
-		taskRepository.save(Task.builder().name("Watch video 1").skill(skillContrapositivePractice).build());
+		taskRepository.save(Task.builder().name("Watch video 1").skill(skillContrapositivePractice)
+				.link("https://www.youtube.com/watch?v=dQw4w9WgXcQ").build());
 		taskRepository
 				.save(Task.builder().name("Do exercise 2.5a").skill(skillContrapositivePractice).build());
 

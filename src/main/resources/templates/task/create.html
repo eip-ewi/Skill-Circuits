@@ -28,7 +28,12 @@
 
             <input id="create-task-skill" name="skill.id" type="hidden"/>
 
-            <input id="create-task-name" aria-label="Name" name="name" type="text" required/>
+            <input id="create-task-name" placeholder="Task name" aria-label="Name" name="name" type="text" required/>
+
+            <div class="item__form__url">
+                <button id="create-task-link-button" type="button" class="fa-solid fa-link"></button>
+                <input id="create-task-link" placeholder="URL" aria-label="Link" name="link" type="url" class="hidden"/>
+            </div>
 
             <button type="button" id="create-task-cancel" class="fa-solid fa-xmark"></button>
             <button type="submit" class="fa-solid fa-check"></button>
@@ -41,10 +46,16 @@
 
 <script th:if="${@authorisationService.canEditSkillInEdition(module.edition.id)}" layout:fragment="script">
     function createTask() {
+        $(".task__create").removeClass("hidden");
+
         let skillId = $(this).data("block");
         $("#create-task-skill").val(skillId);
 
+        let link = $("#create-task-link");
+
         $("#create-task-name").val("");
+        link.addClass("hidden");
+        link.val("");
         $(this).addClass("hidden");
         $(this).after($("#create-task"));
     }
@@ -70,6 +81,12 @@
         $("#create-task-cancel").click(function () {
             $(".item__create").removeClass("hidden");
             $("#create-task-wrapper").append($("#create-task"));
+        });
+
+        $("#create-task-link-button").click(function () {
+            let link = $("#create-task-link");
+            link.val("");
+            link.toggleClass("hidden");
         });
     });
 </script>

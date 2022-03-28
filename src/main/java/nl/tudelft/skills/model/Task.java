@@ -52,6 +52,8 @@ public class Task {
 	@Min(0)
 	private Integer time = 0;
 
+	private String link;
+
 	@NotNull
 	@Builder.Default
 	@ToString.Exclude
