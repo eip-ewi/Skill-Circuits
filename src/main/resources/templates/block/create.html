@@ -24,7 +24,7 @@
 
     <div id="create-block">
 
-        <form id="create-block-form" class="create skill__form">
+        <form id="create-block-form" class="create block__form">
 
             <input id="create-block-row" name="row" type="hidden"/>
             <input id="create-block-column" name="column" type="hidden"/>
@@ -48,7 +48,7 @@
                 <input style="max-width: 20px" type="checkbox" id="essential-checkbox" name="essential" value="true" checked>
             </th:block>
 
-            <div class="skill__form__buttons">
+            <div class="block__form__buttons">
                 <button type="button" id="create-block-cancel">Cancel</button>
                 <button type="submit">Create</button>
             </div>
@@ -60,7 +60,7 @@
 </div>
 
 <script th:if="${canCreate}" layout:fragment="script">
-    function setNewSkillPosition(row, column) {
+    function setNewBlockPosition(row, column) {
         document.getElementById("create-block-row").value = row;
         document.getElementById("create-block-column").value = column;
     }
@@ -68,7 +68,7 @@
     function clickGhost() {
         let col = parseInt($(this).css("gridColumn").split(" / ")[0]) - 1;
         let row = parseInt($(this).css("gridRow").split(" / ")[0]) - 1;
-        setNewSkillPosition(row, col);
+        setNewBlockPosition(row, col);
         let form = $("#create-block");
         form.css("gridColumn", (col + 1).toString());
         form.css("gridRow", (row + 1).toString());
@@ -85,10 +85,13 @@
                 $("#create-block-wrapper").append($("#create-block"));
                 $("#create-block-name").val("");
 
-                $(`#${element.id} > .skill__buttons > .block__edit`).click(editBlock);
-                $(`#${element.id} > .skill__buttons > .block__delete`).click(deleteBlock);
+                $(`#${element.id} > .block__buttons > .block__edit`).click(editBlock);
+                $(`#${element.id} > .block__buttons > .block__delete`).click(deleteBlock);
+                let groupName = $(`#${element.id} > .block__header > .block__group__name`);
+                groupName.mouseenter(mouseEnterGroup);
+                groupName.mouseleave(mouseLeaveGroup);
                 if (blockType === "skill") {
-                    $(`#${element.id} > .tasks > li > .task__create`).click(createTask);
+                    $(`#${element.id} > .items > li > .item__create`).click(createTask);
                 }
             });
         });

@@ -25,7 +25,7 @@
     let circuit = document.getElementById("circuit");
 
     document.addEventListener("dragstart", function (event) {
-        if (event.target.classList.contains("skill")) {
+        if (event.target.classList.contains("block")) {
             event.dataTransfer.setData('text/plain', event.target.id);
             event.dataTransfer.dropEffect = "move";
             event.target.style.opacity = .5;
@@ -34,7 +34,7 @@
         }
     }, false);
     document.addEventListener("dragend", function (event) {
-        if (event.target.classList.contains("skill")) {
+        if (event.target.classList.contains("block")) {
             event.target.style.opacity = "";
             draggingSkill = false;
             circuit.classList.remove("editing");
@@ -90,7 +90,7 @@
             // Update amount of columns and rows
             let newColumns = 0;
             let newRows = 0
-            for (let skill of document.getElementsByClassName("skill")) {
+            for (let skill of document.getElementsByClassName("block")) {
                 let col = parseInt(skill.style.gridColumn.split(" / ")[0]);
                 if (col > newColumns) newColumns = col;
                 let row = parseInt(skill.style.gridRow.split(" / ")[0]);

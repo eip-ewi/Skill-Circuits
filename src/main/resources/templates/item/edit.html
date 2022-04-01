@@ -24,7 +24,7 @@
 
     <div id="edit-item">
 
-        <form id="edit-item-form" class="edit task__form">
+        <form id="edit-item-form" class="edit item__form">
 
             <input id="edit-item-id" name="id" type="hidden"/>
 
@@ -41,7 +41,7 @@
 
 <script th:if="${canEdit}" layout:fragment="script">
     function editItem() {
-        $(".task__name").removeClass("hidden");
+        $(".item__name").removeClass("hidden");
         let itemId = $(this).data("item");
         let itemName = $(`#item-${itemId}-name`);
         $("#edit-item-id").val(itemId);

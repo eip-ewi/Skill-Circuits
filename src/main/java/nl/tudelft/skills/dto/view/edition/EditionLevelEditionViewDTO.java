@@ -18,6 +18,8 @@
 package nl.tudelft.skills.dto.view.edition;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -27,6 +29,8 @@ import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.CircuitView;
 import nl.tudelft.skills.dto.view.GroupView;
 import nl.tudelft.skills.model.SCEdition;
+
+import org.springframework.data.util.Pair;
 
 @Data
 @Builder
@@ -48,5 +52,11 @@ public class EditionLevelEditionViewDTO extends View<SCEdition> implements Circu
 	@Override
 	public List<? extends GroupView> getGroups() {
 		return modules;
+	}
+
+	@Override
+	public Set<Pair<Integer, Integer>> getFilledPositions() {
+		return modules.stream().flatMap(m -> m.getSubmodules().stream())
+				.map(s -> Pair.of(s.getColumn(), s.getRow())).collect(Collectors.toSet());
 	}
 }

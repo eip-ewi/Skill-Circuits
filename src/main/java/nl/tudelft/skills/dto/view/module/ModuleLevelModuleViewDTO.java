@@ -18,6 +18,8 @@
 package nl.tudelft.skills.dto.view.module;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -27,6 +29,8 @@ import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.CircuitView;
 import nl.tudelft.skills.dto.view.GroupView;
 import nl.tudelft.skills.model.SCModule;
+
+import org.springframework.data.util.Pair;
 
 @Data
 @Builder
@@ -48,5 +52,11 @@ public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitV
 	@Override
 	public List<? extends GroupView> getGroups() {
 		return submodules;
+	}
+
+	@Override
+	public Set<Pair<Integer, Integer>> getFilledPositions() {
+		return submodules.stream().flatMap(m -> m.getSkills().stream())
+				.map(s -> Pair.of(s.getColumn(), s.getRow())).collect(Collectors.toSet());
 	}
 }

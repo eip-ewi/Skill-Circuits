@@ -30,13 +30,13 @@
         let circuit = document.getElementById("circuit");
 
         let skillsOnLevel = {};
-        $(".skill").each(function (i, skill) {
+        $(".block").each(function (i, skill) {
             let skillRow = parseInt($(skill).css("gridRow").split(" / ")[0]);
             if (skillsOnLevel[skillRow] === undefined) skillsOnLevel[skillRow] = [];
             skillsOnLevel[skillRow].push(skill);
         });
 
-        for (let skill of document.getElementsByClassName("skill")) {
+        for (let skill of document.getElementsByClassName("block")) {
             let skillCol = parseInt(skill.style.gridColumn.split(" / ")[0]);
             let skillRow = parseInt(skill.style.gridRow.split(" / ")[0]);
 

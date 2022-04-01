@@ -18,9 +18,14 @@
 package nl.tudelft.skills.dto.view;
 
 import java.util.List;
+import java.util.Set;
+
+import org.springframework.data.util.Pair;
 
 public interface CircuitView {
 
 	List<? extends GroupView> getGroups();
+
+	Set<Pair<Integer, Integer>> getFilledPositions();
 
 }

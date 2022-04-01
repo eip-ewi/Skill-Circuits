@@ -33,7 +33,7 @@ public class TestUserDetailsService implements UserDetailsService {
 
 	public static Long id = 329476L;
 
-	private static Person assemblePerson(String username) {
+	public static Person assemblePerson(String username) {
 		Person person = Person.builder()
 				.id(id)
 				.number(username.hashCode())

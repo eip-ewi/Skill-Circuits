@@ -24,7 +24,7 @@
 
     <div id="create-task">
 
-        <form id="create-task-form" class="create task__form">
+        <form id="create-task-form" class="create item__form">
 
             <input id="create-task-skill" name="skill.id" type="hidden"/>
 
@@ -57,18 +57,18 @@
                 let element = $("<div/>").append(html).children()[0]
                 $(`#create-item-${skillId}-button`).before(element);
 
-                $(".task__create").removeClass("hidden");
+                $(".item__create").removeClass("hidden");
                 $("#create-task-wrapper").append($("#create-task"));
 
-                $(`#${element.id} > .task__buttons > .item__edit`).click(editItem);
-                $(`#${element.id} > .task__buttons > .item__delete`).click(deleteItem);
+                $(`#${element.id} > .item__buttons > .item__edit`).click(editItem);
+                $(`#${element.id} > .item__buttons > .item__delete`).click(deleteItem);
             });
         });
 
-        $(".task__create").click(createTask);
+        $(".item__create").click(createTask);
 
         $("#create-task-cancel").click(function () {
-            $(".task__create").removeClass("hidden");
+            $(".item__create").removeClass("hidden");
             $("#create-task-wrapper").append($("#create-task"));
         });
     });

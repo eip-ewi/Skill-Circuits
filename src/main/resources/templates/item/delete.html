@@ -41,9 +41,9 @@
 <script th:if="${canEdit}" layout:fragment="script">
     function deleteItem() {
         toggleOverlay("delete-item-overlay");
-        let taskId = $(this).data("item");
-        $("#delete-item-id").val(taskId);
-        $("#delete-item-name").text($(`#item-${taskId}-name`).text());
+        let itemId = $(this).data("item");
+        $("#delete-item-id").val(itemId);
+        $("#delete-item-name").text($(`#item-${itemId}-name`).text());
     }
 
     document.addEventListener("DOMContentLoaded", function () {

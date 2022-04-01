@@ -28,7 +28,7 @@
     </th:block>
 
     <th:block th:if="${canEdit}">
-        <div th:each="pos : ${spaces}" class="ghost_block"
+        <div th:each="pos : ${emptySpaces}" class="ghost_block"
              th:style="|grid-row: ${pos.second + 1}; grid-column: ${pos.first + 1}|">
             <span class="fa-solid fa-plus"></span>
         </div>

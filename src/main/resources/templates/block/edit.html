@@ -24,7 +24,7 @@
 
     <div id="edit-block">
 
-        <form id="edit-block-form" class="edit skill__form">
+        <form id="edit-block-form" class="edit block__form">
             <input id="edit-block-id" name="id" type="hidden"/>
 
             <label for="edit-block-name">Name</label>
@@ -46,7 +46,7 @@
                 <input style="max-width: 20px" type="checkbox" id="edit-essential-checkbox" name="essential" value="true" checked>
             </th:block>
 
-            <div class="skill__form__buttons">
+            <div class="block__form__buttons">
                 <button type="button" id="edit-block-cancel">Cancel</button>
                 <button type="submit">Edit</button>
             </div>
@@ -59,7 +59,7 @@
 
 <script th:if="${canEdit}" layout:fragment="script">
     function editBlock() {
-        $(".skill__name").removeClass("hidden");
+        $(".block__name").removeClass("hidden");
         let blockId = $(this).data("block");
         let blockName = $(`#block-${blockId}-name`);
         $("#edit-block-id").val(blockId);

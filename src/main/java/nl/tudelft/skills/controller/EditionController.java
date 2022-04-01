@@ -18,7 +18,6 @@
 package nl.tudelft.skills.controller;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import javax.transaction.Transactional;
@@ -59,9 +58,7 @@ public class EditionController {
 	public String getEditionPage(@PathVariable Long id, Model model) {
 		EditionLevelEditionViewDTO edition = editionService.getEditionView(id);
 
-		Set<Pair<Integer, Integer>> positions = edition.getModules().stream()
-				.flatMap(s -> s.getSubmodules().stream())
-				.map(s -> Pair.of(s.getColumn(), s.getRow())).collect(Collectors.toSet());
+		Set<Pair<Integer, Integer>> positions = edition.getFilledPositions();
 		int columns = positions.stream().mapToInt(Pair::getFirst).max().orElse(-1) + 1;
 		int rows = positions.stream().mapToInt(Pair::getSecond).max().orElse(-1) + 1;
 
@@ -69,7 +66,7 @@ public class EditionController {
 		model.addAttribute("edition", edition);
 		model.addAttribute("columns", columns);
 		model.addAttribute("rows", rows);
-		model.addAttribute("spaces", IntStream.range(0, rows).boxed()
+		model.addAttribute("emptySpaces", IntStream.range(0, rows).boxed()
 				.flatMap(row -> IntStream.range(0, columns).mapToObj(col -> Pair.of(col, row)))
 				.filter(pos -> !positions.contains(pos))
 				.toList());

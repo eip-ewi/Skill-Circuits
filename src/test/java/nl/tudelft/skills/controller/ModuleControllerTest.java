@@ -50,8 +50,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
-import reactor.core.publisher.Flux;
-
 @Transactional
 @AutoConfigureMockMvc
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
@@ -80,11 +78,10 @@ public class ModuleControllerTest extends ControllerTest {
 	}
 
 	@Test
-	@WithUserDetails("username")
-	void getModulePageCallsTasksCompleted() throws Exception {
-		when(roleControllerApi.getRolesById(any(), any())).thenReturn(Flux.empty());
+	void getModulePageCallsTasksCompleted() {
+		moduleController.getModulePage(TestUserDetailsService.assemblePerson("username"),
+				db.getModuleProofTechniques().getId(), model);
 
-		mvc.perform(get("/module/{id}", db.getModuleProofTechniques().getId()));
 		verify(moduleService).setCompletedTasksForPerson(
 				View.convert(db.getModuleProofTechniques(), ModuleLevelModuleViewDTO.class),
 				TestUserDetailsService.id);
