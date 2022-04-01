@@ -55,6 +55,7 @@
 </div>
 
 <script layout:fragment="script">
+<<<<<<< HEAD
     function mouseEnterGroup() {
         let submoduleId = $(this).parent().parent().data("group");
         $(`.block[data-group='${submoduleId}']`).addClass("highlighted");
@@ -67,5 +68,16 @@
         let groupName = $(".block__group__name");
         groupName.mouseenter(mouseEnterGroup);
         groupName.mouseleave(mouseLeaveGroup);
+=======
+    document.addEventListener("DOMContentLoaded", function () {
+        $(".block__submodule__name").mouseenter(function (){
+            let submoduleId = $(this).parent().parent().data("group");
+            $(`.block[data-group='${submoduleId}']`).addClass("highlighted");
+        });
+
+        $(".block__submodule__name").mouseleave(function (){
+            $(".block").removeClass("highlighted");
+        });
+>>>>>>> b46f8d0 (Apply suggestions and generify css class names)
     });
 </script>

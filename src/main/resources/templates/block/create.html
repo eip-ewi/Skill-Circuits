@@ -48,11 +48,7 @@
                 <input style="max-width: 20px" type="checkbox" id="essential-checkbox" name="essential" value="true" checked>
             </th:block>
 
-<<<<<<< HEAD
             <div class="block__form__buttons">
-=======
-            <div class="skill__form__buttons">
->>>>>>> f50ffc1 (Test SubmoduleController)
                 <button type="button" id="create-block-cancel">Cancel</button>
                 <button type="submit">Create</button>
             </div>
@@ -95,7 +91,7 @@
                 $(`#${element.id} > .skill__buttons > .block__edit`).click(editBlock);
                 $(`#${element.id} > .skill__buttons > .block__delete`).click(deleteBlock);
                 if (blockType === "skill") {
-                    $(`#${element.id} > .tasks > li > .task__create`).click(createTask);
+                    $(`#${element.id} > .items > li > .item__create`).click(createTask);
                 }
             });
         });
