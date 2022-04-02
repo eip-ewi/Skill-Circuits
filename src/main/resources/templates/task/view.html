@@ -23,7 +23,7 @@
 <li class="task" th:id="|task-${task.id}|" th:classappend="${task.completed ? 'completed' : ''}"
     layout:fragment="item">
     <div th:id="|task-${task.id}-content|" class="task__content">
-        <button class="task__button" th:onclick="|toggleCompleted(${task.id})|">0</button>
+        <button class="task__button" th:onclick="|toggleCompleted(${task.id})|" th:text="${task.time}"></button>
         <span th:id="|task-${task.id}-name|" class="task__name" th:text="${task.name}"></span>
     </div>
     <div th:if="${@authorisationService.canEditSkill(skill.id)}" class="task__buttons"

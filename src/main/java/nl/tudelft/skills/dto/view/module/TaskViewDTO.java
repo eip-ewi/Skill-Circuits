@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.dto.view.module;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -37,6 +38,10 @@ public class TaskViewDTO extends View<Task> {
 	@NotBlank
 	private String name;
 	private TaskType type;
+
+	@Min(0)
+	private Integer time;
+
 	@Builder.Default
 	private boolean completed = false;
 
