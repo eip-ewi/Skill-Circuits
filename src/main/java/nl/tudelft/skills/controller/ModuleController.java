@@ -18,7 +18,6 @@
 package nl.tudelft.skills.controller;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
@@ -72,16 +71,15 @@ public class ModuleController {
 			moduleService.setCompletedTasksForPerson(module, person.getId());
 		}
 
-		Set<Pair<Integer, Integer>> positions = module.getSubmodules().stream()
-				.flatMap(s -> s.getSkills().stream())
-				.map(s -> Pair.of(s.getColumn(), s.getRow())).collect(Collectors.toSet());
+		Set<Pair<Integer, Integer>> positions = module.getFilledPositions();
 		int columns = positions.stream().mapToInt(Pair::getFirst).max().orElse(-1) + 1;
 		int rows = positions.stream().mapToInt(Pair::getSecond).max().orElse(-1) + 1;
 
+		model.addAttribute("level", "module");
 		model.addAttribute("module", module);
 		model.addAttribute("columns", columns);
 		model.addAttribute("rows", rows);
-		model.addAttribute("spaces", IntStream.range(0, rows).boxed()
+		model.addAttribute("emptySpaces", IntStream.range(0, rows).boxed()
 				.flatMap(row -> IntStream.range(0, columns).mapToObj(col -> Pair.of(col, row)))
 				.filter(pos -> !positions.contains(pos))
 				.toList());

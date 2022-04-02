@@ -27,9 +27,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.dto.patch.TaskPatchDTO;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.dto.id.SCModuleIdDTO;
+import nl.tudelft.skills.dto.patch.SubmodulePatchDTO;
+import nl.tudelft.skills.dto.patch.SubmodulePositionPatchDTO;
+import nl.tudelft.skills.model.Submodule;
+import nl.tudelft.skills.repository.SubmoduleRepository;
+import nl.tudelft.skills.service.SkillService;
 
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
@@ -45,62 +48,80 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @AutoConfigureMockMvc
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
-public class TaskControllerTest extends ControllerTest {
+public class SubmoduleControllerTest extends ControllerTest {
 
-	private final TaskController taskController;
-	private final TaskRepository taskRepository;
+	private final SubmoduleController submoduleController;
+	private final SubmoduleRepository submoduleRepository;
 
 	@Autowired
-	public TaskControllerTest(TaskRepository taskRepository) {
-		this.taskController = new TaskController(taskRepository);
-		this.taskRepository = taskRepository;
+	public SubmoduleControllerTest(SubmoduleRepository submoduleRepository, SkillService skillService) {
+		this.submoduleController = new SubmoduleController(submoduleRepository, skillService);
+		this.submoduleRepository = submoduleRepository;
 	}
 
 	@Test
 	@WithUserDetails("admin")
-	void createTask() throws Exception {
-		String element = mvc.perform(post("/task").with(csrf())
+	void createSubmodule() throws Exception {
+		String element = mvc.perform(post("/submodule").with(csrf())
 				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
-						new BasicNameValuePair("name", "Task"),
-						new BasicNameValuePair("skill.id", Long.toString(db.skillVariables.getId()))))))
+						new BasicNameValuePair("name", "Submodule"),
+						new BasicNameValuePair("module.id", Long.toString(db.moduleProofTechniques.getId())),
+						new BasicNameValuePair("row", "10"),
+						new BasicNameValuePair("column", "11")))))
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isOk())
 				.andReturn().getResponse().getContentAsString();
 
-		Matcher idMatcher = Pattern.compile("id=\"item-(\\d+)\"").matcher(element);
+		Matcher idMatcher = Pattern.compile("id=\"block-(\\d+)\"").matcher(element);
 		assertThat(idMatcher.find()).isTrue();
 
 		Long id = Long.parseLong(idMatcher.group(1));
-		assertThat(taskRepository.existsById(id)).isTrue();
+		assertThat(submoduleRepository.existsById(id)).isTrue();
 
 		assertThat(element)
-				.contains("<span id=\"item-" + id + "-name\" class=\"item__name\">Task</span>");
+				.contains("<span id=\"block-" + id + "-name\">Submodule</span>")
+				.contains("style=\"grid-row: 11; grid-column: 12");
 	}
 
 	@Test
-	void patchTask() {
-		taskController.patchTask(TaskPatchDTO.builder()
-				.id(db.taskDo10a.getId())
+	void patchSubmodule() {
+		submoduleController.patchSubmodule(SubmodulePatchDTO.builder()
+				.id(db.submoduleCases.getId())
 				.name("Updated")
+				.module(new SCModuleIdDTO(db.moduleProofTechniques.getId()))
 				.build());
 
-		Task task = taskRepository.findByIdOrThrow(db.taskDo10a.getId());
-		assertThat(task.getName()).isEqualTo("Updated");
+		Submodule submodule = submoduleRepository.findByIdOrThrow(db.submoduleCases.getId());
+		assertThat(submodule.getName()).isEqualTo("Updated");
+		assertThat(submodule.getModule()).isEqualTo(db.moduleProofTechniques);
 	}
 
 	@Test
-	void deleteTask() {
-		taskController.deleteTask(db.taskDo10a.getId());
-		assertThat(taskRepository.existsById(db.taskDo10a.getId())).isFalse();
+	void updateSubmodulePosition() {
+		submoduleController.updateSubmodulePosition(db.submoduleCases.getId(),
+				SubmodulePositionPatchDTO.builder()
+						.column(10)
+						.row(11)
+						.build());
+
+		Submodule submodule = submoduleRepository.findByIdOrThrow(db.submoduleCases.getId());
+		assertThat(submodule.getColumn()).isEqualTo(10);
+		assertThat(submodule.getRow()).isEqualTo(11);
+	}
+
+	@Test
+	void deleteSkill() {
+		submoduleController.deleteSubmodule(db.submoduleCases.getId(), "block");
+		assertThat(submoduleRepository.existsById(db.submoduleCases.getId())).isFalse();
 	}
 
 	@Test
 	void endpointsAreProtected() throws Exception {
-		mvc.perform(patch("/task/{id}", db.taskDo10a.getId()))
+		mvc.perform(patch("/submodule/{id}", db.submoduleCases.getId()))
 				.andExpect(status().isForbidden());
-		mvc.perform(post("/task"))
+		mvc.perform(post("/submodule"))
 				.andExpect(status().isForbidden());
-		mvc.perform(delete("/task?id=1"))
+		mvc.perform(delete("/submodule?id=1"))
 				.andExpect(status().isForbidden());
 	}
 

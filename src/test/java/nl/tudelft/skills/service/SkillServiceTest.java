@@ -19,15 +19,9 @@ package nl.tudelft.skills.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.stream.Stream;
-
-import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
-import nl.tudelft.skills.dto.view.module.TaskViewDTO;
-import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.test.TestDatabaseLoader;
-import nl.tudelft.skills.test.TestUserDetailsService;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,27 +30,24 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
-public class ModuleServiceTest {
+public class SkillServiceTest {
+
+	private final SkillRepository skillRepository;
+	private final SkillService skillService;
 
 	@Autowired
 	private TestDatabaseLoader db;
+
 	@Autowired
-	private ModuleService moduleService;
+	public SkillServiceTest(SkillRepository skillRepository) {
+		this.skillRepository = skillRepository;
+		this.skillService = new SkillService(skillRepository);
+	}
 
 	@Test
-	void setCompletedTasksForPerson() {
-		ModuleLevelModuleViewDTO module = View.convert(db.getModuleProofTechniques(),
-				ModuleLevelModuleViewDTO.class);
-		moduleService.setCompletedTasksForPerson(module, TestUserDetailsService.id);
-		assertThat(module.getSubmodules().stream()
-				.flatMap(sub -> sub.getSkills().stream())
-				.flatMap(skill -> skill.getTasks().stream())
-				.filter(TaskViewDTO::isCompleted)
-				.map(TaskViewDTO::getId).toList())
-						.containsExactlyInAnyOrderElementsOf(
-								Stream.of(db.taskRead11, db.taskDo11ad, db.taskRead12, db.taskDo12ae)
-										.map(Task::getId).toList());
-
+	public void deleteSkill() {
+		skillService.deleteSkill(db.skillVariables.getId());
+		assertThat(skillRepository.existsById(db.skillVariables.getId())).isFalse();
 	}
 
 }

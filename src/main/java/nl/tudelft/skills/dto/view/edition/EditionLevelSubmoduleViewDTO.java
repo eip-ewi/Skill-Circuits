@@ -15,42 +15,57 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.patch;
+package nl.tudelft.skills.dto.view.edition;
+
+import java.util.List;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import nl.tudelft.librador.dto.patch.Patch;
-import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
-import nl.tudelft.skills.model.Skill;
+import lombok.*;
+import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.dto.view.BlockView;
+import nl.tudelft.skills.dto.view.ItemView;
+import nl.tudelft.skills.model.Submodule;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SkillPatchDTO extends Patch<Skill> {
+@EqualsAndHashCode(callSuper = false)
+public class EditionLevelSubmoduleViewDTO extends View<Submodule> implements BlockView {
 
 	@NotNull
 	private Long id;
 	@NotBlank
 	private String name;
 	@NotNull
-	@Builder.Default
-	private Boolean essential = false;
-	private SubmoduleIdDTO submodule;
+	private Integer row;
+	@NotNull
+	private Integer column;
+	@NotNull
+	private List<EditionLevelSkillViewDTO> skills;
+	@NotNull
+	private List<Long> childIds;
 
 	@Override
-	protected void applyOneToOne() {
-		updateNonNull(name, data::setName);
-		updateNonNull(essential, data::setEssential);
-		updateNonNullId(submodule, data::setSubmodule);
+	public void postApply() {
+		super.postApply();
+		this.childIds = data.getSkills().stream()
+				.flatMap(s -> s.getChildren().stream())
+				.map(s -> s.getSubmodule().getId())
+				.filter(id -> !this.id.equals(id))
+				.distinct().toList();
 	}
 
 	@Override
-	protected void validate() {
+	public List<? extends ItemView> getItems() {
+		return skills;
 	}
+
+	@Override
+	public List<Long> getChildIds() {
+		return childIds;
+	}
+
 }

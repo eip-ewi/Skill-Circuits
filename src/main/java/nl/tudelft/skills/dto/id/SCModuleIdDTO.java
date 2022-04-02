@@ -15,42 +15,36 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.patch;
+package nl.tudelft.skills.dto.id;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import nl.tudelft.librador.dto.patch.Patch;
-import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
-import nl.tudelft.skills.model.Skill;
+import lombok.experimental.SuperBuilder;
+import nl.tudelft.librador.dto.id.IdDTO;
+import nl.tudelft.skills.model.SCModule;
+import nl.tudelft.skills.repository.ModuleRepository;
+
+import org.springframework.data.repository.CrudRepository;
 
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
-@AllArgsConstructor
-public class SkillPatchDTO extends Patch<Skill> {
+@EqualsAndHashCode(callSuper = true)
+public class SCModuleIdDTO extends IdDTO<SCModule, Long> {
 
-	@NotNull
-	private Long id;
-	@NotBlank
-	private String name;
-	@NotNull
-	@Builder.Default
-	private Boolean essential = false;
-	private SubmoduleIdDTO submodule;
-
-	@Override
-	protected void applyOneToOne() {
-		updateNonNull(name, data::setName);
-		updateNonNull(essential, data::setEssential);
-		updateNonNullId(submodule, data::setSubmodule);
+	public SCModuleIdDTO(Long id) {
+		super(id);
 	}
 
 	@Override
-	protected void validate() {
+	public Class<? extends CrudRepository<SCModule, Long>> repositoryClass() {
+		return ModuleRepository.class;
 	}
+
+	@Override
+	public Class<? extends SCModule> targetClass() {
+		return SCModule.class;
+	}
+
 }

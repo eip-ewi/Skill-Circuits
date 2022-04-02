@@ -1,0 +1,71 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<div th:id="|block-${block.id}|" class="block"
+     th:style="|grid-row: ${block.row + 1}; grid-column: ${block.column + 1}|"
+     th:draggable="${canEdit}"
+     th:classappend="${canEdit} ? 'draggable' : ''"
+     th:data-group="${group.id}"
+     th:with="childIds = ${block instanceof T(nl.tudelft.skills.dto.view.BlockView)} ? ${block.childIds} : ${{}}"
+     th:data-children="${childIds}"
+     th:data-essential="${level == 'module'} ? ${block.essential} : ${null}"
+     layout:fragment="block">
+    <div th:id="|block-${block.id}-header|" class="block__header">
+        <h2 class="block__name">
+            <span th:id="|block-${block.id}-name|" th:text="${block.name}"></span>
+        </h2>
+        <p th:if="${level == 'module'}" th:id="|block-${block.id}-group|" class="block__group__name" th:text="${group.name}"></p>
+        <a th:unless="${level == 'module'}" th:id="|block-${block.id}-group|" class="block__group__name" th:href="@{|/${groupType}/${group.id}|}" th:text="${group.name}"></a>
+    </div>
+
+    <ul class="items">
+        <th:block th:each="item : ${block.items}">
+            <li layout:replace="~{item/view :: item}"></li>
+        </th:block>
+        <li th:if="${canEdit and level == 'module'}">
+            <button th:id="|create-item-${block.id}-button|" class="item__create fa-solid fa-plus" th:data-block="${block.id}"></button>
+        </li>
+    </ul>
+
+    <div class="block__buttons">
+        <button class="fa-solid fa-pen block__edit" th:if="${canEdit}"
+                th:data-block="${block.id}"></button>
+        <button class="fa-solid fa-trash block__delete" th:if="${canDelete}"
+                th:data-block="${block.id}"></button>
+    </div>
+</div>
+
+<script layout:fragment="script">
+    function mouseEnterGroup() {
+        let submoduleId = $(this).parent().parent().data("group");
+        $(`.block[data-group='${submoduleId}']`).addClass("highlighted");
+    }
+    function mouseLeaveGroup() {
+        $(".block").removeClass("highlighted");
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        let groupName = $(".block__group__name");
+        groupName.mouseenter(mouseEnterGroup);
+        groupName.mouseleave(mouseLeaveGroup);
+    });
+</script>

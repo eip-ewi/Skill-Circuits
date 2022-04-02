@@ -21,7 +21,15 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{container}">
 <head>
-    <link rel="stylesheet" th:href="@{/css/blocks.css}">
+    <link rel="stylesheet" th:href="@{/css/circuit.css}">
+
+    <style th:inline="css">
+        /*<![CDATA[*/
+        :root {
+            --columns: /*[[${columns}]]*/ 5;
+        }
+        /*]]>*/
+    </style>
 
     <title th:text="${edition.name}"></title>
 </head>
@@ -30,47 +38,49 @@
 
 <div layout:fragment="content">
 
-    <form method="post" id="publish-edition-form" th:action="@{|/edition/${edition.id}/publish|}"
-          th:if="${@authorisationService.canPublishEdition(edition.id)}">
-        <button name="publish" id="publishEdition"
-                th:if="!${@editionRepository.findByIdOrThrow(edition.id).isVisible()}"
-                class="fa-solid btn-publish" title="publish" type="submit">
-            Publish
-        </button>
-    </form>
-    <form method="post" id="unpublish-edition-form" th:action="@{|/edition/${edition.id}/unpublish|}"
-          th:if="${@authorisationService.canPublishEdition(edition.id)}">
-        <button name="unpublish" id="unpublishEdition"
-                th:if="${@editionRepository.findByIdOrThrow(edition.id).isVisible()}"
-                class="fa-solid btn-unpublish" title="unpublish" type="submit">
-            Unpublish
-        </button>
-    </form>
+    <div class="circuit__header" th:with="visible = ${@editionRepository.findByIdOrThrow(edition.id).isVisible()}">
+        <h1 th:text="${edition.name}"></h1>
 
-    <h1 th:text="${edition.course.name}"></h1>
-    <h1 th:text="${edition.name}"></h1>
-
-    <div class="blocks" id="blocks">
-
-        <th:block th:each="module: ${edition.modules}">
-            <div layout:replace="~{module/block :: moduleblock}"></div>
-        </th:block>
-
-
-        <div th:if="${@authorisationService.canCreateModuleInEdition(edition.id)}"
-            class="ghost_block fa-solid fa-plus">
-        </div>
-
-
-        <div layout:replace="~{module/create :: form}"></div>
-        <div layout:replace="~{module/delete :: overlay}"></div>
-        <div layout:replace="~{module/edit :: form}"></div>
-
+        <form method="post" id="publish-edition-form" th:action="@{|/edition/${edition.id}/publish|}"
+              th:if="${@authorisationService.canPublishEdition(edition.id) and not visible}">
+            <button name="publish" id="publishEdition"
+                    class="circuit__button" title="publish" type="submit">
+                Publish
+            </button>
+        </form>
+        <form method="post" id="unpublish-edition-form" th:action="@{|/edition/${edition.id}/unpublish|}"
+              th:if="${@authorisationService.canPublishEdition(edition.id) and visible}">
+            <button name="unpublish" id="unpublishEdition"
+                    class="circuit__button" title="unpublish" type="submit">
+                Unpublish
+            </button>
+        </form>
     </div>
 
-    <div layout:replace="~{module/create :: script}"></div>
-    <div layout:replace="~{module/delete :: script}"></div>
-    <div layout:replace="~{module/edit :: script}"></div>
+    <th:block th:with="circuit = ${edition},
+                       canCreate = ${@authorisationService.canCreateSubmoduleInEdition(edition.id)},
+                       canEdit = ${@authorisationService.canEditSubmoduleInEdition(edition.id)},
+                       canDelete = ${@authorisationService.canDeleteSubmoduleInEdition(edition.id)},
+                       groupType = ${'module'},
+                       blockType = ${'submodule'},
+                       itemType = ${'skill'}">
+        <div layout:replace="~{circuit/view :: grid}"></div>
+        <div layout:replace="~{circuit/view :: additional}"></div>
+    </th:block>
+
+    <th:block th:with="circuit = ${edition},
+                       canCreate = ${@authorisationService.canCreateSubmoduleInEdition(edition.id)},
+                       canEdit = ${@authorisationService.canEditSubmoduleInEdition(edition.id)},
+                       canDelete = ${@authorisationService.canDeleteSubmoduleInEdition(edition.id)},
+                       groupType = ${'module'},
+                       blockType = ${'submodule'},
+                       itemType = ${'skill'}">
+        <script>
+            const blockType = "submodule";
+            const itemType = "skill";
+        </script>
+        <div layout:replace="~{circuit/view :: script}"></div>
+    </th:block>
 
 </div>
 

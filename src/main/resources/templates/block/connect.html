@@ -1,0 +1,124 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<script layout:fragment="script">
+    function recalculateConnections() {
+        [...document.getElementsByClassName('connection')].forEach(c => c.remove())
+        calculateConnections();
+    }
+
+    function calculateConnections() {
+        let circuit = document.getElementById("circuit");
+
+        let skillsOnLevel = {};
+        $(".block").each(function (i, skill) {
+            let skillRow = parseInt($(skill).css("gridRow").split(" / ")[0]);
+            if (skillsOnLevel[skillRow] === undefined) skillsOnLevel[skillRow] = [];
+            skillsOnLevel[skillRow].push(skill);
+        });
+
+        for (let skill of document.getElementsByClassName("block")) {
+            let skillCol = parseInt(skill.style.gridColumn.split(" / ")[0]);
+            let skillRow = parseInt(skill.style.gridRow.split(" / ")[0]);
+
+            let children = $(skill).data("children").map(id => document.getElementById(`block-${id}`));
+            children.sort((c1, c2) => parseInt(c1.style.gridColumn.split(" / ")[0]) - parseInt(c2.style.gridColumn.split(" / ")[0]));
+
+            let xOffset = (children.length - 1) * -5;
+            let yOffset = 0;
+
+            for (let child of children) {
+                let childCol = parseInt(child.style.gridColumn.split(" / ")[0]);
+                let childRow = parseInt(child.style.gridRow.split(" / ")[0]);
+
+                yOffset = (skillsOnLevel[childRow].length - 1) * -5 + skillsOnLevel[childRow].indexOf(child) * 10;
+
+                let offsetTranslation = "translate(" + xOffset + "px, " + yOffset + "px)";
+
+                let horizontalConnection = document.createElement("div");
+                horizontalConnection.dataset.target = child.id;
+                horizontalConnection.onmouseover = overConnection;
+                horizontalConnection.onmouseout = outConnection;
+                horizontalConnection.classList.add("horizontal", "connection")
+                horizontalConnection.style.setProperty("--width", (Math.abs(skillCol - childCol) + 1).toString());
+                horizontalConnection.style.setProperty("--x-diff", (Math.sign(skillCol - childCol) * xOffset) + "px");
+                horizontalConnection.style.gridColumn = Math.min(skillCol, childCol) + " / span var(--width)";
+                horizontalConnection.style.gridRow = (childRow - 1).toString();
+                horizontalConnection.style.transform = "translateY(calc(var(--circuit-gap) / 2))"
+                    + offsetTranslation + " translateX(" + (-xOffset / 2 + Math.sign(xOffset)) + "px)"
+                    + (childCol === skillCol ? " translateX(" + (-Math.sign(xOffset)) + "px)" : "");
+                if (childCol === skillCol) {
+                    horizontalConnection.style.setProperty("--x-diff", Math.abs(xOffset) + "px");
+                    horizontalConnection.style.width = "calc(var(--x-diff) + 2px)";
+                }
+                circuit.appendChild(horizontalConnection);
+
+                let verticalInConnection = document.createElement("div");
+                verticalInConnection.dataset.target = child.id;
+                verticalInConnection.onmouseover = overConnection;
+                verticalInConnection.onmouseout = outConnection;
+                verticalInConnection.classList.add("vertical", "in", "connection")
+                verticalInConnection.style.setProperty("--y-offset", yOffset + "px");
+                verticalInConnection.style.gridColumn = childCol.toString();
+                verticalInConnection.style.gridRow = childRow.toString();
+                verticalInConnection.style.transform = "translateY(-100%)";
+                circuit.appendChild(verticalInConnection);
+
+                let verticalOutConnection = document.createElement("div");
+                verticalOutConnection.dataset.target = child.id;
+                verticalOutConnection.onmouseover = overConnection;
+                verticalOutConnection.onmouseout = outConnection;
+                verticalOutConnection.classList.add("vertical", "out", "connection")
+                verticalOutConnection.style.setProperty("--y-offset", yOffset + "px");
+                verticalOutConnection.style.setProperty("--height", (Math.max(Math.abs(skillRow - childRow) - 1, 1)).toString());
+                verticalOutConnection.style.gridColumn = skillCol.toString();
+                verticalOutConnection.style.gridRow = (skillRow + 1) + " / span var(--height)";
+                verticalOutConnection.style.transform = "translateY(calc(var(--circuit-gap) / 2)) " + offsetTranslation;
+                if (skillRow + 1 === childRow) {
+                    verticalOutConnection.style.gridRow = skillRow + " / span var(--height)";
+                    verticalOutConnection.style.height = "calc(var(--y-offset) + var(--circuit-gap) / 2)";
+                }
+                circuit.appendChild(verticalOutConnection);
+
+                xOffset += 10;
+            }
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', calculateConnections);
+
+    function overConnection() {
+        let skill = this.dataset.target;
+        $(".connection[data-target=" + skill + "]").each(function () {
+            this.classList.add("highlighted")
+        });
+    }
+
+    function outConnection() {
+        let skill = this.dataset.target;
+        $(".connection[data-target=" + skill + "]").each(function () {
+            this.classList.remove("highlighted")
+        });
+    }
+</script>
+
+</html>

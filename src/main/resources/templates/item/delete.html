@@ -20,33 +20,34 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
-<div th:if="${@authorisationService.canDeleteSkillInEdition(module.edition.id)}" layout:fragment="overlay" class="hidden overlay" id="delete-skill-overlay">
+<div th:if="${canEdit}" layout:fragment="overlay" class="hidden overlay" id="delete-item-overlay">
 
-    <form id="delete-skill-form" class="confirmation" th:action="@{/skill}" th:method="delete">
+    <form id="delete-item-form" class="confirmation" th:action="@{|/${itemType}|}" th:method="delete">
 
-        <input id="delete-skill-id" name="id" type="hidden"/>
+        <input id="delete-item-id" name="id" type="hidden"/>
+        <input name="page" value="item" type="hidden"/>
 
-        <p>Are you sure you want to delete <span id="delete-skill-name"></span>?</p>
+        <p>Are you sure you want to delete &quot;<span id="delete-item-name"></span>&quot;?</p>
 
         <div class="confirmation__buttons">
-            <button type="button" onclick="toggleOverlay('delete-skill-overlay')">Cancel</button>
-            <button type="submit">Delete Skill</button>
+            <button type="button" onclick="toggleOverlay('delete-item-overlay')">Cancel</button>
+            <button type="submit">Delete</button>
         </div>
 
     </form>
 
 </div>
 
-<script th:if="${@authorisationService.canDeleteSkillInEdition(module.edition.id)}" layout:fragment="script">
-    function deleteSkill() {
-        toggleOverlay("delete-skill-overlay");
-        let skillId = $(this).data("skill");
-        $("#delete-skill-id").val(skillId);
-        $("#delete-skill-name").text($(`#skill-${skillId}-name`).text());
+<script th:if="${canEdit}" layout:fragment="script">
+    function deleteItem() {
+        toggleOverlay("delete-item-overlay");
+        let itemId = $(this).data("item");
+        $("#delete-item-id").val(itemId);
+        $("#delete-item-name").text($(`#item-${itemId}-name`).text());
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-        $(".skill__delete").click(deleteSkill);
+        $(".item__delete").click(deleteItem);
     });
 </script>
 

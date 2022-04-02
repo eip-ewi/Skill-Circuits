@@ -36,230 +36,42 @@
 </head>
 
 <body>
+
 <div layout:fragment="content">
 
     <h1 th:text="${module.name}"></h1>
 
-    <div class="circuit" id="circuit">
-        <div class="checkpoint" style="grid-row: 2;">Checkpoint example</div>
-        <div class="checkpoint" style="grid-row: 5;">Checkpoint example</div>
-
-        <th:block th:each="submodule : ${module.submodules}">
-            <th:block th:each="skill : ${submodule.skills}">
-
-                <div layout:replace="~{skill/view :: block}"></div>
-
-                <div th:if="${@authorisationService.canEditSkillInEdition(module.edition.id)}"
-                     th:each="pos : ${spaces}" class="ghost_skill"
-                     th:style="|grid-row: ${pos.second + 1}; grid-column: ${pos.first + 1}|">
-                    <span class="fa-solid fa-plus"></span>
-                </div>
-                <div th:if="${@authorisationService.canEditSkillInEdition(module.edition.id)}"
-                     th:each="col : ${#numbers.sequence(0, columns - 1)}" class="ghost_skill"
-                     th:style="|grid-row: ${rows + 1}; grid-column: ${col + 1}|">
-                    <span class="fa-solid fa-plus"></span>
-                </div>
-                <div th:if="${@authorisationService.canEditSkillInEdition(module.edition.id)}"
-                     th:each="row : ${#numbers.sequence(0, rows)}" class="ghost_skill"
-                     th:style="|grid-row: ${row + 1}; grid-column: ${columns + 1}|">
-                    <span class="fa-solid fa-plus"></span>
-                </div>
-
-            </th:block>
-        </th:block>
-    </div>
-
-    <div layout:replace="~{skill/create :: form}"></div>
-    <div layout:replace="~{skill/edit :: form}"></div>
-    <div layout:replace="~{skill/delete :: overlay}"></div>
+    <th:block th:with="circuit = ${module},
+                       canCreate = ${@authorisationService.canCreateSkillInEdition(module.edition.id)},
+                       canEdit = ${@authorisationService.canEditSkillInEdition(module.edition.id)},
+                       canDelete = ${@authorisationService.canDeleteSkillInEdition(module.edition.id)},
+                       groupType = ${'submodule'},
+                       blockType = ${'skill'},
+                       itemType = ${'task'}">
+        <div layout:replace="~{circuit/view :: grid}"></div>
+        <div layout:replace="~{circuit/view :: additional}"></div>
+    </th:block>
 
     <div layout:replace="~{task/create :: form}"></div>
-    <div layout:replace="~{task/edit :: form}"></div>
-    <div layout:replace="~{task/delete :: overlay}"></div>
 
-    <script th:inline="javascript">
-        addEventListener('DOMContentLoaded', function () {
-            if (localStorage.getItem('completedTasks') !== null) {
-                // if we have tasks completed in local storage but not yet in the dom, also mark them completed
-                const completedInLocalStorage = JSON.parse(localStorage.getItem("completedTasks"))
-                const completedInDOM = Array.from(document.getElementsByClassName("task completed"), e => parseInt(e.id.split('')[1]))
-
-                const toUpdate = completedInLocalStorage.filter(t => !completedInDOM.includes(t));
-
-                if (!toUpdate.length) {
-                    return
-                }
-
-                toUpdate.forEach(taskId => {
-                    const task = document.getElementById(`task-${taskId}`)
-                    task.classList.add('completed')
-                })
-
-                //send update to server if user is authenticated
-                /*<![CDATA[*/
-                const personId = /*[[${@authorisationService.authPerson?.id}]]*/ null
-                /*]]>*/
-                if (personId !== null) {
-                    $.ajax({
-                        type: "PUT",
-                        url: "/person/" + personId + "/complete/",
-                        data: JSON.stringify(toUpdate),
-                        processData: false,
-                        contentType: "application/json",
-                        success : () => {localStorage.removeItem('completedTasks')}
-                    })
-                }
-            }
-        })
-
-        function toggleCompleted(taskId) {
-            const task = document.getElementById(`task-${taskId}`)
-            task.classList.toggle('completed')
-
-            const completed = task.classList.contains('completed')
-            //send update to server if user is authenticated
-            /*<![CDATA[*/
-            const personId = /*[[${@authorisationService.authPerson?.id}]]*/ null
-            /*]]>*/
-            if (personId !== null){
-                // If there is an authenticated person, also update on the server.
-                $.ajax({
-                    type: "PUT",
-                    url: "/person/" + personId + "/completion/" + taskId,
-                    data: JSON.stringify(completed),
-                    processData: false,
-                    contentType: "application/json",
-                    success : () => {}
-                })
-            } else {
-                // If there is no authenticated person, also store in cookie storage
-                if (localStorage.getItem('completedTasks') === null) {
-                    localStorage.setItem('completedTasks', JSON.stringify([]))
-                }
-                if (completed) {
-                    localStorage.setItem('completedTasks',
-                        JSON.stringify([taskId, ...JSON.parse(localStorage.getItem('completedTasks'))]))
-                } else {
-                    localStorage.setItem('completedTasks',
-                        JSON.stringify(JSON.parse(localStorage.getItem('completedTasks')).filter(e => e !== taskId)))
-                }
-            }
-
-        }
-    </script>
-
-    <div layout:replace="~{skill/create :: script}"></div>
-    <div layout:replace="~{skill/edit :: script}"></div>
-    <div layout:replace="~{skill/delete :: script}"></div>
-    <div layout:replace="~{skill/move :: script}"></div>
-    <div layout:replace="~{skill/view :: script}"></div>
+    <th:block th:with="circuit = ${module},
+                       canCreate = ${@authorisationService.canCreateSkillInEdition(module.edition.id)},
+                       canEdit = ${@authorisationService.canEditSkillInEdition(module.edition.id)},
+                       canDelete = ${@authorisationService.canDeleteSkillInEdition(module.edition.id)},
+                       groupType = ${'submodule'},
+                       blockType = ${'skill'},
+                       itemType = ${'task'}">
+        <script>
+            const blockType = "skill";
+            const itemType = "task";
+        </script>
+        <div layout:replace="~{circuit/view :: script}"></div>
+    </th:block>
 
     <div layout:replace="~{task/create :: script}"></div>
-    <div layout:replace="~{task/edit :: script}"></div>
-    <div layout:replace="~{task/delete :: script}"></div>
-
-    <script>
-        function recalculateConnections() {
-            [...document.getElementsByClassName('connection')].forEach(c => c.remove())
-            calculateConnections();
-        }
-
-        function calculateConnections() {
-            let circuit = document.getElementById("circuit");
-
-            let skillsOnLevel = {};
-            $(".skill").each(function (i, skill) {
-                let skillRow = parseInt($(skill).css("gridRow").split(" / ")[0]);
-                if (skillsOnLevel[skillRow] === undefined) skillsOnLevel[skillRow] = [];
-                skillsOnLevel[skillRow].push(skill);
-            });
-
-            for (let skill of document.getElementsByClassName("skill")) {
-                let skillCol = parseInt(skill.style.gridColumn.split(" / ")[0]);
-                let skillRow = parseInt(skill.style.gridRow.split(" / ")[0]);
-
-                let children = $(skill).data("children").map(id => document.getElementById(`skill-${id}`));
-                children.sort((c1, c2) => parseInt(c1.style.gridColumn.split(" / ")[0]) - parseInt(c2.style.gridColumn.split(" / ")[0]));
-
-                let xOffset = (children.length - 1) * -5;
-                let yOffset = 0;
-
-                for (let child of children) {
-                    let childCol = parseInt(child.style.gridColumn.split(" / ")[0]);
-                    let childRow = parseInt(child.style.gridRow.split(" / ")[0]);
-
-                    yOffset = (skillsOnLevel[childRow].length - 1) * -5 + skillsOnLevel[childRow].indexOf(child) * 10;
-
-                    let offsetTranslation = "translate(" + xOffset + "px, " + yOffset + "px)";
-
-                    let horizontalConnection = document.createElement("div");
-                    horizontalConnection.dataset.target = child.id;
-                    horizontalConnection.onmouseover = overConnection;
-                    horizontalConnection.onmouseout = outConnection;
-                    horizontalConnection.classList.add("horizontal", "connection")
-                    horizontalConnection.style.setProperty("--width", (Math.abs(skillCol - childCol) + 1).toString());
-                    horizontalConnection.style.setProperty("--x-diff", (Math.sign(skillCol - childCol) * xOffset) + "px");
-                    horizontalConnection.style.gridColumn = Math.min(skillCol, childCol) + " / span var(--width)";
-                    horizontalConnection.style.gridRow = (childRow - 1).toString();
-                    horizontalConnection.style.transform = "translateY(calc(var(--circuit-gap) / 2))"
-                        + offsetTranslation + " translateX(" + (-xOffset / 2 + Math.sign(xOffset)) + "px)"
-                        + (childCol === skillCol ? " translateX(" + (-Math.sign(xOffset)) + "px)" : "");
-                    if (childCol === skillCol) {
-                        horizontalConnection.style.setProperty("--x-diff", Math.abs(xOffset) + "px");
-                        horizontalConnection.style.width = "calc(var(--x-diff) + 2px)";
-                    }
-                    circuit.appendChild(horizontalConnection);
-
-                    let verticalInConnection = document.createElement("div");
-                    verticalInConnection.dataset.target = child.id;
-                    verticalInConnection.onmouseover = overConnection;
-                    verticalInConnection.onmouseout = outConnection;
-                    verticalInConnection.classList.add("vertical", "in", "connection")
-                    verticalInConnection.style.setProperty("--y-offset", yOffset + "px");
-                    verticalInConnection.style.gridColumn = childCol.toString();
-                    verticalInConnection.style.gridRow = childRow.toString();
-                    verticalInConnection.style.transform = "translateY(-100%)";
-                    circuit.appendChild(verticalInConnection);
-
-                    let verticalOutConnection = document.createElement("div");
-                    verticalOutConnection.dataset.target = child.id;
-                    verticalOutConnection.onmouseover = overConnection;
-                    verticalOutConnection.onmouseout = outConnection;
-                    verticalOutConnection.classList.add("vertical", "out", "connection")
-                    verticalOutConnection.style.setProperty("--y-offset", yOffset + "px");
-                    verticalOutConnection.style.setProperty("--height", (Math.max(Math.abs(skillRow - childRow) - 1, 1)).toString());
-                    verticalOutConnection.style.gridColumn = skillCol.toString();
-                    verticalOutConnection.style.gridRow = (skillRow + 1) + " / span var(--height)";
-                    verticalOutConnection.style.transform = "translateY(calc(var(--circuit-gap) / 2)) " + offsetTranslation;
-                    if (skillRow + 1 === childRow) {
-                        verticalOutConnection.style.gridRow = skillRow + " / span var(--height)";
-                        verticalOutConnection.style.height = "calc(var(--y-offset) + var(--circuit-gap) / 2)";
-                    }
-                    circuit.appendChild(verticalOutConnection);
-
-                    xOffset += 10;
-                }
-            }
-        }
-
-        window.addEventListener('DOMContentLoaded', calculateConnections);
-
-        function overConnection() {
-            let skill = this.dataset.target;
-            $(".connection[data-target=" + skill + "]").each(function () {
-                this.classList.add("highlighted")
-            });
-        }
-        function outConnection() {
-            let skill = this.dataset.target;
-            $(".connection[data-target=" + skill + "]").each(function () {
-                this.classList.remove("highlighted")
-            });
-        }
-    </script>
+    <div layout:replace="~{task/mark :: script}"></div>
 
 </div>
-
 
 </body>
 </html>

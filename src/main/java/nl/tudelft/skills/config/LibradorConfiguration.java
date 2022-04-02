@@ -23,8 +23,10 @@ import nl.tudelft.librador.EnableLibrador;
 import nl.tudelft.librador.LibradorConfigAdapter;
 import nl.tudelft.librador.dto.id.IdMapperBuilder;
 import nl.tudelft.skills.dto.id.SCEditionIdDTO;
+import nl.tudelft.skills.dto.id.SCModuleIdDTO;
 import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
 import nl.tudelft.skills.model.SCEdition;
+import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.model.Submodule;
 
 import org.modelmapper.ModelMapper;
@@ -38,6 +40,7 @@ public class LibradorConfiguration extends LibradorConfigAdapter {
 	@Override
 	protected void configure(IdMapperBuilder builder) {
 		builder.register(SCEditionIdDTO.class, SCEdition.class);
+		builder.register(SCModuleIdDTO.class, SCModule.class);
 		builder.register(SubmoduleIdDTO.class, Submodule.class);
 	}
 

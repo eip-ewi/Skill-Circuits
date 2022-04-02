@@ -20,18 +20,16 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
-<li class="task" th:id="|task-${task.id}|" th:classappend="${task.completed ? 'completed' : ''}"
+<li class="item" th:id="|item-${item.id}|" th:classappend="${level == 'module'} ? ${item.completed ? 'completed' : ''} : ${''}"
     layout:fragment="item">
-    <div th:id="|task-${task.id}-content|" class="task__content">
-        <button class="task__button" th:onclick="|toggleCompleted(${task.id})|" th:text="${task.time}"></button>
-        <span th:id="|task-${task.id}-name|" class="task__name" th:text="${task.name}"></span>
+    <div th:id="|item-${item.id}-content|" class="item__content">
+        <button th:if="${level == 'module'}" class="item__button" th:onclick="|toggleCompleted(${item.id})|" th:text="${item.time}"></button>
+        <span th:id="|item-${item.id}-name|" class="item__name" th:text="${item.name}"></span>
     </div>
-    <div th:if="${@authorisationService.canEditSkill(skill.id)}" class="task__buttons"
-         th:id="|task-${task.id}-buttons|">
-                <span th:if="${@authorisationService.canEditSkill(skill.id)}" class="fa-solid fa-pen task__edit"
-                      th:data-task="${task.id}"></span>
-        <span th:if="${@authorisationService.canEditSkill(skill.id)}" class="fa-solid fa-trash task__delete"
-              th:data-task="${task.id}"></span>
+    <div th:if="${canEdit}" class="item__buttons"
+         th:id="|item-${item.id}-buttons|">
+        <span class="fa-solid fa-pen item__edit" th:data-item="${item.id}"></span>
+        <span class="fa-solid fa-trash item__delete" th:data-item="${item.id}"></span>
     </div>
 </li>
 

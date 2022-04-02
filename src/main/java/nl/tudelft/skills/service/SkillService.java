@@ -15,35 +15,35 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view.module;
+package nl.tudelft.skills.service;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import nl.tudelft.skills.model.Skill;
+import nl.tudelft.skills.repository.SkillRepository;
 
-import lombok.*;
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.ItemView;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.model.TaskType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class TaskViewDTO extends View<Task> implements ItemView {
+@Service
+public class SkillService {
 
-	@NotNull
-	private Long id;
-	@NotBlank
-	private String name;
-	private TaskType type;
+	private final SkillRepository skillRepository;
 
-	@Min(0)
-	private Integer time;
+	@Autowired
+	public SkillService(SkillRepository skillRepository) {
+		this.skillRepository = skillRepository;
+	}
 
-	@Builder.Default
-	private boolean completed = false;
+	/**
+	 * Deletes a skill.
+	 *
+	 * @param  id The id of the skill
+	 * @return    The deleted skill
+	 */
+	public Skill deleteSkill(Long id) {
+		Skill skill = skillRepository.findByIdOrThrow(id);
+		skill.getChildren().forEach(c -> c.getParents().remove(skill));
+		skillRepository.delete(skill);
+		return skill;
+	}
 
 }

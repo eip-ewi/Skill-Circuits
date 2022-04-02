@@ -24,6 +24,8 @@ import javax.validation.constraints.NotNull;
 
 import lombok.*;
 import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.dto.view.BlockView;
+import nl.tudelft.skills.dto.view.ItemView;
 import nl.tudelft.skills.model.Skill;
 
 @Data
@@ -31,7 +33,7 @@ import nl.tudelft.skills.model.Skill;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class ModuleLevelSkillViewDTO extends View<Skill> {
+public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
 
 	@NotNull
 	private Long id;
@@ -52,5 +54,14 @@ public class ModuleLevelSkillViewDTO extends View<Skill> {
 	public void postApply() {
 		super.postApply();
 		this.childIds = data.getChildren().stream().map(Skill::getId).toList();
+	}
+
+	@Override
+	public List<? extends ItemView> getItems() {
+		return tasks;
+	}
+
+	public List<Long> getChildIds() {
+		return childIds;
 	}
 }

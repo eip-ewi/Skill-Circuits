@@ -31,14 +31,12 @@ import nl.tudelft.skills.repository.EditionRepository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import reactor.core.publisher.Mono;
 
 @Transactional
-@AutoConfigureMockMvc
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
 public class EditionServiceTest {
 

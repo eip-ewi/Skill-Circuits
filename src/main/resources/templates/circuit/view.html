@@ -1,0 +1,65 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<div class="circuit" id="circuit" layout:fragment="grid">
+    <th:block th:each="group : ${circuit.groups}">
+        <th:block th:each="block : ${group.blocks}">
+            <div layout:replace="~{block/view :: block}"></div>
+        </th:block>
+    </th:block>
+
+    <th:block th:if="${canEdit}">
+        <div th:each="pos : ${emptySpaces}" class="ghost_block"
+             th:style="|grid-row: ${pos.second + 1}; grid-column: ${pos.first + 1}|">
+            <span class="fa-solid fa-plus"></span>
+        </div>
+        <div th:each="col : ${#numbers.sequence(0, columns - 1)}" class="ghost_block"
+             th:style="|grid-row: ${rows + 1}; grid-column: ${col + 1}|">
+            <span class="fa-solid fa-plus"></span>
+        </div>
+        <div th:each="row : ${#numbers.sequence(0, rows)}" class="ghost_block"
+             th:style="|grid-row: ${row + 1}; grid-column: ${columns + 1}|">
+            <span class="fa-solid fa-plus"></span>
+        </div>
+    </th:block>
+</div>
+
+<div layout:fragment="additional">
+    <div layout:replace="~{block/create :: form}"></div>
+    <div layout:replace="~{block/edit :: form}"></div>
+    <div layout:replace="~{block/delete :: overlay}"></div>
+
+    <div layout:replace="~{item/edit :: form}"></div>
+    <div layout:replace="~{item/delete :: overlay}"></div>
+</div>
+
+<th:block layout:fragment="script">
+    <div layout:replace="~{block/create :: script}"></div>
+    <div layout:replace="~{block/edit :: script}"></div>
+    <div layout:replace="~{block/delete :: script}"></div>
+    <div layout:replace="~{block/view :: script}"></div>
+    <div layout:replace="~{block/move :: script}"></div>
+    <div layout:replace="~{block/connect :: script}"></div>
+
+    <div layout:replace="~{item/edit :: script}"></div>
+    <div layout:replace="~{item/delete :: script}"></div>
+</th:block>

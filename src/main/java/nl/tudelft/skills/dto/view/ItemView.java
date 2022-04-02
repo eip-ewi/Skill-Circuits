@@ -15,35 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view.module;
+package nl.tudelft.skills.dto.view;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
-import lombok.*;
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.ItemView;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.model.TaskType;
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class TaskViewDTO extends View<Task> implements ItemView {
-
-	@NotNull
-	private Long id;
-	@NotBlank
-	private String name;
-	private TaskType type;
-
-	@Min(0)
-	private Integer time;
-
-	@Builder.Default
-	private boolean completed = false;
-
+public interface ItemView {
 }

@@ -17,11 +17,14 @@
  */
 package nl.tudelft.skills.controller;
 
+import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.SkillCreateDTO;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
+import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.SkillRepository;
+import nl.tudelft.skills.service.SkillService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -35,11 +38,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("skill")
 public class SkillController {
 
-	private SkillRepository skillRepository;
+	private final SkillRepository skillRepository;
+	private final SkillService skillService;
 
 	@Autowired
-	public SkillController(SkillRepository skillRepository) {
+	public SkillController(SkillRepository skillRepository, SkillService skillService) {
 		this.skillRepository = skillRepository;
+		this.skillService = skillService;
 	}
 
 	/**
@@ -53,26 +58,28 @@ public class SkillController {
 	@PreAuthorize("@authorisationService.canCreateSkill(#create.submodule.id)")
 	public String createSkill(SkillCreateDTO create, Model model) {
 		Skill skill = skillRepository.save(create.apply());
-		model.addAttribute("skill", skill);
-		model.addAttribute("submodule", skill.getSubmodule());
-		model.addAttribute("module", skill.getSubmodule().getModule());
-		return "skill/view";
+		model.addAttribute("level", "module");
+		model.addAttribute("block", View.convert(skill, ModuleLevelSkillViewDTO.class));
+		model.addAttribute("group", skill.getSubmodule());
+		model.addAttribute("circuit", skill.getSubmodule().getModule());
+		model.addAttribute("canEdit", true);
+		model.addAttribute("canDelete", true);
+		return "block/view";
 	}
 
 	/**
 	 * Deletes a skill.
 	 *
 	 * @param  id The id of the skill to delete
-	 * @return    A redirect to the module page
+	 * @return    A redirect to the correct page
 	 */
 	@DeleteMapping
 	@Transactional
 	@PreAuthorize("@authorisationService.canDeleteSkill(#id)")
-	public String deleteSkill(@RequestParam Long id) {
-		Skill skill = skillRepository.findByIdOrThrow(id);
-		skill.getChildren().forEach(c -> c.getParents().remove(skill));
-		skillRepository.delete(skill);
-		return "redirect:/module/" + skill.getSubmodule().getModule().getId();
+	public String deleteSkill(@RequestParam Long id, @RequestParam String page) {
+		Skill skill = skillService.deleteSkill(id);
+		return page.equals("block") ? "redirect:/module/" + skill.getSubmodule().getModule().getId()
+				: "redirect:/edition/" + skill.getSubmodule().getModule().getEdition().getId();
 	}
 
 	/**

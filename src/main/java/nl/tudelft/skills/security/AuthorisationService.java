@@ -137,8 +137,8 @@ public class AuthorisationService {
 	/**
 	 * Gets whether the authenticated user can create a module in the edition.
 	 *
-	 * @param   editionId The edition id.
-	 * @returnn           True iff the user can create a module in the edition.
+	 * @param  editionId The edition id.
+	 * @return           True iff the user can create a module in the edition.
 	 */
 	public boolean canCreateModuleInEdition(Long editionId) {
 		return isAtLeastTeacherInEdition(editionId);
@@ -147,8 +147,8 @@ public class AuthorisationService {
 	/**
 	 * Gets whether the authenticated user can delete a module in the edition.
 	 *
-	 * @param   editionId The edition id.
-	 * @returnn           True iff the user can delete a module in the edition.
+	 * @param  editionId The edition id.
+	 * @return           True iff the user can delete a module in the edition.
 	 */
 	public boolean canDeleteModuleInEdition(Long editionId) {
 		return isAtLeastTeacherInEdition(editionId);
@@ -157,8 +157,8 @@ public class AuthorisationService {
 	/**
 	 * Gets whether the authenticated user can delete a module.
 	 *
-	 * @param   moduleId The module id.
-	 * @returnn          True iff the user can delete a module.
+	 * @param  moduleId The module id.
+	 * @return          True iff the user can delete a module.
 	 */
 	public boolean canDeleteModule(Long moduleId) {
 		return canDeleteModuleInEdition(moduleRepository.findByIdOrThrow(moduleId).getEdition().getId());
@@ -179,12 +179,77 @@ public class AuthorisationService {
 	 * Gets whether the authenticated user can edit a module.
 	 *
 	 * @param  moduleId The id of the module
-	 * @return          True iff the user can edit the moduel
+	 * @return          True iff the user can edit the module
 	 */
 	@Transactional
 	public boolean canEditModule(Long moduleId) {
 		return canEditModuleInEdition(
 				moduleRepository.findByIdOrThrow(moduleId).getEdition().getId());
+	}
+
+	/**
+	 * Gets whether the authenticated user can create submodules in an edition.
+	 *
+	 * @param  editionId The id of the edition
+	 * @return           True iff the user can create submodules in the edition
+	 */
+	public boolean canCreateSubmoduleInEdition(Long editionId) {
+		return isAtLeastTeacherInEdition(editionId);
+	}
+
+	/**
+	 * Gets whether the authenticated user can create a submodule in a module.
+	 *
+	 * @param  moduleId The id of the module
+	 * @return          True iff the user can create skills in the module
+	 */
+	public boolean canCreateSubmodule(Long moduleId) {
+		return canCreateSubmoduleInEdition(
+				moduleRepository.findByIdOrThrow(moduleId).getEdition().getId());
+	}
+
+	/**
+	 * Gets whether the authenticated user can delete a submodule in the edition.
+	 *
+	 * @param  editionId The edition id.
+	 * @return           True iff the user can delete a submodule in the edition.
+	 */
+	public boolean canDeleteSubmoduleInEdition(Long editionId) {
+		return isAtLeastTeacherInEdition(editionId);
+	}
+
+	/**
+	 * Gets whether the authenticated user can delete a submodule.
+	 *
+	 * @param  submoduleId The submodule id.
+	 * @return             True iff the user can delete a submodule.
+	 */
+	public boolean canDeleteSubmodule(Long submoduleId) {
+		return canDeleteSubmoduleInEdition(
+				submoduleRepository.findByIdOrThrow(submoduleId).getModule().getEdition().getId());
+	}
+
+	/**
+	 * Gets whether the authenticated user can edit a submodule in a edition.
+	 *
+	 * @param  editionId The id of the edition
+	 * @return           True iff the user can edit the submodule in edition
+	 */
+	@Transactional
+	public boolean canEditSubmoduleInEdition(Long editionId) {
+		return isAtLeastTeacherInEdition(editionId);
+	}
+
+	/**
+	 * Gets whether the authenticated user can edit a submodule.
+	 *
+	 * @param  submoduleId The id of the module
+	 * @return             True iff the user can edit the submodule
+	 */
+	@Transactional
+	public boolean canEditSubmodule(Long submoduleId) {
+		return canEditSubmoduleInEdition(
+				submoduleRepository.findByIdOrThrow(submoduleId).getModule().getEdition().getId());
 	}
 
 	/**

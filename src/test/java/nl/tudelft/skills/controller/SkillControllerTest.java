@@ -32,6 +32,7 @@ import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.SkillRepository;
+import nl.tudelft.skills.service.SkillService;
 
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
@@ -53,8 +54,8 @@ public class SkillControllerTest extends ControllerTest {
 	private final SkillRepository skillRepository;
 
 	@Autowired
-	public SkillControllerTest(SkillRepository skillRepository) {
-		this.skillController = new SkillController(skillRepository);
+	public SkillControllerTest(SkillRepository skillRepository, SkillService skillService) {
+		this.skillController = new SkillController(skillRepository, skillService);
 		this.skillRepository = skillRepository;
 	}
 
@@ -71,14 +72,14 @@ public class SkillControllerTest extends ControllerTest {
 				.andExpect(status().isOk())
 				.andReturn().getResponse().getContentAsString();
 
-		Matcher idMatcher = Pattern.compile("id=\"skill-(\\d+)\"").matcher(element);
+		Matcher idMatcher = Pattern.compile("id=\"block-(\\d+)\"").matcher(element);
 		assertThat(idMatcher.find()).isTrue();
 
 		Long id = Long.parseLong(idMatcher.group(1));
 		assertThat(skillRepository.existsById(id)).isTrue();
 
 		assertThat(element)
-				.contains("<span id=\"skill-" + id + "-name\">Skill</span>\n")
+				.contains("<span id=\"block-" + id + "-name\">Skill</span>")
 				.contains("style=\"grid-row: 11; grid-column: 12");
 	}
 
@@ -109,7 +110,7 @@ public class SkillControllerTest extends ControllerTest {
 
 	@Test
 	void deleteSkill() {
-		skillController.deleteSkill(db.skillVariables.getId());
+		skillController.deleteSkill(db.skillVariables.getId(), "block");
 		assertThat(skillRepository.existsById(db.skillVariables.getId())).isFalse();
 	}
 

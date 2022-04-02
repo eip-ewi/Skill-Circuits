@@ -25,29 +25,26 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import nl.tudelft.librador.dto.patch.Patch;
-import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
-import nl.tudelft.skills.model.Skill;
+import nl.tudelft.skills.dto.id.SCModuleIdDTO;
+import nl.tudelft.skills.model.Submodule;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SkillPatchDTO extends Patch<Skill> {
+public class SubmodulePatchDTO extends Patch<Submodule> {
 
 	@NotNull
 	private Long id;
 	@NotBlank
 	private String name;
 	@NotNull
-	@Builder.Default
-	private Boolean essential = false;
-	private SubmoduleIdDTO submodule;
+	private SCModuleIdDTO module;
 
 	@Override
 	protected void applyOneToOne() {
 		updateNonNull(name, data::setName);
-		updateNonNull(essential, data::setEssential);
-		updateNonNullId(submodule, data::setSubmodule);
+		updateNonNullId(module, data::setModule);
 	}
 
 	@Override

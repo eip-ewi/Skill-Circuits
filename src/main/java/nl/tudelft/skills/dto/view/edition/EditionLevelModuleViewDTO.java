@@ -17,11 +17,15 @@
  */
 package nl.tudelft.skills.dto.view.edition;
 
+import java.util.List;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
 import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.dto.view.BlockView;
+import nl.tudelft.skills.dto.view.GroupView;
 import nl.tudelft.skills.model.SCModule;
 
 @Data
@@ -29,10 +33,18 @@ import nl.tudelft.skills.model.SCModule;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class EditionLevelModuleViewDTO extends View<SCModule> {
+public class EditionLevelModuleViewDTO extends View<SCModule> implements GroupView {
 
 	@NotNull
 	private Long id;
 	@NotBlank
 	private String name;
+	@NotNull
+	@PostApply
+	private List<EditionLevelSubmoduleViewDTO> submodules;
+
+	@Override
+	public List<? extends BlockView> getBlocks() {
+		return submodules;
+	}
 }

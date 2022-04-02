@@ -15,42 +15,38 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.patch;
+package nl.tudelft.skills.dto.create;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import nl.tudelft.librador.dto.patch.Patch;
-import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
-import nl.tudelft.skills.model.Skill;
+import lombok.*;
+import nl.tudelft.librador.dto.create.Create;
+import nl.tudelft.skills.dto.id.SCModuleIdDTO;
+import nl.tudelft.skills.model.Submodule;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SkillPatchDTO extends Patch<Skill> {
+@EqualsAndHashCode(callSuper = false)
+public class SubmoduleCreateDTO extends Create<Submodule> {
 
-	@NotNull
-	private Long id;
 	@NotBlank
 	private String name;
 	@NotNull
-	@Builder.Default
-	private Boolean essential = false;
-	private SubmoduleIdDTO submodule;
+	private SCModuleIdDTO module;
+	@Min(0)
+	@NotNull
+	private Integer row;
+	@Min(0)
+	@NotNull
+	private Integer column;
 
 	@Override
-	protected void applyOneToOne() {
-		updateNonNull(name, data::setName);
-		updateNonNull(essential, data::setEssential);
-		updateNonNullId(submodule, data::setSubmodule);
+	public Class<Submodule> clazz() {
+		return Submodule.class;
 	}
 
-	@Override
-	protected void validate() {
-	}
 }

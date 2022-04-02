@@ -56,7 +56,7 @@ public class TestDatabaseLoader {
 
 	private SCCourse scCourse;
 	private SCEdition editionRL;
-	private SCModule moduleProofTechniques;
+	public SCModule moduleProofTechniques;
 	private SCPerson person;
 
 	public Submodule submoduleLogicBasics;
@@ -152,26 +152,38 @@ public class TestDatabaseLoader {
 		submoduleLogicBasics = submoduleRepository.save(Submodule.builder()
 				.name("Logic Basics")
 				.module(moduleProofTechniques)
+				.row(0)
+				.column(0)
 				.build());
 		submoduleGeneralisation = submoduleRepository.save(Submodule.builder()
 				.name("Generalisation")
 				.module(moduleProofTechniques)
+				.row(1)
+				.column(0)
 				.build());
 		submoduleCases = submoduleRepository.save(Submodule.builder()
 				.name("Cases")
 				.module(moduleProofTechniques)
+				.row(0)
+				.column(1)
 				.build());
 		submoduleContradiction = submoduleRepository.save(Submodule.builder()
 				.name("Contradiction")
 				.module(moduleProofTechniques)
+				.row(1)
+				.column(1)
 				.build());
 		submoduleContrapositive = submoduleRepository.save(Submodule.builder()
 				.name("Contrapositive")
 				.module(moduleProofTechniques)
+				.row(0)
+				.column(2)
 				.build());
 		submoduleInduction = submoduleRepository.save(Submodule.builder()
 				.name("Induction")
 				.module(moduleProofTechniques)
+				.row(1)
+				.column(2)
 				.build());
 	}
 

@@ -20,33 +20,34 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
-<div th:if="${@authorisationService.canEditSkillInEdition(module.edition.id)}" layout:fragment="overlay" class="hidden overlay" id="delete-task-overlay">
+<div th:if="${canDelete}" layout:fragment="overlay" class="hidden overlay" id="delete-block-overlay">
 
-    <form id="delete-task-form" class="confirmation" th:action="@{/task}" th:method="delete">
+    <form id="delete-block-form" class="confirmation" th:action="@{|/${blockType}|}" th:method="delete">
 
-        <input id="delete-task-id" name="id" type="hidden"/>
+        <input id="delete-block-id" name="id" type="hidden"/>
+        <input name="page" value="block" type="hidden"/>
 
-        <p>Are you sure you want to delete "<span id="delete-task-name"></span>"?</p>
+        <p>Are you sure you want to delete &quot;<span id="delete-block-name"></span>&quot;?</p>
 
         <div class="confirmation__buttons">
-            <button type="button" onclick="toggleOverlay('delete-task-overlay')">Cancel</button>
-            <button type="submit">Delete Task</button>
+            <button type="button" onclick="toggleOverlay('delete-block-overlay')">Cancel</button>
+            <button type="submit">Delete</button>
         </div>
 
     </form>
 
 </div>
 
-<script th:if="${@authorisationService.canEditSkillInEdition(module.edition.id)}" layout:fragment="script">
-    function deleteTask() {
-        toggleOverlay("delete-task-overlay");
-        let taskId = $(this).data("task");
-        $("#delete-task-id").val(taskId);
-        $("#delete-task-name").text($(`#task-${taskId}-name`).text());
+<script th:if="${canDelete}" layout:fragment="script">
+    function deleteBlock() {
+        toggleOverlay("delete-block-overlay");
+        let blockId = $(this).data("block");
+        $("#delete-block-id").val(blockId);
+        $("#delete-block-name").text($(`#block-${blockId}-name`).text());
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-        $(".task__delete").click(deleteTask);
+        $(".block__delete").click(deleteBlock);
     });
 </script>
 

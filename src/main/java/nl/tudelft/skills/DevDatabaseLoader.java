@@ -143,30 +143,44 @@ public class DevDatabaseLoader {
 		submoduleLogicBasics = submoduleRepository.save(Submodule.builder()
 				.name("Logic Basics")
 				.module(moduleProofTechniques)
+				.row(0)
+				.column(0)
 				.build());
 		submoduleGeneralisation = submoduleRepository.save(Submodule.builder()
 				.name("Generalisation")
 				.module(moduleProofTechniques)
+				.row(1)
+				.column(1)
 				.build());
 		submoduleCases = submoduleRepository.save(Submodule.builder()
 				.name("Cases")
 				.module(moduleProofTechniques)
+				.row(2)
+				.column(2)
 				.build());
 		submoduleContradiction = submoduleRepository.save(Submodule.builder()
 				.name("Contradiction")
 				.module(moduleProofTechniques)
+				.row(3)
+				.column(1)
 				.build());
 		submoduleContrapositive = submoduleRepository.save(Submodule.builder()
 				.name("Contrapositive")
 				.module(moduleProofTechniques)
+				.row(2)
+				.column(3)
 				.build());
 		submoduleInduction = submoduleRepository.save(Submodule.builder()
 				.name("Induction")
 				.module(moduleProofTechniques)
+				.row(3)
+				.column(0)
 				.build());
 		submoduleSimple = submoduleRepository.save(Submodule.builder()
 				.name("Simple Module")
 				.module(moduleSimple)
+				.row(0)
+				.column(3)
 				.build());
 	}
 

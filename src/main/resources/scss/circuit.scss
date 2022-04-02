@@ -8,9 +8,28 @@
   display: grid;
   gap: var(--circuit-gap);
   grid-template-columns: repeat(var(--columns), 1fr);
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+  }
+
+  &__button {
+    border: 1px solid var(--primary-dark);
+    background-color: var(--primary-light);
+    color: var(--primary-dark);
+    cursor: pointer;
+    font-size: 1.25rem;
+    padding: .5rem 1rem;
+    &:hover, &:focus-visible {
+      background-color: var(--primary-green);
+      color: var(--primary-light);
+    }
+  }
 }
 
-.skill {
+.block {
   background-color: var(--primary-light);
   --border-colour: var(--primary-dark);
   border: 1px solid var(--border-colour);
@@ -53,8 +72,8 @@
       }
     }
   }
-  &:hover > .skill__buttons,
-  &:focus-within > .skill__buttons {
+  &:hover > .block__buttons,
+  &:focus-within > .block__buttons {
     display: flex;
   }
 
@@ -117,22 +136,22 @@
     align-items: flex-start;
   }
 
-  &__submodule__name{
+  &__group__name{
     color: var(--secondary-green);
+    text-decoration: none;
     &:hover {
       color: var(--primary-green);
       border-color: var(--primary-green);
-
     }
   }
 
 }
 
-.tasks {
+.items {
   list-style-type: none;
 }
 
-.task {
+.item {
   align-items: center;
   display: flex;
   gap: 0.5rem;
@@ -152,7 +171,7 @@
   }
 
   &.completed {
-    & > .task__content > .task__button {
+    & > .item__content > .item__button {
       background-color: var(--primary-green);
       &:hover, &:focus-visible {
         background-color: var(--primary-light);
@@ -170,7 +189,7 @@
       color: var(--primary-green);
     }
   }
-  &:hover > .task__buttons {
+  &:hover > .item__buttons {
     display: flex;
   }
 
@@ -213,12 +232,12 @@
     }
   }
 }
-.skill:hover .task__create,
-.skill:focus-within .task__create {
+.block:hover .item__create,
+.block:focus-within .item__create {
   display: initial;
 }
 
-.ghost_skill {
+.ghost_block {
   align-items: center;
   display: grid;
   font-size: 1.5rem;
@@ -241,7 +260,7 @@
     }
   }
 }
-.circuit.editing > .ghost_skill {
+.circuit.editing > .ghost_block {
   background-color: var(--grey-700);
 }
 
@@ -295,14 +314,15 @@
     transform: scale(1, 1);
   }
   &__text {
+    color: var(--primary-dark);
+    background-color: var(--grey-700);
+    padding: 0.2rem;
+    font-size: 0.8rem;
+    text-align: center;
     transform: scale(0, 0);
     transform-origin: top left;
     transition: transform 150ms ease-in-out;
     width: 120px;
-    background-color: var(--grey-700);
-    color: var(--primary-dark);
-    text-align: center;
-    padding: 0.2rem;
 
     /* Position the tooltip */
     position: absolute;

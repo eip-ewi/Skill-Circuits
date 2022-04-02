@@ -15,38 +15,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view.module;
+package nl.tudelft.skills.dto.view;
 
 import java.util.List;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+public interface BlockView {
 
-import lombok.*;
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.BlockView;
-import nl.tudelft.skills.dto.view.GroupView;
-import nl.tudelft.skills.model.Submodule;
+	List<? extends ItemView> getItems();
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class ModuleLevelSubmoduleViewDTO extends View<Submodule> implements GroupView {
+	List<Long> getChildIds();
 
-	@NotNull
-	private Long id;
-	@NotBlank
-	private String name;
-	@NotNull
-	@PostApply
-	private List<ModuleLevelSkillViewDTO> skills;
-	@NotNull
-	private List<Long> childIds;
-
-	@Override
-	public List<? extends BlockView> getBlocks() {
-		return skills;
-	}
 }

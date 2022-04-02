@@ -15,38 +15,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view.module;
+package nl.tudelft.skills.dto.view;
 
 import java.util.List;
+import java.util.Set;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import org.springframework.data.util.Pair;
 
-import lombok.*;
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.BlockView;
-import nl.tudelft.skills.dto.view.GroupView;
-import nl.tudelft.skills.model.Submodule;
+public interface CircuitView {
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class ModuleLevelSubmoduleViewDTO extends View<Submodule> implements GroupView {
+	List<? extends GroupView> getGroups();
 
-	@NotNull
-	private Long id;
-	@NotBlank
-	private String name;
-	@NotNull
-	@PostApply
-	private List<ModuleLevelSkillViewDTO> skills;
-	@NotNull
-	private List<Long> childIds;
+	Set<Pair<Integer, Integer>> getFilledPositions();
 
-	@Override
-	public List<? extends BlockView> getBlocks() {
-		return skills;
-	}
 }
