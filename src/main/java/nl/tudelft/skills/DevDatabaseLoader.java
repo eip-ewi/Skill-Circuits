@@ -288,8 +288,9 @@ public class DevDatabaseLoader {
 	}
 
 	private void initTasks() {
-		taskRepository.save(Task.builder().name("Read chapter 1.2").skill(skillImplication).build());
-		taskRepository.save(Task.builder().name("Do exercise 1.2a-e").skill(skillImplication).build());
+		taskRepository.save(Task.builder().name("Read chapter 1.2").skill(skillImplication).time(7).build());
+		taskRepository.save(Task.builder().name("Do exercise 1.2a-e").skill(skillImplication).time(10)
+				.build());
 		taskRepository.save(Task.builder().name("Read chapter 1.1").skill(skillNegation).build());
 		taskRepository.save(Task.builder().name("Do exercise 1.1a-d").skill(skillNegation).build());
 		taskRepository.save(Task.builder().name("Read chapter 1.0").skill(skillVariables).build());

@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -46,6 +47,10 @@ public class Task {
 	private String name;
 
 	private TaskType type;
+
+	@Builder.Default
+	@Min(0)
+	private Integer time = 0;
 
 	@NotNull
 	@Builder.Default
