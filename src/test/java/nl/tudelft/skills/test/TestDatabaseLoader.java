@@ -17,6 +17,9 @@
  */
 package nl.tudelft.skills.test;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -50,6 +53,8 @@ public class TestDatabaseLoader {
 	private TaskRepository taskRepository;
 	@Autowired
 	private PersonRepository personRepository;
+	@Autowired
+	private CheckpointRepository checkpointRepository;
 
 	public CourseSummaryDTO course;
 	public EditionDetailsDTO edition;
@@ -92,6 +97,9 @@ public class TestDatabaseLoader {
 	public Task taskRead10;
 	public Task taskDo10a;
 
+	private Checkpoint checkpointLectureOne;
+	private Checkpoint checkpointLectureTwo;
+
 	public SCModule getModuleProofTechniques() {
 		return moduleRepository.findByIdOrThrow(moduleProofTechniques.getId());
 	}
@@ -120,6 +128,7 @@ public class TestDatabaseLoader {
 		initSkills();
 		initTasks();
 		initPerson();
+		initCheckpoints();
 	}
 
 	private void initCourse() {
@@ -314,6 +323,24 @@ public class TestDatabaseLoader {
 
 		taskRepository.save(Task.builder().name("Watch lecture 4").skill(skillInductionPractice).build());
 		taskRepository.save(Task.builder().name("Do exercise 2.5b-d").skill(skillInductionPractice).build());
+	}
+
+	private void initCheckpoints() {
+		checkpointLectureOne = checkpointRepository.save(Checkpoint.builder()
+				.name("Lecture 1")
+				.edition(edition.getId())
+				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 42), LocalTime.MIDNIGHT))
+				.skills(Set.of(skillImplication, skillNegation, skillVariables, skillAssumption,
+						skillProofOutline))
+				.build());
+
+		checkpointLectureTwo = checkpointRepository.save(Checkpoint.builder()
+				.name("Lecture 2")
+				.edition(edition.getId())
+				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 49), LocalTime.MIDNIGHT))
+				.skills(Set.of(skillDividingIntoCases, skillGeneralisationPractice, skillTransitiveProperty,
+						skillCasesPractice, skillContradictionPractice, skillNegateImplications))
+				.build());
 	}
 
 }

@@ -105,7 +105,7 @@ public class DevDatabaseLoader {
 	private Skill skillSimpleF;
 
 	private Checkpoint checkpointLectureOne;
-	private Checkpoint lectureTwo;
+	private Checkpoint checkpointLectureTwo;
 
 	@PostConstruct
 	private void init() {
@@ -399,7 +399,7 @@ public class DevDatabaseLoader {
 						skillProofOutline))
 				.build());
 
-		lectureTwo = checkpointRepository.save(Checkpoint.builder()
+		checkpointLectureTwo = checkpointRepository.save(Checkpoint.builder()
 				.name("Lecture 2")
 				.edition(edition.getId())
 				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 49), LocalTime.MIDNIGHT))
