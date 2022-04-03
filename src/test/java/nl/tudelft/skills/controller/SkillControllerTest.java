@@ -32,6 +32,7 @@ import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.SkillRepository;
+import nl.tudelft.skills.repository.SubmoduleRepository;
 import nl.tudelft.skills.service.SkillService;
 
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -52,9 +53,12 @@ public class SkillControllerTest extends ControllerTest {
 
 	private final SkillController skillController;
 	private final SkillRepository skillRepository;
+	private final SubmoduleRepository submoduleRepository;
 
 	@Autowired
-	public SkillControllerTest(SkillRepository skillRepository, SkillService skillService) {
+	public SkillControllerTest(SkillRepository skillRepository, SkillService skillService,
+			SubmoduleRepository submoduleRepository) {
+		this.submoduleRepository = submoduleRepository;
 		this.skillController = new SkillController(skillRepository, skillService);
 		this.skillRepository = skillRepository;
 	}
@@ -93,7 +97,8 @@ public class SkillControllerTest extends ControllerTest {
 
 		Skill skill = skillRepository.findByIdOrThrow(db.skillVariables.getId());
 		assertThat(skill.getName()).isEqualTo("Updated");
-		assertThat(skill.getSubmodule()).isEqualTo(db.submoduleCases);
+		assertThat(submoduleRepository.findByIdOrThrow(skill.getSubmodule().getId())).isEqualTo(
+				submoduleRepository.findByIdOrThrow(db.submoduleCases.getId()));
 	}
 
 	@Test

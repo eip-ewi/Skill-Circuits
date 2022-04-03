@@ -39,40 +39,50 @@ public class PersonControllerTest extends ControllerTest {
 
 	private final PersonController personController;
 	private final PersonRepository personRepository;
+	private final TaskRepository taskRepository;
 
 	@Autowired
-	public PersonControllerTest(TaskRepository taskRepository, PersonRepository personRepository) {
+	public PersonControllerTest(PersonRepository personRepository, TaskRepository taskRepository) {
 		this.personRepository = personRepository;
 		this.personController = new PersonController(taskRepository, personRepository);
+		this.taskRepository = taskRepository;
 	}
 
 	@Test
 	void setTasksCompletedForPerson() {
-		assertThat(db.getPerson().getTasksCompleted()).doesNotContain(db.taskDo10a, db.taskDo10a);
+		assertThat(db.getPerson().getTasksCompleted()).doesNotContain(
+				taskRepository.findByIdOrThrow(db.taskDo10a.getId()),
+				taskRepository.findByIdOrThrow(db.taskRead10.getId()));
 
 		personController.setTasksCompletedForPerson(TestUserDetailsService.id,
 				List.of(db.taskDo10a.getId(), db.taskRead10.getId()));
 
-		assertThat(db.getPerson().getTasksCompleted()).contains(db.taskDo10a, db.taskRead10);
+		assertThat(db.getPerson().getTasksCompleted()).contains(
+				taskRepository.findByIdOrThrow(db.taskDo10a.getId()),
+				taskRepository.findByIdOrThrow(db.taskRead10.getId()));
 	}
 
 	@Test
 	void updateTaskCompletedForPersonTrue() {
-		assertThat(db.getPerson().getTasksCompleted()).doesNotContain(db.taskDo10a);
+		assertThat(db.getPerson().getTasksCompleted())
+				.doesNotContain(taskRepository.findByIdOrThrow(db.taskDo10a.getId()));
 
 		personController.updateTaskCompletedForPerson(TestUserDetailsService.id,
 				db.taskDo10a.getId(), true);
 
-		assertThat(db.getPerson().getTasksCompleted()).contains(db.taskDo10a);
+		assertThat(db.getPerson().getTasksCompleted())
+				.contains(taskRepository.findByIdOrThrow(db.taskDo10a.getId()));
 	}
 
 	@Test
 	void updateTaskCompletedForPersonFalse() {
-		assertThat(db.getPerson().getTasksCompleted()).contains(db.taskDo11ad);
+		assertThat(db.getPerson().getTasksCompleted())
+				.contains(taskRepository.findByIdOrThrow(db.taskDo11ad.getId()));
 
 		personController.updateTaskCompletedForPerson(TestUserDetailsService.id,
 				db.taskDo11ad.getId(), false);
 
-		assertThat(db.getPerson().getTasksCompleted()).doesNotContain(db.taskDo11ad);
+		assertThat(db.getPerson().getTasksCompleted())
+				.doesNotContain(taskRepository.findByIdOrThrow(db.taskDo11ad.getId()));
 	}
 }

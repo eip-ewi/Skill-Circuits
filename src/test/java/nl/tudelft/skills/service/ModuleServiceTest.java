@@ -19,13 +19,14 @@ package nl.tudelft.skills.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.stream.Stream;
+import java.util.List;
 
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.dto.view.module.TaskViewDTO;
-import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.repository.ModuleRepository;
+import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.test.TestDatabaseLoader;
 import nl.tudelft.skills.test.TestUserDetailsService;
 
@@ -40,12 +41,23 @@ public class ModuleServiceTest {
 
 	@Autowired
 	private TestDatabaseLoader db;
+
+	private final ModuleService moduleService;
+	private final TaskRepository taskRepository;
+	private final ModuleRepository moduleRepository;
+
 	@Autowired
-	private ModuleService moduleService;
+	public ModuleServiceTest(ModuleService moduleService, TaskRepository taskRepository,
+			ModuleRepository moduleRepository) {
+		this.moduleService = moduleService;
+		this.taskRepository = taskRepository;
+		this.moduleRepository = moduleRepository;
+	}
 
 	@Test
 	void setCompletedTasksForPerson() {
-		ModuleLevelModuleViewDTO module = View.convert(db.getModuleProofTechniques(),
+		ModuleLevelModuleViewDTO module = View.convert(
+				moduleRepository.findByIdOrThrow(db.getModuleProofTechniques().getId()),
 				ModuleLevelModuleViewDTO.class);
 		moduleService.setCompletedTasksForPerson(module, TestUserDetailsService.id);
 		assertThat(module.getSubmodules().stream()
@@ -54,8 +66,10 @@ public class ModuleServiceTest {
 				.filter(TaskViewDTO::isCompleted)
 				.map(TaskViewDTO::getId).toList())
 						.containsExactlyInAnyOrderElementsOf(
-								Stream.of(db.taskRead11, db.taskDo11ad, db.taskRead12, db.taskDo12ae)
-										.map(Task::getId).toList());
+								List.of(db.taskRead11.getId(),
+										db.taskDo11ad.getId(),
+										db.taskRead12.getId(),
+										db.taskDo12ae.getId()));
 
 	}
 
