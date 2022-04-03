@@ -25,10 +25,14 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
+import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.CircuitView;
 import nl.tudelft.skills.dto.view.GroupView;
+import nl.tudelft.skills.dto.view.checkpoint.CheckpointViewDTO;
 import nl.tudelft.skills.model.SCModule;
+import nl.tudelft.skills.model.Skill;
+import nl.tudelft.skills.repository.EditionRepository;
 
 import org.springframework.data.util.Pair;
 
@@ -48,10 +52,27 @@ public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitV
 	@NotNull
 	@PostApply
 	private List<ModuleLevelSubmoduleViewDTO> submodules;
+	@NotNull
+	@PostApply
+	private List<CheckpointViewDTO> checkpoints;
 
 	@Override
 	public List<? extends GroupView> getGroups() {
 		return submodules;
+	}
+
+	@Override
+	public void postApply() {
+		super.postApply();
+		// get all checkpoints that contain a skill that is in this module.
+		Set<Long> skillIdsInModule = data.getSubmodules().stream()
+				.flatMap(sub -> sub.getSkills().stream().map(Skill::getId)).collect(Collectors.toSet());
+		this.checkpoints = SpringContext.getBean(EditionRepository.class)
+				.findByIdOrThrow(data.getEdition().getId())
+				.getCheckpoints().stream()
+				.filter(checkpoint -> checkpoint.getSkills().stream()
+						.anyMatch(skill -> skillIdsInModule.contains(skill.getId())))
+				.map(checkpoint -> View.convert(checkpoint, CheckpointViewDTO.class)).toList();
 	}
 
 	@Override

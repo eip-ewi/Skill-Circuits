@@ -15,41 +15,44 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.model;
+package nl.tudelft.skills.dto.view.checkpoint;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.List;
 
-import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
+import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.model.Checkpoint;
+import nl.tudelft.skills.model.Skill;
 
 @Data
-@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SCEdition {
-
-	@Id
-	private Long id;
+@EqualsAndHashCode(callSuper = false)
+public class CheckpointViewDTO extends View<Checkpoint> {
 
 	@NotNull
-	@Builder.Default
-	private boolean isVisible = false;
+	private long id;
 
 	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@OneToMany(mappedBy = "edition")
-	private Set<SCModule> modules = new HashSet<>();
+	private Long edition;
+
+	@NotBlank
+	private String name;
 
 	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@OneToMany(mappedBy = "edition")
-	private Set<Checkpoint> checkpoints = new HashSet<>();
+	private LocalDateTime deadline;
 
+	@NotNull
+	private List<Long> skillIds;
+
+	@Override
+	public void postApply() {
+		super.postApply();
+		this.skillIds = data.getSkills().stream().map(Skill::getId).toList();
+	}
 }

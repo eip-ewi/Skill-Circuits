@@ -21,6 +21,10 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
 <div class="circuit" id="circuit" layout:fragment="grid">
+    <th:block th:if="${level == 'module'}">
+        <div th:id="|checkpoint-${checkpoint.id}|" class="checkpoint"
+             th:each="checkpoint : ${module.checkpoints}" th:data-skills="${checkpoint.skillIds}" th:text="${checkpoint.name}">checkpoint</div>
+    </th:block>
     <th:block th:each="group : ${circuit.groups}">
         <th:block th:each="block : ${group.blocks}">
             <div layout:replace="~{block/view :: block}"></div>
@@ -41,6 +45,17 @@
             <span class="fa-solid fa-plus"></span>
         </div>
     </th:block>
+    <script th:if="${level == 'module'}">
+        function updateCheckpointPositions() {
+            [...$('.checkpoint')].forEach(cp => {
+                    $(cp).css("grid-row",
+                        Math.max(...$(cp).data("skills").map(id => {
+                            return parseInt($(`#block-${id}`)?.css('gridRowStart'))
+                        })))
+                }
+            )}
+        document.addEventListener('DOMContentLoaded', updateCheckpointPositions)
+    </script>
 </div>
 
 <div layout:fragment="additional">
