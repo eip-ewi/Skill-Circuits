@@ -45,17 +45,6 @@
             <span class="fa-solid fa-plus"></span>
         </div>
     </th:block>
-    <script th:if="${level == 'module'}">
-        function updateCheckpointPositions() {
-            [...$('.checkpoint')].forEach(cp => {
-                    $(cp).css("grid-row",
-                        Math.max(...$(cp).data("skills").map(id => {
-                            return parseInt($(`#block-${id}`)?.css('gridRowStart'))
-                        })))
-                }
-            )}
-        document.addEventListener('DOMContentLoaded', updateCheckpointPositions)
-    </script>
 </div>
 
 <div layout:fragment="additional">

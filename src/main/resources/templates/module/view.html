@@ -65,6 +65,19 @@
         <div layout:replace="~{circuit/view :: script}"></div>
     </th:block>
 
+    <script>
+        function updateCheckpointPositions() {
+            [...$('.checkpoint')].forEach(cp => {
+                    $(cp).css("grid-row",
+                        Math.max(...$(cp).data("skills").map(id => {
+                            return parseInt($(`#block-${id}`)?.css('gridRowStart'))
+                        })))
+                }
+            )}
+        document.addEventListener('DOMContentLoaded', updateCheckpointPositions)
+        document.addEventListener('drop', updateCheckpointPositions)
+    </script>
+
     <div layout:replace="~{task/create :: script}"></div>
     <div layout:replace="~{task/mark :: script}"></div>
 
