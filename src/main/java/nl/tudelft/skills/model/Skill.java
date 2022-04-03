@@ -91,4 +91,10 @@ public class Skill {
 	@ManyToMany(mappedBy = "skills")
 	private Set<Checkpoint> checkpoints = new HashSet<>();
 
+	@PreRemove
+	private void removeSkillFromCheckpoints() {
+		for (Checkpoint cp : checkpoints) {
+			cp.getSkills().remove(this);
+		}
+	}
 }
