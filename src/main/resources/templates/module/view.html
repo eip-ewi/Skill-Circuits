@@ -67,13 +67,16 @@
 
     <script>
         function updateCheckpointPositions() {
-            [...$('.checkpoint')].forEach(cp => {
-                    $(cp).css("grid-row",
-                        Math.max(...$(cp).data("skills").map(id => {
-                            return parseInt($(`#block-${id}`)?.css('gridRowStart'))
-                        })))
+            const checkpointRows = new Map();
+            [...$('.block')].forEach(skill => {
+                const checkpoint = $(skill).attr("data-checkpoint")
+                const row = $(skill).css("grid-row-start")
+                if (!checkpointRows.has(checkpoint) || checkpointRows.get(checkpoint) < row) {
+                    checkpointRows.set(checkpoint, row)
                 }
-            )}
+            });
+            [...$('.checkpoint')].forEach(cp => $(cp).css("grid-row", checkpointRows.get(cp.id.split("-")[1])))
+        }
         document.addEventListener('DOMContentLoaded', updateCheckpointPositions)
         document.addEventListener('drop', updateCheckpointPositions)
     </script>

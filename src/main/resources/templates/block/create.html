@@ -38,6 +38,11 @@
             </select>
 
             <th:block th:if="${level == 'module'}">
+                <label for="create-skill-checkpoint">Checkpoint</label>
+                <select id="create-skill-checkpoint" name="checkpoint.id" required>
+                    <option th:each="checkpoint : ${module.checkpoints}" th:value="${checkpoint.id}"
+                            th:text="${checkpoint.name}"></option>
+                </select>
                 <div>
                     <label for="essential-checkbox">Essential</label>
                     <div class="info_icon">
@@ -95,6 +100,7 @@
                     $(`#${element.id} > .block__connect.from > button`).click(connectFrom);
                     $(`#${element.id} > .block__connect.to > button`).click(connectTo);
                 }
+                updateCheckpointPositions();
             });
         });
 

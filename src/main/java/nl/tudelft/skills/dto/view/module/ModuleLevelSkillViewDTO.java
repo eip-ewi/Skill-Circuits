@@ -26,6 +26,7 @@ import lombok.*;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.BlockView;
 import nl.tudelft.skills.dto.view.ItemView;
+import nl.tudelft.skills.dto.view.checkpoint.CheckpointViewDTO;
 import nl.tudelft.skills.model.Skill;
 
 @Data
@@ -45,6 +46,8 @@ public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
 	private Integer row;
 	@NotNull
 	private Integer column;
+	@NotNull
+	private CheckpointViewDTO checkpoint;
 	@NotNull
 	private List<TaskViewDTO> tasks;
 	@NotNull
