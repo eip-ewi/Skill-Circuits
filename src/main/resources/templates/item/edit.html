@@ -42,6 +42,7 @@
 <script th:if="${canEdit}" layout:fragment="script">
     function editItem() {
         $(".item__name").removeClass("hidden");
+        $(".item__buttons").removeClass("hidden");
         let itemId = $(this).data("item");
         let itemName = $(`#item-${itemId}-name`);
         $("#edit-item-id").val(itemId);
