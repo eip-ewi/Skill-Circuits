@@ -24,6 +24,7 @@
     layout:fragment="item">
     <div th:id="|item-${item.id}-content|" class="item__content">
         <button th:if="${level == 'module'}" class="item__button" th:onclick="|toggleCompleted(${item.id})|" th:text="${item.time}"></button>
+        <span th:if="${level == 'module'}" th:class="|item__name fa-solid ${item.icon}|"></span>
         <span th:id="|item-${item.id}-name|" class="item__name" th:text="${item.name}"></span>
     </div>
     <div class="item__buttons" th:id="|item-${item.id}-buttons|">
