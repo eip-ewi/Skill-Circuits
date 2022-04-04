@@ -85,16 +85,8 @@ public class Skill {
 	private Set<Task> tasks = new HashSet<>();
 
 	@NotNull
-	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToMany(mappedBy = "skills")
-	private Set<Checkpoint> checkpoints = new HashSet<>();
-
-	@PreRemove
-	private void removeSkillFromCheckpoints() {
-		for (Checkpoint cp : checkpoints) {
-			cp.getSkills().remove(this);
-		}
-	}
+	@ManyToOne
+	private Checkpoint checkpoint;
 }

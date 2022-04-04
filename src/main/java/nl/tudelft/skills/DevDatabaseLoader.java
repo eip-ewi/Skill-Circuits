@@ -106,6 +106,7 @@ public class DevDatabaseLoader {
 
 	private Checkpoint checkpointLectureOne;
 	private Checkpoint checkpointLectureTwo;
+	private Checkpoint checkpointSimple;
 
 	@PostConstruct
 	private void init() {
@@ -116,9 +117,9 @@ public class DevDatabaseLoader {
 		initEdition();
 		initModules();
 		initSubmodules();
+		initCheckpoints();
 		initSkills();
 		initTasks();
-		initCheckpoints();
 	}
 
 	private void initCourse() {
@@ -198,33 +199,39 @@ public class DevDatabaseLoader {
 				.name("Implication")
 				.submodule(submoduleLogicBasics)
 				.row(0).column(0)
+				.checkpoint(checkpointLectureOne)
 				.build());
 		skillNegation = skillRepository.save(Skill.builder()
 				.name("Negation")
 				.submodule(submoduleLogicBasics)
 				.row(0).column(2)
+				.checkpoint(checkpointLectureOne)
 				.build());
 		skillVariables = skillRepository.save(Skill.builder()
 				.name("Variables")
 				.submodule(submoduleLogicBasics)
+				.checkpoint(checkpointLectureOne)
 				.row(0).column(4)
 				.build());
 
 		skillProofOutline = skillRepository.save(Skill.builder()
 				.name("Proof Outline")
 				.submodule(submoduleGeneralisation)
+				.checkpoint(checkpointLectureOne)
 				.row(1).column(3)
 				.build());
 		skillAssumption = skillRepository.save(Skill.builder()
 				.name("Assumption")
 				.submodule(submoduleGeneralisation)
 				.row(1).column(1)
+				.checkpoint(checkpointLectureOne)
 				.parents(Set.of(skillImplication))
 				.build());
 		skillGeneralisationPractice = skillRepository.save(Skill.builder()
 				.name("Generalisation Practice")
 				.submodule(submoduleGeneralisation)
 				.row(2).column(3)
+				.checkpoint(checkpointLectureTwo)
 				.parents(Set.of(skillAssumption, skillProofOutline, skillVariables))
 				.build());
 
@@ -232,11 +239,13 @@ public class DevDatabaseLoader {
 				.name("Dividing into Cases")
 				.submodule(submoduleCases)
 				.row(2).column(1)
+				.checkpoint(checkpointLectureTwo)
 				.build());
 		skillCasesPractice = skillRepository.save(Skill.builder()
 				.name("Cases Practice")
 				.submodule(submoduleCases)
 				.row(3).column(2)
+				.checkpoint(checkpointLectureTwo)
 				.parents(Set.of(skillProofOutline, skillDividingIntoCases))
 				.build());
 
@@ -244,6 +253,7 @@ public class DevDatabaseLoader {
 				.name("Contradiction Practice")
 				.submodule(submoduleContradiction)
 				.row(3).column(3)
+				.checkpoint(checkpointLectureTwo)
 				.parents(Set.of(skillProofOutline, skillNegation))
 				.build());
 
@@ -251,12 +261,14 @@ public class DevDatabaseLoader {
 				.name("Negate Implications")
 				.submodule(submoduleContrapositive)
 				.row(4).column(1)
+				.checkpoint(checkpointLectureTwo)
 				.parents(Set.of(skillNegation, skillImplication))
 				.build());
 		skillContrapositivePractice = skillRepository.save(Skill.builder()
 				.name("Contrapositive Practice")
 				.submodule(submoduleContrapositive)
 				.row(5).column(1)
+				.checkpoint(checkpointLectureTwo)
 				.parents(Set.of(skillProofOutline, skillNegateImplications))
 				.build());
 
@@ -264,12 +276,14 @@ public class DevDatabaseLoader {
 				.name("Transitive Property")
 				.submodule(submoduleInduction)
 				.row(3).column(0)
+				.checkpoint(checkpointLectureTwo)
 				.parents(Set.of(skillImplication))
 				.build());
 		skillInductionPractice = skillRepository.save(Skill.builder()
 				.name("Induction Practice")
 				.submodule(submoduleInduction)
 				.row(6).column(2)
+				.checkpoint(checkpointLectureTwo)
 				.parents(Set.of(skillTransitiveProperty, skillProofOutline, skillDividingIntoCases))
 				.build());
 
@@ -277,36 +291,42 @@ public class DevDatabaseLoader {
 				.name("Skill A")
 				.submodule(submoduleSimple)
 				.row(0).column(1)
+				.checkpoint(checkpointSimple)
 				.build());
 		skillSimpleB = skillRepository.save(Skill.builder()
 				.name("Skill B")
 				.submodule(submoduleSimple)
 				.row(1).column(0)
 				.parents(Set.of(skillSimpleA))
+				.checkpoint(checkpointSimple)
 				.build());
 		skillSimpleC = skillRepository.save(Skill.builder()
 				.name("Skill C")
 				.submodule(submoduleSimple)
 				.row(1).column(2)
 				.parents(Set.of(skillSimpleA))
+				.checkpoint(checkpointSimple)
 				.build());
 		skillSimpleD = skillRepository.save(Skill.builder()
 				.name("Skill D")
 				.submodule(submoduleSimple)
 				.row(2).column(0)
 				.parents(Set.of(skillSimpleB))
+				.checkpoint(checkpointSimple)
 				.build());
 		skillSimpleE = skillRepository.save(Skill.builder()
 				.name("Skill E")
 				.submodule(submoduleSimple)
 				.row(2).column(1)
 				.parents(Set.of(skillSimpleB))
+				.checkpoint(checkpointSimple)
 				.build());
 		skillSimpleF = skillRepository.save(Skill.builder()
 				.name("Skill F")
 				.submodule(submoduleSimple)
 				.row(2).column(2)
 				.parents(Set.of(skillSimpleB))
+				.checkpoint(checkpointSimple)
 				.build());
 	}
 
@@ -395,16 +415,18 @@ public class DevDatabaseLoader {
 				.name("Lecture 1")
 				.edition(edition.getId())
 				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 42), LocalTime.MIDNIGHT))
-				.skills(Set.of(skillImplication, skillNegation, skillVariables, skillAssumption,
-						skillProofOutline))
 				.build());
 
 		checkpointLectureTwo = checkpointRepository.save(Checkpoint.builder()
 				.name("Lecture 2")
 				.edition(edition.getId())
 				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 49), LocalTime.MIDNIGHT))
-				.skills(Set.of(skillDividingIntoCases, skillGeneralisationPractice, skillTransitiveProperty,
-						skillCasesPractice, skillContradictionPractice, skillNegateImplications))
+				.build());
+
+		checkpointSimple = checkpointRepository.save(Checkpoint.builder()
+				.name("Simple")
+				.edition(edition.getId())
+				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 49), LocalTime.MIDNIGHT))
 				.build());
 	}
 

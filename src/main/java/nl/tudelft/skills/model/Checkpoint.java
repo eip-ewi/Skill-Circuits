@@ -51,7 +51,8 @@ public class Checkpoint {
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToMany
+	@OneToMany(mappedBy = "checkpoint")
 	private Set<Skill> skills = new HashSet<>();
+
 
 }

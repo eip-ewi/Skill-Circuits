@@ -23,6 +23,7 @@ import javax.validation.constraints.NotNull;
 
 import lombok.*;
 import nl.tudelft.librador.dto.create.Create;
+import nl.tudelft.skills.dto.id.CheckpointIdDTO;
 import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
 import nl.tudelft.skills.model.Skill;
 
@@ -40,6 +41,8 @@ public class SkillCreateDTO extends Create<Skill> {
 	private Boolean essential = false;
 	@NotNull
 	private SubmoduleIdDTO submodule;
+	@NotNull
+	private CheckpointIdDTO checkpoint;
 	@Min(0)
 	@NotNull
 	private Integer row;
