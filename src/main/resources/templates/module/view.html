@@ -63,27 +63,15 @@
             const itemType = "task";
         </script>
         <div layout:replace="~{circuit/view :: script}"></div>
+
+        <div layout:replace="~{task/create :: script}"></div>
+        <div layout:replace="~{task/mark :: script}"></div>
+
+        <div layout:replace="~{checkpoint/view :: script}"></div>
+        <div layout:replace="~{checkpoint/edit :: form}"></div>
+        <div layout:replace="~{checkpoint/edit :: script}"></div>
+        <div layout:replace="~{checkpoint/delete :: script}"></div>
     </th:block>
-
-    <script>
-        function updateCheckpointPositions() {
-            const checkpointRows = new Map();
-            [...$('.block')].forEach(skill => {
-                const checkpoint = $(skill).attr("data-checkpoint")
-                const row = $(skill).css("grid-row-start")
-                if (!checkpointRows.has(checkpoint) || checkpointRows.get(checkpoint) < row) {
-                    checkpointRows.set(checkpoint, row)
-                }
-            });
-            [...$('.checkpoint')].forEach(cp => $(cp).css("grid-row", checkpointRows.get(cp.id.split("-")[1])))
-        }
-        document.addEventListener('DOMContentLoaded', updateCheckpointPositions)
-        document.addEventListener('drop', updateCheckpointPositions)
-    </script>
-
-    <div layout:replace="~{task/create :: script}"></div>
-    <div layout:replace="~{task/mark :: script}"></div>
-
 </div>
 
 </body>

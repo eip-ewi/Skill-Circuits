@@ -54,5 +54,4 @@ public class Checkpoint {
 	@OneToMany(mappedBy = "checkpoint")
 	private Set<Skill> skills = new HashSet<>();
 
-
 }

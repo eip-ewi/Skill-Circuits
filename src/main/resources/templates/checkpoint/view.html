@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<div th:id="|checkpoint-${checkpoint.id}|" class="checkpoint" layout:fragment="checkpoint">
+    <div th:id="|checkpoint-${checkpoint.id}-name|" class="checkpoint__name" th:text="${checkpoint.name}"></div>
+    <div th:if="${canEdit}" class="checkpoint__buttons"
+         th:id="|checkpoint-${checkpoint.id}-buttons|">
+        <span class="fa-solid fa-pen checkpoint__edit" th:data-checkpoint="${checkpoint.id}"></span>
+        <span class="fa-solid fa-trash checkpoint__delete" th:data-checkpoint="${checkpoint.id}"></span>
+    </div>
+</div>
+
+<script th:if="${level == 'module'}" layout:fragment="script">
+    function updateCheckpointPositions() {
+        const checkpointRows = new Map();
+        [...$('.block')].forEach(skill => {
+            const checkpoint = $(skill).attr("data-checkpoint")
+            const row = $(skill).css("grid-row-start")
+            if (!checkpointRows.has(checkpoint) || checkpointRows.get(checkpoint) < row) {
+                checkpointRows.set(checkpoint, row)
+            }
+        });
+        [...$('.checkpoint')].forEach(cp => $(cp).css("grid-row", checkpointRows.get(cp.id.split("-")[1])))
+    }
+    document.addEventListener('DOMContentLoaded', updateCheckpointPositions)
+    document.addEventListener('drop', updateCheckpointPositions)
+
+</script>
+
+</html>

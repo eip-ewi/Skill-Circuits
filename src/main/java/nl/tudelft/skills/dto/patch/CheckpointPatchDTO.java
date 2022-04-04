@@ -15,34 +15,36 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.id;
+package nl.tudelft.skills.dto.patch;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
-import nl.tudelft.librador.dto.id.IdDTO;
+import nl.tudelft.librador.dto.patch.Patch;
 import nl.tudelft.skills.model.Checkpoint;
-import nl.tudelft.skills.repository.CheckpointRepository;
-
-import org.springframework.data.repository.CrudRepository;
 
 @Data
-@SuperBuilder
+@Builder
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class CheckpointIdDTO extends IdDTO<Checkpoint, Long> {
-	public CheckpointIdDTO(Long id) {
-		super(id);
+@AllArgsConstructor
+public class CheckpointPatchDTO extends Patch<Checkpoint> {
+
+	@NotNull
+	private Long id;
+	@NotBlank
+	private String name;
+
+	@Override
+	protected void applyOneToOne() {
+		updateNonNull(name, data::setName);
 	}
 
 	@Override
-	public Class<? extends CrudRepository<Checkpoint, Long>> repositoryClass() {
-		return CheckpointRepository.class;
-	}
+	protected void validate() {
 
-	@Override
-	public Class<? extends Checkpoint> targetClass() {
-		return Checkpoint.class;
 	}
 }

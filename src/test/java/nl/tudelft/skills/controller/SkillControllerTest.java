@@ -60,7 +60,7 @@ public class SkillControllerTest extends ControllerTest {
 
 	@Autowired
 	public SkillControllerTest(SkillRepository skillRepository, SkillService skillService,
-							   SubmoduleRepository submoduleRepository, CheckpointRepository checkpointRepository) {
+			SubmoduleRepository submoduleRepository, CheckpointRepository checkpointRepository) {
 		this.submoduleRepository = submoduleRepository;
 		this.checkpointRepository = checkpointRepository;
 		this.skillController = new SkillController(skillRepository, skillService);
@@ -74,7 +74,8 @@ public class SkillControllerTest extends ControllerTest {
 				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
 						new BasicNameValuePair("name", "Skill"),
 						new BasicNameValuePair("submodule.id", Long.toString(db.submoduleCases.getId())),
-						new BasicNameValuePair("checkpoint.id", Long.toString(db.checkpointLectureOne.getId())),
+						new BasicNameValuePair("checkpoint.id",
+								Long.toString(db.checkpointLectureOne.getId())),
 						new BasicNameValuePair("row", "10"),
 						new BasicNameValuePair("column", "11")))))
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED))

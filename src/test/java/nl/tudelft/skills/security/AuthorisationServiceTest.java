@@ -63,6 +63,7 @@ public class AuthorisationServiceTest {
 	private final SubmoduleRepository submoduleRepository;
 	private final SkillRepository skillRepository;
 	private final TaskRepository taskRepository;
+	private final CheckpointRepository checkpointRepository;
 
 	@Autowired
 	public AuthorisationServiceTest(RoleCacheManager roleCacheManager,
@@ -72,7 +73,7 @@ public class AuthorisationServiceTest {
 			ModuleRepository moduleRepository,
 			SubmoduleRepository submoduleRepository,
 			SkillRepository skillRepository,
-			TaskRepository taskRepository) {
+			TaskRepository taskRepository, CheckpointRepository checkpointRepository) {
 		this.authorisationService = authorisationService;
 		this.roleCacheManager = roleCacheManager;
 		this.roleApi = roleApi;
@@ -82,6 +83,7 @@ public class AuthorisationServiceTest {
 		this.submoduleRepository = submoduleRepository;
 		this.skillRepository = skillRepository;
 		this.taskRepository = taskRepository;
+		this.checkpointRepository = checkpointRepository;
 
 		this.courseApi = mock(CourseControllerApi.class);
 	}
@@ -120,6 +122,7 @@ public class AuthorisationServiceTest {
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
 				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
+				checkpointRepository,
 				courseApi);
 		when(courseApi.getCourseById(anyLong()))
 				.thenReturn(Mono.just(new CourseDetailsDTO().id(db.getCourseRL().getId())
@@ -136,6 +139,7 @@ public class AuthorisationServiceTest {
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
 				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
+				checkpointRepository,
 				courseApi);
 
 		assertThat(authorisationService.canViewEdition(db.edition.getId())).isEqualTo(expected);
@@ -149,6 +153,7 @@ public class AuthorisationServiceTest {
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
 				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
+				checkpointRepository,
 				courseApi);
 
 		SCEdition edition = db.getEditionRL();
@@ -353,6 +358,7 @@ public class AuthorisationServiceTest {
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
 				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
+				checkpointRepository,
 				courseApi);
 
 		when(courseApi.getCourseById(anyLong()))
