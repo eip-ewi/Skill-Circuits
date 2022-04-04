@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.patch.TaskPatchDTO;
 import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.TaskType;
 import nl.tudelft.skills.repository.TaskRepository;
 
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -82,6 +83,7 @@ public class TaskControllerTest extends ControllerTest {
 		taskController.patchTask(TaskPatchDTO.builder()
 				.id(db.taskDo10a.getId())
 				.name("Updated")
+				.type(TaskType.EXERCISE)
 				.build());
 
 		Task task = taskRepository.findByIdOrThrow(db.taskDo10a.getId());

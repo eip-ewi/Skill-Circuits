@@ -28,6 +28,10 @@
 
             <input id="edit-item-id" name="id" type="hidden"/>
 
+            <select th:if="${level == 'module'}" id="edit-item-type" name="type" required>
+                <option th:each="enum : ${T(nl.tudelft.skills.model.TaskType).values()}" th:data-icon="${enum.icon}" th:value="${enum}" th:text="#{|task.type.${#strings.toLowerCase(enum.name())}|}"></option>
+            </select>
+
             <input id="edit-item-name" aria-label="Name" name="name" type="text" required/>
 
             <div class="item__form__url" th:if="${level == 'module'}">
@@ -51,6 +55,20 @@
         $(".item__buttons").removeClass("hidden");
         let itemId = $(this).data("item");
         let itemName = $(`#item-${itemId}-name`);
+        let itemIcon = $(`#item-${itemId}-icon`);
+        let itemType = $("#edit-item-type");
+
+        itemType.addClass("hidden");
+        itemIcon.css("cursor", "pointer");
+        itemType.change(function() {
+            let itemType = $("#edit-item-type option:selected").data("icon");
+            itemIcon.removeClass();
+            itemIcon.addClass("fa-solid");
+            itemIcon.addClass(`fa-${itemType}`);
+        });
+
+        itemType.val($(this).data("type"));
+
         $("#edit-item-id").val(itemId);
         $("#edit-item-name").val(itemName.text());
         $(`#item-${itemId}-content`).append($("#edit-item"));
@@ -67,6 +85,7 @@
                 link.removeClass("hidden");
             }
         }
+        itemIcon.click(()=>{$("#edit-item-type").toggleClass("hidden")});
     }
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -91,6 +110,15 @@
                             $(`#item-${itemId} > .item__buttons`).prepend($(`<a id="item-${itemId}-link" class="fa-solid fa-link always_visible" href="${link}" target="__blank"></a>`));
                         }
                     }
+
+                    let itemType = $("#edit-item-type option:selected").data("icon");
+                    let itemIcon = $(`#item-${itemId}-icon`);
+                    itemIcon.css("cursor", "");
+                    itemIcon.removeClass();
+                    itemIcon.addClass("fa-solid");
+                    itemIcon.addClass(`fa-${itemType}`);
+                    itemIcon.off("click");
+                    $("#edit-item-type").off("change");
                 }
             });
         });
@@ -102,6 +130,14 @@
             $("#edit-item-wrapper").append($("#edit-item"));
             $(`#item-${itemId}-name`).removeClass("hidden");
             $(`#item-${itemId}-buttons`).removeClass("hidden");
+
+            let itemIcon = $(`#item-${itemId}-icon`);
+            itemIcon.css("cursor", "");
+            itemIcon.removeClass();
+            itemIcon.addClass("fa-solid");
+            itemIcon.addClass(`fa-${$(`.item__edit[data-item=${itemId}]`).data("icon")}`);
+            itemIcon.off("click");
+            $("#edit-item-type").off("change");
         });
 
         $("#edit-task-link-button").click(function () {

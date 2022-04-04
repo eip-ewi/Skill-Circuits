@@ -19,10 +19,35 @@ package nl.tudelft.skills.model;
 
 public enum TaskType {
 
-	READING,
-	IMPLEMENTATION,
-	QUIZ,
-	VIDEO,
-	WRITING
+	READING(
+		"book"
+	),
+	VIDEO(
+		"play"
+	),
+	QUIZ(
+		"clipboard-check"
+	),
+	IMPLEMENTATION(
+		"desktop"
+	),
+	EXERCISE(
+		"pencil-ruler"
+	),
+	COLLABORATION(
+		"people-carry"
+	),
+	EXPERIMENT(
+		"flask"
+	);
 
+	private final String icon;
+
+	TaskType(String icon) {
+		this.icon = icon;
+	}
+
+	public String getIcon() {
+		return icon;
+	}
 }

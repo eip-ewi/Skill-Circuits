@@ -303,9 +303,9 @@ public class DevDatabaseLoader {
 
 	private void initTasks() {
 		taskRepository.save(Task.builder().name("Read chapter 1.2").skill(skillImplication).time(7)
-				.icon("fa-book").build());
+				.type(TaskType.READING).build());
 		taskRepository.save(Task.builder().name("Do exercise 1.2a-e").skill(skillImplication).time(10)
-				.icon("fa-calculator").build());
+				.type(TaskType.EXERCISE).build());
 		taskRepository.save(Task.builder().name("Read chapter 1.1").skill(skillNegation).build());
 		taskRepository.save(Task.builder().name("Do exercise 1.1a-d").skill(skillNegation).build());
 		taskRepository.save(Task.builder().name("Read chapter 1.0").skill(skillVariables).build());
@@ -313,7 +313,8 @@ public class DevDatabaseLoader {
 
 		taskRepository.save(Task.builder().name("Read chapter 2.0").skill(skillProofOutline).build());
 		taskRepository.save(Task.builder().name("Do exercise 2.0a-f").skill(skillProofOutline).build());
-		taskRepository.save(Task.builder().name("Watch lecture 1").skill(skillProofOutline).build());
+		taskRepository.save(
+				Task.builder().name("Watch lecture 1").skill(skillProofOutline).type(TaskType.VIDEO).build());
 		taskRepository.save(Task.builder().name("Read chapter 2.1").skill(skillAssumption).build());
 		taskRepository.save(Task.builder().name("Do exercise 2.1a-g").skill(skillAssumption).build());
 		taskRepository

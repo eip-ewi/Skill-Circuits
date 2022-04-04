@@ -26,6 +26,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import nl.tudelft.librador.dto.patch.Patch;
 import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.TaskType;
 
 @Data
 @Builder
@@ -37,11 +38,14 @@ public class TaskPatchDTO extends Patch<Task> {
 	private Long id;
 	@NotBlank
 	private String name;
+	@NotNull
+	private TaskType type;
 	private String link;
 
 	@Override
 	protected void applyOneToOne() {
 		updateNonNull(name, data::setName);
+		updateNonNull(type, data::setType);
 		data.setLink(link == null || link.isBlank() ? null : link);
 	}
 
