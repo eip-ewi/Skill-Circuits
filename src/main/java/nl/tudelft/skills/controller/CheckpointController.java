@@ -17,26 +17,33 @@
  */
 package nl.tudelft.skills.controller;
 
+import java.util.Optional;
+
 import nl.tudelft.skills.dto.patch.CheckpointPatchDTO;
 import nl.tudelft.skills.model.Checkpoint;
 import nl.tudelft.skills.repository.CheckpointRepository;
+import nl.tudelft.skills.service.CheckpointService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("checkpoint")
 public class CheckpointController {
 
 	private final CheckpointRepository checkpointRepository;
+	private final CheckpointService checkpointService;
 
 	@Autowired
-	public CheckpointController(CheckpointRepository checkpointRepository) {
+	public CheckpointController(CheckpointRepository checkpointRepository,
+			CheckpointService checkpointService) {
 		this.checkpointRepository = checkpointRepository;
+		this.checkpointService = checkpointService;
 	}
 
 	@PatchMapping
@@ -45,5 +52,26 @@ public class CheckpointController {
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(patch.getId());
 		checkpointRepository.save(patch.apply(checkpoint));
 		return ResponseEntity.ok().build();
+	}
+
+	@Transactional
+	@DeleteMapping
+	@PreAuthorize("@authorisationService.canDeleteCheckpoint(#id)")
+	public ResponseEntity<Void> deleteCheckpoint(@RequestParam Long id, @RequestParam Long moduleId)
+			throws CannotDeleteLastCheckpointException {
+		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(id);
+		Optional<Checkpoint> nextCheckpoint = checkpointService.findNextCheckpoint(checkpoint);
+		if (nextCheckpoint.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.CONFLICT);
+		}
+		checkpoint.getSkills().forEach(skill -> skill.setCheckpoint(nextCheckpoint.get()));
+
+		checkpointRepository.delete(checkpoint);
+		return new ResponseEntity<>(HttpStatus.OK);
+
+	}
+
+	@ResponseStatus(code = HttpStatus.CONFLICT, reason = "Cannot delete last checkpoint")
+	private static class CannotDeleteLastCheckpointException extends Exception {
 	}
 }

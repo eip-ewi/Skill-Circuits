@@ -336,6 +336,16 @@ public class AuthorisationService {
 	}
 
 	/**
+	 * Gets whether the authenticated user edit a checkpoint in an edition
+	 *
+	 * @param  editionId The id of the edition
+	 * @return           True iff the user can edit checkpoints in the edition
+	 */
+	public boolean canEditCheckpointInEdition(Long editionId) {
+		return isAtLeastTeacherInEdition(editionId);
+	}
+
+	/**
 	 * Gets whether the authenticated user can edit a checkpoint
 	 *
 	 * @param  checkpointId The id of the checkpoint
@@ -346,13 +356,23 @@ public class AuthorisationService {
 	}
 
 	/**
-	 * Gets whether the authenticated user edit a checkpoint in an edition
+	 * Gets whether the authenticated user can delete a checkpoint in an edition
 	 *
 	 * @param  editionId The id of the edition
-	 * @return           True iff the user can edit checkpoints in the edition
+	 * @return           True iff the user can delete checkpoints in the edition
 	 */
-	public boolean canEditCheckpointInEdition(Long editionId) {
-		return isAtLeastHeadTAInEdition(editionId);
+	public boolean canDeleteCheckpointInEdition(Long editionId) {
+		return canEditCheckpointInEdition(editionId);
+	}
+
+	/**
+	 * Gets whether the authenticated user can edit a checkpoint
+	 *
+	 * @param  checkpointId The id of the checkpoint
+	 * @return              True iff the user can edit the checkpoint
+	 */
+	public boolean canDeleteCheckpoint(Long checkpointId) {
+		return canDeleteCheckpointInEdition(checkpointRepository.findByIdOrThrow(checkpointId).getEdition());
 	}
 
 	/**
