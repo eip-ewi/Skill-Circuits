@@ -157,6 +157,7 @@
   gap: 0.5rem;
 
   &__button {
+    align-self: stretch;
     background-color: var(--primary-dark);
     border: 1px solid var(--primary-light);
     color: var(--primary-light);
@@ -205,6 +206,7 @@
   }
 
   &__content {
+    align-items: center;
     display: flex;
     gap: 0.5rem;
   }
@@ -219,6 +221,12 @@
     & input[type=text],
     & input[type=url] {
       max-width: 12rem;
+    }
+    & input[type=option] {
+      min-width: 12rem;
+    }
+    &__dropdown {
+      min-width: 12rem;
     }
     & button {
       background: none;

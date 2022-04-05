@@ -32,14 +32,10 @@
             <a th:if="${item.link}" th:id="|item-${item.id}-link|" class="fa-solid fa-link always_visible" th:href="${item.link}" target="__blank"></a>
         </th:block>
         <th:block th:if="${canEdit}">
-            <button class="fa-solid fa-pen item__edit" th:data-item="${item.id}"></button>
+            <span th:if="${level == 'module'}" class="fa-solid fa-pen item__edit" th:data-item="${item.id}" th:data-type="${item.type}" th:data-icon="${item.type.icon}"></span>
+            <span th:unless="${level == 'module'}" class="fa-solid fa-pen item__edit" th:data-item="${item.id}"></span>
             <button class="fa-solid fa-trash item__delete" th:data-item="${item.id}"></button>
         </th:block>
-    <div th:if="${canEdit}" class="item__buttons"
-         th:id="|item-${item.id}-buttons|">
-        <span th:if="${level == 'module'}" class="fa-solid fa-pen item__edit" th:data-item="${item.id}" th:data-type="${item.type}" th:data-icon="${item.type.icon}"></span>
-        <span th:unless="${level == 'module'}" class="fa-solid fa-pen item__edit" th:data-item="${item.id}"></span>
-        <span class="fa-solid fa-trash item__delete" th:data-item="${item.id}"></span>
     </div>
 </li>
 

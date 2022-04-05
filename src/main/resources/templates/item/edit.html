@@ -28,7 +28,7 @@
 
             <input id="edit-item-id" name="id" type="hidden"/>
 
-            <select th:if="${level == 'module'}" id="edit-item-type" name="type" required>
+            <select th:if="${level == 'module'}" class="item__form__dropdown" id="edit-item-type" name="type" required>
                 <option th:each="enum : ${T(nl.tudelft.skills.model.TaskType).values()}" th:data-icon="${enum.icon}" th:value="${enum}" th:text="#{|task.type.${#strings.toLowerCase(enum.name())}|}"></option>
             </select>
 
@@ -111,12 +111,12 @@
                         }
                     }
 
-                    let itemType = $("#edit-item-type option:selected").data("icon");
+                    let itemIconType = $("#edit-item-type option:selected").data("icon");
                     let itemIcon = $(`#item-${itemId}-icon`);
                     itemIcon.css("cursor", "");
                     itemIcon.removeClass();
                     itemIcon.addClass("fa-solid");
-                    itemIcon.addClass(`fa-${itemType}`);
+                    itemIcon.addClass(`fa-${itemIconType}`);
                     itemIcon.off("click");
                     $("#edit-item-type").off("change");
                 }
