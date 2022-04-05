@@ -26,10 +26,14 @@
         <button th:if="${level == 'module'}" class="item__button" th:onclick="|toggleCompleted(${item.id})|" th:text="${item.time}"></button>
         <span th:id="|item-${item.id}-name|" class="item__name" th:text="${item.name}"></span>
     </div>
-    <div th:if="${canEdit}" class="item__buttons"
-         th:id="|item-${item.id}-buttons|">
-        <span class="fa-solid fa-pen item__edit" th:data-item="${item.id}"></span>
-        <span class="fa-solid fa-trash item__delete" th:data-item="${item.id}"></span>
+    <div class="item__buttons" th:id="|item-${item.id}-buttons|">
+        <th:block th:if="${level == 'module'}">
+            <a th:if="${item.link}" th:id="|item-${item.id}-link|" class="fa-solid fa-link always_visible" th:href="${item.link}" target="__blank"></a>
+        </th:block>
+        <th:block th:if="${canEdit}">
+            <button class="fa-solid fa-pen item__edit" th:data-item="${item.id}"></button>
+            <button class="fa-solid fa-trash item__delete" th:data-item="${item.id}"></button>
+        </th:block>
     </div>
 </li>
 

@@ -37,10 +37,12 @@ public class TaskPatchDTO extends Patch<Task> {
 	private Long id;
 	@NotBlank
 	private String name;
+	private String link;
 
 	@Override
 	protected void applyOneToOne() {
 		updateNonNull(name, data::setName);
+		data.setLink(link == null || link.isBlank() ? null : link);
 	}
 
 	@Override

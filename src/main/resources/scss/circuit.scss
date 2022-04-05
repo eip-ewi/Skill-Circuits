@@ -183,14 +183,25 @@
 
   &__buttons {
     cursor: pointer;
-    display: none;
+    display: flex;
     gap: .5rem;
+    & > * {
+      background: none;
+      border: none;
+      color: var(--primary-dark);
+      cursor: pointer;
+      display: none;
+      text-decoration: none;
+      &.always_visible {
+        display: initial;
+      }
+    }
     & > *:hover {
       color: var(--primary-green);
     }
   }
-  &:hover > .item__buttons {
-    display: flex;
+  &:hover > .item__buttons > * {
+    display: initial;
   }
 
   &__content {
@@ -200,19 +211,37 @@
 
   &__form {
     display: flex;
+    flex-wrap: wrap;
     gap: .5rem;
-    & > * {
+    & * {
       font-size: 1rem;
     }
-    & > input[type=text] {
+    & input[type=text],
+    & input[type=url] {
       max-width: 12rem;
     }
-    & > button {
+    & button {
       background: none;
       border: none;
       cursor: pointer;
       &:hover {
         color: var(--primary-green);
+      }
+    }
+
+    &__url {
+      display: flex;
+      min-width: 1.5rem;
+      position: relative;
+      & > input {
+        left: 0;
+        padding-left: 1.5rem;
+      }
+      & > button {
+        left: 3px;
+        position: absolute;
+        top: 3px;
+        z-index: 20;
       }
     }
   }

@@ -30,6 +30,11 @@
 
             <input id="edit-item-name" aria-label="Name" name="name" type="text" required/>
 
+            <div class="item__form__url" th:if="${level == 'module'}">
+                <button id="edit-task-link-button" type="button" class="fa-solid fa-link"></button>
+                <input id="edit-task-link" placeholder="URL" aria-label="Link" name="link" type="url" class="hidden"/>
+            </div>
+
             <button type="button" id="edit-item-cancel" class="fa-solid fa-xmark"></button>
             <button type="submit" class="fa-solid fa-check"></button>
 
@@ -41,6 +46,7 @@
 
 <script th:if="${canEdit}" layout:fragment="script">
     function editItem() {
+        $(".item__buttons").removeClass("hidden");
         $(".item__name").removeClass("hidden");
         $(".item__buttons").removeClass("hidden");
         let itemId = $(this).data("item");
@@ -50,6 +56,17 @@
         $(`#item-${itemId}-content`).append($("#edit-item"));
         itemName.addClass("hidden");
         $(`#item-${itemId}-buttons`).addClass("hidden");
+
+        if (itemType === "task") {
+            let link = $("#edit-task-link");
+            link.addClass("hidden");
+            link.val($(`#item-${itemId}-link`).attr("href"));
+            if (link.val() === "") {
+                link.addClass("hidden");
+            } else {
+                link.removeClass("hidden");
+            }
+        }
     }
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -66,6 +83,14 @@
                     itemName.removeClass("hidden");
                     itemName.text($("#edit-item-name").val());
                     $(`#item-${itemId}-buttons`).removeClass("hidden");
+
+                    if (itemType === "task") {
+                        $(`#item-${itemId}-link`).remove();
+                        let link = $("#edit-task-link").val();
+                        if (link !== "") {
+                            $(`#item-${itemId} > .item__buttons`).prepend($(`<a id="item-${itemId}-link" class="fa-solid fa-link always_visible" href="${link}" target="__blank"></a>`));
+                        }
+                    }
                 }
             });
         });
@@ -77,6 +102,16 @@
             $("#edit-item-wrapper").append($("#edit-item"));
             $(`#item-${itemId}-name`).removeClass("hidden");
             $(`#item-${itemId}-buttons`).removeClass("hidden");
+        });
+
+        $("#edit-task-link-button").click(function () {
+            let link = $("#edit-task-link");
+            link.toggleClass("hidden");
+            if (link.hasClass("hidden")) {
+                link.val("");
+            } else {
+                link.val($(`#item-${$("#edit-item-id").val()}-link`).attr("href"));
+            }
         });
     });
 </script>

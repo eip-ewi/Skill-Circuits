@@ -36,6 +36,14 @@ public class TaskCreateDTO extends Create<Task> {
 	private String name;
 	@NotNull
 	private SkillIdDTO skill;
+	private String link;
+
+	@Override
+	protected void postApply(Task data) {
+		if (link != null && link.isBlank()) {
+			data.setLink(null);
+		}
+	}
 
 	@Override
 	public Class<Task> clazz() {
