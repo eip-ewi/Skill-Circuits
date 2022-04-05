@@ -59,7 +59,8 @@
 
 <script th:if="${canEdit}" layout:fragment="script">
     function editBlock() {
-        $(".block__name").removeClass("hidden");
+        $(".block__name > *").removeClass("hidden");
+        $(".block__group__name").removeClass("hidden");
         let blockId = $(this).data("block");
         let blockName = $(`#block-${blockId}-name`);
         $("#edit-block-id").val(blockId);
