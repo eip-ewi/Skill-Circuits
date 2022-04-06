@@ -19,9 +19,11 @@ package nl.tudelft.skills.controller;
 
 import java.util.Optional;
 
+import nl.tudelft.skills.dto.create.CheckpointCreateDTO;
 import nl.tudelft.skills.dto.patch.CheckpointPatchDTO;
 import nl.tudelft.skills.model.Checkpoint;
 import nl.tudelft.skills.repository.CheckpointRepository;
+import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.service.CheckpointService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,12 +40,14 @@ public class CheckpointController {
 
 	private final CheckpointRepository checkpointRepository;
 	private final CheckpointService checkpointService;
+	private final SkillRepository skillRepository;
 
 	@Autowired
 	public CheckpointController(CheckpointRepository checkpointRepository,
-			CheckpointService checkpointService) {
+			CheckpointService checkpointService, SkillRepository skillRepository) {
 		this.checkpointRepository = checkpointRepository;
 		this.checkpointService = checkpointService;
+		this.skillRepository = skillRepository;
 	}
 
 	@PatchMapping
@@ -57,8 +61,7 @@ public class CheckpointController {
 	@Transactional
 	@DeleteMapping
 	@PreAuthorize("@authorisationService.canDeleteCheckpoint(#id)")
-	public ResponseEntity<Void> deleteCheckpoint(@RequestParam Long id, @RequestParam Long moduleId)
-			throws CannotDeleteLastCheckpointException {
+	public ResponseEntity<Void> deleteCheckpoint(@RequestParam Long id) {
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(id);
 		Optional<Checkpoint> nextCheckpoint = checkpointService.findNextCheckpoint(checkpoint);
 		if (nextCheckpoint.isEmpty()) {
@@ -71,7 +74,13 @@ public class CheckpointController {
 
 	}
 
-	@ResponseStatus(code = HttpStatus.CONFLICT, reason = "Cannot delete last checkpoint")
-	private static class CannotDeleteLastCheckpointException extends Exception {
+	@Transactional
+	@PostMapping
+	public String createCheckpoint(CheckpointCreateDTO dto) {
+		Checkpoint checkpoint = checkpointRepository.save(dto.apply());
+		skillRepository.findAllByIdIn(dto.getSkillIds()).forEach(skill -> skill.setCheckpoint(checkpoint));
+
+		return "redirect:module/" + dto.getModuleId();
 	}
+
 }

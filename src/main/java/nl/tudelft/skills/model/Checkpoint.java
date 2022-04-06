@@ -39,7 +39,8 @@ public class Checkpoint {
 	private Long id;
 
 	@NotNull
-	private Long edition;
+	@ManyToOne
+	private SCEdition edition;
 
 	@NotBlank
 	private String name;

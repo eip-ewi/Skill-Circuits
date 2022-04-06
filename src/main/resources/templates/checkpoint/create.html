@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<div th:if="${@authorisationService.canEditCheckpointInEdition(circuit.id)}" layout:fragment="form" class="hidden" id="create-checkpoint-wrapper">
+
+    <div id="create-checkpoint">
+
+        <form id="create-checkpoint-form" class="checkpoint__form create" th:action="@{/checkpoint}" th:method="post">
+
+            <input id="create-checkpoint-edition" name="edition.id" type="hidden" th:value="${circuit.edition.id}" />
+            <input id="create-checkpoint-module" name="moduleId" type="hidden" th:value="${circuit.id}" />
+            <input id="create-checkpoint-skills" name="skillIds" type="hidden" hidden/>
+            <input id="create-checkpoint-deadline" name="deadline" type="hidden" th:value="${#dates.formatISO(#dates.createNow())}" hidden/>
+            <input id="create-checkpoint-name" name="name" type="text" required/>
+
+            <button type="button" id="create-checkpoint-cancel" class="fa-solid fa-xmark"></button>
+            <button type="submit" class="fa-solid fa-check"></button>
+        </form>
+
+    </div>
+
+</div>
+
+<script th:if="${@authorisationService.canEditCheckpointInEdition(circuit.id)}" layout:fragment="script">
+    function addGhostCheckpoints() {
+        const circuit = $("#circuit");
+        const rowsInGrid = [...Array(parseInt(getComputedStyle(document.documentElement).getPropertyValue("--rows"))).keys()];
+        const rowsWithCheckpoints = [...$(".checkpoint")].map(cp => parseInt(cp.style.gridRowStart));
+
+        $(".ghost_checkpoint").remove()
+        rowsInGrid.filter(r => !rowsWithCheckpoints.includes(r)).forEach(row => {
+            const cp = $("<div>").addClass("checkpoint ghost_checkpoint").css("grid-row", row)
+                .append($("<button>").addClass("checkpoint__create fa-solid fa-plus"));
+            circuit.append(cp)
+        });
+    }
+
+    function getSkillsInNewCheckpoint(checkpointRow) {
+        let prevCheckpointRow = [...$(".checkpoint").not(".ghost_checkpoint")].map(cp => parseInt(cp.style.gridRowStart))
+            .filter(cp => cp < checkpointRow).sort().reverse()[0]
+
+        prevCheckpointRow = prevCheckpointRow === undefined ? 0 : prevCheckpointRow;
+
+        return [...$(".block")]
+            .filter(skill => parseInt(skill.style.gridRowStart) > prevCheckpointRow && parseInt(skill.style.gridRowStart) <= checkpointRow)
+            .map(skill => skill.id.split("-")[1])
+
+
+    }
+    function createCheckpoint() {
+        let ghostCheckpoint = $(this).parent();
+        $("#create-checkpoint-skills").val(getSkillsInNewCheckpoint(parseInt(ghostCheckpoint.css("gridRowStart"))));
+        $(this).addClass("hidden");
+        $(this).after($("#create-checkpoint").css("gridRowStart", ghostCheckpoint.css("gridRowStart")));
+    }
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+        $(".checkpoint__create").click(createCheckpoint);
+
+        $("#create-checkpoint-cancel").click(function () {
+            $(".checkpoint__create").removeClass("hidden");
+            $("#create-checkpoint-wrapper").append($("#create-checkpoint"));
+        });
+    });
+
+</script>
+
+</html>

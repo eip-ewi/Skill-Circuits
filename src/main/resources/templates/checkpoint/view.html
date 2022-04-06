@@ -22,9 +22,10 @@
         });
         [...$('.checkpoint')].forEach(cp => $(cp).css("grid-row", checkpointRows.get(cp.id.split("-")[1])))
     }
-    document.addEventListener('DOMContentLoaded', updateCheckpointPositions)
+    document.addEventListener('DOMContentLoaded', function () {
+        updateCheckpointPositions();
+        addGhostCheckpoints();
+    });
     document.addEventListener('drop', updateCheckpointPositions)
-
 </script>
-
 </html>

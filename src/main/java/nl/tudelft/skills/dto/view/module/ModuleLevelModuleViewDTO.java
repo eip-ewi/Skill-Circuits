@@ -46,7 +46,7 @@ public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitV
 	@NotNull
 	private Long id;
 	@NotNull
-	private ModelLevelEditionViewDTO edition;
+	private ModuleLevelEditionViewDTO edition;
 	@NotBlank
 	private String name;
 	@NotNull

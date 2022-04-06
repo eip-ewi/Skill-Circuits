@@ -49,6 +49,7 @@ public class SCEdition {
 	@NotNull
 	@Builder.Default
 	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
 	@OneToMany(mappedBy = "edition")
 	private Set<Checkpoint> checkpoints = new HashSet<>();
 

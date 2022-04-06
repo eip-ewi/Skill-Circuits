@@ -17,6 +17,9 @@
  */
 package nl.tudelft.skills.repository;
 
+import java.util.Collection;
+import java.util.Set;
+
 import nl.tudelft.skills.model.Skill;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,5 +30,7 @@ public interface SkillRepository extends JpaRepository<Skill, Long> {
 	default Skill findByIdOrThrow(Long id) {
 		return findById(id).orElseThrow(() -> new ResourceNotFoundException("Skill was not found: " + id));
 	}
+
+	Set<Skill> findAllByIdIn(Collection<Long> ids);
 
 }

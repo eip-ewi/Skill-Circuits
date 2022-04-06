@@ -352,7 +352,8 @@ public class AuthorisationService {
 	 * @return              True iff the user can edit the checkpoint
 	 */
 	public boolean canEditCheckpoint(Long checkpointId) {
-		return canEditCheckpointInEdition(checkpointRepository.findByIdOrThrow(checkpointId).getEdition());
+		return canEditCheckpointInEdition(
+				checkpointRepository.findByIdOrThrow(checkpointId).getEdition().getId());
 	}
 
 	/**
@@ -372,7 +373,8 @@ public class AuthorisationService {
 	 * @return              True iff the user can edit the checkpoint
 	 */
 	public boolean canDeleteCheckpoint(Long checkpointId) {
-		return canDeleteCheckpointInEdition(checkpointRepository.findByIdOrThrow(checkpointId).getEdition());
+		return canDeleteCheckpointInEdition(
+				checkpointRepository.findByIdOrThrow(checkpointId).getEdition().getId());
 	}
 
 	/**
