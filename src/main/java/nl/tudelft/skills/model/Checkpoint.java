@@ -38,15 +38,17 @@ public class Checkpoint {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
 
-	@NotNull
-	@ManyToOne
-	private SCEdition edition;
-
 	@NotBlank
 	private String name;
 
 	@NotNull
 	private LocalDateTime deadline;
+
+	@NotNull
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@ManyToOne
+	private SCEdition edition;
 
 	@NotNull
 	@Builder.Default
