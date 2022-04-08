@@ -30,20 +30,20 @@
 
             const toUpdate = completedInLocalStorage.filter(t => !completedInDOM.includes(t));
 
-            if (!toUpdate.length) {
-                return
-            }
-
             toUpdate.forEach(taskId => {
                 const task = document.getElementById(`item-${taskId}`)
                 task.classList.add('completed')
-            })
+            });
 
-            //send update to server if user is authenticated
+            // Traverse all blocks topologically and mark their state
+            [...$(".block")].sort((a, b) => $(a).css("gridRowStart") - $(b).css("gridRowStart"))
+                .forEach(block => updateBlockState(block.id.split("-")[1]))
+
+            //send update to server if user is authenticated and there are updates
             /*<![CDATA[*/
             const personId = /*[[${@authorisationService.authPerson?.id}]]*/ null
             /*]]>*/
-            if (personId !== null) {
+            if (personId !== null && toUpdate.length) {
                 $.ajax({
                     type: "PUT",
                     url: "/person/" + personId + "/complete/",
@@ -57,10 +57,14 @@
     })
 
     function toggleCompleted(taskId) {
-        const task = document.getElementById(`item-${taskId}`)
-        task.classList.toggle('completed')
+        const task = $(`#item-${taskId}`);
+        task.toggleClass('completed');
 
-        const completed = task.classList.contains('completed')
+        const completed = task.hasClass('completed');
+        const block = $(task.parents(".block")[0]);
+        updateBlockState(block.prop('id').split("-")[1]);
+        [...block.data("children")].forEach(id => updateBlockState(id));
+
         //send update to server if user is authenticated
         /*<![CDATA[*/
         const personId = /*[[${@authorisationService.authPerson?.id}]]*/ null
@@ -88,7 +92,21 @@
                     JSON.stringify(JSON.parse(localStorage.getItem('completedTasks')).filter(e => e !== taskId)))
             }
         }
+    }
+    function updateBlockState(blockId) {
+        const block = $(`#block-${blockId}`)
+        block.removeClass("completed active disabled")
 
+        if (block.find(".item").not(".completed").length === 0) {
+            block.addClass("completed")
+        } else {
+            const allParentsCompleted = [...block.data("parents")].every(id => $(`#block-${id}`).hasClass("completed"))
+            if (allParentsCompleted) {
+                block.addClass("active")
+            } else {
+                block.addClass("disabled")
+            }
+        }
     }
 </script>
 

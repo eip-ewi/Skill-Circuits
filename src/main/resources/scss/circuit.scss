@@ -41,6 +41,15 @@
     --border-colour: var(--primary-green);
     outline: 2px solid var(--border-colour);
   }
+  &.active{
+    outline: 2px dashed blue;
+  }
+  &.disabled{
+    outline: 2px dashed black;
+  }
+  &.completed{
+    outline: 2px dashed green;
+  }
 
   &[data-essential="false"] {
     --border-colour: #FF00FF;
