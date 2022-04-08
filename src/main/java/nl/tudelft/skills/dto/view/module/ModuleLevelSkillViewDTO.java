@@ -48,11 +48,14 @@ public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
 	@NotNull
 	private List<TaskViewDTO> tasks;
 	@NotNull
+	private List<Long> parentIds;
+	@NotNull
 	private List<Long> childIds;
 
 	@Override
 	public void postApply() {
 		super.postApply();
+		this.parentIds = data.getParents().stream().map(Skill::getId).toList();
 		this.childIds = data.getChildren().stream().map(Skill::getId).toList();
 	}
 
