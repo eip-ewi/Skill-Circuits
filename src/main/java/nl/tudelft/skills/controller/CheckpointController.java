@@ -71,11 +71,11 @@ public class CheckpointController {
 
 		checkpointRepository.delete(checkpoint);
 		return new ResponseEntity<>(HttpStatus.OK);
-
 	}
 
 	@Transactional
 	@PostMapping
+	@PreAuthorize("@authorisationService.canCreateCheckpointInEdition(#dto.getEdition().getId())")
 	public String createCheckpoint(CheckpointCreateDTO dto) {
 		Checkpoint checkpoint = checkpointRepository.save(dto.apply());
 		skillRepository.findAllByIdIn(dto.getSkillIds()).forEach(skill -> skill.setCheckpoint(checkpoint));

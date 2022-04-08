@@ -341,13 +341,13 @@ public class TestDatabaseLoader {
 	private void initCheckpoints() {
 		checkpointLectureOne = checkpointRepository.save(Checkpoint.builder()
 				.name("Lecture 1")
-				.edition(edition.getId())
+				.edition(editionRL)
 				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 42), LocalTime.MIDNIGHT))
 				.build());
 
 		checkpointLectureTwo = checkpointRepository.save(Checkpoint.builder()
 				.name("Lecture 2")
-				.edition(edition.getId())
+				.edition(editionRL)
 				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 49), LocalTime.MIDNIGHT))
 				.build());
 	}

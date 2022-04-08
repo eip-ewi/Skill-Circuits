@@ -229,7 +229,7 @@ public class AuthorisationService {
 	}
 
 	/**
-	 * Gets whether the authenticated user can edit a submodule in a edition.
+	 * Gets whether the authenticated user can edit a submodule in an edition.
 	 *
 	 * @param  editionId The id of the edition
 	 * @return           True iff the user can edit the submodule in edition
@@ -367,7 +367,7 @@ public class AuthorisationService {
 	}
 
 	/**
-	 * Gets whether the authenticated user can edit a checkpoint
+	 * Gets whether the authenticated user can delete a checkpoint
 	 *
 	 * @param  checkpointId The id of the checkpoint
 	 * @return              True iff the user can edit the checkpoint
@@ -375,6 +375,16 @@ public class AuthorisationService {
 	public boolean canDeleteCheckpoint(Long checkpointId) {
 		return canDeleteCheckpointInEdition(
 				checkpointRepository.findByIdOrThrow(checkpointId).getEdition().getId());
+	}
+
+	/**
+	 * Gets whether the authenticated user can create a checkpoint in an edition
+	 *
+	 * @param  editionId The id of the edition
+	 * @return           True iff the user can edit the checkpoint
+	 */
+	public boolean canCreateCheckpointInEdition(Long editionId) {
+		return canEditCheckpointInEdition(editionId);
 	}
 
 	/**
