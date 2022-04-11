@@ -46,7 +46,9 @@ public class Task {
 	@NotBlank
 	private String name;
 
-	private TaskType type;
+	@Builder.Default
+	@NotNull
+	private TaskType type = TaskType.EXERCISE;
 
 	@Builder.Default
 	@Min(0)

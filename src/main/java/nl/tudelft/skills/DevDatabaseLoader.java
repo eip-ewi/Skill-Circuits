@@ -302,24 +302,30 @@ public class DevDatabaseLoader {
 	}
 
 	private void initTasks() {
-		taskRepository.save(Task.builder().name("Read chapter 1.2").skill(skillImplication).time(7).build());
+		taskRepository.save(Task.builder().name("Read chapter 1.2").skill(skillImplication).time(7)
+				.type(TaskType.READING).build());
 		taskRepository.save(Task.builder().name("Do exercise 1.2a-e").skill(skillImplication).time(10)
-				.build());
-		taskRepository.save(Task.builder().name("Read chapter 1.1").skill(skillNegation).build());
+				.type(TaskType.EXERCISE).build());
+		taskRepository.save(Task.builder().name("Read chapter 1.1").skill(skillNegation)
+				.type(TaskType.READING).build());
 		taskRepository.save(Task.builder().name("Do exercise 1.1a-d").skill(skillNegation).build());
-		taskRepository.save(Task.builder().name("Read chapter 1.0").skill(skillVariables).build());
+		taskRepository.save(Task.builder().name("Read chapter 1.0").skill(skillVariables)
+				.type(TaskType.READING).build());
 		taskRepository.save(Task.builder().name("Do exercise 1.0a").skill(skillVariables).build());
 
 		taskRepository.save(Task.builder().name("Read chapter 2.0").skill(skillProofOutline).build());
-		taskRepository.save(Task.builder().name("Do exercise 2.0a-f").skill(skillProofOutline).build());
-		taskRepository.save(Task.builder().name("Watch lecture 1").skill(skillProofOutline).build());
+		taskRepository.save(Task.builder().name("Do exercise 2.0a-f").skill(skillProofOutline)
+				.type(TaskType.COLLABORATION).build());
+		taskRepository.save(
+				Task.builder().name("Watch lecture 1").skill(skillProofOutline).type(TaskType.VIDEO).build());
 		taskRepository.save(Task.builder().name("Read chapter 2.1").skill(skillAssumption).build());
 		taskRepository.save(Task.builder().name("Do exercise 2.1a-g").skill(skillAssumption).build());
 		taskRepository
 				.save(Task.builder().name("Read chapter 2.2").skill(skillGeneralisationPractice).build());
 		taskRepository
 				.save(Task.builder().name("Do exercise 2.2a-b").skill(skillGeneralisationPractice).build());
-		taskRepository.save(Task.builder().name("TA Check 1").skill(skillGeneralisationPractice).build());
+		taskRepository.save(Task.builder().name("TA Check 1").skill(skillGeneralisationPractice)
+				.type(TaskType.QUIZ).build());
 
 		taskRepository.save(Task.builder().name("Read chapter 2.3").skill(skillDividingIntoCases).build());
 		taskRepository.save(Task.builder().name("Watch lecture 2").skill(skillDividingIntoCases).build());
@@ -341,8 +347,20 @@ public class DevDatabaseLoader {
 		taskRepository
 				.save(Task.builder().name("Watch video 2: dominos").skill(skillTransitiveProperty).build());
 
-		taskRepository.save(Task.builder().name("Watch lecture 4").skill(skillInductionPractice).build());
-		taskRepository.save(Task.builder().name("Do exercise 2.5b-d").skill(skillInductionPractice).build());
+		taskRepository.save(Task.builder().name("Watch lecture 4").skill(skillInductionPractice)
+				.type(TaskType.VIDEO).build());
+		taskRepository.save(Task.builder().name("Do exercise 2.5b-d").skill(skillInductionPractice)
+				.type(TaskType.EXERCISE).build());
+		taskRepository.save(Task.builder().name("Read").skill(skillInductionPractice)
+				.type(TaskType.READING).build());
+		taskRepository.save(Task.builder().name("Project 1").skill(skillInductionPractice)
+				.type(TaskType.COLLABORATION).build());
+		taskRepository.save(Task.builder().name("Test yourself!").skill(skillInductionPractice)
+				.type(TaskType.QUIZ).build());
+		taskRepository.save(Task.builder().name("Implement DFS").skill(skillInductionPractice)
+				.type(TaskType.IMPLEMENTATION).build());
+		taskRepository.save(Task.builder().name("Experiment with run time").skill(skillInductionPractice)
+				.type(TaskType.EXPERIMENT).build());
 
 		taskRepository.save(Task.builder().name("Task 1").skill(skillSimpleA).build());
 		taskRepository.save(Task.builder().name("Task 2").skill(skillSimpleA).build());

@@ -38,6 +38,7 @@ public class TaskViewDTO extends View<Task> implements ItemView {
 	private Long id;
 	@NotBlank
 	private String name;
+	@NotNull
 	private TaskType type;
 	@Min(0)
 	private Integer time;
