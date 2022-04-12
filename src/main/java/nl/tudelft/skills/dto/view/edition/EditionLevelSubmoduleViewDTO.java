@@ -50,7 +50,6 @@ public class EditionLevelSubmoduleViewDTO extends View<Submodule> implements Blo
 	@NotNull
 	private List<Long> childIds;
 
-
 	@Override
 	public void postApply() {
 		super.postApply();
