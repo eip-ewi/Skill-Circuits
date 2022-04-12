@@ -32,7 +32,10 @@
 
             toUpdate.forEach(taskId => {
                 const task = document.getElementById(`item-${taskId}`)
-                task.classList.add('completed')
+                // If this task is not in this view, ignore.
+                if (task !== null) {
+                    task.classList.add('completed')
+                }
             });
 
             // Traverse all blocks topologically and mark their state
