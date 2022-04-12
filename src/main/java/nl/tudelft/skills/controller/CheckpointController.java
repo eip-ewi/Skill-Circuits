@@ -50,6 +50,7 @@ public class CheckpointController {
 		this.skillRepository = skillRepository;
 	}
 
+	@Transactional
 	@PatchMapping
 	@PreAuthorize("@authorisationService.canEditCheckpoint(#patch.id)")
 	public ResponseEntity<Void> patchCheckpoint(CheckpointPatchDTO patch) {

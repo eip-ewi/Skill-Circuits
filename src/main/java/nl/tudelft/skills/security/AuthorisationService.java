@@ -370,7 +370,7 @@ public class AuthorisationService {
 	 * Gets whether the authenticated user can delete a checkpoint
 	 *
 	 * @param  checkpointId The id of the checkpoint
-	 * @return              True iff the user can edit the checkpoint
+	 * @return              True iff the user can delete the checkpoint
 	 */
 	public boolean canDeleteCheckpoint(Long checkpointId) {
 		return canDeleteCheckpointInEdition(
@@ -381,7 +381,7 @@ public class AuthorisationService {
 	 * Gets whether the authenticated user can create a checkpoint in an edition
 	 *
 	 * @param  editionId The id of the edition
-	 * @return           True iff the user can edit the checkpoint
+	 * @return           True iff the user can create the checkpoint
 	 */
 	public boolean canCreateCheckpointInEdition(Long editionId) {
 		return canEditCheckpointInEdition(editionId);

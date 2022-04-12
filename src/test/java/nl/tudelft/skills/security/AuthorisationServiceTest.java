@@ -334,6 +334,35 @@ public class AuthorisationServiceTest {
 		assertThat(authorisationService.canDeleteTask(db.taskDo10a.getId())).isEqualTo(expected);
 	}
 
+	@Transactional
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canCreateCheckpointInEdition(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canCreateCheckpointInEdition(db.edition.getId())).isEqualTo(expected);
+	}
+
+	@Transactional
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canEditCheckpoint(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canEditCheckpoint(db.checkpointLectureOne.getId()))
+				.isEqualTo(expected);
+	}
+
+	@Transactional
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canDeleteCheckpoint(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canDeleteCheckpoint(db.checkpointLectureOne.getId()))
+				.isEqualTo(expected);
+	}
+
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER", "HEAD_TA", "TA", "STUDENT" })

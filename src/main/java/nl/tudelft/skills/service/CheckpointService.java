@@ -41,7 +41,7 @@ public class CheckpointService {
 	/**
 	 * Performs a breadth first search to find the next checkpoint, if it exists.
 	 *
-	 * @param  checkpoint t
+	 * @param  checkpoint the checkpoint to find the next of.
 	 * @return            an optional containing the next checkpoint iff it exists
 	 */
 	public Optional<Checkpoint> findNextCheckpoint(Checkpoint checkpoint) {
