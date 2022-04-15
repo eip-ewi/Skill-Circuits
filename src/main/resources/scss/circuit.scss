@@ -41,6 +41,16 @@
     --border-colour: var(--primary-green);
     outline: 2px solid var(--border-colour);
   }
+  &.disabled{
+    & > .block__header {
+      color: var(--grey-500)
+    }
+    --border-colour: var(--grey-500);
+  }
+  &.completed{
+    --border-colour: var(--primary-green);
+    border: 2px solid var(--border-colour);
+  }
 
   &[data-essential="false"] {
     --border-colour: #FF00FF;

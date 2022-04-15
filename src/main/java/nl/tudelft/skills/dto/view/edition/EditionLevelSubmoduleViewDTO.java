@@ -46,6 +46,8 @@ public class EditionLevelSubmoduleViewDTO extends View<Submodule> implements Blo
 	@NotNull
 	private List<EditionLevelSkillViewDTO> skills;
 	@NotNull
+	private List<Long> parentIds;
+	@NotNull
 	private List<Long> childIds;
 
 	@Override
@@ -53,6 +55,11 @@ public class EditionLevelSubmoduleViewDTO extends View<Submodule> implements Blo
 		super.postApply();
 		this.childIds = data.getSkills().stream()
 				.flatMap(s -> s.getChildren().stream())
+				.map(s -> s.getSubmodule().getId())
+				.filter(id -> !this.id.equals(id))
+				.distinct().toList();
+		this.parentIds = data.getSkills().stream()
+				.flatMap(s -> s.getParents().stream())
 				.map(s -> s.getSubmodule().getId())
 				.filter(id -> !this.id.equals(id))
 				.distinct().toList();

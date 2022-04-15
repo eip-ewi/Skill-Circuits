@@ -25,4 +25,6 @@ public interface BlockView {
 
 	List<Long> getChildIds();
 
+	List<Long> getParentIds();
+
 }
