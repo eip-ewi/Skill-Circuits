@@ -112,4 +112,44 @@ public class SkillController {
 		return ResponseEntity.ok().build();
 	}
 
+	/**
+	 * Connects a skill to another.
+	 *
+	 * @param  parentId The parent skill id
+	 * @param  childId  The child skill id
+	 * @return          Empty 200 response
+	 */
+	@Transactional
+	@PostMapping("connect/{parentId}/{childId}")
+	@PreAuthorize("@authorisationService.canEditSkill(#parentId)")
+	public ResponseEntity<Void> connectSkill(@PathVariable Long parentId, @PathVariable Long childId) {
+		Skill parent = skillRepository.findByIdOrThrow(parentId);
+		Skill child = skillRepository.findByIdOrThrow(childId);
+		parent.getChildren().add(child);
+		child.getParents().add(parent);
+		skillRepository.save(parent);
+		skillRepository.save(child);
+		return ResponseEntity.ok().build();
+	}
+
+	/**
+	 * Disconnect a skill from another.
+	 *
+	 * @param  parentId The parent skill id
+	 * @param  childId  The child skill id
+	 * @return          Empty 200 response
+	 */
+	@Transactional
+	@PostMapping("disconnect/{parentId}/{childId}")
+	@PreAuthorize("@authorisationService.canEditSkill(#parentId)")
+	public ResponseEntity<Void> disconnectSkill(@PathVariable Long parentId, @PathVariable Long childId) {
+		Skill parent = skillRepository.findByIdOrThrow(parentId);
+		Skill child = skillRepository.findByIdOrThrow(childId);
+		parent.getChildren().remove(child);
+		child.getParents().remove(parent);
+		skillRepository.save(parent);
+		skillRepository.save(child);
+		return ResponseEntity.ok().build();
+	}
+
 }

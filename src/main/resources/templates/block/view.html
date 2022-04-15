@@ -55,6 +55,15 @@
         <button class="fa-solid fa-trash block__delete" th:if="${canDelete}"
                 th:data-block="${block.id}"></button>
     </div>
+
+    <th:block th:if="${level == 'module' and canEdit}">
+        <div class="block__connect from" th:data-skill="${block.id}">
+            <button><span class="fa-solid fa-link"></span></button>
+        </div>
+        <div class="hidden block__connect to" th:data-skill="${block.id}">
+            <button><span class="fa-solid fa-link"></span></button>
+        </div>
+    </th:block>
 </div>
 
 <script layout:fragment="script">

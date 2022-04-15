@@ -92,6 +92,8 @@
                 $(`#${element.id} > .block__buttons > .block__delete`).click(deleteBlock);
                 if (blockType === "skill") {
                     $(`#${element.id} > .items > li > .item__create`).click(createTask);
+                    $(`#${element.id} > .block__connect.from > button`).click(connectFrom);
+                    $(`#${element.id} > .block__connect.to > button`).click(connectTo);
                 }
             });
         });
