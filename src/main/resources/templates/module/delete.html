@@ -20,7 +20,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
-<div th:if="${@authorisationService.canDeleteModuleInEdition(edition.id)}" layout:fragment="overlay" class="hidden overlay" id="delete-module-overlay">
+<dialog th:if="${@authorisationService.canDeleteModuleInEdition(edition.id)}" layout:fragment="overlay" class="overlay" id="delete-module-overlay">
 
     <form id="delete-module-form" class="confirmation" th:action="@{/module}" th:method="delete">
 
