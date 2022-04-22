@@ -121,7 +121,7 @@ public class SkillController {
 	 */
 	@Transactional
 	@PostMapping("connect/{parentId}/{childId}")
-	@PreAuthorize("@authorisationService.canEditSkill(#parentId)")
+	@PreAuthorize("@authorisationService.canEditSkill(#parentId) or @authorisationService.canEditSkill(#childId)")
 	public ResponseEntity<Void> connectSkill(@PathVariable Long parentId, @PathVariable Long childId) {
 		Skill parent = skillRepository.findByIdOrThrow(parentId);
 		Skill child = skillRepository.findByIdOrThrow(childId);
@@ -141,7 +141,7 @@ public class SkillController {
 	 */
 	@Transactional
 	@PostMapping("disconnect/{parentId}/{childId}")
-	@PreAuthorize("@authorisationService.canEditSkill(#parentId)")
+	@PreAuthorize("@authorisationService.canEditSkill(#parentId) or @authorisationService.canEditSkill(#childId)")
 	public ResponseEntity<Void> disconnectSkill(@PathVariable Long parentId, @PathVariable Long childId) {
 		Skill parent = skillRepository.findByIdOrThrow(parentId);
 		Skill child = skillRepository.findByIdOrThrow(childId);

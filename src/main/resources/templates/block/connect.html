@@ -134,12 +134,12 @@
 <script th:if="${canEdit and level == 'module'}">
     function disconnect() {
         let skill = $(`#${$(this).data("skill")}`);
-        let childId = parseInt($(this).data("child").substr(6));
+        let childId = parseInt($(this).data("child").split("-")[1]);
         let children = skill.data("children").filter(id => id !== childId);
         skill.data("children", children);
         skill.attr("data-children", children);
 
-        let fromId = parseInt(skill.attr("id").substr(6));
+        let fromId = parseInt(skill.attr("id").split("-")[1]);
         $.post(`/skill/disconnect/${fromId}/${childId}`, {}, () => recalculateConnections());
     }
 
@@ -151,26 +151,25 @@
             $(".block__connect.selected").removeClass("selected");
             $(this).parent().addClass("selected");
 
-            let row = parseInt($(this).parent().parent().css("grid-row").split(" / ")[0]);
-            $(".block").filter((i, s) => parseInt($(s).css("grid-row").split(" / ")[0]) > row)
-                .filter((i, s) => !$(this).parent().parent().data("children").includes(parseInt($(s).attr("id").substr(6))))
+            let row = parseInt($(this).parent().parent().css("gridRowStart"));
+            $(".block").filter((i, s) => parseInt($(s).css("gridRowStart")) > row)
+                .filter((i, s) => !$(this).parent().parent().data("children").includes(parseInt($(s).attr("id").split("-")[1])))
                 .children(".block__connect.to").removeClass("hidden");
         }
         $(this).blur();
     }
 
     function connectTo() {
-        let childId = parseInt($(this).parent().parent().attr("id").substr(6));
+        let childId = parseInt($(this).parent().parent().attr("id").split("-")[1]);
         let from = $(".block__connect.from.selected").parent();
-        let children = [childId];
-        from.data("children").forEach(c => children.push(c));
+        let children = [childId, ...from.data("children")];
         from.data("children", children);
         from.attr("data-children", children);
         $(".block__connect.selected").removeClass("selected");
         $(".block__connect.to").addClass("hidden");
         recalculateConnections();
 
-        let fromId = parseInt(from.attr("id").substr(6));
+        let fromId = parseInt(from.attr("id").split("-")[1]);
         $.post(`/skill/connect/${fromId}/${childId}`, {}, () => recalculateConnections());
     }
 
