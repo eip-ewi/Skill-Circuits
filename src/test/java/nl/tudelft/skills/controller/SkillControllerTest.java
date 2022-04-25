@@ -115,12 +115,34 @@ public class SkillControllerTest extends ControllerTest {
 	}
 
 	@Test
+	void connectSkill() {
+		assertThat(skillRepository.findByIdOrThrow(db.skillImplication.getId()).getChildren())
+				.doesNotContain(db.skillProofOutline);
+		skillController.connectSkill(db.skillImplication.getId(), db.skillProofOutline.getId());
+		assertThat(skillRepository.findByIdOrThrow(db.skillImplication.getId()).getChildren())
+				.contains(db.skillProofOutline);
+	}
+
+	@Test
+	void disconnectSkill() {
+		assertThat(skillRepository.findByIdOrThrow(db.skillImplication.getId()).getChildren())
+				.contains(db.skillAssumption);
+		skillController.disconnectSkill(db.skillImplication.getId(), db.skillAssumption.getId());
+		assertThat(skillRepository.findByIdOrThrow(db.skillImplication.getId()).getChildren())
+				.doesNotContain(db.skillAssumption);
+	}
+
+	@Test
 	void endpointsAreProtected() throws Exception {
 		mvc.perform(patch("/skill/{id}", db.skillVariables.getId()))
 				.andExpect(status().isForbidden());
 		mvc.perform(post("/skill"))
 				.andExpect(status().isForbidden());
 		mvc.perform(delete("/skill?id=1"))
+				.andExpect(status().isForbidden());
+		mvc.perform(post("/skill/connect/1/2"))
+				.andExpect(status().isForbidden());
+		mvc.perform(post("/skill/disconnect/1/2"))
 				.andExpect(status().isForbidden());
 	}
 

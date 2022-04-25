@@ -20,7 +20,8 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
-<script layout:fragment="script">
+<th:block layout:fragment="script">
+<script th:inline="javascript">
     function recalculateConnections() {
         [...document.getElementsByClassName('connection')].forEach(c => c.remove())
         calculateConnections();
@@ -99,6 +100,16 @@
                 }
                 circuit.appendChild(verticalOutConnection);
 
+                /*<![CDATA[*/
+                let canEdit = /*[[${canEdit}]]*/ false;
+                /*]]>*/
+
+                if (canEdit && blockType === "skill") {
+                    let disconnectButton = $(`<button class="connection__disconnect" data-skill="${skill.id}" data-child="${child.id}"><span class="fa-solid fa-link-slash"></span></button>`)
+                    $(verticalOutConnection).append(disconnectButton);
+                    $(disconnectButton).click(disconnect);
+                }
+
                 xOffset += 10;
             }
         }
@@ -120,5 +131,53 @@
         });
     }
 </script>
+<script th:if="${canEdit and level == 'module'}">
+    function disconnect() {
+        let skill = $(`#${$(this).data("skill")}`);
+        let childId = parseInt($(this).data("child").split("-")[1]);
+        let children = skill.data("children").filter(id => id !== childId);
+        skill.data("children", children);
+        skill.attr("data-children", children);
+
+        let fromId = parseInt(skill.attr("id").split("-")[1]);
+        $.post(`/skill/disconnect/${fromId}/${childId}`, {}, () => recalculateConnections());
+    }
+
+    function connectFrom() {
+        if ($(this).parent().hasClass("selected")) {
+            $(this).parent().removeClass("selected");
+            $(".block__connect.to").addClass("hidden");
+        } else {
+            $(".block__connect.selected").removeClass("selected");
+            $(this).parent().addClass("selected");
+
+            let row = parseInt($(this).parent().parent().css("gridRowStart"));
+            $(".block").filter((i, s) => parseInt($(s).css("gridRowStart")) > row)
+                .filter((i, s) => !$(this).parent().parent().data("children").includes(parseInt($(s).attr("id").split("-")[1])))
+                .children(".block__connect.to").removeClass("hidden");
+        }
+        $(this).blur();
+    }
+
+    function connectTo() {
+        let childId = parseInt($(this).parent().parent().attr("id").split("-")[1]);
+        let from = $(".block__connect.from.selected").parent();
+        let children = [childId, ...from.data("children")];
+        from.data("children", children);
+        from.attr("data-children", children);
+        $(".block__connect.selected").removeClass("selected");
+        $(".block__connect.to").addClass("hidden");
+        recalculateConnections();
+
+        let fromId = parseInt(from.attr("id").split("-")[1]);
+        $.post(`/skill/connect/${fromId}/${childId}`, {}, () => recalculateConnections());
+    }
+
+    window.addEventListener('DOMContentLoaded', function () {
+        $(".block__connect.from > button").click(connectFrom);
+        $(".block__connect.to > button").click(connectTo);
+    });
+</script>
+</th:block>
 
 </html>

@@ -60,6 +60,53 @@
     cursor: grab;
   }
 
+  &__connect {
+    left: 0;
+    position: absolute;
+    width: 100%;
+
+    &.from {
+      bottom: -.75rem;
+      display: none;
+    }
+    &.to {
+      display: flex;
+      top: -.75rem;
+    }
+
+    & > button {
+      background-color: var(--primary-light);
+      border: 1px solid var(--primary-dark);
+      cursor: pointer;
+      font-size: .75rem;
+      max-width: 1.5rem;
+      margin-inline: auto;
+      min-height: 1.5rem;
+      padding: .2rem;
+      &:hover, &:focus-visible {
+        background-color: var(--primary-green);
+        color: var(--primary-light);
+      }
+    }
+
+    &.selected > button {
+      background-color: var(--primary-green);
+      color: var(--primary-light);
+      &:hover, &:focus-visible {
+        background-color: var(--primary-light);
+        color: var(--primary-dark);
+      }
+    }
+
+    &.selected {
+      display: flex;
+    }
+  }
+  &:hover > .block__connect.from,
+  &:focus-within > .block__connect.from {
+    display: flex;
+  }
+
   &__buttons {
     display: none;
     flex-direction: column;
@@ -313,8 +360,9 @@
 
 .connection {
   align-self: end;
-  justify-self: center;
   background-color: var(--grey-500);
+  justify-self: center;
+  position: relative;
   z-index: 0;
 
   &.horizontal {
@@ -341,6 +389,30 @@
   &.highlighted {
     background-color: #0000ff;
     z-index: 1;
+  }
+
+  &__disconnect {
+    --size: 1.5rem;
+
+    background-color: var(--primary-light);
+    border: 1px solid var(--primary-dark);
+    cursor: pointer;
+    display: none;
+    font-size: .75rem;
+    left: calc(var(--size) / -2);
+    max-width: var(--size);
+    min-height: var(--size);
+    padding: .2rem;
+    position: absolute;
+    top: .5rem;
+
+    &:hover, &:focus {
+      background-color: var(--primary-green);
+      color: var(--primary-light);
+    }
+  }
+  &.highlighted > &__disconnect {
+    display: initial;
   }
 }
 
