@@ -20,7 +20,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
-<div th:if="${canDelete}" layout:fragment="overlay" class="hidden overlay" id="delete-block-overlay">
+<dialog th:if="${canDelete}" layout:fragment="overlay" class="overlay" id="delete-block-overlay">
 
     <form id="delete-block-form" class="confirmation" th:action="@{|/${blockType}|}" th:method="delete">
 
@@ -36,7 +36,7 @@
 
     </form>
 
-</div>
+</dialog>
 
 <script th:if="${canDelete}" layout:fragment="script">
     function deleteBlock() {

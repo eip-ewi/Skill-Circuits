@@ -16,8 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 function toggleOverlay(id) {
-    let overlay = $(`#${id}`);
-    overlay.toggleClass("hidden");
-    $("body").css("overflow-y", overlay.hasClass("hidden") ? "auto" : "hidden");
-    window.scrollTo(0, 0);
+    let overlay = document.getElementById(id);
+    if (overlay.open) {
+        overlay.close();
+    } else {
+        overlay.showModal();
+    }
 }

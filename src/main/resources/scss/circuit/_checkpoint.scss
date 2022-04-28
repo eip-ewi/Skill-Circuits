@@ -1,0 +1,8 @@
+.checkpoint {
+  align-self: end;
+  border-top: 1px dashed var(--primary-dark);
+  grid-column: 1 / span var(--columns);
+  max-height: 1px;
+  transform: translateY(1rem);
+  z-index: 10;
+}
