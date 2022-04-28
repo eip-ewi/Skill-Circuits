@@ -20,6 +20,8 @@ package nl.tudelft.skills.controller;
 import java.util.Set;
 import java.util.stream.IntStream;
 
+import javax.servlet.http.HttpSession;
+
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.dto.view.View;
@@ -45,11 +47,14 @@ public class ModuleController {
 
 	private ModuleRepository moduleRepository;
 	private ModuleService moduleService;
+	private HttpSession session;
 
 	@Autowired
-	public ModuleController(ModuleRepository moduleRepository, ModuleService moduleService) {
+	public ModuleController(ModuleRepository moduleRepository, ModuleService moduleService,
+			HttpSession session) {
 		this.moduleRepository = moduleRepository;
 		this.moduleService = moduleService;
+		this.session = session;
 	}
 
 	/**
@@ -74,6 +79,7 @@ public class ModuleController {
 		Set<Pair<Integer, Integer>> positions = module.getFilledPositions();
 		int columns = positions.stream().mapToInt(Pair::getFirst).max().orElse(-1) + 1;
 		int rows = positions.stream().mapToInt(Pair::getSecond).max().orElse(-1) + 1;
+		Boolean studentMode = (Boolean) session.getAttribute("student-mode-" + id);
 
 		model.addAttribute("level", "module");
 		model.addAttribute("module", module);
@@ -83,6 +89,7 @@ public class ModuleController {
 				.flatMap(row -> IntStream.range(0, columns).mapToObj(col -> Pair.of(col, row)))
 				.filter(pos -> !positions.contains(pos))
 				.toList());
+		model.addAttribute("studentMode", studentMode != null && studentMode);
 
 		return "module/view";
 	}
@@ -135,6 +142,21 @@ public class ModuleController {
 		SCModule module = moduleRepository.findByIdOrThrow(patch.getId());
 		moduleRepository.save(patch.apply(module));
 		return ResponseEntity.ok().build();
+	}
+
+	/**
+	 * Toggles student mode for a specific edition from a module.
+	 *
+	 * @param  id The id of the module
+	 * @return    The module page
+	 */
+	@PostMapping("{id}/studentmode")
+	public String toggleStudentMode(@PathVariable Long id) {
+		Long editionId = moduleRepository.findByIdOrThrow(id).getEdition().getId();
+		Boolean currentStudentMode = (Boolean) session.getAttribute("student-mode-" + editionId);
+		session.setAttribute("student-mode-" + editionId,
+				currentStudentMode == null || !currentStudentMode);
+		return "redirect:/module/{id}";
 	}
 
 }

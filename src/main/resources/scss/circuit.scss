@@ -18,6 +18,10 @@
     display: flex;
     justify-content: space-between;
     margin-bottom: 2rem;
+    &__buttons {
+      display: flex;
+      gap: 1rem;
+    }
   }
 
   &__button {
