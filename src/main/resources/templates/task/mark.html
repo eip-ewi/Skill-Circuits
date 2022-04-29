@@ -37,25 +37,25 @@
                     task.classList.add('completed')
                 }
             });
+        }
 
-            // Traverse all blocks topologically and mark their state
-            [...$(".block")].sort((a, b) => $(a).css("gridRowStart") - $(b).css("gridRowStart"))
-                .forEach(block => updateBlockState(block.id.split("-")[1]))
+        // Traverse all blocks topologically and mark their state
+        [...$(".block")].sort((a, b) => $(a).css("gridRowStart") - $(b).css("gridRowStart"))
+            .forEach(block => updateBlockState(block.id.split("-")[1]))
 
-            //send update to server if user is authenticated and there are updates
-            /*<![CDATA[*/
-            const personId = /*[[${@authorisationService.authPerson?.id}]]*/ null
-            /*]]>*/
-            if (personId !== null && toUpdate.length) {
-                $.ajax({
-                    type: "PUT",
-                    url: "/person/" + personId + "/complete/",
-                    data: JSON.stringify(toUpdate),
-                    processData: false,
-                    contentType: "application/json",
-                    success : () => {localStorage.removeItem('completedTasks')}
-                })
-            }
+        //send update to server if user is authenticated and there are updates
+        /*<![CDATA[*/
+        const personId = /*[[${@authorisationService.authPerson?.id}]]*/ null
+        /*]]>*/
+        if (personId !== null && toUpdate?.length) {
+            $.ajax({
+                type: "PUT",
+                url: "/person/" + personId + "/complete/",
+                data: JSON.stringify(toUpdate),
+                processData: false,
+                contentType: "application/json",
+                success : () => {localStorage.removeItem('completedTasks')}
+            })
         }
     })
 
