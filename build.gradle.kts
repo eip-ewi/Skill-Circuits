@@ -48,8 +48,6 @@ plugins {
     id("com.diffplug.spotless").version("6.0.1")
 
     id("com.github.hierynomus.license").version("0.16.1")
-
-//    id("com.unclezs.gradle.sass").version("1.0.10")
 }
 
 sourceSets {
@@ -177,11 +175,6 @@ tasks.withType<Test>().configureEach {
         events("passed", "skipped", "failed")
     }
 }
-
-//sass {
-//    cssPath = "static/css"
-//    sassPath = "scss"
-//}
 
 tasks.getByName<Test>("test") {
     useJUnitPlatform()
