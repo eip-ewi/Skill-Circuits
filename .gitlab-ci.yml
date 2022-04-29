@@ -1,6 +1,6 @@
 # Skill Circuits
 
-image: gradle:jdk17
+image: gitlab.ewi.tudelft.nl:4242/skill-circuits/docker-image:master
 
 
 variables:
