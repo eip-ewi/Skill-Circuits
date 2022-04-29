@@ -49,7 +49,7 @@ plugins {
 
     id("com.github.hierynomus.license").version("0.16.1")
 
-    id("com.unclezs.gradle.sass").version("1.0.10")
+//    id("com.unclezs.gradle.sass").version("1.0.10")
 }
 
 sourceSets {
@@ -131,7 +131,13 @@ val jacocoTestReport by tasks.getting(JacocoReport::class) {
     }
 }
 
-val processResources by tasks.getting(ProcessResources::class)
+task<Exec>("sassCompile") {
+    commandLine("sass", "src/main/resources/scss:src/main/resources/static/css")
+}
+
+val processResources by tasks.getting(ProcessResources::class) {
+    dependsOn.add(tasks.getByName("sassCompile"))
+}
 
 val bootJar by tasks.getting(BootJar::class) {
     enabled = true
@@ -172,10 +178,10 @@ tasks.withType<Test>().configureEach {
     }
 }
 
-sass {
-    cssPath = "static/css"
-    sassPath = "scss"
-}
+//sass {
+//    cssPath = "static/css"
+//    sassPath = "scss"
+//}
 
 tasks.getByName<Test>("test") {
     useJUnitPlatform()
