@@ -21,8 +21,10 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
 <div class="circuit" id="circuit" th:data-id="${circuit.id}" layout:fragment="grid">
-    <th:block th:if="${level == 'module'}" th:each="checkpoint : ${module.checkpoints}">
-        <div layout:replace="~{checkpoint/view :: checkpoint}"></div>
+    <th:block th:if="${level == 'module'}">
+        <th:block th:each="checkpoint : ${module.checkpoints}">
+            <div layout:replace="~{checkpoint/view :: checkpoint}"></div>
+        </th:block>
     </th:block>
     <th:block th:each="group : ${circuit.groups}">
         <th:block th:each="block : ${group.blocks}">
