@@ -426,7 +426,7 @@ public class DevDatabaseLoader {
 		checkpointSimple = checkpointRepository.save(Checkpoint.builder()
 				.name("Simple")
 				.edition(scEdition)
-				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 49), LocalTime.MIDNIGHT))
+				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 53), LocalTime.MIDNIGHT))
 				.build());
 	}
 

@@ -19,7 +19,7 @@
 -->
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-<div th:if="${@authorisationService.canEditCheckpointInEdition(circuit.id)}" layout:fragment="form" class="hidden" id="create-checkpoint-wrapper">
+<div th:if="${@authorisationService.canEditCheckpointInEdition(circuit.edition.id)}" layout:fragment="form" class="hidden" id="create-checkpoint-wrapper">
 
     <div id="create-checkpoint">
 
@@ -29,7 +29,15 @@
             <input id="create-checkpoint-module" name="moduleId" type="hidden" th:value="${circuit.id}" />
             <input id="create-checkpoint-skills" name="skillIds" type="hidden" hidden/>
             <input id="create-checkpoint-deadline" name="deadline" type="hidden" th:value="${#dates.formatISO(#dates.createNow())}" hidden/>
-            <input id="create-checkpoint-name" name="name" type="text" required/>
+            <th:block layout:replace="components/select_or_new :: select('create-checkpoint-name', 'name')">
+                <th:block layout:fragment="select-options">
+                    <option th:each="checkpoint: ${circuit.checkpointsInEdition}"
+                            th:id="|create-checkpoint-name-option-${checkpoint.id}|"
+                            th:value="${checkpoint.id}" th:text="${checkpoint.name}"
+                            th:data-deadline="${checkpoint.deadline}"
+                    ></option>
+                </th:block>
+            </th:block>
 
             <button type="button" id="create-checkpoint-cancel" class="fa-solid fa-xmark"></button>
             <button type="submit" class="fa-solid fa-check"></button>
@@ -39,7 +47,7 @@
 
 </div>
 
-<script th:if="${@authorisationService.canEditCheckpointInEdition(circuit.id)}" layout:fragment="script">
+<script th:if="${@authorisationService.canEditCheckpointInEdition(circuit.edition.id)}" layout:fragment="script">
     function addGhostCheckpoints() {
         const circuit = $("#circuit");
         const rowsInGrid = [...Array(parseInt(getComputedStyle(document.documentElement).getPropertyValue("--rows"))).keys()];
@@ -66,20 +74,79 @@
 
     }
     function createCheckpoint() {
-        let ghostCheckpoint = $(this).parent();
-        $("#create-checkpoint-skills").val(getSkillsInNewCheckpoint(parseInt(ghostCheckpoint.css("gridRowStart"))));
+        const select = $("#create-checkpoint-name-select");
+        const selectOptions = [...select.children("option")].map(cp => $(cp));
+        const ghostCheckpoint = $(this).parent();
+
+        // reset
+        $(".ghost_checkpoint").removeClass("editing");
+        $(".checkpoint__create").removeClass("hidden");
+        selectOptions.forEach(cp => cp.removeAttr("disabled"))
+        selectOptions.forEach(cp => cp.removeClass("discouraged"))
+
+        ghostCheckpoint.addClass("editing");
+
+        // disabled options already on this list and
+        const nextCheckpoint = getFirstCheckpointAfter(parseInt(ghostCheckpoint.css("gridRowStart")));
+        selectOptions.forEach(cp => {
+            if ($(`#checkpoint-${cp.attr('id').split('-').pop()}`).length !== 0) {
+                cp.prop('disabled', true);
+            }
+        });
+        // Sort active options, then new, then disabled options.
+        selectOptions.sort((a, b) => {
+            if (a.prop('disabled')) {
+                return 1
+            } else if (a.val() === "new") {
+                return 0
+            }
+            return -1
+        })
+        select.html(selectOptions);
+        select.val("new").change();
+
+        const skillsFormElement = $("#create-checkpoint-skills");
+        const skills = getSkillsInNewCheckpoint(parseInt(ghostCheckpoint.css("gridRowStart")))
+        skillsFormElement.val(skills);
+        skillsFormElement.data("skills", skills);
         $(this).addClass("hidden");
         $(this).after($("#create-checkpoint").css("gridRowStart", ghostCheckpoint.css("gridRowStart")));
     }
-
-
+    function getFirstCheckpointAfter(row) {
+        const rowsInGrid = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--rows"));
+        for (let i = row; i <= rowsInGrid; i ++) {
+            const next = [...$(".checkpoint ").not(".ghost_checkpoint")].find(cp => parseInt($(cp).css("gridRowStart")) === i)
+            if (next) {
+                return $(next)
+            }
+        }
+    }
     document.addEventListener("DOMContentLoaded", function () {
         $(".checkpoint__create").click(createCheckpoint);
 
         $("#create-checkpoint-cancel").click(function () {
+            $(".ghost_checkpoint").removeClass("editing");
             $(".checkpoint__create").removeClass("hidden");
             $("#create-checkpoint-wrapper").append($("#create-checkpoint"));
         });
+        $("#create-checkpoint-form").submit(function(event) {
+            event.preventDefault();
+            const checkpointId = $("#create-checkpoint-name-select option:selected").val();
+            if (checkpointId === "new") {
+                $.post("/checkpoint", $("#create-checkpoint-form").serialize(), () => location.reload());
+            } else {
+                $.ajax({
+                    type: "post",
+                    url: `/checkpoint/${checkpointId}/add-skills/`,
+                    data: JSON.stringify($("#create-checkpoint-skills").data("skills")),
+                    processData: false,
+                    contentType: "application/json",
+                    success: () => {
+                        location.reload();
+                    }
+                })
+            }
+        })
     });
 
 </script>

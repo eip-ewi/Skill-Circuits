@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.controller;
 
+import java.util.List;
 import java.util.Optional;
 
 import nl.tudelft.skills.dto.create.CheckpointCreateDTO;
@@ -56,6 +57,17 @@ public class CheckpointController {
 	public ResponseEntity<Void> patchCheckpoint(CheckpointPatchDTO patch) {
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(patch.getId());
 		checkpointRepository.save(patch.apply(checkpoint));
+		return ResponseEntity.ok().build();
+	}
+
+	@Transactional
+	@PostMapping("{id}/add-skills")
+	@PreAuthorize("@authorisationService.canEditCheckpoint(#id)")
+	public ResponseEntity<Void> addSkillsToCheckpoint(@PathVariable Long id,
+			@RequestBody List<Long> skillIds) {
+		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(id);
+		skillRepository.findAllByIdIn(skillIds).forEach(skill -> skill.setCheckpoint(checkpoint));
+
 		return ResponseEntity.ok().build();
 	}
 

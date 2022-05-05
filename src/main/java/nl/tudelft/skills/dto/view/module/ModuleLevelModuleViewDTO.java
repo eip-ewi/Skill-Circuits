@@ -56,6 +56,10 @@ public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitV
 	@PostApply
 	private List<CheckpointViewDTO> checkpoints;
 
+	@NotNull
+	@PostApply
+	private List<CheckpointViewDTO> checkpointsInEdition;
+
 	@Override
 	public List<? extends GroupView> getGroups() {
 		return submodules;
@@ -64,7 +68,10 @@ public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitV
 	@Override
 	public void postApply() {
 		super.postApply();
-		// get all checkpoints that contain a skill that is in this module.
+		// get all checkpoints in this edition
+		this.checkpointsInEdition = data.getEdition().getCheckpoints().stream()
+				.map(cp -> View.convert(cp, CheckpointViewDTO.class)).toList();
+		// get all checkpoints that contain a skill that is in this module
 		Set<Long> skillIdsInModule = data.getSubmodules().stream()
 				.flatMap(sub -> sub.getSkills().stream().map(Skill::getId)).collect(Collectors.toSet());
 		this.checkpoints = SpringContext.getBean(EditionRepository.class)

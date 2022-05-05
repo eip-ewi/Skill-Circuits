@@ -31,7 +31,6 @@
     & > * {
       font-size: 1rem;
     }
-
     & > button {
       background: none;
       border: none;
@@ -45,8 +44,8 @@
     border-top: 1px dashed var(--primary-dark);
     color: var(--grey-500);
     opacity: 0;
-    &:hover {
-      opacity: 100;
+    &:hover, &.editing {
+      opacity: 100
     }
     & > button {
       background: none;

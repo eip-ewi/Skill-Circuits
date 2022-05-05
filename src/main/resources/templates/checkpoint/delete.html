@@ -20,7 +20,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
-<div th:if="${canEdit}" layout:fragment="overlay" class="hidden overlay" id="delete-checkpoint-overlay">
+<dialog th:if="${canEdit}" layout:fragment="overlay" class="overlay" id="delete-checkpoint-overlay">
 
     <form id="delete-checkpoint-form" class="confirmation" th:action="@{/checkpoint}" th:method="delete">
 
@@ -37,7 +37,7 @@
 
     </form>
 
-</div>
+</dialog>
 
 <script th:if="${canEdit}" layout:fragment="script">
     function deleteCheckpoint() {
