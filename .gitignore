@@ -36,3 +36,7 @@ sentry.properties
 
 # css
 /src/main/resources/static/css
+
+# sass cashe
+
+.sass_cache/
