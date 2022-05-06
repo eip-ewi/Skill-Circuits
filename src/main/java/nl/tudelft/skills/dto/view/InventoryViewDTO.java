@@ -15,22 +15,27 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.repository;
+package nl.tudelft.skills.dto.view;
 
-import java.util.Optional;
+import java.util.List;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.model.Inventory;
-import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.model.InventoryItem;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
+public class InventoryViewDTO extends View<Inventory> {
 
-public interface InventoryRepository extends JpaRepository<Inventory, Long> {
+	private Long id;
 
-	default Inventory findByIdOrThrow(Long id) {
-		return findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Inventory was not found: " + id));
-	}
-
-	public Optional<Inventory> findByPerson(SCPerson person);
+	private List<InventoryItem> inventoryItems;
 }
