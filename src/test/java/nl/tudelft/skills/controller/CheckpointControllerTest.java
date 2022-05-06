@@ -156,9 +156,21 @@ public class CheckpointControllerTest extends ControllerTest {
 	}
 
 	@Test
+	@WithUserDetails("admin")
+	public void addSkillsToCheckpointTest() {
+		var res = checkpointController.addSkillsToCheckpoint(db.checkpointLectureTwo.getId(), List.of(db.skillImplication.getId()));
+
+		assertThat(res).isEqualTo(new ResponseEntity<>(HttpStatus.OK));
+
+		assertThat(skillRepository.findByIdOrThrow(db.skillImplication.getId()).getCheckpoint()).isEqualTo(db.checkpointLectureTwo);
+		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(db.checkpointLectureTwo.getId());
+		assertThat(checkpoint.getSkills()).contains(db.skillImplication);
+	}
+
+	@Test
 	public void deleteCheckpointIsForbidden() throws Exception {
 		mvc.perform(delete("/checkpoint/" + db.checkpointLectureOne.getId()))
-				.andExpect(status().isForbidden()).andReturn().getResponse();
+				.andExpect(status().isForbidden());
 	}
 
 }

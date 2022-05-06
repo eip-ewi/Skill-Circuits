@@ -66,6 +66,7 @@ public class CheckpointController {
 	public ResponseEntity<Void> addSkillsToCheckpoint(@PathVariable Long id,
 			@RequestBody List<Long> skillIds) {
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(id);
+		checkpoint.getSkills().addAll(skillRepository.findAllByIdIn(skillIds));
 		skillRepository.findAllByIdIn(skillIds).forEach(skill -> skill.setCheckpoint(checkpoint));
 
 		return ResponseEntity.ok().build();
