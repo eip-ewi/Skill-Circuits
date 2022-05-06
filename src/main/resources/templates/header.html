@@ -27,18 +27,17 @@
 
         <nav aria-label="primary" class="header__links"></nav>
 
-        <ul class="header__icons">
-            <li class="header__icon" th:unless="${@authorisationService.isAuthenticated()}">
-                <a class="fa-solid fa-right-to-bracket" th:href="@{/auth/login}"></a>
-            </li>
-            <li class="header__icon" th:if="${@authorisationService.isAuthenticated()}">
-                <a class="fa-solid fa-user" th:href="@{/}"></a>
-            </li>
-            <li class="header__icon" th:if="${@authorisationService.isAuthenticated()}">
-                <form th:action="@{/auth/logout}" method="post">
-                    <button type="submit" class="fa-solid fa-right-from-bracket"></button>
-                </form>
-            </li>
-        </ul>
-    </header>
+    <ul class="header__icons">
+        <li class="header__icon" th:unless="${@authorisationService.isAuthenticated()}"><a class="fa-solid fa-right-to-bracket" th:href="@{/auth/login}"></a></li>
+        <li class="header__icon" th:if="${@authorisationService.isAuthenticated()}"><a class="fa-solid fa-user" th:href="@{/}"></a></li>
+        <li class="header__icon" th:if="${@authorisationService.isAuthenticated()}"><a class="fa-solid fa-boxes-stacked" th:href="@{/inventory}"></a></li>
+        <li class="header__icon" th:if="${@authorisationService.isAuthenticated()}">
+            <form th:action="@{/auth/logout}" method="post">
+                <button type="submit" class="fa-solid fa-right-from-bracket"></button>
+            </form>
+        </li>
+    </ul>
+
+</header>
+
 </html>
