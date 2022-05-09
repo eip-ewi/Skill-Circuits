@@ -150,7 +150,10 @@
         } else {
             $(".block__connect.selected").removeClass("selected");
             $(this).parent().addClass("selected");
+            $(".block__connect.to").addClass("hidden");
 
+            // Enable 'connect to' button for all skills on lower levels
+            // that don't have a connection to this skill already.
             let row = parseInt($(this).parent().parent().css("gridRowStart"));
             $(".block").filter((i, s) => parseInt($(s).css("gridRowStart")) > row)
                 .filter((i, s) => !$(this).parent().parent().data("children").includes(parseInt($(s).attr("id").split("-")[1])))
