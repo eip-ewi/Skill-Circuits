@@ -42,14 +42,26 @@ public class InventoryService {
 	 * @return
 	 */
 	public InventoryViewDTO getInventoryView(SCPerson person) {
+		getInventory(person);
+
+		return View.convert(person.getInventory(),
+				InventoryViewDTO.class);
+	}
+
+	/**
+	 * Gets the inventory of a person.
+	 *
+	 * @param  person the person of whose inventory must be retrieved
+	 * @return        the inventory
+	 */
+	public Inventory getInventory(SCPerson person) {
 		Inventory inventory = person.getInventory();
 
 		if (inventory == null) {
 			inventory = createInventory(person);
 		}
 
-		return View.convert(person.getInventory(),
-				InventoryViewDTO.class);
+		return inventory;
 	}
 
 	/**
@@ -63,5 +75,9 @@ public class InventoryService {
 		inventoryRepository.save(inventory);
 		person.setInventory(inventory);
 		return person.getInventory();
+	}
+
+	public Inventory patchInventory(Inventory patchedInventory) {
+		return inventoryRepository.save(patchedInventory);
 	}
 }
