@@ -38,9 +38,6 @@ public class Checkpoint {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
 
-	@NotNull
-	private Long edition;
-
 	@NotBlank
 	private String name;
 
@@ -48,10 +45,16 @@ public class Checkpoint {
 	private LocalDateTime deadline;
 
 	@NotNull
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@ManyToOne
+	private SCEdition edition;
+
+	@NotNull
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToMany
+	@OneToMany(mappedBy = "checkpoint")
 	private Set<Skill> skills = new HashSet<>();
 
 }

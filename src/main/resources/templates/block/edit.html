@@ -36,6 +36,11 @@
             </select>
 
             <th:block th:if="${level == 'module'}">
+                <label for="edit-skill-checkpoint">Checkpoint</label>
+                <select id="edit-skill-checkpoint" name="checkpoint.id" required>
+                    <option th:each="checkpoint : ${module.checkpoints}" th:value="${checkpoint.id}"
+                            th:text="${checkpoint.name}"></option>
+                </select>
                 <div>
                     <label for="edit-essential-checkbox">Essential</label>
                     <div class="info_icon">
@@ -73,6 +78,7 @@
         $(`#block-${blockId}-group`).addClass("hidden");
 
         if (blockType === "skill") {
+            $("#edit-skill-checkpoint").val(block.data("checkpoint"));
             $("#edit-essential-checkbox").prop("checked", block.data("essential"));
         }
     }
@@ -102,7 +108,12 @@
                         let essential = $("#edit-essential-checkbox").prop("checked");
                         block.data("essential", essential);
                         block.attr("data-essential",essential);
+
+                        let checkpoint = $("#edit-skill-checkpoint option:selected");
+                        block.data("checkpoint", checkpoint.val());
+                        block.attr("data-checkpoint", checkpoint.val());
                     }
+                    updateCheckpointPositions();
                 }
             });
         });

@@ -15,42 +15,34 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.model;
+package nl.tudelft.skills.dto.id;
 
-import java.util.HashSet;
-import java.util.Set;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+import nl.tudelft.librador.dto.id.IdDTO;
+import nl.tudelft.skills.model.Checkpoint;
+import nl.tudelft.skills.repository.CheckpointRepository;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-
-import lombok.*;
+import org.springframework.data.repository.CrudRepository;
 
 @Data
-@Entity
-@Builder
+@SuperBuilder
 @NoArgsConstructor
-@AllArgsConstructor
-public class SCEdition {
+@EqualsAndHashCode(callSuper = true)
+public class CheckpointIdDTO extends IdDTO<Checkpoint, Long> {
+	public CheckpointIdDTO(Long id) {
+		super(id);
+	}
 
-	@Id
-	private Long id;
+	@Override
+	public Class<? extends CrudRepository<Checkpoint, Long>> repositoryClass() {
+		return CheckpointRepository.class;
+	}
 
-	@NotNull
-	@Builder.Default
-	private boolean isVisible = false;
-
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@OneToMany(mappedBy = "edition")
-	private Set<SCModule> modules = new HashSet<>();
-
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@OneToMany(mappedBy = "edition")
-	private Set<Checkpoint> checkpoints = new HashSet<>();
-
+	@Override
+	public Class<? extends Checkpoint> targetClass() {
+		return Checkpoint.class;
+	}
 }

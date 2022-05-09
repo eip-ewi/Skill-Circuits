@@ -15,20 +15,45 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view.module;
+package nl.tudelft.skills.dto.view.checkpoint;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
 import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.model.SCEdition;
+import nl.tudelft.skills.dto.view.module.ModuleLevelEditionViewDTO;
+import nl.tudelft.skills.model.Checkpoint;
+import nl.tudelft.skills.model.Skill;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class ModelLevelEditionViewDTO extends View<SCEdition> {
+public class CheckpointViewDTO extends View<Checkpoint> {
+
 	@NotNull
-	private Long id;
+	private long id;
+
+	@NotNull
+	private ModuleLevelEditionViewDTO edition;
+
+	@NotBlank
+	private String name;
+
+	@NotNull
+	private LocalDateTime deadline;
+
+	@NotNull
+	private List<Long> skillIds;
+
+	@Override
+	public void postApply() {
+		super.postApply();
+		this.skillIds = data.getSkills().stream().map(Skill::getId).toList();
+	}
 }

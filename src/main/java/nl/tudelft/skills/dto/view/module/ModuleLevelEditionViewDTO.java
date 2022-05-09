@@ -15,44 +15,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.create;
+package nl.tudelft.skills.dto.view.module;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
-import nl.tudelft.librador.dto.create.Create;
-import nl.tudelft.skills.dto.id.CheckpointIdDTO;
-import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
-import nl.tudelft.skills.model.Skill;
+import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.model.SCEdition;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class SkillCreateDTO extends Create<Skill> {
-
-	@NotBlank
-	private String name;
+public class ModuleLevelEditionViewDTO extends View<SCEdition> {
 	@NotNull
-	@Builder.Default
-	private Boolean essential = false;
-	@NotNull
-	private SubmoduleIdDTO submodule;
-	@NotNull
-	private CheckpointIdDTO checkpoint;
-	@Min(0)
-	@NotNull
-	private Integer row;
-	@Min(0)
-	@NotNull
-	private Integer column;
-
-	@Override
-	public Class<Skill> clazz() {
-		return Skill.class;
-	}
-
+	private Long id;
 }

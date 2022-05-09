@@ -84,7 +84,7 @@ public class CourseServiceTest {
 	public void hasAtLeastOneEditionVisibleToStudents() {
 		when(courseApi.getCourseById(anyLong())).thenReturn(
 				Mono.just(new CourseDetailsDTO().editions(List.of(new EditionSummaryDTO().id(1L)))));
-		SCEdition edition = new SCEdition(1L, true, Collections.emptySet());
+		SCEdition edition = new SCEdition(1L, true, Collections.emptySet(), Collections.emptySet());
 		editionRepository.save(edition);
 
 		assertThat(courseService.hasAtLeastOneEditionVisibleToStudents(1L));
@@ -104,8 +104,8 @@ public class CourseServiceTest {
 				List.of(new EditionSummaryDTO().id(1L).startDate(LocalDateTime.now()),
 						new EditionSummaryDTO().id(2L).startDate(LocalDateTime.now())));
 
-		editionRepository.save(new SCEdition(1L, true, null));
-		editionRepository.save(new SCEdition(2L, true, null));
+		editionRepository.save(new SCEdition(1L, true, null, null));
+		editionRepository.save(new SCEdition(2L, true, null, null));
 
 		when(courseApi.getCourseById(anyLong())).thenReturn(Mono.just(courseDetailsDTO));
 
@@ -125,8 +125,8 @@ public class CourseServiceTest {
 		when(courseApi.getCourseById(anyLong())).thenReturn(Mono.just(courseDetailsDTO));
 		when(authorisationService.isStudentInEdition(anyLong())).thenReturn(false);
 
-		editionRepository.save(new SCEdition(1L, true, null));
-		editionRepository.save(new SCEdition(2L, true, null));
+		editionRepository.save(new SCEdition(1L, true, null, null));
+		editionRepository.save(new SCEdition(2L, true, null, null));
 
 		// if student is not in any edition, then most recent edition is returned
 		assertThat(courseService.getLastStudentEditionForCourseOrLast(3L)).isEqualTo(2L);
@@ -144,9 +144,9 @@ public class CourseServiceTest {
 		when(authorisationService.isStudentInEdition(2L)).thenReturn(true);
 		when(authorisationService.isStudentInEdition(3L)).thenReturn(false);
 
-		editionRepository.save(new SCEdition(1L, true, null));
-		editionRepository.save(new SCEdition(2L, true, null));
-		editionRepository.save(new SCEdition(3L, true, null));
+		editionRepository.save(new SCEdition(1L, true, null, null));
+		editionRepository.save(new SCEdition(2L, true, null, null));
+		editionRepository.save(new SCEdition(3L, true, null, null));
 
 		// if student is at least in one edition, then most recent active edition is returned
 		assertThat(courseService.getLastStudentEditionForCourseOrLast(3L)).isEqualTo(2L);

@@ -17,42 +17,39 @@
  */
 package nl.tudelft.skills.dto.create;
 
-import javax.validation.constraints.Min;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
 import nl.tudelft.librador.dto.create.Create;
-import nl.tudelft.skills.dto.id.CheckpointIdDTO;
-import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
-import nl.tudelft.skills.model.Skill;
+import nl.tudelft.skills.dto.id.SCEditionIdDTO;
+import nl.tudelft.skills.model.Checkpoint;
+
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class SkillCreateDTO extends Create<Skill> {
+public class CheckpointCreateDTO extends Create<Checkpoint> {
 
 	@NotBlank
 	private String name;
 	@NotNull
-	@Builder.Default
-	private Boolean essential = false;
+	private SCEditionIdDTO edition;
 	@NotNull
-	private SubmoduleIdDTO submodule;
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+	private LocalDateTime deadline;
 	@NotNull
-	private CheckpointIdDTO checkpoint;
-	@Min(0)
-	@NotNull
-	private Integer row;
-	@Min(0)
-	@NotNull
-	private Integer column;
+	private List<Long> skillIds;
 
 	@Override
-	public Class<Skill> clazz() {
-		return Skill.class;
+	public Class<Checkpoint> clazz() {
+		return Checkpoint.class;
 	}
 
 }

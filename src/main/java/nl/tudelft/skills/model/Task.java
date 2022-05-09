@@ -41,6 +41,8 @@ public class Task {
 
 	@NotNull
 	@ManyToOne
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
 	private Skill skill;
 
 	@NotBlank

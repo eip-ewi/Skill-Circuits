@@ -15,44 +15,36 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.create;
+package nl.tudelft.skills.dto.patch;
 
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import lombok.*;
-import nl.tudelft.librador.dto.create.Create;
-import nl.tudelft.skills.dto.id.CheckpointIdDTO;
-import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
-import nl.tudelft.skills.model.Skill;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import nl.tudelft.librador.dto.patch.Patch;
+import nl.tudelft.skills.model.Checkpoint;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class SkillCreateDTO extends Create<Skill> {
+public class CheckpointPatchDTO extends Patch<Checkpoint> {
 
+	@NotNull
+	private Long id;
 	@NotBlank
 	private String name;
-	@NotNull
-	@Builder.Default
-	private Boolean essential = false;
-	@NotNull
-	private SubmoduleIdDTO submodule;
-	@NotNull
-	private CheckpointIdDTO checkpoint;
-	@Min(0)
-	@NotNull
-	private Integer row;
-	@Min(0)
-	@NotNull
-	private Integer column;
 
 	@Override
-	public Class<Skill> clazz() {
-		return Skill.class;
+	protected void applyOneToOne() {
+		updateNonNull(name, data::setName);
 	}
 
+	@Override
+	protected void validate() {
+
+	}
 }

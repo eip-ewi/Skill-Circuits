@@ -28,6 +28,7 @@
         /*<![CDATA[*/
         :root {
             --columns: /*[[${columns}]]*/ 5;
+            --rows: /*[[${rows}]]*/ 5;
         }
         /*]]>*/
     </style>
@@ -38,9 +39,6 @@
 <body>
 
 <div layout:fragment="content">
-
-    <h1 th:text="${module.name}"></h1>
-
     <th:block th:with="circuit = ${module},
                        canCreate = ${@authorisationService.canCreateSkillInEdition(module.edition.id)},
                        canEdit = ${@authorisationService.canEditSkillInEdition(module.edition.id)},
@@ -66,11 +64,18 @@
             const itemType = "task";
         </script>
         <div layout:replace="~{circuit/view :: script}"></div>
+
+        <div layout:replace="~{task/create :: script}"></div>
+        <div layout:replace="~{task/mark :: script}"></div>
+
+        <div layout:replace="~{checkpoint/view :: script}"></div>
+        <div layout:replace="~{checkpoint/edit :: form}"></div>
+        <div layout:replace="~{checkpoint/edit :: script}"></div>
+        <div layout:replace="~{checkpoint/create :: form}"></div>
+        <div layout:replace="~{checkpoint/create :: script}"></div>
+        <div layout:replace="~{checkpoint/delete :: overlay}"></div>
+        <div layout:replace="~{checkpoint/delete :: script}"></div>
     </th:block>
-
-    <div layout:replace="~{task/create :: script}"></div>
-    <div layout:replace="~{task/mark :: script}"></div>
-
 </div>
 
 </body>

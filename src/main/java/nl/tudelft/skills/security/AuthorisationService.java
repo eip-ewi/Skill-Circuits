@@ -29,11 +29,7 @@ import nl.tudelft.labracore.lib.security.LabradorUserDetails;
 import nl.tudelft.labracore.lib.security.user.DefaultRole;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.cache.RoleCacheManager;
-import nl.tudelft.skills.repository.EditionRepository;
-import nl.tudelft.skills.repository.ModuleRepository;
-import nl.tudelft.skills.repository.SkillRepository;
-import nl.tudelft.skills.repository.SubmoduleRepository;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.repository.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -50,6 +46,7 @@ public class AuthorisationService {
 	private SubmoduleRepository submoduleRepository;
 	private SkillRepository skillRepository;
 	private TaskRepository taskRepository;
+	private CheckpointRepository checkpointRepository;
 
 	private CourseControllerApi courseApi;
 
@@ -57,6 +54,7 @@ public class AuthorisationService {
 	public AuthorisationService(RoleCacheManager roleCache, EditionRepository editionRepository,
 			ModuleRepository moduleRepository, SubmoduleRepository submoduleRepository,
 			SkillRepository skillRepository, TaskRepository taskRepository,
+			CheckpointRepository checkpointRepository,
 			CourseControllerApi courseControllerApi) {
 		this.roleCache = roleCache;
 
@@ -65,6 +63,7 @@ public class AuthorisationService {
 		this.submoduleRepository = submoduleRepository;
 		this.skillRepository = skillRepository;
 		this.taskRepository = taskRepository;
+		this.checkpointRepository = checkpointRepository;
 
 		this.courseApi = courseControllerApi;
 	}
@@ -230,7 +229,7 @@ public class AuthorisationService {
 	}
 
 	/**
-	 * Gets whether the authenticated user can edit a submodule in a edition.
+	 * Gets whether the authenticated user can edit a submodule in an edition.
 	 *
 	 * @param  editionId The id of the edition
 	 * @return           True iff the user can edit the submodule in edition
@@ -334,6 +333,58 @@ public class AuthorisationService {
 	 */
 	public boolean canDeleteTask(Long taskId) {
 		return canEditSkill(taskRepository.findByIdOrThrow(taskId).getSkill().getId());
+	}
+
+	/**
+	 * Gets whether the authenticated user edit a checkpoint in an edition
+	 *
+	 * @param  editionId The id of the edition
+	 * @return           True iff the user can edit checkpoints in the edition
+	 */
+	public boolean canEditCheckpointInEdition(Long editionId) {
+		return isAtLeastTeacherInEdition(editionId);
+	}
+
+	/**
+	 * Gets whether the authenticated user can edit a checkpoint
+	 *
+	 * @param  checkpointId The id of the checkpoint
+	 * @return              True iff the user can edit the checkpoint
+	 */
+	public boolean canEditCheckpoint(Long checkpointId) {
+		return canEditCheckpointInEdition(
+				checkpointRepository.findByIdOrThrow(checkpointId).getEdition().getId());
+	}
+
+	/**
+	 * Gets whether the authenticated user can delete a checkpoint in an edition
+	 *
+	 * @param  editionId The id of the edition
+	 * @return           True iff the user can delete checkpoints in the edition
+	 */
+	public boolean canDeleteCheckpointInEdition(Long editionId) {
+		return canEditCheckpointInEdition(editionId);
+	}
+
+	/**
+	 * Gets whether the authenticated user can delete a checkpoint
+	 *
+	 * @param  checkpointId The id of the checkpoint
+	 * @return              True iff the user can delete the checkpoint
+	 */
+	public boolean canDeleteCheckpoint(Long checkpointId) {
+		return canDeleteCheckpointInEdition(
+				checkpointRepository.findByIdOrThrow(checkpointId).getEdition().getId());
+	}
+
+	/**
+	 * Gets whether the authenticated user can create a checkpoint in an edition
+	 *
+	 * @param  editionId The id of the edition
+	 * @return           True iff the user can create the checkpoint
+	 */
+	public boolean canCreateCheckpointInEdition(Long editionId) {
+		return canEditCheckpointInEdition(editionId);
 	}
 
 	/**

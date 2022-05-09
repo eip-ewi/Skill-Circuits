@@ -31,6 +31,7 @@ import nl.tudelft.skills.dto.id.SCModuleIdDTO;
 import nl.tudelft.skills.dto.patch.SubmodulePatchDTO;
 import nl.tudelft.skills.dto.patch.SubmodulePositionPatchDTO;
 import nl.tudelft.skills.model.Submodule;
+import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.SubmoduleRepository;
 import nl.tudelft.skills.service.SkillService;
 
@@ -52,9 +53,12 @@ public class SubmoduleControllerTest extends ControllerTest {
 
 	private final SubmoduleController submoduleController;
 	private final SubmoduleRepository submoduleRepository;
+	private final ModuleRepository moduleRepository;
 
 	@Autowired
-	public SubmoduleControllerTest(SubmoduleRepository submoduleRepository, SkillService skillService) {
+	public SubmoduleControllerTest(SubmoduleRepository submoduleRepository, SkillService skillService,
+			ModuleRepository moduleRepository) {
+		this.moduleRepository = moduleRepository;
 		this.submoduleController = new SubmoduleController(submoduleRepository, skillService);
 		this.submoduleRepository = submoduleRepository;
 	}
@@ -93,7 +97,8 @@ public class SubmoduleControllerTest extends ControllerTest {
 
 		Submodule submodule = submoduleRepository.findByIdOrThrow(db.submoduleCases.getId());
 		assertThat(submodule.getName()).isEqualTo("Updated");
-		assertThat(submodule.getModule()).isEqualTo(db.moduleProofTechniques);
+		assertThat(moduleRepository.findByIdOrThrow(submodule.getModule().getId())).isEqualTo(
+				moduleRepository.findByIdOrThrow(db.moduleProofTechniques.getId()));
 	}
 
 	@Test

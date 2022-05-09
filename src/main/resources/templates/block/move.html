@@ -97,6 +97,7 @@
                 if (row > newRows) newRows = row;
             }
             document.documentElement.style.setProperty("--columns", newColumns.toString());
+            document.documentElement.style.setProperty("--rows", newRows.toString());
 
             // Remove spaces if necessary, keep track of the highest row and column
             let spaceMaxCol = 0;

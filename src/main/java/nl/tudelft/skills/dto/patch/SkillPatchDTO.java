@@ -25,6 +25,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import nl.tudelft.librador.dto.patch.Patch;
+import nl.tudelft.skills.dto.id.CheckpointIdDTO;
 import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
 import nl.tudelft.skills.model.Skill;
 
@@ -42,12 +43,14 @@ public class SkillPatchDTO extends Patch<Skill> {
 	@Builder.Default
 	private Boolean essential = false;
 	private SubmoduleIdDTO submodule;
+	private CheckpointIdDTO checkpoint;
 
 	@Override
 	protected void applyOneToOne() {
 		updateNonNull(name, data::setName);
 		updateNonNull(essential, data::setEssential);
 		updateNonNullId(submodule, data::setSubmodule);
+		updateNonNullId(checkpoint, data::setCheckpoint);
 	}
 
 	@Override

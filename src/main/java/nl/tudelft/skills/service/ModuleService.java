@@ -25,6 +25,7 @@ import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ModuleService {
@@ -44,6 +45,7 @@ public class ModuleService {
 	 * @param moduleViewDTO the dto to set completed attributes for
 	 * @param personId      the id of the person
 	 */
+	@Transactional
 	public void setCompletedTasksForPerson(ModuleLevelModuleViewDTO moduleViewDTO, Long personId) {
 		List<Long> completedTasks = personRepository.getById(personId).getTasksCompleted().stream()
 				.map(Task::getId).toList();

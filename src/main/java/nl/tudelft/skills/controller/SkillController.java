@@ -89,6 +89,7 @@ public class SkillController {
 	 * @return       Empty 200 response
 	 */
 	@PatchMapping
+	@Transactional
 	@PreAuthorize("@authorisationService.canEditSkill(#patch.id)")
 	public ResponseEntity<Void> patchSkill(SkillPatchDTO patch) {
 		Skill skill = skillRepository.findByIdOrThrow(patch.getId());
@@ -104,6 +105,7 @@ public class SkillController {
 	 * @return       Empty 200 response
 	 */
 	@PatchMapping("{id}/position")
+	@Transactional
 	@PreAuthorize("@authorisationService.canEditSkill(#id)")
 	public ResponseEntity<Void> updateSkillPosition(@PathVariable Long id,
 			@RequestBody SkillPositionPatchDTO patch) {
