@@ -43,7 +43,9 @@
     }
     document.addEventListener('DOMContentLoaded', function () {
         updateCheckpointPositions();
-        addGhostCheckpoints();
+        if (typeof addGhostCheckpoints === "function") {
+            addGhostCheckpoints();
+        }
     });
     document.addEventListener('drop', updateCheckpointPositions)
 </script>
