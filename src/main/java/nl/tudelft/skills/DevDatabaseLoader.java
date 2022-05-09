@@ -246,7 +246,7 @@ public class DevDatabaseLoader {
 				.submodule(submoduleCases)
 				.row(3).column(2)
 				.checkpoint(checkpointLectureTwo)
-				.parents(Set.of(skillProofOutline, skillDividingIntoCases))
+				.parents(Set.of(skillGeneralisationPractice, skillDividingIntoCases))
 				.build());
 
 		skillContradictionPractice = skillRepository.save(Skill.builder()
@@ -254,22 +254,7 @@ public class DevDatabaseLoader {
 				.submodule(submoduleContradiction)
 				.row(3).column(3)
 				.checkpoint(checkpointLectureTwo)
-				.parents(Set.of(skillProofOutline, skillNegation))
-				.build());
-
-		skillNegateImplications = skillRepository.save(Skill.builder()
-				.name("Negate Implications")
-				.submodule(submoduleContrapositive)
-				.row(4).column(1)
-				.checkpoint(checkpointLectureTwo)
-				.parents(Set.of(skillNegation, skillImplication))
-				.build());
-		skillContrapositivePractice = skillRepository.save(Skill.builder()
-				.name("Contrapositive Practice")
-				.submodule(submoduleContrapositive)
-				.row(5).column(1)
-				.checkpoint(checkpointLectureTwo)
-				.parents(Set.of(skillProofOutline, skillNegateImplications))
+				.parents(Set.of(skillGeneralisationPractice, skillNegation))
 				.build());
 
 		skillTransitiveProperty = skillRepository.save(Skill.builder()
@@ -279,12 +264,28 @@ public class DevDatabaseLoader {
 				.checkpoint(checkpointLectureTwo)
 				.parents(Set.of(skillImplication))
 				.build());
+
+		skillNegateImplications = skillRepository.save(Skill.builder()
+				.name("Negate Implications")
+				.submodule(submoduleContrapositive)
+				.row(4).column(1)
+				.checkpoint(checkpointLectureTwo)
+				.parents(Set.of(skillTransitiveProperty, skillCasesPractice))
+				.build());
+		skillContrapositivePractice = skillRepository.save(Skill.builder()
+				.name("Contrapositive Practice")
+				.submodule(submoduleContrapositive)
+				.row(5).column(1)
+				.checkpoint(checkpointLectureTwo)
+				.parents(Set.of(skillNegateImplications, skillContradictionPractice))
+				.build());
+
 		skillInductionPractice = skillRepository.save(Skill.builder()
 				.name("Induction Practice")
 				.submodule(submoduleInduction)
 				.row(6).column(2)
 				.checkpoint(checkpointLectureTwo)
-				.parents(Set.of(skillTransitiveProperty, skillProofOutline, skillDividingIntoCases))
+				.parents(Set.of(skillContradictionPractice, skillContrapositivePractice))
 				.build());
 
 		skillSimpleA = skillRepository.save(Skill.builder()
