@@ -50,7 +50,7 @@
         if (personId !== null && toUpdate?.length) {
             $.ajax({
                 type: "PUT",
-                url: "/person/" + personId + "/complete/",
+                url: "/person/complete/",
                 data: JSON.stringify(toUpdate),
                 processData: false,
                 contentType: "application/json",
@@ -76,7 +76,7 @@
             // If there is an authenticated person, also update on the server.
             $.ajax({
                 type: "PUT",
-                url: "/person/" + personId + "/completion/" + taskId,
+                url: "/person/completion/" + taskId,
                 data: JSON.stringify(completed),
                 processData: false,
                 contentType: "application/json",

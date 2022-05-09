@@ -21,6 +21,8 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
+import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.TaskRepository;
@@ -43,15 +45,16 @@ public class PersonController {
 	/**
 	 * Marks a certain task as completed or uncompleted for a certain person.
 	 *
-	 * @param personId  the id of the person
-	 * @param taskId    the id of the task
-	 * @param completed whether the task has been completed or uncompleted
+	 * @param authPerson the currently authenticated person
+	 * @param taskId     the id of the task
+	 * @param completed  whether the task has been completed or uncompleted
 	 */
-	@PutMapping("{personId}/completion/{taskId}")
+	@PutMapping("completion/{taskId}")
 	@Transactional
-	public void updateTaskCompletedForPerson(@PathVariable Long personId, @PathVariable Long taskId,
+	public void updateTaskCompletedForPerson(@AuthenticatedPerson Person authPerson,
+			@PathVariable Long taskId,
 			@RequestBody boolean completed) {
-		SCPerson person = scPersonRepository.findByIdOrThrow(personId);
+		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
 		Task task = taskRepository.findByIdOrThrow(taskId);
 		if (completed) {
 			person.getTasksCompleted().add(task);
@@ -63,14 +66,14 @@ public class PersonController {
 	/**
 	 * Marks a list of task as completed for a certain person.
 	 *
-	 * @param personId       the id of the person
+	 * @param authPerson     the currently authenticated person
 	 * @param completedTasks a list of ids of completed tasks
 	 */
-	@PutMapping("{personId}/complete/")
+	@PutMapping("complete")
 	@Transactional
-	public void setTasksCompletedForPerson(@PathVariable Long personId,
+	public void setTasksCompletedForPerson(@AuthenticatedPerson Person authPerson,
 			@RequestBody List<Long> completedTasks) {
-		SCPerson person = scPersonRepository.findByIdOrThrow(personId);
+		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
 		person.getTasksCompleted().addAll(taskRepository.findAllById(completedTasks));
 	}
 }

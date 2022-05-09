@@ -21,10 +21,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
+import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
-import nl.tudelft.skills.test.TestUserDetailsService;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +50,9 @@ public class PersonControllerTest extends ControllerTest {
 	void setTasksCompletedForPerson() {
 		assertThat(db.getPerson().getTasksCompleted()).doesNotContain(db.taskDo10a, db.taskDo10a);
 
-		personController.setTasksCompletedForPerson(TestUserDetailsService.id,
+		Person person = new Person();
+		person.setId(db.getPerson().getId());
+		personController.setTasksCompletedForPerson(person,
 				List.of(db.taskDo10a.getId(), db.taskRead10.getId()));
 
 		assertThat(db.getPerson().getTasksCompleted()).contains(db.taskDo10a, db.taskRead10);
@@ -60,7 +62,9 @@ public class PersonControllerTest extends ControllerTest {
 	void updateTaskCompletedForPersonTrue() {
 		assertThat(db.getPerson().getTasksCompleted()).doesNotContain(db.taskDo10a);
 
-		personController.updateTaskCompletedForPerson(TestUserDetailsService.id,
+		Person person = new Person();
+		person.setId(db.getPerson().getId());
+		personController.updateTaskCompletedForPerson(person,
 				db.taskDo10a.getId(), true);
 
 		assertThat(db.getPerson().getTasksCompleted()).contains(db.taskDo10a);
@@ -70,7 +74,9 @@ public class PersonControllerTest extends ControllerTest {
 	void updateTaskCompletedForPersonFalse() {
 		assertThat(db.getPerson().getTasksCompleted()).contains(db.taskDo11ad);
 
-		personController.updateTaskCompletedForPerson(TestUserDetailsService.id,
+		Person person = new Person();
+		person.setId(db.getPerson().getId());
+		personController.updateTaskCompletedForPerson(person,
 				db.taskDo11ad.getId(), false);
 
 		assertThat(db.getPerson().getTasksCompleted()).doesNotContain(db.taskDo11ad);
