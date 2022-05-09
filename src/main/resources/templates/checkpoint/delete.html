@@ -26,6 +26,7 @@
 
         <input id="delete-checkpoint-id" name="id" type="hidden"/>
         <input id="delete-checkpoint-module" name="moduleId" type="hidden"/>
+        <input id="delete-checkpoint-skills" name="moduleId" type="hidden"/>
 
         <p>Are you sure you want to delete &quot;<span id="delete-checkpoint-name"></span>&quot;?</p>
 
@@ -45,6 +46,7 @@
         let checkpointId = $(this).data("checkpoint");
         $("#delete-checkpoint-id").val(checkpointId);
         $("#delete-checkpoint-module").val($("#circuit").data("id"));
+        $("#delete-checkpoint-skills").data("skills", getSkillsInCheckpoint($(`#checkpoint-${checkpointId}`).css('gridRowStart')));
         $("#delete-checkpoint-name").text($(`#checkpoint-${checkpointId}-name`).text());
     }
     function cancelDeleteCheckpoint() {
@@ -60,8 +62,10 @@
             event.preventDefault();
             $.ajax({
                 type: "DELETE",
-                url: "/checkpoint",
-                data: $("#delete-checkpoint-form").serialize(),
+                url: `/checkpoint/${$("#delete-checkpoint-id").val()}/skills`,
+                data: JSON.stringify($("#delete-checkpoint-skills").data("skills")),
+                processData: false,
+                contentType: "application/json",
                 success: () => {
                     location.reload();
                 },

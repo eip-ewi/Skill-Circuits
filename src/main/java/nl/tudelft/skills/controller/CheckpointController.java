@@ -19,10 +19,12 @@ package nl.tudelft.skills.controller;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import nl.tudelft.skills.dto.create.CheckpointCreateDTO;
 import nl.tudelft.skills.dto.patch.CheckpointPatchDTO;
 import nl.tudelft.skills.model.Checkpoint;
+import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.CheckpointRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.service.CheckpointService;
@@ -61,13 +63,40 @@ public class CheckpointController {
 	}
 
 	@Transactional
-	@PostMapping("{id}/add-skills")
+	@PostMapping("{id}/skills")
 	@PreAuthorize("@authorisationService.canEditCheckpoint(#id)")
 	public ResponseEntity<Void> addSkillsToCheckpoint(@PathVariable Long id,
 			@RequestBody List<Long> skillIds) {
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(id);
-		checkpoint.getSkills().addAll(skillRepository.findAllByIdIn(skillIds));
-		skillRepository.findAllByIdIn(skillIds).forEach(skill -> skill.setCheckpoint(checkpoint));
+		Set<Skill> skills = skillRepository.findAllByIdIn(skillIds);
+		checkpoint.getSkills().addAll(skills);
+		skills.forEach(skill -> skill.setCheckpoint(checkpoint));
+
+		return ResponseEntity.ok().build();
+	}
+
+	@Transactional
+	@DeleteMapping("{id}/skills")
+	@PreAuthorize("@authorisationService.canEditCheckpoint(#id)")
+	public ResponseEntity<Void> deleteSkillsFromCheckpoint(@PathVariable Long id,
+			@RequestBody List<Long> skillIds) {
+		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(id);
+		Optional<Checkpoint> nextCheckpoint = checkpointService.findNextCheckpoint(checkpoint);
+		if (nextCheckpoint.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.CONFLICT);
+		}
+
+		Set<Skill> skills = skillRepository.findAllByIdIn(skillIds);
+		checkpoint.getSkills().removeAll(skills);
+		skills.forEach(skill -> {
+			skill.setCheckpoint(nextCheckpoint.get());
+			skillRepository.save(skill);
+		});
+
+		//if checkpoint has no skills left, delete it
+		if (checkpoint.getSkills().isEmpty()) {
+			checkpointRepository.delete(checkpoint);
+		}
 
 		return ResponseEntity.ok().build();
 	}
@@ -81,7 +110,10 @@ public class CheckpointController {
 		if (nextCheckpoint.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.CONFLICT);
 		}
-		checkpoint.getSkills().forEach(skill -> skill.setCheckpoint(nextCheckpoint.get()));
+		checkpoint.getSkills().forEach(skill -> {
+			skill.setCheckpoint(nextCheckpoint.get());
+			skillRepository.save(skill);
+		});
 
 		checkpointRepository.delete(checkpoint);
 		return new ResponseEntity<>(HttpStatus.OK);

@@ -26,9 +26,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.model.Checkpoint;
+import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.CheckpointRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 
@@ -157,14 +159,51 @@ public class CheckpointControllerTest extends ControllerTest {
 
 	@Test
 	@WithUserDetails("admin")
-	public void addSkillsToCheckpointTest() {
-		var res = checkpointController.addSkillsToCheckpoint(db.checkpointLectureTwo.getId(), List.of(db.skillImplication.getId()));
+	public void addSkillsToCheckpoint() {
+		var res = checkpointController.addSkillsToCheckpoint(db.checkpointLectureTwo.getId(),
+				List.of(db.skillImplication.getId()));
 
 		assertThat(res).isEqualTo(new ResponseEntity<>(HttpStatus.OK));
 
-		assertThat(skillRepository.findByIdOrThrow(db.skillImplication.getId()).getCheckpoint()).isEqualTo(db.checkpointLectureTwo);
+		assertThat(skillRepository.findByIdOrThrow(db.skillImplication.getId()).getCheckpoint())
+				.isEqualTo(db.checkpointLectureTwo);
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(db.checkpointLectureTwo.getId());
 		assertThat(checkpoint.getSkills()).contains(db.skillImplication);
+	}
+
+	@Test
+	@WithUserDetails("admin")
+	public void deleteSomeSkillsFromCheckpoint() {
+		var res = checkpointController.deleteSkillsFromCheckpoint(db.checkpointLectureOne.getId(),
+				List.of(db.skillProofOutline.getId()));
+
+		assertThat(res).isEqualTo(new ResponseEntity<>(HttpStatus.OK));
+
+		//skill gets next checkpoint
+		assertThat(skillRepository.findByIdOrThrow(db.skillProofOutline.getId()).getCheckpoint())
+				.isEqualTo(db.checkpointLectureTwo);
+		// Checkpoint still exists
+		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(db.checkpointLectureTwo.getId());
+		assertThat(checkpoint.getSkills()).doesNotContain(db.skillProofOutline);
+	}
+
+	@Test
+	@WithUserDetails("admin")
+	public void deleteAllSkillsFromCheckpoint() {
+		var res = checkpointController.deleteSkillsFromCheckpoint(db.checkpointLectureOne.getId(),
+				checkpointRepository.findByIdOrThrow(db.checkpointLectureOne.getId()).getSkills().stream()
+						.map(Skill::getId).toList());
+
+		assertThat(res).isEqualTo(new ResponseEntity<>(HttpStatus.OK));
+
+		assertThat(skillRepository.findAllByIdIn(Set.of(db.skillImplication.getId(), db.skillNegation.getId(),
+				db.skillVariables.getId(), db.skillProofOutline.getId(),
+				db.skillAssumption.getId())).stream().map(Skill::getCheckpoint))
+						.allSatisfy(cp -> assertThat(cp).isEqualTo(db.checkpointLectureTwo));
+		assertThat(skillRepository.findByIdOrThrow(db.skillProofOutline.getId()).getCheckpoint())
+				.isEqualTo(db.checkpointLectureTwo);
+		// Checkpoint is deleted
+		assertThat(checkpointRepository.findById(db.checkpointLectureOne.getId())).isEmpty();
 	}
 
 	@Test

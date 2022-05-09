@@ -61,7 +61,7 @@
         });
     }
 
-    function getSkillsInNewCheckpoint(checkpointRow) {
+    function getSkillsInCheckpoint(checkpointRow) {
         let prevCheckpointRow = [...$(".checkpoint").not(".ghost_checkpoint")].map(cp => parseInt(cp.style.gridRowStart))
             .filter(cp => cp < checkpointRow).sort().reverse()[0]
 
@@ -106,7 +106,7 @@
         select.val("new").change();
 
         const skillsFormElement = $("#create-checkpoint-skills");
-        const skills = getSkillsInNewCheckpoint(parseInt(ghostCheckpoint.css("gridRowStart")))
+        const skills = getSkillsInCheckpoint(parseInt(ghostCheckpoint.css("gridRowStart")))
         skillsFormElement.val(skills);
         skillsFormElement.data("skills", skills);
         $(this).addClass("hidden");
@@ -137,7 +137,7 @@
             } else {
                 $.ajax({
                     type: "post",
-                    url: `/checkpoint/${checkpointId}/add-skills/`,
+                    url: `/checkpoint/${checkpointId}/skills/`,
                     data: JSON.stringify($("#create-checkpoint-skills").data("skills")),
                     processData: false,
                     contentType: "application/json",
