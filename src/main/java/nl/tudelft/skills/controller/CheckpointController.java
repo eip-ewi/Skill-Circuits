@@ -122,11 +122,11 @@ public class CheckpointController {
 	@Transactional
 	@PostMapping
 	@PreAuthorize("@authorisationService.canCreateCheckpointInEdition(#dto.getEdition().getId())")
-	public String createCheckpoint(CheckpointCreateDTO dto) {
+	public String createCheckpoint(CheckpointCreateDTO dto, @RequestParam Long moduleId) {
 		Checkpoint checkpoint = checkpointRepository.save(dto.apply());
 		skillRepository.findAllByIdIn(dto.getSkillIds()).forEach(skill -> skill.setCheckpoint(checkpoint));
 
-		return "redirect:module/" + dto.getModuleId();
+		return "redirect:module/" + moduleId;
 	}
 
 }

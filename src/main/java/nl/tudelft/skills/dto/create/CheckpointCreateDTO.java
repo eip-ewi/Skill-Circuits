@@ -46,8 +46,6 @@ public class CheckpointCreateDTO extends Create<Checkpoint> {
 	private LocalDateTime deadline;
 	@NotNull
 	private List<Long> skillIds;
-	@NotNull
-	private Long moduleId;
 
 	@Override
 	public Class<Checkpoint> clazz() {
