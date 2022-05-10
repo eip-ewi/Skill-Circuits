@@ -111,6 +111,14 @@ configure<SpotlessExtension> {
         trimTrailingWhitespace()
         endWithNewline()
     }
+    format("html") {
+        target("src/main/resources/**/*.html", "src/main/resources/**/*.js", "src/main/resources/scss/**/*.scss")
+        prettier("2.6").config(mapOf(
+            "tabWidth" to 4, "semi" to true,
+            "printWidth" to 100,
+            "bracketSameLine" to true,
+            "arrowParens" to "avoid", ))
+    }
 }
 
 val jacocoTestReport by tasks.getting(JacocoReport::class) {
