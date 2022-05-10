@@ -1,5 +1,27 @@
 @use '../mixins' as *;
 
+#disconnect-buttons {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  & > .connection_disconnect {
+    pointer-events: initial;
+    position: absolute;
+    @include button;
+    --size: 1.5rem;
+
+    font-size: .75rem;
+    width: var(--size);
+    height: var(--size);
+    padding: .2rem;
+    &:not(.highlighted) {
+      visibility: hidden;
+    }
+  }
+}
 #connections {
   position: absolute;
   overflow: visible;
@@ -17,18 +39,4 @@
       stroke: var(--primary-blue);
     }
   }
-
-  &__disconnect {
-    @include button;
-    --size: 1.5rem;
-
-    font-size: .75rem;
-    left: calc(var(--size) / -2);
-    max-width: var(--size);
-    min-height: var(--size);
-    padding: .2rem;
-    position: absolute;
-    top: .5rem;
-  }
-  @include show-only-when(".connection__disconnect", ".highlighted");
 }

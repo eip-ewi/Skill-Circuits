@@ -23,14 +23,19 @@
 <th:block layout:fragment="script">
 <script th:inline="javascript">
     function recalculateConnections() {
-        $('polyline').remove();
+        $('.connection').remove();
+        $('.connection_disconnect').remove();
         calculateConnections();
     }
-    function getCircuitGapInPx() {
-        return parseFloat($(".circuit").css('--circuit-gap')) * parseFloat(getComputedStyle(document.documentElement).fontSize)
+    function remToPx(rem) {
+        return parseFloat(rem) * parseFloat(getComputedStyle(document.documentElement).fontSize)
     }
     function calculateConnections() {
-        const circuitGap = getCircuitGapInPx();
+        /*<![CDATA[*/
+        let canEdit = /*[[${canEdit}]]*/ false;
+        /*]]>*/
+
+        const circuitGap = remToPx($('#circuit').css('--circuit-gap'));
         const blocks = [...$(".block")]
 
         let skillsOnLevel = {};
@@ -42,18 +47,19 @@
         blocks.forEach(block => {
             block = $(block);
 
-            const parentX = block.offset().left + (block.outerWidth() / 2);
-            const parentY = block.offset().top + block.outerHeight()
-
             let children = block.data('children').map(child => $(`#block-${child}`))
             children.sort((c1, c2) => c1.css('gridColumnStart') - c2.css('gridColumnStart'))
 
+            const parentX = block.offset().left + (block.outerWidth() / 2);
+            const parentY = block.offset().top + block.outerHeight()
+
             const xStepSize = block.outerWidth() / 30
-            let xOffset = (children.length - 1) * -xStepSize / 2;
+            let xOffset = (children.length - 1) * - xStepSize / 2;
 
             for (let child of children) {
-                const line = $(document.createElementNS("http://www.w3.org/2000/svg", "polyline"))
-                    .attr("data-target", child.prop('id'))
+                const line = $(document.createElementNS(SVG_NAMESPACE, "polyline"))
+                    .attr("data-child", child.prop('id'))
+                    .attr("data-parent", block.prop('id'))
                     .addClass('connection')
                     .mouseenter(overConnection)
                     .mouseout(outConnection)
@@ -76,10 +82,21 @@
 
                 $("#connections").append(line.attr("points", points));
 
+                if (canEdit && blockType === "skill") {
+                    let disconnectButton =
+                        $(`<button class="connection_disconnect" data-parent="${block.prop('id')}" data-child="${child.prop('id')}">
+                              <span class="fa-solid fa-link-slash"></span>
+                           </button>`)
+                            .css('top', parentY + circuitGap / 10)
+                            .css('left', fromX - remToPx('1.5rem') / 2)
+                            .mouseenter(overConnection)
+                            .mouseout(outConnection);
+                    $("#disconnect-buttons").append(disconnectButton);
+                    $(disconnectButton).click(disconnect);
+                }
+
                 xOffset += xStepSize
             }
-
-
         })
     }
 
@@ -91,22 +108,22 @@
     window.addEventListener('resize', recalculateConnections);
 
     function overConnection() {
-        let skill = this.dataset.target;
-        $(".connection[data-target=" + skill + "]").each(function () {
+        const child = this.dataset.child;
+        $(`.connection[data-child=${child}], .connection_disconnect[data-child=${child}]`).each(function () {
             this.classList.add("highlighted")
         });
     }
 
     function outConnection() {
-        let skill = this.dataset.target;
-        $(".connection[data-target=" + skill + "]").each(function () {
+        const child = this.dataset.child;
+        $(`.connection[data-child=${child}], .connection_disconnect[data-child=${child}]`).each(function () {
             this.classList.remove("highlighted")
         });
     }
 </script>
 <script th:if="${canEdit and level == 'module'}">
     function disconnect() {
-        let skill = $(`#${$(this).data("skill")}`);
+        let skill = $(`#${$(this).data("parent")}`);
         let childId = parseInt($(this).data("child").split("-")[1]);
         let children = skill.data("children").filter(id => id !== childId);
         skill.data("children", children);

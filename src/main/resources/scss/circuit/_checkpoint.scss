@@ -8,11 +8,7 @@
   z-index: 10;
   gap: .5rem;
   align-items: center;
-  // allow connections to be hovered behind checkpoints,
-  // but not behind ghost checkpoints
-  &:not(.ghost_checkpoint) {
-    pointer-events: none;
-  }
+  pointer-events: none;
   & * {
     pointer-events: initial;
   }
