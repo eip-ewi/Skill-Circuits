@@ -21,6 +21,9 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
 <div class="circuit" id="circuit" th:data-id="${circuit.id}" layout:fragment="grid">
+    <th:block th:fragment="~{container :: connections}">
+        <svg xmlns="http://www.w3.org/2000/svg" id="connections"></svg>
+    </th:block>
     <th:block th:if="${level == 'module'}">
         <th:block th:each="checkpoint : ${module.checkpoints}">
             <div layout:replace="~{checkpoint/view :: checkpoint}"></div>

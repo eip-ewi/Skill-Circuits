@@ -1,36 +1,21 @@
 @use '../mixins' as *;
 
-.connection {
-  align-self: end;
-  background-color: var(--grey-500);
-  justify-self: center;
-  position: relative;
-  z-index: 0;
+#connections {
+  position: absolute;
+  overflow: visible;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
 
-  &.horizontal {
-    --width: 1;
-    --x-diff: 0;
-    height: 2px;
-    width: calc((100% + var(--circuit-gap)) * (var(--width) - 1) / var(--width) + var(--x-diff));
-  }
+  & > .connection {
+    stroke-width: 2;
+    stroke: var(--grey-500);
+    fill: none;
 
-  &.vertical {
-    --y-offset: 0;
-    height: calc(var(--circuit-gap) / 2);
-    width: 2px;
-    &.in {
-      align-self: start;
-      height: calc(var(--circuit-gap) / 2 - var(--y-offset));
+    &.highlighted {
+      stroke: var(--primary-blue);
     }
-    &.out {
-      --height: 1;
-      height: calc(100% + var(--y-offset) + var(--circuit-gap) * 1.5);
-    }
-  }
-
-  &.highlighted {
-    background-color: #0000ff;
-    z-index: 1;
   }
 
   &__disconnect {
