@@ -35,7 +35,7 @@
                 <option th:each="group : ${circuit.groups}" th:value="${group.id}" th:text="${group.name}"></option>
             </select>
 
-            <th:block th:if="${level == 'module'}">
+            <div th:if="${level == 'module'}">
                 <label for="edit-skill-checkpoint">Checkpoint</label>
                 <select id="edit-skill-checkpoint" name="checkpoint.id" required>
                     <option th:each="checkpoint : ${module.checkpoints}" th:value="${checkpoint.id}"
@@ -48,8 +48,8 @@
                         <span class="info_icon__text">Mark optional materials as non-essential.</span>
                     </div>
                 </div>
-                <input style="max-width: 20px" type="checkbox" id="edit-essential-checkbox" name="essential" value="true" checked>
-            </th:block>
+                <input style="max-width: 20px" type="checkbox" id="edit-essential-checkbox" name="essential" value="true" checked />
+            </div>
 
             <div class="block__form__buttons">
                 <button type="button" id="edit-block-cancel">Cancel</button>
