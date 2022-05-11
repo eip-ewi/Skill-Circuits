@@ -1,12 +1,12 @@
 .checkpoint {
     display: flex;
     align-self: end;
-    border-top: 1px dashed var(--primary-dark);
     grid-column: 1 / span var(--columns);
     transform: translateY(2.5rem);
     z-index: 10;
+    border-top: 1px dashed var(--primary-dark);
     pointer-events: none;
-    max-height: 1.5rem;
+
     &__body {
         display: flex;
         align-items: center;
@@ -47,15 +47,16 @@
             }
         }
     }
+
     &.ghost_checkpoint {
-        border-top: 1px dashed var(--primary-dark);
         color: var(--grey-500);
         opacity: 0;
         &:hover,
         &.editing {
             opacity: 100;
         }
-        & > button {
+        & .checkpoint__create {
+            pointer-events: initial;
             background: none;
             border: 1px solid var(--grey-700);
             min-width: 6rem;

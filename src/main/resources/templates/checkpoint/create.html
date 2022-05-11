@@ -92,7 +92,13 @@
                     const cp = $("<div>")
                         .addClass("checkpoint ghost_checkpoint")
                         .css("grid-row", row)
-                        .append($("<button>").addClass("checkpoint__create fa-solid fa-plus"));
+                        .append(
+                            $("<div>")
+                                .addClass("checkpoint__body")
+                                .append(
+                                    $("<button>").addClass("checkpoint__create fa-solid fa-plus")
+                                )
+                        );
                     circuit.append(cp);
                 });
         }
@@ -117,7 +123,7 @@
         function createCheckpoint() {
             const select = $("#create-checkpoint-name-select");
             const selectOptions = [...select.children("option")].map(cp => $(cp));
-            const ghostCheckpoint = $(this).parent();
+            const ghostCheckpoint = $(this).closest(".checkpoint");
 
             // reset
             $(".ghost_checkpoint").removeClass("editing");
@@ -128,9 +134,6 @@
             ghostCheckpoint.addClass("editing");
 
             // disabled options already on this list and
-            const nextCheckpoint = getFirstCheckpointAfter(
-                parseInt(ghostCheckpoint.css("gridRowStart"))
-            );
             selectOptions.forEach(cp => {
                 if ($(`#checkpoint-${cp.attr("id").split("-").pop()}`).length !== 0) {
                     cp.prop("disabled", true);
