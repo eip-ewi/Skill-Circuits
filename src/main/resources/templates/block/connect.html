@@ -23,117 +23,107 @@
 <th:block layout:fragment="script">
 <script th:inline="javascript">
     function recalculateConnections() {
-        [...document.getElementsByClassName('connection')].forEach(c => c.remove())
+        $('.connection').remove();
+        $('.connection_disconnect').remove();
         calculateConnections();
     }
-
+    function remToPx(rem) {
+        return parseFloat(rem) * parseFloat(getComputedStyle(document.documentElement).fontSize)
+    }
     function calculateConnections() {
-        let circuit = document.getElementById("circuit");
+        /*<![CDATA[*/
+        let canEdit = /*[[${canEdit}]]*/ false;
+        /*]]>*/
+
+        const circuitGap = remToPx($('#circuit').css('--circuit-gap'));
+        const blocks = [...$(".block")]
 
         let skillsOnLevel = {};
-        $(".block").each(function (i, skill) {
-            let skillRow = parseInt($(skill).css("gridRow").split(" / ")[0]);
+        blocks.forEach(skill => {
+            const skillRow = $(skill).css('gridRowStart');
             if (skillsOnLevel[skillRow] === undefined) skillsOnLevel[skillRow] = [];
-            skillsOnLevel[skillRow].push(skill);
+            skillsOnLevel[skillRow].push($(skill));
         });
+        blocks.forEach(block => {
+            block = $(block);
 
-        for (let skill of document.getElementsByClassName("block")) {
-            let skillCol = parseInt(skill.style.gridColumn.split(" / ")[0]);
-            let skillRow = parseInt(skill.style.gridRow.split(" / ")[0]);
+            let children = block.data('children').map(child => $(`#block-${child}`))
+            children.sort((c1, c2) => c1.css('gridColumnStart') - c2.css('gridColumnStart'))
 
-            let children = $(skill).data("children").map(id => document.getElementById(`block-${id}`));
-            children.sort((c1, c2) => parseInt(c1.style.gridColumn.split(" / ")[0]) - parseInt(c2.style.gridColumn.split(" / ")[0]));
+            const parentX = block.offset().left + (block.outerWidth() / 2);
+            const parentY = block.offset().top + block.outerHeight()
 
-            let xOffset = (children.length - 1) * -5;
-            let yOffset = 0;
+            const xStepSize = block.outerWidth() / 30
+            let xOffset = (children.length - 1) * - xStepSize / 2;
 
             for (let child of children) {
-                let childCol = parseInt(child.style.gridColumn.split(" / ")[0]);
-                let childRow = parseInt(child.style.gridRow.split(" / ")[0]);
+                const line = $(document.createElementNS(SVG_NAMESPACE, "polyline"))
+                    .attr("data-child", child.prop('id'))
+                    .attr("data-parent", block.prop('id'))
+                    .addClass('connection')
+                    .mouseenter(overConnection)
+                    .mouseout(outConnection)
 
-                yOffset = (skillsOnLevel[childRow].length - 1) * -5 + skillsOnLevel[childRow].indexOf(child) * 10;
+                const childRow = child.css('gridRowStart');
 
-                let offsetTranslation = "translate(" + xOffset + "px, " + yOffset + "px)";
+                const fromX = parentX + xOffset
+                const yOffset = (skillsOnLevel[childRow].length - 1) * (circuitGap / 20)
+                    + skillsOnLevel[childRow].findIndex(e => e.is(child)) * (circuitGap / 10);
 
-                let horizontalConnection = document.createElement("div");
-                horizontalConnection.dataset.target = child.id;
-                horizontalConnection.onmouseover = overConnection;
-                horizontalConnection.onmouseout = outConnection;
-                horizontalConnection.classList.add("horizontal", "connection")
-                horizontalConnection.style.setProperty("--width", (Math.abs(skillCol - childCol) + 1).toString());
-                horizontalConnection.style.setProperty("--x-diff", (Math.sign(skillCol - childCol) * xOffset) + "px");
-                horizontalConnection.style.gridColumn = Math.min(skillCol, childCol) + " / span var(--width)";
-                horizontalConnection.style.gridRow = (childRow - 1).toString();
-                horizontalConnection.style.transform = "translateY(calc(var(--circuit-gap) / 2))"
-                    + offsetTranslation + " translateX(" + (-xOffset / 2 + Math.sign(xOffset)) + "px)"
-                    + (childCol === skillCol ? " translateX(" + (-Math.sign(xOffset)) + "px)" : "");
-                if (childCol === skillCol) {
-                    horizontalConnection.style.setProperty("--x-diff", Math.abs(xOffset) + "px");
-                    horizontalConnection.style.width = "calc(var(--x-diff) + 2px)";
-                }
-                circuit.appendChild(horizontalConnection);
+                const toX = child.offset().left + (child.outerWidth() / 2);
+                const toY = child.offset().top
 
-                let verticalInConnection = document.createElement("div");
-                verticalInConnection.dataset.target = child.id;
-                verticalInConnection.onmouseover = overConnection;
-                verticalInConnection.onmouseout = outConnection;
-                verticalInConnection.classList.add("vertical", "in", "connection")
-                verticalInConnection.style.setProperty("--y-offset", yOffset + "px");
-                verticalInConnection.style.gridColumn = childCol.toString();
-                verticalInConnection.style.gridRow = childRow.toString();
-                verticalInConnection.style.transform = "translateY(-100%)";
-                circuit.appendChild(verticalInConnection);
+                const horizontalConnectionY = toY - (circuitGap / 2) + yOffset;
 
-                let verticalOutConnection = document.createElement("div");
-                verticalOutConnection.dataset.target = child.id;
-                verticalOutConnection.onmouseover = overConnection;
-                verticalOutConnection.onmouseout = outConnection;
-                verticalOutConnection.classList.add("vertical", "out", "connection")
-                verticalOutConnection.style.setProperty("--y-offset", yOffset + "px");
-                verticalOutConnection.style.setProperty("--height", (Math.max(Math.abs(skillRow - childRow) - 1, 1)).toString());
-                verticalOutConnection.style.gridColumn = skillCol.toString();
-                verticalOutConnection.style.gridRow = (skillRow + 1) + " / span var(--height)";
-                verticalOutConnection.style.transform = "translateY(calc(var(--circuit-gap) / 2)) " + offsetTranslation;
-                if (skillRow + 1 === childRow) {
-                    verticalOutConnection.style.gridRow = skillRow + " / span var(--height)";
-                    verticalOutConnection.style.height = "calc(var(--y-offset) + var(--circuit-gap) / 2)";
-                }
-                circuit.appendChild(verticalOutConnection);
+                const points = `${fromX},${parentY},
+                                ${fromX},${horizontalConnectionY}
+                                ${toX},${horizontalConnectionY}
+                                ${toX},${toY}`
 
-                /*<![CDATA[*/
-                let canEdit = /*[[${canEdit}]]*/ false;
-                /*]]>*/
+                $("#connections").append(line.attr("points", points));
 
                 if (canEdit && blockType === "skill") {
-                    let disconnectButton = $(`<button class="connection__disconnect" data-skill="${skill.id}" data-child="${child.id}"><span class="fa-solid fa-link-slash"></span></button>`)
-                    $(verticalOutConnection).append(disconnectButton);
+                    let disconnectButton =
+                        $(`<button class="connection_disconnect" data-parent="${block.prop('id')}" data-child="${child.prop('id')}">
+                              <span class="fa-solid fa-link-slash"></span>
+                           </button>`)
+                            .css('top', parentY + circuitGap / 10)
+                            .css('left', fromX - remToPx('1.5rem') / 2)
+                            .mouseenter(overConnection)
+                            .mouseout(outConnection);
+                    $("#disconnect-buttons").append(disconnectButton);
                     $(disconnectButton).click(disconnect);
                 }
 
-                xOffset += 10;
+                xOffset += xStepSize
             }
-        }
+        })
     }
 
     window.addEventListener('DOMContentLoaded', calculateConnections);
+    window.addEventListener('DOMContentLoaded', function() {
+        const observer = new ResizeObserver(recalculateConnections);
+        [...document.getElementsByClassName("block")].forEach(block => observer.observe(block))
+    });
+    window.addEventListener('resize', recalculateConnections);
 
     function overConnection() {
-        let skill = this.dataset.target;
-        $(".connection[data-target=" + skill + "]").each(function () {
+        const child = this.dataset.child;
+        $(`.connection[data-child=${child}], .connection_disconnect[data-child=${child}]`).each(function () {
             this.classList.add("highlighted")
         });
     }
 
     function outConnection() {
-        let skill = this.dataset.target;
-        $(".connection[data-target=" + skill + "]").each(function () {
+        const child = this.dataset.child;
+        $(`.connection[data-child=${child}], .connection_disconnect[data-child=${child}]`).each(function () {
             this.classList.remove("highlighted")
         });
     }
 </script>
 <script th:if="${canEdit and level == 'module'}">
     function disconnect() {
-        let skill = $(`#${$(this).data("skill")}`);
+        let skill = $(`#${$(this).data("parent")}`);
         let childId = parseInt($(this).data("child").split("-")[1]);
         let children = skill.data("children").filter(id => id !== childId);
         skill.data("children", children);

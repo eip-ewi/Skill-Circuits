@@ -32,6 +32,7 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 
     <script defer>
+        const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
         window.addEventListener('DOMContentLoaded', function() {
             const token = $("meta[name='_csrf']").attr("content");
             const header = $("meta[name='_csrf_header']").attr("content");

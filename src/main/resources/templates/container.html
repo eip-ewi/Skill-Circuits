@@ -24,6 +24,8 @@
 <body>
 
     <div class="container" layout:fragment="container">
+        <th:block layout:fragment="connections"></th:block>
+        <th:block layout:fragment="disconnect-buttons"></th:block>
         <div layout:replace="~{header :: header}"></div>
         <main class="main-section">
             <th:block layout:fragment="content" class="content">

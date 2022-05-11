@@ -1,49 +1,42 @@
 @use '../mixins' as *;
 
-.connection {
-  align-self: end;
-  background-color: var(--grey-500);
-  justify-self: center;
-  position: relative;
-  z-index: 0;
-
-  &.horizontal {
-    --width: 1;
-    --x-diff: 0;
-    height: 2px;
-    width: calc((100% + var(--circuit-gap)) * (var(--width) - 1) / var(--width) + var(--x-diff));
-  }
-
-  &.vertical {
-    --y-offset: 0;
-    height: calc(var(--circuit-gap) / 2);
-    width: 2px;
-    &.in {
-      align-self: start;
-      height: calc(var(--circuit-gap) / 2 - var(--y-offset));
-    }
-    &.out {
-      --height: 1;
-      height: calc(100% + var(--y-offset) + var(--circuit-gap) * 1.5);
-    }
-  }
-
-  &.highlighted {
-    background-color: #0000ff;
-    z-index: 1;
-  }
-
-  &__disconnect {
+#disconnect-buttons {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  & > .connection_disconnect {
+    pointer-events: initial;
+    position: absolute;
     @include button;
     --size: 1.5rem;
 
     font-size: .75rem;
-    left: calc(var(--size) / -2);
-    max-width: var(--size);
-    min-height: var(--size);
+    width: var(--size);
+    height: var(--size);
     padding: .2rem;
-    position: absolute;
-    top: .5rem;
+    &:not(.highlighted) {
+      visibility: hidden;
+    }
   }
-  @include show-only-when(".connection__disconnect", ".highlighted");
+}
+#connections {
+  position: absolute;
+  overflow: visible;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+
+  & > .connection {
+    stroke-width: 2;
+    stroke: var(--grey-500);
+    fill: none;
+
+    &.highlighted {
+      stroke: var(--primary-blue);
+    }
+  }
 }

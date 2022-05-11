@@ -1,4 +1,7 @@
 .header {
+  position: relative;
+  // has to be on top of the connection svg
+  z-index: 100;
   background-color: var(--primary-green);
   display: flex;
   justify-content: space-between;
