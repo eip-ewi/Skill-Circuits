@@ -39,16 +39,16 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
 public class ModuleServiceTest {
 
-	@Autowired
 	private TestDatabaseLoader db;
-
 	private final ModuleService moduleService;
 	private final TaskRepository taskRepository;
 	private final ModuleRepository moduleRepository;
 
 	@Autowired
-	public ModuleServiceTest(ModuleService moduleService, TaskRepository taskRepository,
+	public ModuleServiceTest(TestDatabaseLoader db, ModuleService moduleService,
+			TaskRepository taskRepository,
 			ModuleRepository moduleRepository) {
+		this.db = db;
 		this.moduleService = moduleService;
 		this.taskRepository = taskRepository;
 		this.moduleRepository = moduleRepository;

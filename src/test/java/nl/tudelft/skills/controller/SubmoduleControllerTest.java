@@ -69,7 +69,8 @@ public class SubmoduleControllerTest extends ControllerTest {
 		String element = mvc.perform(post("/submodule").with(csrf())
 				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
 						new BasicNameValuePair("name", "Submodule"),
-						new BasicNameValuePair("module.id", Long.toString(db.moduleProofTechniques.getId())),
+						new BasicNameValuePair("module.id",
+								Long.toString(db.moduleProofTechniques.getId())),
 						new BasicNameValuePair("row", "10"),
 						new BasicNameValuePair("column", "11")))))
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED))

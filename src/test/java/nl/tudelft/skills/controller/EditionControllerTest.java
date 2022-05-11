@@ -77,7 +77,7 @@ public class EditionControllerTest extends ControllerTest {
 	@Test
 	@WithUserDetails("admin")
 	void publishEdition() {
-		Long editionId = db.getEditionRL().getId();
+		Long editionId = db.editionRL2021.getId();
 
 		assertThat(editionRepository.findByIdOrThrow(editionId).isVisible()).isFalse();
 
@@ -90,11 +90,11 @@ public class EditionControllerTest extends ControllerTest {
 	@Test
 	@WithUserDetails("admin")
 	void unpublishEdition() {
-		SCEdition edition = db.getEditionRL();
+		SCEdition edition = db.editionRL2021;
 		edition.setVisible(true);
 		editionRepository.save(edition);
 
-		Long editionId = db.getEditionRL().getId();
+		Long editionId = db.editionRL2021.getId();
 
 		assertThat(editionRepository.findByIdOrThrow(editionId).isVisible()).isTrue();
 

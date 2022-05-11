@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.repository.SkillRepository;
+import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.test.TestDatabaseLoader;
 
 import org.junit.jupiter.api.Test;
@@ -35,19 +36,21 @@ public class SkillServiceTest {
 	private final SkillRepository skillRepository;
 	private final SkillService skillService;
 
-	@Autowired
 	private TestDatabaseLoader db;
 
 	@Autowired
-	public SkillServiceTest(SkillRepository skillRepository) {
+	public SkillServiceTest(SkillRepository skillRepository, TaskRepository taskRepository,
+			TestDatabaseLoader db) {
 		this.skillRepository = skillRepository;
-		this.skillService = new SkillService(skillRepository);
+		this.db = db;
+		this.skillService = new SkillService(skillRepository, taskRepository);
 	}
 
 	@Test
 	public void deleteSkill() {
-		skillService.deleteSkill(db.skillVariables.getId());
-		assertThat(skillRepository.existsById(db.skillVariables.getId())).isFalse();
+		Long id = db.skillVariables.getId();
+		skillService.deleteSkill(id);
+		assertThat(skillRepository.existsById(id)).isFalse();
 	}
 
 }

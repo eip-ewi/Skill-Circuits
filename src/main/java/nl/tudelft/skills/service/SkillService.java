@@ -19,6 +19,7 @@ package nl.tudelft.skills.service;
 
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.SkillRepository;
+import nl.tudelft.skills.repository.TaskRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,9 +29,12 @@ public class SkillService {
 
 	private final SkillRepository skillRepository;
 
+	private final TaskRepository taskRepository;
+
 	@Autowired
-	public SkillService(SkillRepository skillRepository) {
+	public SkillService(SkillRepository skillRepository, TaskRepository taskRepository) {
 		this.skillRepository = skillRepository;
+		this.taskRepository = taskRepository;
 	}
 
 	/**
@@ -41,7 +45,10 @@ public class SkillService {
 	 */
 	public Skill deleteSkill(Long id) {
 		Skill skill = skillRepository.findByIdOrThrow(id);
-		skill.getChildren().forEach(c -> c.getParents().remove(skill));
+		skill.getChildren().forEach(c -> {
+			c.getParents().remove(skill);
+			skillRepository.save(c);
+		});
 		skillRepository.delete(skill);
 		return skill;
 	}

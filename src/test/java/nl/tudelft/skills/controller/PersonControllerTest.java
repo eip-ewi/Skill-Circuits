@@ -91,4 +91,20 @@ public class PersonControllerTest extends ControllerTest {
 		assertThat(db.getPerson().getTasksCompleted())
 				.doesNotContain(taskRepository.findByIdOrThrow(db.taskDo11ad.getId()));
 	}
+
+	@Test
+	@WithUserDetails("username")
+	void getCatchUpTime() {
+		assertThat(personController
+				.getCatchUpTime(authorisationService.getAuthPerson(), db.editionRL2021.getId())
+				.getStatusCode())
+						.isEqualTo(HttpStatus.OK);
+	}
+
+	@Test
+	void getCatchUpTimeProtected() throws Exception {
+		mvc.perform(patch("/person/catch-up-time/{edition_id}", db.getEditionRL().getId()))
+				.andExpect(status().isForbidden());
+	}
+
 }

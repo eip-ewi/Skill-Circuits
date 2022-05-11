@@ -196,9 +196,11 @@ public class CheckpointControllerTest extends ControllerTest {
 
 		assertThat(res).isEqualTo(new ResponseEntity<>(HttpStatus.OK));
 
-		assertThat(skillRepository.findAllByIdIn(Set.of(db.skillImplication.getId(), db.skillNegation.getId(),
-				db.skillVariables.getId(), db.skillProofOutline.getId(),
-				db.skillAssumption.getId())).stream().map(Skill::getCheckpoint))
+		assertThat(skillRepository
+				.findAllByIdIn(Set.of(db.skillImplication.getId(), db.skillNegation.getId(),
+						db.skillVariables.getId(), db.skillProofOutline.getId(),
+						db.skillAssumption.getId()))
+				.stream().map(Skill::getCheckpoint))
 						.allSatisfy(cp -> assertThat(cp).isEqualTo(db.checkpointLectureTwo));
 		assertThat(skillRepository.findByIdOrThrow(db.skillProofOutline.getId()).getCheckpoint())
 				.isEqualTo(db.checkpointLectureTwo);

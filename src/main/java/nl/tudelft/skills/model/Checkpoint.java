@@ -27,6 +27,9 @@ import javax.validation.constraints.NotNull;
 
 import lombok.*;
 
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
+
 @Data
 @Entity
 @Builder
@@ -55,6 +58,7 @@ public class Checkpoint {
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@OneToMany(mappedBy = "checkpoint")
+	@Cascade(CascadeType.ALL)
 	private Set<Skill> skills = new HashSet<>();
 
 }

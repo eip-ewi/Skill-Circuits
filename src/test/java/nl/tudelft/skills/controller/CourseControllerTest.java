@@ -62,7 +62,7 @@ public class CourseControllerTest extends ControllerTest {
 
 	@Test
 	void getCoursePage() {
-		CourseLevelCourseViewDTO mockCourseView = View.convert(db.getCourseRL(),
+		CourseLevelCourseViewDTO mockCourseView = View.convert(db.courseRL,
 				CourseLevelCourseViewDTO.class);
 
 		mockCourseView.setName("course name");
@@ -72,7 +72,7 @@ public class CourseControllerTest extends ControllerTest {
 
 		when(courseService.getCourseView(anyLong())).thenReturn(mockCourseView);
 
-		Long courseId = db.getCourseRL().getId();
+		Long courseId = db.courseRL.getId();
 
 		courseController.getCoursePage(courseId, model);
 
@@ -85,7 +85,7 @@ public class CourseControllerTest extends ControllerTest {
 	void viewAllEditionsIsForbiddenForNonTeacher() throws Exception {
 		when(courseApi.getCourseById(anyLong()))
 				.thenReturn(Mono.just(new CourseDetailsDTO().editions(Collections.emptyList())));
-		mvc.perform(get("/course/{id}", db.course.getId()))
+		mvc.perform(get("/course/{id}", db.courseRL.getId()))
 				.andExpect(status().is3xxRedirection());
 	}
 }

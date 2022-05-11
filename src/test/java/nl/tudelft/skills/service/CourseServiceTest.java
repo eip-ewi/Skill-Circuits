@@ -36,6 +36,7 @@ import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.CourseRepository;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.security.AuthorisationService;
+import nl.tudelft.skills.test.TestDatabaseLoader;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,19 +51,21 @@ public class CourseServiceTest {
 
 	private CourseControllerApi courseApi;
 
+	private TestDatabaseLoader db;
+
 	private CourseRepository courseRepository;
 	private EditionRepository editionRepository;
-
 	private CourseService courseService;
 
 	private final AuthorisationService authorisationService;
 
 	@Autowired
 	public CourseServiceTest(CourseRepository courseRepository, EditionRepository editionRepository,
-			CourseControllerApi courseApi) {
+			CourseControllerApi courseApi, TestDatabaseLoader db) {
 		this.courseApi = courseApi;
 		this.courseRepository = courseRepository;
 		this.editionRepository = editionRepository;
+		this.db = db;
 		authorisationService = mock(AuthorisationService.class);
 		courseService = new CourseService(courseApi, courseRepository, editionRepository,
 				authorisationService);
@@ -154,7 +157,7 @@ public class CourseServiceTest {
 
 	@Test
 	public void createSCEditionWhenNoneExists() {
-		Long courseId = 1L;
+		Long courseId = db.getNextId();
 		assertThat(courseRepository.findById(courseId)).isNotPresent();
 
 		SCCourse course = courseService.getOrCreateSCCourse(courseId);
