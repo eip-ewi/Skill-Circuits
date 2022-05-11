@@ -5,22 +5,26 @@
     grid-column: 1 / span var(--columns);
     transform: translateY(2.5rem);
     z-index: 10;
-    gap: 0.5rem;
-    align-items: center;
     pointer-events: none;
-    & * {
+    max-height: 1.5rem;
+    &__body {
+        display: flex;
+        align-items: center;
         pointer-events: initial;
+        gap: 0.5rem;
+
+        &:hover > .checkpoint__buttons {
+            visibility: initial;
+            display: flex;
+        }
     }
     &__buttons {
         cursor: pointer;
-        display: none;
+        visibility: hidden;
         gap: 0.5rem;
         & > *:hover {
             color: var(--primary-green);
         }
-    }
-    &:hover > .checkpoint__buttons {
-        display: flex;
     }
 
     &__form {

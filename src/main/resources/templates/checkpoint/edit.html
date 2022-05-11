@@ -45,7 +45,7 @@
             let itemName = $(`#checkpoint-${checkpointId}-name`);
             $("#edit-checkpoint-id").val(checkpointId);
             $("#edit-checkpoint-name").val(itemName.text());
-            $(`#checkpoint-${checkpointId}`).append($("#edit-checkpoint"));
+            $(`#checkpoint-${checkpointId}-body`).append($("#edit-checkpoint"));
             itemName.addClass("hidden");
             $(`#checkpoint-${checkpointId}-buttons`).addClass("hidden");
         }
