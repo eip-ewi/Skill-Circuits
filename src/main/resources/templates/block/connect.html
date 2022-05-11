@@ -101,6 +101,7 @@
                                     .css("left", fromX - remToPx("1.5rem") / 2)
                                     .mouseenter(overConnection)
                                     .mouseout(outConnection);
+                            const dis = $("#disconnect-buttons");
                             $("#disconnect-buttons").append(disconnectButton);
                             $(disconnectButton).click(disconnect);
                         }
