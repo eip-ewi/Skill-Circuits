@@ -18,25 +18,49 @@
 
 -->
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-
-<li class="item" th:id="|item-${item.id}|" th:classappend="${level == 'module'} ? ${item.completed ? 'completed' : ''} : ${''}"
-    layout:fragment="item">
-    <div th:id="|item-${item.id}-content|" class="item__content">
-        <button th:if="${level == 'module'}" class="item__button" th:onclick="|toggleCompleted(${item.id})|" th:text="${item.time}"></button>
-        <span th:if="${level == 'module'}" th:id="|item-${item.id}-icon|" th:class="|fa-solid fa-${item.type.icon}|"></span>
-        <span th:id="|item-${item.id}-name|" class="item__name" th:text="${item.name}"></span>
-    </div>
-    <div class="item__buttons" th:id="|item-${item.id}-buttons|">
-        <th:block th:if="${level == 'module'}">
-            <a th:if="${item.link}" th:id="|item-${item.id}-link|" class="fa-solid fa-link always_visible" th:href="${item.link}" target="__blank"></a>
-        </th:block>
-        <th:block th:if="${canEdit}">
-            <span th:if="${level == 'module'}" class="fa-solid fa-pen item__edit" th:data-item="${item.id}" th:data-type="${item.type}" th:data-icon="${item.type.icon}"></span>
-            <span th:unless="${level == 'module'}" class="fa-solid fa-pen item__edit" th:data-item="${item.id}"></span>
-            <button class="fa-solid fa-trash item__delete" th:data-item="${item.id}"></button>
-        </th:block>
-    </div>
-</li>
-
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <li
+        class="item"
+        th:id="|item-${item.id}|"
+        th:classappend="${level == 'module'} ? ${item.completed ? 'completed' : ''} : ${''}"
+        layout:fragment="item">
+        <div th:id="|item-${item.id}-content|" class="item__content">
+            <button
+                th:if="${level == 'module'}"
+                class="item__button"
+                th:onclick="|toggleCompleted(${item.id})|"
+                th:text="${item.time}"></button>
+            <span
+                th:if="${level == 'module'}"
+                th:id="|item-${item.id}-icon|"
+                th:class="|fa-solid fa-${item.type.icon}|"></span>
+            <span th:id="|item-${item.id}-name|" class="item__name" th:text="${item.name}"></span>
+        </div>
+        <div class="item__buttons" th:id="|item-${item.id}-buttons|">
+            <th:block th:if="${level == 'module'}">
+                <a
+                    th:if="${item.link}"
+                    th:id="|item-${item.id}-link|"
+                    class="fa-solid fa-link always_visible"
+                    th:href="${item.link}"
+                    target="__blank"></a>
+            </th:block>
+            <th:block th:if="${canEdit}">
+                <span
+                    th:if="${level == 'module'}"
+                    class="fa-solid fa-pen item__edit"
+                    th:data-item="${item.id}"
+                    th:data-type="${item.type}"
+                    th:data-icon="${item.type.icon}"></span>
+                <span
+                    th:unless="${level == 'module'}"
+                    class="fa-solid fa-pen item__edit"
+                    th:data-item="${item.id}"></span>
+                <button class="fa-solid fa-trash item__delete" th:data-item="${item.id}"></button>
+            </th:block>
+        </div>
+    </li>
 </html>

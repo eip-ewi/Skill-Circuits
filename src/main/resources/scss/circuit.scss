@@ -1,39 +1,40 @@
-@import 'circuit/block';
-@import 'circuit/checkpoint';
-@import 'circuit/connection';
-@import 'circuit/item';
+@import "circuit/block";
+@import "circuit/checkpoint";
+@import "circuit/connection";
+@import "circuit/item";
 
 :root {
-  --columns: 5;
+    --columns: 5;
 }
 
 .circuit {
-  --circuit-gap: 3rem;
+    --circuit-gap: 3rem;
 
-  display: grid;
-  gap: var(--circuit-gap);
-  grid-template-columns: repeat(var(--columns), 1fr);
+    display: grid;
+    gap: var(--circuit-gap);
+    grid-template-columns: repeat(var(--columns), 1fr);
 
-  &__header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 2rem;
-    &__buttons {
-      display: flex;
-      gap: 1rem;
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        &__buttons {
+            display: flex;
+            gap: 1rem;
+        }
     }
-  }
 
-  &__button {
-    border: 1px solid var(--primary-dark);
-    background-color: var(--primary-light);
-    color: var(--primary-dark);
-    cursor: pointer;
-    font-size: 1.25rem;
-    padding: .5rem 1rem;
-    &:hover, &:focus-visible {
-      background-color: var(--primary-green);
-      color: var(--primary-light);
+    &__button {
+        border: 1px solid var(--primary-dark);
+        background-color: var(--primary-light);
+        color: var(--primary-dark);
+        cursor: pointer;
+        font-size: 1.25rem;
+        padding: 0.5rem 1rem;
+        &:hover,
+        &:focus-visible {
+            background-color: var(--primary-green);
+            color: var(--primary-light);
+        }
     }
-  }
 }

@@ -18,80 +18,88 @@
 
 -->
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{container}">
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{container}">
+    <head>
+        <link rel="stylesheet" th:href="@{/css/circuit.css}" />
 
-<head>
-    <link rel="stylesheet" th:href="@{/css/circuit.css}">
+        <style th:inline="css">
+            /*<![CDATA[*/
+            :root {
+                --columns: /*[[${columns}]]*/ 5;
+                --rows: /*[[${rows}]]*/ 5;
+            }
+            /*]]>*/
+        </style>
 
-    <style th:inline="css">
-        /*<![CDATA[*/
-        :root {
-            --columns: /*[[${columns}]]*/ 5;
-            --rows: /*[[${rows}]]*/ 5;
-        }
-        /*]]>*/
-    </style>
+        <title th:text="${module.name}"></title>
+    </head>
 
-    <title th:text="${module.name}"></title>
-</head>
+    <body>
+        <div layout:fragment="content">
+            <div class="circuit__header">
+                <h1 th:text="${module.name}"></h1>
 
-<body>
+                <div class="circuit__header__buttons">
+                    <form
+                        th:if="${@authorisationService.isAtLeastTeacherInEdition(module.edition.id)}"
+                        method="post"
+                        th:action="@{|/module/${module.id}/studentmode|}">
+                        <button th:if="${studentMode}" type="submit" class="circuit__button">
+                            Exit student view
+                        </button>
+                        <button th:unless="${studentMode}" type="submit" class="circuit__button">
+                            Enter student view
+                        </button>
+                    </form>
+                </div>
+            </div>
 
-<div layout:fragment="content">
+            <th:block
+                th:with="circuit = ${module},
+                       canCreate = ${@authorisationService.canCreateSkillInEdition(module.edition.id) and not studentMode},
+                       canEdit = ${@authorisationService.canEditSkillInEdition(module.edition.id) and not studentMode},
+                       canDelete = ${@authorisationService.canDeleteSkillInEdition(module.edition.id) and not studentMode},
+                       groupType = ${'submodule'},
+                       blockType = ${'skill'},
+                       itemType = ${'task'}">
+                <div layout:replace="~{circuit/view :: grid}"></div>
+                <div layout:replace="~{circuit/view :: additional}"></div>
+                <th:block th:fragment="~{container :: disconnect-buttons}">
+                    <div id="disconnect-buttons"></div>
+                </th:block>
+            </th:block>
 
-    <div class="circuit__header">
-        <h1 th:text="${module.name}"></h1>
+            <div layout:replace="~{task/create :: form}"></div>
 
-        <div class="circuit__header__buttons">
-            <form th:if="${@authorisationService.isAtLeastTeacherInEdition(module.edition.id)}" method="post" th:action="@{|/module/${module.id}/studentmode|}">
-                <button th:if="${studentMode}" type="submit" class="circuit__button">Exit student view</button>
-                <button th:unless="${studentMode}" type="submit" class="circuit__button">Enter student view</button>
-            </form>
+            <th:block
+                th:with="circuit = ${module},
+                       canCreate = ${@authorisationService.canCreateSkillInEdition(module.edition.id) and not studentMode},
+                       canEdit = ${@authorisationService.canEditSkillInEdition(module.edition.id) and not studentMode},
+                       canDelete = ${@authorisationService.canDeleteSkillInEdition(module.edition.id) and not studentMode},
+                       groupType = ${'submodule'},
+                       blockType = ${'skill'},
+                       itemType = ${'task'}">
+                <script>
+                    const blockType = "skill";
+                    const itemType = "task";
+                </script>
+                <div layout:replace="~{circuit/view :: script}"></div>
+
+                <div layout:replace="~{task/create :: script}"></div>
+                <div layout:replace="~{task/mark :: script}"></div>
+
+                <div layout:replace="~{checkpoint/view :: script}"></div>
+                <div layout:replace="~{checkpoint/edit :: form}"></div>
+                <div layout:replace="~{checkpoint/edit :: script}"></div>
+                <div layout:replace="~{checkpoint/create :: form}"></div>
+                <div layout:replace="~{checkpoint/create :: script}"></div>
+                <div layout:replace="~{checkpoint/delete :: overlay}"></div>
+                <div layout:replace="~{checkpoint/delete :: script}"></div>
+            </th:block>
         </div>
-    </div>
-
-    <th:block th:with="circuit = ${module},
-                       canCreate = ${@authorisationService.canCreateSkillInEdition(module.edition.id) and not studentMode},
-                       canEdit = ${@authorisationService.canEditSkillInEdition(module.edition.id) and not studentMode},
-                       canDelete = ${@authorisationService.canDeleteSkillInEdition(module.edition.id) and not studentMode},
-                       groupType = ${'submodule'},
-                       blockType = ${'skill'},
-                       itemType = ${'task'}">
-        <div layout:replace="~{circuit/view :: grid}"></div>
-        <div layout:replace="~{circuit/view :: additional}"></div>
-        <th:block th:fragment="~{container :: disconnect-buttons}">
-            <div id="disconnect-buttons"></div>
-        </th:block>
-    </th:block>
-
-    <div layout:replace="~{task/create :: form}"></div>
-
-    <th:block th:with="circuit = ${module},
-                       canCreate = ${@authorisationService.canCreateSkillInEdition(module.edition.id) and not studentMode},
-                       canEdit = ${@authorisationService.canEditSkillInEdition(module.edition.id) and not studentMode},
-                       canDelete = ${@authorisationService.canDeleteSkillInEdition(module.edition.id) and not studentMode},
-                       groupType = ${'submodule'},
-                       blockType = ${'skill'},
-                       itemType = ${'task'}">
-        <script>
-            const blockType = "skill";
-            const itemType = "task";
-        </script>
-        <div layout:replace="~{circuit/view :: script}"></div>
-
-        <div layout:replace="~{task/create :: script}"></div>
-        <div layout:replace="~{task/mark :: script}"></div>
-
-        <div layout:replace="~{checkpoint/view :: script}"></div>
-        <div layout:replace="~{checkpoint/edit :: form}"></div>
-        <div layout:replace="~{checkpoint/edit :: script}"></div>
-        <div layout:replace="~{checkpoint/create :: form}"></div>
-        <div layout:replace="~{checkpoint/create :: script}"></div>
-        <div layout:replace="~{checkpoint/delete :: overlay}"></div>
-        <div layout:replace="~{checkpoint/delete :: script}"></div>
-    </th:block>
-</div>
-
-</body>
+    </body>
 </html>

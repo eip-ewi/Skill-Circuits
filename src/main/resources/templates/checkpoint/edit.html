@@ -18,63 +18,64 @@
 
 -->
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div th:if="${canEdit}" layout:fragment="form" class="hidden" id="edit-checkpoint-wrapper">
+        <div id="edit-checkpoint">
+            <form id="edit-checkpoint-form" class="checkpoint__form">
+                <input id="edit-checkpoint-id" name="id" type="hidden" />
 
-<div th:if="${canEdit}" layout:fragment="form" class="hidden" id="edit-checkpoint-wrapper">
+                <input id="edit-checkpoint-name" name="name" type="text" required />
 
-    <div id="edit-checkpoint">
-
-        <form id="edit-checkpoint-form" class="checkpoint__form">
-
-            <input id="edit-checkpoint-id" name="id" type="hidden"/>
-
-            <input id="edit-checkpoint-name"  name="name" type="text" required/>
-
-            <button type="button" id="edit-checkpoint-cancel" class="fa-solid fa-xmark"></button>
-            <button type="submit" class="fa-solid fa-check"></button>
-        </form>
+                <button
+                    type="button"
+                    id="edit-checkpoint-cancel"
+                    class="fa-solid fa-xmark"></button>
+                <button type="submit" class="fa-solid fa-check"></button>
+            </form>
+        </div>
     </div>
-</div>
 
-<script th:if="${canEdit}" layout:fragment="script">
-    function editCheckpoint() {
-        $(".checkpoint__name").removeClass("hidden");
-        let checkpointId = $(this).data("checkpoint");
-        let itemName = $(`#checkpoint-${checkpointId}-name`);
-        $("#edit-checkpoint-id").val(checkpointId);
-        $("#edit-checkpoint-name").val(itemName.text());
-        $(`#checkpoint-${checkpointId}`).append($("#edit-checkpoint"));
-        itemName.addClass("hidden");
-        $(`#checkpoint-${checkpointId}-buttons`).addClass("hidden");
-    }
+    <script th:if="${canEdit}" layout:fragment="script">
+        function editCheckpoint() {
+            $(".checkpoint__name").removeClass("hidden");
+            let checkpointId = $(this).data("checkpoint");
+            let itemName = $(`#checkpoint-${checkpointId}-name`);
+            $("#edit-checkpoint-id").val(checkpointId);
+            $("#edit-checkpoint-name").val(itemName.text());
+            $(`#checkpoint-${checkpointId}`).append($("#edit-checkpoint"));
+            itemName.addClass("hidden");
+            $(`#checkpoint-${checkpointId}-buttons`).addClass("hidden");
+        }
 
-    document.addEventListener("DOMContentLoaded", function () {
-        $("#edit-checkpoint-form").submit(function (event) {
-            event.preventDefault();
-            $.ajax({
-                type: "PATCH",
-                url: `/checkpoint`,
-                data: $("#edit-checkpoint-form").serialize(),
-                success: () => {
-                    let checkpointId = $("#edit-checkpoint-id").val();
-                    let checkpointName = $(`#checkpoint-${checkpointId}-name`);
-                    $("#edit-checkpoint-wrapper").append($("#edit-checkpoint"));
-                    checkpointName.removeClass("hidden");
-                    checkpointName.text($("#edit-checkpoint-name").val());
-                    $(`#checkpoint-${checkpointId}-buttons`).removeClass("hidden");
-                }
+        document.addEventListener("DOMContentLoaded", function () {
+            $("#edit-checkpoint-form").submit(function (event) {
+                event.preventDefault();
+                $.ajax({
+                    type: "PATCH",
+                    url: `/checkpoint`,
+                    data: $("#edit-checkpoint-form").serialize(),
+                    success: () => {
+                        let checkpointId = $("#edit-checkpoint-id").val();
+                        let checkpointName = $(`#checkpoint-${checkpointId}-name`);
+                        $("#edit-checkpoint-wrapper").append($("#edit-checkpoint"));
+                        checkpointName.removeClass("hidden");
+                        checkpointName.text($("#edit-checkpoint-name").val());
+                        $(`#checkpoint-${checkpointId}-buttons`).removeClass("hidden");
+                    },
+                });
+            });
+
+            $(".checkpoint__edit").click(editCheckpoint);
+
+            $("#edit-checkpoint-cancel").click(function () {
+                let checkpointId = $("#edit-checkpoint-id").val();
+                $("#edit-checkpoint-wrapper").append($("#edit-checkpoint"));
+                $(`#checkpoint-${checkpointId}-name`).removeClass("hidden");
+                $(`#checkpoint-${checkpointId}-buttons`).removeClass("hidden");
             });
         });
-
-        $(".checkpoint__edit").click(editCheckpoint);
-
-        $("#edit-checkpoint-cancel").click(function () {
-            let checkpointId = $("#edit-checkpoint-id").val();
-            $("#edit-checkpoint-wrapper").append($("#edit-checkpoint"));
-            $(`#checkpoint-${checkpointId}-name`).removeClass("hidden");
-            $(`#checkpoint-${checkpointId}-buttons`).removeClass("hidden");
-        });
-    });
-</script>
-
+    </script>
 </html>

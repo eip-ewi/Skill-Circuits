@@ -1,61 +1,62 @@
-
 .checkpoint {
-  display: flex;
-  align-self: end;
-  border-top: 1px dashed var(--primary-dark);
-  grid-column: 1 / span var(--columns);
-  transform: translateY(2.5rem);
-  z-index: 10;
-  gap: .5rem;
-  align-items: center;
-  pointer-events: none;
-  & * {
-    pointer-events: initial;
-  }
-  &__buttons {
-    cursor: pointer;
-    display: none;
-    gap: .5rem;
-    & > *:hover {
-      color: var(--primary-green);
-    }
-  }
-  &:hover > .checkpoint__buttons {
     display: flex;
-  }
-
-  &__form {
-    display: flex;
-    gap: .5rem;
-
-    & > input[type=text], & > select {
-      max-width: 12rem;
-    }
-    & > * {
-      font-size: 1rem;
-    }
-    & > button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      &:hover {
-        color: var(--primary-green)
-      }
-    }
-  }
-  &.ghost_checkpoint {
+    align-self: end;
     border-top: 1px dashed var(--primary-dark);
-    color: var(--grey-500);
-    opacity: 0;
-    &:hover, &.editing {
-      opacity: 100
+    grid-column: 1 / span var(--columns);
+    transform: translateY(2.5rem);
+    z-index: 10;
+    gap: 0.5rem;
+    align-items: center;
+    pointer-events: none;
+    & * {
+        pointer-events: initial;
     }
-    & > button {
-      background: none;
-      border: 1px solid var(--grey-700);
-      min-width: 6rem;
-      height: 1.5rem;
-      cursor: pointer;
+    &__buttons {
+        cursor: pointer;
+        display: none;
+        gap: 0.5rem;
+        & > *:hover {
+            color: var(--primary-green);
+        }
     }
-  }
+    &:hover > .checkpoint__buttons {
+        display: flex;
+    }
+
+    &__form {
+        display: flex;
+        gap: 0.5rem;
+
+        & > input[type="text"],
+        & > select {
+            max-width: 12rem;
+        }
+        & > * {
+            font-size: 1rem;
+        }
+        & > button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            &:hover {
+                color: var(--primary-green);
+            }
+        }
+    }
+    &.ghost_checkpoint {
+        border-top: 1px dashed var(--primary-dark);
+        color: var(--grey-500);
+        opacity: 0;
+        &:hover,
+        &.editing {
+            opacity: 100;
+        }
+        & > button {
+            background: none;
+            border: 1px solid var(--grey-700);
+            min-width: 6rem;
+            height: 1.5rem;
+            cursor: pointer;
+        }
+    }
 }

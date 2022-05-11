@@ -18,22 +18,20 @@
 
 -->
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}">
-
-<body>
-
-    <div class="container" layout:fragment="container">
-        <th:block layout:fragment="connections"></th:block>
-        <th:block layout:fragment="disconnect-buttons"></th:block>
-        <div layout:replace="~{header :: header}"></div>
-        <main class="main-section">
-            <th:block layout:fragment="content" class="content">
-                Content goes here.
-            </th:block>
-        </main>
-        <div layout:replace="~{components/select_or_new :: script}"></div>
-    </div>
-</body>
-
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}">
+    <body>
+        <div class="container" layout:fragment="container">
+            <th:block layout:fragment="connections"></th:block>
+            <th:block layout:fragment="disconnect-buttons"></th:block>
+            <div layout:replace="~{header :: header}"></div>
+            <main class="main-section">
+                <th:block layout:fragment="content" class="content">Content goes here.</th:block>
+            </main>
+            <div layout:replace="~{components/select_or_new :: script}"></div>
+        </div>
+    </body>
 </html>

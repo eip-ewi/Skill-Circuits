@@ -18,138 +18,157 @@
 
 -->
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div th:if="${canEdit}" layout:fragment="form" class="hidden" id="edit-item-wrapper">
+        <div id="edit-item">
+            <form id="edit-item-form" class="edit item__form">
+                <input id="edit-item-id" name="id" type="hidden" />
 
-<div th:if="${canEdit}" layout:fragment="form" class="hidden" id="edit-item-wrapper">
+                <select
+                    th:if="${level == 'module'}"
+                    class="item__form__dropdown"
+                    id="edit-item-type"
+                    name="type"
+                    required>
+                    <option
+                        th:each="enum : ${T(nl.tudelft.skills.model.TaskType).values()}"
+                        th:data-icon="${enum.icon}"
+                        th:value="${enum}"
+                        th:text="#{|task.type.${#strings.toLowerCase(enum.name())}|}"></option>
+                </select>
 
-    <div id="edit-item">
+                <input id="edit-item-name" aria-label="Name" name="name" type="text" required />
 
-        <form id="edit-item-form" class="edit item__form">
+                <div class="item__form__url" th:if="${level == 'module'}">
+                    <button
+                        id="edit-task-link-button"
+                        type="button"
+                        class="fa-solid fa-link"></button>
+                    <input
+                        id="edit-task-link"
+                        placeholder="URL"
+                        aria-label="Link"
+                        name="link"
+                        type="url"
+                        class="hidden" />
+                </div>
 
-            <input id="edit-item-id" name="id" type="hidden"/>
-
-            <select th:if="${level == 'module'}" class="item__form__dropdown" id="edit-item-type" name="type" required>
-                <option th:each="enum : ${T(nl.tudelft.skills.model.TaskType).values()}" th:data-icon="${enum.icon}" th:value="${enum}" th:text="#{|task.type.${#strings.toLowerCase(enum.name())}|}"></option>
-            </select>
-
-            <input id="edit-item-name" aria-label="Name" name="name" type="text" required/>
-
-            <div class="item__form__url" th:if="${level == 'module'}">
-                <button id="edit-task-link-button" type="button" class="fa-solid fa-link"></button>
-                <input id="edit-task-link" placeholder="URL" aria-label="Link" name="link" type="url" class="hidden"/>
-            </div>
-
-            <button type="button" id="edit-item-cancel" class="fa-solid fa-xmark"></button>
-            <button type="submit" class="fa-solid fa-check"></button>
-
-        </form>
-
+                <button type="button" id="edit-item-cancel" class="fa-solid fa-xmark"></button>
+                <button type="submit" class="fa-solid fa-check"></button>
+            </form>
+        </div>
     </div>
 
-</div>
+    <script th:if="${canEdit}" layout:fragment="script">
+        function editItem() {
+            $(".item__buttons").removeClass("hidden");
+            $(".item__name").removeClass("hidden");
+            $(".item__buttons").removeClass("hidden");
+            let itemId = $(this).data("item");
+            let itemName = $(`#item-${itemId}-name`);
+            let itemIcon = $(`#item-${itemId}-icon`);
+            let itemType = $("#edit-item-type");
 
-<script th:if="${canEdit}" layout:fragment="script">
-    function editItem() {
-        $(".item__buttons").removeClass("hidden");
-        $(".item__name").removeClass("hidden");
-        $(".item__buttons").removeClass("hidden");
-        let itemId = $(this).data("item");
-        let itemName = $(`#item-${itemId}-name`);
-        let itemIcon = $(`#item-${itemId}-icon`);
-        let itemType = $("#edit-item-type");
+            itemType.addClass("hidden");
+            itemIcon.css("cursor", "pointer");
+            itemType.change(function () {
+                let itemType = $("#edit-item-type option:selected").data("icon");
+                itemIcon.removeClass();
+                itemIcon.addClass("fa-solid");
+                itemIcon.addClass(`fa-${itemType}`);
+            });
 
-        itemType.addClass("hidden");
-        itemIcon.css("cursor", "pointer");
-        itemType.change(function() {
-            let itemType = $("#edit-item-type option:selected").data("icon");
-            itemIcon.removeClass();
-            itemIcon.addClass("fa-solid");
-            itemIcon.addClass(`fa-${itemType}`);
-        });
+            itemType.val($(this).data("type"));
 
-        itemType.val($(this).data("type"));
+            $("#edit-item-id").val(itemId);
+            $("#edit-item-name").val(itemName.text());
+            $(`#item-${itemId}-content`).append($("#edit-item"));
+            itemName.addClass("hidden");
+            $(`#item-${itemId}-buttons`).addClass("hidden");
 
-        $("#edit-item-id").val(itemId);
-        $("#edit-item-name").val(itemName.text());
-        $(`#item-${itemId}-content`).append($("#edit-item"));
-        itemName.addClass("hidden");
-        $(`#item-${itemId}-buttons`).addClass("hidden");
-
-        if (itemType === "task") {
-            let link = $("#edit-task-link");
-            link.addClass("hidden");
-            link.val($(`#item-${itemId}-link`).attr("href"));
-            if (link.val() === "") {
+            if (itemType === "task") {
+                let link = $("#edit-task-link");
                 link.addClass("hidden");
-            } else {
-                link.removeClass("hidden");
+                link.val($(`#item-${itemId}-link`).attr("href"));
+                if (link.val() === "") {
+                    link.addClass("hidden");
+                } else {
+                    link.removeClass("hidden");
+                }
             }
+            itemIcon.click(() => {
+                $("#edit-item-type").toggleClass("hidden");
+            });
         }
-        itemIcon.click(()=>{$("#edit-item-type").toggleClass("hidden")});
-    }
 
-    document.addEventListener("DOMContentLoaded", function () {
-        $("#edit-item-form").submit(function (event) {
-            event.preventDefault();
-            $.ajax({
-                type: "PATCH",
-                url: `/${itemType}`,
-                data: $("#edit-item-form").serialize(),
-                success: () => {
-                    let itemId = $("#edit-item-id").val();
-                    let itemName = $(`#item-${itemId}-name`);
-                    $("#edit-item-wrapper").append($("#edit-item"));
-                    itemName.removeClass("hidden");
-                    itemName.text($("#edit-item-name").val());
-                    $(`#item-${itemId}-buttons`).removeClass("hidden");
+        document.addEventListener("DOMContentLoaded", function () {
+            $("#edit-item-form").submit(function (event) {
+                event.preventDefault();
+                $.ajax({
+                    type: "PATCH",
+                    url: `/${itemType}`,
+                    data: $("#edit-item-form").serialize(),
+                    success: () => {
+                        let itemId = $("#edit-item-id").val();
+                        let itemName = $(`#item-${itemId}-name`);
+                        $("#edit-item-wrapper").append($("#edit-item"));
+                        itemName.removeClass("hidden");
+                        itemName.text($("#edit-item-name").val());
+                        $(`#item-${itemId}-buttons`).removeClass("hidden");
 
-                    if (itemType === "task") {
-                        $(`#item-${itemId}-link`).remove();
-                        let link = $("#edit-task-link").val();
-                        if (link !== "") {
-                            $(`#item-${itemId} > .item__buttons`).prepend($(`<a id="item-${itemId}-link" class="fa-solid fa-link always_visible" href="${link}" target="__blank"></a>`));
+                        if (itemType === "task") {
+                            $(`#item-${itemId}-link`).remove();
+                            let link = $("#edit-task-link").val();
+                            if (link !== "") {
+                                $(`#item-${itemId} > .item__buttons`).prepend(
+                                    $(
+                                        `<a id="item-${itemId}-link" class="fa-solid fa-link always_visible" href="${link}" target="__blank"></a>`
+                                    )
+                                );
+                            }
                         }
-                    }
 
-                    let itemIconType = $("#edit-item-type option:selected").data("icon");
-                    let itemIcon = $(`#item-${itemId}-icon`);
-                    itemIcon.css("cursor", "");
-                    itemIcon.removeClass();
-                    itemIcon.addClass("fa-solid");
-                    itemIcon.addClass(`fa-${itemIconType}`);
-                    itemIcon.off("click");
-                    $("#edit-item-type").off("change");
+                        let itemIconType = $("#edit-item-type option:selected").data("icon");
+                        let itemIcon = $(`#item-${itemId}-icon`);
+                        itemIcon.css("cursor", "");
+                        itemIcon.removeClass();
+                        itemIcon.addClass("fa-solid");
+                        itemIcon.addClass(`fa-${itemIconType}`);
+                        itemIcon.off("click");
+                        $("#edit-item-type").off("change");
+                    },
+                });
+            });
+
+            $(".item__edit").click(editItem);
+
+            $("#edit-item-cancel").click(function () {
+                let itemId = $("#edit-item-id").val();
+                $("#edit-item-wrapper").append($("#edit-item"));
+                $(`#item-${itemId}-name`).removeClass("hidden");
+                $(`#item-${itemId}-buttons`).removeClass("hidden");
+
+                let itemIcon = $(`#item-${itemId}-icon`);
+                itemIcon.css("cursor", "");
+                itemIcon.removeClass();
+                itemIcon.addClass("fa-solid");
+                itemIcon.addClass(`fa-${$(`.item__edit[data-item=${itemId}]`).data("icon")}`);
+                itemIcon.off("click");
+                $("#edit-item-type").off("change");
+            });
+
+            $("#edit-task-link-button").click(function () {
+                let link = $("#edit-task-link");
+                link.toggleClass("hidden");
+                if (link.hasClass("hidden")) {
+                    link.val("");
+                } else {
+                    link.val($(`#item-${$("#edit-item-id").val()}-link`).attr("href"));
                 }
             });
         });
-
-        $(".item__edit").click(editItem);
-
-        $("#edit-item-cancel").click(function () {
-            let itemId = $("#edit-item-id").val();
-            $("#edit-item-wrapper").append($("#edit-item"));
-            $(`#item-${itemId}-name`).removeClass("hidden");
-            $(`#item-${itemId}-buttons`).removeClass("hidden");
-
-            let itemIcon = $(`#item-${itemId}-icon`);
-            itemIcon.css("cursor", "");
-            itemIcon.removeClass();
-            itemIcon.addClass("fa-solid");
-            itemIcon.addClass(`fa-${$(`.item__edit[data-item=${itemId}]`).data("icon")}`);
-            itemIcon.off("click");
-            $("#edit-item-type").off("change");
-        });
-
-        $("#edit-task-link-button").click(function () {
-            let link = $("#edit-task-link");
-            link.toggleClass("hidden");
-            if (link.hasClass("hidden")) {
-                link.val("");
-            } else {
-                link.val($(`#item-${$("#edit-item-id").val()}-link`).attr("href"));
-            }
-        });
-    });
-</script>
-
+    </script>
 </html>

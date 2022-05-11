@@ -1,19 +1,19 @@
 :root {
-  --primary-green: #2e8a00;
-  --primary-light: #FFFFFF;
-  --primary-dark: #000000;
-  --primary-red: #cc0000;
-  --primary-blue: #0000FF;
+    --primary-green: #2e8a00;
+    --primary-light: #ffffff;
+    --primary-dark: #000000;
+    --primary-red: #cc0000;
+    --primary-blue: #0000ff;
 
-  --secondary-green: #8FBC8F;
+    --secondary-green: #8fbc8f;
 
-  --background-colour: #F7F7F7;
+    --background-colour: #f7f7f7;
 
-  --grey-500: #b3b3b3;
-  --grey-700: #d9d9d9;
+    --grey-500: #b3b3b3;
+    --grey-700: #d9d9d9;
 
-  --font: noto sans, arial, sans-serif;
+    --font: noto sans, arial, sans-serif;
 
-  background-color: var(--background-colour);
-  font-family: var(--font);
+    background-color: var(--background-colour);
+    font-family: var(--font);
 }

@@ -18,31 +18,30 @@
 
 -->
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{container}">
-<head>
-    <link rel="stylesheet" th:href="@{/css/blocks.css}">
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{container}">
+    <head>
+        <link rel="stylesheet" th:href="@{/css/blocks.css}" />
 
-    <title th:text="${course.name}"></title>
-</head>
+        <title th:text="${course.name}"></title>
+    </head>
 
-<body>
+    <body>
+        <div layout:fragment="content">
+            <h1 th:text="${course.name}"></h1>
+            <h1 th:text="${course.code}"></h1>
 
-<div layout:fragment="content">
-
-    <h1 th:text="${course.name}"></h1>
-    <h1 th:text="${course.code}"></h1>
-
-    <div class="blocks">
-
-        <a class="block" th:each="edition : ${course.editions}" th:href="@{|/edition/${edition.id}|}">
-
-            <h2 th:text="${edition.name}"></h2>
-
-        </a>
-    </div>
-
-</div>
-
-</body>
+            <div class="blocks">
+                <a
+                    class="block"
+                    th:each="edition : ${course.editions}"
+                    th:href="@{|/edition/${edition.id}|}">
+                    <h2 th:text="${edition.name}"></h2>
+                </a>
+            </div>
+        </div>
+    </body>
 </html>

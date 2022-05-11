@@ -18,108 +18,120 @@
 
 -->
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div th:if="${canCreate}" layout:fragment="form" class="hidden" id="create-block-wrapper">
+        <div id="create-block">
+            <form id="create-block-form" class="create block__form">
+                <input id="create-block-row" name="row" type="hidden" />
+                <input id="create-block-column" name="column" type="hidden" />
 
-<div th:if="${canCreate}" layout:fragment="form" class="hidden" id="create-block-wrapper">
+                <label for="create-block-name">Name</label>
+                <input id="create-block-name" name="name" type="text" required />
 
-    <div id="create-block">
-
-        <form id="create-block-form" class="create block__form">
-
-            <input id="create-block-row" name="row" type="hidden"/>
-            <input id="create-block-column" name="column" type="hidden"/>
-
-            <label for="create-block-name">Name</label>
-            <input id="create-block-name" name="name" type="text" required/>
-
-            <label for="create-block-group" th:text="#{|level.${groupType}|}"></label>
-            <select id="create-block-group" th:name="|${groupType}.id|" required>
-                <option th:each="group : ${circuit.groups}" th:value="${group.id}" th:text="${group.name}"></option>
-            </select>
-
-            <th:block th:if="${level == 'module'}">
-                <label for="create-skill-checkpoint">Checkpoint</label>
-                <select id="create-skill-checkpoint" name="checkpoint.id" required>
-                    <option th:each="checkpoint : ${module.checkpoints}" th:value="${checkpoint.id}"
-                            th:text="${checkpoint.name}"></option>
+                <label for="create-block-group" th:text="#{|level.${groupType}|}"></label>
+                <select id="create-block-group" th:name="|${groupType}.id|" required>
+                    <option
+                        th:each="group : ${circuit.groups}"
+                        th:value="${group.id}"
+                        th:text="${group.name}"></option>
                 </select>
-                <div>
-                    <label for="essential-checkbox">Essential</label>
-                    <div class="info_icon">
-                        <sup class="fa-solid fa-info-circle"></sup>
-                        <span class="info_icon__text">Mark optional materials as non-essential.</span>
+
+                <th:block th:if="${level == 'module'}">
+                    <label for="create-skill-checkpoint">Checkpoint</label>
+                    <select id="create-skill-checkpoint" name="checkpoint.id" required>
+                        <option
+                            th:each="checkpoint : ${module.checkpoints}"
+                            th:value="${checkpoint.id}"
+                            th:text="${checkpoint.name}"></option>
+                    </select>
+                    <div>
+                        <label for="essential-checkbox">Essential</label>
+                        <div class="info_icon">
+                            <sup class="fa-solid fa-info-circle"></sup>
+                            <span class="info_icon__text">
+                                Mark optional materials as non-essential.
+                            </span>
+                        </div>
                     </div>
+                    <input
+                        style="max-width: 20px"
+                        type="checkbox"
+                        id="essential-checkbox"
+                        name="essential"
+                        value="true"
+                        checked />
+                </th:block>
+
+                <div class="block__form__buttons">
+                    <button type="button" id="create-block-cancel">Cancel</button>
+                    <button type="submit">Create</button>
                 </div>
-                <input style="max-width: 20px" type="checkbox" id="essential-checkbox" name="essential" value="true" checked>
-            </th:block>
-
-            <div class="block__form__buttons">
-                <button type="button" id="create-block-cancel">Cancel</button>
-                <button type="submit">Create</button>
-            </div>
-
-        </form>
-
+            </form>
+        </div>
     </div>
 
-</div>
+    <script th:if="${canCreate}" layout:fragment="script">
+        function setNewBlockPosition(row, column) {
+            document.getElementById("create-block-row").value = row;
+            document.getElementById("create-block-column").value = column;
+        }
 
-<script th:if="${canCreate}" layout:fragment="script">
-    function setNewBlockPosition(row, column) {
-        document.getElementById("create-block-row").value = row;
-        document.getElementById("create-block-column").value = column;
-    }
+        function clickGhost() {
+            let col = parseInt($(this).css("gridColumn").split(" / ")[0]) - 1;
+            let row = parseInt($(this).css("gridRow").split(" / ")[0]) - 1;
+            setNewBlockPosition(row, col);
+            let form = $("#create-block");
+            form.css("gridColumn", (col + 1).toString());
+            form.css("gridRow", (row + 1).toString());
+            $(this).replaceWith(form);
+        }
 
-    function clickGhost() {
-        let col = parseInt($(this).css("gridColumn").split(" / ")[0]) - 1;
-        let row = parseInt($(this).css("gridRow").split(" / ")[0]) - 1;
-        setNewBlockPosition(row, col);
-        let form = $("#create-block");
-        form.css("gridColumn", (col + 1).toString());
-        form.css("gridRow", (row + 1).toString());
-        $(this).replaceWith(form);
-    }
+        document.addEventListener("DOMContentLoaded", function () {
+            $("#create-block-form").submit(function (event) {
+                event.preventDefault();
+                $.post(`/${blockType}`, $("#create-block-form").serialize(), html => {
+                    let element = $("<div/>").append(html).children()[0];
 
-    document.addEventListener("DOMContentLoaded", function () {
-        $("#create-block-form").submit(function (event) {
-            event.preventDefault();
-            $.post(`/${blockType}`, $("#create-block-form").serialize(), html => {
-                let element = $("<div/>").append(html).children()[0]
+                    $("#circuit").append(element);
+                    $("#create-block-wrapper").append($("#create-block"));
+                    $("#create-block-name").val("");
 
-                $("#circuit").append(element);
+                    let groupName = $(`#${element.id} > .block__header > .block__group__name`);
+                    groupName.mouseenter(mouseEnterGroup);
+                    groupName.mouseleave(mouseLeaveGroup);
+                    $(`#${element.id} > .block__buttons > .block__edit`).click(editBlock);
+                    $(`#${element.id} > .block__buttons > .block__delete`).click(deleteBlock);
+                    if (blockType === "skill") {
+                        $(`#${element.id} > .items > li > .item__create`).click(createTask);
+                        $(`#${element.id} > .block__connect.from > button`).click(connectFrom);
+                        $(`#${element.id} > .block__connect.to > button`).click(connectTo);
+                    }
+                    updateCheckpointPositions();
+                });
+            });
+
+            $("#create-block-cancel").click(function () {
+                let row = parseInt($("#create-block-row").val());
+                let col = parseInt($("#create-block-column").val());
                 $("#create-block-wrapper").append($("#create-block"));
                 $("#create-block-name").val("");
+                let ghost = $(
+                    `<div class="ghost_block" style="grid-row: ${row + 1}; grid-column: ${
+                        col + 1
+                    }"><span class="fa-solid fa-plus"></span></div>`
+                );
+                ghost.click(clickGhost);
+                $("#circuit").append(ghost);
 
-                let groupName = $(`#${element.id} > .block__header > .block__group__name`);
-                groupName.mouseenter(mouseEnterGroup);
-                groupName.mouseleave(mouseLeaveGroup);
-                $(`#${element.id} > .block__buttons > .block__edit`).click(editBlock);
-                $(`#${element.id} > .block__buttons > .block__delete`).click(deleteBlock);
                 if (blockType === "skill") {
-                    $(`#${element.id} > .items > li > .item__create`).click(createTask);
-                    $(`#${element.id} > .block__connect.from > button`).click(connectFrom);
-                    $(`#${element.id} > .block__connect.to > button`).click(connectTo);
+                    $("#essential-checkbox").prop("checked", true);
                 }
-                updateCheckpointPositions();
             });
+
+            $(".ghost_block").click(clickGhost);
         });
-
-        $("#create-block-cancel").click(function () {
-            let row = parseInt($("#create-block-row").val());
-            let col = parseInt($("#create-block-column").val());
-            $("#create-block-wrapper").append($("#create-block"));
-            $("#create-block-name").val("");
-            let ghost = $(`<div class="ghost_block" style="grid-row: ${row + 1}; grid-column: ${col + 1}"><span class="fa-solid fa-plus"></span></div>`);
-            ghost.click(clickGhost);
-            $("#circuit").append(ghost);
-
-            if (blockType === "skill") {
-                $("#essential-checkbox").prop('checked', true);
-            }
-        });
-
-        $(".ghost_block").click(clickGhost);
-    });
-</script>
-
+    </script>
 </html>

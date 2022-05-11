@@ -1,38 +1,40 @@
 .header {
-  position: relative;
-  // has to be on top of the connection svg
-  z-index: 100;
-  background-color: var(--primary-green);
-  display: flex;
-  justify-content: space-between;
-  padding: .5rem 1rem;
-
-  &__title > a {
-    color: var(--primary-light);
-    text-decoration: none;
-  }
-
-  &__icons {
-    align-items: center;
+    position: relative;
+    // has to be on top of the connection svg
+    z-index: 100;
+    background-color: var(--primary-green);
     display: flex;
-    gap: 1rem;
-    list-style-type: none;
-  }
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
 
-  &__icon {
-    & > a {
-      color: var(--primary-light);
-      text-decoration: none;
+    &__title > a {
+        color: var(--primary-light);
+        text-decoration: none;
     }
-    & button {
-      background: none;
-      border: none;
-      color: var(--primary-light);
-      cursor: pointer;
-      font-size: 1rem;
+
+    &__icons {
+        align-items: center;
+        display: flex;
+        gap: 1rem;
+        list-style-type: none;
     }
-    &:hover, & > a:focus-visible, & button:focus-visible {
-      transform: scale(1.2);
+
+    &__icon {
+        & > a {
+            color: var(--primary-light);
+            text-decoration: none;
+        }
+        & button {
+            background: none;
+            border: none;
+            color: var(--primary-light);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        &:hover,
+        & > a:focus-visible,
+        & button:focus-visible {
+            transform: scale(1.2);
+        }
     }
-  }
 }

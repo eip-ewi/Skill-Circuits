@@ -1,29 +1,37 @@
-@mixin button($background: var(--primary-light), $border: var(--primary-dark), $colour: var(--primary-dark),
-              $background-active: var(--primary-green), $border-active: var(--primary-dark), $colour-active: var(--primary-light)) {
-  background-color: $background;
-  border: 1px solid $border;
-  color: $colour;
-  cursor: pointer;
-  &:hover, &:focus-visible {
-    background-color: $background-active;
-    border-color: $border-active;
-    color: $colour-active;
-  }
+@mixin button(
+    $background: var(--primary-light),
+    $border: var(--primary-dark),
+    $colour: var(--primary-dark),
+    $background-active: var(--primary-green),
+    $border-active: var(--primary-dark),
+    $colour-active: var(--primary-light)
+) {
+    background-color: $background;
+    border: 1px solid $border;
+    color: $colour;
+    cursor: pointer;
+    &:hover,
+    &:focus-visible {
+        background-color: $background-active;
+        border-color: $border-active;
+        color: $colour-active;
+    }
 }
 
 @mixin icon-button {
-  background: none;
-  border: none;
-  color: var(--primary-dark);
-  cursor: pointer;
-  text-decoration: none;
-  &:hover, &:focus-visible {
-    color: var(--primary-green);
-  }
+    background: none;
+    border: none;
+    color: var(--primary-dark);
+    cursor: pointer;
+    text-decoration: none;
+    &:hover,
+    &:focus-visible {
+        color: var(--primary-green);
+    }
 }
 
 @mixin show-only-when($element, $appear-when) {
-  &:not(#{$appear-when}) #{$element} {
-    display: none;
-  }
+    &:not(#{$appear-when}) #{$element} {
+        display: none;
+    }
 }

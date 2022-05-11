@@ -18,99 +18,118 @@
 
 -->
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <script layout:fragment="script" th:inline="javascript">
+        addEventListener("DOMContentLoaded", function () {
+            if (localStorage.getItem("completedTasks") !== null) {
+                // if we have tasks completed in local storage but not yet in the dom, also mark them completed
+                const completedInLocalStorage = JSON.parse(localStorage.getItem("completedTasks"));
+                const completedInDOM = Array.from(
+                    document.getElementsByClassName("task completed"),
+                    e => parseInt(e.id.split("")[1])
+                );
 
-<script layout:fragment="script" th:inline="javascript">
+                const toUpdate = completedInLocalStorage.filter(t => !completedInDOM.includes(t));
 
-    addEventListener('DOMContentLoaded', function () {
-        if (localStorage.getItem('completedTasks') !== null) {
-            // if we have tasks completed in local storage but not yet in the dom, also mark them completed
-            const completedInLocalStorage = JSON.parse(localStorage.getItem("completedTasks"))
-            const completedInDOM = Array.from(document.getElementsByClassName("task completed"), e => parseInt(e.id.split('')[1]))
+                toUpdate.forEach(taskId => {
+                    const task = document.getElementById(`item-${taskId}`);
+                    // If this task is not in this view, ignore.
+                    if (task !== null) {
+                        task.classList.add("completed");
+                    }
+                });
+            }
 
-            const toUpdate = completedInLocalStorage.filter(t => !completedInDOM.includes(t));
+            // Traverse all blocks topologically and mark their state
+            [...$(".block")]
+                .sort((a, b) => $(a).css("gridRowStart") - $(b).css("gridRowStart"))
+                .forEach(block => updateBlockState(block.id.split("-")[1]));
 
-            toUpdate.forEach(taskId => {
-                const task = document.getElementById(`item-${taskId}`)
-                // If this task is not in this view, ignore.
-                if (task !== null) {
-                    task.classList.add('completed')
+            //send update to server if user is authenticated and there are updates
+            /*<![CDATA[*/
+            const personId = /*[[${@authorisationService.authPerson?.id}]]*/ null;
+            /*]]>*/
+            if (personId !== null && toUpdate?.length) {
+                $.ajax({
+                    type: "PUT",
+                    url: "/person/complete/",
+                    data: JSON.stringify(toUpdate),
+                    processData: false,
+                    contentType: "application/json",
+                    success: () => {
+                        localStorage.removeItem("completedTasks");
+                    },
+                });
+            }
+        });
+
+        function toggleCompleted(taskId) {
+            const task = $(`#item-${taskId}`);
+            task.toggleClass("completed");
+
+            const completed = task.hasClass("completed");
+            const block = $(task.parents(".block")[0]);
+            updateBlockState(block.prop("id").split("-")[1]);
+            [...block.data("children")].forEach(id => updateBlockState(id));
+
+            //send update to server if user is authenticated
+            /*<![CDATA[*/
+            const personId = /*[[${@authorisationService.authPerson?.id}]]*/ null;
+            /*]]>*/
+            if (personId !== null) {
+                // If there is an authenticated person, also update on the server.
+                $.ajax({
+                    type: "PUT",
+                    url: "/person/completion/" + taskId,
+                    data: JSON.stringify(completed),
+                    processData: false,
+                    contentType: "application/json",
+                    success: () => {},
+                });
+            } else {
+                // If there is no authenticated person, also store in cookie storage
+                if (localStorage.getItem("completedTasks") === null) {
+                    localStorage.setItem("completedTasks", JSON.stringify([]));
                 }
-            });
-        }
-
-        // Traverse all blocks topologically and mark their state
-        [...$(".block")].sort((a, b) => $(a).css("gridRowStart") - $(b).css("gridRowStart"))
-            .forEach(block => updateBlockState(block.id.split("-")[1]))
-
-        //send update to server if user is authenticated and there are updates
-        /*<![CDATA[*/
-        const personId = /*[[${@authorisationService.authPerson?.id}]]*/ null
-        /*]]>*/
-        if (personId !== null && toUpdate?.length) {
-            $.ajax({
-                type: "PUT",
-                url: "/person/complete/",
-                data: JSON.stringify(toUpdate),
-                processData: false,
-                contentType: "application/json",
-                success : () => {localStorage.removeItem('completedTasks')}
-            })
-        }
-    })
-
-    function toggleCompleted(taskId) {
-        const task = $(`#item-${taskId}`);
-        task.toggleClass('completed');
-
-        const completed = task.hasClass('completed');
-        const block = $(task.parents(".block")[0]);
-        updateBlockState(block.prop('id').split("-")[1]);
-        [...block.data("children")].forEach(id => updateBlockState(id));
-
-        //send update to server if user is authenticated
-        /*<![CDATA[*/
-        const personId = /*[[${@authorisationService.authPerson?.id}]]*/ null
-        /*]]>*/
-        if (personId !== null){
-            // If there is an authenticated person, also update on the server.
-            $.ajax({
-                type: "PUT",
-                url: "/person/completion/" + taskId,
-                data: JSON.stringify(completed),
-                processData: false,
-                contentType: "application/json",
-                success : () => {}
-            })
-        } else {
-            // If there is no authenticated person, also store in cookie storage
-            if (localStorage.getItem('completedTasks') === null) {
-                localStorage.setItem('completedTasks', JSON.stringify([]))
+                if (completed) {
+                    localStorage.setItem(
+                        "completedTasks",
+                        JSON.stringify([
+                            taskId,
+                            ...JSON.parse(localStorage.getItem("completedTasks")),
+                        ])
+                    );
+                } else {
+                    localStorage.setItem(
+                        "completedTasks",
+                        JSON.stringify(
+                            JSON.parse(localStorage.getItem("completedTasks")).filter(
+                                e => e !== taskId
+                            )
+                        )
+                    );
+                }
             }
-            if (completed) {
-                localStorage.setItem('completedTasks',
-                    JSON.stringify([taskId, ...JSON.parse(localStorage.getItem('completedTasks'))]))
+        }
+        function updateBlockState(blockId) {
+            const block = $(`#block-${blockId}`);
+            block.removeClass("completed active disabled");
+
+            if (block.find(".item").not(".completed").length === 0) {
+                block.addClass("completed");
             } else {
-                localStorage.setItem('completedTasks',
-                    JSON.stringify(JSON.parse(localStorage.getItem('completedTasks')).filter(e => e !== taskId)))
+                const allParentsCompleted = [...block.data("parents")].every(id =>
+                    $(`#block-${id}`).hasClass("completed")
+                );
+                if (allParentsCompleted) {
+                    block.addClass("active");
+                } else {
+                    block.addClass("disabled");
+                }
             }
         }
-    }
-    function updateBlockState(blockId) {
-        const block = $(`#block-${blockId}`)
-        block.removeClass("completed active disabled")
-
-        if (block.find(".item").not(".completed").length === 0) {
-            block.addClass("completed")
-        } else {
-            const allParentsCompleted = [...block.data("parents")].every(id => $(`#block-${id}`).hasClass("completed"))
-            if (allParentsCompleted) {
-                block.addClass("active")
-            } else {
-                block.addClass("disabled")
-            }
-        }
-    }
-</script>
-
+    </script>
 </html>

@@ -1,27 +1,27 @@
 .info_icon {
-  position: relative;
-  display: inline-block;
+    position: relative;
+    display: inline-block;
 
-  &:hover .info_icon__text {
-    transform: scale(1, 1);
-  }
-  &__text {
-    color: var(--primary-dark);
-    background-color: var(--grey-700);
-    padding: 0.2rem;
-    font-size: 0.8rem;
-    text-align: center;
-    transform: scale(0, 0);
-    transform-origin: top left;
-    transition: transform 150ms ease-in-out;
-    width: 120px;
-
-    /* Position the tooltip */
-    position: absolute;
-    z-index: 1;
-
-    @media(prefers-reduced-motion) {
-      transition: none;
+    &:hover .info_icon__text {
+        transform: scale(1, 1);
     }
-  }
+    &__text {
+        color: var(--primary-dark);
+        background-color: var(--grey-700);
+        padding: 0.2rem;
+        font-size: 0.8rem;
+        text-align: center;
+        transform: scale(0, 0);
+        transform-origin: top left;
+        transition: transform 150ms ease-in-out;
+        width: 120px;
+
+        /* Position the tooltip */
+        position: absolute;
+        z-index: 1;
+
+        @media (prefers-reduced-motion) {
+            transition: none;
+        }
+    }
 }
