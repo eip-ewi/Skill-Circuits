@@ -108,8 +108,8 @@ public class ModuleControllerTest extends ControllerTest {
 		Long id = Long.parseLong(idMatcher.group(1));
 		assertThat(moduleRepository.existsById(id)).isTrue();
 
-		assertThat(element)
-				.contains("<h2 id=\"module-" + id + "-name\" class=\"module-title\">Module</h2>");
+		assertThat(element.replaceAll("\n\\s+", "\n"))
+				.contains("<h2\nid=\"module-" + id + "-name\"\nclass=\"module-title\">Module</h2>");
 	}
 
 	@Test
