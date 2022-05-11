@@ -19,29 +19,31 @@
 -->
 <!DOCTYPE html>
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-<div layout:fragment="select(id, name)">
-    <div th:id="${id}">
-        <select th:id="|${id}-select|" data-type="select-or-new">
-            <option value="new" th:id="|${id}-new|" th:val="new" th:text="New..."></option>
-            <th:block layout:fragment="select-options"></th:block>
-        </select>
-        <input th:id="|${id}-input|" th:name="${name}" type="hidden" required/>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div layout:fragment="select(id, name)">
+        <div th:id="${id}">
+            <select th:id="|${id}-select|" data-type="select-or-new">
+                <option value="new" th:id="|${id}-new|" th:val="new" th:text="New..."></option>
+                <th:block layout:fragment="select-options"></th:block>
+            </select>
+            <input th:id="|${id}-input|" th:name="${name}" type="hidden" required />
+        </div>
     </div>
-</div>
 
-<script layout:fragment="script">
-    document.addEventListener('DOMContentLoaded', function () {
-        $('[data-type="select-or-new"]').change(function () {
-            if ($(this).find(":selected").val() === "new") {
-                $(this).siblings("input").prop("type", "text")
-                $(this).siblings("input").val("")
-            } else {
-                $(this).siblings("input").prop("type", "hidden")
-                $(this).siblings("input").val($(this).find(":selected").val())
-            }
-        })
-    })
-</script>
-
+    <script layout:fragment="script">
+        document.addEventListener("DOMContentLoaded", function () {
+            $('[data-type="select-or-new"]').change(function () {
+                if ($(this).find(":selected").val() === "new") {
+                    $(this).siblings("input").prop("type", "text");
+                    $(this).siblings("input").val("");
+                } else {
+                    $(this).siblings("input").prop("type", "hidden");
+                    $(this).siblings("input").val($(this).find(":selected").val());
+                }
+            });
+        });
+    </script>
 </html>

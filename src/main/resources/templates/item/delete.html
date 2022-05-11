@@ -18,37 +18,38 @@
 
 -->
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <dialog th:if="${canEdit}" layout:fragment="overlay" class="overlay" id="delete-item-overlay">
+        <form
+            id="delete-item-form"
+            class="confirmation"
+            th:action="@{|/${itemType}|}"
+            th:method="delete">
+            <input id="delete-item-id" name="id" type="hidden" />
+            <input name="page" value="item" type="hidden" />
 
-<dialog th:if="${canEdit}" layout:fragment="overlay" class="overlay" id="delete-item-overlay">
+            <p>Are you sure you want to delete &quot;<span id="delete-item-name"></span>&quot;?</p>
 
-    <form id="delete-item-form" class="confirmation" th:action="@{|/${itemType}|}" th:method="delete">
+            <div class="confirmation__buttons">
+                <button type="button" onclick="toggleOverlay('delete-item-overlay')">Cancel</button>
+                <button type="submit">Delete</button>
+            </div>
+        </form>
+    </dialog>
 
-        <input id="delete-item-id" name="id" type="hidden"/>
-        <input name="page" value="item" type="hidden"/>
+    <script th:if="${canEdit}" layout:fragment="script">
+        function deleteItem() {
+            toggleOverlay("delete-item-overlay");
+            let itemId = $(this).data("item");
+            $("#delete-item-id").val(itemId);
+            $("#delete-item-name").text($(`#item-${itemId}-name`).text());
+        }
 
-        <p>Are you sure you want to delete &quot;<span id="delete-item-name"></span>&quot;?</p>
-
-        <div class="confirmation__buttons">
-            <button type="button" onclick="toggleOverlay('delete-item-overlay')">Cancel</button>
-            <button type="submit">Delete</button>
-        </div>
-
-    </form>
-
-</dialog>
-
-<script th:if="${canEdit}" layout:fragment="script">
-    function deleteItem() {
-        toggleOverlay("delete-item-overlay");
-        let itemId = $(this).data("item");
-        $("#delete-item-id").val(itemId);
-        $("#delete-item-name").text($(`#item-${itemId}-name`).text());
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-        $(".item__delete").click(deleteItem);
-    });
-</script>
-
+        document.addEventListener("DOMContentLoaded", function () {
+            $(".item__delete").click(deleteItem);
+        });
+    </script>
 </html>

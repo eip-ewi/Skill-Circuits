@@ -18,37 +18,44 @@
 
 -->
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <dialog
+        th:if="${canDelete}"
+        layout:fragment="overlay"
+        class="overlay"
+        id="delete-block-overlay">
+        <form
+            id="delete-block-form"
+            class="confirmation"
+            th:action="@{|/${blockType}|}"
+            th:method="delete">
+            <input id="delete-block-id" name="id" type="hidden" />
+            <input name="page" value="block" type="hidden" />
 
-<dialog th:if="${canDelete}" layout:fragment="overlay" class="overlay" id="delete-block-overlay">
+            <p>Are you sure you want to delete &quot;<span id="delete-block-name"></span>&quot;?</p>
 
-    <form id="delete-block-form" class="confirmation" th:action="@{|/${blockType}|}" th:method="delete">
+            <div class="confirmation__buttons">
+                <button type="button" onclick="toggleOverlay('delete-block-overlay')">
+                    Cancel
+                </button>
+                <button type="submit">Delete</button>
+            </div>
+        </form>
+    </dialog>
 
-        <input id="delete-block-id" name="id" type="hidden"/>
-        <input name="page" value="block" type="hidden"/>
+    <script th:if="${canDelete}" layout:fragment="script">
+        function deleteBlock() {
+            toggleOverlay("delete-block-overlay");
+            let blockId = $(this).data("block");
+            $("#delete-block-id").val(blockId);
+            $("#delete-block-name").text($(`#block-${blockId}-name`).text());
+        }
 
-        <p>Are you sure you want to delete &quot;<span id="delete-block-name"></span>&quot;?</p>
-
-        <div class="confirmation__buttons">
-            <button type="button" onclick="toggleOverlay('delete-block-overlay')">Cancel</button>
-            <button type="submit">Delete</button>
-        </div>
-
-    </form>
-
-</dialog>
-
-<script th:if="${canDelete}" layout:fragment="script">
-    function deleteBlock() {
-        toggleOverlay("delete-block-overlay");
-        let blockId = $(this).data("block");
-        $("#delete-block-id").val(blockId);
-        $("#delete-block-name").text($(`#block-${blockId}-name`).text());
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-        $(".block__delete").click(deleteBlock);
-    });
-</script>
-
+        document.addEventListener("DOMContentLoaded", function () {
+            $(".block__delete").click(deleteBlock);
+        });
+    </script>
 </html>

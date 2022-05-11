@@ -18,56 +18,65 @@
 
 -->
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-
-<div class="circuit" id="circuit" th:data-id="${circuit.id}" layout:fragment="grid">
-    <th:block th:fragment="~{container :: connections}">
-        <svg xmlns="http://www.w3.org/2000/svg" id="connections"></svg>
-    </th:block>
-    <th:block th:if="${level == 'module'}">
-        <th:block th:each="checkpoint : ${module.checkpoints}">
-            <div layout:replace="~{checkpoint/view :: checkpoint}"></div>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div class="circuit" id="circuit" th:data-id="${circuit.id}" layout:fragment="grid">
+        <th:block th:fragment="~{container :: connections}">
+            <svg xmlns="http://www.w3.org/2000/svg" id="connections"></svg>
         </th:block>
-    </th:block>
-    <th:block th:each="group : ${circuit.groups}">
-        <th:block th:each="block : ${group.blocks}">
-            <div layout:replace="~{block/view :: block}"></div>
+        <th:block th:if="${level == 'module'}">
+            <th:block th:each="checkpoint : ${module.checkpoints}">
+                <div layout:replace="~{checkpoint/view :: checkpoint}"></div>
+            </th:block>
         </th:block>
+        <th:block th:each="group : ${circuit.groups}">
+            <th:block th:each="block : ${group.blocks}">
+                <div layout:replace="~{block/view :: block}"></div>
+            </th:block>
+        </th:block>
+
+        <th:block th:if="${canEdit}">
+            <div
+                th:each="pos : ${emptySpaces}"
+                class="ghost_block"
+                th:style="|grid-row: ${pos.second + 1}; grid-column: ${pos.first + 1}|">
+                <span class="fa-solid fa-plus"></span>
+            </div>
+            <div
+                th:each="col : ${#numbers.sequence(0, columns - 1)}"
+                class="ghost_block"
+                th:style="|grid-row: ${rows + 1}; grid-column: ${col + 1}|">
+                <span class="fa-solid fa-plus"></span>
+            </div>
+            <div
+                th:each="row : ${#numbers.sequence(0, rows)}"
+                class="ghost_block"
+                th:style="|grid-row: ${row + 1}; grid-column: ${columns + 1}|">
+                <span class="fa-solid fa-plus"></span>
+            </div>
+        </th:block>
+    </div>
+
+    <div layout:fragment="additional">
+        <div layout:replace="~{block/create :: form}"></div>
+        <div layout:replace="~{block/edit :: form}"></div>
+        <div layout:replace="~{block/delete :: overlay}"></div>
+
+        <div layout:replace="~{item/edit :: form}"></div>
+        <div layout:replace="~{item/delete :: overlay}"></div>
+    </div>
+
+    <th:block layout:fragment="script">
+        <div layout:replace="~{block/create :: script}"></div>
+        <div layout:replace="~{block/edit :: script}"></div>
+        <div layout:replace="~{block/delete :: script}"></div>
+        <div layout:replace="~{block/view :: script}"></div>
+        <div layout:replace="~{block/move :: script}"></div>
+        <div layout:replace="~{block/connect :: script}"></div>
+
+        <div layout:replace="~{item/edit :: script}"></div>
+        <div layout:replace="~{item/delete :: script}"></div>
     </th:block>
-
-    <th:block th:if="${canEdit}">
-        <div th:each="pos : ${emptySpaces}" class="ghost_block"
-             th:style="|grid-row: ${pos.second + 1}; grid-column: ${pos.first + 1}|">
-            <span class="fa-solid fa-plus"></span>
-        </div>
-        <div th:each="col : ${#numbers.sequence(0, columns - 1)}" class="ghost_block"
-             th:style="|grid-row: ${rows + 1}; grid-column: ${col + 1}|">
-            <span class="fa-solid fa-plus"></span>
-        </div>
-        <div th:each="row : ${#numbers.sequence(0, rows)}" class="ghost_block"
-             th:style="|grid-row: ${row + 1}; grid-column: ${columns + 1}|">
-            <span class="fa-solid fa-plus"></span>
-        </div>
-    </th:block>
-</div>
-
-<div layout:fragment="additional">
-    <div layout:replace="~{block/create :: form}"></div>
-    <div layout:replace="~{block/edit :: form}"></div>
-    <div layout:replace="~{block/delete :: overlay}"></div>
-
-    <div layout:replace="~{item/edit :: form}"></div>
-    <div layout:replace="~{item/delete :: overlay}"></div>
-</div>
-
-<th:block layout:fragment="script">
-    <div layout:replace="~{block/create :: script}"></div>
-    <div layout:replace="~{block/edit :: script}"></div>
-    <div layout:replace="~{block/delete :: script}"></div>
-    <div layout:replace="~{block/view :: script}"></div>
-    <div layout:replace="~{block/move :: script}"></div>
-    <div layout:replace="~{block/connect :: script}"></div>
-
-    <div layout:replace="~{item/edit :: script}"></div>
-    <div layout:replace="~{item/delete :: script}"></div>
-</th:block>
+</html>

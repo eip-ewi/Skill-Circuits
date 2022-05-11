@@ -17,36 +17,35 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 -->
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-<head>
-    <link rel="stylesheet" type="text/css" th:href="@{/css/main.css}"/>
-    <link rel="stylesheet" href="/webjars/font-awesome/css/all.min.css"/>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <head>
+        <link rel="stylesheet" type="text/css" th:href="@{/css/main.css}" />
+        <link rel="stylesheet" href="/webjars/font-awesome/css/all.min.css" />
 
-    <script src="/webjars/jquery/jquery.min.js" defer></script>
-    <script src="/webjars/js-cookie/js.cookie.js"></script>
-    <script th:src="@{/js/main.js}"></script>
+        <script src="/webjars/jquery/jquery.min.js" defer></script>
+        <script src="/webjars/js-cookie/js.cookie.js"></script>
+        <script th:src="@{/js/main.js}"></script>
 
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="viewport" content="width=device-width initial-scale=1">
-    <meta name="_csrf" th:content="${_csrf.token}"/>
-    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width initial-scale=1" />
+        <meta name="_csrf" th:content="${_csrf.token}" />
+        <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 
-    <script defer>
-        const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
-        window.addEventListener('DOMContentLoaded', function() {
-            const token = $("meta[name='_csrf']").attr("content");
-            const header = $("meta[name='_csrf_header']").attr("content");
-            $(document).ajaxSend(function(e, xhr) {
-                xhr.setRequestHeader(header, token);
+        <script defer>
+            const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
+            window.addEventListener("DOMContentLoaded", function () {
+                const token = $("meta[name='_csrf']").attr("content");
+                const header = $("meta[name='_csrf_header']").attr("content");
+                $(document).ajaxSend(function (e, xhr) {
+                    xhr.setRequestHeader(header, token);
+                });
             });
-        });
-    </script>
-</head>
-<body>
-
-<th:block layout:fragment="container">
-
-</th:block>
-
-</body>
+        </script>
+    </head>
+    <body>
+        <th:block layout:fragment="container"> </th:block>
+    </body>
 </html>

@@ -18,24 +18,33 @@
 
 -->
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-
-<div th:id="|module-${module.id}|" th:data-module="${module.id}" class="block"
-
-     layout:fragment="moduleblock">
-
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div
+        th:id="|module-${module.id}|"
+        th:data-module="${module.id}"
+        class="block"
+        layout:fragment="moduleblock">
         <div th:id="|module-${module.id}-header|">
-            <a style="text-decoration: none; color: black" th:href="@{|/module/${module.id}|}"><h2 th:id="|module-${module.id}-name|" class="module-title" th:text="${module.name}"></h2></a>
+            <a style="text-decoration: none; color: black" th:href="@{|/module/${module.id}|}"
+                ><h2
+                    th:id="|module-${module.id}-name|"
+                    class="module-title"
+                    th:text="${module.name}"></h2
+            ></a>
         </div>
 
         <div class="block__buttons">
-            <button class="fa-solid fa-edit block__edit"
-                    th:if="${@authorisationService.canEditModule(module.id)}"
-                    th:data-module="${module.id}"></button>
-            <button class="fa-solid fa-trash block__delete"
-                        th:if="${@authorisationService.canDeleteModule(module.id)}"
-                        th:data-module="${module.id}"></button>
+            <button
+                class="fa-solid fa-edit block__edit"
+                th:if="${@authorisationService.canEditModule(module.id)}"
+                th:data-module="${module.id}"></button>
+            <button
+                class="fa-solid fa-trash block__delete"
+                th:if="${@authorisationService.canDeleteModule(module.id)}"
+                th:data-module="${module.id}"></button>
         </div>
-</div>
-
+    </div>
 </html>

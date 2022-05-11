@@ -18,63 +18,63 @@
 
 -->
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div
+        th:if="${@authorisationService.canCreateModuleInEdition(edition.id)}"
+        layout:fragment="form"
+        class="hidden"
+        id="create-module-wrapper">
+        <div id="create-module">
+            <form id="create-module-form" class="create block__form">
+                <input th:value="${edition.id}" name="edition.id" type="hidden" />
 
-<div th:if="${@authorisationService.canCreateModuleInEdition(edition.id)}" layout:fragment="form" class="hidden" id="create-module-wrapper">
+                <label for="create-module-name">Name</label>
+                <input id="create-module-name" name="name" type="text" required />
 
-    <div id="create-module">
-
-        <form id="create-module-form" class="create block__form">
-
-            <input th:value="${edition.id}" name="edition.id" type="hidden"/>
-
-            <label for="create-module-name">Name</label>
-            <input id="create-module-name" name="name" type="text" required/>
-
-            <div class="block__form__buttons">
-                <button type="button" id="create-module-cancel">Cancel</button>
-                <button type="submit">Create Module</button>
-            </div>
-
-        </form>
-
+                <div class="block__form__buttons">
+                    <button type="button" id="create-module-cancel">Cancel</button>
+                    <button type="submit">Create Module</button>
+                </div>
+            </form>
+        </div>
     </div>
 
-</div>
+    <script
+        th:if="${@authorisationService.canCreateModuleInEdition(edition.id)}"
+        layout:fragment="script">
+        function clickOnBlockGhost() {
+            let form = $("#create-module");
+            $(this).replaceWith(form);
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            $("#create-module-form").submit(function (event) {
+                event.preventDefault();
+                $.post("/module", $("#create-module-form").serialize(), html => {
+                    let element = $("<div/>").append(html).children()[0];
 
-<script th:if="${@authorisationService.canCreateModuleInEdition(edition.id)}" layout:fragment="script">
+                    $("#blocks").append(element);
+                    $("#create-module-wrapper").append($("#create-module"));
+                    $("#create-module-name").val("");
 
-    function clickOnBlockGhost(){
-        let form = $("#create-module");
-        $(this).replaceWith(form);
-    }
-    document.addEventListener("DOMContentLoaded", function () {
-        $("#create-module-form").submit(function (event) {
-            event.preventDefault();
-            $.post("/module", $("#create-module-form").serialize(), html => {
-                let element = $("<div/>").append(html).children()[0]
+                    $(`#${element.id} > .block__buttons > .block__edit`).click(editModule);
+                    $(`#${element.id} > .block__buttons > .block__delete`).click(deleteModule);
 
-                $("#blocks").append(element);
+                    $("#blocks").append($('<div class="ghost_block fa-solid fa-plus"></div>'));
+                    $(".ghost_block").click(clickOnBlockGhost);
+                });
+            });
+
+            $("#create-module-cancel").click(function () {
                 $("#create-module-wrapper").append($("#create-module"));
                 $("#create-module-name").val("");
-
-                $(`#${element.id} > .block__buttons > .block__edit`).click(editModule);
-                $(`#${element.id} > .block__buttons > .block__delete`).click(deleteModule);
-
-                $("#blocks").append($("<div class=\"ghost_block fa-solid fa-plus\"></div>"))
+                $("#blocks").append($('<div class="ghost_block fa-solid fa-plus"></div>'));
                 $(".ghost_block").click(clickOnBlockGhost);
             });
-        });
 
-        $("#create-module-cancel").click(function () {
-            $("#create-module-wrapper").append($("#create-module"));
-            $("#create-module-name").val("");
-            $("#blocks").append($("<div class=\"ghost_block fa-solid fa-plus\"></div>"))
             $(".ghost_block").click(clickOnBlockGhost);
         });
-
-        $(".ghost_block").click(clickOnBlockGhost);
-    });
-</script>
-
+    </script>
 </html>
