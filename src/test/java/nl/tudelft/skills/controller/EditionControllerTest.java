@@ -21,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
+import javax.servlet.http.HttpSession;
+
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.edition.EditionLevelCourseViewDTO;
@@ -44,12 +46,14 @@ public class EditionControllerTest extends ControllerTest {
 	private final EditionController editionController;
 	private final EditionService editionService;
 	private final EditionRepository editionRepository;
+	private final HttpSession session;
 
 	@Autowired
 	public EditionControllerTest(EditionRepository editionRepository) {
 		this.editionRepository = editionRepository;
 		this.editionService = mock(EditionService.class);
-		this.editionController = new EditionController(editionRepository, editionService);
+		this.session = mock(HttpSession.class);
+		this.editionController = new EditionController(editionRepository, editionService, session);
 	}
 
 	@Test
@@ -75,11 +79,11 @@ public class EditionControllerTest extends ControllerTest {
 	void publishEdition() {
 		Long editionId = db.getEditionRL().getId();
 
-		assertThat(!editionRepository.findByIdOrThrow(editionId).isVisible());
+		assertThat(editionRepository.findByIdOrThrow(editionId).isVisible()).isFalse();
 
 		editionController.publishEdition(editionId);
 
-		assertThat(editionRepository.findByIdOrThrow(editionId).isVisible());
+		assertThat(editionRepository.findByIdOrThrow(editionId).isVisible()).isTrue();
 
 	}
 
@@ -92,12 +96,25 @@ public class EditionControllerTest extends ControllerTest {
 
 		Long editionId = db.getEditionRL().getId();
 
-		assertThat(editionRepository.findByIdOrThrow(editionId).isVisible());
+		assertThat(editionRepository.findByIdOrThrow(editionId).isVisible()).isTrue();
 
-		editionController.publishEdition(editionId);
+		editionController.unpublishEdition(editionId);
 
-		assertThat(!editionRepository.findByIdOrThrow(editionId).isVisible());
+		assertThat(editionRepository.findByIdOrThrow(editionId).isVisible()).isFalse();
+	}
 
+	@Test
+	void toggleStudentMode() {
+		when(session.getAttribute("student-mode-" + db.getEditionRL().getId()))
+				.thenReturn(null)
+				.thenReturn(true)
+				.thenReturn(false);
+		editionController.toggleStudentMode(db.getEditionRL().getId());
+		verify(session).setAttribute("student-mode-" + db.getEditionRL().getId(), true);
+		editionController.toggleStudentMode(db.getEditionRL().getId());
+		verify(session).setAttribute("student-mode-" + db.getEditionRL().getId(), false);
+		editionController.toggleStudentMode(db.getEditionRL().getId());
+		verify(session, times(2)).setAttribute("student-mode-" + db.getEditionRL().getId(), true);
 	}
 
 }

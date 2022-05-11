@@ -39,10 +39,22 @@
 <body>
 
 <div layout:fragment="content">
+
+    <div class="circuit__header">
+        <h1 th:text="${module.name}"></h1>
+
+        <div class="circuit__header__buttons">
+            <form th:if="${@authorisationService.isAtLeastTeacherInEdition(module.edition.id)}" method="post" th:action="@{|/module/${module.id}/studentmode|}">
+                <button th:if="${studentMode}" type="submit" class="circuit__button">Exit student view</button>
+                <button th:unless="${studentMode}" type="submit" class="circuit__button">Enter student view</button>
+            </form>
+        </div>
+    </div>
+
     <th:block th:with="circuit = ${module},
-                       canCreate = ${@authorisationService.canCreateSkillInEdition(module.edition.id)},
-                       canEdit = ${@authorisationService.canEditSkillInEdition(module.edition.id)},
-                       canDelete = ${@authorisationService.canDeleteSkillInEdition(module.edition.id)},
+                       canCreate = ${@authorisationService.canCreateSkillInEdition(module.edition.id) and not studentMode},
+                       canEdit = ${@authorisationService.canEditSkillInEdition(module.edition.id) and not studentMode},
+                       canDelete = ${@authorisationService.canDeleteSkillInEdition(module.edition.id) and not studentMode},
                        groupType = ${'submodule'},
                        blockType = ${'skill'},
                        itemType = ${'task'}">
@@ -53,9 +65,9 @@
     <div layout:replace="~{task/create :: form}"></div>
 
     <th:block th:with="circuit = ${module},
-                       canCreate = ${@authorisationService.canCreateSkillInEdition(module.edition.id)},
-                       canEdit = ${@authorisationService.canEditSkillInEdition(module.edition.id)},
-                       canDelete = ${@authorisationService.canDeleteSkillInEdition(module.edition.id)},
+                       canCreate = ${@authorisationService.canCreateSkillInEdition(module.edition.id) and not studentMode},
+                       canEdit = ${@authorisationService.canEditSkillInEdition(module.edition.id) and not studentMode},
+                       canDelete = ${@authorisationService.canDeleteSkillInEdition(module.edition.id) and not studentMode},
                        groupType = ${'submodule'},
                        blockType = ${'skill'},
                        itemType = ${'task'}">

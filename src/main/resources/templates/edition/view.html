@@ -42,20 +42,26 @@
     <div class="circuit__header" th:with="visible = ${@editionRepository.findByIdOrThrow(edition.id).isVisible()}">
         <h1 th:text="${edition.name}"></h1>
 
-        <form method="post" id="publish-edition-form" th:action="@{|/edition/${edition.id}/publish|}"
-              th:if="${@authorisationService.canPublishEdition(edition.id) and not visible}">
-            <button name="publish" id="publishEdition"
-                    class="circuit__button" title="publish" type="submit">
-                Publish
-            </button>
-        </form>
-        <form method="post" id="unpublish-edition-form" th:action="@{|/edition/${edition.id}/unpublish|}"
-              th:if="${@authorisationService.canPublishEdition(edition.id) and visible}">
-            <button name="unpublish" id="unpublishEdition"
-                    class="circuit__button" title="unpublish" type="submit">
-                Unpublish
-            </button>
-        </form>
+        <div class="circuit__header__buttons">
+            <form method="post" id="publish-edition-form" th:action="@{|/edition/${edition.id}/publish|}"
+                  th:if="${@authorisationService.canPublishEdition(edition.id) and not visible}">
+                <button name="publish" id="publishEdition"
+                        class="circuit__button" title="publish" type="submit">
+                    Publish
+                </button>
+            </form>
+            <form method="post" id="unpublish-edition-form" th:action="@{|/edition/${edition.id}/unpublish|}"
+                  th:if="${@authorisationService.canPublishEdition(edition.id) and visible}">
+                <button name="unpublish" id="unpublishEdition"
+                        class="circuit__button" title="unpublish" type="submit">
+                    Unpublish
+                </button>
+            </form>
+            <form th:if="${@authorisationService.isAtLeastTeacherInEdition(edition.id)}" method="post" th:action="@{|/edition/${edition.id}/studentmode|}">
+                <button th:if="${studentMode}" type="submit" class="circuit__button">Exit student view</button>
+                <button th:unless="${studentMode}" type="submit" class="circuit__button">Enter student view</button>
+            </form>
+        </div>
     </div>
 
     <th:block th:with="circuit = ${edition},

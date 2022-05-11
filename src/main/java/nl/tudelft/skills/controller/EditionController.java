@@ -20,6 +20,7 @@ package nl.tudelft.skills.controller;
 import java.util.Set;
 import java.util.stream.IntStream;
 
+import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
 import nl.tudelft.skills.dto.view.edition.EditionLevelEditionViewDTO;
@@ -39,11 +40,14 @@ import org.springframework.web.bind.annotation.*;
 public class EditionController {
 	private EditionRepository editionRepository;
 	private EditionService editionService;
+	private HttpSession session;
 
 	@Autowired
-	public EditionController(EditionRepository editionRepository, EditionService editionService) {
+	public EditionController(EditionRepository editionRepository, EditionService editionService,
+			HttpSession session) {
 		this.editionRepository = editionRepository;
 		this.editionService = editionService;
+		this.session = session;
 	}
 
 	/**
@@ -61,6 +65,7 @@ public class EditionController {
 		Set<Pair<Integer, Integer>> positions = edition.getFilledPositions();
 		int columns = positions.stream().mapToInt(Pair::getFirst).max().orElse(-1) + 1;
 		int rows = positions.stream().mapToInt(Pair::getSecond).max().orElse(-1) + 1;
+		Boolean studentMode = (Boolean) session.getAttribute("student-mode-" + id);
 
 		model.addAttribute("level", "edition");
 		model.addAttribute("edition", edition);
@@ -70,6 +75,7 @@ public class EditionController {
 				.flatMap(row -> IntStream.range(0, columns).mapToObj(col -> Pair.of(col, row)))
 				.filter(pos -> !positions.contains(pos))
 				.toList());
+		model.addAttribute("studentMode", studentMode != null && studentMode);
 
 		return "edition/view";
 	}
@@ -102,7 +108,6 @@ public class EditionController {
 	@Transactional
 	@PreAuthorize("@authorisationService.canPublishEdition(#id)")
 	public String unpublishEdition(@PathVariable Long id) {
-
 		SCEdition edition = editionRepository.findByIdOrThrow(id);
 
 		edition.setVisible(false);
@@ -110,4 +115,19 @@ public class EditionController {
 
 		return "redirect:/edition/" + id.toString();
 	}
+
+	/**
+	 * Toggles student mode for a specific edition.
+	 *
+	 * @param  id The id of the edition
+	 * @return    The edition page
+	 */
+	@PostMapping("{id}/studentmode")
+	public String toggleStudentMode(@PathVariable Long id) {
+		Boolean currentStudentMode = (Boolean) session.getAttribute("student-mode-" + id);
+		session.setAttribute("student-mode-" + id,
+				currentStudentMode == null || !currentStudentMode);
+		return "redirect:/edition/{id}";
+	}
+
 }

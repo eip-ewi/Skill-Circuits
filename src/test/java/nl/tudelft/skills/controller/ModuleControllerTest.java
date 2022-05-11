@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.http.HttpSession;
+
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
@@ -59,7 +61,8 @@ public class ModuleControllerTest extends ControllerTest {
 	private ModuleService moduleService;
 	private final ModuleController moduleController;
 	private final RoleControllerApi roleControllerApi;
-	private ModuleRepository moduleRepository;
+	private final ModuleRepository moduleRepository;
+	private final HttpSession session;
 
 	@Autowired
 	public ModuleControllerTest(ModuleController moduleController, RoleControllerApi roleControllerApi,
@@ -67,6 +70,7 @@ public class ModuleControllerTest extends ControllerTest {
 		this.moduleController = moduleController;
 		this.roleControllerApi = roleControllerApi;
 		this.moduleRepository = moduleRepository;
+		this.session = mock(HttpSession.class);
 	}
 
 	@Test
@@ -114,14 +118,14 @@ public class ModuleControllerTest extends ControllerTest {
 
 		assertThat(moduleRepository.existsById(moduleId)).isTrue();
 
-		new ModuleController(moduleRepository, moduleService).deleteModule(moduleId);
+		new ModuleController(moduleRepository, moduleService, session).deleteModule(moduleId);
 
 		assertThat(moduleRepository.existsById(moduleId)).isFalse();
 	}
 
 	@Test
 	void patchModule() {
-		new ModuleController(moduleRepository, moduleService).patchModule(SCModulePatchDTO.builder()
+		new ModuleController(moduleRepository, moduleService, session).patchModule(SCModulePatchDTO.builder()
 				.id(db.getModuleProofTechniques().getId())
 				.name("Module 2.0")
 				.edition(new SCEditionIdDTO(db.getModuleProofTechniques().getEdition().getId()))
@@ -130,5 +134,20 @@ public class ModuleControllerTest extends ControllerTest {
 		SCModule module = moduleRepository.findByIdOrThrow(db.getModuleProofTechniques().getId());
 
 		assertThat(module.getName()).isEqualTo("Module 2.0");
+	}
+
+	@Test
+	void toggleStudentMode() {
+		ModuleController moduleController = new ModuleController(moduleRepository, moduleService, session);
+		when(session.getAttribute("student-mode-" + db.getEditionRL().getId()))
+				.thenReturn(null)
+				.thenReturn(true)
+				.thenReturn(false);
+		moduleController.toggleStudentMode(db.getModuleProofTechniques().getId());
+		verify(session).setAttribute("student-mode-" + db.getEditionRL().getId(), true);
+		moduleController.toggleStudentMode(db.getModuleProofTechniques().getId());
+		verify(session).setAttribute("student-mode-" + db.getEditionRL().getId(), false);
+		moduleController.toggleStudentMode(db.getModuleProofTechniques().getId());
+		verify(session, times(2)).setAttribute("student-mode-" + db.getEditionRL().getId(), true);
 	}
 }
