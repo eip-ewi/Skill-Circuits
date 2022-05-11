@@ -28,12 +28,12 @@
         class="block"
         layout:fragment="moduleblock">
         <div th:id="|module-${module.id}-header|">
-            <a style="text-decoration: none; color: black" th:href="@{|/module/${module.id}|}"
-                ><h2
+            <a style="text-decoration: none; color: black" th:href="@{|/module/${module.id}|}">
+                <h2
                     th:id="|module-${module.id}-name|"
                     class="module-title"
-                    th:text="${module.name}"></h2
-            ></a>
+                    th:text="${module.name}"></h2>
+            </a>
         </div>
 
         <div class="block__buttons">

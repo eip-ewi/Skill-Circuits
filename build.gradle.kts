@@ -117,7 +117,8 @@ configure<SpotlessExtension> {
             "tabWidth" to 4, "semi" to true,
             "printWidth" to 100,
             "bracketSameLine" to true,
-            "arrowParens" to "avoid", ))
+            "arrowParens" to "avoid",
+            "htmlWhitespaceSensitivity" to "ignore"))
     }
 }
 
