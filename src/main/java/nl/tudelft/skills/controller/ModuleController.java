@@ -79,7 +79,7 @@ public class ModuleController {
 		Set<Pair<Integer, Integer>> positions = module.getFilledPositions();
 		int columns = positions.stream().mapToInt(Pair::getFirst).max().orElse(-1) + 1;
 		int rows = positions.stream().mapToInt(Pair::getSecond).max().orElse(-1) + 1;
-		Boolean studentMode = (Boolean) session.getAttribute("student-mode-" + id);
+		Boolean studentMode = (Boolean) session.getAttribute("student-mode-" + module.getEdition().getId());
 
 		model.addAttribute("level", "module");
 		model.addAttribute("module", module);
