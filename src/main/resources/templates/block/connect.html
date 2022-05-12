@@ -57,12 +57,24 @@
                         (c1, c2) => c1.css("gridColumnStart") - c2.css("gridColumnStart")
                     );
 
+                    const closestChildOnSameColumn = children
+                        .filter(
+                            child =>
+                                $(child).css("gridColumnStart") === block.css("gridColumnStart")
+                        )
+                        .sort((c1, c2) => c1.css("gridRowStart") - c2.css("gridRowStart"))[0];
+
                     const parentX = block.offset().left + block.outerWidth() / 2;
                     const parentY = block.offset().top + block.outerHeight();
 
                     const xStepSize = block.outerWidth() / 30;
                     let xOffset = ((children.length - 1) * -xStepSize) / 2;
-
+                    if (closestChildOnSameColumn) {
+                        // if there is a child that is in the same column,
+                        // make that connection end up in the middle.
+                        const idx = children.findIndex(ch => ch.is(closestChildOnSameColumn));
+                        xOffset = idx * -xStepSize;
+                    }
                     for (let child of children) {
                         const line = $(document.createElementNS(SVG_NAMESPACE, "polyline"))
                             .attr("data-child", child.prop("id"))
