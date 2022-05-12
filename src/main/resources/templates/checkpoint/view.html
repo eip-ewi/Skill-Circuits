@@ -27,20 +27,22 @@
         th:data-deadline="${checkpoint.deadline}"
         class="checkpoint"
         layout:fragment="checkpoint">
-        <div
-            th:id="|checkpoint-${checkpoint.id}-name|"
-            class="checkpoint__name"
-            th:text="${checkpoint.name}"></div>
-        <div
-            th:if="${canEdit}"
-            class="checkpoint__buttons"
-            th:id="|checkpoint-${checkpoint.id}-buttons|">
-            <span
-                class="fa-solid fa-pen checkpoint__edit"
-                th:data-checkpoint="${checkpoint.id}"></span>
-            <span
-                class="fa-solid fa-trash checkpoint__delete"
-                th:data-checkpoint="${checkpoint.id}"></span>
+        <div class="checkpoint__body" th:id="|checkpoint-${checkpoint.id}-body|">
+            <div
+                th:id="|checkpoint-${checkpoint.id}-name|"
+                class="checkpoint__name"
+                th:text="${checkpoint.name}"></div>
+            <div
+                th:if="${canEdit}"
+                class="checkpoint__buttons"
+                th:id="|checkpoint-${checkpoint.id}-buttons|">
+                <span
+                    class="fa-solid fa-pen checkpoint__edit"
+                    th:data-checkpoint="${checkpoint.id}"></span>
+                <span
+                    class="fa-solid fa-trash checkpoint__delete"
+                    th:data-checkpoint="${checkpoint.id}"></span>
+            </div>
         </div>
     </div>
 
