@@ -1,0 +1,69 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <th:block layout:fragment="item">
+        <th:block layout:replace="~{item/view :: item}">
+            <th:block layout:fragment="item-content-element">
+                <a th:if="${item.link}" th:href="${item.link}" target="_blank">
+                    <th:block layout:replace="~{item/view :: item-content}"></th:block>
+                </a>
+                <th:block th:unless="${item.link}">
+                    <th:block layout:replace="~{item/view :: item-content}"></th:block>
+                </th:block>
+            </th:block>
+            <th:block layout:fragment="item-decoration">
+                <button
+                    class="item__button"
+                    th:onclick="|toggleCompleted(${item.id})|"
+                    th:text="${item.time}"></button>
+            </th:block>
+            <th:block layout:fragment="item-before-content">
+                <span
+                    th:id="|item-${item.id}-icon|"
+                    th:class="|fa-solid fa-${item.type.icon}|"></span>
+            </th:block>
+            <th:block layout:fragment="item-name">
+                <span
+                    th:id="|item-${item.id}-name|"
+                    class="item__name"
+                    th:text="${item.name}"></span>
+            </th:block>
+            <th:block layout:fragment="item-after-content">
+                <span
+                    th:if="${item.link}"
+                    th:id="|item-${item.id}-link|"
+                    class="fa-solid fa-link always_visible"></span>
+            </th:block>
+            <th:block layout:fragment="item-buttons">
+                <th:block th:if="${canEdit}">
+                    <button
+                        class="fa-solid fa-pen item__edit"
+                        th:data-item="${item.id}"
+                        th:data-type="${item.type}"
+                        th:data-icon="${item.type.icon}"></button>
+                </th:block>
+            </th:block>
+        </th:block>
+    </th:block>
+</html>

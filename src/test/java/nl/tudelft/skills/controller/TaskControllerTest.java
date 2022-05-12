@@ -75,7 +75,7 @@ public class TaskControllerTest extends ControllerTest {
 		assertThat(taskRepository.existsById(id)).isTrue();
 
 		assertThat(element)
-				.contains("<span id=\"item-" + id + "-name\" class=\"item__name\">Task</span>");
+				.containsPattern("<span\\s+id=\"item-" + id + "-name\"\\s+class=\"item__name\">Task</span>");
 	}
 
 	@Test
