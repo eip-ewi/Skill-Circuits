@@ -23,11 +23,7 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <dialog th:if="${canEdit}" layout:fragment="overlay" class="overlay" id="delete-item-overlay">
-        <form
-            id="delete-item-form"
-            class="confirmation"
-            th:action="@{|/${itemType}|}"
-            th:method="delete">
+        <form id="delete-item-form" class="confirmation">
             <input id="delete-item-id" name="id" type="hidden" />
             <input name="page" value="item" type="hidden" />
 
@@ -54,6 +50,18 @@
 
         document.addEventListener("DOMContentLoaded", function () {
             $(".item__delete").click(deleteItem);
+            $("#delete-item-form").submit(e => {
+                e.preventDefault();
+                $.ajax({
+                    url: "/task",
+                    type: "delete",
+                    data: $("#delete-item-form").serialize(),
+                    success: () => {
+                        $(`#item-${$("#delete-item-id").val()}`).remove();
+                        toggleOverlay("delete-item-overlay");
+                    },
+                });
+            });
         });
     </script>
 </html>

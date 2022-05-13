@@ -65,15 +65,15 @@ public class TaskController {
 	 * Deletes a task.
 	 *
 	 * @param  id The id of the task to delete
-	 * @return    A redirect to the module page
+	 * @return    Empty 200 response
 	 */
 	@DeleteMapping
 	@Transactional
 	@PreAuthorize("@authorisationService.canDeleteTask(#id)")
-	public String deleteTask(@RequestParam Long id) {
+	public ResponseEntity<Void> deleteTask(@RequestParam Long id) {
 		Task task = taskRepository.findByIdOrThrow(id);
 		taskRepository.delete(task);
-		return "redirect:/module/" + task.getSkill().getSubmodule().getModule().getId();
+		return ResponseEntity.ok().build();
 	}
 
 	/**
