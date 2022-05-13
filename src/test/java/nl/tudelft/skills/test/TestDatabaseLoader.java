@@ -20,10 +20,12 @@ package nl.tudelft.skills.test;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import nl.tudelft.skills.model.Badge;
 import nl.tudelft.skills.model.Checkpoint;
 import nl.tudelft.skills.model.Inventory;
 import nl.tudelft.skills.model.Path;
@@ -34,6 +36,7 @@ import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Submodule;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.repository.BadgeRepository;
 import nl.tudelft.skills.repository.CheckpointRepository;
 import nl.tudelft.skills.repository.CourseRepository;
 import nl.tudelft.skills.repository.EditionRepository;
@@ -71,11 +74,17 @@ public class TestDatabaseLoader {
 	@Autowired
 	private PersonRepository personRepository;
 	@Autowired
+	private BadgeRepository badgeRepository;
+	@Autowired
 	private InventoryRepository inventoryRepository;
 	@Autowired
 	private PathRepository pathRepository;
+
 	@Autowired
 	private CheckpointRepository checkpointRepository;
+
+	public Badge badge1;
+	public Badge badge2;
 
 	/**
 	 * Used to simulate sequential IDs as done by the @GeneratedValue annotation.
@@ -181,6 +190,7 @@ public class TestDatabaseLoader {
 		initSkill();
 		initTask();
 		initPerson();
+		initBadges();
 		initInventory();
 	}
 
@@ -309,13 +319,19 @@ public class TestDatabaseLoader {
 	}
 
 	private void initInventory() {
-		inventory = inventoryRepository.save(Inventory.builder().person(person).build());
+		inventory = inventoryRepository.save(Inventory.builder().personId(person.getId()).build());
 	}
 
 	public long getNextId() {
 		currentId++;
 
 		return currentId;
+	}
+
+	private void initBadges() {
+		badge1 = badgeRepository.save(Badge.builder().name("Badge 1").inventories(new HashSet<>()).build());
+		badge2 = badgeRepository.save(Badge.builder().name("Badge 2").inventories(new HashSet<>()).build());
+		System.out.println(badge1.getId());
 	}
 
 }

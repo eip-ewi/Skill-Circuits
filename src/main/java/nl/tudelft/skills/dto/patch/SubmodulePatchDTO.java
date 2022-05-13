@@ -23,6 +23,7 @@ import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import nl.tudelft.librador.dto.patch.Patch;
 import nl.tudelft.skills.dto.id.SCModuleIdDTO;
@@ -32,6 +33,7 @@ import nl.tudelft.skills.model.Submodule;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public class SubmodulePatchDTO extends Patch<Submodule> {
 
 	@NotNull

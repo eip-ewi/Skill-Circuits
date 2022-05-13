@@ -20,12 +20,17 @@ package nl.tudelft.skills.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.InventoryViewDTO;
 import nl.tudelft.skills.model.Inventory;
+import nl.tudelft.skills.model.InventoryItem;
 import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.repository.BadgeRepository;
 import nl.tudelft.skills.repository.InventoryRepository;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.test.TestDatabaseLoader;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,46 +41,45 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
 public class InventoryServiceTest {
+	@Autowired
+	private TestDatabaseLoader db;
 	private InventoryService inventoryService;
 	private InventoryRepository inventoryRepository;
+	private PersonRepository personRepository;
+	private BadgeRepository badgeRepository;
 	private Inventory inventory;
 	private SCPerson person;
-
-	private final Long INVENTORY_ID = 32L;
+	private List<InventoryItem> badgeList = new ArrayList<>();
 
 	@Autowired
-	public InventoryServiceTest(InventoryRepository inventoryRepository) {
+	public InventoryServiceTest(InventoryRepository inventoryRepository, PersonRepository personRepository,
+			BadgeRepository badgeRepository) {
 		this.inventoryRepository = inventoryRepository;
-		this.inventoryService = new InventoryService(inventoryRepository);
+		this.inventoryService = new InventoryService(inventoryRepository, personRepository, badgeRepository);
 	}
 
 	@BeforeEach
 	public void setUp() {
-		inventory = Inventory.builder().id(INVENTORY_ID).inventoryItems(new ArrayList<>()).build();
+		badgeList.add(db.badge1);
+		inventory = Inventory.builder().id(db.getInventory().getId()).inventoryItems(badgeList)
+				.build();
 		person = SCPerson.builder().id(1L).inventory(inventory).build();
 	}
 
 	@Test
 	public void getInventory() {
-		assertEquals(inventory, inventoryService.getInventory(person));
+		assertEquals(inventory, inventoryService.getInventory(db.getPerson().getId()));
 	}
 
 	@Test
 	public void getInventoryView() {
-		InventoryViewDTO inventoryDTO = InventoryViewDTO.builder().id(INVENTORY_ID)
-				.inventoryItems(new ArrayList<>()).build();
-		assertEquals(inventoryDTO, inventoryService.getInventoryView(person));
+		InventoryViewDTO inventoryDTO = InventoryViewDTO.builder().id(db.getInventory().getId())
+				.inventoryItems(badgeList).build();
+		assertEquals(inventoryDTO, inventoryService.getInventoryView(db.getPerson().getId()));
 	}
 
 	@Test
 	public void createInventory() {
-		assertEquals(inventory, inventoryService.createInventory(person));
-	}
-
-	@Test
-	public void patchInventory() {
-		Inventory patchedInventory = inventoryRepository.save(inventory);
-		patchedInventory.setPerson(person);
-		assertEquals(patchedInventory, inventoryService.patchInventory(patchedInventory));
+		assertEquals(inventory, inventoryService.createInventory(db.getPerson().getId()));
 	}
 }

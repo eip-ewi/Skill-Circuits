@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.dto.patch;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -24,6 +25,7 @@ import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import nl.tudelft.librador.dto.patch.Patch;
 import nl.tudelft.skills.model.Inventory;
@@ -34,6 +36,7 @@ import nl.tudelft.skills.model.labracore.SCPerson;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class InventoryPatchDTO extends Patch<Inventory> {
 	@NotNull
 	private Long id;
@@ -46,5 +49,14 @@ public class InventoryPatchDTO extends Patch<Inventory> {
 	@Override
 	protected void validate() {
 
+	}
+
+	public Inventory addItems(Inventory inventory) {
+		if (inventoryItems == null) {
+			inventoryItems = new ArrayList<>();
+		}
+
+		this.inventoryItems.addAll(inventory.getInventoryItems());
+		return apply(inventory);
 	}
 }

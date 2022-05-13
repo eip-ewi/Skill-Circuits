@@ -15,39 +15,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.model.labracore;
+package nl.tudelft.skills.service;
 
-import java.util.HashSet;
-import java.util.Set;
+import nl.tudelft.skills.model.Badge;
+import nl.tudelft.skills.repository.BadgeRepository;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToOne;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import lombok.*;
-import nl.tudelft.skills.model.Inventory;
-import nl.tudelft.skills.model.Task;
+@Service
+public class BadgeService {
+	private BadgeRepository badgeRepository;
 
-@Data
-@Entity
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class SCPerson {
+	@Autowired
+	public BadgeService(BadgeRepository badgeRepository) {
+		this.badgeRepository = badgeRepository;
+	}
 
-	@Id
-	private Long id;
-
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany(fetch = FetchType.LAZY)
-	private Set<Task> tasksCompleted = new HashSet<>();
-
-	@OneToOne
-	@JoinColumn(name = "inventory_id")
-	private Inventory inventory;
-
+	public Badge createBadge(Badge createdBadge) {
+		return badgeRepository.save(createdBadge);
+	}
 }

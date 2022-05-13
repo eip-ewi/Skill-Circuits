@@ -18,11 +18,11 @@
 package nl.tudelft.skills.dto.view;
 
 import java.util.List;
+import java.util.Objects;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.model.Inventory;
@@ -32,10 +32,23 @@ import nl.tudelft.skills.model.InventoryItem;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = false)
 public class InventoryViewDTO extends View<Inventory> {
 
 	private Long id;
-
 	private List<InventoryItem> inventoryItems;
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		InventoryViewDTO that = (InventoryViewDTO) o;
+		return Objects.equals(inventoryItems, that.inventoryItems);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(inventoryItems);
+	}
 }

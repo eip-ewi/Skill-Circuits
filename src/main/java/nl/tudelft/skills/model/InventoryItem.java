@@ -24,16 +24,27 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
 import javax.persistence.ManyToMany;
 import javax.validation.constraints.NotNull;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
 @Entity
+@Inheritance
+@NoArgsConstructor
+@AllArgsConstructor
 public abstract class InventoryItem {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private Long id;
+	protected Long id;
+
+	protected String name;
 
 	@ManyToMany(mappedBy = "inventoryItems")
 	@NotNull
-	private Set<Inventory> inventories = new HashSet<>();
+	protected Set<Inventory> inventories = new HashSet<>();
 }

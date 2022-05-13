@@ -15,39 +15,31 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.model.labracore;
+package nl.tudelft.skills.dto.create;
 
-import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToOne;
-
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import nl.tudelft.librador.dto.create.Create;
+import nl.tudelft.skills.model.Badge;
 import nl.tudelft.skills.model.Inventory;
-import nl.tudelft.skills.model.Task;
 
 @Data
-@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SCPerson {
-
-	@Id
+@EqualsAndHashCode(callSuper = false)
+public class BadgeCreateDTO extends Create<Badge> {
 	private Long id;
+	private String name;
+	private Set<Inventory> inventories;
 
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany(fetch = FetchType.LAZY)
-	private Set<Task> tasksCompleted = new HashSet<>();
-
-	@OneToOne
-	@JoinColumn(name = "inventory_id")
-	private Inventory inventory;
-
+	@Override
+	public Class<Badge> clazz() {
+		return Badge.class;
+	}
 }

@@ -17,14 +17,10 @@
  */
 package nl.tudelft.skills.repository;
 
+import javax.transaction.Transactional;
+
 import nl.tudelft.skills.model.InventoryItem;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
-
-public interface InventoryItemRepository extends JpaRepository<InventoryItem, Long> {
-	default InventoryItem findByIdOrThrow(Long id) {
-		return findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Item not found: " + id));
-	}
+@Transactional
+public interface InventoryItemRepository extends InventoryItemBaseRepository<InventoryItem> {
 }

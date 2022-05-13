@@ -25,15 +25,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import javax.persistence.OneToOne;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import nl.tudelft.skills.model.labracore.SCPerson;
-
-import org.hibernate.Hibernate;
 
 @Data
 @Entity
@@ -45,8 +41,7 @@ public class Inventory {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
 
-	@OneToOne(mappedBy = "inventory")
-	private SCPerson person;
+	private Long personId;
 
 	@ManyToMany
 	private List<InventoryItem> inventoryItems;
@@ -61,10 +56,10 @@ public class Inventory {
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
-		if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o))
+		if (o == null || getClass() != o.getClass())
 			return false;
 		Inventory inventory = (Inventory) o;
-		return id != null && Objects.equals(id, inventory.id);
+		return Objects.equals(personId, inventory.personId)
+				&& Objects.equals(inventoryItems, inventory.inventoryItems);
 	}
-
 }

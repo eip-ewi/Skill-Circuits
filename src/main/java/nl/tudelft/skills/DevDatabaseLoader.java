@@ -20,6 +20,7 @@ package nl.tudelft.skills;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -53,6 +54,10 @@ public class DevDatabaseLoader {
 	private TaskRepository taskRepository;
 	@Autowired
 	private CheckpointRepository checkpointRepository;
+	@Autowired
+	private BadgeRepository badgeRepository;
+	@Autowired
+	private InventoryRepository inventoryRepository;
 
 	@Autowired
 	private CourseControllerApi courseControllerApi;
@@ -104,9 +109,13 @@ public class DevDatabaseLoader {
 	private Skill skillSimpleE;
 	private Skill skillSimpleF;
 
+	private Inventory inventory;
+
 	private Checkpoint checkpointLectureOne;
 	private Checkpoint checkpointLectureTwo;
 	private Checkpoint checkpointSimple;
+
+	private Badge badge;
 
 	@PostConstruct
 	private void init() {
@@ -120,6 +129,7 @@ public class DevDatabaseLoader {
 		initCheckpoints();
 		initSkills();
 		initTasks();
+		initBadges();
 	}
 
 	private void initCourse() {
@@ -430,6 +440,11 @@ public class DevDatabaseLoader {
 				.edition(scEdition)
 				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 53), LocalTime.MIDNIGHT))
 				.build());
+	}
+
+	private void initBadges() {
+		badge = badgeRepository
+				.save(Badge.builder().name("Your first badge!").inventories(new HashSet<>()).build());
 	}
 
 }

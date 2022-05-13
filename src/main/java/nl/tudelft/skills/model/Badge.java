@@ -15,39 +15,26 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.model.labracore;
+package nl.tudelft.skills.model;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToOne;
 
-import lombok.*;
-import nl.tudelft.skills.model.Inventory;
-import nl.tudelft.skills.model.Task;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
-public class SCPerson {
+public class Badge extends InventoryItem {
 
-	@Id
-	private Long id;
-
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany(fetch = FetchType.LAZY)
-	private Set<Task> tasksCompleted = new HashSet<>();
-
-	@OneToOne
-	@JoinColumn(name = "inventory_id")
-	private Inventory inventory;
+	@Builder
+	public Badge(Long id, String name, Set<Inventory> inventories) {
+		super(id, name, inventories);
+	}
 
 }

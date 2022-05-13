@@ -20,7 +20,6 @@ package nl.tudelft.skills.repository;
 import java.util.Optional;
 
 import nl.tudelft.skills.model.Inventory;
-import nl.tudelft.skills.model.labracore.SCPerson;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -32,5 +31,5 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 				.orElseThrow(() -> new ResourceNotFoundException("Inventory was not found: " + id));
 	}
 
-	public Optional<Inventory> findByPerson(SCPerson person);
+	public Optional<Inventory> findByPersonId(Long personId);
 }
