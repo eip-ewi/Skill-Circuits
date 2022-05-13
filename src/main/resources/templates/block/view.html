@@ -56,7 +56,12 @@
 
         <ul class="items">
             <th:block th:each="item : ${block.items}">
-                <li layout:replace="~{item/view :: item}"></li>
+                <th:block th:if="${level == 'module'}">
+                    <li layout:replace="~{task/view :: item}"></li>
+                </th:block>
+                <th:block th:unless="${level == 'module'}">
+                    <li layout:replace="~{item/view :: item}"></li>
+                </th:block>
             </th:block>
             <li th:if="${canEdit and level == 'module'}">
                 <button

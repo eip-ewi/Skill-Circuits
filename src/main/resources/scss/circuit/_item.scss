@@ -23,7 +23,7 @@
     }
 
     &.completed {
-        & > .item__content > .item__button {
+        & > .item__button {
             background-color: var(--primary-green);
             &:hover,
             &:focus-visible {
@@ -38,7 +38,7 @@
         cursor: pointer;
         display: flex;
         gap: 0.5rem;
-        & > * {
+        & > :is(button, a) {
             @include icon-button;
         }
     }
@@ -48,6 +48,15 @@
         align-items: center;
         display: flex;
         gap: 0.5rem;
+    }
+    & > a {
+        text-decoration: none;
+        & > .item__content {
+            color: var(--primary-dark);
+            &:hover {
+                color: var(--primary-green);
+            }
+        }
     }
 
     &__form {
