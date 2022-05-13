@@ -23,7 +23,7 @@
     }
 
     &.completed {
-        & > .item__content > .item__button {
+        & > .item__button {
             background-color: var(--primary-green);
             &:hover,
             &:focus-visible {

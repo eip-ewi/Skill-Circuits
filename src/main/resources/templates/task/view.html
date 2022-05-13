@@ -25,7 +25,11 @@
     <th:block layout:fragment="item">
         <th:block layout:replace="~{item/view :: item}">
             <th:block layout:fragment="item-content-element">
-                <a th:if="${item.link}" th:href="${item.link}" target="_blank">
+                <a
+                    th:if="${item.link}"
+                    th:href="${item.link}"
+                    target="_blank"
+                    th:id="|item-${item.id}-link|">
                     <th:block layout:replace="~{item/view :: item-content}"></th:block>
                 </a>
                 <th:block th:unless="${item.link}">
@@ -52,7 +56,7 @@
             <th:block layout:fragment="item-after-content">
                 <span
                     th:if="${item.link}"
-                    th:id="|item-${item.id}-link|"
+                    th:id="|item-${item.id}-link-icon|"
                     class="fa-solid fa-link always_visible"></span>
             </th:block>
             <th:block layout:fragment="item-buttons">
