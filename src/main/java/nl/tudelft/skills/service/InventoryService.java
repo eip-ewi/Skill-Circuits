@@ -17,6 +17,8 @@
  */
 package nl.tudelft.skills.service;
 
+import java.util.ArrayList;
+
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.InventoryViewDTO;
 import nl.tudelft.skills.model.Inventory;
@@ -71,7 +73,7 @@ public class InventoryService {
 	 * @return        the newly created inventory.
 	 */
 	public Inventory createInventory(SCPerson person) {
-		Inventory inventory = Inventory.builder().build();
+		Inventory inventory = Inventory.builder().inventoryItems(new ArrayList<>()).build();
 		inventoryRepository.save(inventory);
 		person.setInventory(inventory);
 		return person.getInventory();

@@ -25,6 +25,7 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 
 import nl.tudelft.skills.model.Checkpoint;
+import nl.tudelft.skills.model.Inventory;
 import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.SCCourse;
 import nl.tudelft.skills.model.SCEdition;
@@ -36,6 +37,7 @@ import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.CheckpointRepository;
 import nl.tudelft.skills.repository.CourseRepository;
 import nl.tudelft.skills.repository.EditionRepository;
+import nl.tudelft.skills.repository.InventoryRepository;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.PathRepository;
 import nl.tudelft.skills.repository.SkillRepository;
@@ -68,6 +70,10 @@ public class TestDatabaseLoader {
 	private TaskRepository taskRepository;
 	@Autowired
 	private PersonRepository personRepository;
+	@Autowired
+	private InventoryRepository inventoryRepository;
+	@Autowired
+	private PathRepository pathRepository;
 	@Autowired
 	private CheckpointRepository checkpointRepository;
 
@@ -142,6 +148,7 @@ public class TestDatabaseLoader {
 	public Path pathfinderRL = Path.builder().id(this.getNextId()).name("Pathfinder").build();
 	public Path mountainClimberRL = Path.builder().id(this.getNextId()).name("Mountain Climber").build();
 
+	public Inventory inventory;
 	public SCPerson person = SCPerson.builder().id(TestUserDetailsService.id).build();
 
 	public Checkpoint checkpointLectureOne;
@@ -159,6 +166,10 @@ public class TestDatabaseLoader {
 		return personRepository.findByIdOrThrow(person.getId());
 	}
 
+	public Inventory getInventory() {
+		return inventoryRepository.findByIdOrThrow(inventory.getId());
+	}
+
 	@PostConstruct
 	private void init() {
 		initCourse();
@@ -170,6 +181,7 @@ public class TestDatabaseLoader {
 		initSkill();
 		initTask();
 		initPerson();
+		initInventory();
 	}
 
 	private void initCourse() {
@@ -294,6 +306,10 @@ public class TestDatabaseLoader {
 		person.setPaths(Set.of(explorerRL));
 		person.setTasksCompleted(Set.of(taskDo11ad, taskRead12, taskDo12ae, taskRead11));
 		person = personRepository.save(person);
+	}
+
+	private void initInventory() {
+		inventory = inventoryRepository.save(Inventory.builder().person(person).build());
 	}
 
 	public long getNextId() {

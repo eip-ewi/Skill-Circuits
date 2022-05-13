@@ -32,7 +32,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
@@ -71,7 +70,7 @@ public class InventoryController {
 	 */
 	@PatchMapping
 	@PreAuthorize("@authorisationService.isAuthenticated()")
-	ResponseEntity<Void> patchInventory(@RequestBody InventoryPatchDTO patch) {
+	ResponseEntity<Void> patchInventory(InventoryPatchDTO patch) {
 		Inventory inventory = inventoryService.getInventory(patch.getPerson());
 		inventoryService.patchInventory(patch.apply(inventory));
 		return ResponseEntity.ok().build();

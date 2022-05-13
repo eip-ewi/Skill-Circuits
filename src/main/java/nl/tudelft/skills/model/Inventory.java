@@ -18,6 +18,7 @@
 package nl.tudelft.skills.model;
 
 import java.util.List;
+import java.util.Objects;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -31,6 +32,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import nl.tudelft.skills.model.labracore.SCPerson;
+
+import org.hibernate.Hibernate;
 
 @Data
 @Entity
@@ -47,5 +50,21 @@ public class Inventory {
 
 	@ManyToMany
 	private List<InventoryItem> inventoryItems;
+
+	/**
+	 * Tests whether two inventories are equal.
+	 *
+	 * @param  o the inventory to be checked
+	 * @return   whether the inventories are equal or not
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o))
+			return false;
+		Inventory inventory = (Inventory) o;
+		return id != null && Objects.equals(id, inventory.id);
+	}
 
 }
