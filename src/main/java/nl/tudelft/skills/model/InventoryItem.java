@@ -42,6 +42,7 @@ public abstract class InventoryItem {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	protected Long id;
 
+	@NotNull
 	protected String name;
 
 	@ManyToMany(mappedBy = "inventoryItems")

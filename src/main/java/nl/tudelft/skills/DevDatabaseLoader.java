@@ -29,7 +29,9 @@ import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.skills.model.*;
+import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.*;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -58,11 +60,14 @@ public class DevDatabaseLoader {
 	private BadgeRepository badgeRepository;
 	@Autowired
 	private InventoryRepository inventoryRepository;
-
 	@Autowired
 	private CourseControllerApi courseControllerApi;
 	@Autowired
 	private EditionControllerApi editionApi;
+	@Autowired
+	private PersonRepository personRepository;
+
+	private SCPerson person;
 
 	private EditionDetailsDTO edition;
 
@@ -122,6 +127,7 @@ public class DevDatabaseLoader {
 		course = courseControllerApi.getAllCourses().blockFirst();
 		edition = editionApi.getAllEditions().blockFirst();
 
+		initPerson();
 		initCourse();
 		initEdition();
 		initModules();
@@ -129,7 +135,12 @@ public class DevDatabaseLoader {
 		initCheckpoints();
 		initSkills();
 		initTasks();
+		initInventory();
 		initBadges();
+	}
+
+	private void initPerson() {
+		person = personRepository.save(SCPerson.builder().id(1L).build());
 	}
 
 	private void initCourse() {
@@ -440,6 +451,11 @@ public class DevDatabaseLoader {
 				.edition(scEdition)
 				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 53), LocalTime.MIDNIGHT))
 				.build());
+	}
+
+	private void initInventory() {
+		Inventory inventory = inventoryRepository.save(Inventory.builder().build());
+		person.setInventory(inventory);
 	}
 
 	private void initBadges() {
