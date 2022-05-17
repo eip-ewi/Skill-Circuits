@@ -31,7 +31,7 @@
             <div
                 th:id="|checkpoint-${checkpoint.id}-name|"
                 class="checkpoint__name"
-                th:text="${checkpoint.name}"></div>
+                th:text="${checkpoint.name} + ' ('  + ${#temporals.format(checkpoint.deadline, 'dd-MM-yyyy HH:mm')} + ') ' "></div>
             <div
                 th:if="${canEdit}"
                 class="checkpoint__buttons"
