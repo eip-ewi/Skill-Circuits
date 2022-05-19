@@ -28,6 +28,7 @@
                 <input id="edit-checkpoint-id" name="id" type="hidden" />
 
                 <input id="edit-checkpoint-name" name="name" type="text" required />
+                <input id="edit-checkpoint-deadline" name="deadline" type="datetime-local" required />
 
                 <button
                     type="button"
@@ -42,11 +43,15 @@
         function editCheckpoint() {
             $(".checkpoint__name").removeClass("hidden");
             let checkpointId = $(this).data("checkpoint");
+            let checkpointDisplay = $(`#checkpoint-${checkpointId}-display`);
             let itemName = $(`#checkpoint-${checkpointId}-name`);
+            let itemDeadline = $(`#checkpoint-${checkpointId}-deadline`);
             $("#edit-checkpoint-id").val(checkpointId);
             $("#edit-checkpoint-name").val(itemName.text());
+            const currentDeadline = luxon.DateTime.fromFormat(itemDeadline.text(), "dd-MM-yyyy HH:mm");
+            $("#edit-checkpoint-deadline").val(currentDeadline.toFormat("yyyy-MM-dd'T'HH:mm"));
             $(`#checkpoint-${checkpointId}-body`).append($("#edit-checkpoint"));
-            itemName.addClass("hidden");
+            checkpointDisplay.addClass("hidden");
             $(`#checkpoint-${checkpointId}-buttons`).addClass("hidden");
         }
 
@@ -60,9 +65,11 @@
                     success: () => {
                         let checkpointId = $("#edit-checkpoint-id").val();
                         let checkpointName = $(`#checkpoint-${checkpointId}-name`);
+                        let checkpointDeadline = $(`#checkpoint-${checkpointId}-deadline`);
                         $("#edit-checkpoint-wrapper").append($("#edit-checkpoint"));
-                        checkpointName.removeClass("hidden");
+                        $(`#checkpoint-${checkpointId}-display`).removeClass("hidden");
                         checkpointName.text($("#edit-checkpoint-name").val());
+                        checkpointDeadline.text(luxon.DateTime.fromISO($("#edit-checkpoint-deadline").val()).toFormat("dd-MM-yyyy HH:mm"));
                         $(`#checkpoint-${checkpointId}-buttons`).removeClass("hidden");
                     },
                 });
@@ -73,7 +80,7 @@
             $("#edit-checkpoint-cancel").click(function () {
                 let checkpointId = $("#edit-checkpoint-id").val();
                 $("#edit-checkpoint-wrapper").append($("#edit-checkpoint"));
-                $(`#checkpoint-${checkpointId}-name`).removeClass("hidden");
+                $(`#checkpoint-${checkpointId}-display`).removeClass("hidden");
                 $(`#checkpoint-${checkpointId}-buttons`).removeClass("hidden");
             });
         });

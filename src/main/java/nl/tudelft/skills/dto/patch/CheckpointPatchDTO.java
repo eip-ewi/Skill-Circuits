@@ -26,6 +26,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import nl.tudelft.librador.dto.patch.Patch;
 import nl.tudelft.skills.model.Checkpoint;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -38,9 +41,14 @@ public class CheckpointPatchDTO extends Patch<Checkpoint> {
 	@NotBlank
 	private String name;
 
+	@NotNull
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+	private LocalDateTime deadline;
+
 	@Override
 	protected void applyOneToOne() {
 		updateNonNull(name, data::setName);
+		updateNonNull(deadline, data::setDeadline);
 	}
 
 	@Override
