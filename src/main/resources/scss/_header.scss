@@ -20,21 +20,47 @@
     }
 
     &__icon {
-        & > a {
+        a {
             color: var(--primary-light);
             text-decoration: none;
-        }
-        & button {
-            background: none;
-            border: none;
-            color: var(--primary-light);
             cursor: pointer;
-            font-size: 1rem;
-        }
-        &:hover,
-        & > a:focus-visible,
-        & button:focus-visible {
-            transform: scale(1.2);
         }
     }
+
+    button {
+        background: none;
+        border: none;
+        color: var(--primary-light);
+        cursor: pointer;
+        font-size: 1rem;
+    }
+
+    &__dropdown {
+        display: none;
+        position: absolute;
+        right: 1rem;
+        background-color: var(--background-colour);
+        border: 1px solid var(--grey-500);
+        box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.25);
+        list-style: none;
+        padding: 5px 0;
+        border-radius: 5px;
+
+        a,
+        button {
+            color: var(--primary-dark);
+            text-align: left;
+            padding: 5px 15px;
+            display: block;
+            width: 100%;
+
+            &:hover {
+                background-color: var(--grey-700);
+            }
+        }
+    }
+}
+
+.show_dropdown {
+    display: block;
 }
