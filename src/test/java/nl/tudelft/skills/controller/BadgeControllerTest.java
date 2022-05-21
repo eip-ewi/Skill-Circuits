@@ -44,12 +44,12 @@ class BadgeControllerTest extends ControllerTest {
 
 	@Test
 	void createBadge() {
-		BadgeCreateDTO create = BadgeCreateDTO.builder().id(db.badge1.getId())
-				.name(db.badge1.getName()).inventories(db.badge1.getInventories()).build();
+		BadgeCreateDTO create = BadgeCreateDTO.builder().id(db.getBadge1().getId())
+				.name(db.getBadge1().getName()).inventories(db.getBadge1().getInventories()).build();
 
 		badgeController.createBadge(create);
 
-		verify(badgeService).createBadge(db.badge1);
+		verify(badgeService).createBadge(db.getBadge1());
 	}
 
 }

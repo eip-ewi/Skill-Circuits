@@ -60,7 +60,7 @@ public class InventoryServiceTest {
 
 	@BeforeEach
 	public void setUp() {
-		badgeList.add(db.badge1);
+		badgeList.add(db.getBadge1());
 		inventory = Inventory.builder().id(db.getInventory().getId()).inventoryItems(badgeList)
 				.build();
 		person = SCPerson.builder().id(1L).inventory(inventory).build();

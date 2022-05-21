@@ -74,7 +74,7 @@ public class CheckpointControllerTest extends ControllerTest {
 						new BasicNameValuePair("moduleId",
 								Long.toString(db.getModuleProofTechniques().getId())),
 						new BasicNameValuePair("skillIds",
-								db.skillImplication.getId() + "," + db.skillNegation.getId()),
+								db.getSkillImplication().getId() + "," + db.getSkillNegation().getId()),
 						new BasicNameValuePair("deadline",
 								LocalDateTime.of(2022, 1, 1, 1, 1)
 										.format(DateTimeFormatter.ISO_DATE_TIME))))))
@@ -87,7 +87,9 @@ public class CheckpointControllerTest extends ControllerTest {
 
 		assertThat(skillRepository.findAll().stream()
 				.filter(skill -> skill.getCheckpoint().equals(checkpoint.get())))
-						.containsExactlyInAnyOrder(db.skillImplication, db.skillNegation);
+						.containsExactlyInAnyOrder(
+								db.getSkillImplication(),
+								db.getSkillNegation());
 	}
 
 	@Test
@@ -99,7 +101,7 @@ public class CheckpointControllerTest extends ControllerTest {
 						new BasicNameValuePair("moduleId",
 								Long.toString(db.getModuleProofTechniques().getId())),
 						new BasicNameValuePair("skillIds",
-								db.skillImplication.getId() + "," + db.skillNegation.getId()),
+								db.getSkillImplication().getId() + "," + db.getSkillNegation().getId()),
 						new BasicNameValuePair("deadline",
 								LocalDateTime.of(2022, 1, 1, 1, 1)
 										.format(DateTimeFormatter.ISO_DATE_TIME))))))
@@ -115,12 +117,12 @@ public class CheckpointControllerTest extends ControllerTest {
 	public void patchCheckpoint() throws Exception {
 		mvc.perform(patch("/checkpoint").with(csrf())
 				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
-						new BasicNameValuePair("id", Long.toString(db.checkpointLectureOne.getId())),
+						new BasicNameValuePair("id", Long.toString(db.getCheckpointLectureOne().getId())),
 						new BasicNameValuePair("name", "edited")))))
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isOk());
 
-		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(db.checkpointLectureOne.getId());
+		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(db.getCheckpointLectureOne().getId());
 		assertThat(checkpoint.getName()).isEqualTo("edited");
 	}
 
@@ -128,89 +130,91 @@ public class CheckpointControllerTest extends ControllerTest {
 	public void patchCheckpointIsForbidden() throws Exception {
 		mvc.perform(patch("/checkpoint").with(csrf())
 				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
-						new BasicNameValuePair("id", Long.toString(db.checkpointLectureOne.getId())),
+						new BasicNameValuePair("id", Long.toString(db.getCheckpointLectureOne().getId())),
 						new BasicNameValuePair("name", "edited")))))
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(redirectedUrlPattern("**/auth/login"));
 
-		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(db.checkpointLectureOne.getId());
+		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(db.getCheckpointLectureOne().getId());
 		assertThat(checkpoint.getName()).isEqualTo("Lecture 1");
 	}
 
 	@Test
 	@WithUserDetails("admin")
 	public void deleteCheckpoint() {
-		checkpointController.deleteCheckpoint(db.checkpointLectureOne.getId());
+		Long checkpointId = db.getCheckpointLectureOne().getId();
+		checkpointController.deleteCheckpoint(checkpointId);
 
-		Optional<Checkpoint> checkpoint = checkpointRepository.findById(db.checkpointLectureOne.getId());
+		Optional<Checkpoint> checkpoint = checkpointRepository.findById(checkpointId);
 		assertThat(checkpoint).isEmpty();
 	}
 
 	@Test
 	@WithUserDetails("admin")
 	public void deleteLastCheckpointForbidden() {
-		var res = checkpointController.deleteCheckpoint(db.checkpointLectureTwo.getId());
+		var res = checkpointController.deleteCheckpoint(db.getCheckpointLectureTwo().getId());
 
 		assertThat(res).isEqualTo(new ResponseEntity<>(HttpStatus.CONFLICT));
 
-		Optional<Checkpoint> checkpoint = checkpointRepository.findById(db.checkpointLectureTwo.getId());
+		Optional<Checkpoint> checkpoint = checkpointRepository.findById(db.getCheckpointLectureTwo().getId());
 		assertThat(checkpoint).isNotEmpty();
 	}
 
 	@Test
 	@WithUserDetails("admin")
 	public void addSkillsToCheckpoint() {
-		var res = checkpointController.addSkillsToCheckpoint(db.checkpointLectureTwo.getId(),
-				List.of(db.skillImplication.getId()));
+		var res = checkpointController.addSkillsToCheckpoint(db.getCheckpointLectureTwo().getId(),
+				List.of(db.getSkillImplication().getId()));
 
 		assertThat(res).isEqualTo(new ResponseEntity<>(HttpStatus.OK));
 
-		assertThat(skillRepository.findByIdOrThrow(db.skillImplication.getId()).getCheckpoint())
-				.isEqualTo(db.checkpointLectureTwo);
-		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(db.checkpointLectureTwo.getId());
-		assertThat(checkpoint.getSkills()).contains(db.skillImplication);
+		assertThat(db.getSkillImplication().getCheckpoint())
+				.isEqualTo(db.getCheckpointLectureTwo());
+		Checkpoint checkpoint = db.getCheckpointLectureTwo();
+		assertThat(checkpoint.getSkills()).contains(db.getSkillImplication());
 	}
 
 	@Test
 	@WithUserDetails("admin")
 	public void deleteSomeSkillsFromCheckpoint() {
-		var res = checkpointController.deleteSkillsFromCheckpoint(db.checkpointLectureOne.getId(),
-				List.of(db.skillProofOutline.getId()));
+		var res = checkpointController.deleteSkillsFromCheckpoint(db.getCheckpointLectureOne().getId(),
+				List.of(db.getSkillProofOutline().getId()));
 
 		assertThat(res).isEqualTo(new ResponseEntity<>(HttpStatus.OK));
 
 		//skill gets next checkpoint
-		assertThat(skillRepository.findByIdOrThrow(db.skillProofOutline.getId()).getCheckpoint())
-				.isEqualTo(db.checkpointLectureTwo);
+		assertThat(db.getSkillProofOutline().getCheckpoint())
+				.isEqualTo(db.getCheckpointLectureTwo());
 		// Checkpoint still exists
-		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(db.checkpointLectureTwo.getId());
-		assertThat(checkpoint.getSkills()).doesNotContain(db.skillProofOutline);
+		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(db.getCheckpointLectureTwo().getId());
+		assertThat(checkpoint.getSkills()).doesNotContain(db.getSkillProofOutline());
 	}
 
 	@Test
 	@WithUserDetails("admin")
 	public void deleteAllSkillsFromCheckpoint() {
-		var res = checkpointController.deleteSkillsFromCheckpoint(db.checkpointLectureOne.getId(),
-				checkpointRepository.findByIdOrThrow(db.checkpointLectureOne.getId()).getSkills().stream()
+		Long checkpointLectureOneId = db.getCheckpointLectureOne().getId();
+		var res = checkpointController.deleteSkillsFromCheckpoint(checkpointLectureOneId,
+				db.getCheckpointLectureOne().getSkills().stream()
 						.map(Skill::getId).toList());
 
 		assertThat(res).isEqualTo(new ResponseEntity<>(HttpStatus.OK));
 
 		assertThat(skillRepository
-				.findAllByIdIn(Set.of(db.skillImplication.getId(), db.skillNegation.getId(),
-						db.skillVariables.getId(), db.skillProofOutline.getId(),
-						db.skillAssumption.getId()))
+				.findAllByIdIn(Set.of(db.getSkillImplication().getId(), db.getSkillNegation().getId(),
+						db.getSkillVariables().getId(), db.getSkillProofOutline().getId(),
+						db.getSkillAssumption().getId()))
 				.stream().map(Skill::getCheckpoint))
-						.allSatisfy(cp -> assertThat(cp).isEqualTo(db.checkpointLectureTwo));
-		assertThat(skillRepository.findByIdOrThrow(db.skillProofOutline.getId()).getCheckpoint())
-				.isEqualTo(db.checkpointLectureTwo);
+						.allSatisfy(cp -> assertThat(cp).isEqualTo(db.getCheckpointLectureTwo()));
+		assertThat(db.getSkillProofOutline().getCheckpoint())
+				.isEqualTo(db.getCheckpointLectureTwo());
 		// Checkpoint is deleted
-		assertThat(checkpointRepository.findById(db.checkpointLectureOne.getId())).isEmpty();
+		assertThat(checkpointRepository.findById(checkpointLectureOneId)).isEmpty();
 	}
 
 	@Test
 	public void deleteCheckpointIsForbidden() throws Exception {
-		mvc.perform(delete("/checkpoint/" + db.checkpointLectureOne.getId()))
+		mvc.perform(delete("/checkpoint/" + db.getCheckpointLectureOne().getId()))
 				.andExpect(status().isForbidden());
 	}
 

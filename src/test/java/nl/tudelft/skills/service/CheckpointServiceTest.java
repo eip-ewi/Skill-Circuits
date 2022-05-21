@@ -44,14 +44,14 @@ public class CheckpointServiceTest {
 	@Test
 	public void findNextCheckpoint() {
 		assertThat(checkpointService
-				.findNextCheckpoint(checkpointRepository.findByIdOrThrow(db.checkpointLectureOne.getId())))
-						.hasValue(db.checkpointLectureTwo);
+				.findNextCheckpoint(db.getCheckpointLectureOne()))
+						.hasValue(db.getCheckpointLectureTwo());
 	}
 
 	@Test
 	public void findNextCheckpointLast() {
 		assertThat(checkpointService
-				.findNextCheckpoint(checkpointRepository.findByIdOrThrow(db.checkpointLectureTwo.getId())))
+				.findNextCheckpoint(db.getCheckpointLectureTwo()))
 						.isEmpty();
 	}
 

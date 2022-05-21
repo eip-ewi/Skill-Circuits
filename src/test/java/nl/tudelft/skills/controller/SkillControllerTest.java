@@ -73,9 +73,9 @@ public class SkillControllerTest extends ControllerTest {
 		String element = mvc.perform(post("/skill").with(csrf())
 				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
 						new BasicNameValuePair("name", "Skill"),
-						new BasicNameValuePair("submodule.id", Long.toString(db.submoduleCases.getId())),
+						new BasicNameValuePair("submodule.id", Long.toString(db.getSubmoduleCases().getId())),
 						new BasicNameValuePair("checkpoint.id",
-								Long.toString(db.checkpointLectureOne.getId())),
+								Long.toString(db.getCheckpointLectureOne().getId())),
 						new BasicNameValuePair("row", "10"),
 						new BasicNameValuePair("column", "11")))))
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
@@ -96,59 +96,60 @@ public class SkillControllerTest extends ControllerTest {
 	@Test
 	void patchSkill() {
 		skillController.patchSkill(SkillPatchDTO.builder()
-				.id(db.skillVariables.getId())
+				.id(db.getSkillVariables().getId())
 				.name("Updated")
-				.submodule(new SubmoduleIdDTO(db.submoduleCases.getId()))
-				.checkpoint(new CheckpointIdDTO((db.checkpointLectureTwo.getId())))
+				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
+				.checkpoint(new CheckpointIdDTO((db.getCheckpointLectureTwo().getId())))
 				.build());
 
-		Skill skill = skillRepository.findByIdOrThrow(db.skillVariables.getId());
+		Skill skill = db.getSkillVariables();
 		assertThat(skill.getName()).isEqualTo("Updated");
 		assertThat(submoduleRepository.findByIdOrThrow(skill.getSubmodule().getId())).isEqualTo(
-				submoduleRepository.findByIdOrThrow(db.submoduleCases.getId()));
+				submoduleRepository.findByIdOrThrow(db.getSubmoduleCases().getId()));
 		assertThat(checkpointRepository.findByIdOrThrow(skill.getCheckpoint().getId())).isEqualTo(
-				checkpointRepository.findByIdOrThrow(db.checkpointLectureTwo.getId()));
+				checkpointRepository.findByIdOrThrow(db.getCheckpointLectureTwo().getId()));
 	}
 
 	@Test
 	void updateSkillPosition() {
-		skillController.updateSkillPosition(db.skillVariables.getId(), SkillPositionPatchDTO.builder()
+		skillController.updateSkillPosition(db.getSkillVariables().getId(), SkillPositionPatchDTO.builder()
 				.column(10)
 				.row(11)
 				.build());
 
-		Skill skill = skillRepository.findByIdOrThrow(db.skillVariables.getId());
+		Skill skill = db.getSkillVariables();
 		assertThat(skill.getColumn()).isEqualTo(10);
 		assertThat(skill.getRow()).isEqualTo(11);
 	}
 
 	@Test
 	void deleteSkill() {
-		skillController.deleteSkill(db.skillVariables.getId(), "block");
-		assertThat(skillRepository.existsById(db.skillVariables.getId())).isFalse();
+		Long id = db.getSkillVariables().getId();
+		skillController.deleteSkill(id, "block");
+		assertThat(skillRepository.existsById(id)).isFalse();
 	}
 
 	@Test
 	void connectSkill() {
-		assertThat(skillRepository.findByIdOrThrow(db.skillImplication.getId()).getChildren())
-				.doesNotContain(db.skillProofOutline);
-		skillController.connectSkill(db.skillImplication.getId(), db.skillProofOutline.getId());
-		assertThat(skillRepository.findByIdOrThrow(db.skillImplication.getId()).getChildren())
-				.contains(db.skillProofOutline);
+		assertThat(db.getSkillImplication().getChildren())
+				.doesNotContain(db.getSkillProofOutline());
+		skillController.connectSkill(db.getSkillImplication().getId(), db.getSkillProofOutline().getId());
+		assertThat(db.getSkillImplication().getChildren())
+				.contains(db.getSkillProofOutline());
 	}
 
 	@Test
 	void disconnectSkill() {
-		assertThat(skillRepository.findByIdOrThrow(db.skillImplication.getId()).getChildren())
-				.contains(db.skillAssumption);
-		skillController.disconnectSkill(db.skillImplication.getId(), db.skillAssumption.getId());
-		assertThat(skillRepository.findByIdOrThrow(db.skillImplication.getId()).getChildren())
-				.doesNotContain(db.skillAssumption);
+		assertThat(db.getSkillImplication().getChildren())
+				.contains(db.getSkillAssumption());
+		skillController.disconnectSkill(db.getSkillImplication().getId(), db.getSkillAssumption().getId());
+		assertThat(db.getSkillImplication().getChildren())
+				.doesNotContain(db.getSkillAssumption());
 	}
 
 	@Test
 	void endpointsAreProtected() throws Exception {
-		mvc.perform(patch("/skill/{id}", db.skillVariables.getId()))
+		mvc.perform(patch("/skill/{id}", db.getSkillVariables().getId()))
 				.andExpect(status().isForbidden());
 		mvc.perform(post("/skill"))
 				.andExpect(status().isForbidden());

@@ -66,10 +66,10 @@ public class ModuleServiceTest {
 				.filter(TaskViewDTO::isCompleted)
 				.map(TaskViewDTO::getId).toList())
 						.containsExactlyInAnyOrderElementsOf(
-								List.of(db.taskRead11.getId(),
-										db.taskDo11ad.getId(),
-										db.taskRead12.getId(),
-										db.taskDo12ae.getId()));
+								List.of(db.getTaskRead11().getId(),
+										db.getTaskDo11ad().getId(),
+										db.getTaskRead12().getId(),
+										db.getTaskDo12ae().getId()));
 
 	}
 

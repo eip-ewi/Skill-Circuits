@@ -51,7 +51,7 @@ public class BadgeServiceTest {
 
 	@BeforeEach
 	public void setUp() {
-		badge = Badge.builder().id(db.badge1.getId()).name(db.badge1.getName()).build();
+		badge = Badge.builder().id(db.getBadge1().getId()).name(db.getBadge1().getName()).build();
 	}
 
 	@Test

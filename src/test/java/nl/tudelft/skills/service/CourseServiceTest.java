@@ -157,7 +157,7 @@ public class CourseServiceTest {
 
 	@Test
 	public void createSCEditionWhenNoneExists() {
-		Long courseId = db.getNextId();
+		Long courseId = courseRepository.findAll().stream().mapToLong(SCCourse::getId).max().orElse(0) + 1L;
 		assertThat(courseRepository.findById(courseId)).isNotPresent();
 
 		SCCourse course = courseService.getOrCreateSCCourse(courseId);

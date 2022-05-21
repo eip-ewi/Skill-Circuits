@@ -57,6 +57,12 @@ import org.springframework.stereotype.Service;
 public class TestDatabaseLoader {
 
 	/**
+	 * ID constants.
+	 */
+	private final Long COURSE_ID = 30L;
+	private final Long EDITION_ID = 69L;
+
+	/**
 	 * Repositories.
 	 */
 	@Autowired
@@ -79,86 +85,85 @@ public class TestDatabaseLoader {
 	private InventoryRepository inventoryRepository;
 	@Autowired
 	private PathRepository pathRepository;
-
 	@Autowired
 	private CheckpointRepository checkpointRepository;
 
-	public Badge badge1;
-	public Badge badge2;
-
 	/**
-	 * Used to simulate sequential IDs as done by the @GeneratedValue annotation.
+	 * Test models.
 	 */
-	private long currentId = 0L;
+	private SCCourse courseRL = SCCourse.builder().build();
 
-	private SCCourse scCourse;
-	private SCEdition editionRL;
-	public SCModule moduleProofTechniques;
-	private SCPerson person;
+	private SCEdition editionRL2021 = SCEdition.builder().build();
 
-	public SCEdition editionRL2021 = SCEdition.builder().id(this.getNextId()).build();
-
-	public SCModule moduleProofTechniques = SCModule.builder().id(this.getNextId()).name("Proof Techniques")
+	private SCModule moduleProofTechniques = SCModule.builder().name("Proof Techniques")
 			.build();
 
-	public Submodule submoduleLogicBasics = Submodule.builder().id(this.getNextId()).name("Logic Basics")
+	private Submodule submoduleLogicBasics = Submodule.builder().name("Logic Basics")
 			.row(0).column(0).build();
-	public Submodule submoduleGeneralisation = Submodule.builder().id(this.getNextId())
+	private Submodule submoduleGeneralisation = Submodule.builder()
 			.name("Generalisation").row(1).column(0).build();
-	public Submodule submoduleCases = Submodule.builder().id(this.getNextId()).name("Cases").row(0)
+	private Submodule submoduleCases = Submodule.builder().name("Cases").row(0)
 			.column(1).build();
-	public Submodule submoduleContradiction = Submodule.builder().id(this.getNextId()).name("Contradiction")
+	private Submodule submoduleContradiction = Submodule.builder().name("Contradiction")
 			.row(1).column(1).build();
-	public Submodule submoduleContrapositive = Submodule.builder().id(this.getNextId())
+	private Submodule submoduleContrapositive = Submodule.builder()
 			.name("Contrapositive").row(0).column(2).build();
-	public Submodule submoduleInduction = Submodule.builder().id(this.getNextId()).name("Induction").row(1)
+	private Submodule submoduleInduction = Submodule.builder().name("Induction").row(1)
 			.column(2).build();
 
-	public Checkpoint checkpointLectureOne = Checkpoint.builder().id(this.getNextId()).name("Lecture 1")
+	private Checkpoint checkpointLectureOne = Checkpoint.builder().name("Lecture 1")
 			.deadline((LocalDateTime.of(LocalDate.ofYearDay(2022, 42), LocalTime.MIDNIGHT))).build();
-	public Checkpoint checkpointLectureTwo = Checkpoint.builder().id(this.getNextId()).name("Lecture 2")
+	private Checkpoint checkpointLectureTwo = Checkpoint.builder().name("Lecture 2")
 			.deadline((LocalDateTime.of(LocalDate.ofYearDay(2022, 49), LocalTime.MIDNIGHT))).build();
 
-	public Skill skillImplication = Skill.builder().id(this.getNextId()).name("Implication").row(0)
+	private Skill skillImplication = Skill.builder().name("Implication").row(0)
 			.column(0).build();
-	public Skill skillNegation = Skill.builder().id(this.getNextId()).name("Negation").row(0).column(2)
+	private Skill skillNegation = Skill.builder().name("Negation").row(0).column(2)
 			.build();
-	public Skill skillVariables = Skill.builder().id(this.getNextId()).name("Variables").row(0).column(4)
+	private Skill skillVariables = Skill.builder().name("Variables").row(0).column(4)
 			.build();
-	public Skill skillProofOutline = Skill.builder().id(this.getNextId()).name("Proof Outline").row(1)
+	private Skill skillProofOutline = Skill.builder().name("Proof Outline").row(1)
 			.column(3).build();
-	public Skill skillAssumption = Skill.builder().id(this.getNextId()).name("Assumption").row(1).column(1)
+	private Skill skillAssumption = Skill.builder().name("Assumption").row(1).column(1)
 			.build();
-	public Skill skillGeneralisationPractice = Skill.builder().id(this.getNextId())
+	private Skill skillGeneralisationPractice = Skill.builder()
 			.name("Generalisation Practice").row(2).column(3).build();
-	public Skill skillDividingIntoCases = Skill.builder().id(this.getNextId()).name("Dividing into Cases")
+	private Skill skillDividingIntoCases = Skill.builder().name("Dividing into Cases")
 			.row(2).column(1).build();
-	public Skill skillCasesPractice = Skill.builder().id(this.getNextId()).name("Cases Practice").row(3)
+	private Skill skillCasesPractice = Skill.builder().name("Cases Practice").row(3)
 			.column(2).build();
-	public Skill skillContradictionPractice = Skill.builder().id(this.getNextId())
+	private Skill skillContradictionPractice = Skill.builder()
 			.name("Contradiction Practice").row(3).column(3).build();
-	public Skill skillNegateImplications = Skill.builder().id(this.getNextId()).name("Negate Implications")
+	private Skill skillNegateImplications = Skill.builder().name("Negate Implications")
 			.row(4).column(1).build();
-	public Skill skillContrapositivePractice = Skill.builder().id(this.getNextId())
+	private Skill skillContrapositivePractice = Skill.builder()
 			.name("Contrapositive Practice").row(5).column(1).build();
-	public Skill skillTransitiveProperty = Skill.builder().id(this.getNextId()).name("Transitive Property")
+	private Skill skillTransitiveProperty = Skill.builder().name("Transitive Property")
 			.row(3).column(0).build();
-	public Skill skillInductionPractice = Skill.builder().id(this.getNextId()).name("Induction Practice")
+	private Skill skillInductionPractice = Skill.builder().name("Induction Practice")
 			.row(6).column(2).build();
 
-	public Task taskRead12 = Task.builder().id(this.getNextId()).name("Read chapter 1.2").build();
-	public Task taskDo12ae = Task.builder().id(this.getNextId()).name("Do exercise 1.2a-e").build();
-	public Task taskRead11 = Task.builder().id(this.getNextId()).name("Read chapter 1.1").build();
-	public Task taskDo11ad = Task.builder().id(this.getNextId()).name("Do exercise 1.1a-d").build();
-	public Task taskRead10 = Task.builder().id(this.getNextId()).name("Read chapter 1.0").build();
-	public Task taskDo10a = Task.builder().id(this.getNextId()).name("Do exercise 1.0a").build();
+	private Task taskRead12 = Task.builder().name("Read chapter 1.2").time(1).build();
+	private Task taskDo12ae = Task.builder().name("Do exercise 1.2a-e").time(3).build();
+	private Task taskRead11 = Task.builder().name("Read chapter 1.1").time(5).build();
+	private Task taskDo11ad = Task.builder().name("Do exercise 1.1a-d").time(7).build();
+	private Task taskRead10 = Task.builder().name("Read chapter 1.0").time(13).build();
+	private Task taskDo10a = Task.builder().name("Do exercise 1.0a").time(20).build();
 
-	public Path explorerRL = Path.builder().id(this.getNextId()).name("Explorer").build();
-	public Path pathfinderRL = Path.builder().id(this.getNextId()).name("Pathfinder").build();
-	public Path mountainClimberRL = Path.builder().id(this.getNextId()).name("Mountain Climber").build();
+	private Path explorerRL = Path.builder().name("Explorer").build();
+	private Path pathfinderRL = Path.builder().name("Pathfinder").build();
+	private Path mountainClimberRL = Path.builder().name("Mountain Climber").build();
 
-	public Inventory inventory;
-	public SCPerson person = SCPerson.builder().id(TestUserDetailsService.id).build();
+	private Badge badge1 = Badge.builder().name("Badge 1").inventories(new HashSet<>()).build();
+	private Badge badge2 = Badge.builder().name("Badge 2").inventories(new HashSet<>()).build();
+
+	private Inventory inventory = Inventory.builder().build();
+
+	private SCPerson person = SCPerson.builder().id(TestUserDetailsService.id).build();
+
+	public SCCourse getCourseRL() {
+		return courseRepository.findByIdOrThrow(courseRL.getId());
+	}
 
 	public Checkpoint checkpointLectureOne;
 	public Checkpoint checkpointLectureTwo;
@@ -171,12 +176,140 @@ public class TestDatabaseLoader {
 		return moduleRepository.findByIdOrThrow(moduleProofTechniques.getId());
 	}
 
-	public SCPerson getPerson() {
-		return personRepository.findByIdOrThrow(person.getId());
+	public Submodule getSubmoduleLogicBasics() {
+		return submoduleRepository.findByIdOrThrow(submoduleLogicBasics.getId());
+	}
+
+	public Submodule getSubmoduleGeneralisation() {
+		return submoduleRepository.findByIdOrThrow(submoduleGeneralisation.getId());
+	}
+
+	public Submodule getSubmoduleCases() {
+		return submoduleRepository.findByIdOrThrow(submoduleCases.getId());
+	}
+
+	public Submodule getSubmoduleContradiction() {
+		return submoduleRepository.findByIdOrThrow(submoduleContradiction.getId());
+	}
+
+	public Submodule getSubmoduleContrapositive() {
+		return submoduleRepository.findByIdOrThrow(submoduleContrapositive.getId());
+	}
+
+	public Submodule getSubmoduleInduction() {
+		return submoduleRepository.findByIdOrThrow(submoduleInduction.getId());
+	}
+
+	public Checkpoint getCheckpointLectureOne() {
+		return checkpointRepository.findByIdOrThrow(checkpointLectureOne.getId());
+	}
+
+	public Checkpoint getCheckpointLectureTwo() {
+		return checkpointRepository.findByIdOrThrow(checkpointLectureTwo.getId());
+	}
+
+	public Skill getSkillImplication() {
+		return skillRepository.findByIdOrThrow(skillImplication.getId());
+	}
+
+	public Skill getSkillNegation() {
+		return skillRepository.findByIdOrThrow(skillNegation.getId());
+	}
+
+	public Skill getSkillVariables() {
+		return skillRepository.findByIdOrThrow(skillVariables.getId());
+	}
+
+	public Skill getSkillProofOutline() {
+		return skillRepository.findByIdOrThrow(skillProofOutline.getId());
+	}
+
+	public Skill getSkillAssumption() {
+		return skillRepository.findByIdOrThrow(skillAssumption.getId());
+	}
+
+	public Skill getSkillGeneralisationPractice() {
+		return skillRepository.findByIdOrThrow(skillGeneralisationPractice.getId());
+	}
+
+	public Skill getSkillDividingIntoCases() {
+		return skillRepository.findByIdOrThrow(skillDividingIntoCases.getId());
+	}
+
+	public Skill getSkillCasesPractice() {
+		return skillRepository.findByIdOrThrow(skillCasesPractice.getId());
+	}
+
+	public Skill getSkillContradictionPractice() {
+		return skillRepository.findByIdOrThrow(skillContradictionPractice.getId());
+	}
+
+	public Skill getSkillNegateImplications() {
+		return skillRepository.findByIdOrThrow(skillNegateImplications.getId());
+	}
+
+	public Skill getSkillContrapositivePractice() {
+		return skillRepository.findByIdOrThrow(skillContrapositivePractice.getId());
+	}
+
+	public Skill getSkillTransitiveProperty() {
+		return skillRepository.findByIdOrThrow(skillTransitiveProperty.getId());
+	}
+
+	public Skill getSkillInductionPractice() {
+		return skillRepository.findByIdOrThrow(skillInductionPractice.getId());
+	}
+
+	public Task getTaskRead12() {
+		return taskRepository.findByIdOrThrow(taskRead12.getId());
+	}
+
+	public Task getTaskDo12ae() {
+		return taskRepository.findByIdOrThrow(taskDo12ae.getId());
+	}
+
+	public Task getTaskRead11() {
+		return taskRepository.findByIdOrThrow(taskRead11.getId());
+	}
+
+	public Task getTaskDo11ad() {
+		return taskRepository.findByIdOrThrow(taskDo11ad.getId());
+	}
+
+	public Task getTaskRead10() {
+		return taskRepository.findByIdOrThrow(taskRead10.getId());
+	}
+
+	public Task getTaskDo10a() {
+		return taskRepository.findByIdOrThrow(taskDo10a.getId());
+	}
+
+	public Path getExplorerRL() {
+		return pathRepository.findByIdOrThrow(explorerRL.getId());
+	}
+
+	public Path getPathfinderRL() {
+		return pathRepository.findByIdOrThrow(pathfinderRL.getId());
+	}
+
+	public Path getMountainClimberRL() {
+		return pathRepository.findByIdOrThrow(mountainClimberRL.getId());
+	}
+
+	public Badge getBadge1() {
+		return badgeRepository.findByIdOrThrow(badge1.getId());
+	}
+
+	public Badge getBadge2() {
+		return badgeRepository.findByIdOrThrow(badge2.getId());
 	}
 
 	public Inventory getInventory() {
 		return inventoryRepository.findByIdOrThrow(inventory.getId());
+	}
+
+	public SCPerson getPerson() {
+		return personRepository.findByIdOrThrow(person.getId());
 	}
 
 	@PostConstruct
@@ -195,10 +328,12 @@ public class TestDatabaseLoader {
 	}
 
 	private void initCourse() {
+		courseRL.setId(COURSE_ID);
 		courseRL = courseRepository.save(courseRL);
 	}
 
 	private void initEdition() {
+		editionRL2021.setId(EDITION_ID);
 		editionRL2021 = editionRepository.save(editionRL2021);
 	}
 
@@ -319,19 +454,12 @@ public class TestDatabaseLoader {
 	}
 
 	private void initInventory() {
-		inventory = inventoryRepository.save(Inventory.builder().personId(person.getId()).build());
-	}
-
-	public long getNextId() {
-		currentId++;
-
-		return currentId;
+		inventory.setPersonId(this.getPerson().getId());
+		inventory = inventoryRepository.save(inventory);
 	}
 
 	private void initBadges() {
-		badge1 = badgeRepository.save(Badge.builder().name("Badge 1").inventories(new HashSet<>()).build());
-		badge2 = badgeRepository.save(Badge.builder().name("Badge 2").inventories(new HashSet<>()).build());
-		System.out.println(badge1.getId());
+		badge1 = badgeRepository.save(badge1);
+		badge2 = badgeRepository.save(badge2);
 	}
-
 }

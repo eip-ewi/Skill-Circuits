@@ -25,7 +25,7 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
 @NoRepositoryBean
 public interface InventoryItemBaseRepository<T extends InventoryItem> extends JpaRepository<T, Long> {
-	default InventoryItem findByIdOrThrow(Long id) {
+	default T findByIdOrThrow(Long id) {
 		return findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Item not found: " + id));
 	}

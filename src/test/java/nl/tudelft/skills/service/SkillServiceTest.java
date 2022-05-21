@@ -48,7 +48,7 @@ public class SkillServiceTest {
 
 	@Test
 	public void deleteSkill() {
-		Long id = db.skillVariables.getId();
+		Long id = db.getSkillVariables().getId();
 		skillService.deleteSkill(id);
 		assertThat(skillRepository.existsById(id)).isFalse();
 	}
