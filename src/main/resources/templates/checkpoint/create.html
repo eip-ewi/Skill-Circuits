@@ -44,12 +44,6 @@
                     type="hidden"
                     th:value="${circuit.id}" />
                 <input id="create-checkpoint-skills" name="skillIds" type="hidden" hidden />
-                <input
-                    id="create-checkpoint-deadline"
-                    name="deadline"
-                    type="hidden"
-                    th:value="${#dates.formatISO(#dates.createNow())}"
-                    hidden />
                 <th:block
                     layout:replace="components/select_or_new :: select('create-checkpoint-name', 'name')">
                     <th:block layout:fragment="select-options">
@@ -61,6 +55,12 @@
                             th:data-deadline="${checkpoint.deadline}"></option>
                     </th:block>
                 </th:block>
+                <input
+                        id="create-checkpoint-deadline"
+                        name="deadline"
+                        type="datetime-local"
+                        th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')+'T'+#dates.format(#dates.createNow(), 'HH:mm')}"
+                />
 
                 <button
                     type="button"
@@ -181,6 +181,16 @@
                 $(".checkpoint__create").removeClass("hidden");
                 $("#create-checkpoint-wrapper").append($("#create-checkpoint"));
             });
+
+            $('#create-checkpoint-name-select').change(function () {
+                const checkpointId = $("#create-checkpoint-name-select option:selected").val();
+                if (checkpointId == "new") {
+                    $("#create-checkpoint-deadline").prop("type", "datetime-local");
+                } else {
+                    $("#create-checkpoint-deadline").prop("type", "hidden");
+                }
+            });
+
             $("#create-checkpoint-form").submit(function (event) {
                 event.preventDefault();
                 const checkpointId = $("#create-checkpoint-name-select option:selected").val();
