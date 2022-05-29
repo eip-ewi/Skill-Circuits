@@ -17,13 +17,18 @@
  */
 package nl.tudelft.skills.controller;
 
+import javax.validation.Valid;
+
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.SubmoduleCreateDTO;
 import nl.tudelft.skills.dto.patch.SubmodulePatchDTO;
 import nl.tudelft.skills.dto.patch.SubmodulePositionPatchDTO;
+import nl.tudelft.skills.dto.view.edition.EditionLevelEditionViewDTO;
+import nl.tudelft.skills.dto.view.edition.EditionLevelModuleViewDTO;
 import nl.tudelft.skills.dto.view.edition.EditionLevelSubmoduleViewDTO;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Submodule;
+import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.SubmoduleRepository;
 import nl.tudelft.skills.service.SkillService;
 
@@ -40,11 +45,14 @@ import org.springframework.web.bind.annotation.*;
 public class SubmoduleController {
 
 	private final SubmoduleRepository submoduleRepository;
+	private final ModuleRepository moduleRepository;
 	private final SkillService skillService;
 
 	@Autowired
-	public SubmoduleController(SubmoduleRepository submoduleRepository, SkillService skillService) {
+	public SubmoduleController(SubmoduleRepository submoduleRepository, ModuleRepository moduleRepository,
+			SkillService skillService) {
 		this.submoduleRepository = submoduleRepository;
+		this.moduleRepository = moduleRepository;
 		this.skillService = skillService;
 	}
 
@@ -59,9 +67,17 @@ public class SubmoduleController {
 	@PreAuthorize("@authorisationService.canCreateSubmodule(#create.module.id)")
 	public String createSubmodule(SubmoduleCreateDTO create, Model model) {
 		Submodule submodule = submoduleRepository.save(create.apply());
+		EditionLevelEditionViewDTO circuit = EditionLevelEditionViewDTO.builder()
+				.id(submodule.getModule().getEdition().getId())
+				.modules(moduleRepository.findAllByEditionId(submodule.getModule().getEdition().getId())
+						.stream()
+						.map(m -> EditionLevelModuleViewDTO.builder().id(m.getId()).name(m.getName()).build())
+						.toList())
+				.build();
+
 		model.addAttribute("block", View.convert(submodule, EditionLevelSubmoduleViewDTO.class));
 		model.addAttribute("group", submodule.getModule());
-		model.addAttribute("circuit", submodule.getModule().getEdition());
+		model.addAttribute("circuit", circuit);
 		model.addAttribute("canEdit", true);
 		model.addAttribute("canDelete", true);
 		model.addAttribute("groupType", "module");
@@ -91,11 +107,30 @@ public class SubmoduleController {
 	 * @return       Empty 200 response
 	 */
 	@PatchMapping
+	@Transactional
 	@PreAuthorize("@authorisationService.canEditSubmodule(#patch.id)")
-	public ResponseEntity<Void> patchSubmodule(SubmodulePatchDTO patch) {
+	public String patchSubmodule(@Valid @RequestBody SubmodulePatchDTO patch, Model model) {
 		Submodule submodule = submoduleRepository.findByIdOrThrow(patch.getId());
 		submoduleRepository.save(patch.apply(submodule));
-		return ResponseEntity.ok().build();
+		patch.getRemovedItems().forEach(skillService::deleteSkill);
+
+		EditionLevelEditionViewDTO circuit = EditionLevelEditionViewDTO.builder()
+				.id(submodule.getModule().getEdition().getId())
+				.modules(moduleRepository.findAllByEditionId(submodule.getModule().getEdition().getId())
+						.stream()
+						.map(m -> EditionLevelModuleViewDTO.builder().id(m.getId()).name(m.getName()).build())
+						.toList())
+				.build();
+
+		model.addAttribute("level", "edition");
+		model.addAttribute("groupType", "module");
+		model.addAttribute("block", View.convert(submodule, EditionLevelSubmoduleViewDTO.class));
+		model.addAttribute("group", submodule.getModule());
+		model.addAttribute("circuit", circuit);
+		model.addAttribute("canEdit", true);
+		model.addAttribute("canDelete", true);
+
+		return "block/view";
 	}
 
 	/**

@@ -17,13 +17,19 @@
  */
 package nl.tudelft.skills.controller;
 
+import javax.validation.Valid;
+
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.SkillCreateDTO;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
+import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
+import nl.tudelft.skills.dto.view.module.ModuleLevelSubmoduleViewDTO;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.SkillRepository;
+import nl.tudelft.skills.repository.SubmoduleRepository;
+import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.service.SkillService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,11 +45,17 @@ import org.springframework.web.bind.annotation.*;
 public class SkillController {
 
 	private final SkillRepository skillRepository;
+	private final TaskRepository taskRepository;
+	private final SubmoduleRepository submoduleRepository;
 	private final SkillService skillService;
 
 	@Autowired
-	public SkillController(SkillRepository skillRepository, SkillService skillService) {
+	public SkillController(SkillRepository skillRepository, TaskRepository taskRepository,
+			SubmoduleRepository submoduleRepository,
+			SkillService skillService) {
 		this.skillRepository = skillRepository;
+		this.taskRepository = taskRepository;
+		this.submoduleRepository = submoduleRepository;
 		this.skillService = skillService;
 	}
 
@@ -58,10 +70,19 @@ public class SkillController {
 	@PreAuthorize("@authorisationService.canCreateSkill(#create.submodule.id)")
 	public String createSkill(SkillCreateDTO create, Model model) {
 		Skill skill = skillRepository.save(create.apply());
+		ModuleLevelModuleViewDTO circuit = ModuleLevelModuleViewDTO.builder()
+				.id(skill.getSubmodule().getModule().getId())
+				.submodules(submoduleRepository.findAllByModuleId(skill.getSubmodule().getModule().getId())
+						.stream()
+						.map(s -> ModuleLevelSubmoduleViewDTO.builder().id(s.getId()).name(s.getName())
+								.build())
+						.toList())
+				.build();
+
 		model.addAttribute("level", "module");
 		model.addAttribute("block", View.convert(skill, ModuleLevelSkillViewDTO.class));
 		model.addAttribute("group", skill.getSubmodule());
-		model.addAttribute("circuit", skill.getSubmodule().getModule());
+		model.addAttribute("circuit", circuit);
 		model.addAttribute("canEdit", true);
 		model.addAttribute("canDelete", true);
 		return "block/view";
@@ -85,16 +106,35 @@ public class SkillController {
 	/**
 	 * Patches a skill.
 	 *
-	 * @param  patch The patch containing the new data
-	 * @return       Empty 200 response
+	 * @param  patch The patch containing the new data in JSON format
+	 * @return       The HTML for the updated skill block
 	 */
 	@PatchMapping
 	@Transactional
 	@PreAuthorize("@authorisationService.canEditSkill(#patch.id)")
-	public ResponseEntity<Void> patchSkill(SkillPatchDTO patch) {
+	public String patchSkill(@Valid @RequestBody SkillPatchDTO patch, Model model) {
 		Skill skill = skillRepository.findByIdOrThrow(patch.getId());
 		skillRepository.save(patch.apply(skill));
-		return ResponseEntity.ok().build();
+		taskRepository.deleteAllByIdIn(patch.getRemovedItems());
+
+		ModuleLevelModuleViewDTO circuit = ModuleLevelModuleViewDTO.builder()
+				.id(skill.getSubmodule().getModule().getId())
+				.submodules(submoduleRepository.findAllByModuleId(skill.getSubmodule().getModule().getId())
+						.stream()
+						.map(s -> ModuleLevelSubmoduleViewDTO.builder().id(s.getId()).name(s.getName())
+								.build())
+						.toList())
+				.build();
+
+		model.addAttribute("level", "module");
+		model.addAttribute("groupType", "submodule");
+		model.addAttribute("block", View.convert(skill, ModuleLevelSkillViewDTO.class));
+		model.addAttribute("group", skill.getSubmodule());
+		model.addAttribute("circuit", circuit);
+		model.addAttribute("canEdit", true);
+		model.addAttribute("canDelete", true);
+
+		return "block/view";
 	}
 
 	/**

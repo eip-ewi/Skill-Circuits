@@ -1,6 +1,8 @@
 @use "../mixins" as *;
 
 .items {
+    display: flex;
+    flex-direction: column-reverse; /* Fix for z-index on edit elements not working */
     list-style-type: none;
 }
 
@@ -8,6 +10,12 @@
     align-items: center;
     display: flex;
     gap: 0.5rem;
+
+    &[data-delete="true"] {
+        & > :not(.item__buttons) {
+            opacity: 30%;
+        }
+    }
 
     &__button {
         @include button(
@@ -20,6 +28,17 @@
         );
         align-self: stretch;
         min-width: 2.5rem;
+
+        &__edit {
+            background-color: var(--primary-dark);
+            border: 1px solid var(--primary-light);
+            color: var(--primary-light);
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+            align-self: stretch;
+            max-width: 2.5rem;
+            text-align: center;
+        }
     }
 
     &.completed {
@@ -57,6 +76,11 @@
                 color: var(--primary-green);
             }
         }
+    }
+
+    &__icon__edit {
+        min-width: 20px; /* Size of largest icon */
+        text-align: center;
     }
 
     &__form {

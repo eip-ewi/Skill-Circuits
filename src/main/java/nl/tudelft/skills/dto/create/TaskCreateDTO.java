@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.dto.create;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -24,6 +25,7 @@ import lombok.*;
 import nl.tudelft.librador.dto.create.Create;
 import nl.tudelft.skills.dto.id.SkillIdDTO;
 import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.TaskType;
 
 @Data
 @Builder
@@ -36,6 +38,11 @@ public class TaskCreateDTO extends Create<Task> {
 	private String name;
 	@NotNull
 	private SkillIdDTO skill;
+	@NotNull
+	private TaskType type;
+	@NotNull
+	@Min(0)
+	private Integer time;
 	private String link;
 
 	@Override

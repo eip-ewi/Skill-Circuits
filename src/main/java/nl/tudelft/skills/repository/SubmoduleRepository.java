@@ -17,6 +17,8 @@
  */
 package nl.tudelft.skills.repository;
 
+import java.util.List;
+
 import nl.tudelft.skills.model.Submodule;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -28,5 +30,7 @@ public interface SubmoduleRepository extends JpaRepository<Submodule, Long> {
 		return findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Submodule was not found: " + id));
 	}
+
+	List<Submodule> findAllByModuleId(Long moduleId);
 
 }

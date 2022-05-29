@@ -22,120 +22,158 @@
     lang="en"
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-    <div th:if="${canEdit}" layout:fragment="form" class="hidden" id="edit-block-wrapper">
-        <div id="edit-block">
-            <form id="edit-block-form" class="edit block__form">
-                <input id="edit-block-id" name="id" type="hidden" />
+    <form th:if="${canEdit}" layout:fragment="header" data-edit="only" class="block__header">
+        <input name="id" th:value="${block.id}" type="hidden" />
+        <input
+            th:data-initial="${block.name}"
+            class="font_size_bigger font_bold"
+            data-edit="only"
+            type="text"
+            aria-label="Name"
+            name="name"
+            th:value="${block.name}"
+            style="max-width: 20rem"
+            required />
+        <select
+            th:data-initial="${group.id}"
+            class="selectbox font_size_regular"
+            data-edit="only"
+            id="edit-block-group"
+            aria-label="Group"
+            th:name="|${groupType}.id|"
+            required>
+            <option
+                data-edit="only"
+                th:each="g : ${circuit.groups}"
+                th:selected="${g.id == group.id}"
+                th:value="${g.id}"
+                th:text="${g.name}"></option>
+        </select>
 
-                <label for="edit-block-name">Name</label>
-                <input id="edit-block-name" name="name" type="text" required />
-
-                <label for="edit-block-group" th:text="#{|level.${groupType}|}"></label>
-                <select id="edit-block-group" th:name="|${groupType}.id|" required>
-                    <option
-                        th:each="group : ${circuit.groups}"
-                        th:value="${group.id}"
-                        th:text="${group.name}"></option>
-                </select>
-
-                <div th:if="${level == 'module'}">
-                    <label for="edit-skill-checkpoint">Checkpoint</label>
-                    <select id="edit-skill-checkpoint" name="checkpoint.id" required>
-                        <option
-                            th:each="checkpoint : ${module.checkpoints}"
-                            th:value="${checkpoint.id}"
-                            th:text="${checkpoint.name}"></option>
-                    </select>
-                    <div>
-                        <label for="edit-essential-checkbox">Essential</label>
-                        <div class="info_icon">
-                            <sup class="fa-solid fa-info-circle"></sup>
-                            <span class="info_icon__text">
-                                Mark optional materials as non-essential.
-                            </span>
-                        </div>
-                    </div>
-                    <input
-                        style="max-width: 20px"
-                        type="checkbox"
-                        id="edit-essential-checkbox"
-                        name="essential"
-                        value="true"
-                        checked />
-                </div>
-
-                <div class="block__form__buttons">
-                    <button type="button" id="edit-block-cancel">Cancel</button>
-                    <button type="submit">Edit</button>
-                </div>
-            </form>
+        <div data-edit="only" th:if="${level == 'module'}">
+            <input
+                data-edit="only"
+                type="checkbox"
+                th:id="|essential-checkbox-${block.id}|"
+                name="essential"
+                value="true"
+                th:checked="${block.essential}" />
+            <span data-edit="only">
+                <label data-edit="only" th:for="|essential-checkbox-${block.id}|">Essential</label>
+                <span data-edit="only" class="info_icon">
+                    <sup data-edit="only" class="fa-solid fa-info-circle"></sup>
+                    <span data-edit="only" class="info_icon__text">
+                        Mark optional materials as non-essential.
+                    </span>
+                </span>
+            </span>
         </div>
-    </div>
+    </form>
 
     <script th:if="${canEdit}" layout:fragment="script">
         function editBlock() {
-            $(".block__name > *").removeClass("hidden");
-            $(".block__group__name").removeClass("hidden");
-            let blockId = $(this).data("block");
-            let blockName = $(`#block-${blockId}-name`);
-            $("#edit-block-id").val(blockId);
-            $("#edit-block-name").val(blockName.text());
+            const block = $(this).parent().parent();
+            const current = block.data("editing") === true;
+            block.data("editing", !current);
+            block.attr("data-editing", !current);
+            block.attr("draggable", current);
 
-            let block = $(`#block-${blockId}`);
-            $("#edit-block-group").val(block.data("group"));
-            $(`#block-${blockId}-header`).append($("#edit-block"));
-            blockName.addClass("hidden");
-            $(`#block-${blockId}-group`).addClass("hidden");
+            block.find(".item > a").each((i, link) => {
+                $(link).after($(link).children());
+            });
+        }
 
-            if (blockType === "skill") {
-                $("#edit-skill-checkpoint").val(block.data("checkpoint"));
-                $("#edit-essential-checkbox").prop("checked", block.data("essential"));
+        function cancelEditBlock() {
+            const block = $(this).parent().parent();
+            block.data("editing", false);
+            block.attr("data-editing", false);
+            block.attr("draggable", true);
+
+            block.find(".item[data-new='true']").remove();
+            $(`#${block.attr("id")} input:not([type="hidden"])`).each((i, field) =>
+                $(field).val($(field).data("initial"))
+            );
+            $(`#${block.attr("id")} select`).each((i, field) =>
+                $(field).val($(field).data("initial")).change()
+            );
+
+            block.find(".item > a").append(block.find("a + .item__content"));
+        }
+
+        function saveEdit() {
+            const block = $(this).parent().parent();
+            const data = {};
+            block
+                .children(".block__header[data-edit='only']")
+                .serializeArray()
+                .forEach(field => {
+                    if (field.name.includes(".")) {
+                        data[field.name.split(".")[0]] = {};
+                        data[field.name.split(".")[0]][field.name.split(".")[1]] = field.value;
+                    } else data[field.name] = field.value;
+                });
+
+            function serializeItem(item) {
+                const data = {};
+                item.find("input, select").each((i, input) => {
+                    const name = $(input).attr("name");
+                    const value = $(input).val();
+                    if (name.includes(".")) {
+                        data[name.split(".")[0]] = {};
+                        data[name.split(".")[0]][name.split(".")[1]] = value;
+                    } else data[name] = value;
+                });
+                data["new"] = item.data("new") === true;
+                data["delete"] = item.data("delete") === true;
+                return data;
             }
+
+            const items = block
+                .children(".items")
+                .children(".item")
+                .map((i, item) => serializeItem($(item)))
+                .toArray();
+            data["items"] = items.filter(item => !item.new && !item.delete);
+            data["newItems"] = items.filter(item => item.new);
+            data["removedItems"] = items.filter(item => item.delete).map(item => item.id);
+
+            $.ajax({
+                url: `/${blockType}`,
+                method: "PATCH",
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: html => {
+                    let element = $($("<div/>").append(html).children()[0]);
+                    block.remove();
+                    $("#circuit").append(element);
+
+                    element.find(".block__edit").click(editBlock);
+                    element.find(".block__edit__cancel").click(cancelEditBlock);
+                    element.find(".block__edit__save").click(saveEdit);
+                    element.find(".block__delete").click(deleteBlock);
+
+                    if (blockType === "skill") {
+                        element.find(".block__connect.from > button").click(connectFrom);
+                        element.find(".block__connect.to > button").click(connectTo);
+                    }
+
+                    let groupName = element.find(".block__group__name");
+                    groupName.mouseenter(mouseEnterGroup);
+                    groupName.mouseleave(mouseLeaveGroup);
+
+                    if (blockType === "skill") {
+                        element.find(".item__create").click(createItem);
+                        element.find(".select__items button").click(selectItemIcon);
+                    }
+                    element.find(".item__delete").click(deleteItem);
+                },
+            });
         }
 
         document.addEventListener("DOMContentLoaded", function () {
-            $("#edit-block-form").submit(function (event) {
-                event.preventDefault();
-                $.ajax({
-                    type: "PATCH",
-                    url: `/${blockType}`,
-                    data: $("#edit-block-form").serialize(),
-                    success: () => {
-                        let blockId = $("#edit-block-id").val();
-                        let blockName = $(`#block-${blockId}-name`);
-                        $("#edit-block-wrapper").append($("#edit-block"));
-                        blockName.text($("#edit-block-name").val());
-                        blockName.removeClass("hidden");
-                        let group = $("#edit-block-group option:selected");
-                        let block = $(`#block-${blockId}`);
-                        block.attr("data-group", group.val());
-                        block.data("group", group.val());
-                        let blockGroup = $(`#block-${blockId}-group`);
-                        blockGroup.text(group.text());
-                        blockGroup.removeClass("hidden");
-
-                        if (blockType === "skill") {
-                            let essential = $("#edit-essential-checkbox").prop("checked");
-                            block.data("essential", essential);
-                            block.attr("data-essential", essential);
-
-                            let checkpoint = $("#edit-skill-checkpoint option:selected");
-                            block.data("checkpoint", checkpoint.val());
-                            block.attr("data-checkpoint", checkpoint.val());
-                        }
-                        updateCheckpointPositions();
-                    },
-                });
-            });
-
             $(".block__edit").click(editBlock);
-
-            $("#edit-block-cancel").click(function () {
-                let blockId = $("#edit-block-id").val();
-                $("#edit-block-wrapper").append($("#edit-block"));
-                $(`#block-${blockId}-name`).removeClass("hidden");
-                $(`#block-${blockId}-group`).removeClass("hidden");
-            });
+            $(".block__edit__cancel").click(cancelEditBlock);
+            $(".block__edit__save").click(saveEdit);
         });
     </script>
 </html>

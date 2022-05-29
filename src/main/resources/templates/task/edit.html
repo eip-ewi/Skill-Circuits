@@ -1,0 +1,80 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div layout:fragment="icon" th:if="${canEdit}" class="select item__icon__edit" data-edit="only">
+        <span
+            data-edit="only"
+            th:id="|item-${item.id}-icon|"
+            th:class="|select__label fa-solid fa-${item.type.icon}|"></span>
+        <div class="select__items" data-edit="only">
+            <ul data-edit="only">
+                <li
+                    data-edit="only"
+                    th:each="type : ${T(nl.tudelft.skills.model.TaskType).values()}">
+                    <button data-edit="only" th:data-value="${type}" type="button">
+                        <span
+                            data-edit="only"
+                            class="fa-solid"
+                            th:classappend="|fa-${type.icon}|"></span>
+                        <span
+                            data-edit="only"
+                            th:text="#{|task.type.${#strings.toLowerCase(type.name())}|}"></span>
+                    </button>
+                </li>
+            </ul>
+            <select
+                data-edit="only"
+                th:id="|item-${item.id}-type|"
+                name="type"
+                th:data-initial="${item.type}"
+                aria-label="Task type"
+                hidden
+                required>
+                <option
+                    data-edit="only"
+                    th:each="type : ${T(nl.tudelft.skills.model.TaskType).values()}"
+                    th:data-icon="${type.icon}"
+                    th:selected="${item.type == type}"
+                    th:value="${type}"></option>
+            </select>
+        </div>
+    </div>
+
+    <script layout:fragment="script">
+        function selectItemIcon() {
+            $(this)
+                .parent()
+                .parent()
+                .parent()
+                .children("select")
+                .val($(this).data("value"))
+                .change();
+            $(".select__items *").blur();
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            $(".select__items button").click(selectItemIcon);
+        });
+    </script>
+</html>

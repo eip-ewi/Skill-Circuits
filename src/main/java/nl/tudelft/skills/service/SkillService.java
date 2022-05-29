@@ -22,6 +22,7 @@ import nl.tudelft.skills.repository.SkillRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SkillService {
@@ -39,6 +40,7 @@ public class SkillService {
 	 * @param  id The id of the skill
 	 * @return    The deleted skill
 	 */
+	@Transactional
 	public Skill deleteSkill(Long id) {
 		Skill skill = skillRepository.findByIdOrThrow(id);
 		skill.getChildren().forEach(c -> c.getParents().remove(skill));

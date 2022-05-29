@@ -17,6 +17,10 @@
  */
 package nl.tudelft.skills.dto.patch;
 
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -27,6 +31,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import nl.tudelft.librador.dto.patch.Patch;
 import nl.tudelft.skills.dto.id.SCModuleIdDTO;
+import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Submodule;
 
 @Data
@@ -42,6 +47,12 @@ public class SubmodulePatchDTO extends Patch<Submodule> {
 	private String name;
 	@NotNull
 	private SCModuleIdDTO module;
+	@NotNull
+	@Builder.Default
+	private List<SubmoduleLevelSkillPatchDTO> items = new ArrayList<>();
+	@NotNull
+	@Builder.Default
+	private Set<Long> removedItems = new HashSet<>();
 
 	@Override
 	protected void applyOneToOne() {
@@ -50,6 +61,24 @@ public class SubmodulePatchDTO extends Patch<Submodule> {
 	}
 
 	@Override
+	protected void applyOneToMany() {
+		Map<Long, Skill> skills = data.getSkills().stream()
+				.collect(Collectors.toMap(Skill::getId, Function.identity()));
+		items.forEach(p -> p.apply(skills.get(p.getId())));
+
+		data.getSkills().stream().filter(s -> removedItems.contains(s.getId())).toList()
+				.forEach(s -> data.getSkills().remove(s));
+	}
+
+	@Override
 	protected void validate() {
+		Set<Long> skillIds = data.getSkills().stream().map(Skill::getId).collect(Collectors.toSet());
+		if (!skillIds.containsAll(
+				items.stream().map(SubmoduleLevelSkillPatchDTO::getId).collect(Collectors.toSet()))) {
+			errors.rejectValue("items", "itemNotInSubmodule", "Item is not in submodule");
+		}
+		if (!skillIds.containsAll(removedItems)) {
+			errors.rejectValue("removedItems", "itemNotInSubmodule", "Item is not in submodule");
+		}
 	}
 }

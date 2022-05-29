@@ -17,6 +17,10 @@
  */
 package nl.tudelft.skills.dto.patch;
 
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -25,10 +29,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.patch.Patch;
-import nl.tudelft.skills.dto.id.CheckpointIdDTO;
+import nl.tudelft.skills.dto.create.TaskCreateDTO;
 import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
 import nl.tudelft.skills.model.Skill;
+import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.repository.TaskRepository;
 
 @Data
 @Builder
@@ -45,17 +52,48 @@ public class SkillPatchDTO extends Patch<Skill> {
 	@Builder.Default
 	private Boolean essential = false;
 	private SubmoduleIdDTO submodule;
-	private CheckpointIdDTO checkpoint;
+	@NotNull
+	@Builder.Default
+	private List<TaskPatchDTO> items = new ArrayList<>();
+	@NotNull
+	@Builder.Default
+	private List<TaskCreateDTO> newItems = new ArrayList<>();
+	@NotNull
+	@Builder.Default
+	private Set<Long> removedItems = new HashSet<>();
 
 	@Override
 	protected void applyOneToOne() {
 		updateNonNull(name, data::setName);
 		updateNonNull(essential, data::setEssential);
 		updateNonNullId(submodule, data::setSubmodule);
-		updateNonNullId(checkpoint, data::setCheckpoint);
+	}
+
+	@Override
+	protected void applyOneToMany() {
+		Map<Long, Task> tasks = data.getTasks().stream()
+				.collect(Collectors.toMap(Task::getId, Function.identity()));
+		items.forEach(p -> p.apply(tasks.get(p.getId())));
+
+		TaskRepository taskRepository = SpringContext.getBean(TaskRepository.class);
+		data.getTasks().addAll(
+				newItems.stream().map(c -> taskRepository.save(c.apply())).collect(Collectors.toSet()));
+
+		data.getTasks().stream().filter(t -> removedItems.contains(t.getId())).toList()
+				.forEach(t -> data.getTasks().remove(t));
 	}
 
 	@Override
 	protected void validate() {
+		Set<Long> taskIds = data.getTasks().stream().map(Task::getId).collect(Collectors.toSet());
+		if (!newItems.stream().allMatch(t -> Objects.equals(t.getSkill().getId(), id))) {
+			errors.rejectValue("newItems", "itemNotInSkill", "Item is not in skill");
+		}
+		if (!taskIds.containsAll(items.stream().map(TaskPatchDTO::getId).collect(Collectors.toSet()))) {
+			errors.rejectValue("items", "itemNotInSkill", "Item is not in skill");
+		}
+		if (!taskIds.containsAll(removedItems)) {
+			errors.rejectValue("removedItems", "itemNotInSkill", "Item is not in skill");
+		}
 	}
 }

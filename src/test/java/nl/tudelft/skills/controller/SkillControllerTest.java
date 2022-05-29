@@ -27,7 +27,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.dto.id.CheckpointIdDTO;
 import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
@@ -35,6 +34,7 @@ import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.CheckpointRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.SubmoduleRepository;
+import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.service.SkillService;
 
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -59,11 +59,13 @@ public class SkillControllerTest extends ControllerTest {
 	private final CheckpointRepository checkpointRepository;
 
 	@Autowired
-	public SkillControllerTest(SkillRepository skillRepository, SkillService skillService,
-			SubmoduleRepository submoduleRepository, CheckpointRepository checkpointRepository) {
+	public SkillControllerTest(SkillRepository skillRepository, TaskRepository taskRepository,
+			SkillService skillService, SubmoduleRepository submoduleRepository,
+			CheckpointRepository checkpointRepository) {
 		this.submoduleRepository = submoduleRepository;
 		this.checkpointRepository = checkpointRepository;
-		this.skillController = new SkillController(skillRepository, skillService);
+		this.skillController = new SkillController(skillRepository, taskRepository, submoduleRepository,
+				skillService);
 		this.skillRepository = skillRepository;
 	}
 
@@ -99,15 +101,12 @@ public class SkillControllerTest extends ControllerTest {
 				.id(db.getSkillVariables().getId())
 				.name("Updated")
 				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
-				.checkpoint(new CheckpointIdDTO((db.getCheckpointLectureTwo().getId())))
-				.build());
+				.build(), model);
 
 		Skill skill = db.getSkillVariables();
 		assertThat(skill.getName()).isEqualTo("Updated");
 		assertThat(submoduleRepository.findByIdOrThrow(skill.getSubmodule().getId())).isEqualTo(
 				submoduleRepository.findByIdOrThrow(db.getSubmoduleCases().getId()));
-		assertThat(checkpointRepository.findByIdOrThrow(skill.getCheckpoint().getId())).isEqualTo(
-				checkpointRepository.findByIdOrThrow(db.getCheckpointLectureTwo().getId()));
 	}
 
 	@Test

@@ -22,46 +22,22 @@
     lang="en"
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-    <dialog th:if="${canEdit}" layout:fragment="overlay" class="overlay" id="delete-item-overlay">
-        <form id="delete-item-form" class="confirmation">
-            <input id="delete-item-id" name="id" type="hidden" />
-            <input name="page" value="item" type="hidden" />
-
-            <p>
-                Are you sure you want to delete &quot;
-                <span id="delete-item-name"></span>
-                &quot;?
-            </p>
-
-            <div class="confirmation__buttons">
-                <button type="button" onclick="toggleOverlay('delete-item-overlay')">Cancel</button>
-                <button type="submit">Delete</button>
-            </div>
-        </form>
-    </dialog>
-
     <script th:if="${canEdit}" layout:fragment="script">
         function deleteItem() {
-            toggleOverlay("delete-item-overlay");
-            let itemId = $(this).data("item");
-            $("#delete-item-id").val(itemId);
-            $("#delete-item-name").text($(`#item-${itemId}-name`).text());
+            const item = $(this).parent().parent();
+            if (item.data("new")) {
+                item.remove();
+            } else {
+                const del = item.data("delete") !== true;
+                item.data("delete", del);
+                item.attr("data-delete", del);
+                $(`#${item.attr("id")} :is(input)`).prop("disabled", del);
+                $(`#${item.attr("id")} .select`).attr("data-disabled", del);
+            }
         }
 
         document.addEventListener("DOMContentLoaded", function () {
             $(".item__delete").click(deleteItem);
-            $("#delete-item-form").submit(e => {
-                e.preventDefault();
-                $.ajax({
-                    url: "/task",
-                    type: "delete",
-                    data: $("#delete-item-form").serialize(),
-                    success: () => {
-                        $(`#item-${$("#delete-item-id").val()}`).remove();
-                        toggleOverlay("delete-item-overlay");
-                    },
-                });
-            });
         });
     </script>
 </html>
