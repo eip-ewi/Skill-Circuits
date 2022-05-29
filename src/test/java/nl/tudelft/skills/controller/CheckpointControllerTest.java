@@ -125,7 +125,7 @@ public class CheckpointControllerTest extends ControllerTest {
 
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(db.getCheckpointLectureOne().getId());
 		assertThat(checkpoint.getName()).isEqualTo("edited");
-		assertThat(checkpoint.getDeadline()).isEqualTo(LocalDateTime.of(2022,12,21,23,59));
+		assertThat(checkpoint.getDeadline()).isEqualTo(LocalDateTime.of(2022, 12, 21, 23, 59));
 	}
 
 	@Test

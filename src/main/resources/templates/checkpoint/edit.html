@@ -28,7 +28,11 @@
                 <input id="edit-checkpoint-id" name="id" type="hidden" />
 
                 <input id="edit-checkpoint-name" name="name" type="text" required />
-                <input id="edit-checkpoint-deadline" name="deadline" type="datetime-local" required />
+                <input
+                    id="edit-checkpoint-deadline"
+                    name="deadline"
+                    type="datetime-local"
+                    required />
 
                 <button
                     type="button"
@@ -48,7 +52,10 @@
             let itemDeadline = $(`#checkpoint-${checkpointId}-deadline`);
             $("#edit-checkpoint-id").val(checkpointId);
             $("#edit-checkpoint-name").val(itemName.text());
-            const currentDeadline = luxon.DateTime.fromFormat(itemDeadline.text(), "dd-MM-yyyy HH:mm");
+            const currentDeadline = luxon.DateTime.fromFormat(
+                itemDeadline.text(),
+                "dd-MM-yyyy HH:mm"
+            );
             $("#edit-checkpoint-deadline").val(currentDeadline.toFormat("yyyy-MM-dd'T'HH:mm"));
             $(`#checkpoint-${checkpointId}-body`).append($("#edit-checkpoint"));
             checkpointDisplay.addClass("hidden");
@@ -69,7 +76,11 @@
                         $("#edit-checkpoint-wrapper").append($("#edit-checkpoint"));
                         $(`#checkpoint-${checkpointId}-display`).removeClass("hidden");
                         checkpointName.text($("#edit-checkpoint-name").val());
-                        checkpointDeadline.text(luxon.DateTime.fromISO($("#edit-checkpoint-deadline").val()).toFormat("dd-MM-yyyy HH:mm"));
+                        checkpointDeadline.text(
+                            luxon.DateTime.fromISO($("#edit-checkpoint-deadline").val()).toFormat(
+                                "dd-MM-yyyy HH:mm"
+                            )
+                        );
                         $(`#checkpoint-${checkpointId}-buttons`).removeClass("hidden");
                     },
                 });

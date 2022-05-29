@@ -28,12 +28,16 @@
         class="checkpoint"
         layout:fragment="checkpoint">
         <div class="checkpoint__body" th:id="|checkpoint-${checkpoint.id}-body|">
-            <div
-                th:id="|checkpoint-${checkpoint.id}-display|"
-                class="checkpoint__name">
+            <div th:id="|checkpoint-${checkpoint.id}-display|" class="checkpoint__name">
                 <p>
-                    <span th:id="|checkpoint-${checkpoint.id}-name|" th:text="${checkpoint.name}"></span>
-                    (<span th:id="|checkpoint-${checkpoint.id}-deadline|" th:text="${#temporals.format(checkpoint.deadline, 'dd-MM-yyyy HH:mm')}"></span>)
+                    <span
+                        th:id="|checkpoint-${checkpoint.id}-name|"
+                        th:text="${checkpoint.name}"></span>
+                    (
+                    <span
+                        th:id="|checkpoint-${checkpoint.id}-deadline|"
+                        th:text="${#temporals.format(checkpoint.deadline, 'dd-MM-yyyy HH:mm')}"></span>
+                    )
                 </p>
             </div>
             <div

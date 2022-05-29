@@ -17,6 +17,8 @@
  */
 package nl.tudelft.skills.dto.patch;
 
+import java.time.LocalDateTime;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -26,9 +28,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import nl.tudelft.librador.dto.patch.Patch;
 import nl.tudelft.skills.model.Checkpoint;
-import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalDateTime;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Data
 @Builder

@@ -56,11 +56,10 @@
                     </th:block>
                 </th:block>
                 <input
-                        id="create-checkpoint-deadline"
-                        name="deadline"
-                        type="datetime-local"
-                        th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')+'T'+#dates.format(#dates.createNow(), 'HH:mm')}"
-                />
+                    id="create-checkpoint-deadline"
+                    name="deadline"
+                    type="datetime-local"
+                    th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')+'T'+#dates.format(#dates.createNow(), 'HH:mm')}" />
 
                 <button
                     type="button"
@@ -182,7 +181,7 @@
                 $("#create-checkpoint-wrapper").append($("#create-checkpoint"));
             });
 
-            $('#create-checkpoint-name-select').change(function () {
+            $("#create-checkpoint-name-select").change(function () {
                 const checkpointId = $("#create-checkpoint-name-select option:selected").val();
                 if (checkpointId == "new") {
                     $("#create-checkpoint-deadline").prop("type", "datetime-local");
