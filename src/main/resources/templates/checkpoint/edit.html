@@ -45,21 +45,24 @@
 
     <script th:if="${canEdit}" layout:fragment="script">
         function editCheckpoint() {
-            $(".checkpoint__name").removeClass("hidden");
-            let checkpointId = $(this).data("checkpoint");
-            let checkpointDisplay = $(`#checkpoint-${checkpointId}-display`);
-            let itemName = $(`#checkpoint-${checkpointId}-name`);
-            let itemDeadline = $(`#checkpoint-${checkpointId}-deadline`);
+            const checkpointId = $(this).data("checkpoint");
+            const checkpointDisplay = $(`#checkpoint-${checkpointId}-display`);
+            const checkpointNameItem = $(`#checkpoint-${checkpointId}-name`);
+            const checkpointDeadlineItem = $(`#checkpoint-${checkpointId}-deadline`);
+
             $("#edit-checkpoint-id").val(checkpointId);
-            $("#edit-checkpoint-name").val(itemName.text());
+            $("#edit-checkpoint-name").val(checkpointNameItem.text());
             const currentDeadline = luxon.DateTime.fromFormat(
-                itemDeadline.text(),
+                checkpointDeadlineItem.text(),
                 "dd-MM-yyyy HH:mm"
             );
             $("#edit-checkpoint-deadline").val(currentDeadline.toFormat("yyyy-MM-dd'T'HH:mm"));
             $(`#checkpoint-${checkpointId}-body`).append($("#edit-checkpoint"));
+
+            $(".checkpoint__name").removeClass("hidden");
             checkpointDisplay.addClass("hidden");
             $(`#checkpoint-${checkpointId}-buttons`).addClass("hidden");
+
         }
 
         document.addEventListener("DOMContentLoaded", function () {
@@ -70,17 +73,19 @@
                     url: `/checkpoint`,
                     data: $("#edit-checkpoint-form").serialize(),
                     success: () => {
-                        let checkpointId = $("#edit-checkpoint-id").val();
-                        let checkpointName = $(`#checkpoint-${checkpointId}-name`);
-                        let checkpointDeadline = $(`#checkpoint-${checkpointId}-deadline`);
+                        const checkpointId = $("#edit-checkpoint-id").val();
+                        const checkpointName = $(`#checkpoint-${checkpointId}-name`);
+                        const checkpointDeadline = $(`#checkpoint-${checkpointId}-deadline`);
+
                         $("#edit-checkpoint-wrapper").append($("#edit-checkpoint"));
-                        $(`#checkpoint-${checkpointId}-display`).removeClass("hidden");
                         checkpointName.text($("#edit-checkpoint-name").val());
                         checkpointDeadline.text(
                             luxon.DateTime.fromISO($("#edit-checkpoint-deadline").val()).toFormat(
                                 "dd-MM-yyyy HH:mm"
                             )
                         );
+
+                        $(`#checkpoint-${checkpointId}-display`).removeClass("hidden");
                         $(`#checkpoint-${checkpointId}-buttons`).removeClass("hidden");
                     },
                 });
