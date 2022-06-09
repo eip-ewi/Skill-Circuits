@@ -20,8 +20,8 @@ package nl.tudelft.skills.controller;
 import javax.transaction.Transactional;
 
 import nl.tudelft.skills.dto.create.BadgeCreateDTO;
-import nl.tudelft.skills.service.BadgeService;
 
+import nl.tudelft.skills.repository.BadgeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -32,17 +32,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("item/badge")
 public class BadgeController {
-	public BadgeService badgeService;
+	private final BadgeRepository badgeRepository;
 
 	@Autowired
-	public BadgeController(BadgeService badgeService) {
-		this.badgeService = badgeService;
+	public BadgeController(BadgeRepository badgeRepository) {
+		this.badgeRepository = badgeRepository;
 	}
 
 	@PostMapping
 	@Transactional
 	public ResponseEntity<Void> createBadge(@RequestBody BadgeCreateDTO create) {
-		badgeService.createBadge(create.apply());
+		badgeRepository.save(create.apply());
 		return ResponseEntity.ok().build();
 	}
 

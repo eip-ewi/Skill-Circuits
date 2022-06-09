@@ -22,8 +22,9 @@ import static org.mockito.Mockito.verify;
 
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.create.BadgeCreateDTO;
-import nl.tudelft.skills.service.BadgeService;
 
+import nl.tudelft.skills.model.Badge;
+import nl.tudelft.skills.repository.BadgeRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,21 +36,21 @@ import org.springframework.transaction.annotation.Transactional;
 class BadgeControllerTest extends ControllerTest {
 
 	private BadgeController badgeController;
-	private BadgeService badgeService;
+	private BadgeRepository badgeRepository;
 
 	public BadgeControllerTest() {
-		badgeService = mock(BadgeService.class);
-		badgeController = new BadgeController(badgeService);
+		badgeRepository = mock(BadgeRepository.class);
+		badgeController = new BadgeController(badgeRepository);
 	}
 
 	@Test
 	void createBadge() {
 		BadgeCreateDTO create = BadgeCreateDTO.builder().id(db.getBadge1().getId())
-				.name(db.getBadge1().getName()).inventories(db.getBadge1().getInventories()).build();
+				.name(db.getBadge1().getName()).build();
 
 		badgeController.createBadge(create);
 
-		verify(badgeService).createBadge(db.getBadge1());
+		verify(badgeRepository).save(Badge.builder().id(db.getBadge1().getId()).name(db.getBadge1().getName()).build());
 	}
 
 }

@@ -46,20 +46,4 @@ public class Inventory {
 	@ManyToMany
 	private List<InventoryItem> inventoryItems;
 
-	/**
-	 * Tests whether two inventories are equal.
-	 *
-	 * @param  o the inventory to be checked
-	 * @return   whether the inventories are equal or not
-	 */
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
-		Inventory inventory = (Inventory) o;
-		return Objects.equals(personId, inventory.personId)
-				&& Objects.equals(inventoryItems, inventory.inventoryItems);
-	}
 }

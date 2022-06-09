@@ -17,8 +17,6 @@
  */
 package nl.tudelft.skills.dto.view;
 
-import java.util.Set;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,7 +24,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.model.Badge;
-import nl.tudelft.skills.model.Inventory;
 
 @Data
 @Builder
@@ -36,5 +33,4 @@ import nl.tudelft.skills.model.Inventory;
 public class BadgeViewDTO extends View<Badge> {
 	private Long id;
 	private String name;
-	private Set<Inventory> inventories;
 }

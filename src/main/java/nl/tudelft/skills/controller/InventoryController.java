@@ -19,7 +19,10 @@ package nl.tudelft.skills.controller;
 
 import javax.transaction.Transactional;
 
+import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
+import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.dto.view.InventoryViewDTO;
 import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.InventoryService;
 
@@ -33,14 +36,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("inventory")
 public class InventoryController {
-	public InventoryService inventoryService;
-
-	public AuthorisationService authorisationService;
+	private final InventoryService inventoryService;
 
 	@Autowired
-	public InventoryController(InventoryService inventoryService, AuthorisationService authorisationService) {
+	public InventoryController(InventoryService inventoryService) {
 		this.inventoryService = inventoryService;
-		this.authorisationService = authorisationService;
 	}
 
 	/**
@@ -51,10 +51,9 @@ public class InventoryController {
 	 */
 	@GetMapping
 	@Transactional
-	@PreAuthorize("@authorisationService.isAuthenticated()")
-	public String getInventoryPage(Model model) {
-		Person person = authorisationService.getAuthPerson();
-		model.addAttribute("inventory", inventoryService.getInventoryView(person.getId()));
+	public String getInventoryPage(@AuthenticatedPerson Person person, Model model) {
+		model.addAttribute("inventory", View.convert(inventoryService.getInventory(person.getId()),
+				InventoryViewDTO.class));
 		return "inventory/view";
 	}
 }

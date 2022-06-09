@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.dto.create;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import lombok.AllArgsConstructor;
@@ -36,10 +37,14 @@ import nl.tudelft.skills.model.Inventory;
 public class BadgeCreateDTO extends Create<Badge> {
 	private Long id;
 	private String name;
-	private Set<Inventory> inventories;
 
 	@Override
 	public Class<Badge> clazz() {
 		return Badge.class;
+	}
+
+	@Override
+	public void postApply(Badge badge) {
+		badge.setInventories(new HashSet<>());
 	}
 }

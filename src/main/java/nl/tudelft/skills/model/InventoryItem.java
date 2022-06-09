@@ -25,6 +25,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.ManyToMany;
 import javax.validation.constraints.NotNull;
 
@@ -34,7 +35,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Entity
-@Inheritance
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @NoArgsConstructor
 @AllArgsConstructor
 public abstract class InventoryItem {

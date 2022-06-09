@@ -29,12 +29,9 @@ public class SkillService {
 
 	private final SkillRepository skillRepository;
 
-	private final TaskRepository taskRepository;
-
 	@Autowired
-	public SkillService(SkillRepository skillRepository, TaskRepository taskRepository) {
+	public SkillService(SkillRepository skillRepository) {
 		this.skillRepository = skillRepository;
-		this.taskRepository = taskRepository;
 	}
 
 	/**
@@ -45,9 +42,7 @@ public class SkillService {
 	 */
 	public Skill deleteSkill(Long id) {
 		Skill skill = skillRepository.findByIdOrThrow(id);
-		skill.getChildren().forEach(c -> {
-			c.getParents().remove(skill);
-		});
+		skill.getChildren().forEach(c -> c.getParents().remove(skill));
 		skillRepository.delete(skill);
 		return skill;
 	}

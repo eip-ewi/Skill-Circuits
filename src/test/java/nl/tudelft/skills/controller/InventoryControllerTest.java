@@ -46,13 +46,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class InventoryControllerTest extends ControllerTest {
 	private final InventoryController inventoryController;
 	private final InventoryService inventoryService;
-	private final AuthorisationService authorisationService;
 
 	@Autowired
 	public InventoryControllerTest() {
 		inventoryService = mock(InventoryService.class);
-		authorisationService = mock(AuthorisationService.class);
-		inventoryController = new InventoryController(inventoryService, authorisationService);
+		inventoryController = new InventoryController(inventoryService);
 	}
 
 	@Test
@@ -63,21 +61,12 @@ public class InventoryControllerTest extends ControllerTest {
 		mockInventoryView.setInventoryItems(new ArrayList<>());
 
 		when(inventoryService.getInventoryView(anyLong())).thenReturn(mockInventoryView);
-		when(authorisationService.getAuthPerson())
-				.thenReturn(Person.builder().id(db.getPerson().getId()).build());
 
-		inventoryController.getInventoryPage(model);
+		inventoryController.getInventoryPage(Person.builder().id(db.getPerson().getId()).build(), model);
 
 		assertThat(model.getAttribute("inventory")).isEqualTo(mockInventoryView);
 
 		verify(inventoryService).getInventoryView(db.getPerson().getId());
-	}
-
-	@Test
-	void getInventoryPageNotAuthenticated() throws Exception {
-		when(authorisationService.isAuthenticated()).thenReturn(false);
-
-		mvc.perform(get("/inventory")).andExpect(status().is3xxRedirection());
 	}
 
 }

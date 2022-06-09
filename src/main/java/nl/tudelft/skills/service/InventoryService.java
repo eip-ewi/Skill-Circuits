@@ -47,17 +47,6 @@ public class InventoryService {
 	}
 
 	/**
-	 * Converts the inventory entity of a user to an inventory view
-	 *
-	 * @param  personId the id of the person whose inventory is needed
-	 * @return
-	 */
-	public InventoryViewDTO getInventoryView(Long personId) {
-		return View.convert(getInventory(personId),
-				InventoryViewDTO.class);
-	}
-
-	/**
 	 * Gets the inventory of a person.
 	 *
 	 * @param  personId the id of the person whose inventory must be retrieved

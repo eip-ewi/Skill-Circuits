@@ -35,7 +35,7 @@
                 </a>
             </li>
             <li class="header__icon" th:if="${@authorisationService.isAuthenticated()}">
-                <a onclick="showDropdown()">
+                <a id="dropdown-button">
                     <span th:text="${@authorisationService.getAuthPerson().displayName}"></span>
                     <span id="dropdown-icon" class="fa-solid fa-angle-down"></span>
                 </a>
@@ -66,17 +66,19 @@
 
         <script>
             function showDropdown() {
-                document.getElementById("dropdown").classList.toggle("show_dropdown");
+                $("#dropdown").toggleClass("show_dropdown")
             }
 
-            window.onclick = function (event) {
+            document.getElementById("dropdown-button").addEventListener("click", showDropdown)
+
+            window.addEventListener("click", function (event) {
                 if (!event.target.matches(".header__icon *")) {
                     var openDropdown = document.getElementById("dropdown");
                     if (openDropdown.classList.contains("show_dropdown")) {
                         openDropdown.classList.remove("show_dropdown");
                     }
                 }
-            };
+            });
         </script>
     </header>
 </html>
