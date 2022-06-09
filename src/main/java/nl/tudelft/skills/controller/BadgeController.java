@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("item/badge")
+@RequestMapping("badge")
 public class BadgeController {
 	private final BadgeRepository badgeRepository;
 
