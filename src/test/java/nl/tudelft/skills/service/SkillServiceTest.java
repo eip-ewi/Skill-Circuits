@@ -43,7 +43,7 @@ public class SkillServiceTest {
 			TestDatabaseLoader db) {
 		this.skillRepository = skillRepository;
 		this.db = db;
-		this.skillService = new SkillService(skillRepository, taskRepository);
+		this.skillService = new SkillService(skillRepository);
 	}
 
 	@Test

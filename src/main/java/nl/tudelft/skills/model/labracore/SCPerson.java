@@ -21,9 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
 
@@ -44,11 +42,10 @@ public class SCPerson {
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToMany(fetch = FetchType.LAZY)
+	@ManyToMany
 	private Set<Task> tasksCompleted = new HashSet<>();
 
 	@OneToOne
-	@JoinColumn(name = "inventory_id")
 	private Inventory inventory;
 
 }

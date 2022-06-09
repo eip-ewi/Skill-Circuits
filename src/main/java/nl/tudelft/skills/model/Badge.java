@@ -37,4 +37,8 @@ public class Badge extends InventoryItem {
 		super(id, name, inventories);
 	}
 
+	public String toString() {
+		return "Badge(" + id + ", " + name + ", " + inventories + ")";
+	}
+
 }

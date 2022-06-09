@@ -20,20 +20,25 @@ package nl.tudelft.skills.controller;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import java.util.HashSet;
+
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.create.BadgeCreateDTO;
-
 import nl.tudelft.skills.model.Badge;
 import nl.tudelft.skills.repository.BadgeRepository;
+import nl.tudelft.skills.test.TestDatabaseLoader;
+
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
-@AutoConfigureMockMvc
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
-class BadgeControllerTest extends ControllerTest {
+class BadgeControllerTest {
+
+	@Autowired
+	private TestDatabaseLoader db;
 
 	private BadgeController badgeController;
 	private BadgeRepository badgeRepository;
@@ -50,7 +55,9 @@ class BadgeControllerTest extends ControllerTest {
 
 		badgeController.createBadge(create);
 
-		verify(badgeRepository).save(Badge.builder().id(db.getBadge1().getId()).name(db.getBadge1().getName()).build());
+		verify(badgeRepository)
+				.save(Badge.builder().id(db.getBadge1().getId()).name(db.getBadge1().getName())
+						.inventories(new HashSet<>()).build());
 	}
 
 }

@@ -18,7 +18,6 @@
 package nl.tudelft.skills.dto.create;
 
 import java.util.HashSet;
-import java.util.Set;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,7 +26,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import nl.tudelft.librador.dto.create.Create;
 import nl.tudelft.skills.model.Badge;
-import nl.tudelft.skills.model.Inventory;
 
 @Data
 @Builder

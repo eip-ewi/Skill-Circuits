@@ -424,6 +424,9 @@ public class TestDatabaseLoader {
 	private void initInventory() {
 		inventory.setPersonId(this.getPerson().getId());
 		inventory = inventoryRepository.save(inventory);
+
+		person.setInventory(inventory);
+		personRepository.save(person);
 	}
 
 	private void initBadges() {

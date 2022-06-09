@@ -23,11 +23,10 @@ import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.InventoryViewDTO;
-import nl.tudelft.skills.security.AuthorisationService;
-import nl.tudelft.skills.service.InventoryService;
+import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,11 +35,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("inventory")
 public class InventoryController {
-	private final InventoryService inventoryService;
+	private final PersonRepository personRepository;
 
 	@Autowired
-	public InventoryController(InventoryService inventoryService) {
-		this.inventoryService = inventoryService;
+	public InventoryController(PersonRepository personRepository) {
+		this.personRepository = personRepository;
 	}
 
 	/**
@@ -52,7 +51,9 @@ public class InventoryController {
 	@GetMapping
 	@Transactional
 	public String getInventoryPage(@AuthenticatedPerson Person person, Model model) {
-		model.addAttribute("inventory", View.convert(inventoryService.getInventory(person.getId()),
+		SCPerson scPerson = personRepository.findByIdOrThrow(person.getId());
+		System.out.println(scPerson);
+		model.addAttribute("inventory", View.convert(scPerson.getInventory(),
 				InventoryViewDTO.class));
 		return "inventory/view";
 	}

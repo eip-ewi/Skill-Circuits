@@ -20,19 +20,14 @@ package nl.tudelft.skills.controller;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
 
 import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.InventoryViewDTO;
-import nl.tudelft.skills.security.AuthorisationService;
-import nl.tudelft.skills.service.InventoryService;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,28 +40,24 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
 public class InventoryControllerTest extends ControllerTest {
 	private final InventoryController inventoryController;
-	private final InventoryService inventoryService;
+	private final PersonRepository personRepository;
 
 	@Autowired
 	public InventoryControllerTest() {
-		inventoryService = mock(InventoryService.class);
-		inventoryController = new InventoryController(inventoryService);
+		personRepository = mock(PersonRepository.class);
+		inventoryController = new InventoryController(personRepository);
 	}
 
 	@Test
 	void getInventoryPage() {
-		InventoryViewDTO mockInventoryView = View.convert(db.getInventory(), InventoryViewDTO.class);
+		InventoryViewDTO inventoryViewDTO = InventoryViewDTO.builder().id(db.getInventory().getId())
+				.inventoryItems(new ArrayList<>()).build();
 
-		mockInventoryView.setId(1L);
-		mockInventoryView.setInventoryItems(new ArrayList<>());
-
-		when(inventoryService.getInventoryView(anyLong())).thenReturn(mockInventoryView);
+		when(personRepository.findByIdOrThrow(anyLong())).thenReturn(db.getPerson());
 
 		inventoryController.getInventoryPage(Person.builder().id(db.getPerson().getId()).build(), model);
 
-		assertThat(model.getAttribute("inventory")).isEqualTo(mockInventoryView);
-
-		verify(inventoryService).getInventoryView(db.getPerson().getId());
+		assertThat(model.getAttribute("inventory")).isEqualTo(inventoryViewDTO);
 	}
 
 }

@@ -66,14 +66,14 @@ public class Skill {
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToMany(fetch = FetchType.LAZY)
+	@ManyToMany
 	private Set<Skill> parents = new HashSet<>();
 
 	@NotNull
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToMany(mappedBy = "parents", fetch = FetchType.LAZY)
+	@ManyToMany(mappedBy = "parents")
 	private Set<Skill> children = new HashSet<>();
 
 	@NotNull

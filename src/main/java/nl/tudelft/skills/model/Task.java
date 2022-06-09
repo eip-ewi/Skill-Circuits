@@ -76,7 +76,7 @@ public class Task {
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToMany(mappedBy = "tasksCompleted", fetch = FetchType.LAZY)
+	@ManyToMany(mappedBy = "tasksCompleted")
 	private Set<SCPerson> persons = new HashSet<>();
 
 }

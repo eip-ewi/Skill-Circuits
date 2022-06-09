@@ -20,8 +20,8 @@ package nl.tudelft.skills.controller;
 import javax.transaction.Transactional;
 
 import nl.tudelft.skills.dto.create.BadgeCreateDTO;
-
 import nl.tudelft.skills.repository.BadgeRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
