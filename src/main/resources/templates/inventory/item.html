@@ -18,8 +18,12 @@
 
 -->
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-<div class="inventory-item" layout:fragment="checkpoint">
-    <span class="fa-solid fa-award"></span><span th:text="${inventoryItem.name}"></span>
-</div>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div class="inventory-item" layout:fragment="checkpoint">
+        <span class="fa-solid fa-award"></span>
+        <span th:text="${inventoryItem.name}"></span>
+    </div>
 </html>

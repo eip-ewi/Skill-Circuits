@@ -27,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.ArrayList;
 
+import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.InventoryViewDTO;
@@ -62,7 +63,8 @@ public class InventoryControllerTest extends ControllerTest {
 		mockInventoryView.setInventoryItems(new ArrayList<>());
 
 		when(inventoryService.getInventoryView(anyLong())).thenReturn(mockInventoryView);
-		when(authorisationService.getAuthSCPerson()).thenReturn(db.getPerson());
+		when(authorisationService.getAuthPerson())
+				.thenReturn(Person.builder().id(db.getPerson().getId()).build());
 
 		inventoryController.getInventoryPage(model);
 

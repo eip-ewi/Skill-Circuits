@@ -47,7 +47,6 @@ public class SkillService {
 		Skill skill = skillRepository.findByIdOrThrow(id);
 		skill.getChildren().forEach(c -> {
 			c.getParents().remove(skill);
-			skillRepository.save(c);
 		});
 		skillRepository.delete(skill);
 		return skill;

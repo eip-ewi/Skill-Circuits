@@ -28,7 +28,6 @@ import javax.annotation.PostConstruct;
 import nl.tudelft.skills.model.Badge;
 import nl.tudelft.skills.model.Checkpoint;
 import nl.tudelft.skills.model.Inventory;
-import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.SCCourse;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.SCModule;
@@ -150,10 +149,6 @@ public class TestDatabaseLoader {
 	private Task taskRead10 = Task.builder().name("Read chapter 1.0").time(13).build();
 	private Task taskDo10a = Task.builder().name("Do exercise 1.0a").time(20).build();
 
-	private Path explorerRL = Path.builder().name("Explorer").build();
-	private Path pathfinderRL = Path.builder().name("Pathfinder").build();
-	private Path mountainClimberRL = Path.builder().name("Mountain Climber").build();
-
 	private Badge badge1 = Badge.builder().name("Badge 1").inventories(new HashSet<>()).build();
 	private Badge badge2 = Badge.builder().name("Badge 2").inventories(new HashSet<>()).build();
 
@@ -164,9 +159,6 @@ public class TestDatabaseLoader {
 	public SCCourse getCourseRL() {
 		return courseRepository.findByIdOrThrow(courseRL.getId());
 	}
-
-	public Checkpoint checkpointLectureOne;
-	public Checkpoint checkpointLectureTwo;
 
 	public SCEdition getEditionRL() {
 		return editionRepository.findByIdOrThrow(editionRL2021.getId());
@@ -284,18 +276,6 @@ public class TestDatabaseLoader {
 		return taskRepository.findByIdOrThrow(taskDo10a.getId());
 	}
 
-	public Path getExplorerRL() {
-		return pathRepository.findByIdOrThrow(explorerRL.getId());
-	}
-
-	public Path getPathfinderRL() {
-		return pathRepository.findByIdOrThrow(pathfinderRL.getId());
-	}
-
-	public Path getMountainClimberRL() {
-		return pathRepository.findByIdOrThrow(mountainClimberRL.getId());
-	}
-
 	public Badge getBadge1() {
 		return badgeRepository.findByIdOrThrow(badge1.getId());
 	}
@@ -316,7 +296,6 @@ public class TestDatabaseLoader {
 	private void init() {
 		initCourse();
 		initEdition();
-		initPath();
 		initModule();
 		initSubmodule();
 		initCheckpoint();
@@ -335,16 +314,6 @@ public class TestDatabaseLoader {
 	private void initEdition() {
 		editionRL2021.setId(EDITION_ID);
 		editionRL2021 = editionRepository.save(editionRL2021);
-	}
-
-	private void initPath() {
-		explorerRL.setEdition(editionRL2021);
-		pathfinderRL.setEdition(editionRL2021);
-		mountainClimberRL.setEdition(editionRL2021);
-
-		explorerRL = pathRepository.save(explorerRL);
-		pathfinderRL = pathRepository.save(pathfinderRL);
-		mountainClimberRL = pathRepository.save(mountainClimberRL);
 	}
 
 	private void initModule() {
@@ -448,7 +417,6 @@ public class TestDatabaseLoader {
 	}
 
 	private void initPerson() {
-		person.setPaths(Set.of(explorerRL));
 		person.setTasksCompleted(Set.of(taskDo11ad, taskRead12, taskDo12ae, taskRead11));
 		person = personRepository.save(person);
 	}

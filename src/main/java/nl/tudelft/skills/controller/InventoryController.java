@@ -19,7 +19,7 @@ package nl.tudelft.skills.controller;
 
 import javax.transaction.Transactional;
 
-import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.InventoryService;
 
@@ -53,7 +53,7 @@ public class InventoryController {
 	@Transactional
 	@PreAuthorize("@authorisationService.isAuthenticated()")
 	public String getInventoryPage(Model model) {
-		SCPerson person = authorisationService.getAuthSCPerson();
+		Person person = authorisationService.getAuthPerson();
 		model.addAttribute("inventory", inventoryService.getInventoryView(person.getId()));
 		return "inventory/view";
 	}

@@ -18,19 +18,22 @@
 
 -->
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{container}">
-<head>
-    <meta charset="UTF-8">
-    <title>Inventory</title>
-</head>
-<body>
-    <div layout:fragment="content">
-        <h1>Inventory</h1>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{container}">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Inventory</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <h1>Inventory</h1>
 
-        <div th:each="inventoryItem : ${inventory.inventoryItems}">
-            <div layout:replace="~{inventory/item}"></div>
+            <div th:each="inventoryItem : ${inventory.inventoryItems}">
+                <div layout:replace="~{inventory/item}"></div>
+            </div>
         </div>
-    </div>
-</body>
+    </body>
 </html>
