@@ -52,7 +52,6 @@ public class InventoryController {
 	@Transactional
 	public String getInventoryPage(@AuthenticatedPerson Person person, Model model) {
 		SCPerson scPerson = personRepository.findByIdOrThrow(person.getId());
-		System.out.println(scPerson);
 		model.addAttribute("inventory", View.convert(scPerson.getInventory(),
 				InventoryViewDTO.class));
 		return "inventory/view";

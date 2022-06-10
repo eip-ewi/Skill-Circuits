@@ -27,6 +27,7 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.ManyToMany;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
@@ -46,7 +47,7 @@ public abstract class InventoryItem {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	protected Long id;
 
-	@NotNull
+	@NotBlank
 	protected String name;
 
 	@ManyToMany(mappedBy = "inventoryItems")
