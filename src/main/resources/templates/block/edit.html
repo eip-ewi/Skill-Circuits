@@ -164,6 +164,7 @@
                     if (blockType === "skill") {
                         element.find(".item__create").click(createItem);
                         element.find(".select__items button").click(selectItemIcon);
+                        element.find(".select__items > select").change(changeSelectedIcon);
                     }
                     element.find(".item__delete").click(deleteItem);
                 },

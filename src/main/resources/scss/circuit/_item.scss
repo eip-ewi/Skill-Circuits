@@ -83,49 +83,6 @@
         text-align: center;
     }
 
-    &__form {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        & * {
-            font-size: 1rem;
-        }
-        & input[type="text"],
-        & input[type="url"] {
-            max-width: 12rem;
-        }
-        & input[type="option"] {
-            min-width: 12rem;
-        }
-        &__dropdown {
-            min-width: 12rem;
-        }
-        & button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            &:hover {
-                color: var(--primary-green);
-            }
-        }
-
-        &__url {
-            display: flex;
-            min-width: 1.5rem;
-            position: relative;
-            & > input {
-                left: 0;
-                padding-left: 1.5rem;
-            }
-            & > button {
-                left: 3px;
-                position: absolute;
-                top: 3px;
-                z-index: 20;
-            }
-        }
-    }
-
     &__create {
         background-color: var(--primary-dark);
         border: 1px solid var(--primary-light);

@@ -34,8 +34,8 @@
         transform: scale(0);
     }
 
-    &:hover > input,
-    & > input:focus {
+    &:hover > input:not([disabled]),
+    & > input:not([disabled]):focus {
         transform: scale(1);
     }
 

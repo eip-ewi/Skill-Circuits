@@ -73,8 +73,16 @@
             $(".select__items *").blur();
         }
 
+        function changeSelectedIcon() {
+            const newIcon = $(this).children("option:selected").data("icon");
+            const label = $(this).parent().parent().children(".select__label");
+            label.removeClass();
+            label.addClass(["select__label", "fa-solid", `fa-${newIcon}`]);
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
             $(".select__items button").click(selectItemIcon);
+            $(".select__items > select").change(changeSelectedIcon);
         });
     </script>
 </html>
