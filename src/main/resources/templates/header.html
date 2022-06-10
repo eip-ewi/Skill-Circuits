@@ -35,10 +35,10 @@
                 </a>
             </li>
             <li class="header__icon" th:if="${@authorisationService.isAuthenticated()}">
-                <a id="dropdown-button">
+                <button id="dropdown-button">
                     <span th:text="${@authorisationService.getAuthPerson().displayName}"></span>
                     <span id="dropdown-icon" class="fa-solid fa-angle-down"></span>
-                </a>
+                </button>
                 <ul id="dropdown" class="header__dropdown">
                     <li>
                         <a th:href="@{/}">
@@ -63,22 +63,5 @@
                 </ul>
             </li>
         </ul>
-
-        <script>
-            function showDropdown() {
-                $("#dropdown").toggleClass("show_dropdown");
-            }
-
-            document.getElementById("dropdown-button").addEventListener("click", showDropdown);
-
-            window.addEventListener("click", function (event) {
-                if (!event.target.matches(".header__icon *")) {
-                    var openDropdown = document.getElementById("dropdown");
-                    if (openDropdown.classList.contains("show_dropdown")) {
-                        openDropdown.classList.remove("show_dropdown");
-                    }
-                }
-            });
-        </script>
     </header>
 </html>
