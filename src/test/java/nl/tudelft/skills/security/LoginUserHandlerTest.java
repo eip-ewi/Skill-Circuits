@@ -56,9 +56,11 @@ public class LoginUserHandlerTest {
 		when(personRepository.existsById(any())).thenReturn(false);
 
 		loginUserHandler.handleUserLogin(Person.builder().id(id).build());
-		verify(personRepository).save(SCPerson.builder().id(id)
-				.inventory(Inventory.builder().personId(id).inventoryItems(new ArrayList<>()).build())
-				.build());
+
+		SCPerson person = SCPerson.builder().id(id).build();
+		Inventory inventory = Inventory.builder().person(person).inventoryItems(new ArrayList<>()).build();
+		person.setInventory(inventory);
+		verify(personRepository).save(person);
 	}
 
 	@Test

@@ -302,7 +302,6 @@ public class TestDatabaseLoader {
 		initTask();
 		initPerson();
 		initBadges();
-		initInventory();
 	}
 
 	private void initCourse() {
@@ -417,15 +416,11 @@ public class TestDatabaseLoader {
 
 	private void initPerson() {
 		person.setTasksCompleted(Set.of(taskDo11ad, taskRead12, taskDo12ae, taskRead11));
-		person = personRepository.save(person);
-	}
-
-	private void initInventory() {
-		inventory.setPersonId(this.getPerson().getId());
-		inventory = inventoryRepository.save(inventory);
-
+		inventory.setPerson(person);
 		person.setInventory(inventory);
-		personRepository.save(person);
+
+		person = personRepository.save(person);
+		inventory = person.getInventory();
 	}
 
 	private void initBadges() {

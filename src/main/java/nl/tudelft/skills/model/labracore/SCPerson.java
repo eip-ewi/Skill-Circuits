@@ -20,10 +20,12 @@ package nl.tudelft.skills.model.labracore;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
+import javax.validation.constraints.NotNull;
 
 import lombok.*;
 import nl.tudelft.skills.model.Inventory;
@@ -45,7 +47,8 @@ public class SCPerson {
 	@ManyToMany
 	private Set<Task> tasksCompleted = new HashSet<>();
 
-	@OneToOne
+	@NotNull
+	@OneToOne(cascade = CascadeType.ALL)
 	private Inventory inventory;
 
 }

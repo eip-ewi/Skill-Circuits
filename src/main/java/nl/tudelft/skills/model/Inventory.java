@@ -24,11 +24,16 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToOne;
+import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+import nl.tudelft.skills.model.labracore.SCPerson;
 
 @Data
 @Entity
@@ -40,7 +45,11 @@ public class Inventory {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
 
-	private Long personId;
+	@NotNull
+	@OneToOne(mappedBy = "inventory")
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
+	private SCPerson person;
 
 	@ManyToMany
 	private List<InventoryItem> inventoryItems;

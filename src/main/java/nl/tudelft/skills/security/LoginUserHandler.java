@@ -63,11 +63,12 @@ public class LoginUserHandler implements LabradorUserHandler {
 		});
 		if (!scPersonRepository.existsById(person.getId())) {
 			Inventory inventory = Inventory.builder().inventoryItems(new ArrayList<>())
-					.personId(person.getId())
 					.build();
-			inventoryRepository.save(inventory);
 
 			SCPerson scPerson = SCPerson.builder().id(person.getId()).inventory(inventory).build();
+			inventory.setPerson(scPerson);
+
+			inventoryRepository.save(inventory);
 			scPersonRepository.save(scPerson);
 
 		}
