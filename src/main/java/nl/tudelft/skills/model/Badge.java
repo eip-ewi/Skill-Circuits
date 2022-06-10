@@ -17,28 +17,18 @@
  */
 package nl.tudelft.skills.model;
 
-import java.util.Set;
-
 import javax.persistence.Entity;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
 public class Badge extends InventoryItem {
-
-	@Builder
-	public Badge(Long id, String name, Set<Inventory> inventories) {
-		super(id, name, inventories);
-	}
-
-	public String toString() {
-		return "Badge(" + id + ", " + name + ", " + inventories + ")";
-	}
 
 }

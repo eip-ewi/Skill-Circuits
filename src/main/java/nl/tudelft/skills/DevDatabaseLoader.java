@@ -20,7 +20,6 @@ package nl.tudelft.skills;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -460,7 +459,7 @@ public class DevDatabaseLoader {
 
 	private void initBadges() {
 		badge = badgeRepository
-				.save(Badge.builder().name("Your first badge!").inventories(new HashSet<>()).build());
+				.save(Badge.builder().name("Your first badge!").build());
 	}
 
 }

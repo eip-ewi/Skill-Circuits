@@ -20,7 +20,6 @@ package nl.tudelft.skills.test;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -149,8 +148,8 @@ public class TestDatabaseLoader {
 	private Task taskRead10 = Task.builder().name("Read chapter 1.0").time(13).build();
 	private Task taskDo10a = Task.builder().name("Do exercise 1.0a").time(20).build();
 
-	private Badge badge1 = Badge.builder().name("Badge 1").inventories(new HashSet<>()).build();
-	private Badge badge2 = Badge.builder().name("Badge 2").inventories(new HashSet<>()).build();
+	private Badge badge1 = Badge.builder().name("Badge 1").build();
+	private Badge badge2 = Badge.builder().name("Badge 2").build();
 
 	private Inventory inventory = Inventory.builder().build();
 

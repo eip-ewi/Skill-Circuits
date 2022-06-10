@@ -20,8 +20,6 @@ package nl.tudelft.skills.controller;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import java.util.HashSet;
-
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.create.BadgeCreateDTO;
 import nl.tudelft.skills.model.Badge;
@@ -56,8 +54,7 @@ class BadgeControllerTest {
 		badgeController.createBadge(create);
 
 		verify(badgeRepository)
-				.save(Badge.builder().id(db.getBadge1().getId()).name(db.getBadge1().getName())
-						.inventories(new HashSet<>()).build());
+				.save(Badge.builder().id(db.getBadge1().getId()).name(db.getBadge1().getName()).build());
 	}
 
 }

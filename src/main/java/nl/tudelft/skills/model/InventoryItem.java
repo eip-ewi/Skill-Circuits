@@ -30,14 +30,17 @@ import javax.persistence.ManyToMany;
 import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Data
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @NoArgsConstructor
 @AllArgsConstructor
+@SuperBuilder
 public abstract class InventoryItem {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -48,5 +51,6 @@ public abstract class InventoryItem {
 
 	@ManyToMany(mappedBy = "inventoryItems")
 	@NotNull
+	@Builder.Default
 	protected Set<Inventory> inventories = new HashSet<>();
 }
