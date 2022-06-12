@@ -66,7 +66,7 @@ public class DevDatabaseLoader {
 	@Autowired
 	private PersonRepository personRepository;
 
-	private SCPerson person;
+	private SCPerson person = SCPerson.builder().id(1L).build();
 
 	private EditionDetailsDTO edition;
 
@@ -126,7 +126,6 @@ public class DevDatabaseLoader {
 		course = courseControllerApi.getAllCourses().blockFirst();
 		edition = editionApi.getAllEditions().blockFirst();
 
-		initPerson();
 		initCourse();
 		initEdition();
 		initModules();
@@ -134,12 +133,16 @@ public class DevDatabaseLoader {
 		initCheckpoints();
 		initSkills();
 		initTasks();
-		initInventory();
 		initBadges();
+		initPerson();
 	}
 
 	private void initPerson() {
-		person = personRepository.save(SCPerson.builder().id(1L).build());
+		Inventory inventory = Inventory.builder().build();
+		person.setInventory(inventory);
+		inventory.setPerson(person);
+
+		person = personRepository.save(person);
 	}
 
 	private void initCourse() {
@@ -450,11 +453,6 @@ public class DevDatabaseLoader {
 				.edition(scEdition)
 				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 53), LocalTime.MIDNIGHT))
 				.build());
-	}
-
-	private void initInventory() {
-		Inventory inventory = inventoryRepository.save(Inventory.builder().build());
-		person.setInventory(inventory);
 	}
 
 	private void initBadges() {
