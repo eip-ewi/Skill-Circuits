@@ -15,41 +15,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.patch;
+package nl.tudelft.skills.model;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import javax.persistence.Entity;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import nl.tudelft.librador.dto.patch.Patch;
-import nl.tudelft.skills.dto.id.SCModuleIdDTO;
-import nl.tudelft.skills.model.Submodule;
+import lombok.experimental.SuperBuilder;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
-@Builder
-@NoArgsConstructor
+@Entity
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class SubmodulePatchDTO extends Patch<Submodule> {
+@SuperBuilder
+public class Badge extends InventoryItem {
 
-	@NotNull
-	private Long id;
-	@NotBlank
-	private String name;
-	@NotNull
-	private SCModuleIdDTO module;
-
-	@Override
-	protected void applyOneToOne() {
-		updateNonNull(name, data::setName);
-		updateNonNullId(module, data::setModule);
-	}
-
-	@Override
-	protected void validate() {
-	}
 }

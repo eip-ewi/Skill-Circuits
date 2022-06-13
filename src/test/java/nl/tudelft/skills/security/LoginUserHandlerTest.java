@@ -19,9 +19,13 @@ package nl.tudelft.skills.security;
 
 import static org.mockito.Mockito.*;
 
+import java.util.ArrayList;
+
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.model.Inventory;
 import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.repository.InventoryRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.test.TestDatabaseLoader;
 
@@ -37,11 +41,13 @@ public class LoginUserHandlerTest {
 
 	private LoginUserHandler loginUserHandler;
 	private PersonRepository personRepository;
+	private InventoryRepository inventoryRepository;
 
 	@Autowired
 	public LoginUserHandlerTest() {
 		this.personRepository = mock(PersonRepository.class);
-		this.loginUserHandler = new LoginUserHandler(personRepository);
+		this.inventoryRepository = mock(InventoryRepository.class);
+		this.loginUserHandler = new LoginUserHandler(personRepository, inventoryRepository);
 	}
 
 	@Test
@@ -50,7 +56,11 @@ public class LoginUserHandlerTest {
 		when(personRepository.existsById(any())).thenReturn(false);
 
 		loginUserHandler.handleUserLogin(Person.builder().id(id).build());
-		verify(personRepository).save(SCPerson.builder().id(id).build());
+
+		SCPerson person = SCPerson.builder().id(id).build();
+		Inventory inventory = Inventory.builder().person(person).inventoryItems(new ArrayList<>()).build();
+		person.setInventory(inventory);
+		verify(personRepository).save(person);
 	}
 
 	@Test

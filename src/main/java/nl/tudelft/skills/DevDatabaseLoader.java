@@ -28,7 +28,9 @@ import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.skills.model.*;
+import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.*;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -53,11 +55,18 @@ public class DevDatabaseLoader {
 	private TaskRepository taskRepository;
 	@Autowired
 	private CheckpointRepository checkpointRepository;
-
+	@Autowired
+	private BadgeRepository badgeRepository;
+	@Autowired
+	private InventoryRepository inventoryRepository;
 	@Autowired
 	private CourseControllerApi courseControllerApi;
 	@Autowired
 	private EditionControllerApi editionApi;
+	@Autowired
+	private PersonRepository personRepository;
+
+	private SCPerson person = SCPerson.builder().id(1L).build();
 
 	private EditionDetailsDTO edition;
 
@@ -104,9 +113,13 @@ public class DevDatabaseLoader {
 	private Skill skillSimpleE;
 	private Skill skillSimpleF;
 
+	private Inventory inventory;
+
 	private Checkpoint checkpointLectureOne;
 	private Checkpoint checkpointLectureTwo;
 	private Checkpoint checkpointSimple;
+
+	private Badge badge;
 
 	@PostConstruct
 	private void init() {
@@ -120,6 +133,16 @@ public class DevDatabaseLoader {
 		initCheckpoints();
 		initSkills();
 		initTasks();
+		initBadges();
+		initPerson();
+	}
+
+	private void initPerson() {
+		Inventory inventory = Inventory.builder().build();
+		person.setInventory(inventory);
+		inventory.setPerson(person);
+
+		person = personRepository.save(person);
 	}
 
 	private void initCourse() {
@@ -430,6 +453,11 @@ public class DevDatabaseLoader {
 				.edition(scEdition)
 				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 53), LocalTime.MIDNIGHT))
 				.build());
+	}
+
+	private void initBadges() {
+		badge = badgeRepository
+				.save(Badge.builder().name("Your first badge!").build());
 	}
 
 }

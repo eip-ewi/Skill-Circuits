@@ -97,7 +97,7 @@ public class ModuleControllerTest extends ControllerTest {
 		String element = mvc.perform(post("/module").with(csrf())
 				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
 						new BasicNameValuePair("name", "Module"),
-						new BasicNameValuePair("edition.id", Long.toString(db.edition.getId()))))))
+						new BasicNameValuePair("edition.id", Long.toString(db.getEditionRL().getId()))))))
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isOk())
 				.andReturn().getResponse().getContentAsString();

@@ -51,44 +51,45 @@ public class PersonControllerTest extends ControllerTest {
 	@Test
 	void setTasksCompletedForPerson() {
 		assertThat(db.getPerson().getTasksCompleted()).doesNotContain(
-				taskRepository.findByIdOrThrow(db.taskDo10a.getId()),
-				taskRepository.findByIdOrThrow(db.taskRead10.getId()));
+				db.getTaskDo10a(),
+				db.getTaskRead10());
 
 		Person person = new Person();
 		person.setId(db.getPerson().getId());
 		personController.setTasksCompletedForPerson(person,
-				List.of(db.taskDo10a.getId(), db.taskRead10.getId()));
+				List.of(db.getTaskDo10a().getId(), db.getTaskRead10().getId()));
 
 		assertThat(db.getPerson().getTasksCompleted()).contains(
-				taskRepository.findByIdOrThrow(db.taskDo10a.getId()),
-				taskRepository.findByIdOrThrow(db.taskRead10.getId()));
+				db.getTaskDo10a(),
+				db.getTaskRead10());
 	}
 
 	@Test
 	void updateTaskCompletedForPersonTrue() {
 		assertThat(db.getPerson().getTasksCompleted())
-				.doesNotContain(taskRepository.findByIdOrThrow(db.taskDo10a.getId()));
+				.doesNotContain(db.getTaskDo10a());
 
 		Person person = new Person();
 		person.setId(db.getPerson().getId());
 		personController.updateTaskCompletedForPerson(person,
-				db.taskDo10a.getId(), true);
+				db.getTaskDo10a().getId(), true);
 
 		assertThat(db.getPerson().getTasksCompleted())
-				.contains(taskRepository.findByIdOrThrow(db.taskDo10a.getId()));
+				.contains(db.getTaskDo10a());
 	}
 
 	@Test
 	void updateTaskCompletedForPersonFalse() {
 		assertThat(db.getPerson().getTasksCompleted())
-				.contains(taskRepository.findByIdOrThrow(db.taskDo11ad.getId()));
+				.contains(db.getTaskDo11ad());
 
 		Person person = new Person();
 		person.setId(db.getPerson().getId());
 		personController.updateTaskCompletedForPerson(person,
-				db.taskDo11ad.getId(), false);
+				db.getTaskDo11ad().getId(), false);
 
 		assertThat(db.getPerson().getTasksCompleted())
-				.doesNotContain(taskRepository.findByIdOrThrow(db.taskDo11ad.getId()));
+				.doesNotContain(db.getTaskDo11ad());
 	}
+
 }

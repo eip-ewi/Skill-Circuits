@@ -15,9 +15,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.patch;
+package nl.tudelft.skills.model;
 
-import javax.validation.constraints.NotBlank;
+import java.util.List;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
@@ -25,31 +32,26 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import nl.tudelft.librador.dto.patch.Patch;
-import nl.tudelft.skills.dto.id.SCModuleIdDTO;
-import nl.tudelft.skills.model.Submodule;
+import lombok.ToString;
+import nl.tudelft.skills.model.labracore.SCPerson;
 
 @Data
+@Entity
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class SubmodulePatchDTO extends Patch<Submodule> {
-
-	@NotNull
+@NoArgsConstructor
+public class Inventory {
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
-	@NotBlank
-	private String name;
+
 	@NotNull
-	private SCModuleIdDTO module;
+	@OneToOne(mappedBy = "inventory")
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
+	private SCPerson person;
 
-	@Override
-	protected void applyOneToOne() {
-		updateNonNull(name, data::setName);
-		updateNonNullId(module, data::setModule);
-	}
+	@ManyToMany
+	private List<InventoryItem> inventoryItems;
 
-	@Override
-	protected void validate() {
-	}
 }

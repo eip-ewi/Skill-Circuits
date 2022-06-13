@@ -15,41 +15,43 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.patch;
+package nl.tudelft.skills.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.ManyToMany;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import nl.tudelft.librador.dto.patch.Patch;
-import nl.tudelft.skills.dto.id.SCModuleIdDTO;
-import nl.tudelft.skills.model.Submodule;
+import lombok.experimental.SuperBuilder;
 
 @Data
-@Builder
+@Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class SubmodulePatchDTO extends Patch<Submodule> {
+@SuperBuilder
+public abstract class InventoryItem {
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	protected Long id;
 
-	@NotNull
-	private Long id;
 	@NotBlank
-	private String name;
+	protected String name;
+
+	@ManyToMany(mappedBy = "inventoryItems")
 	@NotNull
-	private SCModuleIdDTO module;
-
-	@Override
-	protected void applyOneToOne() {
-		updateNonNull(name, data::setName);
-		updateNonNullId(module, data::setModule);
-	}
-
-	@Override
-	protected void validate() {
-	}
+	@Builder.Default
+	protected Set<Inventory> inventories = new HashSet<>();
 }

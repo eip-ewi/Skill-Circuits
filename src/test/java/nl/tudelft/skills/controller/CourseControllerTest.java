@@ -85,7 +85,7 @@ public class CourseControllerTest extends ControllerTest {
 	void viewAllEditionsIsForbiddenForNonTeacher() throws Exception {
 		when(courseApi.getCourseById(anyLong()))
 				.thenReturn(Mono.just(new CourseDetailsDTO().editions(Collections.emptyList())));
-		mvc.perform(get("/course/{id}", db.course.getId()))
+		mvc.perform(get("/course/{id}", db.getCourseRL().getId()))
 				.andExpect(status().is3xxRedirection());
 	}
 }

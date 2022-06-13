@@ -32,29 +32,26 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
 public class CheckpointServiceTest {
 
-	private final CheckpointService checkpointService;
-	private final CheckpointRepository checkpointRepository;
-	private final TestDatabaseLoader db;
+	@Autowired
+	private TestDatabaseLoader db;
 
 	@Autowired
-	public CheckpointServiceTest(CheckpointService checkpointService,
-			CheckpointRepository checkpointRepository, TestDatabaseLoader db) {
-		this.checkpointService = checkpointService;
-		this.checkpointRepository = checkpointRepository;
-		this.db = db;
-	}
+	private CheckpointService checkpointService;
+
+	@Autowired
+	private CheckpointRepository checkpointRepository;
 
 	@Test
 	public void findNextCheckpoint() {
 		assertThat(checkpointService
-				.findNextCheckpoint(checkpointRepository.findByIdOrThrow(db.checkpointLectureOne.getId())))
-						.hasValue(db.checkpointLectureTwo);
+				.findNextCheckpoint(db.getCheckpointLectureOne()))
+						.hasValue(db.getCheckpointLectureTwo());
 	}
 
 	@Test
 	public void findNextCheckpointLast() {
 		assertThat(checkpointService
-				.findNextCheckpoint(checkpointRepository.findByIdOrThrow(db.checkpointLectureTwo.getId())))
+				.findNextCheckpoint(db.getCheckpointLectureTwo()))
 						.isEmpty();
 	}
 

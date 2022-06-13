@@ -15,40 +15,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.model.labracore;
+package nl.tudelft.skills.repository;
 
-import java.util.HashSet;
-import java.util.Set;
+import nl.tudelft.skills.model.InventoryItem;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToOne;
-import javax.validation.constraints.NotNull;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
-import lombok.*;
-import nl.tudelft.skills.model.Inventory;
-import nl.tudelft.skills.model.Task;
-
-@Data
-@Entity
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class SCPerson {
-
-	@Id
-	private Long id;
-
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany
-	private Set<Task> tasksCompleted = new HashSet<>();
-
-	@NotNull
-	@OneToOne(cascade = CascadeType.ALL)
-	private Inventory inventory;
-
+@NoRepositoryBean
+public interface InventoryItemBaseRepository<T extends InventoryItem> extends JpaRepository<T, Long> {
+	default T findByIdOrThrow(Long id) {
+		return findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("InventoryItem not found: " + id));
+	}
 }

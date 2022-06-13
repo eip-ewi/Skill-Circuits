@@ -17,9 +17,13 @@
  */
 package nl.tudelft.skills.security;
 
+import java.util.ArrayList;
+
 import nl.tudelft.labracore.lib.security.LabradorUserHandler;
 import nl.tudelft.labracore.lib.security.user.Person;
+import nl.tudelft.skills.model.Inventory;
 import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.repository.InventoryRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 import org.springframework.stereotype.Service;
@@ -38,9 +42,11 @@ import io.sentry.protocol.User;
 public class LoginUserHandler implements LabradorUserHandler {
 
 	private final PersonRepository scPersonRepository;
+	private final InventoryRepository inventoryRepository;
 
-	public LoginUserHandler(PersonRepository personRepository) {
+	public LoginUserHandler(PersonRepository personRepository, InventoryRepository inventoryRepository) {
 		this.scPersonRepository = personRepository;
+		this.inventoryRepository = inventoryRepository;
 	}
 
 	/**
@@ -56,7 +62,14 @@ public class LoginUserHandler implements LabradorUserHandler {
 			scope.setTag("DefaultRole", person.getDefaultRole().toString());
 		});
 		if (!scPersonRepository.existsById(person.getId())) {
-			scPersonRepository.save(SCPerson.builder().id(person.getId()).build());
+			Inventory inventory = Inventory.builder().inventoryItems(new ArrayList<>())
+					.build();
+
+			SCPerson scPerson = SCPerson.builder().id(person.getId()).inventory(inventory).build();
+			inventory.setPerson(scPerson);
+
+			scPersonRepository.save(scPerson);
+
 		}
 
 	}

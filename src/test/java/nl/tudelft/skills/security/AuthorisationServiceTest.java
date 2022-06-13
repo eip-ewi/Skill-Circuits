@@ -126,7 +126,7 @@ public class AuthorisationServiceTest {
 				courseApi);
 		when(courseApi.getCourseById(anyLong()))
 				.thenReturn(Mono.just(new CourseDetailsDTO().id(db.getCourseRL().getId())
-						.editions(List.of(new EditionSummaryDTO().id(db.edition.getId())))));
+						.editions(List.of(new EditionSummaryDTO().id(db.getEditionRL().getId())))));
 
 		assertThat(authorisationService.canViewCourse(db.getCourseRL().getId())).isEqualTo(expected);
 	}
@@ -142,7 +142,7 @@ public class AuthorisationServiceTest {
 				checkpointRepository,
 				courseApi);
 
-		assertThat(authorisationService.canViewEdition(db.edition.getId())).isEqualTo(expected);
+		assertThat(authorisationService.canViewEdition(db.getEditionRL().getId())).isEqualTo(expected);
 	}
 
 	@ParameterizedTest
@@ -168,7 +168,7 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canPublishEdition(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canPublishEdition(db.edition.getId())).isEqualTo(expected);
+		assertThat(authorisationService.canPublishEdition(db.getEditionRL().getId())).isEqualTo(expected);
 	}
 
 	@ParameterizedTest
@@ -176,7 +176,8 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canDeleteCreateInEdition(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canCreateModuleInEdition(db.edition.getId())).isEqualTo(expected);
+		assertThat(authorisationService.canCreateModuleInEdition(db.getEditionRL().getId()))
+				.isEqualTo(expected);
 	}
 
 	@ParameterizedTest
@@ -184,7 +185,8 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canDeleteModuleInEdition(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canDeleteModuleInEdition(db.edition.getId())).isEqualTo(expected);
+		assertThat(authorisationService.canDeleteModuleInEdition(db.getEditionRL().getId()))
+				.isEqualTo(expected);
 	}
 
 	@ParameterizedTest
@@ -201,7 +203,8 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canEditModuleInEdition(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canEditModuleInEdition(db.edition.getId())).isEqualTo(expected);
+		assertThat(authorisationService.canEditModuleInEdition(db.getEditionRL().getId()))
+				.isEqualTo(expected);
 	}
 
 	@ParameterizedTest
@@ -218,7 +221,8 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canCreateSubmoduleInEdition(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canCreateSubmoduleInEdition(db.edition.getId())).isEqualTo(expected);
+		assertThat(authorisationService.canCreateSubmoduleInEdition(db.getEditionRL().getId()))
+				.isEqualTo(expected);
 	}
 
 	@Transactional
@@ -227,7 +231,7 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canCreateSubmodule(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canCreateSubmodule(db.moduleProofTechniques.getId()))
+		assertThat(authorisationService.canCreateSubmodule(db.getModuleProofTechniques().getId()))
 				.isEqualTo(expected);
 	}
 
@@ -236,7 +240,8 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canEditSubmoduleInEdition(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canEditSubmoduleInEdition(db.edition.getId())).isEqualTo(expected);
+		assertThat(authorisationService.canEditSubmoduleInEdition(db.getEditionRL().getId()))
+				.isEqualTo(expected);
 	}
 
 	@Transactional
@@ -245,7 +250,7 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canEditSubmodule(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canEditSubmodule(db.submoduleCases.getId())).isEqualTo(expected);
+		assertThat(authorisationService.canEditSubmodule(db.getSubmoduleCases().getId())).isEqualTo(expected);
 	}
 
 	@ParameterizedTest
@@ -253,7 +258,8 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canDeleteSubmoduleInEdition(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canDeleteSubmoduleInEdition(db.edition.getId())).isEqualTo(expected);
+		assertThat(authorisationService.canDeleteSubmoduleInEdition(db.getEditionRL().getId()))
+				.isEqualTo(expected);
 	}
 
 	@Transactional
@@ -262,7 +268,8 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canDeleteSubmodule(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canDeleteSubmodule(db.submoduleCases.getId())).isEqualTo(expected);
+		assertThat(authorisationService.canDeleteSubmodule(db.getSubmoduleCases().getId()))
+				.isEqualTo(expected);
 	}
 
 	@ParameterizedTest
@@ -270,7 +277,8 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canCreateSkillInEdition(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canCreateSkillInEdition(db.edition.getId())).isEqualTo(expected);
+		assertThat(authorisationService.canCreateSkillInEdition(db.getEditionRL().getId()))
+				.isEqualTo(expected);
 	}
 
 	@Transactional
@@ -279,7 +287,7 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canCreateSkill(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canCreateSkill(db.submoduleCases.getId())).isEqualTo(expected);
+		assertThat(authorisationService.canCreateSkill(db.getSubmoduleCases().getId())).isEqualTo(expected);
 	}
 
 	@ParameterizedTest
@@ -287,7 +295,7 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canEditSkillInEdition(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canEditSkillInEdition(db.edition.getId())).isEqualTo(expected);
+		assertThat(authorisationService.canEditSkillInEdition(db.getEditionRL().getId())).isEqualTo(expected);
 	}
 
 	@Transactional
@@ -296,7 +304,7 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canEditSkill(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canEditSkill(db.skillAssumption.getId())).isEqualTo(expected);
+		assertThat(authorisationService.canEditSkill(db.getSkillAssumption().getId())).isEqualTo(expected);
 	}
 
 	@ParameterizedTest
@@ -304,7 +312,8 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canDeleteSkillInEdition(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canDeleteSkillInEdition(db.edition.getId())).isEqualTo(expected);
+		assertThat(authorisationService.canDeleteSkillInEdition(db.getEditionRL().getId()))
+				.isEqualTo(expected);
 	}
 
 	@Transactional
@@ -313,7 +322,7 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canDeleteSkill(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canDeleteSkill(db.skillAssumption.getId())).isEqualTo(expected);
+		assertThat(authorisationService.canDeleteSkill(db.getSkillAssumption().getId())).isEqualTo(expected);
 	}
 
 	@Transactional
@@ -322,7 +331,7 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canEditTask(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canEditTask(db.taskDo10a.getId())).isEqualTo(expected);
+		assertThat(authorisationService.canEditTask(db.getTaskDo10a().getId())).isEqualTo(expected);
 	}
 
 	@Transactional
@@ -331,7 +340,7 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canDeleteTask(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canDeleteTask(db.taskDo10a.getId())).isEqualTo(expected);
+		assertThat(authorisationService.canDeleteTask(db.getTaskDo10a().getId())).isEqualTo(expected);
 	}
 
 	@Transactional
@@ -340,7 +349,8 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canCreateCheckpointInEdition(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canCreateCheckpointInEdition(db.edition.getId())).isEqualTo(expected);
+		assertThat(authorisationService.canCreateCheckpointInEdition(db.getEditionRL().getId()))
+				.isEqualTo(expected);
 	}
 
 	@Transactional
@@ -349,7 +359,7 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canEditCheckpoint(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canEditCheckpoint(db.checkpointLectureOne.getId()))
+		assertThat(authorisationService.canEditCheckpoint(db.getCheckpointLectureOne().getId()))
 				.isEqualTo(expected);
 	}
 
@@ -359,7 +369,7 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canDeleteCheckpoint(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canDeleteCheckpoint(db.checkpointLectureOne.getId()))
+		assertThat(authorisationService.canDeleteCheckpoint(db.getCheckpointLectureOne().getId()))
 				.isEqualTo(expected);
 	}
 
@@ -368,7 +378,7 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER", "HEAD_TA", "TA", "STUDENT" })
 	void getRoleInEdition(String role) {
 		mockRole(role);
-		assertThat(authorisationService.getRoleInEdition(db.edition.getId()))
+		assertThat(authorisationService.getRoleInEdition(db.getEditionRL().getId()))
 				.isEqualTo(RoleDetailsDTO.TypeEnum.valueOf(role));
 	}
 
@@ -376,7 +386,7 @@ public class AuthorisationServiceTest {
 	@WithUserDetails("username")
 	void getNoRoleInEdition() {
 		mockRole(null);
-		assertThat(authorisationService.getRoleInEdition(db.edition.getId())).isEqualTo(null);
+		assertThat(authorisationService.getRoleInEdition(db.getEditionRL().getId())).isEqualTo(null);
 	}
 
 	@ParameterizedTest
@@ -392,7 +402,7 @@ public class AuthorisationServiceTest {
 
 		when(courseApi.getCourseById(anyLong()))
 				.thenReturn(Mono.just(new CourseDetailsDTO().id(db.getCourseRL().getId())
-						.editions(List.of(new EditionSummaryDTO().id(db.edition.getId())))));
+						.editions(List.of(new EditionSummaryDTO().id(db.getEditionRL().getId())))));
 		assertThat(authorisationService.isAtLeastTeacherInCourse(db.getCourseRL().getId()))
 				.isEqualTo(expected);
 	}
@@ -402,7 +412,8 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void isAtLeastTeacherInEdition(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.isAtLeastTeacherInEdition(db.edition.getId())).isEqualTo(expected);
+		assertThat(authorisationService.isAtLeastTeacherInEdition(db.getEditionRL().getId()))
+				.isEqualTo(expected);
 	}
 
 	@ParameterizedTest
@@ -410,7 +421,7 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER_RO,true", "TEACHER,false", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void isTeacherROInEdition(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.isTeacherROInEdition(db.edition.getId())).isEqualTo(expected);
+		assertThat(authorisationService.isTeacherROInEdition(db.getEditionRL().getId())).isEqualTo(expected);
 	}
 
 	@ParameterizedTest
@@ -418,7 +429,8 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void isAtLeastHeadTAInEdition(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.isAtLeastHeadTAInEdition(db.edition.getId())).isEqualTo(expected);
+		assertThat(authorisationService.isAtLeastHeadTAInEdition(db.getEditionRL().getId()))
+				.isEqualTo(expected);
 	}
 
 	@ParameterizedTest
@@ -426,7 +438,7 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,true", "STUDENT,false", ",false" })
 	void isAtLeastTAInEdition(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.isAtLeastTAInEdition(db.edition.getId())).isEqualTo(expected);
+		assertThat(authorisationService.isAtLeastTAInEdition(db.getEditionRL().getId())).isEqualTo(expected);
 	}
 
 	@ParameterizedTest
@@ -434,7 +446,8 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,true", "STUDENT,true", ",false" })
 	void isAtLeastStudentInEdition(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.isAtLeastStudentInEdition(db.edition.getId())).isEqualTo(expected);
+		assertThat(authorisationService.isAtLeastStudentInEdition(db.getEditionRL().getId()))
+				.isEqualTo(expected);
 	}
 
 	@ParameterizedTest
@@ -442,7 +455,7 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,false", "HEAD_TA,false", "TA,false", "STUDENT,true", ",false" })
 	void isStudentInEdition(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.isStudentInEdition(db.edition.getId())).isEqualTo(expected);
+		assertThat(authorisationService.isStudentInEdition(db.getEditionRL().getId())).isEqualTo(expected);
 	}
 
 	private void mockRole(String role) {
@@ -451,7 +464,8 @@ public class AuthorisationServiceTest {
 		} else {
 			when(roleApi.getRolesById(anyList(), anyList()))
 					.thenReturn(Flux.just(new RoleDetailsDTO()
-							.id(new Id().editionId(db.edition.getId()).personId(TestUserDetailsService.id))
+							.id(new Id().editionId(db.getEditionRL().getId())
+									.personId(TestUserDetailsService.id))
 							.person(new PersonSummaryDTO().id(TestUserDetailsService.id).username("username"))
 							.type(RoleDetailsDTO.TypeEnum.valueOf(role))));
 		}

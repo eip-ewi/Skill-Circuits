@@ -63,7 +63,7 @@ public class TaskControllerTest extends ControllerTest {
 		String element = mvc.perform(post("/task").with(csrf())
 				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
 						new BasicNameValuePair("name", "Task"),
-						new BasicNameValuePair("skill.id", Long.toString(db.skillVariables.getId()))))))
+						new BasicNameValuePair("skill.id", Long.toString(db.getSkillVariables().getId()))))))
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isOk())
 				.andReturn().getResponse().getContentAsString();
@@ -81,24 +81,25 @@ public class TaskControllerTest extends ControllerTest {
 	@Test
 	void patchTask() {
 		taskController.patchTask(TaskPatchDTO.builder()
-				.id(db.taskDo10a.getId())
+				.id(db.getTaskDo10a().getId())
 				.name("Updated")
 				.type(TaskType.EXERCISE)
 				.build());
 
-		Task task = taskRepository.findByIdOrThrow(db.taskDo10a.getId());
+		Task task = db.getTaskDo10a();
 		assertThat(task.getName()).isEqualTo("Updated");
 	}
 
 	@Test
 	void deleteTask() {
-		taskController.deleteTask(db.taskDo10a.getId());
-		assertThat(taskRepository.existsById(db.taskDo10a.getId())).isFalse();
+		Long id = db.getTaskDo10a().getId();
+		taskController.deleteTask(id);
+		assertThat(taskRepository.existsById(id)).isFalse();
 	}
 
 	@Test
 	void endpointsAreProtected() throws Exception {
-		mvc.perform(patch("/task/{id}", db.taskDo10a.getId()))
+		mvc.perform(patch("/task/{id}", db.getTaskDo10a().getId()))
 				.andExpect(status().isForbidden());
 		mvc.perform(post("/task"))
 				.andExpect(status().isForbidden());

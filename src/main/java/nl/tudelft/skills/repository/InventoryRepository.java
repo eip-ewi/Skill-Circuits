@@ -15,40 +15,21 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.patch;
+package nl.tudelft.skills.repository;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import java.util.Optional;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import nl.tudelft.librador.dto.patch.Patch;
-import nl.tudelft.skills.model.Submodule;
+import nl.tudelft.skills.model.Inventory;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class SubmodulePositionPatchDTO extends Patch<Submodule> {
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
-	@Min(0)
-	@NotNull
-	private Integer column;
-	@Min(0)
-	@NotNull
-	private Integer row;
+public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 
-	@Override
-	protected void applyOneToOne() {
-		updateNonNull(column, data::setColumn);
-		updateNonNull(row, data::setRow);
+	default Inventory findByIdOrThrow(Long id) {
+		return findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Inventory was not found: " + id));
 	}
 
-	@Override
-	protected void validate() {
-	}
+	public Optional<Inventory> findByPersonId(Long personId);
 }

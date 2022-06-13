@@ -69,7 +69,8 @@ public class SubmoduleControllerTest extends ControllerTest {
 		String element = mvc.perform(post("/submodule").with(csrf())
 				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
 						new BasicNameValuePair("name", "Submodule"),
-						new BasicNameValuePair("module.id", Long.toString(db.moduleProofTechniques.getId())),
+						new BasicNameValuePair("module.id",
+								Long.toString(db.getModuleProofTechniques().getId())),
 						new BasicNameValuePair("row", "10"),
 						new BasicNameValuePair("column", "11")))))
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
@@ -90,39 +91,41 @@ public class SubmoduleControllerTest extends ControllerTest {
 	@Test
 	void patchSubmodule() {
 		submoduleController.patchSubmodule(SubmodulePatchDTO.builder()
-				.id(db.submoduleCases.getId())
+				.id(db.getSubmoduleCases().getId())
 				.name("Updated")
-				.module(new SCModuleIdDTO(db.moduleProofTechniques.getId()))
+				.module(new SCModuleIdDTO(db.getModuleProofTechniques().getId()))
 				.build());
 
-		Submodule submodule = submoduleRepository.findByIdOrThrow(db.submoduleCases.getId());
+		Submodule submodule = submoduleRepository.findByIdOrThrow(db.getSubmoduleCases().getId());
 		assertThat(submodule.getName()).isEqualTo("Updated");
 		assertThat(moduleRepository.findByIdOrThrow(submodule.getModule().getId())).isEqualTo(
-				moduleRepository.findByIdOrThrow(db.moduleProofTechniques.getId()));
+				moduleRepository.findByIdOrThrow(db.getModuleProofTechniques().getId()));
 	}
 
 	@Test
 	void updateSubmodulePosition() {
-		submoduleController.updateSubmodulePosition(db.submoduleCases.getId(),
+		submoduleController.updateSubmodulePosition(db.getSubmoduleCases().getId(),
 				SubmodulePositionPatchDTO.builder()
 						.column(10)
 						.row(11)
 						.build());
 
-		Submodule submodule = submoduleRepository.findByIdOrThrow(db.submoduleCases.getId());
+		Submodule submodule = submoduleRepository.findByIdOrThrow(db.getSubmoduleCases().getId());
 		assertThat(submodule.getColumn()).isEqualTo(10);
 		assertThat(submodule.getRow()).isEqualTo(11);
 	}
 
 	@Test
 	void deleteSkill() {
-		submoduleController.deleteSubmodule(db.submoduleCases.getId(), "block");
-		assertThat(submoduleRepository.existsById(db.submoduleCases.getId())).isFalse();
+		Long submoduleCasesId = db.getSubmoduleCases().getId();
+
+		submoduleController.deleteSubmodule(submoduleCasesId, "block");
+		assertThat(submoduleRepository.existsById(submoduleCasesId)).isFalse();
 	}
 
 	@Test
 	void endpointsAreProtected() throws Exception {
-		mvc.perform(patch("/submodule/{id}", db.submoduleCases.getId()))
+		mvc.perform(patch("/submodule/{id}", db.getSubmoduleCases().getId()))
 				.andExpect(status().isForbidden());
 		mvc.perform(post("/submodule"))
 				.andExpect(status().isForbidden());

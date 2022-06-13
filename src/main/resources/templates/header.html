@@ -28,16 +28,41 @@
         <nav aria-label="primary" class="header__links"></nav>
 
         <ul class="header__icons">
-            <li class="header__icon" th:unless="${@authorisationService.isAuthenticated()}">
-                <a class="fa-solid fa-right-to-bracket" th:href="@{/auth/login}"></a>
+            <li
+                class="header__icon header__button"
+                th:unless="${@authorisationService.isAuthenticated()}">
+                <a th:href="@{/auth/login}">
+                    <span class="fa-solid fa-right-to-bracket"></span>
+                    Login
+                </a>
             </li>
             <li class="header__icon" th:if="${@authorisationService.isAuthenticated()}">
-                <a class="fa-solid fa-user" th:href="@{/}"></a>
-            </li>
-            <li class="header__icon" th:if="${@authorisationService.isAuthenticated()}">
-                <form th:action="@{/auth/logout}" method="post">
-                    <button type="submit" class="fa-solid fa-right-from-bracket"></button>
-                </form>
+                <button class="header__button" id="dropdown-button">
+                    <span th:text="${@authorisationService.getAuthPerson().displayName}"></span>
+                    <span id="dropdown-icon" class="fa-solid fa-angle-down"></span>
+                </button>
+                <ul id="dropdown" class="header__dropdown">
+                    <li>
+                        <a th:href="@{/}">
+                            <span class="fa-solid fa-user"></span>
+                            Your Profile
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/inventory}">
+                            <span class="fa-solid fa-boxes-stacked"></span>
+                            Inventory
+                        </a>
+                    </li>
+                    <li>
+                        <form th:action="@{/auth/logout}" method="post">
+                            <button type="submit">
+                                <span class="fa-solid fa-right-from-bracket"></span>
+                                Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
             </li>
         </ul>
     </header>
