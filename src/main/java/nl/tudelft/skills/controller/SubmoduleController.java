@@ -67,17 +67,10 @@ public class SubmoduleController {
 	@PreAuthorize("@authorisationService.canCreateSubmodule(#create.module.id)")
 	public String createSubmodule(SubmoduleCreateDTO create, Model model) {
 		Submodule submodule = submoduleRepository.save(create.apply());
-		EditionLevelEditionViewDTO circuit = EditionLevelEditionViewDTO.builder()
-				.id(submodule.getModule().getEdition().getId())
-				.modules(moduleRepository.findAllByEditionId(submodule.getModule().getEdition().getId())
-						.stream()
-						.map(m -> EditionLevelModuleViewDTO.builder().id(m.getId()).name(m.getName()).build())
-						.toList())
-				.build();
 
 		model.addAttribute("block", View.convert(submodule, EditionLevelSubmoduleViewDTO.class));
 		model.addAttribute("group", submodule.getModule());
-		model.addAttribute("circuit", circuit);
+		model.addAttribute("circuit", buildCircuitFromSubmodule(submodule));
 		model.addAttribute("canEdit", true);
 		model.addAttribute("canDelete", true);
 		model.addAttribute("groupType", "module");
@@ -114,23 +107,31 @@ public class SubmoduleController {
 		submoduleRepository.save(patch.apply(submodule));
 		patch.getRemovedItems().forEach(skillService::deleteSkill);
 
-		EditionLevelEditionViewDTO circuit = EditionLevelEditionViewDTO.builder()
+		model.addAttribute("level", "edition");
+		model.addAttribute("groupType", "module");
+		model.addAttribute("block", View.convert(submodule, EditionLevelSubmoduleViewDTO.class));
+		model.addAttribute("group", submodule.getModule());
+		model.addAttribute("circuit", buildCircuitFromSubmodule(submodule));
+		model.addAttribute("canEdit", true);
+		model.addAttribute("canDelete", true);
+
+		return "block/view";
+	}
+
+	/**
+	 * Creates a circuit view from a submodule.
+	 *
+	 * @param  submodule The submodule
+	 * @return           The circuit view
+	 */
+	private EditionLevelEditionViewDTO buildCircuitFromSubmodule(Submodule submodule) {
+		return EditionLevelEditionViewDTO.builder()
 				.id(submodule.getModule().getEdition().getId())
 				.modules(moduleRepository.findAllByEditionId(submodule.getModule().getEdition().getId())
 						.stream()
 						.map(m -> EditionLevelModuleViewDTO.builder().id(m.getId()).name(m.getName()).build())
 						.toList())
 				.build();
-
-		model.addAttribute("level", "edition");
-		model.addAttribute("groupType", "module");
-		model.addAttribute("block", View.convert(submodule, EditionLevelSubmoduleViewDTO.class));
-		model.addAttribute("group", submodule.getModule());
-		model.addAttribute("circuit", circuit);
-		model.addAttribute("canEdit", true);
-		model.addAttribute("canDelete", true);
-
-		return "block/view";
 	}
 
 	/**

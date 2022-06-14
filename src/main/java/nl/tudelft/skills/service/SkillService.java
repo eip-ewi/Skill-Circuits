@@ -44,6 +44,7 @@ public class SkillService {
 	public Skill deleteSkill(Long id) {
 		Skill skill = skillRepository.findByIdOrThrow(id);
 		skill.getChildren().forEach(c -> c.getParents().remove(skill));
+		skill.getTasks().forEach(t -> t.getPersons().forEach(p -> p.getTasksCompleted().remove(t)));
 		skillRepository.delete(skill);
 		return skill;
 	}

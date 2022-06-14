@@ -48,7 +48,6 @@ public class SkillPatchDTO extends Patch<Skill> {
 	private Long id;
 	@NotBlank
 	private String name;
-	@NotNull
 	@Builder.Default
 	private Boolean essential = false;
 	private SubmoduleIdDTO submodule;

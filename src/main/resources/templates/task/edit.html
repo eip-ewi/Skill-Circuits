@@ -23,16 +23,16 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <div layout:fragment="icon" th:if="${canEdit}" class="select item__icon__edit" data-edit="only">
-        <span
+        <button
             data-edit="only"
             th:id="|item-${item.id}-icon|"
-            th:class="|select__label fa-solid fa-${item.type.icon}|"></span>
+            th:class="|select__label fa-solid fa-${item.type.icon}|"></button>
         <div class="select__items" data-edit="only">
             <ul data-edit="only">
                 <li
                     data-edit="only"
                     th:each="type : ${T(nl.tudelft.skills.model.TaskType).values()}">
-                    <button data-edit="only" th:data-value="${type}" type="button">
+                    <button tabindex="-1" data-edit="only" th:data-value="${type}" type="button">
                         <span
                             data-edit="only"
                             class="fa-solid"
@@ -64,24 +64,58 @@
     <script layout:fragment="script">
         function selectItemIcon() {
             $(this)
-                .parent()
-                .parent()
-                .parent()
+                .closest(".select__items")
                 .children("select")
                 .val($(this).data("value"))
                 .change();
             $(".select__items *").blur();
+            $(this).closest(".select__items").css("pointer-events", "none");
+            $(this)
+                .closest(".select")
+                .children(".select__label")
+                .one("mouseover", function () {
+                    $(this).closest(".select").children(".select__items").css("pointer-events", "");
+                });
+        }
+
+        function selectNavigate(event) {
+            if (event.which === 38) {
+                // up
+                event.preventDefault();
+                const prev = $(this).closest("li").prev();
+                (prev.length > 0
+                    ? prev.children("button")
+                    : $(this).closest("ul").find("li:last-child button")
+                ).focus();
+            } else if (event.which === 40) {
+                // down
+                event.preventDefault();
+                const next = $(this).closest("li").next();
+                (next.length > 0
+                    ? next.children("button")
+                    : $(this).closest("ul").find("li:first-child button")
+                ).focus();
+            }
         }
 
         function changeSelectedIcon() {
             const newIcon = $(this).children("option:selected").data("icon");
-            const label = $(this).parent().parent().children(".select__label");
+            const label = $(this).closest(".select").children(".select__label");
             label.removeClass();
             label.addClass(["select__label", "fa-solid", `fa-${newIcon}`]);
         }
 
         document.addEventListener("DOMContentLoaded", function () {
-            $(".select__items button").click(selectItemIcon);
+            const buttons = $(".select__items button");
+            buttons.click(selectItemIcon);
+            buttons.keydown(selectNavigate);
+            $(".select__label").focus(function () {
+                $(this)
+                    .closest(".select")
+                    .find(".select__items li:first-child")
+                    .children("button")
+                    .focus();
+            });
             $(".select__items > select").change(changeSelectedIcon);
         });
     </script>

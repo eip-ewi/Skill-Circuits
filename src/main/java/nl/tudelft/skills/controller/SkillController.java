@@ -70,19 +70,11 @@ public class SkillController {
 	@PreAuthorize("@authorisationService.canCreateSkill(#create.submodule.id)")
 	public String createSkill(SkillCreateDTO create, Model model) {
 		Skill skill = skillRepository.save(create.apply());
-		ModuleLevelModuleViewDTO circuit = ModuleLevelModuleViewDTO.builder()
-				.id(skill.getSubmodule().getModule().getId())
-				.submodules(submoduleRepository.findAllByModuleId(skill.getSubmodule().getModule().getId())
-						.stream()
-						.map(s -> ModuleLevelSubmoduleViewDTO.builder().id(s.getId()).name(s.getName())
-								.build())
-						.toList())
-				.build();
 
 		model.addAttribute("level", "module");
 		model.addAttribute("block", View.convert(skill, ModuleLevelSkillViewDTO.class));
 		model.addAttribute("group", skill.getSubmodule());
-		model.addAttribute("circuit", circuit);
+		model.addAttribute("circuit", buildCircuitFromSkill(skill));
 		model.addAttribute("canEdit", true);
 		model.addAttribute("canDelete", true);
 		return "block/view";
@@ -117,7 +109,25 @@ public class SkillController {
 		skillRepository.save(patch.apply(skill));
 		taskRepository.deleteAllByIdIn(patch.getRemovedItems());
 
-		ModuleLevelModuleViewDTO circuit = ModuleLevelModuleViewDTO.builder()
+		model.addAttribute("level", "module");
+		model.addAttribute("groupType", "submodule");
+		model.addAttribute("block", View.convert(skill, ModuleLevelSkillViewDTO.class));
+		model.addAttribute("group", skill.getSubmodule());
+		model.addAttribute("circuit", buildCircuitFromSkill(skill));
+		model.addAttribute("canEdit", true);
+		model.addAttribute("canDelete", true);
+
+		return "block/view";
+	}
+
+	/**
+	 * Creates a circuit view from a skill.
+	 *
+	 * @param  skill The skill
+	 * @return       The circuit view
+	 */
+	private ModuleLevelModuleViewDTO buildCircuitFromSkill(Skill skill) {
+		return ModuleLevelModuleViewDTO.builder()
 				.id(skill.getSubmodule().getModule().getId())
 				.submodules(submoduleRepository.findAllByModuleId(skill.getSubmodule().getModule().getId())
 						.stream()
@@ -125,16 +135,6 @@ public class SkillController {
 								.build())
 						.toList())
 				.build();
-
-		model.addAttribute("level", "module");
-		model.addAttribute("groupType", "submodule");
-		model.addAttribute("block", View.convert(skill, ModuleLevelSkillViewDTO.class));
-		model.addAttribute("group", skill.getSubmodule());
-		model.addAttribute("circuit", circuit);
-		model.addAttribute("canEdit", true);
-		model.addAttribute("canDelete", true);
-
-		return "block/view";
 	}
 
 	/**

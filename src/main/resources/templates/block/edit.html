@@ -90,6 +90,12 @@
             block.attr("draggable", true);
 
             block.find(".item[data-new='true']").remove();
+            const deleted = block.find(".item[data-delete='true']");
+            deleted.attr("data-delete", false);
+            deleted.data("delete", false);
+            block.find(".item[data-delete='true']").attr("data-delete", false);
+            block.find("input").prop("disabled", false);
+            block.find("select").attr("data-disabled", false);
             $(`#${block.attr("id")} input:not([type="hidden"])`).each((i, field) =>
                 $(field).val($(field).data("initial"))
             );

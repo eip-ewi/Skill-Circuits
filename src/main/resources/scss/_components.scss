@@ -48,6 +48,12 @@
     cursor: initial;
     position: relative;
 
+    &__label {
+        background: none;
+        border: none;
+        font-size: 1rem;
+    }
+
     &:is(&:hover, &:focus-within):not([data-disabled="true"]) > &__items {
         transform: scaleY(1);
     }
