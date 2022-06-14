@@ -108,6 +108,16 @@
 
         function saveEdit() {
             const block = $(this).parent().parent();
+
+            let valid = true;
+            block.find("input").each((i, e) => {
+                e.reportValidity();
+                valid = valid && e.checkValidity();
+            });
+            if (!valid) {
+                return;
+            }
+
             const data = {};
             block
                 .children(".block__header[data-edit='only']")

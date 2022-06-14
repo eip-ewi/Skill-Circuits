@@ -46,6 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Transactional
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
 public class AuthorisationServiceTest {
 
