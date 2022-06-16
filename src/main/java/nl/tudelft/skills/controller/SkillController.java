@@ -107,6 +107,8 @@ public class SkillController {
 	public String patchSkill(@Valid @RequestBody SkillPatchDTO patch, Model model) {
 		Skill skill = skillRepository.findByIdOrThrow(patch.getId());
 		skillRepository.save(patch.apply(skill));
+		taskRepository.findAllByIdIn(patch.getRemovedItems())
+				.forEach(t -> t.getPersons().forEach(p -> p.getTasksCompleted().remove(t)));
 		taskRepository.deleteAllByIdIn(patch.getRemovedItems());
 
 		model.addAttribute("level", "module");

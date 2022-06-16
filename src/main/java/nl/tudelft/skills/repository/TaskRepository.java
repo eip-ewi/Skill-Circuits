@@ -18,6 +18,7 @@
 package nl.tudelft.skills.repository;
 
 import java.util.Collection;
+import java.util.List;
 
 import nl.tudelft.skills.model.Task;
 
@@ -29,6 +30,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 	default Task findByIdOrThrow(Long id) {
 		return findById(id).orElseThrow(() -> new ResourceNotFoundException("Task was not found: " + id));
 	}
+
+	List<Task> findAllByIdIn(Collection<Long> id);
 
 	void deleteAllByIdIn(Collection<Long> id);
 
