@@ -17,3 +17,18 @@
     background-color: var(--background-colour);
     font-family: var(--font);
 }
+
+$font-sizes: (
+    "regular": 1rem,
+    "big": 1.25rem,
+    "bigger": 1.5rem,
+    "large": 2rem,
+);
+@each $name, $size in $font-sizes {
+    .font_size_#{$name} {
+        font-size: $size;
+    }
+}
+.font_bold {
+    font-weight: bold;
+}

@@ -15,21 +15,38 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.repository;
+package nl.tudelft.skills.dto.patch;
 
-import java.util.List;
+import java.util.*;
 
-import nl.tudelft.skills.model.SCModule;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import nl.tudelft.librador.dto.patch.Patch;
+import nl.tudelft.skills.model.Skill;
 
-public interface ModuleRepository extends JpaRepository<SCModule, Long> {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class SubmoduleLevelSkillPatchDTO extends Patch<Skill> {
 
-	default SCModule findByIdOrThrow(Long id) {
-		return findById(id).orElseThrow(() -> new ResourceNotFoundException("Module was not found: " + id));
+	@NotNull
+	private Long id;
+	@NotBlank
+	private String name;
+
+	@Override
+	protected void applyOneToOne() {
+		updateNonNull(name, data::setName);
 	}
 
-	List<SCModule> findAllByEditionId(Long editionId);
+	@Override
+	protected void validate() {
 
+	}
 }

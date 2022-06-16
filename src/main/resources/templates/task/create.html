@@ -22,89 +22,88 @@
     lang="en"
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-    <div
-        th:if="${@authorisationService.canEditSkillInEdition(module.edition.id)}"
+    <li
         layout:fragment="form"
-        class="hidden"
-        id="create-task-wrapper">
-        <div id="create-task">
-            <form id="create-task-form" class="create item__form">
-                <input id="create-task-skill" name="skill.id" type="hidden" />
-
-                <input
-                    id="create-task-name"
-                    placeholder="Task name"
-                    aria-label="Name"
-                    name="name"
-                    type="text"
-                    required />
-
-                <div class="item__form__url">
-                    <button
-                        id="create-task-link-button"
-                        type="button"
-                        class="fa-solid fa-link"></button>
-                    <input
-                        id="create-task-link"
-                        placeholder="URL"
-                        aria-label="Link"
-                        name="link"
-                        type="url"
-                        class="hidden" />
+        id="create-task"
+        class="hidden item"
+        data-edit="only"
+        data-new="true">
+        <input type="hidden" name="skill.id" />
+        <input
+            name="time"
+            aria-label="Task time"
+            class="item__button__edit"
+            required
+            type="number"
+            min="0"
+            data-edit="only"
+            value="0" />
+        <div class="item__content" data-edit="only">
+            <div class="select item__icon__edit" data-edit="only">
+                <span
+                    class="select__label fa-solid"
+                    th:classappend="|fa-${T(nl.tudelft.skills.model.TaskType).values()[0].icon}|"
+                    data-edit="only"></span>
+                <div class="select__items" data-edit="only">
+                    <ul data-edit="only">
+                        <li
+                            data-edit="only"
+                            th:each="type : ${T(nl.tudelft.skills.model.TaskType).values()}">
+                            <button data-edit="only" th:data-value="${type}" type="button">
+                                <span
+                                    data-edit="only"
+                                    class="fa-solid"
+                                    th:classappend="|fa-${type.icon}|"></span>
+                                <span
+                                    data-edit="only"
+                                    th:text="#{|task.type.${#strings.toLowerCase(type.name())}|}"></span>
+                            </button>
+                        </li>
+                    </ul>
+                    <select data-edit="only" name="type" aria-label="Task type" hidden required>
+                        <option
+                            data-edit="only"
+                            th:each="type : ${T(nl.tudelft.skills.model.TaskType).values()}"
+                            th:data-icon="${type.icon}"
+                            th:value="${type}"></option>
+                    </select>
                 </div>
-
-                <button type="button" id="create-task-cancel" class="fa-solid fa-xmark"></button>
-                <button type="submit" class="fa-solid fa-check"></button>
-            </form>
+            </div>
+            <input
+                type="text"
+                data-edit="only"
+                name="name"
+                required
+                placeholder="Name"
+                aria-label="Name" />
         </div>
-    </div>
+        <div class="hover_input" data-edit="only">
+            <input
+                placeholder="Task link"
+                data-edit="only"
+                aria-label="Task URL"
+                type="url"
+                name="link" />
+            <span data-edit="only" class="fa-solid fa-link always_visible"></span>
+        </div>
+        <div class="item__buttons" data-edit="only">
+            <button class="fa-solid fa-trash item__delete always_visible" data-edit="only"></button>
+        </div>
+    </li>
 
-    <script
-        th:if="${@authorisationService.canEditSkillInEdition(module.edition.id)}"
-        layout:fragment="script">
-        function createTask() {
-            $(".task__create").removeClass("hidden");
-
-            let skillId = $(this).data("block");
-            $("#create-task-skill").val(skillId);
-
-            let link = $("#create-task-link");
-
-            $("#create-task-name").val("");
-            link.addClass("hidden");
-            link.val("");
-            $(this).addClass("hidden");
-            $(this).after($("#create-task"));
+    <script th:if="${canEdit}" layout:fragment="script">
+        function createItem() {
+            const button = $(this);
+            const elem = $("#create-task").clone(true);
+            elem.removeAttr("id");
+            elem.removeClass("hidden");
+            elem.children("input[type='hidden']").val(button.data("block"));
+            button.parent().after(elem);
+            button.closest("ul").find("li:nth-child(2) input[name='time']").focus();
         }
 
         document.addEventListener("DOMContentLoaded", function () {
-            $("#create-task-form").submit(function (event) {
-                event.preventDefault();
-                $.post("/task", $("#create-task-form").serialize(), html => {
-                    let skillId = $("#create-task-skill").val();
-                    let element = $("<div/>").append(html).children()[0];
-                    $(`#create-item-${skillId}-button`).before(element);
-
-                    $(".item__create").removeClass("hidden");
-                    $("#create-task-wrapper").append($("#create-task"));
-
-                    $(`#${element.id} > .item__buttons > .item__edit`).click(editItem);
-                    $(`#${element.id} > .item__buttons > .item__delete`).click(deleteItem);
-                });
-            });
-
-            $(".item__create").click(createTask);
-
-            $("#create-task-cancel").click(function () {
-                $(".item__create").removeClass("hidden");
-                $("#create-task-wrapper").append($("#create-task"));
-            });
-
-            $("#create-task-link-button").click(function () {
-                let link = $("#create-task-link");
-                link.val("");
-                link.toggleClass("hidden");
-            });
+            $(".item__create").click(createItem);
         });
     </script>
 </html>

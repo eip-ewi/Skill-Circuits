@@ -25,3 +25,72 @@
         }
     }
 }
+
+.hover_input {
+    position: relative;
+
+    & > input {
+        position: absolute;
+        transform: scale(0);
+    }
+
+    &:hover > input:not([disabled]),
+    & > input:not([disabled]):focus {
+        transform: scale(1);
+    }
+
+    input:placeholder-shown + span {
+        color: var(--grey-500);
+    }
+}
+
+.select {
+    cursor: initial;
+    position: relative;
+
+    &__label {
+        background: none;
+        border: none;
+        font-size: 1rem;
+    }
+
+    &:is(&:hover, &:focus-within):not([data-disabled="true"]) > &__items {
+        transform: scaleY(1);
+    }
+
+    &__items {
+        transform: scaleY(0);
+
+        & > ul {
+            background-color: var(--primary-light);
+            border: 1px solid var(--primary-dark);
+            display: flex;
+            flex-direction: column;
+            list-style: none;
+            position: absolute;
+            z-index: 30;
+
+            & > li > button {
+                align-items: center;
+                background: none;
+                border: none;
+                display: flex;
+                gap: 0.25rem;
+                height: 100%;
+                padding: 0.1rem 0.25rem;
+                width: 100%;
+
+                &:hover,
+                &:focus-visible {
+                    background-color: var(--primary-green);
+                    color: var(--primary-light);
+                }
+            }
+        }
+    }
+}
+
+.selectbox {
+    background-color: var(--primary-light);
+    border: 1px solid var(--primary-dark);
+}

@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.dto.patch;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -41,12 +42,16 @@ public class TaskPatchDTO extends Patch<Task> {
 	@NotBlank
 	private String name;
 	@NotNull
+	@Min(0)
+	private Integer time;
+	@NotNull
 	private TaskType type;
 	private String link;
 
 	@Override
 	protected void applyOneToOne() {
 		updateNonNull(name, data::setName);
+		updateNonNull(time, data::setTime);
 		updateNonNull(type, data::setType);
 		data.setLink(link == null || link.isBlank() ? null : link);
 	}

@@ -63,7 +63,9 @@ public class TaskControllerTest extends ControllerTest {
 		String element = mvc.perform(post("/task").with(csrf())
 				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
 						new BasicNameValuePair("name", "Task"),
-						new BasicNameValuePair("skill.id", Long.toString(db.getSkillVariables().getId()))))))
+						new BasicNameValuePair("skill.id", Long.toString(db.getSkillVariables().getId())),
+						new BasicNameValuePair("time", "0"),
+						new BasicNameValuePair("type", "READING")))))
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isOk())
 				.andReturn().getResponse().getContentAsString();
@@ -83,6 +85,7 @@ public class TaskControllerTest extends ControllerTest {
 		taskController.patchTask(TaskPatchDTO.builder()
 				.id(db.getTaskDo10a().getId())
 				.name("Updated")
+				.time(0)
 				.type(TaskType.EXERCISE)
 				.build());
 

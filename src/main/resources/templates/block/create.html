@@ -99,16 +99,24 @@
                     $("#create-block-wrapper").append($("#create-block"));
                     $("#create-block-name").val("");
 
-                    let groupName = $(`#${element.id} > .block__header > .block__group__name`);
+                    element = $(`#${element.id}`);
+
+                    let groupName = element.find(".block__group__name");
                     groupName.mouseenter(mouseEnterGroup);
                     groupName.mouseleave(mouseLeaveGroup);
-                    $(`#${element.id} > .block__buttons > .block__edit`).click(editBlock);
-                    $(`#${element.id} > .block__buttons > .block__delete`).click(deleteBlock);
+
+                    element.find(".block__edit").click(editBlock);
+                    element.find(".block__edit__cancel").click(cancelEditBlock);
+                    element.find(".block__edit__save").click(saveEdit);
+                    element.find(".block__delete").click(deleteBlock);
+
                     if (blockType === "skill") {
-                        $(`#${element.id} > .items > li > .item__create`).click(createTask);
-                        $(`#${element.id} > .block__connect.from > button`).click(connectFrom);
-                        $(`#${element.id} > .block__connect.to > button`).click(connectTo);
+                        element.find(".item__create").click(createItem);
+                        element.find(".block__connect.from > button").click(connectFrom);
+                        element.find(".block__connect.to > button").click(connectTo);
                     }
+                    element.find(".item__delete").click(deleteItem);
+
                     updateCheckpointPositions();
                 });
             });

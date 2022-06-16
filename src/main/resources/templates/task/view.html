@@ -41,32 +41,38 @@
                     class="item__button"
                     th:onclick="|toggleCompleted(${item.id})|"
                     th:text="${item.time}"></button>
+                <input
+                    class="item__button__edit"
+                    th:data-initial="${item.time}"
+                    required
+                    name="time"
+                    type="number"
+                    min="0"
+                    data-edit="only"
+                    th:value="${item.time}" />
             </th:block>
             <th:block layout:fragment="item-before-content">
                 <span
                     th:id="|item-${item.id}-icon|"
                     th:class="|fa-solid fa-${item.type.icon}|"></span>
-            </th:block>
-            <th:block layout:fragment="item-name">
-                <span
-                    th:id="|item-${item.id}-name|"
-                    class="item__name"
-                    th:text="${item.name}"></span>
+                <th:block layout:replace="~{task/edit :: icon}"></th:block>
             </th:block>
             <th:block layout:fragment="item-after-content">
                 <span
                     th:if="${item.link}"
                     th:id="|item-${item.id}-link-icon|"
                     class="fa-solid fa-link always_visible"></span>
-            </th:block>
-            <th:block layout:fragment="item-buttons">
-                <th:block th:if="${canEdit}">
-                    <button
-                        class="fa-solid fa-pen item__edit"
-                        th:data-item="${item.id}"
-                        th:data-type="${item.type}"
-                        th:data-icon="${item.type.icon}"></button>
-                </th:block>
+                <div class="hover_input" data-edit="only">
+                    <input
+                        th:data-initial="${item.link}"
+                        placeholder="Task link"
+                        data-edit="only"
+                        aria-label="Task URL"
+                        type="url"
+                        name="link"
+                        th:value="${item.link}" />
+                    <span data-edit="only" class="fa-solid fa-link always_visible"></span>
+                </div>
             </th:block>
         </th:block>
     </th:block>

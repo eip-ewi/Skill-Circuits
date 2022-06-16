@@ -27,7 +27,6 @@
         class="block"
         th:style="|grid-row: ${block.row + 1}; grid-column: ${block.column + 1}|"
         th:draggable="${canEdit}"
-        th:classappend="${canEdit} ? 'draggable' : ''"
         th:data-group="${group.id}"
         th:with="
      parentIds = ${block instanceof T(nl.tudelft.skills.dto.view.BlockView)} ? ${block.parentIds} : ${{}},
@@ -54,7 +53,16 @@
                 th:text="${group.name}"></a>
         </div>
 
-        <ul class="items">
+        <th:block layout:replace="~{block/edit :: header}"></th:block>
+
+        <ul data-edit="always" class="items">
+            <li data-edit="only" th:if="${canEdit and level == 'module'}">
+                <button
+                    data-edit="only"
+                    th:id="|create-item-${block.id}-button|"
+                    class="item__create fa-solid fa-plus"
+                    th:data-block="${block.id}"></button>
+            </li>
             <th:block th:each="item : ${block.items}">
                 <th:block th:if="${level == 'module'}">
                     <li layout:replace="~{task/view :: item}"></li>
@@ -63,23 +71,24 @@
                     <li layout:replace="~{item/view :: item}"></li>
                 </th:block>
             </th:block>
-            <li th:if="${canEdit and level == 'module'}">
-                <button
-                    th:id="|create-item-${block.id}-button|"
-                    class="item__create fa-solid fa-plus"
-                    th:data-block="${block.id}"></button>
-            </li>
         </ul>
 
-        <div class="block__buttons">
+        <div data-edit="always" class="block__buttons">
             <button
+                data-edit="always"
                 class="fa-solid fa-pen block__edit"
                 th:if="${canEdit}"
                 th:data-block="${block.id}"></button>
             <button
+                data-edit="always"
                 class="fa-solid fa-trash block__delete"
                 th:if="${canDelete}"
                 th:data-block="${block.id}"></button>
+        </div>
+
+        <div data-edit="only" class="block__form__buttons">
+            <button data-edit="only" type="button" class="block__edit__cancel">Cancel</button>
+            <button data-edit="only" type="submit" class="block__edit__save">Save</button>
         </div>
 
         <th:block th:if="${level == 'module' and canEdit}">

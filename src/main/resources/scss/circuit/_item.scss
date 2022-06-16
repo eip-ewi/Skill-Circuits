@@ -1,6 +1,8 @@
 @use "../mixins" as *;
 
 .items {
+    display: flex;
+    flex-direction: column-reverse; /* Fix for z-index on edit elements not working */
     list-style-type: none;
 }
 
@@ -8,6 +10,12 @@
     align-items: center;
     display: flex;
     gap: 0.5rem;
+
+    &[data-delete="true"] {
+        & > :not(.item__buttons) {
+            opacity: 30%;
+        }
+    }
 
     &__button {
         @include button(
@@ -20,6 +28,17 @@
         );
         align-self: stretch;
         min-width: 2.5rem;
+
+        &__edit {
+            background-color: var(--primary-dark);
+            border: 1px solid var(--primary-light);
+            color: var(--primary-light);
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+            align-self: stretch;
+            max-width: 2.5rem;
+            text-align: center;
+        }
     }
 
     &.completed {
@@ -59,47 +78,9 @@
         }
     }
 
-    &__form {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        & * {
-            font-size: 1rem;
-        }
-        & input[type="text"],
-        & input[type="url"] {
-            max-width: 12rem;
-        }
-        & input[type="option"] {
-            min-width: 12rem;
-        }
-        &__dropdown {
-            min-width: 12rem;
-        }
-        & button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            &:hover {
-                color: var(--primary-green);
-            }
-        }
-
-        &__url {
-            display: flex;
-            min-width: 1.5rem;
-            position: relative;
-            & > input {
-                left: 0;
-                padding-left: 1.5rem;
-            }
-            & > button {
-                left: 3px;
-                position: absolute;
-                top: 3px;
-                z-index: 20;
-            }
-        }
+    &__icon__edit {
+        min-width: 20px; /* Size of largest icon */
+        text-align: center;
     }
 
     &__create {

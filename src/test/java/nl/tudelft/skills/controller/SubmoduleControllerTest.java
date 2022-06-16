@@ -59,7 +59,8 @@ public class SubmoduleControllerTest extends ControllerTest {
 	public SubmoduleControllerTest(SubmoduleRepository submoduleRepository, SkillService skillService,
 			ModuleRepository moduleRepository) {
 		this.moduleRepository = moduleRepository;
-		this.submoduleController = new SubmoduleController(submoduleRepository, skillService);
+		this.submoduleController = new SubmoduleController(submoduleRepository, moduleRepository,
+				skillService);
 		this.submoduleRepository = submoduleRepository;
 	}
 
@@ -94,7 +95,7 @@ public class SubmoduleControllerTest extends ControllerTest {
 				.id(db.getSubmoduleCases().getId())
 				.name("Updated")
 				.module(new SCModuleIdDTO(db.getModuleProofTechniques().getId()))
-				.build());
+				.build(), model);
 
 		Submodule submodule = submoduleRepository.findByIdOrThrow(db.getSubmoduleCases().getId());
 		assertThat(submodule.getName()).isEqualTo("Updated");
