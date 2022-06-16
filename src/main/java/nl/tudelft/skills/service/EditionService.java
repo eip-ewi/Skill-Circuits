@@ -42,8 +42,8 @@ public class EditionService {
 	}
 
 	/**
-	 * Return EditionViewDto for edition with id, including edition name and course from Labrador db and
-	 * SCModules.
+	 * Return EditionLevelEditionViewDto for edition with id, including edition name and course from Labrador
+	 * db and SCModules.
 	 *
 	 * @param  id Edition id.
 	 * @return    EditionViewDTO for edition with id.

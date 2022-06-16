@@ -81,6 +81,22 @@ public class EditionController {
 	}
 
 	/**
+	 * Gets the setup page for a single edition.
+	 *
+	 * @param  id    The id of the edition
+	 * @param  model The model to add data to
+	 * @return       The page to load
+	 */
+	@GetMapping("{id}/setup")
+	@PreAuthorize("@authorisationService.canEditEdition(#id)")
+	public String getEditionEditPage(@PathVariable Long id, Model model) {
+		EditionLevelEditionViewDTO edition = editionService.getEditionView(id);
+
+		model.addAttribute("edition", edition);
+		return "edition-setup/view";
+	}
+
+	/**
 	 * Sets the edition to visible for students.
 	 *
 	 * @param  id The id of the edition

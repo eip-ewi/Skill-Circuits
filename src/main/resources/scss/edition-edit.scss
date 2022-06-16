@@ -1,0 +1,22 @@
+@use "mixins" as *;
+
+#module-list {
+    list-style: none;
+}
+.module-content {
+    display: flex;
+    gap: 1rem;
+    & > a {
+        text-decoration: none;
+    }
+    &__buttons {
+        display: flex;
+        gap: 0.5rem;
+        & > button {
+            @include icon-button;
+        }
+    }
+}
+#edit-module button {
+    @include icon-button;
+}

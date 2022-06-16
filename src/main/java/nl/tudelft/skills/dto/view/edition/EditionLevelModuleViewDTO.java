@@ -47,4 +47,8 @@ public class EditionLevelModuleViewDTO extends View<SCModule> implements GroupVi
 	public List<? extends BlockView> getBlocks() {
 		return submodules;
 	}
+
+	public int getSkillsCount() {
+		return submodules.stream().mapToInt(s -> s.getSkills().size()).sum();
+	}
 }

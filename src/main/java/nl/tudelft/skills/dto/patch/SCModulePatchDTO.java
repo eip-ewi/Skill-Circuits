@@ -34,9 +34,7 @@ public class SCModulePatchDTO extends Patch<SCModule> {
 
 	@NotNull
 	private Long id;
-	@NotBlank
 	private String name;
-	@NotNull
 	private SCEditionIdDTO edition;
 
 	@Override
