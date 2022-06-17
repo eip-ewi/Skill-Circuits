@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div
+        th:if="${@authorisationService.canEditModuleInEdition(edition.id)}"
+        layout:fragment="form"
+        class="hidden"
+        id="edit-module-wrapper">
+        <div id="edit-module">
+            <form id="edit-module-form" class="">
+                <input id="edit-module-id" name="id" type="hidden" />
+
+                <input id="edit-module-name" aria-label="Name" name="name" type="text" required />
+
+                <button type="button" id="edit-module-cancel" class="fa-solid fa-xmark"></button>
+                <button type="submit" class="fa-solid fa-check"></button>
+            </form>
+        </div>
+    </div>
+
+    <script
+        th:if="${@authorisationService.canEditModuleInEdition(edition.id)}"
+        layout:fragment="script">
+        function editModule() {
+            const moduleId = $(this).data("module");
+            $("#edit-module-id").val(moduleId);
+            $("#edit-module-name").val($(`#module-${moduleId}-name`).text());
+            $(`#module-${moduleId}`).append($("#edit-module"));
+
+            $(".module-content").removeClass("hidden");
+            $(`#module-${moduleId}-content`).addClass("hidden");
+        }
+        function cancelEditModule() {
+            $("#edit-module-wrapper").append($("#edit-module"));
+            $(".module-content").removeClass("hidden");
+        }
+        document.addEventListener("DOMContentLoaded", () => {
+            $(".module__edit").click(editModule);
+            $("#edit-module-cancel").click(cancelEditModule);
+            $("#edit-module-form").submit(e => {
+                e.preventDefault();
+                $.ajax({
+                    type: "PATCH",
+                    url: `/module`,
+                    data: $("#edit-module-form").serialize(),
+                    success: () => {
+                        location.reload();
+                    },
+                });
+            });
+        });
+    </script>
+</html>

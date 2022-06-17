@@ -50,7 +50,7 @@ public class SCEdition {
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@OneToMany(mappedBy = "edition")
+	@OneToMany(mappedBy = "edition", fetch = FetchType.EAGER)
 	private Set<Checkpoint> checkpoints = new HashSet<>();
 
 }

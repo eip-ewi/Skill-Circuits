@@ -21,8 +21,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.CheckpointCreateDTO;
 import nl.tudelft.skills.dto.patch.CheckpointPatchDTO;
+import nl.tudelft.skills.dto.view.checkpoint.CheckpointViewDTO;
 import nl.tudelft.skills.model.Checkpoint;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.CheckpointRepository;
@@ -35,6 +37,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -107,7 +110,7 @@ public class CheckpointController {
 	public ResponseEntity<Void> deleteCheckpoint(@RequestParam Long id) {
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(id);
 		Optional<Checkpoint> nextCheckpoint = checkpointService.findNextCheckpoint(checkpoint);
-		if (nextCheckpoint.isEmpty()) {
+		if (!checkpoint.getSkills().isEmpty() && nextCheckpoint.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.CONFLICT);
 		}
 		checkpoint.getSkills().forEach(skill -> {
@@ -127,6 +130,17 @@ public class CheckpointController {
 		skillRepository.findAllByIdIn(dto.getSkillIds()).forEach(skill -> skill.setCheckpoint(checkpoint));
 
 		return "redirect:module/" + moduleId;
+	}
+
+	@Transactional
+	@PostMapping("/setup")
+	@PreAuthorize("@authorisationService.canCreateCheckpointInEdition(#dto.getEdition().getId())")
+	public String createCheckpointSetup(CheckpointCreateDTO dto, Model model) {
+		model.addAttribute("checkpoint",
+				View.convert(checkpointRepository.save(dto.apply()), CheckpointViewDTO.class));
+
+		return "edition-setup/checkpoint";
+
 	}
 
 }

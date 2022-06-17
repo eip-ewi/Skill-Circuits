@@ -112,8 +112,7 @@ public class ModuleController {
 	}
 
 	/**
-	 * Creates a module.
-	 * Used during edition setup.
+	 * Creates a module. Used during edition setup.
 	 *
 	 * @param  create The DTO with information to create the module
 	 * @return        A new module html element
@@ -146,6 +145,7 @@ public class ModuleController {
 		moduleRepository.delete(module);
 		return "redirect:/edition/" + module.getEdition().getId();
 	}
+
 	/**
 	 * Deletes a module during setup.
 	 *
@@ -155,7 +155,7 @@ public class ModuleController {
 	@DeleteMapping("setup")
 	@Transactional
 	@PreAuthorize("@authorisationService.canDeleteModule(#id)")
-	public String deleteModuleSetup(@RequestParam Long id) {
+	public ResponseEntity<Void> deleteModuleSetup(@RequestParam Long id) {
 		SCModule module = moduleRepository.findByIdOrThrow(id);
 		module.getSubmodules().stream()
 				.flatMap(s -> s.getSkills().stream())
@@ -163,7 +163,7 @@ public class ModuleController {
 				.forEach(t -> t.getPersons()
 						.forEach(p -> p.getTasksCompleted().remove(t)));
 		moduleRepository.delete(module);
-		return "redirect:/edition/" + module.getEdition().getId() + "/setup";
+		return ResponseEntity.ok().build();
 	}
 
 	/**

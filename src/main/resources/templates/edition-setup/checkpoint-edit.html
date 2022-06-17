@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div
+        th:if="${@authorisationService.canEditCheckpointInEdition(edition.id)}"
+        layout:fragment="form"
+        class="hidden"
+        id="edit-checkpoint-wrapper">
+        <div id="edit-checkpoint">
+            <form id="edit-checkpoint-form" class="">
+                <input id="edit-checkpoint-id" name="id" type="hidden" />
+
+                <input
+                    id="edit-checkpoint-name"
+                    aria-label="Name"
+                    name="name"
+                    type="text"
+                    required />
+
+                <button
+                    type="button"
+                    id="edit-checkpoint-cancel"
+                    class="fa-solid fa-xmark"></button>
+                <button type="submit" class="fa-solid fa-check"></button>
+            </form>
+        </div>
+    </div>
+
+    <script
+        th:if="${@authorisationService.canEditCheckpointInEdition(edition.id)}"
+        layout:fragment="script">
+        function editCheckpoint() {
+            const checkpointId = $(this).data("checkpoint");
+            $("#edit-checkpoint-id").val(checkpointId);
+            $("#edit-checkpoint-name").val($(`#checkpoint-${checkpointId}-name`).text());
+            $(`#checkpoint-${checkpointId}`).append($("#edit-checkpoint"));
+
+            $(".checkpoint-content").removeClass("hidden");
+            $(`#checkpoint-${checkpointId}-content`).addClass("hidden");
+        }
+        function cancelEditCheckpoint() {
+            $("#edit-checkpoint-wrapper").append($("#edit-checkpoint"));
+            $(".checkpoint-content").removeClass("hidden");
+        }
+        document.addEventListener("DOMContentLoaded", () => {
+            $(".checkpoint__edit").click(editCheckpoint);
+            $("#edit-checkpoint-cancel").click(cancelEditCheckpoint);
+            $("#edit-checkpoint-form").submit(e => {
+                e.preventDefault();
+                $.ajax({
+                    type: "PATCH",
+                    url: `/checkpoint`,
+                    data: $("#edit-checkpoint-form").serialize(),
+                    success: () => {
+                        location.reload();
+                    },
+                });
+            });
+        });
+    </script>
+</html>

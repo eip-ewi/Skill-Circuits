@@ -17,12 +17,14 @@
  */
 package nl.tudelft.skills.controller;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
 
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
+import nl.tudelft.skills.dto.view.checkpoint.CheckpointViewDTO;
 import nl.tudelft.skills.dto.view.edition.EditionLevelEditionViewDTO;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.EditionRepository;
@@ -91,8 +93,10 @@ public class EditionController {
 	@PreAuthorize("@authorisationService.canEditEdition(#id)")
 	public String getEditionEditPage(@PathVariable Long id, Model model) {
 		EditionLevelEditionViewDTO edition = editionService.getEditionView(id);
+		List<CheckpointViewDTO> checkpoints = editionService.getCheckpointsByEditionId(id);
 
 		model.addAttribute("edition", edition);
+		model.addAttribute("checkpoints", checkpoints);
 		return "edition-setup/view";
 	}
 

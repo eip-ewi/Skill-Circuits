@@ -27,25 +27,22 @@
         layout:fragment="overlay"
         class="overlay"
         id="delete-module-overlay">
-        <form
-            id="delete-module-form"
-            class="confirmation"
-            th:action="@{/module/setup}"
-            th:method="delete">
+        <form id="delete-module-form" class="confirmation">
             <input id="delete-module-id" name="id" type="hidden" />
 
             <p>
                 Are you sure you want to delete
-                <span id="delete-module-name"></span>?
+                <span id="delete-module-name"></span>
+                ?
             </p>
             <div id="delete-module-confirmation">
                 <p>
-                    This will delete all <span id="delete-module-skills-count"></span> skills in this module and all tasks in them.
+                    This will delete all
+                    <span id="delete-module-skills-count"></span>
+                    skills in this module and all tasks in them.
                 </p>
-                <p>
-                    Type the name of the module below to confirm.
-                </p>
-                <input type="text" id="delete-module-confirmation-input"/>
+                <p>Type the name of the module below to confirm.</p>
+                <input type="text" id="delete-module-confirmation-input" />
             </div>
 
             <div class="confirmation__buttons">
@@ -68,10 +65,10 @@
             const deleteModuleConfirmation = $("#delete-module-confirmation");
             const deleteModuleConfirmationInput = $("#delete-module-confirmation-input");
 
-
             $("#delete-module-id").val(moduleId);
             $("#delete-module-name").text(moduleName);
             $("#delete-module-skills-count").text(moduleSkillsCount);
+            deleteModuleConfirmationInput.text("");
 
             if (moduleSkillsCount === 0) {
                 deleteModuleConfirmationInput.prop("required", false);
@@ -85,6 +82,18 @@
 
         document.addEventListener("DOMContentLoaded", function () {
             $(".module__delete").click(deleteModule);
+            $("#delete-module-form").submit(e => {
+                e.preventDefault();
+                $.ajax({
+                    url: "/module/setup",
+                    type: "DELETE",
+                    data: $("#delete-module-form").serialize(),
+                    success: () => {
+                        toggleOverlay("delete-module-overlay");
+                        $(`#module-${$("#delete-module-id").val()}`).remove();
+                    },
+                });
+            });
         });
     </script>
 </html>

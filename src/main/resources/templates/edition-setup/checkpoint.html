@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <li
+        th:id="|checkpoint-${checkpoint.id}|"
+        th:data-checkpoint="${checkpoint.id}"
+        layout:fragment="checkpoint"
+        class="editable-li">
+        <div th:id="|checkpoint-${checkpoint.id}-content|" class="checkpoint-content">
+            <p
+                th:id="|checkpoint-${checkpoint.id}-name|"
+                th:text="${checkpoint.name}"
+                class="checkpoint__name" />
+            <div class="button-container">
+                <button
+                    th:data-checkpoint="${checkpoint.id}"
+                    class="fa-solid fa-pencil checkpoint__edit"></button>
+                <button
+                    th:data-checkpoint="${checkpoint.id}"
+                    class="fa-solid fa-trash checkpoint__delete"
+                    onclick=""></button>
+            </div>
+        </div>
+    </li>
+</html>

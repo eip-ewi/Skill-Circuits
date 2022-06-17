@@ -1,0 +1,90 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <dialog
+        th:if="${@authorisationService.canDeleteCheckpointInEdition(edition.id)}"
+        layout:fragment="overlay"
+        class="overlay"
+        id="delete-checkpoint-overlay">
+        <form
+            id="delete-checkpoint-form"
+            class="confirmation"
+            th:action="@{/checkpoint}"
+            th:method="delete">
+            <input id="delete-checkpoint-id" name="id" type="hidden" />
+
+            <p>
+                Are you sure you want to delete
+                <span id="delete-checkpoint-name"></span>
+                ?
+            </p>
+
+            <div class="confirmation__buttons">
+                <button type="button" onclick="toggleOverlay('delete-checkpoint-overlay')">
+                    Cancel
+                </button>
+                <button type="submit">Delete checkpoint</button>
+            </div>
+            <p id="delete-checkpoint-conflict-warning" class="hidden">
+                Cannot delete checkpoint: this would leave some skills without checkpoint.
+            </p>
+        </form>
+    </dialog>
+
+    <script
+        th:if="${@authorisationService.canDeleteCheckpointInEdition(edition.id)}"
+        layout:fragment="script">
+        function deleteCheckpoint(event) {
+            toggleOverlay("delete-checkpoint-overlay");
+            const checkpointId = $(this).data("checkpoint");
+            const checkpointName = $(`#checkpoint-${checkpointId}-name`).text();
+
+            $("#delete-checkpoint-id").val(checkpointId);
+            $("#delete-checkpoint-name").text(checkpointName);
+            $("#delete-checkpoint-conflict-warning").addClass("hidden");
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            $(".checkpoint__delete").click(deleteCheckpoint);
+
+            $("#delete-checkpoint-form").submit(e => {
+                e.preventDefault();
+                $.ajax({
+                    url: "/checkpoint",
+                    type: "DELETE",
+                    data: $("#delete-checkpoint-form").serialize(),
+                    success: () => {
+                        toggleOverlay("delete-checkpoint-overlay");
+                        $(`#checkpoint-${$("#delete-checkpoint-id").val()}`).remove();
+                    },
+                    error: e => {
+                        if (e.status === 409) {
+                            $("#delete-checkpoint-conflict-warning").removeClass("hidden");
+                        }
+                    },
+                });
+            });
+        });
+    </script>
+</html>

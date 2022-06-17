@@ -18,6 +18,7 @@
 package nl.tudelft.skills.dto.create;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.constraints.NotBlank;
@@ -43,9 +44,12 @@ public class CheckpointCreateDTO extends Create<Checkpoint> {
 	private SCEditionIdDTO edition;
 	@NotNull
 	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-	private LocalDateTime deadline;
+	@Builder.Default
+	private LocalDateTime deadline = LocalDateTime.now();
+
 	@NotNull
-	private List<Long> skillIds;
+	@Builder.Default
+	private List<Long> skillIds = new ArrayList<>();
 
 	@Override
 	public Class<Checkpoint> clazz() {

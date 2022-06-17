@@ -1,15 +1,16 @@
 @use "mixins" as *;
 
-#module-list {
+ul {
     list-style: none;
 }
-.module-content {
+.editable-li > div {
     display: flex;
     gap: 1rem;
-    & > a {
+    & a {
         text-decoration: none;
+        color: var(--primary-dark);
     }
-    &__buttons {
+    & .button-container {
         display: flex;
         gap: 0.5rem;
         & > button {
@@ -17,6 +18,25 @@
         }
     }
 }
-#edit-module button {
-    @include icon-button;
+.overlay {
+    width: 25rem;
+}
+#edit-module,
+#edit-checkpoint {
+    & button {
+        @include icon-button;
+    }
+}
+#new-module-form,
+#new-checkpoint-form {
+    input {
+        padding: 0.25rem;
+    }
+    button {
+        @include button;
+        padding: 0.25rem;
+    }
+}
+#delete-checkpoint-conflict-warning {
+    color: var(--primary-red);
 }
