@@ -43,7 +43,7 @@
                     <label for="create-skill-checkpoint">Checkpoint</label>
                     <select id="create-skill-checkpoint" name="checkpoint.id" required>
                         <option
-                            th:each="checkpoint : ${module.checkpoints}"
+                            th:each="checkpoint : ${module.checkpointsInEdition}"
                             th:value="${checkpoint.id}"
                             th:text="${checkpoint.name}"></option>
                     </select>
