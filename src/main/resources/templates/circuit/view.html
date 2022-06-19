@@ -54,7 +54,8 @@
             <div
                 th:each="row : ${#numbers.sequence(0, rows)}"
                 class="ghost_block"
-                th:style="|grid-row: ${row + 1}; grid-column: ${columns + 1}|">
+                th:style="|grid-row: ${row + 1}; grid-column: ${columns + 1}|"
+                th:classappend="${rows == 1 ? 'ensured_wide' : ''}">
                 <span class="fa-solid fa-plus"></span>
             </div>
         </th:block>

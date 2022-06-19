@@ -65,18 +65,23 @@ public class EditionController {
 		EditionLevelEditionViewDTO edition = editionService.getEditionView(id);
 
 		Set<Pair<Integer, Integer>> positions = edition.getFilledPositions();
-		int columns = positions.stream().mapToInt(Pair::getFirst).max().orElse(-1) + 1;
-		int rows = positions.stream().mapToInt(Pair::getSecond).max().orElse(-1) + 1;
+		int columns = positions.stream().mapToInt(Pair::getFirst).max().orElse(0) + 1;
+		int rows = positions.stream().mapToInt(Pair::getSecond).max().orElse(0) + 1;
 		Boolean studentMode = (Boolean) session.getAttribute("student-mode-" + id);
 
 		model.addAttribute("level", "edition");
 		model.addAttribute("edition", edition);
 		model.addAttribute("columns", columns);
 		model.addAttribute("rows", rows);
-		model.addAttribute("emptySpaces", IntStream.range(0, rows).boxed()
-				.flatMap(row -> IntStream.range(0, columns).mapToObj(col -> Pair.of(col, row)))
-				.filter(pos -> !positions.contains(pos))
-				.toList());
+		if (positions.isEmpty()) {
+			model.addAttribute("emptySpaces", List.of(Pair.of(0, 0)));
+		} else {
+			model.addAttribute(IntStream.range(0, rows).boxed()
+					.flatMap(row -> IntStream.range(0, columns).mapToObj(col -> Pair.of(col, row)))
+					.filter(pos -> !positions.contains(pos))
+					.toList());
+		}
+
 		model.addAttribute("studentMode", studentMode != null && studentMode);
 
 		return "edition/view";
