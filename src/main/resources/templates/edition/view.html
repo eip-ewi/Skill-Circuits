@@ -46,6 +46,14 @@
                 <h1 th:text="${edition.name}"></h1>
 
                 <div class="circuit__header__buttons">
+                    <a
+                            id="edition-setup"
+                            class="circuit__button"
+                            title="setup"
+                            type="submit"
+                            th:href="@{|/edition/${edition.id}/setup|}">
+                        Setup
+                    </a>
                     <form
                         method="post"
                         id="publish-edition-form"
