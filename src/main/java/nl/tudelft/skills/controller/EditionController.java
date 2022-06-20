@@ -24,7 +24,6 @@ import java.util.stream.IntStream;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
-import nl.tudelft.skills.dto.view.checkpoint.CheckpointViewDTO;
 import nl.tudelft.skills.dto.view.edition.EditionLevelEditionViewDTO;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.EditionRepository;
@@ -85,24 +84,6 @@ public class EditionController {
 		model.addAttribute("studentMode", studentMode != null && studentMode);
 
 		return "edition/view";
-	}
-
-	/**
-	 * Gets the setup page for a single edition.
-	 *
-	 * @param  id    The id of the edition
-	 * @param  model The model to add data to
-	 * @return       The page to load
-	 */
-	@GetMapping("{id}/setup")
-	@PreAuthorize("@authorisationService.canEditEdition(#id)")
-	public String getEditionEditPage(@PathVariable Long id, Model model) {
-		EditionLevelEditionViewDTO edition = editionService.getEditionView(id);
-		List<CheckpointViewDTO> checkpoints = editionService.getCheckpointsByEditionId(id);
-
-		model.addAttribute("edition", edition);
-		model.addAttribute("checkpoints", checkpoints);
-		return "edition-setup/view";
 	}
 
 	/**

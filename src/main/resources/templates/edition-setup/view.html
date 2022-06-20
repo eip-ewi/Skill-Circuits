@@ -4,81 +4,110 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
     layout:decorate="~{container}">
-    <head>
-        <link rel="stylesheet" th:href="@{/css/edition-edit.css}" />
-        <title>Create edition</title>
-    </head>
-    <body>
-        <div layout:fragment="content">
-            <h1 th:text="${edition.name}"></h1>
+    <div id="edition-setup-sidebar" class="sidebar hidden" layout:fragment="setup-overlay">
+        <div class="sidebar__header">
+            <h1>Edition setup</h1>
+            <button
+                id="close-edition-setup-sidebar circuit__button"
+                class="fa-solid fa-angle-right fa-2xl"></button>
+        </div>
 
-            <h2>Modules</h2>
-            <ul id="module-list">
-                <th:block th:each="module : ${edition.modules}">
-                    <th:block layout:replace="~{edition-setup/module :: module}"></th:block>
-                </th:block>
-            </ul>
-            <form id="new-module-form">
-                <input name="edition.id" hidden th:value="${edition.id}" />
-                <input
-                    id="new-module-name"
-                    name="name"
-                    type="text"
-                    placeholder="New Module"
-                    required />
-                <button type="submit">create</button>
-            </form>
+        <h2>Modules</h2>
+        <ul id="module-list">
+            <th:block th:each="module : ${edition.modules}">
+                <th:block layout:replace="~{edition-setup/module :: module}"></th:block>
+            </th:block>
+        </ul>
+        <form id="new-module-form">
+            <input name="edition.id" hidden th:value="${edition.id}" />
+            <input id="new-module-name" name="name" type="text" placeholder="New Module" required />
+            <button type="submit">create</button>
+        </form>
 
-            <h2>Checkpoints</h2>
-            <ul id="checkpoint-list">
-                <th:block th:each="checkpoint : ${checkpoints}">
-                    <th:block layout:replace="~{edition-setup/checkpoint :: checkpoint}"></th:block>
-                </th:block>
-            </ul>
-            <form id="new-checkpoint-form">
-                <input name="edition.id" hidden th:value="${edition.id}" />
-                <input
-                    id="new-checkpoint-name"
-                    name="name"
-                    type="text"
-                    placeholder="New Checkpoint"
-                    required />
-                <button type="submit">create</button>
-            </form>
+        <h2>Checkpoints</h2>
+        <ul id="checkpoint-list">
+            <th:block th:each="checkpoint : ${checkpoints}">
+                <th:block layout:replace="~{edition-setup/checkpoint :: checkpoint}"></th:block>
+            </th:block>
+        </ul>
+        <form id="new-checkpoint-form">
+            <input name="edition.id" hidden th:value="${edition.id}" />
+            <input
+                id="new-checkpoint-name"
+                name="name"
+                type="text"
+                placeholder="New Checkpoint"
+                required />
+            <button type="submit">create</button>
+        </form>
 
-            <script>
-                document.addEventListener("DOMContentLoaded", () => {
-                    $("#new-module-form").submit(e => {
-                        e.preventDefault();
-                        $.post("/module/setup", $("#new-module-form").serialize(), html => {
-                            const element = $("<div/>").append(html).children()[0];
-                            $(element).find(".module__edit").click(editModule);
-                            $(element).find(".module__delete").click(deleteModule);
-                            $("#new-module-name").val("")
-                            $("#module-list").append(element);
-                        });
-                    });
+        <form
+            method="post"
+            id="publish-edition-form"
+            th:action="@{|/edition/${edition.id}/publish|}"
+            th:if="${@authorisationService.canPublishEdition(edition.id) and not visible}">
+            <button
+                name="publish"
+                id="publishEdition"
+                class="circuit__button"
+                title="publish"
+                type="submit">
+                Publish Edition
+            </button>
+        </form>
+        <form
+            method="post"
+            id="unpublish-edition-form"
+            th:action="@{|/edition/${edition.id}/unpublish|}"
+            th:if="${@authorisationService.canPublishEdition(edition.id) and visible}">
+            <button
+                name="unpublish"
+                id="unpublishEdition"
+                class="circuit__button"
+                title="unpublish"
+                type="submit">
+                Unpublish Edition
+            </button>
+        </form>
 
-                    $("#new-checkpoint-form").submit(e => {
-                        e.preventDefault();
-                        $.post("/checkpoint/setup", $("#new-checkpoint-form").serialize(), html => {
-                            const element = $("<div/>").append(html).children()[0];
-                            $(element).find(".checkpoint__edit").click(editCheckpoint);
-                            $(element).find(".checkpoint__delete").click(deleteCheckpoint);
-                            $("#new-checkpoint-name").val("")
-                            $("#checkpoint-list").append(element);
-                        });
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                $("#new-module-form").submit(e => {
+                    e.preventDefault();
+                    $.post("/module/setup", $("#new-module-form").serialize(), html => {
+                        const element = $("<div/>").append(html).children()[0];
+                        $(element).find(".module__edit").click(editModule);
+                        $(element).find(".module__delete").click(deleteModule);
+                        $("#new-module-name").val("");
+                        $("#module-list").append(element);
                     });
                 });
-            </script>
-            <th:block layout:replace="~{edition-setup/module-delete :: overlay}" />
-            <th:block layout:replace="~{edition-setup/module-delete :: script}" />
-            <th:block layout:replace="~{edition-setup/module-edit :: form}" />
-            <th:block layout:replace="~{edition-setup/module-edit :: script}" />
-            <th:block layout:replace="~{edition-setup/checkpoint-delete :: overlay}" />
-            <th:block layout:replace="~{edition-setup/checkpoint-delete :: script}" />
-            <th:block layout:replace="~{edition-setup/checkpoint-edit :: form}" />
-            <th:block layout:replace="~{edition-setup/checkpoint-edit :: script}" />
-        </div>
-    </body>
+
+                $("#new-checkpoint-form").submit(e => {
+                    e.preventDefault();
+                    $.post("/checkpoint/setup", $("#new-checkpoint-form").serialize(), html => {
+                        const element = $("<div/>").append(html).children()[0];
+                        $(element).find(".checkpoint__edit").click(editCheckpoint);
+                        $(element).find(".checkpoint__delete").click(deleteCheckpoint);
+                        $("#new-checkpoint-name").val("");
+                        $("#checkpoint-list").append(element);
+                    });
+                });
+                $("#close-edition-setup-sidebar").click(() => {
+                    $("#edition-setup-sidebar").addClass("hidden");
+                });
+                $("#open-edition-setup-sidebar").click(() => {
+                    $("#edition-setup-sidebar").removeClass("hidden");
+                });
+            });
+        </script>
+        <th:block layout:replace="~{edition-setup/module-delete :: overlay}" />
+        <th:block layout:replace="~{edition-setup/module-delete :: script}" />
+        <th:block layout:replace="~{edition-setup/module-edit :: form}" />
+        <th:block layout:replace="~{edition-setup/module-edit :: script}" />
+        <th:block layout:replace="~{edition-setup/checkpoint-delete :: overlay}" />
+        <th:block layout:replace="~{edition-setup/checkpoint-delete :: script}" />
+        <th:block layout:replace="~{edition-setup/checkpoint-edit :: form}" />
+        <th:block layout:replace="~{edition-setup/checkpoint-edit :: script}" />
+    </div>
 </html>

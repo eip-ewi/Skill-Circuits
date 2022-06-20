@@ -46,42 +46,6 @@
                 <h1 th:text="${edition.name}"></h1>
 
                 <div class="circuit__header__buttons">
-                    <a
-                            id="edition-setup"
-                            class="circuit__button"
-                            title="setup"
-                            type="submit"
-                            th:href="@{|/edition/${edition.id}/setup|}">
-                        Setup
-                    </a>
-                    <form
-                        method="post"
-                        id="publish-edition-form"
-                        th:action="@{|/edition/${edition.id}/publish|}"
-                        th:if="${@authorisationService.canPublishEdition(edition.id) and not visible}">
-                        <button
-                            name="publish"
-                            id="publishEdition"
-                            class="circuit__button"
-                            title="publish"
-                            type="submit">
-                            Publish
-                        </button>
-                    </form>
-                    <form
-                        method="post"
-                        id="unpublish-edition-form"
-                        th:action="@{|/edition/${edition.id}/unpublish|}"
-                        th:if="${@authorisationService.canPublishEdition(edition.id) and visible}">
-                        <button
-                            name="unpublish"
-                            id="unpublishEdition"
-                            class="circuit__button"
-                            title="unpublish"
-                            type="submit">
-                            Unpublish
-                        </button>
-                    </form>
                     <form
                         th:if="${@authorisationService.isAtLeastTeacherInEdition(edition.id)}"
                         method="post"
@@ -93,7 +57,15 @@
                             Enter student view
                         </button>
                     </form>
+                    <button
+                        th:unless="${studentMode}"
+                        id="open-edition-setup-sidebar"
+                        class="circuit__button"
+                        title="setup">
+                        Setup
+                    </button>
                 </div>
+                <div layout:replace="~{edition-setup/view :: setup-overlay}"></div>
             </div>
 
             <th:block
