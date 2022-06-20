@@ -25,6 +25,7 @@ import javax.servlet.http.HttpSession;
 
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
+import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.SCModuleCreateDTO;
 import nl.tudelft.skills.dto.patch.SCModulePatchDTO;
@@ -182,6 +183,22 @@ public class ModuleController {
 		SCModule module = moduleRepository.findByIdOrThrow(patch.getId());
 		moduleRepository.save(patch.apply(module));
 		return ResponseEntity.ok().build();
+	}
+
+	/**
+	 * Patches a module from the setup sidebar.
+	 *
+	 * @param  patch The patch containing the new data
+	 * @return       The new circuit
+	 */
+	@PatchMapping("/setup")
+	@PreAuthorize("@authorisationService.canEditModule(#patch.id)")
+	public String patchModuleSetup(SCModulePatchDTO patch, Model model) {
+		SCModule module = moduleRepository.findByIdOrThrow(patch.getId());
+		moduleRepository.save(patch.apply(module));
+
+		return SpringContext.getBean(EditionController.class).getEditionPage(module.getEdition().getId(),
+				model);
 	}
 
 	/**

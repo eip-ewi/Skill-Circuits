@@ -137,6 +137,7 @@ public class CheckpointController {
 	@PreAuthorize("@authorisationService.canCreateCheckpointInEdition(#dto.getEdition().getId())")
 	public String createCheckpointSetup(CheckpointCreateDTO dto, Model model) {
 		Checkpoint checkpoint = checkpointRepository.save(dto.apply());
+		checkpoint.getEdition().getCheckpoints().add(checkpoint);
 
 		model.addAttribute("checkpoint", View.convert(checkpoint, CheckpointViewDTO.class));
 

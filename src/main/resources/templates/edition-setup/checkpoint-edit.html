@@ -34,11 +34,13 @@
         function editCheckpoint() {
             const checkpointId = $(this).data("checkpoint");
             $("#edit-checkpoint-id").val(checkpointId);
-            $("#edit-checkpoint-name").val($(`#checkpoint-${checkpointId}-name`).text());
+            const editCheckpointName = $("#edit-checkpoint-name");
+            editCheckpointName.val($(`#checkpoint-${checkpointId}-name`).text());
             $(`#checkpoint-${checkpointId}`).append($("#edit-checkpoint"));
 
             $(".checkpoint-content").removeClass("hidden");
             $(`#checkpoint-${checkpointId}-content`).addClass("hidden");
+            editCheckpointName.focus();
         }
         function cancelEditCheckpoint() {
             $("#edit-checkpoint-wrapper").append($("#edit-checkpoint"));
@@ -54,7 +56,10 @@
                     url: `/checkpoint`,
                     data: $("#edit-checkpoint-form").serialize(),
                     success: () => {
-                        location.reload();
+                        $(`#checkpoint-${$("#edit-checkpoint-id").val()}-name`).text(
+                            $("#edit-checkpoint-name").val()
+                        );
+                        cancelEditCheckpoint();
                     },
                 });
             });

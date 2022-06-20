@@ -97,13 +97,7 @@
 
                         const horizontalConnectionY = toY - circuitGap / 2 + yOffset;
 
-                        let points = `${fromX},${parentY},
-                                ${fromX},${horizontalConnectionY}
-                                ${toX},${horizontalConnectionY}
-                                ${toX},${toY}`;
-
-                        // circuitY = 10;
-                        points = `${fromX},${parentY - circuitY},
+                        const points = `${fromX},${parentY - circuitY},
                                 ${fromX},${horizontalConnectionY - circuitY}
                                 ${toX},${horizontalConnectionY - circuitY}
                                 ${toX},${toY - circuitY}`;

@@ -25,10 +25,14 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
+import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.CircuitView;
 import nl.tudelft.skills.dto.view.GroupView;
+import nl.tudelft.skills.dto.view.checkpoint.CheckpointViewDTO;
+import nl.tudelft.skills.model.Checkpoint;
 import nl.tudelft.skills.model.SCEdition;
+import nl.tudelft.skills.repository.CheckpointRepository;
 
 import org.springframework.data.util.Pair;
 
@@ -48,10 +52,21 @@ public class EditionLevelEditionViewDTO extends View<SCEdition> implements Circu
 	@NotNull
 	@PostApply
 	private List<EditionLevelModuleViewDTO> modules;
+	@NotNull
+	@PostApply
+	private List<CheckpointViewDTO> checkpointsInEdition;
 
 	@Override
 	public List<? extends GroupView> getGroups() {
 		return modules;
+	}
+
+	public void postApply() {
+		super.postApply();
+		this.checkpointsInEdition = View.convert(
+				SpringContext.getBean(CheckpointRepository.class)
+						.findAllById(this.data.getCheckpoints().stream().map(Checkpoint::getId).toList()),
+				CheckpointViewDTO.class);
 	}
 
 	@Override

@@ -26,11 +26,13 @@
         function editModule() {
             const moduleId = $(this).data("module");
             $("#edit-module-id").val(moduleId);
-            $("#edit-module-name").val($(`#module-${moduleId}-name`).text());
+            const editModuleName = $("#edit-module-name");
+            editModuleName.val($(`#module-${moduleId}-name`).text());
             $(`#module-${moduleId}`).append($("#edit-module"));
 
             $(".module-content").removeClass("hidden");
             $(`#module-${moduleId}-content`).addClass("hidden");
+            editModuleName.focus();
         }
         function cancelEditModule() {
             $("#edit-module-wrapper").append($("#edit-module"));
@@ -43,10 +45,14 @@
                 e.preventDefault();
                 $.ajax({
                     type: "PATCH",
-                    url: `/module`,
+                    url: `/module/setup`,
                     data: $("#edit-module-form").serialize(),
-                    success: () => {
-                        location.reload();
+                    success: html => {
+                        $("#circuit").replaceWith($(html).find("#circuit"));
+                        $(`#module-${$("#edit-module-id").val()}-name`).text(
+                            $("#edit-module-name").val()
+                        );
+                        cancelEditModule();
                     },
                 });
             });
