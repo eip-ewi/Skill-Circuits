@@ -9,45 +9,49 @@
             <div class="sidebar__header">
                 <h1>Edition setup</h1>
                 <form
-                        method="post"
-                        id="publish-edition-form"
-                        th:action="@{|/edition/${edition.id}/publish|}"
-                        th:if="${@authorisationService.canPublishEdition(edition.id) and not visible}">
+                    method="post"
+                    id="publish-edition-form"
+                    th:action="@{|/edition/${edition.id}/publish|}"
+                    th:if="${@authorisationService.canPublishEdition(edition.id) and not visible}">
                     <button
-                            name="publish"
-                            id="publishEdition"
-                            class="circuit__button"
-                            title="publish"
-                            type="submit">
-                        Publish Edition
+                        name="publish"
+                        id="publishEdition"
+                        class="circuit__button"
+                        title="publish"
+                        type="submit">
+                        Publish edition
                     </button>
                 </form>
                 <form
-                        method="post"
-                        id="unpublish-edition-form"
-                        th:action="@{|/edition/${edition.id}/unpublish|}"
-                        th:if="${@authorisationService.canPublishEdition(edition.id) and visible}">
+                    method="post"
+                    id="unpublish-edition-form"
+                    th:action="@{|/edition/${edition.id}/unpublish|}"
+                    th:if="${@authorisationService.canPublishEdition(edition.id) and visible}">
                     <button
-                            name="unpublish"
-                            id="unpublishEdition"
-                            class="circuit__button"
-                            title="unpublish"
-                            type="submit">
-                        Unpublish Edition
+                        name="unpublish"
+                        id="unpublishEdition"
+                        class="circuit__button"
+                        title="unpublish"
+                        type="submit">
+                        Unpublish edition
                     </button>
                 </form>
                 <button
-                        id="close-edition-setup-sidebar"
-                        class="fa-solid fa-angle-right fa-2xl"></button>
+                    id="close-edition-setup-sidebar"
+                    class="fa-solid fa-angle-right fa-2xl"></button>
             </div>
-
 
             <div class="sidebar__columns">
                 <div class="sidebar__column">
                     <h2>Modules</h2>
                     <form id="new-module-form">
                         <input name="edition.id" hidden th:value="${edition.id}" />
-                        <input id="new-module-name" name="name" type="text" placeholder="New Module" required />
+                        <input
+                            id="new-module-name"
+                            name="name"
+                            type="text"
+                            placeholder="New Module"
+                            required />
                         <button type="submit">create</button>
                     </form>
                     <ul id="module-list">
@@ -61,16 +65,17 @@
                     <form id="new-checkpoint-form">
                         <input name="edition.id" hidden th:value="${edition.id}" />
                         <input
-                                id="new-checkpoint-name"
-                                name="name"
-                                type="text"
-                                placeholder="New Checkpoint"
-                                required />
+                            id="new-checkpoint-name"
+                            name="name"
+                            type="text"
+                            placeholder="New Checkpoint"
+                            required />
                         <button type="submit">create</button>
                     </form>
                     <ul id="checkpoint-list">
                         <th:block th:each="checkpoint : ${checkpoints}">
-                            <th:block layout:replace="~{edition-setup/checkpoint :: checkpoint}"></th:block>
+                            <th:block
+                                layout:replace="~{edition-setup/checkpoint :: checkpoint}"></th:block>
                         </th:block>
                     </ul>
                 </div>

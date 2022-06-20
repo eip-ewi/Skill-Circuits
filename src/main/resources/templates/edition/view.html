@@ -43,9 +43,14 @@
             <div
                 class="circuit__header"
                 th:with="visible = ${@editionRepository.findByIdOrThrow(edition.id).isVisible()}">
-                <h1 th:text="${edition.name}"></h1>
+                <div class="circuit__header__group">
+                    <h1 th:text="${edition.name}"></h1>
+                    <a th:href="@{|/course/${edition.course.id}|}">
+                        <span class="level-up-button fa-solid fa-turn-up fa-xl"></span>
+                    </a>
+                </div>
 
-                <div class="circuit__header__buttons">
+                <div class="circuit__header__group">
                     <form
                         th:if="${@authorisationService.isAtLeastTeacherInEdition(edition.id)}"
                         method="post"

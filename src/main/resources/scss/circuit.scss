@@ -1,3 +1,4 @@
+@use "mixins" as *;
 @import "circuit/block";
 @import "circuit/checkpoint";
 @import "circuit/connection";
@@ -20,9 +21,18 @@
         display: flex;
         justify-content: space-between;
         margin-bottom: 2rem;
-        &__buttons {
+        &__group {
             display: flex;
             gap: 1rem;
+        }
+        & a {
+            text-decoration: none;
+            color: black;
+            & > .level-up-button {
+                @include icon-button;
+                position: relative;
+                top: 0.7rem;
+            }
         }
     }
 

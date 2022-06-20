@@ -41,9 +41,14 @@
     <body>
         <div layout:fragment="content">
             <div class="circuit__header">
-                <h1 th:text="${module.name}"></h1>
+                <div class="circuit__header__group">
+                    <h1 th:text="${module.name}"></h1>
+                    <a th:href="@{|/edition/${module.edition.id}|}">
+                        <span class="level-up-button fa-solid fa-turn-up fa-xl"></span>
+                    </a>
+                </div>
 
-                <div class="circuit__header__buttons">
+                <div class="circuit__header__group">
                     <form
                         th:if="${@authorisationService.isAtLeastTeacherInEdition(module.edition.id)}"
                         method="post"
