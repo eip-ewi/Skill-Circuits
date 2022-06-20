@@ -38,7 +38,7 @@
             th:data-initial="${group.id}"
             class="selectbox font_size_regular"
             data-edit="only"
-            id="edit-block-group"
+            th:id="|edit-block-${block.id}-group|"
             aria-label="Group"
             th:name="|${groupType}.id|"
             required>

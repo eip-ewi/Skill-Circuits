@@ -88,8 +88,14 @@
                     e.preventDefault();
                     $.post("/module/setup", $("#new-module-form").serialize(), html => {
                         const element = $("<div/>").append(html).children()[0];
+                        const newModuleId = $(element).data('module');
+                        const newModuleName = $(element).text()
+
                         $(element).find(".module__edit").click(editModule);
                         $(element).find(".module__delete").click(deleteModule);
+                        $("select[name='module.id']")
+                            .append(`<option data-edit="only" value="${newModuleId}">${newModuleName}<option>`)
+
                         $("#new-module-name").val("");
                         $("#module-list").prepend(element);
                     });
