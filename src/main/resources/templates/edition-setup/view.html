@@ -5,70 +5,73 @@
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
     layout:decorate="~{container}">
     <div id="edition-setup-sidebar" class="sidebar hidden" layout:fragment="setup-overlay">
-        <div class="sidebar__header">
-            <h1>Edition setup</h1>
-            <button
-                id="close-edition-setup-sidebar circuit__button"
-                class="fa-solid fa-angle-right fa-2xl"></button>
+        <div class="sidebar__content">
+            <div class="sidebar__header">
+                <h1>Edition setup</h1>
+                <button
+                        id="close-edition-setup-sidebar"
+                        class="fa-solid fa-angle-right fa-2xl"></button>
+            </div>
+
+            <h2>Modules</h2>
+            <ul id="module-list">
+                <th:block th:each="module : ${edition.modules}">
+                    <th:block layout:replace="~{edition-setup/module :: module}"></th:block>
+                </th:block>
+            </ul>
+            <form id="new-module-form">
+                <input name="edition.id" hidden th:value="${edition.id}" />
+                <input id="new-module-name" name="name" type="text" placeholder="New Module" required />
+                <button type="submit">create</button>
+            </form>
+
+            <h2>Checkpoints</h2>
+            <ul id="checkpoint-list">
+                <th:block th:each="checkpoint : ${checkpoints}">
+                    <th:block layout:replace="~{edition-setup/checkpoint :: checkpoint}"></th:block>
+                </th:block>
+            </ul>
+            <form id="new-checkpoint-form">
+                <input name="edition.id" hidden th:value="${edition.id}" />
+                <input
+                        id="new-checkpoint-name"
+                        name="name"
+                        type="text"
+                        placeholder="New Checkpoint"
+                        required />
+                <button type="submit">create</button>
+            </form>
+
+            <form
+                    method="post"
+                    id="publish-edition-form"
+                    th:action="@{|/edition/${edition.id}/publish|}"
+                    th:if="${@authorisationService.canPublishEdition(edition.id) and not visible}">
+                <button
+                        name="publish"
+                        id="publishEdition"
+                        class="circuit__button"
+                        title="publish"
+                        type="submit">
+                    Publish Edition
+                </button>
+            </form>
+            <form
+                    method="post"
+                    id="unpublish-edition-form"
+                    th:action="@{|/edition/${edition.id}/unpublish|}"
+                    th:if="${@authorisationService.canPublishEdition(edition.id) and visible}">
+                <button
+                        name="unpublish"
+                        id="unpublishEdition"
+                        class="circuit__button"
+                        title="unpublish"
+                        type="submit">
+                    Unpublish Edition
+                </button>
+            </form>
+
         </div>
-
-        <h2>Modules</h2>
-        <ul id="module-list">
-            <th:block th:each="module : ${edition.modules}">
-                <th:block layout:replace="~{edition-setup/module :: module}"></th:block>
-            </th:block>
-        </ul>
-        <form id="new-module-form">
-            <input name="edition.id" hidden th:value="${edition.id}" />
-            <input id="new-module-name" name="name" type="text" placeholder="New Module" required />
-            <button type="submit">create</button>
-        </form>
-
-        <h2>Checkpoints</h2>
-        <ul id="checkpoint-list">
-            <th:block th:each="checkpoint : ${checkpoints}">
-                <th:block layout:replace="~{edition-setup/checkpoint :: checkpoint}"></th:block>
-            </th:block>
-        </ul>
-        <form id="new-checkpoint-form">
-            <input name="edition.id" hidden th:value="${edition.id}" />
-            <input
-                id="new-checkpoint-name"
-                name="name"
-                type="text"
-                placeholder="New Checkpoint"
-                required />
-            <button type="submit">create</button>
-        </form>
-
-        <form
-            method="post"
-            id="publish-edition-form"
-            th:action="@{|/edition/${edition.id}/publish|}"
-            th:if="${@authorisationService.canPublishEdition(edition.id) and not visible}">
-            <button
-                name="publish"
-                id="publishEdition"
-                class="circuit__button"
-                title="publish"
-                type="submit">
-                Publish Edition
-            </button>
-        </form>
-        <form
-            method="post"
-            id="unpublish-edition-form"
-            th:action="@{|/edition/${edition.id}/unpublish|}"
-            th:if="${@authorisationService.canPublishEdition(edition.id) and visible}">
-            <button
-                name="unpublish"
-                id="unpublishEdition"
-                class="circuit__button"
-                title="unpublish"
-                type="submit">
-                Unpublish Edition
-            </button>
-        </form>
 
         <script>
             document.addEventListener("DOMContentLoaded", () => {

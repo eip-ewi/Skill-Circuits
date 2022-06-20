@@ -64,6 +64,8 @@
                         )
                         .sort((c1, c2) => c1.css("gridRowStart") - c2.css("gridRowStart"))[0];
 
+                    let circuitY = $("#circuit").offset().top;
+
                     const parentX = block.offset().left + block.outerWidth() / 2;
                     const parentY = block.offset().top + block.outerHeight();
 
@@ -95,10 +97,16 @@
 
                         const horizontalConnectionY = toY - circuitGap / 2 + yOffset;
 
-                        const points = `${fromX},${parentY},
-                                ${fromX},${horizontalConnectionY}
+                        let points = `${fromX},${parentY},
+                                ${fromX},${horizontalConnectionY }
                                 ${toX},${horizontalConnectionY}
                                 ${toX},${toY}`;
+
+                        // circuitY = 10;
+                        points = `${fromX},${parentY - circuitY},
+                                ${fromX},${horizontalConnectionY - circuitY}
+                                ${toX},${horizontalConnectionY - circuitY}
+                                ${toX},${toY - circuitY}`;
 
                         $("#connections").append(line.attr("points", points));
 
@@ -109,7 +117,7 @@
                                 )}" data-child="${child.prop("id")}">
                               <span class="fa-solid fa-link-slash"></span>
                            </button>`)
-                                    .css("top", parentY + circuitGap / 10)
+                                    .css("top", parentY + circuitGap / 10 - circuitY)
                                     .css("left", fromX - remToPx("1.5rem") / 2)
                                     .mouseenter(overConnection)
                                     .mouseout(outConnection);

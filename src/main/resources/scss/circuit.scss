@@ -11,6 +11,7 @@
 .circuit {
     --circuit-gap: 3rem;
 
+    position: relative;
     display: grid;
     gap: var(--circuit-gap);
     grid-template-columns: repeat(var(--columns), 1fr);
