@@ -16,4 +16,833 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-databaseChangeLog: []
+databaseChangeLog:
+  - changeSet:
+      id: 1655712010430-1
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_6
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+            tableName: achievement
+  - changeSet:
+      id: 1655712010430-2
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_1
+                  name: achievements_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_1
+                  name: tasks_id
+                  type: BIGINT
+            tableName: achievement_tasks
+  - changeSet:
+      id: 1655712010430-3
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_E
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: deadline
+                  type: TIMESTAMP
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: edition_id
+                  type: BIGINT
+            tableName: checkpoint
+  - changeSet:
+      id: 1655712010430-4
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_8
+                  name: id
+                  type: BIGINT
+            tableName: inventory
+  - changeSet:
+      id: 1655712010430-5
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: inventories_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: inventory_items_id
+                  type: BIGINT
+            tableName: inventory_inventory_items
+  - changeSet:
+      id: 1655712010430-6
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: dtype
+                  type: VARCHAR(31)
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_F
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+            tableName: inventory_item
+  - changeSet:
+      id: 1655712010430-7
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_3
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+            tableName: path
+  - changeSet:
+      id: 1655712010430-8
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_4
+                  name: paths_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_4
+                  name: tasks_id
+                  type: BIGINT
+            tableName: path_tasks
+  - changeSet:
+      id: 1655712010430-9
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_C
+                  name: id
+                  type: BIGINT
+            tableName: sccourse
+  - changeSet:
+      id: 1655712010430-10
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_5
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: is_visible
+                  type: BOOLEAN
+            tableName: scedition
+  - changeSet:
+      id: 1655712010430-11
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_D
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: edition_id
+                  type: BIGINT
+            tableName: scmodule
+  - changeSet:
+      id: 1655712010430-12
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_E4
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: inventory_id
+                  type: BIGINT
+            tableName: scperson
+  - changeSet:
+      id: 1655712010430-13
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_B
+                  name: persons_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_B
+                  name: tasks_completed_id
+                  type: BIGINT
+            tableName: scperson_tasks_completed
+  - changeSet:
+      id: 1655712010430-14
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_68
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: x_pos
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: essential
+                  type: BOOLEAN
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: y_pos
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: checkpoint_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: submodule_id
+                  type: BIGINT
+            tableName: skill
+  - changeSet:
+      id: 1655712010430-15
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_67
+                  name: children_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_67
+                  name: parents_id
+                  type: BIGINT
+            tableName: skill_parents
+  - changeSet:
+      id: 1655712010430-16
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_15
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: x_pos
+                  type: INT
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: y_pos
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: module_id
+                  type: BIGINT
+            tableName: submodule
+  - changeSet:
+      id: 1655712010430-17
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_36
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: link
+                  type: VARCHAR(255)
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  name: time
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: type
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: skill_id
+                  type: BIGINT
+            tableName: task
+  - changeSet:
+      id: 1655712010430-18
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_69
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: programme
+                  type: BIGINT
+            tableName: track
+  - changeSet:
+      id: 1655712010430-19
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: module_id
+            indexName: FK1agsy25x72pn2m1799f2jp030_INDEX_1
+            tableName: submodule
+  - changeSet:
+      id: 1655712010430-20
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: inventories_id
+            indexName: FK4gwfo42iccppofjxx7yndoh78_INDEX_7
+            tableName: inventory_inventory_items
+  - changeSet:
+      id: 1655712010430-21
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: achievements_id
+            indexName: FK5f74xe2q1sgn798dbc9tfy8xs_INDEX_1
+            tableName: achievement_tasks
+  - changeSet:
+      id: 1655712010430-22
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: checkpoint_id
+            indexName: FK6evhc0s8spdk725gpr5pdejfb_INDEX_6
+            tableName: skill
+  - changeSet:
+      id: 1655712010430-23
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: tasks_id
+            indexName: FK8d8e7lpvv6jxa6jkt1kexaq6j_INDEX_4
+            tableName: path_tasks
+  - changeSet:
+      id: 1655712010430-24
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: edition_id
+            indexName: FKac9edr5braecolj4nwi04wgyj_INDEX_D
+            tableName: scmodule
+  - changeSet:
+      id: 1655712010430-25
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: skill_id
+            indexName: FKgaoov6uwpmelq2v96wxgfc9ty_INDEX_3
+            tableName: task
+  - changeSet:
+      id: 1655712010430-26
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: paths_id
+            indexName: FKgk7imq9p338vghn5rno8d32ca_INDEX_4
+            tableName: path_tasks
+  - changeSet:
+      id: 1655712010430-27
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: parents_id
+            indexName: FKi3rncw39bg0yvw2e79jkchrkl_INDEX_6
+            tableName: skill_parents
+  - changeSet:
+      id: 1655712010430-28
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: tasks_id
+            indexName: FKn4by6fo5ektu6wcpoqtu3nvm8_INDEX_1
+            tableName: achievement_tasks
+  - changeSet:
+      id: 1655712010430-29
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: edition_id
+            indexName: FKn95s0iwso0dtrrwppsm6c71ft_INDEX_E
+            tableName: checkpoint
+  - changeSet:
+      id: 1655712010430-30
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: children_id
+            indexName: FKnb8ad4t5c3fy0olkqmj31n27e_INDEX_6
+            tableName: skill_parents
+  - changeSet:
+      id: 1655712010430-31
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: inventory_id
+            indexName: FKo3yf33nocqc5g4krhvo1oq8dy_INDEX_E
+            tableName: scperson
+  - changeSet:
+      id: 1655712010430-32
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: persons_id
+            indexName: FKrwsuhj88n1n0sigqwibq4dap1_INDEX_B
+            tableName: scperson_tasks_completed
+  - changeSet:
+      id: 1655712010430-33
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: inventory_items_id
+            indexName: FKshbh4txmrh1choxhfe89hqqnq_INDEX_7
+            tableName: inventory_inventory_items
+  - changeSet:
+      id: 1655712010430-34
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: tasks_completed_id
+            indexName: FKtgiw4qnal6d91p8va4dvur1o4_INDEX_B
+            tableName: scperson_tasks_completed
+  - changeSet:
+      id: 1655712010430-35
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: submodule_id
+            indexName: FKtoxrhqfsou77r0uus5bk7l0nt_INDEX_6
+            tableName: skill
+  - changeSet:
+      id: 1655712010430-36
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: module_id
+            baseTableName: submodule
+            constraintName: FK1agsy25x72pn2m1799f2jp030
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: scmodule
+            validate: true
+  - changeSet:
+      id: 1655712010430-37
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: inventories_id
+            baseTableName: inventory_inventory_items
+            constraintName: FK4gwfo42iccppofjxx7yndoh78
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: inventory
+            validate: true
+  - changeSet:
+      id: 1655712010430-38
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: achievements_id
+            baseTableName: achievement_tasks
+            constraintName: FK5f74xe2q1sgn798dbc9tfy8xs
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: achievement
+            validate: true
+  - changeSet:
+      id: 1655712010430-39
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: checkpoint_id
+            baseTableName: skill
+            constraintName: FK6evhc0s8spdk725gpr5pdejfb
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: checkpoint
+            validate: true
+  - changeSet:
+      id: 1655712010430-40
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: tasks_id
+            baseTableName: path_tasks
+            constraintName: FK8d8e7lpvv6jxa6jkt1kexaq6j
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: task
+            validate: true
+  - changeSet:
+      id: 1655712010430-41
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: edition_id
+            baseTableName: scmodule
+            constraintName: FKac9edr5braecolj4nwi04wgyj
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: scedition
+            validate: true
+  - changeSet:
+      id: 1655712010430-42
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: skill_id
+            baseTableName: task
+            constraintName: FKgaoov6uwpmelq2v96wxgfc9ty
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: skill
+            validate: true
+  - changeSet:
+      id: 1655712010430-43
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: paths_id
+            baseTableName: path_tasks
+            constraintName: FKgk7imq9p338vghn5rno8d32ca
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: path
+            validate: true
+  - changeSet:
+      id: 1655712010430-44
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: parents_id
+            baseTableName: skill_parents
+            constraintName: FKi3rncw39bg0yvw2e79jkchrkl
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: skill
+            validate: true
+  - changeSet:
+      id: 1655712010430-45
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: tasks_id
+            baseTableName: achievement_tasks
+            constraintName: FKn4by6fo5ektu6wcpoqtu3nvm8
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: task
+            validate: true
+  - changeSet:
+      id: 1655712010430-46
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: edition_id
+            baseTableName: checkpoint
+            constraintName: FKn95s0iwso0dtrrwppsm6c71ft
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: scedition
+            validate: true
+  - changeSet:
+      id: 1655712010430-47
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: children_id
+            baseTableName: skill_parents
+            constraintName: FKnb8ad4t5c3fy0olkqmj31n27e
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: skill
+            validate: true
+  - changeSet:
+      id: 1655712010430-48
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: inventory_id
+            baseTableName: scperson
+            constraintName: FKo3yf33nocqc5g4krhvo1oq8dy
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: inventory
+            validate: true
+  - changeSet:
+      id: 1655712010430-49
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: persons_id
+            baseTableName: scperson_tasks_completed
+            constraintName: FKrwsuhj88n1n0sigqwibq4dap1
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: scperson
+            validate: true
+  - changeSet:
+      id: 1655712010430-50
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: inventory_items_id
+            baseTableName: inventory_inventory_items
+            constraintName: FKshbh4txmrh1choxhfe89hqqnq
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: inventory_item
+            validate: true
+  - changeSet:
+      id: 1655712010430-51
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: tasks_completed_id
+            baseTableName: scperson_tasks_completed
+            constraintName: FKtgiw4qnal6d91p8va4dvur1o4
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: task
+            validate: true
+  - changeSet:
+      id: 1655712010430-52
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: submodule_id
+            baseTableName: skill
+            constraintName: FKtoxrhqfsou77r0uus5bk7l0nt
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: submodule
+            validate: true
+
+
+
