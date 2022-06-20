@@ -75,7 +75,7 @@ public class EditionController {
 		if (positions.isEmpty()) {
 			model.addAttribute("emptySpaces", List.of(Pair.of(0, 0)));
 		} else {
-			model.addAttribute(IntStream.range(0, rows).boxed()
+			model.addAttribute("emptySpaces", IntStream.range(0, rows).boxed()
 					.flatMap(row -> IntStream.range(0, columns).mapToObj(col -> Pair.of(col, row)))
 					.filter(pos -> !positions.contains(pos))
 					.toList());
