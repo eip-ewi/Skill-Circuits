@@ -2,19 +2,36 @@
 
 .sidebar {
     z-index: 420;
-    position: fixed;
     background-color: var(--background-colour);
-    border: 1px solid black;
+    border-left: 1px solid black;
     min-width: 30rem;
-    right: 0;
-    margin-top: -2rem;
-    height: 100vh;
+    max-width: 45rem;
+    min-height: 100vh;
+    height: auto;
     padding: 2rem;
+    position: absolute;
+    top: 0;
+    right: 0;
+
+    &__columns {
+        display: flex;
+        flex-direction: row;
+        gap: 1rem;
+        justify-content: space-between;
+    }
+
+
+    &__content {
+        position: -webkit-sticky; /* Safari */
+        position: sticky;
+        top: 0;
+    }
 
     &__header {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
+        margin-bottom: 1rem;
         & > button {
             @include icon-button;
         }
@@ -45,10 +62,15 @@
 #checkpoint-list {
     margin-bottom: 1rem;
     list-style: none;
+    max-width: 20rem;
 }
 #new-module-form,
 #new-checkpoint-form {
     input {
+        padding: 0.25rem;
+    }
+    button {
+        @include button;
         padding: 0.25rem;
     }
     margin: 1rem 0;
