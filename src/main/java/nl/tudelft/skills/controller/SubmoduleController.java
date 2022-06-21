@@ -19,6 +19,7 @@ package nl.tudelft.skills.controller;
 
 import javax.validation.Valid;
 
+import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.SubmoduleCreateDTO;
 import nl.tudelft.skills.dto.patch.SubmodulePatchDTO;
@@ -60,21 +61,14 @@ public class SubmoduleController {
 	 * Creates a submodule.
 	 *
 	 * @param  create The DTO with information to create the submodule
-	 * @return        A new submodule html element
+	 * @return        The new version of the edition page for updating locally.
 	 */
 	@PostMapping
-	@Transactional
 	@PreAuthorize("@authorisationService.canCreateSubmodule(#create.module.id)")
 	public String createSubmodule(SubmoduleCreateDTO create, Model model) {
-		Submodule submodule = submoduleRepository.save(create.apply());
-
-		model.addAttribute("block", View.convert(submodule, EditionLevelSubmoduleViewDTO.class));
-		model.addAttribute("group", submodule.getModule());
-		model.addAttribute("circuit", buildCircuitFromSubmodule(submodule));
-		model.addAttribute("canEdit", true);
-		model.addAttribute("canDelete", true);
-		model.addAttribute("groupType", "module");
-		return "block/view";
+		Submodule submodule = submoduleRepository.saveAndFlush(create.apply());
+		return SpringContext.getBean(EditionController.class)
+				.getEditionPage(submodule.getModule().getEdition().getId(), model);
 	}
 
 	/**

@@ -93,31 +93,7 @@
             $("#create-block-form").submit(function (event) {
                 event.preventDefault();
                 $.post(`/${blockType}`, $("#create-block-form").serialize(), html => {
-                    let element = $("<div/>").append(html).children()[0];
-
-                    $("#circuit").append(element);
-                    $("#create-block-wrapper").append($("#create-block"));
-                    $("#create-block-name").val("");
-
-                    element = $(`#${element.id}`);
-
-                    let groupName = element.find(".block__group__name");
-                    groupName.mouseenter(mouseEnterGroup);
-                    groupName.mouseleave(mouseLeaveGroup);
-
-                    element.find(".block__edit").click(editBlock);
-                    element.find(".block__edit__cancel").click(cancelEditBlock);
-                    element.find(".block__edit__save").click(saveEdit);
-                    element.find(".block__delete").click(deleteBlock);
-
-                    if (blockType === "skill") {
-                        element.find(".item__create").click(createItem);
-                        element.find(".block__connect.from > button").click(connectFrom);
-                        element.find(".block__connect.to > button").click(connectTo);
-                    }
-                    element.find(".item__delete").click(deleteItem);
-
-                    updateCheckpointPositions();
+                    $("#circuit").replaceWith($(html).find("#circuit"));
                 });
             });
 
