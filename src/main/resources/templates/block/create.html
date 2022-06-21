@@ -75,8 +75,8 @@
 
     <script th:if="${canCreate}" layout:fragment="script">
         function setNewBlockPosition(row, column) {
-            document.getElementById("create-block-row").value = row;
-            document.getElementById("create-block-column").value = column;
+            $("#create-block-row").val(row);
+            $("#create-block-column").val(column);
         }
 
         function clickGhost() {
@@ -93,7 +93,13 @@
             $("#create-block-form").submit(function (event) {
                 event.preventDefault();
                 $.post(`/${blockType}`, $("#create-block-form").serialize(), html => {
+                    $("#create-block-wrapper").append($("#create-block"));
                     $("#circuit").replaceWith($(html).find("#circuit"));
+                    // Re-fire DOMContentLoaded to re-attach event listeners and onclick functions
+                    window.document.dispatchEvent(new Event("DOMContentLoaded", {
+                        bubbles: true,
+                        cancelable: true
+                    }));
                 });
             });
 

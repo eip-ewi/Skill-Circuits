@@ -19,6 +19,9 @@ package nl.tudelft.skills.controller;
 
 import javax.validation.Valid;
 
+import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
+import nl.tudelft.labracore.lib.security.user.Person;
+import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.SkillCreateDTO;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
@@ -68,16 +71,11 @@ public class SkillController {
 	@PostMapping
 	@Transactional
 	@PreAuthorize("@authorisationService.canCreateSkill(#create.submodule.id)")
-	public String createSkill(SkillCreateDTO create, Model model) {
-		Skill skill = skillRepository.save(create.apply());
+	public String createSkill(@AuthenticatedPerson Person person, SkillCreateDTO create, Model model) {
+		Skill skill = skillRepository.saveAndFlush(create.apply());
 
-		model.addAttribute("level", "module");
-		model.addAttribute("block", View.convert(skill, ModuleLevelSkillViewDTO.class));
-		model.addAttribute("group", skill.getSubmodule());
-		model.addAttribute("circuit", buildCircuitFromSkill(skill));
-		model.addAttribute("canEdit", true);
-		model.addAttribute("canDelete", true);
-		return "block/view";
+		return SpringContext.getBean(ModuleController.class)
+				.getModulePage(person, skill.getSubmodule().getModule().getId(), model);
 	}
 
 	/**

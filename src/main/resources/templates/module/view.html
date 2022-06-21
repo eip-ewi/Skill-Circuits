@@ -25,16 +25,6 @@
     layout:decorate="~{container}">
     <head>
         <link rel="stylesheet" th:href="@{/css/circuit.css}" />
-
-        <style th:inline="css">
-            /*<![CDATA[*/
-            :root {
-                --columns: /*[[${columns}]]*/ 5;
-                --rows: /*[[${rows}]]*/ 5;
-            }
-            /*]]>*/
-        </style>
-
         <title th:text="${module.name}"></title>
     </head>
 

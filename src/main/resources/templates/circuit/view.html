@@ -22,7 +22,8 @@
     lang="en"
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-    <div class="circuit" id="circuit" th:data-id="${circuit.id}" layout:fragment="grid">
+    <div class="circuit" id="circuit" th:data-id="${circuit.id}" layout:fragment="grid"
+         th:style="|--columns: ${columns}; --rows: ${rows}|">
         <svg xmlns="http://www.w3.org/2000/svg" id="connections"></svg>
         <th:block th:if="${level == 'module'}">
             <div id="disconnect-buttons"></div>
