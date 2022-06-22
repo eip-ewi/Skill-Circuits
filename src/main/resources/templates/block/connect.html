@@ -64,7 +64,7 @@
                         )
                         .sort((c1, c2) => c1.css("gridRowStart") - c2.css("gridRowStart"))[0];
 
-                    let circuitY = $("#circuit").offset().top;
+                    const circuitY = $("#circuit").offset().top;
 
                     const parentX = block.offset().left + block.outerWidth() / 2;
                     const parentY = block.offset().top + block.outerHeight();

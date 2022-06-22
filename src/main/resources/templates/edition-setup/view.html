@@ -63,7 +63,7 @@
             <div class="sidebar__columns">
                 <div class="sidebar__column">
                     <h2>Modules</h2>
-                    <form id="new-module-form">
+                    <form id="new-module-form" class="sidebar__new_item_form">
                         <input name="edition.id" hidden th:value="${edition.id}" />
                         <input
                             id="new-module-name"
@@ -81,7 +81,7 @@
                 </div>
                 <div>
                     <h2>Checkpoints</h2>
-                    <form id="new-checkpoint-form">
+                    <form id="new-checkpoint-form" class="sidebar__new_item_form">
                         <input name="edition.id" hidden th:value="${edition.id}" />
                         <input
                             id="new-checkpoint-name"

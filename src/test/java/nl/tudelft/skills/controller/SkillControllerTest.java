@@ -18,15 +18,15 @@
 package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
 
 import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.dto.create.SkillCreateDTO;
+import nl.tudelft.skills.dto.id.CheckpointIdDTO;
 import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
@@ -37,16 +37,14 @@ import nl.tudelft.skills.repository.SubmoduleRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.service.SkillService;
 
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 
 @Transactional
 @AutoConfigureMockMvc
@@ -71,28 +69,16 @@ public class SkillControllerTest extends ControllerTest {
 
 	@Test
 	@WithUserDetails("admin")
-	void createSkill() throws Exception {
-		String element = mvc.perform(post("/skill").with(csrf())
-				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
-						new BasicNameValuePair("name", "Skill"),
-						new BasicNameValuePair("submodule.id", Long.toString(db.getSubmoduleCases().getId())),
-						new BasicNameValuePair("checkpoint.id",
-								Long.toString(db.getCheckpointLectureOne().getId())),
-						new BasicNameValuePair("row", "10"),
-						new BasicNameValuePair("column", "11")))))
-				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
-				.andExpect(status().isOk())
-				.andReturn().getResponse().getContentAsString();
+	void createSkill() {
+		var dto = SkillCreateDTO.builder()
+				.name("New Skill")
+				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
+				.checkpoint(new CheckpointIdDTO(db.getCheckpointLectureOne().getId()))
+				.column(10).row(11).newItems(new ArrayList<>()).build();
 
-		Matcher idMatcher = Pattern.compile("id=\"block-(\\d+)\"").matcher(element);
-		assertThat(idMatcher.find()).isTrue();
+		skillController.createSkill(null, dto, Mockito.mock(Model.class));
 
-		Long id = Long.parseLong(idMatcher.group(1));
-		assertThat(skillRepository.existsById(id)).isTrue();
-
-		assertThat(element)
-				.contains("<span id=\"block-" + id + "-name\">Skill</span>")
-				.contains("style=\"grid-row: 11; grid-column: 12");
+		assertTrue(skillRepository.findAll().stream().anyMatch(s -> s.getName().equals("New Skill")));
 	}
 
 	@Test

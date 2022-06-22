@@ -35,6 +35,16 @@
             @include icon-button;
         }
     }
+    &__new_item_form {
+        input {
+            padding: 0.25rem;
+        }
+        button {
+            @include button;
+            padding: 0.25rem;
+        }
+        margin: 1rem 0;
+    }
 }
 .editable-li > div {
     display: flex;
@@ -62,20 +72,4 @@
     margin-bottom: 1rem;
     list-style: none;
     max-width: 20rem;
-}
-#new-module-form,
-#new-checkpoint-form {
-    input {
-        padding: 0.25rem;
-    }
-    button {
-        @include button;
-        padding: 0.25rem;
-    }
-    margin: 1rem 0;
-}
-#delete-checkpoint-conflict-warning {
-    color: var(--primary-red);
-}
-#edition-setup {
 }

@@ -132,6 +132,13 @@ public class CheckpointController {
 		return "redirect:module/" + moduleId;
 	}
 
+	/**
+	 * Creates a checkpoint, and returns a checkpoint element for the setup sidebar.
+	 *
+	 * @param  dto   the checkpoint to create.
+	 * @param  model the model to add data to.
+	 * @return       A new checkpoint html element.
+	 */
 	@Transactional
 	@PostMapping("/setup")
 	@PreAuthorize("@authorisationService.canCreateCheckpointInEdition(#dto.getEdition().getId())")

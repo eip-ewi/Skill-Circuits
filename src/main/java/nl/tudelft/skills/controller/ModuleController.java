@@ -122,7 +122,7 @@ public class ModuleController {
 	}
 
 	/**
-	 * Creates a module. Used during edition setup.
+	 * Creates a module, and returns a module element for the setup sidebar.
 	 *
 	 * @param  create The DTO with information to create the module
 	 * @return        A new module html element
@@ -137,7 +137,7 @@ public class ModuleController {
 	}
 
 	/**
-	 * Deletes a module.
+	 * Deletes a module, and redirects to the edition page.
 	 *
 	 * @param  id The id of the module to delete
 	 * @return    A redirect to the edition page
@@ -157,7 +157,7 @@ public class ModuleController {
 	}
 
 	/**
-	 * Deletes a module during setup.
+	 * Deletes a module.
 	 *
 	 * @param  id The id of the module to delete
 	 * @return    A redirect to the edition page
@@ -191,7 +191,7 @@ public class ModuleController {
 	}
 
 	/**
-	 * Patches a module from the setup sidebar.
+	 * Patches a module, and returns a new edition page html element.
 	 *
 	 * @param  patch The patch containing the new data
 	 * @return       The new circuit
