@@ -17,6 +17,8 @@
  */
 package nl.tudelft.skills.dto.create;
 
+import java.util.List;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -26,8 +28,6 @@ import nl.tudelft.librador.dto.create.Create;
 import nl.tudelft.skills.dto.id.CheckpointIdDTO;
 import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
 import nl.tudelft.skills.model.Skill;
-
-import java.util.List;
 
 @Data
 @Builder

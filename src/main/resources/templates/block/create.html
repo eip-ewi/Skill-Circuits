@@ -36,12 +36,12 @@
         }
 
         function cancelCreateBlock(block) {
-            const row = parseInt(block.css('gridRowStart'));
-            const col = parseInt(block.css('gridColumnStart'));
+            const row = parseInt(block.css("gridRowStart"));
+            const col = parseInt(block.css("gridColumnStart"));
             $("#create-block-wrapper").append(block);
 
             const ghost = $(
-               `<div class="ghost_block" style="grid-row: ${row}; grid-column: ${col}">
+                `<div class="ghost_block" style="grid-row: ${row}; grid-column: ${col}">
                     <span class="fa-solid fa-plus"></span>
                 </div>`
             );
@@ -58,9 +58,11 @@
             data["newItems"] = items.filter(item => item.new);
             data["newItems"] = items.filter(item => item.new);
             data["checkpoint"] = {};
-            data["checkpoint"]["id"] = getFirstCheckpointAfter(block.css('gridRowStart')).attr('id').split('-')[1];
-            data["row"] = parseInt(block.css('gridRowStart')) - 1;
-            data["column"] = parseInt(block.css('gridColumnStart')) - 1;
+            data["checkpoint"]["id"] = getFirstCheckpointAfter(block.css("gridRowStart"))
+                .attr("id")
+                .split("-")[1];
+            data["row"] = parseInt(block.css("gridRowStart")) - 1;
+            data["column"] = parseInt(block.css("gridColumnStart")) - 1;
 
             $.post({
                 url: `/${blockType}`,
@@ -76,7 +78,8 @@
                             cancelable: true,
                         })
                     );
-                }});
+                },
+            });
         }
 
         document.addEventListener("DOMContentLoaded", function () {

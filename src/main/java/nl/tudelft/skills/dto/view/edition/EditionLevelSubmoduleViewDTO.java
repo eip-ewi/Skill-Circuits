@@ -20,7 +20,6 @@ package nl.tudelft.skills.dto.view.edition;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
@@ -75,6 +74,7 @@ public class EditionLevelSubmoduleViewDTO extends View<Submodule> implements Blo
 	public List<Long> getChildIds() {
 		return childIds;
 	}
+
 	public static EditionLevelSubmoduleViewDTO empty() {
 		return EditionLevelSubmoduleViewDTO.builder()
 				.id(-1L).name("").row(-1).column(-1).skills(new ArrayList<>())

@@ -76,11 +76,7 @@
         layout:fragment="script">
         function addGhostCheckpoints() {
             const circuit = $("#circuit");
-            const rowsInGrid = [
-                ...Array(
-                    parseInt(circuit.css("--rows"))
-                ).keys(),
-            ];
+            const rowsInGrid = [...Array(parseInt(circuit.css("--rows"))).keys()];
             const rowsWithCheckpoints = [...$(".checkpoint")].map(cp =>
                 parseInt(cp.style.gridRowStart)
             );

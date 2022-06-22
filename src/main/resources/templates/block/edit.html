@@ -22,7 +22,12 @@
     lang="en"
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-    <form th:if="${canEdit}" layout:fragment="header" data-edit="only" class="block__header" action="javascript:void(0);">
+    <form
+        th:if="${canEdit}"
+        layout:fragment="header"
+        data-edit="only"
+        class="block__header"
+        action="javascript:void(0);">
         <input name="id" th:value="${block.id}" type="hidden" />
         <input
             th:data-initial="${block.name}"
@@ -88,9 +93,8 @@
             if (block.data("create")) {
                 cancelCreateBlock(block);
             } else {
-                cancelEditBlock(block)
+                cancelEditBlock(block);
             }
-
         }
         function cancelEditBlock(block) {
             block.data("editing", false);
@@ -120,13 +124,12 @@
             } else {
                 saveEdit(block);
             }
-
         }
         function validateBlock(block) {
-            return [...block.find("input")].every((e) => {
-                e.reportValidity()
+            return [...block.find("input")].every(e => {
+                e.reportValidity();
                 return e.checkValidity();
-            })
+            });
         }
         function serializeBlockHeader(block) {
             const data = {};
