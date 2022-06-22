@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.dto.view.module;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.constraints.NotBlank;
@@ -38,7 +39,7 @@ public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
 
 	@NotNull
 	private Long id;
-	@NotBlank
+	@NotNull
 	private String name;
 	@NotNull
 	private Boolean essential;
@@ -69,5 +70,11 @@ public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
 
 	public List<Long> getChildIds() {
 		return childIds;
+	}
+
+	public static ModuleLevelSkillViewDTO empty() {
+		return ModuleLevelSkillViewDTO.builder().id(-1L).name("").essential(true).row(-1).column(-1)
+				.checkpoint(CheckpointViewDTO.empty()).tasks(new ArrayList<>())
+				.parentIds(new ArrayList<>()).childIds(new ArrayList<>()).build();
 	}
 }

@@ -24,12 +24,16 @@ import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.SkillCreateDTO;
+import nl.tudelft.skills.dto.create.TaskCreateDTO;
+import nl.tudelft.skills.dto.id.SkillIdDTO;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSubmoduleViewDTO;
+import nl.tudelft.skills.dto.view.module.TaskViewDTO;
 import nl.tudelft.skills.model.Skill;
+import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.SubmoduleRepository;
 import nl.tudelft.skills.repository.TaskRepository;
@@ -42,6 +46,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("skill")
@@ -71,8 +79,13 @@ public class SkillController {
 	@PostMapping
 	@Transactional
 	@PreAuthorize("@authorisationService.canCreateSkill(#create.submodule.id)")
-	public String createSkill(@AuthenticatedPerson Person person, SkillCreateDTO create, Model model) {
+	public String createSkill(@AuthenticatedPerson Person person, @RequestBody SkillCreateDTO create, Model model) {
 		Skill skill = skillRepository.saveAndFlush(create.apply());
+		Set<Task> tasks = create.getNewItems().stream().map(dto -> {
+			dto.setSkill(SkillIdDTO.builder().id(skill.getId()).build());
+			return dto.apply();
+		}).collect(Collectors.toSet());
+		skill.setTasks(Set.copyOf(taskRepository.saveAllAndFlush(tasks)));
 
 		return SpringContext.getBean(ModuleController.class)
 				.getModulePage(person, skill.getSubmodule().getModule().getId(), model);

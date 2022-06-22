@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.dto.view.module;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.constraints.NotBlank;
@@ -37,7 +38,7 @@ public class ModuleLevelSubmoduleViewDTO extends View<Submodule> implements Grou
 
 	@NotNull
 	private Long id;
-	@NotBlank
+	@NotNull
 	private String name;
 	@NotNull
 	@PostApply
@@ -48,5 +49,14 @@ public class ModuleLevelSubmoduleViewDTO extends View<Submodule> implements Grou
 	@Override
 	public List<? extends BlockView> getBlocks() {
 		return skills;
+	}
+
+	public static ModuleLevelSubmoduleViewDTO empty() {
+		return ModuleLevelSubmoduleViewDTO.builder()
+				.id(-1L)
+				.name("")
+				.skills(new ArrayList<>())
+				.childIds(new ArrayList<>()).build();
+
 	}
 }

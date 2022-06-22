@@ -25,6 +25,8 @@ import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
 import nl.tudelft.skills.dto.view.edition.EditionLevelEditionViewDTO;
+import nl.tudelft.skills.dto.view.edition.EditionLevelModuleViewDTO;
+import nl.tudelft.skills.dto.view.edition.EditionLevelSubmoduleViewDTO;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.service.EditionService;
@@ -81,6 +83,8 @@ public class EditionController {
 					.toList());
 		}
 
+		model.addAttribute("emptyBlock", EditionLevelSubmoduleViewDTO.empty());
+		model.addAttribute("emptyGroup", EditionLevelModuleViewDTO.empty());
 		model.addAttribute("studentMode", studentMode != null && studentMode);
 
 		return "edition/view";

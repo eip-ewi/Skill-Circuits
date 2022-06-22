@@ -31,6 +31,8 @@ import nl.tudelft.skills.dto.create.SCModuleCreateDTO;
 import nl.tudelft.skills.dto.patch.SCModulePatchDTO;
 import nl.tudelft.skills.dto.view.edition.EditionLevelModuleViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
+import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
+import nl.tudelft.skills.dto.view.module.ModuleLevelSubmoduleViewDTO;
 import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.service.ModuleService;
@@ -96,6 +98,9 @@ public class ModuleController {
 					.filter(pos -> !positions.contains(pos))
 					.toList());
 		}
+
+		model.addAttribute("emptyBlock", ModuleLevelSkillViewDTO.empty());
+		model.addAttribute("emptyGroup", ModuleLevelSubmoduleViewDTO.empty());
 		model.addAttribute("studentMode", studentMode != null && studentMode);
 		return "module/view";
 	}

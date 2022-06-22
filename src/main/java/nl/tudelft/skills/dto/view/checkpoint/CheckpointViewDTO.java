@@ -18,6 +18,7 @@
 package nl.tudelft.skills.dto.view.checkpoint;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.constraints.NotBlank;
@@ -28,6 +29,7 @@ import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.module.ModuleLevelEditionViewDTO;
 import nl.tudelft.skills.model.Checkpoint;
 import nl.tudelft.skills.model.Skill;
+import org.hibernate.annotations.Check;
 
 @Data
 @Builder
@@ -38,16 +40,13 @@ public class CheckpointViewDTO extends View<Checkpoint> {
 
 	@NotNull
 	private long id;
-
 	@NotNull
-	private ModuleLevelEditionViewDTO edition;
-
-	@NotBlank
 	private String name;
 
-	@NotNull
-	private LocalDateTime deadline;
 
+	private ModuleLevelEditionViewDTO edition;
+
+	private LocalDateTime deadline;
 	@NotNull
 	private List<Long> skillIds;
 
@@ -55,5 +54,11 @@ public class CheckpointViewDTO extends View<Checkpoint> {
 	public void postApply() {
 		super.postApply();
 		this.skillIds = data.getSkills().stream().map(Skill::getId).toList();
+	}
+	public static CheckpointViewDTO empty() {
+		return CheckpointViewDTO.builder()
+				.id(-1)
+				.name("").skillIds(new ArrayList<>())
+				.build();
 	}
 }

@@ -27,6 +27,8 @@ import nl.tudelft.skills.dto.id.CheckpointIdDTO;
 import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
 import nl.tudelft.skills.model.Skill;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -49,6 +51,8 @@ public class SkillCreateDTO extends Create<Skill> {
 	@Min(0)
 	@NotNull
 	private Integer column;
+	@NotNull
+	private List<TaskCreateDTO> newItems;
 
 	@Override
 	public Class<Skill> clazz() {

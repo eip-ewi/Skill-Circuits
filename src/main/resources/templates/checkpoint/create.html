@@ -78,7 +78,7 @@
             const circuit = $("#circuit");
             const rowsInGrid = [
                 ...Array(
-                    parseInt(getComputedStyle(document.documentElement).getPropertyValue("--rows"))
+                    parseInt(circuit.css("--rows"))
                 ).keys(),
             ];
             const rowsWithCheckpoints = [...$(".checkpoint")].map(cp =>
@@ -161,9 +161,7 @@
             );
         }
         function getFirstCheckpointAfter(row) {
-            const rowsInGrid = parseInt(
-                getComputedStyle(document.documentElement).getPropertyValue("--rows")
-            );
+            const rowsInGrid = parseInt($("#circuit").css("--rows"));
             for (let i = row; i <= rowsInGrid; i++) {
                 const next = [...$(".checkpoint ").not(".ghost_checkpoint")].find(
                     cp => parseInt($(cp).css("gridRowStart")) === i
