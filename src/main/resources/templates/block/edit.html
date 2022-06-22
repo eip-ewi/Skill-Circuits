@@ -22,7 +22,7 @@
     lang="en"
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-    <form th:if="${canEdit}" layout:fragment="header" data-edit="only" class="block__header">
+    <form th:if="${canEdit}" layout:fragment="header" data-edit="only" class="block__header" action="javascript:void(0);">
         <input name="id" th:value="${block.id}" type="hidden" />
         <input
             th:data-initial="${block.name}"
