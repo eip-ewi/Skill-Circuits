@@ -124,7 +124,7 @@ public class CheckpointController {
 
 	@Transactional
 	@PostMapping
-	@PreAuthorize("@authorisationService.canCreateCheckpointInEdition(#dto.getEdition().getId())")
+	@PreAuthorize("@authorisationService.canCreateCheckpointInEdition(#dto.edition.id)")
 	public String createCheckpoint(CheckpointCreateDTO dto, @RequestParam Long moduleId) {
 		Checkpoint checkpoint = checkpointRepository.save(dto.apply());
 		skillRepository.findAllByIdIn(dto.getSkillIds()).forEach(skill -> skill.setCheckpoint(checkpoint));
@@ -140,15 +140,15 @@ public class CheckpointController {
 	 * @return       A new checkpoint html element.
 	 */
 	@Transactional
-	@PostMapping("/setup")
-	@PreAuthorize("@authorisationService.canCreateCheckpointInEdition(#dto.getEdition().getId())")
+	@PostMapping("setup")
+	@PreAuthorize("@authorisationService.canCreateCheckpointInEdition(#dto.edition.id)")
 	public String createCheckpointSetup(CheckpointCreateDTO dto, Model model) {
 		Checkpoint checkpoint = checkpointRepository.save(dto.apply());
 		checkpoint.getEdition().getCheckpoints().add(checkpoint);
 
 		model.addAttribute("checkpoint", View.convert(checkpoint, CheckpointViewDTO.class));
 
-		return "edition-setup/checkpoint";
+		return "edition_setup/checkpoint";
 
 	}
 

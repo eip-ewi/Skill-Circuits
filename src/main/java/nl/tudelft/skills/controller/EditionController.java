@@ -17,9 +17,7 @@
  */
 package nl.tudelft.skills.controller;
 
-import java.util.List;
 import java.util.Set;
-import java.util.stream.IntStream;
 
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
@@ -29,6 +27,7 @@ import nl.tudelft.skills.dto.view.edition.EditionLevelModuleViewDTO;
 import nl.tudelft.skills.dto.view.edition.EditionLevelSubmoduleViewDTO;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.EditionRepository;
+import nl.tudelft.skills.service.CircuitService;
 import nl.tudelft.skills.service.EditionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,16 +71,7 @@ public class EditionController {
 
 		model.addAttribute("level", "edition");
 		model.addAttribute("edition", edition);
-		model.addAttribute("columns", columns);
-		model.addAttribute("rows", rows);
-		if (positions.isEmpty()) {
-			model.addAttribute("emptySpaces", List.of(Pair.of(0, 0)));
-		} else {
-			model.addAttribute("emptySpaces", IntStream.range(0, rows).boxed()
-					.flatMap(row -> IntStream.range(0, columns).mapToObj(col -> Pair.of(col, row)))
-					.filter(pos -> !positions.contains(pos))
-					.toList());
-		}
+		CircuitService.setCircuitAttributes(model, positions, columns, rows);
 
 		model.addAttribute("emptyBlock", EditionLevelSubmoduleViewDTO.empty());
 		model.addAttribute("emptyGroup", EditionLevelModuleViewDTO.empty());

@@ -46,30 +46,31 @@
         margin: 1rem 0;
     }
 }
-.editable-li > div {
-    display: flex;
-    gap: 1rem;
-    & a {
-        text-decoration: none;
-        color: var(--primary-dark);
+.editable-ul {
+    margin-bottom: 1rem;
+    list-style: none;
+    max-width: 20rem;
+
+    &__edit button {
+        @include icon-button;
     }
-    & .button-container {
+
+    & .editable-li > div {
         display: flex;
-        gap: 0.5rem;
-        & > button {
-            @include icon-button;
+        gap: 1rem;
+        & a {
+            text-decoration: none;
+            color: var(--primary-dark);
+        }
+        & .button-container {
+            display: flex;
+            gap: 0.5rem;
+            & > button {
+                @include icon-button;
+            }
         }
     }
 }
 #edit-module,
 #edit-checkpoint {
-    & button {
-        @include icon-button;
-    }
-}
-#module-list,
-#checkpoint-list {
-    margin-bottom: 1rem;
-    list-style: none;
-    max-width: 20rem;
 }

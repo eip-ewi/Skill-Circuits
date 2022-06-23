@@ -23,23 +23,24 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <li
-        th:id="|checkpoint-${checkpoint.id}|"
-        th:data-checkpoint="${checkpoint.id}"
-        layout:fragment="checkpoint"
+        th:id="|module-${module.id}|"
+        th:data-module="${module.id}"
+        th:data-skills-count="${module.getSkillsCount()}"
+        layout:fragment="module"
         class="editable-li">
-        <div th:id="|checkpoint-${checkpoint.id}-content|" class="checkpoint-content">
-            <p
-                th:id="|checkpoint-${checkpoint.id}-name|"
-                th:text="${checkpoint.name}"
-                class="checkpoint__name" />
+        <div th:id="|module-${module.id}-content|" class="module-content">
+            <a
+                th:id="|module-${module.id}-name|"
+                th:href="|/module/${module.id}|"
+                th:text="${module.name}"
+                class="editable-item__name" />
             <div class="button-container">
                 <button
-                    th:data-checkpoint="${checkpoint.id}"
-                    class="fa-solid fa-pencil checkpoint__edit"></button>
+                    th:data-module="${module.id}"
+                    class="fa-solid fa-pencil module__edit"></button>
                 <button
-                    th:data-checkpoint="${checkpoint.id}"
-                    class="fa-solid fa-trash checkpoint__delete"
-                    onclick=""></button>
+                    th:data-module="${module.id}"
+                    class="fa-solid fa-trash module__delete"></button>
             </div>
         </div>
     </li>

@@ -73,13 +73,13 @@
                             required />
                         <button type="submit">create</button>
                     </form>
-                    <ul id="module-list">
+                    <ul id="module-list" class="editable-ul">
                         <th:block th:each="module : ${edition.modules}">
-                            <th:block layout:replace="~{edition-setup/module :: module}"></th:block>
+                            <th:block layout:replace="~{edition_setup/module :: module}"></th:block>
                         </th:block>
                     </ul>
                 </div>
-                <div>
+                <div class="sidebar__column">
                     <h2>Checkpoints</h2>
                     <form id="new-checkpoint-form" class="sidebar__new_item_form">
                         <input name="edition.id" hidden th:value="${edition.id}" />
@@ -91,10 +91,10 @@
                             required />
                         <button type="submit">create</button>
                     </form>
-                    <ul id="checkpoint-list">
+                    <ul id="checkpoint-list" class="editable-ul">
                         <th:block th:each="checkpoint : ${edition.checkpointsInEdition}">
                             <th:block
-                                layout:replace="~{edition-setup/checkpoint :: checkpoint}"></th:block>
+                                layout:replace="~{edition_setup/checkpoint :: checkpoint}"></th:block>
                         </th:block>
                     </ul>
                 </div>
@@ -139,13 +139,13 @@
                 });
             });
         </script>
-        <th:block layout:replace="~{edition-setup/module-delete :: overlay}" />
-        <th:block layout:replace="~{edition-setup/module-delete :: script}" />
-        <th:block layout:replace="~{edition-setup/module-edit :: form}" />
-        <th:block layout:replace="~{edition-setup/module-edit :: script}" />
-        <th:block layout:replace="~{edition-setup/checkpoint-delete :: overlay}" />
-        <th:block layout:replace="~{edition-setup/checkpoint-delete :: script}" />
-        <th:block layout:replace="~{edition-setup/checkpoint-edit :: form}" />
-        <th:block layout:replace="~{edition-setup/checkpoint-edit :: script}" />
+        <th:block layout:replace="~{edition_setup/module-delete :: overlay}" />
+        <th:block layout:replace="~{edition_setup/module-delete :: script}" />
+        <th:block layout:replace="~{edition_setup/module-edit :: form}" />
+        <th:block layout:replace="~{edition_setup/module-edit :: script}" />
+        <th:block layout:replace="~{edition_setup/checkpoint-delete :: overlay}" />
+        <th:block layout:replace="~{edition_setup/checkpoint-delete :: script}" />
+        <th:block layout:replace="~{edition_setup/checkpoint-edit :: form}" />
+        <th:block layout:replace="~{edition_setup/checkpoint-edit :: script}" />
     </div>
 </html>
