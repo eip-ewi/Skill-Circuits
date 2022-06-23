@@ -41,6 +41,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -56,6 +57,8 @@ public class SubmoduleControllerTest extends ControllerTest {
 	private final SubmoduleRepository submoduleRepository;
 	private final ModuleRepository moduleRepository;
 	private final EditionControllerApi editionControllerApi;
+	@MockBean
+	private EditionController editionController;
 
 	@Autowired
 	public SubmoduleControllerTest(SubmoduleRepository submoduleRepository, SkillService skillService,

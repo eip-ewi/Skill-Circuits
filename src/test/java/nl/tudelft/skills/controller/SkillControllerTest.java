@@ -31,7 +31,6 @@ import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
 import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.repository.CheckpointRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.SubmoduleRepository;
 import nl.tudelft.skills.repository.TaskRepository;
@@ -42,6 +41,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -54,14 +54,13 @@ public class SkillControllerTest extends ControllerTest {
 	private final SkillController skillController;
 	private final SkillRepository skillRepository;
 	private final SubmoduleRepository submoduleRepository;
-	private final CheckpointRepository checkpointRepository;
+	@MockBean
+	private ModuleController moduleController;
 
 	@Autowired
 	public SkillControllerTest(SkillRepository skillRepository, TaskRepository taskRepository,
-			SkillService skillService, SubmoduleRepository submoduleRepository,
-			CheckpointRepository checkpointRepository) {
+			SkillService skillService, SubmoduleRepository submoduleRepository) {
 		this.submoduleRepository = submoduleRepository;
-		this.checkpointRepository = checkpointRepository;
 		this.skillController = new SkillController(skillRepository, taskRepository, submoduleRepository,
 				skillService);
 		this.skillRepository = skillRepository;
