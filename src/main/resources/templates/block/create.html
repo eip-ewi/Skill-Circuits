@@ -57,10 +57,12 @@
 
             data["newItems"] = items.filter(item => item.new);
             data["newItems"] = items.filter(item => item.new);
-            data["checkpoint"] = {};
-            data["checkpoint"]["id"] = getFirstCheckpointAfter(block.css("gridRowStart"))
-                .attr("id")
-                .split("-")[1];
+            if (blockType === "skill") {
+                data["checkpoint"] = {};
+                data["checkpoint"]["id"] = getFirstCheckpointAfter(block.css("gridRowStart"))
+                    .attr("id")
+                    .split("-")[1];
+            }
             data["row"] = parseInt(block.css("gridRowStart")) - 1;
             data["column"] = parseInt(block.css("gridColumnStart")) - 1;
 

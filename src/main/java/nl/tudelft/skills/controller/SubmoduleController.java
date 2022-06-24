@@ -65,7 +65,7 @@ public class SubmoduleController {
 	 */
 	@PostMapping
 	@PreAuthorize("@authorisationService.canCreateSubmodule(#create.module.id)")
-	public String createSubmodule(SubmoduleCreateDTO create, Model model) {
+	public String createSubmodule(@RequestBody SubmoduleCreateDTO create, Model model) {
 		Submodule submodule = submoduleRepository.saveAndFlush(create.apply());
 		return SpringContext.getBean(EditionController.class)
 				.getEditionPage(submodule.getModule().getEdition().getId(), model);
