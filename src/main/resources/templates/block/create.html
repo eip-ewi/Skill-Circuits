@@ -32,6 +32,17 @@
             form.attr("data-editing", true);
             form.css("gridColumn", (col + 1).toString());
             form.css("gridRow", (row + 1).toString());
+
+            if (blockType === "skill") {
+                const checkpoint = getFirstCheckpointAfter(row);
+                const checkPointSelect = $("#create-skill-checkpoint");
+                const showCheckpointSelect = checkpoint === undefined;
+
+                checkPointSelect.attr("hidden", !showCheckpointSelect);
+                if (!showCheckpointSelect) {
+                    checkPointSelect.val(checkpoint.prop("id").split("-")[1]);
+                }
+            }
             $(this).replaceWith(form);
         }
 
@@ -57,12 +68,7 @@
 
             data["newItems"] = items.filter(item => item.new);
             data["newItems"] = items.filter(item => item.new);
-            if (blockType === "skill") {
-                data["checkpoint"] = {};
-                data["checkpoint"]["id"] = getFirstCheckpointAfter(block.css("gridRowStart"))
-                    .attr("id")
-                    .split("-")[1];
-            }
+
             data["row"] = parseInt(block.css("gridRowStart")) - 1;
             data["column"] = parseInt(block.css("gridColumnStart")) - 1;
 

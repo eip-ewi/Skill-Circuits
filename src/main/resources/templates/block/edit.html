@@ -55,6 +55,21 @@
                 th:text="${g.name}"></option>
         </select>
 
+        <div data-edit="only" th:if="${level == 'module' && create != null}">
+            <select
+                data-edit="only"
+                id="create-skill-checkpoint"
+                class="selectbox font_size_regular"
+                name="checkpoint.id"
+                required>
+                <option
+                    data-edit="only"
+                    th:each="checkpoint : ${module.checkpointsInEdition}"
+                    th:value="${checkpoint.id}"
+                    th:text="${checkpoint.name}"></option>
+            </select>
+        </div>
+
         <div data-edit="only" th:if="${level == 'module'}">
             <input
                 data-edit="only"

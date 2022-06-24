@@ -158,7 +158,7 @@
         }
         function getFirstCheckpointAfter(row) {
             const rowsInGrid = parseInt($("#circuit").css("--rows"));
-            for (let i = row; i <= rowsInGrid; i++) {
+            for (let i = row + 1; i <= rowsInGrid + 1; i++) {
                 const next = [...$(".checkpoint ").not(".ghost_checkpoint")].find(
                     cp => parseInt($(cp).css("gridRowStart")) === i
                 );
