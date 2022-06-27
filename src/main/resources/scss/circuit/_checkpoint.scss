@@ -14,6 +14,10 @@
         background-color: var(--background-colour);
         gap: 0.5rem;
 
+        .checkpoint__deadline {
+            font-size: smaller;
+            color: var(--grey-500);
+        }
         &:hover > .checkpoint__buttons {
             visibility: initial;
             display: flex;

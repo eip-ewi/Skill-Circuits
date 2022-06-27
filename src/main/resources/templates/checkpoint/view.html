@@ -24,21 +24,19 @@
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <div
         th:id="|checkpoint-${checkpoint.id}|"
-        th:data-deadline="${checkpoint.deadline}"
+        th:data-deadline="${#temporals.formatISO(checkpoint.deadline)}"
+        th:data-name="${checkpoint.name}"
         class="checkpoint"
         layout:fragment="checkpoint">
         <div class="checkpoint__body" th:id="|checkpoint-${checkpoint.id}-body|">
-            <div th:id="|checkpoint-${checkpoint.id}-display|" class="checkpoint__name">
-                <p>
-                    <span
-                        th:id="|checkpoint-${checkpoint.id}-name|"
-                        th:text="${checkpoint.name}"></span>
-                    (
-                    <span
-                        th:id="|checkpoint-${checkpoint.id}-deadline|"
-                        th:text="${#temporals.format(checkpoint.deadline, 'dd-MM-yyyy HH:mm')}"></span>
-                    )
-                </p>
+            <div th:id="|checkpoint-${checkpoint.id}-display|">
+                <span
+                    th:id="|checkpoint-${checkpoint.id}-name|"
+                    th:text="${checkpoint.name}"
+                    class="checkpoint__name"></span>
+                <span
+                    th:id="|checkpoint-${checkpoint.id}-deadline|"
+                    class="checkpoint__deadline"></span>
             </div>
             <div
                 th:if="${canEdit}"
@@ -68,8 +66,30 @@
                 $(cp).css("grid-row", checkpointRows.get(cp.id.split("-")[1]))
             );
         }
+        function formatDeadline(isoTime) {
+            const deadline = luxon.DateTime.fromISO(isoTime);
+            const fmtOptions = {
+                weekday: "short",
+                year: "numeric",
+                month: "long",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                hourCycle: "h23",
+            };
+
+            return deadline.toLocaleString(fmtOptions);
+        }
+        function updateCheckpointDeadlines() {
+            // Needed so that we always use the same format (after edit and on view)
+            $(".checkpoint").each(function () {
+                const deadline = formatDeadline($(this).data("deadline"));
+                $(this).find(".checkpoint__deadline").text(deadline);
+            });
+        }
         document.addEventListener("DOMContentLoaded", function () {
             updateCheckpointPositions();
+            updateCheckpointDeadlines();
             if (typeof addGhostCheckpoints === "function") {
                 addGhostCheckpoints();
             }

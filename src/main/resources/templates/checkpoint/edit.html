@@ -47,15 +47,12 @@
         function editCheckpoint() {
             const checkpointId = $(this).data("checkpoint");
             const checkpointDisplay = $(`#checkpoint-${checkpointId}-display`);
-            const checkpointNameItem = $(`#checkpoint-${checkpointId}-name`);
-            const checkpointDeadlineItem = $(`#checkpoint-${checkpointId}-deadline`);
+            const checkpointName = $(`#checkpoint-${checkpointId}`).data("name");
+            const checkpointDeadline = $(`#checkpoint-${checkpointId}`).data("deadline");
 
             $("#edit-checkpoint-id").val(checkpointId);
-            $("#edit-checkpoint-name").val(checkpointNameItem.text());
-            const currentDeadline = luxon.DateTime.fromFormat(
-                checkpointDeadlineItem.text(),
-                "dd-MM-yyyy HH:mm"
-            );
+            $("#edit-checkpoint-name").val(checkpointName);
+            const currentDeadline = luxon.DateTime.fromISO(checkpointDeadline);
             $("#edit-checkpoint-deadline").val(currentDeadline.toFormat("yyyy-MM-dd'T'HH:mm"));
             $(`#checkpoint-${checkpointId}-body`).append($("#edit-checkpoint"));
 
@@ -75,14 +72,13 @@
                         const checkpointId = $("#edit-checkpoint-id").val();
                         const checkpointName = $(`#checkpoint-${checkpointId}-name`);
                         const checkpointDeadline = $(`#checkpoint-${checkpointId}-deadline`);
+                        const newDeadline = luxon.DateTime.fromISO(
+                            $("#edit-checkpoint-deadline").val()
+                        );
 
                         $("#edit-checkpoint-wrapper").append($("#edit-checkpoint"));
                         checkpointName.text($("#edit-checkpoint-name").val());
-                        checkpointDeadline.text(
-                            luxon.DateTime.fromISO($("#edit-checkpoint-deadline").val()).toFormat(
-                                "dd-MM-yyyy HH:mm"
-                            )
-                        );
+                        checkpointDeadline.text(formatDeadline(newDeadline));
 
                         $(`#checkpoint-${checkpointId}-display`).removeClass("hidden");
                         $(`#checkpoint-${checkpointId}-buttons`).removeClass("hidden");
