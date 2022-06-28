@@ -1,6 +1,6 @@
 # Skill Circuits
 
-image: gradle:jdk17
+image: gitlab.ewi.tudelft.nl:4242/skill-circuits/docker-image:master
 
 
 variables:
@@ -290,28 +290,60 @@ license_scanning:
     MAVEN_CLI_OPTS: -q -Dmaven.main.skip -Dmaven.test.skip -DskipTests --batch-mode
     LM_JAVA_VERSION: 17
 
+dev-deploy:
+  image: getsentry/sentry-cli
+  stage: deploy
+  dependencies:
+    - publish_jar
+  before_script:
+    - 'which ssh-agent || ( apk add --update openssh-client )'
+    - eval $(ssh-agent -s)
+    ##
+    ## Add the SSH key stored in SSH_PRIVATE_KEY variable to the agent store
+    ## We're using tr to fix line endings which makes ed25519 keys work
+    ## without extra base64 encoding.
+    ## https://gitlab.com/gitlab-examples/ssh-private-key/issues/1#note_48526556
+    ##
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan skills-dev.ewi.tudelft.nl >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  script:
+    - scp skill_circuits.jar deploy@skills-dev.ewi.tudelft.nl:/var/www/skills/skills.jar
+    - ssh deploy@skills-dev.ewi.tudelft.nl sudo /bin/systemctl restart skills
+  environment:
+    name: test
+    url: https://skills-dev.tudelft.nl
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "trigger" ||
+        $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
+      when: never
+    - if: $CI_COMMIT_BRANCH == "development"
+      when: on_success
+
 # TODO CONFIGURE
-#deploy:
-#  image: getsentry/sentry-cli
-#  stage: deploy
-#  dependencies:
-#    - publish_jar
-#  before_script:
-#    - 'which ssh-agent || ( apk add --update openssh-client )'
-#    - eval $(ssh-agent -s)
-#    ##
-#    ## Add the SSH key stored in SSH_PRIVATE_KEY variable to the agent store
-#    ## We're using tr to fix line endings which makes ed25519 keys work
-#    ## without extra base64 encoding.
-#    ## https://gitlab.com/gitlab-examples/ssh-private-key/issues/1#note_48526556
-#    ##
-#    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-#    - mkdir -p ~/.ssh
-#    - chmod 700 ~/.ssh
-#    - ssh-keyscan submit.tudelft.nl >> ~/.ssh/known_hosts
-#    - chmod 644 ~/.ssh/known_hosts
-#  script:
-#    - start=$(date +%s)
+deploy:
+  image: getsentry/sentry-cli
+  stage: deploy
+  dependencies:
+    - publish_jar
+  before_script:
+    - 'which ssh-agent || ( apk add --update openssh-client )'
+    - eval $(ssh-agent -s)
+    ##
+    ## Add the SSH key stored in SSH_PRIVATE_KEY variable to the agent store
+    ## We're using tr to fix line endings which makes ed25519 keys work
+    ## without extra base64 encoding.
+    ## https://gitlab.com/gitlab-examples/ssh-private-key/issues/1#note_48526556
+    ##
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan skills.ewi.tudelft.nl >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  script:
+    - start=$(date +%s)
 #    - export SENTRY_URL=$SENTRY_URL
 #    - export SENTRY_ORG=$SENTRY_GIT_ORG
 #    - export SENTRY_AUTH_TOKEN=$SENTRY_GIT_AUTH_TOKEN
@@ -320,18 +352,18 @@ license_scanning:
 #    - echo "proposed version is $SENTRY_RELEASE_VERSION"
 #    - sentry-cli releases set-commits $SENTRY_RELEASE_VERSION --auto
 #    - sentry-cli releases new $SENTRY_RELEASE_VERSION
-#    - scp submit.jar deploy@submit.tudelft.nl:/var/www/submit/
-#    - ssh deploy@submit.tudelft.nl sudo /bin/systemctl restart submit
+    - scp skill_circuits.jar deploy@skills.ewi.tudelft.nl:/var/www/skills/skills.jar
+    - ssh deploy@skills.ewi.tudelft.nl sudo /bin/systemctl restart skills
 #    - sentry-cli releases finalize $SENTRY_RELEASE_VERSION
-#    - now=$(date +%s)
+    - now=$(date +%s)
 #    - sentry-cli releases deploys $SENTRY_RELEASE_VERSION new -e production -t $((now-start))
-#  environment:
-#    name: production
-#    url: https://submit.tudelft.nl
-#  rules:
-#    - if: $CI_PIPELINE_SOURCE == "trigger" ||
-#        $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
-#      when: never
-#    - if: $CI_COMMIT_BRANCH == "master"
-#      when: manual
+  environment:
+    name: production
+    url: https://skills.ewi.tudelft.nl
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "trigger" ||
+        $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
+      when: never
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: on_success
 

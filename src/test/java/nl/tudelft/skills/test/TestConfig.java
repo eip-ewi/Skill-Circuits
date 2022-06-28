@@ -19,12 +19,19 @@ package nl.tudelft.skills.test;
 
 import nl.tudelft.labracore.api.*;
 
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class TestConfig {
 
-	//	@MockBean
-	//	private Bean bean;
+	@MockBean
+	private CourseControllerApi courseApi;
+	@MockBean
+	private EditionControllerApi editionApi;
+	@MockBean
+	private PersonControllerApi personApi;
+	@MockBean
+	private RoleControllerApi roleApi;
 
 }

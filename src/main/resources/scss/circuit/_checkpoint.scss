@@ -1,0 +1,72 @@
+.checkpoint {
+    display: flex;
+    align-self: end;
+    grid-column: 1 / span var(--columns);
+    transform: translateY(2.5rem);
+    z-index: 10;
+    border-top: 1px dashed var(--primary-dark);
+    pointer-events: none;
+
+    &__body {
+        display: flex;
+        align-items: center;
+        pointer-events: initial;
+        background-color: var(--background-colour);
+        gap: 0.5rem;
+
+        .checkpoint__deadline {
+            font-size: smaller;
+            color: var(--grey-500);
+        }
+        &:hover > .checkpoint__buttons {
+            visibility: initial;
+            display: flex;
+        }
+    }
+    &__buttons {
+        cursor: pointer;
+        visibility: hidden;
+        gap: 0.5rem;
+        & > *:hover {
+            color: var(--primary-green);
+        }
+    }
+
+    &__form {
+        display: flex;
+        gap: 0.5rem;
+
+        & > input[type="text"],
+        & > select {
+            max-width: 12rem;
+        }
+        & * {
+            font-size: 1rem;
+        }
+        & > button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            &:hover {
+                color: var(--primary-green);
+            }
+        }
+    }
+
+    &.ghost_checkpoint {
+        color: var(--grey-500);
+        opacity: 0;
+        &:hover,
+        &.editing {
+            opacity: 100;
+        }
+        & .checkpoint__create {
+            pointer-events: initial;
+            background: none;
+            border: 1px solid var(--grey-700);
+            min-width: 6rem;
+            height: 1.5rem;
+            cursor: pointer;
+        }
+    }
+}

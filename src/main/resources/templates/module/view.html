@@ -1,0 +1,98 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{container}">
+    <head>
+        <link rel="stylesheet" th:href="@{/css/circuit.css}" />
+        <title th:text="${module.name}"></title>
+    </head>
+
+    <body>
+        <div layout:fragment="content">
+            <div class="circuit__header">
+                <div class="circuit__header__group">
+                    <h1 th:text="${module.name}"></h1>
+                    <a th:href="@{|/edition/${module.edition.id}|}">
+                        <span class="level_up_button fa-solid fa-turn-up fa-xl"></span>
+                    </a>
+                </div>
+
+                <div class="circuit__header__group">
+                    <form
+                        th:if="${@authorisationService.isAtLeastTeacherInEdition(module.edition.id)}"
+                        method="post"
+                        th:action="@{|/module/${module.id}/studentmode|}">
+                        <button th:if="${studentMode}" type="submit" class="circuit__button">
+                            Exit student view
+                        </button>
+                        <button th:unless="${studentMode}" type="submit" class="circuit__button">
+                            Enter student view
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <th:block
+                th:with="circuit = ${module},
+                       canCreate = ${@authorisationService.canCreateSkillInEdition(module.edition.id) and not studentMode},
+                       canEdit = ${@authorisationService.canEditSkillInEdition(module.edition.id) and not studentMode},
+                       canDelete = ${@authorisationService.canDeleteSkillInEdition(module.edition.id) and not studentMode},
+                       groupType = ${'submodule'},
+                       blockType = ${'skill'},
+                       itemType = ${'task'}">
+                <div layout:replace="~{circuit/view :: grid}"></div>
+                <div layout:replace="~{circuit/view :: additional}"></div>
+            </th:block>
+
+            <div layout:replace="~{task/create :: form}"></div>
+
+            <th:block
+                th:with="circuit = ${module},
+                       canCreate = ${@authorisationService.canCreateSkillInEdition(module.edition.id) and not studentMode},
+                       canEdit = ${@authorisationService.canEditSkillInEdition(module.edition.id) and not studentMode},
+                       canDelete = ${@authorisationService.canDeleteSkillInEdition(module.edition.id) and not studentMode},
+                       groupType = ${'submodule'},
+                       blockType = ${'skill'},
+                       itemType = ${'task'}">
+                <script>
+                    const blockType = "skill";
+                    const itemType = "task";
+                </script>
+                <div layout:replace="~{circuit/view :: script}"></div>
+
+                <div layout:replace="~{task/create :: script}"></div>
+                <div layout:replace="~{task/edit :: script}"></div>
+                <div layout:replace="~{task/mark :: script}"></div>
+
+                <div layout:replace="~{checkpoint/view :: script}"></div>
+                <div layout:replace="~{checkpoint/edit :: form}"></div>
+                <div layout:replace="~{checkpoint/edit :: script}"></div>
+                <div layout:replace="~{checkpoint/create :: form}"></div>
+                <div layout:replace="~{checkpoint/create :: script}"></div>
+                <div layout:replace="~{checkpoint/delete :: overlay}"></div>
+                <div layout:replace="~{checkpoint/delete :: script}"></div>
+            </th:block>
+        </div>
+    </body>
+</html>

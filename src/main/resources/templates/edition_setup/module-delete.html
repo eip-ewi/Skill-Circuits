@@ -1,0 +1,99 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <dialog
+        th:if="${@authorisationService.canDeleteModuleInEdition(edition.id)}"
+        layout:fragment="overlay"
+        class="overlay"
+        id="delete-module-overlay">
+        <form id="delete-module-form" class="confirmation">
+            <input id="delete-module-id" name="id" type="hidden" />
+
+            <p>
+                Are you sure you want to delete
+                <span id="delete-module-name"></span>
+                ?
+            </p>
+            <div id="delete-module-confirmation">
+                <p>
+                    This will delete all
+                    <span id="delete-module-skills-count"></span>
+                    skills in this module and all tasks in them.
+                </p>
+                <p>Type the name of the module below to confirm.</p>
+                <input type="text" id="delete-module-confirmation-input" />
+            </div>
+
+            <div class="confirmation__buttons">
+                <button type="button" onclick="toggleOverlay('delete-module-overlay')">
+                    Cancel
+                </button>
+                <button type="submit">Delete Module</button>
+            </div>
+        </form>
+    </dialog>
+
+    <script
+        th:if="${@authorisationService.canDeleteModuleInEdition(edition.id)}"
+        layout:fragment="script">
+        function deleteModule(event) {
+            toggleOverlay("delete-module-overlay");
+            const moduleId = $(this).data("module");
+            const moduleName = $(`#module-${moduleId}-name`).text();
+            const moduleSkillsCount = $(`#module-${moduleId}`).data("skills-count");
+            const deleteModuleConfirmation = $("#delete-module-confirmation");
+            const deleteModuleConfirmationInput = $("#delete-module-confirmation-input");
+
+            $("#delete-module-id").val(moduleId);
+            $("#delete-module-name").text(moduleName);
+            $("#delete-module-skills-count").text(moduleSkillsCount);
+            deleteModuleConfirmationInput.text("");
+
+            if (moduleSkillsCount === 0) {
+                deleteModuleConfirmationInput.prop("required", false);
+                deleteModuleConfirmation.addClass("hidden");
+            } else {
+                deleteModuleConfirmationInput.prop("required", true);
+                deleteModuleConfirmation.removeClass("hidden");
+                deleteModuleConfirmationInput.attr("pattern", moduleName);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            $(".module__delete").click(deleteModule);
+            $("#delete-module-form").submit(e => {
+                e.preventDefault();
+                $.ajax({
+                    url: "/module/setup",
+                    type: "DELETE",
+                    data: $("#delete-module-form").serialize(),
+                    success: () => {
+                        toggleOverlay("delete-module-overlay");
+                        $(`#module-${$("#delete-module-id").val()}`).remove();
+                    },
+                });
+            });
+        });
+    </script>
+</html>

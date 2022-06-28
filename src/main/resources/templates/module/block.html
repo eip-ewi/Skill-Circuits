@@ -1,0 +1,50 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div
+        th:id="|module-${module.id}|"
+        th:data-module="${module.id}"
+        class="block"
+        layout:fragment="moduleblock">
+        <div th:id="|module-${module.id}-header|">
+            <a style="text-decoration: none; color: black" th:href="@{|/module/${module.id}|}">
+                <h2
+                    th:id="|module-${module.id}-name|"
+                    class="module-title"
+                    th:text="${module.name}"></h2>
+            </a>
+        </div>
+
+        <div class="block__buttons">
+            <button
+                class="fa-solid fa-edit block__edit"
+                th:if="${@authorisationService.canEditModule(module.id)}"
+                th:data-module="${module.id}"></button>
+            <button
+                class="fa-solid fa-trash block__delete"
+                th:if="${@authorisationService.canDeleteModule(module.id)}"
+                th:data-module="${module.id}"></button>
+        </div>
+    </div>
+</html>

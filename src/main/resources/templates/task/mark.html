@@ -1,0 +1,137 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <script layout:fragment="script" th:inline="javascript">
+        addEventListener("DOMContentLoaded", function () {
+            let toUpdate = null;
+
+            if (localStorage.getItem("completedTasks") !== null) {
+                // if we have tasks completed in local storage but not yet in the dom, also mark them completed
+                const completedInLocalStorage = JSON.parse(localStorage.getItem("completedTasks"));
+                const completedInDOM = Array.from(
+                    document.getElementsByClassName("task completed"),
+                    e => parseInt(e.id.split("")[1])
+                );
+
+                toUpdate = completedInLocalStorage.filter(t => !completedInDOM.includes(t));
+
+                toUpdate.forEach(taskId => {
+                    const task = document.getElementById(`item-${taskId}`);
+                    // If this task is not in this view, ignore.
+                    if (task !== null) {
+                        task.classList.add("completed");
+                    }
+                });
+            }
+
+            // Traverse all blocks topologically and mark their state
+            [...$(".block")]
+                .sort((a, b) => $(a).css("gridRowStart") - $(b).css("gridRowStart"))
+                .forEach(block => updateBlockState(block.id.split("-")[1]));
+
+            //send update to server if user is authenticated and there are updates
+            /*<![CDATA[*/
+            const personId = /*[[${@authorisationService.authPerson?.id}]]*/ null;
+            /*]]>*/
+            if (personId !== null && toUpdate?.length) {
+                $.ajax({
+                    type: "PUT",
+                    url: "/person/complete/",
+                    data: JSON.stringify(toUpdate),
+                    processData: false,
+                    contentType: "application/json",
+                    success: () => {
+                        localStorage.removeItem("completedTasks");
+                    },
+                });
+            }
+        });
+
+        function toggleCompleted(taskId) {
+            const task = $(`#item-${taskId}`);
+            task.toggleClass("completed");
+
+            const completed = task.hasClass("completed");
+            const block = $(task.parents(".block")[0]);
+            updateBlockState(block.prop("id").split("-")[1]);
+            [...block.data("children")].forEach(id => updateBlockState(id));
+
+            //send update to server if user is authenticated
+            /*<![CDATA[*/
+            const personId = /*[[${@authorisationService.authPerson?.id}]]*/ null;
+            /*]]>*/
+            if (personId !== null) {
+                // If there is an authenticated person, also update on the server.
+                $.ajax({
+                    type: "PUT",
+                    url: "/person/completion/" + taskId,
+                    data: JSON.stringify(completed),
+                    processData: false,
+                    contentType: "application/json",
+                    success: () => {},
+                });
+            } else {
+                // If there is no authenticated person, also store in cookie storage
+                if (localStorage.getItem("completedTasks") === null) {
+                    localStorage.setItem("completedTasks", JSON.stringify([]));
+                }
+                if (completed) {
+                    localStorage.setItem(
+                        "completedTasks",
+                        JSON.stringify([
+                            taskId,
+                            ...JSON.parse(localStorage.getItem("completedTasks")),
+                        ])
+                    );
+                } else {
+                    localStorage.setItem(
+                        "completedTasks",
+                        JSON.stringify(
+                            JSON.parse(localStorage.getItem("completedTasks")).filter(
+                                e => e !== taskId
+                            )
+                        )
+                    );
+                }
+            }
+        }
+        function updateBlockState(blockId) {
+            const block = $(`#block-${blockId}`);
+            block.removeClass("completed active disabled");
+
+            if (block.find(".item").not(".completed").length === 0) {
+                block.addClass("completed");
+            } else {
+                const allParentsCompleted = [...block.data("parents")].every(id =>
+                    $(`#block-${id}`).hasClass("completed")
+                );
+                if (allParentsCompleted) {
+                    block.addClass("active");
+                } else {
+                    block.addClass("disabled");
+                }
+            }
+        }
+    </script>
+</html>

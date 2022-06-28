@@ -1,0 +1,47 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{container}">
+    <head>
+        <link rel="stylesheet" th:href="@{/css/blocks.css}" />
+
+        <title th:text="${course.name}"></title>
+    </head>
+
+    <body>
+        <div layout:fragment="content">
+            <h1 th:text="${course.name}"></h1>
+            <h1 th:text="${course.code}"></h1>
+
+            <div class="blocks">
+                <a
+                    class="block"
+                    th:each="edition : ${course.editions}"
+                    th:href="@{|/edition/${edition.id}|}">
+                    <h2 th:text="${edition.name}"></h2>
+                </a>
+            </div>
+        </div>
+    </body>
+</html>

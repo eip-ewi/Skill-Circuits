@@ -1,0 +1,76 @@
+@use "../mixins" as *;
+
+.sidebar {
+    z-index: 420;
+    background-color: var(--background-colour);
+    border-left: 1px solid black;
+    min-width: 30rem;
+    max-width: 45rem;
+    min-height: 100vh;
+    height: auto;
+    padding: 2rem;
+    position: absolute;
+    top: 0;
+    right: 0;
+
+    &__columns {
+        display: flex;
+        flex-direction: row;
+        gap: 1rem;
+        justify-content: space-between;
+    }
+
+    &__content {
+        position: -webkit-sticky; /* Safari */
+        position: sticky;
+        top: 0;
+    }
+
+    &__header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        & > button {
+            @include icon-button;
+        }
+    }
+    &__new_item_form {
+        input {
+            padding: 0.25rem;
+        }
+        button {
+            @include button;
+            padding: 0.25rem;
+        }
+        margin: 1rem 0;
+    }
+}
+.editable-ul {
+    margin-bottom: 1rem;
+    list-style: none;
+    max-width: 20rem;
+
+    &__edit button {
+        @include icon-button;
+    }
+
+    & .editable-li > div {
+        display: flex;
+        gap: 1rem;
+        & a {
+            text-decoration: none;
+            color: var(--primary-dark);
+        }
+        & .button-container {
+            display: flex;
+            gap: 0.5rem;
+            & > button {
+                @include icon-button;
+            }
+        }
+    }
+}
+#edit-module,
+#edit-checkpoint {
+}

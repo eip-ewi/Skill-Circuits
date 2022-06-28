@@ -1,0 +1,66 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <dialog
+        th:if="${@authorisationService.canDeleteModuleInEdition(edition.id)}"
+        layout:fragment="overlay"
+        class="overlay"
+        id="delete-module-overlay">
+        <form
+            id="delete-module-form"
+            class="confirmation"
+            th:action="@{/module}"
+            th:method="delete">
+            <input id="delete-module-id" name="id" type="hidden" />
+
+            <p>
+                Are you sure you want to delete
+                <span id="delete-module-name"></span>
+                ?
+            </p>
+
+            <div class="confirmation__buttons">
+                <button type="button" onclick="toggleOverlay('delete-module-overlay')">
+                    Cancel
+                </button>
+                <button type="submit">Delete Module</button>
+            </div>
+        </form>
+    </dialog>
+
+    <script
+        th:if="${@authorisationService.canDeleteModuleInEdition(edition.id)}"
+        layout:fragment="script">
+        function deleteModule(event) {
+            toggleOverlay("delete-module-overlay");
+            let moduleId = $(this).data("module");
+            $("#delete-module-id").val(moduleId);
+            $("#delete-module-name").text($(`#module-${moduleId}-name`).text());
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            $(".block__delete").click(deleteModule);
+        });
+    </script>
+</html>

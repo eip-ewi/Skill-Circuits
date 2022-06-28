@@ -1,0 +1,45 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <li
+        th:id="|checkpoint-${checkpoint.id}|"
+        th:data-checkpoint="${checkpoint.id}"
+        layout:fragment="checkpoint"
+        class="editable-li">
+        <div th:id="|checkpoint-${checkpoint.id}-content|" class="checkpoint-content">
+            <p
+                th:id="|checkpoint-${checkpoint.id}-name|"
+                th:text="${checkpoint.name}"
+                class="checkpoint__name" />
+            <div class="button-container">
+                <button
+                    th:data-checkpoint="${checkpoint.id}"
+                    class="fa-solid fa-pencil checkpoint__edit"></button>
+                <button
+                    th:data-checkpoint="${checkpoint.id}"
+                    class="fa-solid fa-trash checkpoint__delete"></button>
+            </div>
+        </div>
+    </li>
+</html>

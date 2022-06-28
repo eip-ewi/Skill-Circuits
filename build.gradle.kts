@@ -48,8 +48,6 @@ plugins {
     id("com.diffplug.spotless").version("6.0.1")
 
     id("com.github.hierynomus.license").version("0.16.1")
-
-    id("com.unclezs.gradle.sass").version("1.0.10")
 }
 
 sourceSets {
@@ -113,6 +111,15 @@ configure<SpotlessExtension> {
         trimTrailingWhitespace()
         endWithNewline()
     }
+    format("html") {
+        target("src/main/resources/**/*.html", "src/main/resources/**/*.js", "src/main/resources/scss/**/*.scss")
+        prettier("2.6").config(mapOf(
+            "tabWidth" to 4, "semi" to true,
+            "printWidth" to 100,
+            "bracketSameLine" to true,
+            "arrowParens" to "avoid",
+            "htmlWhitespaceSensitivity" to "ignore"))
+    }
 }
 
 val jacocoTestReport by tasks.getting(JacocoReport::class) {
@@ -131,7 +138,13 @@ val jacocoTestReport by tasks.getting(JacocoReport::class) {
     }
 }
 
-val processResources by tasks.getting(ProcessResources::class)
+task<Exec>("sassCompile") {
+    commandLine("sass", "src/main/resources/scss:src/main/resources/static/css")
+}
+
+val processResources by tasks.getting(ProcessResources::class) {
+    dependsOn.add(tasks.getByName("sassCompile"))
+}
 
 val bootJar by tasks.getting(BootJar::class) {
     enabled = true
@@ -170,11 +183,6 @@ tasks.withType<Test>().configureEach {
     testLogging {
         events("passed", "skipped", "failed")
     }
-}
-
-sass {
-    cssPath = "static/css"
-    sassPath = "scss"
 }
 
 tasks.getByName<Test>("test") {
@@ -234,10 +242,13 @@ dependencies {
     implementation("org.webjars:webjars-locator-core")
     implementation("org.webjars:jquery:3.6.0")
     implementation("org.webjars:js-cookie:2.2.1")
+    // Better DateTime handling in JavaScript
+    implementation("org.webjars.npm:luxon:2.3.2")
+
     //// Websockets
     //implementation("org.webjars:sockjs-client:1.5.1")
     //implementation("org.webjars:stomp-websocket:2.3.4")
-    implementation("org.webjars:font-awesome:5.15.3")
+    implementation("org.webjars:font-awesome:6.0.0")
     implementation("org.webjars:chartjs:3.6.0")
 
     // Jaeger

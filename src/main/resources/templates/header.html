@@ -1,0 +1,69 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <header layout:fragment="header" class="header">
+        <h1 class="header__title"><a th:href="@{/}">Skill Circuits</a></h1>
+
+        <nav aria-label="primary" class="header__links"></nav>
+
+        <ul class="header__icons">
+            <li
+                class="header__icon header__button"
+                th:unless="${@authorisationService.isAuthenticated()}">
+                <a th:href="@{/auth/login}">
+                    <span class="fa-solid fa-right-to-bracket"></span>
+                    Login
+                </a>
+            </li>
+            <li class="header__icon" th:if="${@authorisationService.isAuthenticated()}">
+                <button class="header__button" id="dropdown-button">
+                    <span th:text="${@authorisationService.getAuthPerson().displayName}"></span>
+                    <span id="dropdown-icon" class="fa-solid fa-angle-down"></span>
+                </button>
+                <ul id="dropdown" class="header__dropdown">
+                    <li>
+                        <a th:href="@{/}">
+                            <span class="fa-solid fa-user"></span>
+                            Your Profile
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/inventory}">
+                            <span class="fa-solid fa-boxes-stacked"></span>
+                            Inventory
+                        </a>
+                    </li>
+                    <li>
+                        <form th:action="@{/auth/logout}" method="post">
+                            <button type="submit">
+                                <span class="fa-solid fa-right-from-bracket"></span>
+                                Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </header>
+</html>

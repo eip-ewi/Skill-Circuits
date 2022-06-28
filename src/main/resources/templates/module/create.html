@@ -1,0 +1,80 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div
+        th:if="${@authorisationService.canCreateModuleInEdition(edition.id)}"
+        layout:fragment="form"
+        class="hidden"
+        id="create-module-wrapper">
+        <div id="create-module">
+            <form id="create-module-form" class="create block__form">
+                <input th:value="${edition.id}" name="edition.id" type="hidden" />
+
+                <label for="create-module-name">Name</label>
+                <input id="create-module-name" name="name" type="text" required />
+
+                <div class="block__form__buttons">
+                    <button type="button" id="create-module-cancel">Cancel</button>
+                    <button type="submit">Create Module</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script
+        th:if="${@authorisationService.canCreateModuleInEdition(edition.id)}"
+        layout:fragment="script">
+        function clickOnBlockGhost() {
+            let form = $("#create-module");
+            $(this).replaceWith(form);
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            $("#create-module-form").submit(function (event) {
+                event.preventDefault();
+                $.post("/module", $("#create-module-form").serialize(), html => {
+                    let element = $("<div/>").append(html).children()[0];
+
+                    $("#blocks").append(element);
+                    $("#create-module-wrapper").append($("#create-module"));
+                    $("#create-module-name").val("");
+
+                    $(`#${element.id} > .block__buttons > .block__edit`).click(editModule);
+                    $(`#${element.id} > .block__buttons > .block__delete`).click(deleteModule);
+
+                    $("#blocks").append($('<div class="ghost_block fa-solid fa-plus"></div>'));
+                    $(".ghost_block").click(clickOnBlockGhost);
+                });
+            });
+
+            $("#create-module-cancel").click(function () {
+                $("#create-module-wrapper").append($("#create-module"));
+                $("#create-module-name").val("");
+                $("#blocks").append($('<div class="ghost_block fa-solid fa-plus"></div>'));
+                $(".ghost_block").click(clickOnBlockGhost);
+            });
+
+            $(".ghost_block").click(clickOnBlockGhost);
+        });
+    </script>
+</html>

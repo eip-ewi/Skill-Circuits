@@ -1,0 +1,99 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div th:if="${canEdit}" layout:fragment="form" class="hidden" id="edit-checkpoint-wrapper">
+        <div id="edit-checkpoint">
+            <form id="edit-checkpoint-form" class="checkpoint__form">
+                <input id="edit-checkpoint-id" name="id" type="hidden" />
+
+                <input id="edit-checkpoint-name" name="name" type="text" required />
+                <input
+                    id="edit-checkpoint-deadline"
+                    name="deadline"
+                    type="datetime-local"
+                    required />
+
+                <button
+                    type="button"
+                    id="edit-checkpoint-cancel"
+                    class="fa-solid fa-xmark"></button>
+                <button type="submit" class="fa-solid fa-check"></button>
+            </form>
+        </div>
+    </div>
+
+    <script th:if="${canEdit}" layout:fragment="script">
+        function editCheckpoint() {
+            const checkpointId = $(this).data("checkpoint");
+            const checkpointDisplay = $(`#checkpoint-${checkpointId}-display`);
+            const checkpointName = $(`#checkpoint-${checkpointId}`).data("name");
+            const checkpointDeadline = $(`#checkpoint-${checkpointId}`).data("deadline");
+
+            $("#edit-checkpoint-id").val(checkpointId);
+            $("#edit-checkpoint-name").val(checkpointName);
+            const currentDeadline = luxon.DateTime.fromISO(checkpointDeadline);
+            $("#edit-checkpoint-deadline").val(currentDeadline.toFormat("yyyy-MM-dd'T'HH:mm"));
+            $(`#checkpoint-${checkpointId}-body`).append($("#edit-checkpoint"));
+
+            $(".checkpoint__name").removeClass("hidden");
+            checkpointDisplay.addClass("hidden");
+            $(`#checkpoint-${checkpointId}-buttons`).addClass("hidden");
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            $("#edit-checkpoint-form").submit(function (event) {
+                event.preventDefault();
+                $.ajax({
+                    type: "PATCH",
+                    url: `/checkpoint`,
+                    data: $("#edit-checkpoint-form").serialize(),
+                    success: () => {
+                        const checkpointId = $("#edit-checkpoint-id").val();
+                        const checkpointName = $(`#checkpoint-${checkpointId}-name`);
+                        const checkpointDeadline = $(`#checkpoint-${checkpointId}-deadline`);
+                        const newDeadline = luxon.DateTime.fromISO(
+                            $("#edit-checkpoint-deadline").val()
+                        );
+
+                        $("#edit-checkpoint-wrapper").append($("#edit-checkpoint"));
+                        checkpointName.text($("#edit-checkpoint-name").val());
+                        checkpointDeadline.text(formatDeadline(newDeadline));
+
+                        $(`#checkpoint-${checkpointId}-display`).removeClass("hidden");
+                        $(`#checkpoint-${checkpointId}-buttons`).removeClass("hidden");
+                    },
+                });
+            });
+
+            $(".checkpoint__edit").click(editCheckpoint);
+
+            $("#edit-checkpoint-cancel").click(function () {
+                let checkpointId = $("#edit-checkpoint-id").val();
+                $("#edit-checkpoint-wrapper").append($("#edit-checkpoint"));
+                $(`#checkpoint-${checkpointId}-display`).removeClass("hidden");
+                $(`#checkpoint-${checkpointId}-buttons`).removeClass("hidden");
+            });
+        });
+    </script>
+</html>

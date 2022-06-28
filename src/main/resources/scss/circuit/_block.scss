@@ -1,0 +1,182 @@
+@use "../mixins" as *;
+
+.block {
+    background-color: var(--primary-light);
+    --border-colour: var(--primary-dark);
+    border: 1px solid var(--border-colour);
+    padding: 1rem;
+    position: relative;
+    z-index: 10;
+
+    &.highlighted {
+        --border-colour: var(--primary-green);
+        outline: 2px solid var(--border-colour);
+    }
+    &.disabled {
+        & > .block__header {
+            color: var(--grey-500);
+        }
+        --border-colour: var(--grey-500);
+    }
+    &.completed {
+        --border-colour: var(--primary-green);
+        border: 2px solid var(--border-colour);
+    }
+
+    &[data-essential="false"] {
+        --border-colour: #ff00ff;
+    }
+
+    &[draggable="true"] {
+        cursor: grab;
+    }
+
+    &[data-editing="true"] {
+        z-index: 200;
+        & :not([data-edit="only"], [data-edit="always"]) {
+            display: none;
+        }
+    }
+    &:not([data-editing="true"]) [data-edit="only"] {
+        display: none;
+    }
+
+    &__connect {
+        display: flex;
+        left: 0;
+        position: absolute;
+        width: 100%;
+
+        &.from {
+            bottom: -0.75rem;
+        }
+        &.to {
+            top: -0.75rem;
+        }
+
+        & > button {
+            background-color: var(--primary-light);
+            border: 1px solid var(--primary-dark);
+            cursor: pointer;
+            font-size: 0.75rem;
+            max-width: 1.5rem;
+            margin-inline: auto;
+            min-height: 1.5rem;
+            padding: 0.2rem;
+            &:hover,
+            &:focus-visible {
+                background-color: var(--primary-green);
+                color: var(--primary-light);
+            }
+        }
+
+        &.selected > button {
+            background-color: var(--primary-green);
+            color: var(--primary-light);
+            &:hover,
+            &:focus-visible {
+                background-color: var(--primary-light);
+                color: var(--primary-dark);
+            }
+        }
+    }
+    @include show-only-when(".block__connect.from:not(.selected)", ":hover, :focus-within");
+
+    &__buttons {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        right: 0;
+        top: -1px;
+
+        button {
+            @include button;
+            font-size: 1rem;
+            padding: 0.5rem;
+            transform: translateX(100%);
+            z-index: 11;
+        }
+    }
+
+    @include show-only-when(".block__buttons", ":hover, :focus-within");
+
+    &__form {
+        display: grid;
+        gap: 0.5rem;
+        grid-template-columns: repeat(2, auto);
+
+        & > input[type="text"],
+        & > select {
+            max-width: 12rem;
+        }
+        & > * {
+            font-size: 1rem;
+        }
+
+        &.create {
+            background-color: var(--primary-light);
+            border: 1px solid var(--primary-dark);
+            padding: 1rem;
+            z-index: 10;
+            position: relative;
+        }
+
+        &__buttons {
+            display: flex;
+            gap: 0.5rem;
+            grid-column: 1 / span 2;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+
+            & > button {
+                @include button;
+                font-size: 1rem;
+                padding: 0.25rem 0.5rem;
+            }
+        }
+    }
+    &__header {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        &[data-edit] {
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    &__group__name {
+        color: var(--secondary-green);
+        text-decoration: none;
+        &:hover {
+            color: var(--primary-green);
+            border-color: var(--primary-green);
+        }
+    }
+}
+
+.ghost_block {
+    align-items: center;
+    display: grid;
+    font-size: 1.5rem;
+    justify-content: center;
+    min-height: 2rem;
+    min-width: 2rem;
+    &.ensured_wide {
+        min-width: 10rem;
+    }
+    &.drag_over {
+        border: 1px dashed var(--primary-dark);
+    }
+    &:hover,
+    &:focus-visible {
+        background-color: var(--primary-light);
+        border: 1px dotted var(--primary-dark);
+        cursor: pointer;
+        opacity: 50%;
+    }
+    @include show-only-when("*", ":hover");
+}
+.circuit.editing > .ghost_block {
+    background-color: var(--grey-700);
+}

@@ -1,0 +1,108 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <script th:if="${canCreate}" layout:fragment="script">
+        function clickGhost() {
+            const col = parseInt($(this).css("gridColumn").split(" / ")[0]) - 1;
+            const row = parseInt($(this).css("gridRow").split(" / ")[0]) - 1;
+            const form = $("#create-block-wrapper > .block");
+
+            form.data("editing", true);
+            form.attr("data-editing", true);
+            form.css("gridColumn", (col + 1).toString());
+            form.css("gridRow", (row + 1).toString());
+
+            if (blockType === "skill") {
+                const checkpoint = getFirstCheckpointAfter(row);
+                const checkPointSelect = $("#create-skill-checkpoint");
+                const showCheckpointSelect = checkpoint === undefined;
+
+                checkPointSelect.attr("hidden", !showCheckpointSelect);
+                if (!showCheckpointSelect) {
+                    checkPointSelect.val(checkpoint.prop("id").split("-")[1]);
+                }
+            }
+            $(this).replaceWith(form);
+        }
+
+        function cancelCreateBlock(block) {
+            block.find(".item").remove();
+            block.find("select > option").prop("selected", false);
+            block.find("input:not(:where([type='hidden'], [type='checkbox']))").val("");
+            block.find("input[type='checkbox']").prop("checked", true);
+
+            const row = parseInt(block.css("gridRowStart"));
+            const col = parseInt(block.css("gridColumnStart"));
+            $("#create-block-wrapper").append(block);
+
+            const ghost = $(
+                `<div class="ghost_block" style="grid-row: ${row}; grid-column: ${col}">
+                    <span class="fa-solid fa-plus"></span>
+                </div>`
+            );
+            ghost.click(clickGhost);
+            $("#circuit").append(ghost);
+        }
+
+        function createBlock(block) {
+            if (!validateBlock(block)) {
+                return;
+            }
+            const data = serialiseBlockHeader(block);
+            const items = serialiseBlockItems(block);
+
+            data["newItems"] = items.filter(item => item.new);
+
+            data["row"] = parseInt(block.css("gridRowStart")) - 1;
+            data["column"] = parseInt(block.css("gridColumnStart")) - 1;
+
+            $.post({
+                url: `/${blockType}`,
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: html => {
+                    block.find(".item").remove();
+                    block.find("select > option").prop("selected", false);
+                    block.find("input:not(:where([type='hidden'], [type='checkbox']))").val("");
+                    block.find("input[type='checkbox']").prop("checked", true);
+
+                    $("#create-block-wrapper").append(block);
+                    $("#circuit").replaceWith($(html).find("#circuit"));
+                    // Re-fire DOMContentLoaded to re-attach event listeners and onclick functions
+                    $("*").unbind();
+                    window.document.dispatchEvent(
+                        new Event("DOMContentLoaded", {
+                            bubbles: true,
+                            cancelable: true,
+                        })
+                    );
+                },
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            $(".ghost_block").click(clickGhost);
+        });
+    </script>
+</html>

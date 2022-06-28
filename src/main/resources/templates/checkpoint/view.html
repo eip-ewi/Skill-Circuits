@@ -1,0 +1,99 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div
+        th:id="|checkpoint-${checkpoint.id}|"
+        th:data-deadline="${#temporals.formatISO(checkpoint.deadline)}"
+        th:data-name="${checkpoint.name}"
+        class="checkpoint"
+        layout:fragment="checkpoint">
+        <div class="checkpoint__body" th:id="|checkpoint-${checkpoint.id}-body|">
+            <div th:id="|checkpoint-${checkpoint.id}-display|">
+                <span
+                    th:id="|checkpoint-${checkpoint.id}-name|"
+                    th:text="${checkpoint.name}"
+                    class="checkpoint__name"></span>
+                <span
+                    th:id="|checkpoint-${checkpoint.id}-deadline|"
+                    class="checkpoint__deadline"></span>
+            </div>
+            <div
+                th:if="${canEdit}"
+                class="checkpoint__buttons"
+                th:id="|checkpoint-${checkpoint.id}-buttons|">
+                <span
+                    class="fa-solid fa-pen checkpoint__edit"
+                    th:data-checkpoint="${checkpoint.id}"></span>
+                <span
+                    class="fa-solid fa-trash checkpoint__delete"
+                    th:data-checkpoint="${checkpoint.id}"></span>
+            </div>
+        </div>
+    </div>
+
+    <script th:if="${level == 'module'}" layout:fragment="script">
+        function updateCheckpointPositions() {
+            const checkpointRows = new Map();
+            [...$(".block")].forEach(skill => {
+                const checkpoint = $(skill).attr("data-checkpoint");
+                const row = $(skill).css("grid-row-start");
+                if (!checkpointRows.has(checkpoint) || checkpointRows.get(checkpoint) < row) {
+                    checkpointRows.set(checkpoint, row);
+                }
+            });
+            [...$(".checkpoint")].forEach(cp =>
+                $(cp).css("grid-row", checkpointRows.get(cp.id.split("-")[1]))
+            );
+        }
+        function formatDeadline(isoTime) {
+            const deadline = luxon.DateTime.fromISO(isoTime);
+            const fmtOptions = {
+                weekday: "short",
+                year: "numeric",
+                month: "long",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                hourCycle: "h23",
+            };
+
+            return deadline.toLocaleString(fmtOptions);
+        }
+        function updateCheckpointDeadlines() {
+            // Needed so that we always use the same format (after edit and on view)
+            $(".checkpoint").each(function () {
+                const deadline = formatDeadline($(this).data("deadline"));
+                $(this).find(".checkpoint__deadline").text(deadline);
+            });
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            updateCheckpointPositions();
+            updateCheckpointDeadlines();
+            if (typeof addGhostCheckpoints === "function") {
+                addGhostCheckpoints();
+            }
+        });
+        document.addEventListener("drop", updateCheckpointPositions);
+    </script>
+</html>

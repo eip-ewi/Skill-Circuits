@@ -1,0 +1,209 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div
+        th:if="${@authorisationService.canEditCheckpointInEdition(circuit.edition.id)}"
+        layout:fragment="form"
+        class="hidden"
+        id="create-checkpoint-wrapper">
+        <div id="create-checkpoint">
+            <form
+                id="create-checkpoint-form"
+                class="checkpoint__form create"
+                th:action="@{/checkpoint}"
+                th:method="post">
+                <input
+                    id="create-checkpoint-edition"
+                    name="edition.id"
+                    type="hidden"
+                    th:value="${circuit.edition.id}" />
+                <input
+                    id="create-checkpoint-module"
+                    name="moduleId"
+                    type="hidden"
+                    th:value="${circuit.id}" />
+                <input id="create-checkpoint-skills" name="skillIds" type="hidden" hidden />
+                <th:block
+                    layout:replace="components/select_or_new :: select('create-checkpoint-name', 'name')">
+                    <th:block layout:fragment="select-options">
+                        <option
+                            th:each="checkpoint: ${circuit.checkpointsInEdition}"
+                            th:id="|create-checkpoint-name-option-${checkpoint.id}|"
+                            th:value="${checkpoint.id}"
+                            th:text="${checkpoint.name}"
+                            th:data-deadline="${checkpoint.deadline}"></option>
+                    </th:block>
+                </th:block>
+                <input
+                    id="create-checkpoint-deadline"
+                    name="deadline"
+                    type="datetime-local"
+                    th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')+'T'+#dates.format(#dates.createNow(), 'HH:mm')}" />
+
+                <button
+                    type="button"
+                    id="create-checkpoint-cancel"
+                    class="fa-solid fa-xmark"></button>
+                <button type="submit" class="fa-solid fa-check"></button>
+            </form>
+        </div>
+    </div>
+
+    <script
+        th:if="${@authorisationService.canEditCheckpointInEdition(circuit.edition.id)}"
+        layout:fragment="script">
+        function addGhostCheckpoints() {
+            const circuit = $("#circuit");
+            const rowsInGrid = [...Array(parseInt(circuit.css("--rows"))).keys()];
+            const rowsWithCheckpoints = [...$(".checkpoint")].map(cp =>
+                parseInt(cp.style.gridRowStart)
+            );
+
+            $(".ghost_checkpoint").remove();
+            rowsInGrid
+                .filter(r => !rowsWithCheckpoints.includes(r))
+                .forEach(row => {
+                    const cp = $("<div>")
+                        .addClass("checkpoint ghost_checkpoint")
+                        .css("grid-row", row)
+                        .append(
+                            $("<div>")
+                                .addClass("checkpoint__body")
+                                .append(
+                                    $("<button>").addClass("checkpoint__create fa-solid fa-plus")
+                                )
+                        );
+                    circuit.append(cp);
+                });
+        }
+
+        function getSkillsInCheckpoint(checkpointRow) {
+            let prevCheckpointRow = [...$(".checkpoint").not(".ghost_checkpoint")]
+                .map(cp => parseInt(cp.style.gridRowStart))
+                .filter(cp => cp < checkpointRow)
+                .sort()
+                .reverse()[0];
+
+            prevCheckpointRow = prevCheckpointRow === undefined ? 0 : prevCheckpointRow;
+
+            return [...$(".block")]
+                .filter(
+                    skill =>
+                        parseInt(skill.style.gridRowStart) > prevCheckpointRow &&
+                        parseInt(skill.style.gridRowStart) <= checkpointRow
+                )
+                .map(skill => skill.id.split("-")[1]);
+        }
+        function createCheckpoint() {
+            const select = $("#create-checkpoint-name-select");
+            const selectOptions = [...select.children("option")].map(cp => $(cp));
+            const ghostCheckpoint = $(this).closest(".checkpoint");
+
+            // reset
+            $(".ghost_checkpoint").removeClass("editing");
+            $(".checkpoint__create").removeClass("hidden");
+            selectOptions.forEach(cp => cp.removeAttr("disabled"));
+            selectOptions.forEach(cp => cp.removeClass("discouraged"));
+
+            ghostCheckpoint.addClass("editing");
+
+            // disabled options already on this list and
+            selectOptions.forEach(cp => {
+                if ($(`#checkpoint-${cp.attr("id").split("-").pop()}`).length !== 0) {
+                    cp.prop("disabled", true);
+                }
+            });
+            // Sort active options, then new, then disabled options.
+            selectOptions.sort((a, b) => {
+                if (a.prop("disabled")) {
+                    return 1;
+                } else if (a.val() === "new") {
+                    return 0;
+                }
+                return -1;
+            });
+            select.html(selectOptions);
+            select.val("new").change();
+
+            const skillsFormElement = $("#create-checkpoint-skills");
+            const skills = getSkillsInCheckpoint(parseInt(ghostCheckpoint.css("gridRowStart")));
+            skillsFormElement.val(skills);
+            skillsFormElement.data("skills", skills);
+            $(this).addClass("hidden");
+            $(this).after(
+                $("#create-checkpoint").css("gridRowStart", ghostCheckpoint.css("gridRowStart"))
+            );
+        }
+        function getFirstCheckpointAfter(row) {
+            const rowsInGrid = parseInt($("#circuit").css("--rows"));
+            for (let i = row + 1; i <= rowsInGrid + 1; i++) {
+                const next = [...$(".checkpoint ").not(".ghost_checkpoint")].find(
+                    cp => parseInt($(cp).css("gridRowStart")) === i
+                );
+                if (next) {
+                    return $(next);
+                }
+            }
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            $(".checkpoint__create").click(createCheckpoint);
+
+            $("#create-checkpoint-cancel").click(function () {
+                $(".ghost_checkpoint").removeClass("editing");
+                $(".checkpoint__create").removeClass("hidden");
+                $("#create-checkpoint-wrapper").append($("#create-checkpoint"));
+            });
+
+            $("#create-checkpoint-name-select").change(function () {
+                const checkpointId = $("#create-checkpoint-name-select option:selected").val();
+                if (checkpointId == "new") {
+                    $("#create-checkpoint-deadline").prop("type", "datetime-local");
+                } else {
+                    $("#create-checkpoint-deadline").prop("type", "hidden");
+                }
+            });
+
+            $("#create-checkpoint-form").submit(function (event) {
+                event.preventDefault();
+                const checkpointId = $("#create-checkpoint-name-select option:selected").val();
+                if (checkpointId === "new") {
+                    $.post("/checkpoint", $("#create-checkpoint-form").serialize(), () =>
+                        location.reload()
+                    );
+                } else {
+                    $.ajax({
+                        type: "post",
+                        url: `/checkpoint/${checkpointId}/skills/`,
+                        data: JSON.stringify($("#create-checkpoint-skills").data("skills")),
+                        processData: false,
+                        contentType: "application/json",
+                        success: () => {
+                            location.reload();
+                        },
+                    });
+                }
+            });
+        });
+    </script>
+</html>

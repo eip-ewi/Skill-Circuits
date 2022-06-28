@@ -15,11 +15,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.security;
+package nl.tudelft.skills.dto.view.course;
 
-import org.springframework.stereotype.Service;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
-@Service
-public class AuthorizationService {
+import lombok.*;
+import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.model.SCEdition;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
+public class CourseLevelEditionViewDTO extends View<SCEdition> {
+
+	@NotNull
+	private Long id;
+	@NotBlank
+	private String name;
 }

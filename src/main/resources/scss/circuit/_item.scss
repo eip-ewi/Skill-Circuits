@@ -1,0 +1,100 @@
+@use "../mixins" as *;
+
+.items {
+    display: flex;
+    flex-direction: column-reverse; /* Fix for z-index on edit elements not working */
+    list-style-type: none;
+}
+
+.item {
+    align-items: center;
+    display: flex;
+    gap: 0.5rem;
+
+    &[data-delete="true"] {
+        & > :not(.item__buttons) {
+            opacity: 30%;
+        }
+    }
+
+    &__button {
+        @include button(
+            var(--primary-dark),
+            var(--primary-light),
+            var(--primary-light),
+            var(--primary-light),
+            var(--primary-green),
+            var(--primary-green)
+        );
+        align-self: stretch;
+        min-width: 2.5rem;
+
+        &__edit {
+            background-color: var(--primary-dark);
+            border: 1px solid var(--primary-light);
+            color: var(--primary-light);
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+            align-self: stretch;
+            max-width: 2.5rem;
+            text-align: center;
+        }
+    }
+
+    &.completed {
+        & > .item__button {
+            background-color: var(--primary-green);
+            &:hover,
+            &:focus-visible {
+                background-color: var(--primary-light);
+                border-color: var(--primary-green);
+                color: var(--primary-green);
+            }
+        }
+    }
+
+    &__buttons {
+        cursor: pointer;
+        display: flex;
+        gap: 0.5rem;
+        & > :is(button, a) {
+            @include icon-button;
+        }
+    }
+    @include show-only-when(".item__buttons > *:not(.always_visible)", ":hover");
+
+    &__content {
+        align-items: center;
+        display: flex;
+        gap: 0.5rem;
+    }
+    & > a {
+        text-decoration: none;
+        & > .item__content {
+            color: var(--primary-dark);
+            &:hover {
+                color: var(--primary-green);
+            }
+        }
+    }
+
+    &__icon__edit {
+        min-width: 20px; /* Size of largest icon */
+        text-align: center;
+    }
+
+    &__create {
+        background-color: var(--primary-dark);
+        border: 1px solid var(--primary-light);
+        color: var(--primary-light);
+        cursor: pointer;
+        min-width: 2.5rem;
+        padding: 0.25rem 0.5rem;
+        &:hover,
+        &:focus-visible {
+            background-color: var(--primary-light);
+            border: 1px solid var(--primary-dark);
+            color: var(--primary-green);
+        }
+    }
+}

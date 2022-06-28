@@ -1,0 +1,240 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <form
+        th:if="${canEdit}"
+        layout:fragment="header"
+        data-edit="only"
+        class="block__header"
+        action="javascript:void(0);">
+        <input name="id" th:value="${block.id}" type="hidden" />
+        <input
+            th:data-initial="${block.name}"
+            class="font_size_bigger font_bold"
+            data-edit="only"
+            type="text"
+            aria-label="Name"
+            name="name"
+            th:value="${block.name}"
+            style="max-width: 20rem"
+            required />
+        <select
+            th:data-initial="${group.id}"
+            class="selectbox font_size_regular"
+            data-edit="only"
+            th:id="|edit-block-${block.id}-group|"
+            aria-label="Group"
+            th:name="|${groupType}.id|"
+            required>
+            <option
+                data-edit="only"
+                th:each="g : ${circuit.groups}"
+                th:selected="${g.id == group.id}"
+                th:value="${g.id}"
+                th:text="${g.name}"></option>
+        </select>
+
+        <div data-edit="only" th:if="${level == 'module' && create != null}">
+            <select
+                data-edit="only"
+                id="create-skill-checkpoint"
+                class="selectbox font_size_regular"
+                name="checkpoint.id"
+                required>
+                <option
+                    data-edit="only"
+                    th:each="checkpoint : ${module.checkpointsInEdition}"
+                    th:value="${checkpoint.id}"
+                    th:text="${checkpoint.name}"></option>
+            </select>
+        </div>
+
+        <div data-edit="only" th:if="${level == 'module'}">
+            <input
+                data-edit="only"
+                type="checkbox"
+                th:id="|essential-checkbox-${block.id}|"
+                name="essential"
+                value="true"
+                th:checked="${block.essential}" />
+            <span data-edit="only">
+                <label data-edit="only" th:for="|essential-checkbox-${block.id}|">Essential</label>
+                <span data-edit="only" class="info_icon">
+                    <sup data-edit="only" class="fa-solid fa-info-circle"></sup>
+                    <span data-edit="only" class="info_icon__text">
+                        Mark optional materials as non-essential.
+                    </span>
+                </span>
+            </span>
+        </div>
+    </form>
+
+    <script th:if="${canEdit}" layout:fragment="script">
+        function editBlock() {
+            const block = $(this).parent().parent();
+            const current = block.data("editing") === true;
+            block.data("editing", !current);
+            block.attr("data-editing", !current);
+            block.attr("draggable", current);
+
+            block.find(".item > a").each((i, link) => {
+                $(link).after($(link).children());
+            });
+        }
+
+        function cancelEditOrCreateBlock() {
+            const block = $(this).parent().parent();
+            if (block.data("create")) {
+                cancelCreateBlock(block);
+            } else {
+                cancelEditBlock(block);
+            }
+        }
+        function cancelEditBlock(block) {
+            block.data("editing", false);
+            block.attr("data-editing", false);
+            block.attr("draggable", true);
+
+            block.find(".item[data-new='true']").remove();
+            const deleted = block.find(".item[data-delete='true']");
+            deleted.attr("data-delete", false);
+            deleted.data("delete", false);
+            block.find(".item[data-delete='true']").attr("data-delete", false);
+            block.find("input").prop("disabled", false);
+            block.find("select").attr("data-disabled", false);
+            $(`#${block.attr("id")} input:not([type="hidden"])`).each((i, field) =>
+                $(field).val($(field).data("initial"))
+            );
+            $(`#${block.attr("id")} select`).each((i, field) =>
+                $(field).val($(field).data("initial")).change()
+            );
+            block.find("input[type='checkbox']").prop("checked", true);
+
+            block.find(".item > a").append(block.find("a + .item__content"));
+        }
+        function saveEditOrCreate() {
+            const block = $(this).parent().parent();
+            if (block.data("create")) {
+                createBlock(block);
+            } else {
+                saveEdit(block);
+            }
+        }
+        function validateBlock(block) {
+            return [...block.find("input")].every(e => {
+                e.reportValidity();
+                return e.checkValidity();
+            });
+        }
+        function serialiseBlockHeader(block) {
+            const data = {};
+            block
+                .children(".block__header[data-edit='only']")
+                .serializeArray()
+                .forEach(field => {
+                    if (field.name.includes(".")) {
+                        data[field.name.split(".")[0]] = {};
+                        data[field.name.split(".")[0]][field.name.split(".")[1]] = field.value;
+                    } else data[field.name] = field.value;
+                });
+            return data;
+        }
+        function serialiseBlockItems(block) {
+            function serialiseItem(item) {
+                const data = {};
+                item.find("input, select").each((i, input) => {
+                    const name = $(input).attr("name");
+                    const value = $(input).val();
+                    if (name.includes(".")) {
+                        data[name.split(".")[0]] = {};
+                        data[name.split(".")[0]][name.split(".")[1]] = value;
+                    } else data[name] = value;
+                });
+                data["new"] = item.data("new") === true;
+                data["delete"] = item.data("delete") === true;
+                return data;
+            }
+
+            return block
+                .children(".items")
+                .children(".item")
+                .map((i, item) => serialiseItem($(item)))
+                .toArray();
+        }
+
+        function configureBlockEvents(block) {
+            block.find(".block__edit").click(editBlock);
+            block.find(".block__edit__cancel").click(cancelEditOrCreateBlock);
+            block.find(".block__edit__save").click(saveEditOrCreate);
+            block.find(".block__delete").click(deleteBlock);
+
+            if (blockType === "skill") {
+                block.find(".block__connect.from > button").click(connectFrom);
+                block.find(".block__connect.to > button").click(connectTo);
+            }
+
+            let groupName = block.find(".block__group__name");
+            groupName.mouseenter(mouseEnterGroup);
+            groupName.mouseleave(mouseLeaveGroup);
+
+            if (blockType === "skill") {
+                block.find(".item__create").click(createItem);
+                block.find(".select__items button").click(selectItemIcon);
+                block.find(".select__items > select").change(changeSelectedIcon);
+            }
+            block.find(".item__delete").click(deleteItem);
+        }
+
+        function saveEdit(block) {
+            if (!validateBlock(block)) {
+                return;
+            }
+            const data = serialiseBlockHeader(block);
+            const items = serialiseBlockItems(block);
+
+            data["items"] = items.filter(item => !item.new && !item.delete);
+            data["newItems"] = items.filter(item => item.new);
+            data["removedItems"] = items.filter(item => item.delete).map(item => item.id);
+
+            $.ajax({
+                url: `/${blockType}`,
+                method: "PATCH",
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: html => {
+                    let element = $($("<div/>").append(html).children()[0]);
+                    block.remove();
+                    $("#circuit").append(element);
+                    configureBlockEvents(element);
+                },
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            $(".block__edit").click(editBlock);
+            $(".block__edit__cancel").click(cancelEditOrCreateBlock);
+            $(".block__edit__save").click(saveEditOrCreate);
+        });
+    </script>
+</html>

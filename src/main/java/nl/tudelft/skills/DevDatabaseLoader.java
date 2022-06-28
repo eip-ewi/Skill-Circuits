@@ -17,16 +17,447 @@
  */
 package nl.tudelft.skills;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Set;
+
 import javax.annotation.PostConstruct;
 
-import org.springframework.context.annotation.Profile;
+import nl.tudelft.labracore.api.CourseControllerApi;
+import nl.tudelft.labracore.api.EditionControllerApi;
+import nl.tudelft.labracore.api.dto.*;
+import nl.tudelft.skills.model.*;
+import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.repository.*;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Service;
+
+@Service
 @Profile("dev")
+@SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection") // Can be disabled as this class is not tested.
 public class DevDatabaseLoader {
+
+	@Autowired
+	private CourseRepository courseRepository;
+	@Autowired
+	private EditionRepository editionRepository;
+	@Autowired
+	private ModuleRepository moduleRepository;
+	@Autowired
+	private SubmoduleRepository submoduleRepository;
+	@Autowired
+	private SkillRepository skillRepository;
+	@Autowired
+	private TaskRepository taskRepository;
+	@Autowired
+	private CheckpointRepository checkpointRepository;
+	@Autowired
+	private BadgeRepository badgeRepository;
+	@Autowired
+	private InventoryRepository inventoryRepository;
+	@Autowired
+	private CourseControllerApi courseControllerApi;
+	@Autowired
+	private EditionControllerApi editionApi;
+	@Autowired
+	private PersonRepository personRepository;
+
+	private SCPerson person = SCPerson.builder().id(1L).build();
+
+	private EditionDetailsDTO edition;
+
+	private CourseSummaryDTO course;
+	private SCEdition scEdition;
+
+	private SCCourse scCourse;
+
+	private SCModule moduleProofTechniques;
+	private SCModule modulePropositionalLogic;
+	private SCModule moduleSimple;
+
+	private Submodule submoduleLogicBasics;
+	private Submodule submoduleGeneralisation;
+	private Submodule submoduleCases;
+	private Submodule submoduleContradiction;
+	private Submodule submoduleContrapositive;
+	private Submodule submoduleInduction;
+	private Submodule submoduleSimple;
+
+	private Skill skillImplication;
+	private Skill skillNegation;
+
+	private Skill skillVariables;
+	private Skill skillProofOutline;
+	private Skill skillGeneralisationPractice;
+	private Skill skillAssumption;
+
+	private Skill skillDividingIntoCases;
+	private Skill skillCasesPractice;
+
+	private Skill skillContradictionPractice;
+
+	private Skill skillNegateImplications;
+	private Skill skillContrapositivePractice;
+
+	private Skill skillTransitiveProperty;
+	private Skill skillInductionPractice;
+
+	private Skill skillSimpleA;
+	private Skill skillSimpleB;
+	private Skill skillSimpleC;
+	private Skill skillSimpleD;
+	private Skill skillSimpleE;
+	private Skill skillSimpleF;
+
+	private Inventory inventory;
+
+	private Checkpoint checkpointLectureOne;
+	private Checkpoint checkpointLectureTwo;
+	private Checkpoint checkpointSimple;
+
+	private Badge badge;
 
 	@PostConstruct
 	private void init() {
-		// Load dev data
+		course = courseControllerApi.getAllCourses().blockFirst();
+		edition = editionApi.getAllEditions().blockFirst();
+
+		initCourse();
+		initEdition();
+		initModules();
+		initSubmodules();
+		initCheckpoints();
+		initSkills();
+		initTasks();
+		initBadges();
+		initPerson();
+	}
+
+	private void initPerson() {
+		Inventory inventory = Inventory.builder().build();
+		person.setInventory(inventory);
+		inventory.setPerson(person);
+
+		person = personRepository.save(person);
+	}
+
+	private void initCourse() {
+		scCourse = courseRepository.save(SCCourse.builder()
+				.id(edition.getCourse().getId())
+				.build());
+	}
+
+	private void initEdition() {
+		scEdition = editionRepository.save(SCEdition.builder()
+				.id(edition.getId())
+				.build());
+	}
+
+	private void initModules() {
+		moduleProofTechniques = moduleRepository.save(SCModule.builder()
+				.name("Proof Techniques")
+				.edition(scEdition)
+				.build());
+		modulePropositionalLogic = moduleRepository.save(SCModule.builder()
+				.name("Propositional Logic")
+				.edition(scEdition)
+				.build());
+		moduleSimple = moduleRepository.save(SCModule.builder()
+				.name("Simple Module")
+				.edition(scEdition)
+				.build());
+	}
+
+	private void initSubmodules() {
+		submoduleLogicBasics = submoduleRepository.save(Submodule.builder()
+				.name("Logic Basics")
+				.module(moduleProofTechniques)
+				.row(0)
+				.column(0)
+				.build());
+		submoduleGeneralisation = submoduleRepository.save(Submodule.builder()
+				.name("Generalisation")
+				.module(moduleProofTechniques)
+				.row(1)
+				.column(1)
+				.build());
+		submoduleCases = submoduleRepository.save(Submodule.builder()
+				.name("Cases")
+				.module(moduleProofTechniques)
+				.row(2)
+				.column(2)
+				.build());
+		submoduleContradiction = submoduleRepository.save(Submodule.builder()
+				.name("Contradiction")
+				.module(moduleProofTechniques)
+				.row(3)
+				.column(1)
+				.build());
+		submoduleContrapositive = submoduleRepository.save(Submodule.builder()
+				.name("Contrapositive")
+				.module(moduleProofTechniques)
+				.row(2)
+				.column(3)
+				.build());
+		submoduleInduction = submoduleRepository.save(Submodule.builder()
+				.name("Induction")
+				.module(moduleProofTechniques)
+				.row(3)
+				.column(0)
+				.build());
+		submoduleSimple = submoduleRepository.save(Submodule.builder()
+				.name("Simple Module")
+				.module(moduleSimple)
+				.row(0)
+				.column(3)
+				.build());
+	}
+
+	private void initSkills() {
+		skillImplication = skillRepository.save(Skill.builder()
+				.name("Implication")
+				.submodule(submoduleLogicBasics)
+				.row(0).column(0)
+				.checkpoint(checkpointLectureOne)
+				.build());
+		skillNegation = skillRepository.save(Skill.builder()
+				.name("Negation")
+				.submodule(submoduleLogicBasics)
+				.row(0).column(2)
+				.checkpoint(checkpointLectureOne)
+				.build());
+		skillVariables = skillRepository.save(Skill.builder()
+				.name("Variables")
+				.submodule(submoduleLogicBasics)
+				.checkpoint(checkpointLectureOne)
+				.row(0).column(4)
+				.build());
+
+		skillProofOutline = skillRepository.save(Skill.builder()
+				.name("Proof Outline")
+				.submodule(submoduleGeneralisation)
+				.checkpoint(checkpointLectureOne)
+				.row(1).column(3)
+				.build());
+		skillAssumption = skillRepository.save(Skill.builder()
+				.name("Assumption")
+				.submodule(submoduleGeneralisation)
+				.row(1).column(1)
+				.checkpoint(checkpointLectureOne)
+				.parents(Set.of(skillImplication))
+				.build());
+		skillGeneralisationPractice = skillRepository.save(Skill.builder()
+				.name("Generalisation Practice")
+				.submodule(submoduleGeneralisation)
+				.row(2).column(3)
+				.checkpoint(checkpointLectureTwo)
+				.parents(Set.of(skillAssumption, skillProofOutline, skillVariables))
+				.build());
+
+		skillDividingIntoCases = skillRepository.save(Skill.builder()
+				.name("Dividing into Cases")
+				.submodule(submoduleCases)
+				.row(2).column(1)
+				.checkpoint(checkpointLectureTwo)
+				.build());
+		skillCasesPractice = skillRepository.save(Skill.builder()
+				.name("Cases Practice")
+				.submodule(submoduleCases)
+				.row(3).column(2)
+				.checkpoint(checkpointLectureTwo)
+				.parents(Set.of(skillGeneralisationPractice, skillDividingIntoCases))
+				.build());
+
+		skillContradictionPractice = skillRepository.save(Skill.builder()
+				.name("Contradiction Practice")
+				.submodule(submoduleContradiction)
+				.row(3).column(3)
+				.checkpoint(checkpointLectureTwo)
+				.parents(Set.of(skillGeneralisationPractice, skillNegation))
+				.build());
+
+		skillTransitiveProperty = skillRepository.save(Skill.builder()
+				.name("Transitive Property")
+				.submodule(submoduleInduction)
+				.row(3).column(0)
+				.checkpoint(checkpointLectureTwo)
+				.parents(Set.of(skillImplication))
+				.build());
+
+		skillNegateImplications = skillRepository.save(Skill.builder()
+				.name("Negate Implications")
+				.submodule(submoduleContrapositive)
+				.row(4).column(1)
+				.checkpoint(checkpointLectureTwo)
+				.parents(Set.of(skillTransitiveProperty, skillCasesPractice))
+				.build());
+		skillContrapositivePractice = skillRepository.save(Skill.builder()
+				.name("Contrapositive Practice")
+				.submodule(submoduleContrapositive)
+				.row(5).column(1)
+				.checkpoint(checkpointLectureTwo)
+				.parents(Set.of(skillNegateImplications, skillContradictionPractice))
+				.build());
+
+		skillInductionPractice = skillRepository.save(Skill.builder()
+				.name("Induction Practice")
+				.submodule(submoduleInduction)
+				.row(6).column(2)
+				.checkpoint(checkpointLectureTwo)
+				.parents(Set.of(skillContradictionPractice, skillContrapositivePractice))
+				.build());
+
+		skillSimpleA = skillRepository.save(Skill.builder()
+				.name("Skill A")
+				.submodule(submoduleSimple)
+				.row(0).column(1)
+				.checkpoint(checkpointSimple)
+				.build());
+		skillSimpleB = skillRepository.save(Skill.builder()
+				.name("Skill B")
+				.submodule(submoduleSimple)
+				.row(1).column(0)
+				.parents(Set.of(skillSimpleA))
+				.checkpoint(checkpointSimple)
+				.build());
+		skillSimpleC = skillRepository.save(Skill.builder()
+				.name("Skill C")
+				.submodule(submoduleSimple)
+				.row(1).column(2)
+				.parents(Set.of(skillSimpleA))
+				.checkpoint(checkpointSimple)
+				.build());
+		skillSimpleD = skillRepository.save(Skill.builder()
+				.name("Skill D")
+				.submodule(submoduleSimple)
+				.row(2).column(0)
+				.parents(Set.of(skillSimpleB))
+				.checkpoint(checkpointSimple)
+				.build());
+		skillSimpleE = skillRepository.save(Skill.builder()
+				.name("Skill E")
+				.submodule(submoduleSimple)
+				.row(2).column(1)
+				.parents(Set.of(skillSimpleB))
+				.checkpoint(checkpointSimple)
+				.build());
+		skillSimpleF = skillRepository.save(Skill.builder()
+				.name("Skill F")
+				.submodule(submoduleSimple)
+				.row(2).column(2)
+				.parents(Set.of(skillSimpleB))
+				.checkpoint(checkpointSimple)
+				.build());
+	}
+
+	private void initTasks() {
+		taskRepository.save(Task.builder().name("Read chapter 1.2").skill(skillImplication).time(7)
+				.type(TaskType.READING).build());
+		taskRepository.save(Task.builder().name("Do exercise 1.2a-e").skill(skillImplication).time(10)
+				.type(TaskType.EXERCISE).build());
+		taskRepository.save(Task.builder().name("Read chapter 1.1").skill(skillNegation)
+				.link("https://docs.oracle.com/en/java/javase/17/docs/api/index.html").type(TaskType.READING)
+				.build());
+		taskRepository.save(Task.builder().name("Do exercise 1.1a-d").skill(skillNegation).build());
+		taskRepository.save(Task.builder().name("Read chapter 1.0").skill(skillVariables)
+				.type(TaskType.READING).build());
+		taskRepository.save(Task.builder().name("Do exercise 1.0a").skill(skillVariables).build());
+
+		taskRepository.save(Task.builder().name("Read chapter 2.0").skill(skillProofOutline).build());
+		taskRepository.save(Task.builder().name("Do exercise 2.0a-f").skill(skillProofOutline)
+				.type(TaskType.COLLABORATION).build());
+		taskRepository.save(
+				Task.builder().name("Watch lecture 1").skill(skillProofOutline).type(TaskType.VIDEO).build());
+		taskRepository.save(Task.builder().name("Read chapter 2.1").skill(skillAssumption).build());
+		taskRepository.save(Task.builder().name("Do exercise 2.1a-g").skill(skillAssumption).build());
+		taskRepository
+				.save(Task.builder().name("Read chapter 2.2").skill(skillGeneralisationPractice).build());
+		taskRepository
+				.save(Task.builder().name("Do exercise 2.2a-b").skill(skillGeneralisationPractice).build());
+		taskRepository.save(Task.builder().name("TA Check 1").skill(skillGeneralisationPractice)
+				.type(TaskType.QUIZ).build());
+
+		taskRepository.save(Task.builder().name("Read chapter 2.3").skill(skillDividingIntoCases).build());
+		taskRepository.save(Task.builder().name("Watch lecture 2").skill(skillDividingIntoCases).build());
+		taskRepository.save(Task.builder().name("Do exercise 2.3a-d").skill(skillCasesPractice).build());
+
+		taskRepository
+				.save(Task.builder().name("Read chapter 2.4").skill(skillContradictionPractice).build());
+		taskRepository.save(Task.builder().name("Watch lecture 3").skill(skillContradictionPractice).build());
+		taskRepository.save(Task.builder().name("TA Check 2").skill(skillContradictionPractice).build());
+
+		taskRepository.save(Task.builder().name("Read chapter 2.5").skill(skillNegateImplications).build());
+		taskRepository.save(Task.builder().name("Watch video 1").skill(skillContrapositivePractice)
+				.link("https://www.youtube.com/watch?v=dQw4w9WgXcQ").build());
+		taskRepository
+				.save(Task.builder().name("Do exercise 2.5a").skill(skillContrapositivePractice).build());
+
+		taskRepository.save(Task.builder().name("Read chapter 2.5").skill(skillTransitiveProperty).build());
+		taskRepository.save(Task.builder().name("Do exercise 2.5a").skill(skillTransitiveProperty).build());
+		taskRepository
+				.save(Task.builder().name("Watch video 2: dominos").skill(skillTransitiveProperty).build());
+
+		taskRepository.save(Task.builder().name("Watch lecture 4").skill(skillInductionPractice)
+				.type(TaskType.VIDEO).build());
+		taskRepository.save(Task.builder().name("Do exercise 2.5b-d").skill(skillInductionPractice)
+				.type(TaskType.EXERCISE).build());
+		taskRepository.save(Task.builder().name("Read").skill(skillInductionPractice)
+				.type(TaskType.READING).build());
+		taskRepository.save(Task.builder().name("Project 1").skill(skillInductionPractice)
+				.type(TaskType.COLLABORATION).build());
+		taskRepository.save(Task.builder().name("Test yourself!").skill(skillInductionPractice)
+				.type(TaskType.QUIZ).build());
+		taskRepository.save(Task.builder().name("Implement DFS").skill(skillInductionPractice)
+				.type(TaskType.IMPLEMENTATION).build());
+		taskRepository.save(Task.builder().name("Experiment with run time").skill(skillInductionPractice)
+				.type(TaskType.EXPERIMENT).build());
+
+		taskRepository.save(Task.builder().name("Task 1").skill(skillSimpleA).build());
+		taskRepository.save(Task.builder().name("Task 2").skill(skillSimpleA).build());
+
+		taskRepository.save(Task.builder().name("Task 3").skill(skillSimpleB).build());
+		taskRepository.save(Task.builder().name("Task 4").skill(skillSimpleB).build());
+
+		taskRepository.save(Task.builder().name("Task 5").skill(skillSimpleC).build());
+		taskRepository.save(Task.builder().name("Task 6").skill(skillSimpleC).build());
+
+		taskRepository.save(Task.builder().name("Task 7").skill(skillSimpleD).build());
+		taskRepository.save(Task.builder().name("Task 8").skill(skillSimpleD).build());
+
+		taskRepository.save(Task.builder().name("Task 9").skill(skillSimpleE).build());
+		taskRepository.save(Task.builder().name("Task 10").skill(skillSimpleE).build());
+
+		taskRepository.save(Task.builder().name("Task 11").skill(skillSimpleF).build());
+		taskRepository.save(Task.builder().name("Task 12").skill(skillSimpleF).build());
+	}
+
+	private void initCheckpoints() {
+		checkpointLectureOne = checkpointRepository.save(Checkpoint.builder()
+				.name("Lecture 1")
+				.edition(scEdition)
+				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 42), LocalTime.MIDNIGHT))
+				.build());
+
+		checkpointLectureTwo = checkpointRepository.save(Checkpoint.builder()
+				.name("Lecture 2")
+				.edition(scEdition)
+				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 49), LocalTime.MIDNIGHT))
+				.build());
+
+		checkpointSimple = checkpointRepository.save(Checkpoint.builder()
+				.name("Simple")
+				.edition(scEdition)
+				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 53), LocalTime.MIDNIGHT))
+				.build());
+	}
+
+	private void initBadges() {
+		badge = badgeRepository
+				.save(Badge.builder().name("Your first badge!").build());
 	}
 
 }

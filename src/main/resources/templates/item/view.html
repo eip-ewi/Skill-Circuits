@@ -1,0 +1,66 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <li
+        data-edit="always"
+        class="item"
+        th:id="|item-${item.id}|"
+        th:classappend="${level == 'module'} ? ${item.completed ? 'completed' : ''} : ${''}"
+        layout:fragment="item">
+        <input th:if="${canEdit}" name="id" type="hidden" th:value="${item.id}" />
+        <th:block layout:fragment="item-decoration"></th:block>
+        <th:block layout:fragment="item-content-element">
+            <th:block layout:fragment="item-content">
+                <div data-edit="always" th:id="|item-${item.id}-content|" class="item__content">
+                    <th:block layout:fragment="item-before-content"></th:block>
+                    <th:block layout:fragment="item-name">
+                        <span
+                            th:id="|item-${item.id}-name|"
+                            class="item__name"
+                            th:text="${item.name}"></span>
+                        <input
+                            type="text"
+                            data-edit="only"
+                            name="name"
+                            required
+                            th:data-initial="${item.name}"
+                            aria-label="Name"
+                            placeholder="Name"
+                            th:value="${item.name}" />
+                    </th:block>
+                    <th:block layout:fragment="item-after-content"></th:block>
+                </div>
+            </th:block>
+        </th:block>
+        <div class="item__buttons" th:id="|item-${item.id}-buttons|" data-edit="only">
+            <th:block layout:fragment="item-buttons">
+                <th:block th:if="${canEdit}">
+                    <button
+                        class="fa-solid fa-trash item__delete always_visible"
+                        data-edit="only"></button>
+                </th:block>
+            </th:block>
+        </div>
+    </li>
+</html>
