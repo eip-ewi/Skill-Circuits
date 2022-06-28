@@ -24,6 +24,8 @@
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <script layout:fragment="script" th:inline="javascript">
         addEventListener("DOMContentLoaded", function () {
+            let toUpdate = null;
+
             if (localStorage.getItem("completedTasks") !== null) {
                 // if we have tasks completed in local storage but not yet in the dom, also mark them completed
                 const completedInLocalStorage = JSON.parse(localStorage.getItem("completedTasks"));
@@ -32,7 +34,7 @@
                     e => parseInt(e.id.split("")[1])
                 );
 
-                const toUpdate = completedInLocalStorage.filter(t => !completedInDOM.includes(t));
+                toUpdate = completedInLocalStorage.filter(t => !completedInDOM.includes(t));
 
                 toUpdate.forEach(taskId => {
                     const task = document.getElementById(`item-${taskId}`);
