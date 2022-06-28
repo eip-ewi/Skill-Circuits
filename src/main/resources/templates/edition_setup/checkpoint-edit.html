@@ -1,0 +1,87 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div
+        th:if="${@authorisationService.canEditCheckpointInEdition(edition.id)}"
+        layout:fragment="form"
+        class="hidden"
+        id="edit-checkpoint-wrapper">
+        <div id="edit-checkpoint" class="editable-ul__edit">
+            <form id="edit-checkpoint-form" class="">
+                <input id="edit-checkpoint-id" name="id" type="hidden" />
+
+                <input
+                    id="edit-checkpoint-name"
+                    aria-label="Name"
+                    name="name"
+                    type="text"
+                    required />
+
+                <button
+                    type="button"
+                    id="edit-checkpoint-cancel"
+                    class="fa-solid fa-xmark"></button>
+                <button type="submit" class="fa-solid fa-check"></button>
+            </form>
+        </div>
+    </div>
+
+    <script
+        th:if="${@authorisationService.canEditCheckpointInEdition(edition.id)}"
+        layout:fragment="script">
+        function editCheckpoint() {
+            const checkpointId = $(this).data("checkpoint");
+            $("#edit-checkpoint-id").val(checkpointId);
+            const editCheckpointName = $("#edit-checkpoint-name");
+            editCheckpointName.val($(`#checkpoint-${checkpointId}-name`).text());
+            $(`#checkpoint-${checkpointId}`).append($("#edit-checkpoint"));
+
+            $(".checkpoint-content").removeClass("hidden");
+            $(`#checkpoint-${checkpointId}-content`).addClass("hidden");
+            editCheckpointName.focus();
+        }
+        function cancelEditCheckpoint() {
+            $("#edit-checkpoint-wrapper").append($("#edit-checkpoint"));
+            $(".checkpoint-content").removeClass("hidden");
+        }
+        document.addEventListener("DOMContentLoaded", () => {
+            $(".checkpoint__edit").click(editCheckpoint);
+            $("#edit-checkpoint-cancel").click(cancelEditCheckpoint);
+            $("#edit-checkpoint-form").submit(e => {
+                e.preventDefault();
+                $.ajax({
+                    type: "PATCH",
+                    url: `/checkpoint`,
+                    data: $("#edit-checkpoint-form").serialize(),
+                    success: () => {
+                        $(`#checkpoint-${$("#edit-checkpoint-id").val()}-name`).text(
+                            $("#edit-checkpoint-name").val()
+                        );
+                        cancelEditCheckpoint();
+                    },
+                });
+            });
+        });
+    </script>
+</html>

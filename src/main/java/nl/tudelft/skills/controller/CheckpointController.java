@@ -21,8 +21,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.CheckpointCreateDTO;
 import nl.tudelft.skills.dto.patch.CheckpointPatchDTO;
+import nl.tudelft.skills.dto.view.checkpoint.CheckpointViewDTO;
 import nl.tudelft.skills.model.Checkpoint;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.CheckpointRepository;
@@ -35,6 +37,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -107,7 +110,7 @@ public class CheckpointController {
 	public ResponseEntity<Void> deleteCheckpoint(@RequestParam Long id) {
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(id);
 		Optional<Checkpoint> nextCheckpoint = checkpointService.findNextCheckpoint(checkpoint);
-		if (nextCheckpoint.isEmpty()) {
+		if (!checkpoint.getSkills().isEmpty() && nextCheckpoint.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.CONFLICT);
 		}
 		checkpoint.getSkills().forEach(skill -> {
@@ -121,12 +124,31 @@ public class CheckpointController {
 
 	@Transactional
 	@PostMapping
-	@PreAuthorize("@authorisationService.canCreateCheckpointInEdition(#dto.getEdition().getId())")
+	@PreAuthorize("@authorisationService.canCreateCheckpointInEdition(#dto.edition.id)")
 	public String createCheckpoint(CheckpointCreateDTO dto, @RequestParam Long moduleId) {
 		Checkpoint checkpoint = checkpointRepository.save(dto.apply());
 		skillRepository.findAllByIdIn(dto.getSkillIds()).forEach(skill -> skill.setCheckpoint(checkpoint));
 
 		return "redirect:module/" + moduleId;
+	}
+
+	/**
+	 * Creates a checkpoint, and returns a checkpoint element for the setup sidebar.
+	 *
+	 * @param  dto   the checkpoint to create.
+	 * @param  model the model to add data to.
+	 * @return       A new checkpoint html element.
+	 */
+	@Transactional
+	@PostMapping("setup")
+	@PreAuthorize("@authorisationService.canCreateCheckpointInEdition(#dto.edition.id)")
+	public String createCheckpointSetup(CheckpointCreateDTO dto, Model model) {
+		Checkpoint checkpoint = checkpointRepository.saveAndFlush(dto.apply());
+
+		model.addAttribute("checkpoint", View.convert(checkpoint, CheckpointViewDTO.class));
+
+		return "edition_setup/checkpoint";
+
 	}
 
 }

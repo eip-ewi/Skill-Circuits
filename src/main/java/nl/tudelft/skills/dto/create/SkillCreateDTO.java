@@ -17,6 +17,8 @@
  */
 package nl.tudelft.skills.dto.create;
 
+import java.util.List;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -36,7 +38,6 @@ public class SkillCreateDTO extends Create<Skill> {
 
 	@NotBlank
 	private String name;
-	@NotNull
 	@Builder.Default
 	private Boolean essential = false;
 	@NotNull
@@ -49,6 +50,8 @@ public class SkillCreateDTO extends Create<Skill> {
 	@Min(0)
 	@NotNull
 	private Integer column;
+	@NotNull
+	private List<TaskCreateDTO> newItems;
 
 	@Override
 	public Class<Skill> clazz() {

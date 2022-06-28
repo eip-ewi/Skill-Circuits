@@ -17,7 +17,6 @@
  */
 package nl.tudelft.skills.dto.patch;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
@@ -34,9 +33,7 @@ public class SCModulePatchDTO extends Patch<SCModule> {
 
 	@NotNull
 	private Long id;
-	@NotBlank
 	private String name;
-	@NotNull
 	private SCEditionIdDTO edition;
 
 	@Override

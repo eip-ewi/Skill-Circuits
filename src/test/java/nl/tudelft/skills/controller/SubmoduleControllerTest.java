@@ -18,33 +18,38 @@
 package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import javax.servlet.http.HttpSession;
 
+import nl.tudelft.labracore.api.EditionControllerApi;
+import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
+import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.dto.create.SubmoduleCreateDTO;
 import nl.tudelft.skills.dto.id.SCModuleIdDTO;
 import nl.tudelft.skills.dto.patch.SubmodulePatchDTO;
 import nl.tudelft.skills.dto.patch.SubmodulePositionPatchDTO;
 import nl.tudelft.skills.model.Submodule;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.SubmoduleRepository;
+import nl.tudelft.skills.service.EditionService;
 import nl.tudelft.skills.service.SkillService;
 
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
+
+import reactor.core.publisher.Mono;
 
 @Transactional
 @AutoConfigureMockMvc
@@ -54,39 +59,38 @@ public class SubmoduleControllerTest extends ControllerTest {
 	private final SubmoduleController submoduleController;
 	private final SubmoduleRepository submoduleRepository;
 	private final ModuleRepository moduleRepository;
+	private final EditionControllerApi editionControllerApi;
+	private final HttpSession session;
 
 	@Autowired
 	public SubmoduleControllerTest(SubmoduleRepository submoduleRepository, SkillService skillService,
-			ModuleRepository moduleRepository) {
+			ModuleRepository moduleRepository, EditionControllerApi editionControllerApi,
+			EditionService editionService) {
 		this.moduleRepository = moduleRepository;
+		this.editionControllerApi = editionControllerApi;
+		this.session = mock(HttpSession.class);
 		this.submoduleController = new SubmoduleController(submoduleRepository, moduleRepository,
-				skillService);
+				skillService, editionService, session);
 		this.submoduleRepository = submoduleRepository;
 	}
 
 	@Test
 	@WithUserDetails("admin")
-	void createSubmodule() throws Exception {
-		String element = mvc.perform(post("/submodule").with(csrf())
-				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
-						new BasicNameValuePair("name", "Submodule"),
-						new BasicNameValuePair("module.id",
-								Long.toString(db.getModuleProofTechniques().getId())),
-						new BasicNameValuePair("row", "10"),
-						new BasicNameValuePair("column", "11")))))
-				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
-				.andExpect(status().isOk())
-				.andReturn().getResponse().getContentAsString();
+	void createSubmodule() {
+		var edition = mock(EditionDetailsDTO.class);
+		var course = mock(CourseSummaryDTO.class);
+		Mockito.when(course.getId()).thenReturn(1L);
+		Mockito.when(edition.getName()).thenReturn("Mocked Edition");
+		Mockito.when(edition.getCourse()).thenReturn(course);
+		Mockito.when(editionControllerApi.getEditionById(any())).thenReturn(Mono.just(edition));
+		var dto = SubmoduleCreateDTO.builder()
+				.name("New Submodule")
+				.module(new SCModuleIdDTO(db.getModuleProofTechniques().getId()))
+				.row(1).column(1).build();
 
-		Matcher idMatcher = Pattern.compile("id=\"block-(\\d+)\"").matcher(element);
-		assertThat(idMatcher.find()).isTrue();
+		submoduleController.createSubmodule(dto, mock(Model.class));
 
-		Long id = Long.parseLong(idMatcher.group(1));
-		assertThat(submoduleRepository.existsById(id)).isTrue();
-
-		assertThat(element)
-				.contains("<span id=\"block-" + id + "-name\">Submodule</span>")
-				.contains("style=\"grid-row: 11; grid-column: 12");
+		assertTrue(submoduleRepository.findAll().stream().anyMatch(s -> s.getName().equals("New Submodule")));
 	}
 
 	@Test

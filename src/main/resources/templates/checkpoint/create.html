@@ -75,11 +75,7 @@
         layout:fragment="script">
         function addGhostCheckpoints() {
             const circuit = $("#circuit");
-            const rowsInGrid = [
-                ...Array(
-                    parseInt(getComputedStyle(document.documentElement).getPropertyValue("--rows"))
-                ).keys(),
-            ];
+            const rowsInGrid = [...Array(parseInt(circuit.css("--rows"))).keys()];
             const rowsWithCheckpoints = [...$(".checkpoint")].map(cp =>
                 parseInt(cp.style.gridRowStart)
             );
@@ -160,10 +156,8 @@
             );
         }
         function getFirstCheckpointAfter(row) {
-            const rowsInGrid = parseInt(
-                getComputedStyle(document.documentElement).getPropertyValue("--rows")
-            );
-            for (let i = row; i <= rowsInGrid; i++) {
+            const rowsInGrid = parseInt($("#circuit").css("--rows"));
+            for (let i = row + 1; i <= rowsInGrid + 1; i++) {
                 const next = [...$(".checkpoint ").not(".ghost_checkpoint")].find(
                     cp => parseInt($(cp).css("gridRowStart")) === i
                 );

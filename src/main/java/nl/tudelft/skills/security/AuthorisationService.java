@@ -124,6 +124,16 @@ public class AuthorisationService {
 	}
 
 	/**
+	 * Gets whether the authenticated user can edit the edition
+	 *
+	 * @param  editionId The id of the edition.
+	 * @return           True iff the user can publish the edition.
+	 */
+	public boolean canEditEdition(Long editionId) {
+		return isAtLeastTeacherInEdition(editionId);
+	}
+
+	/**
 	 * Gets whether the authenticated user can publish the edition for students.
 	 *
 	 * @param  editionId The id of the edition.

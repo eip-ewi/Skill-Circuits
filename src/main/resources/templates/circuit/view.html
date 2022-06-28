@@ -22,7 +22,12 @@
     lang="en"
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-    <div class="circuit" id="circuit" th:data-id="${circuit.id}" layout:fragment="grid">
+    <div
+        class="circuit"
+        id="circuit"
+        th:data-id="${circuit.id}"
+        layout:fragment="grid"
+        th:style="|--columns: ${columns}; --rows: ${rows}|">
         <svg xmlns="http://www.w3.org/2000/svg" id="connections"></svg>
         <th:block th:if="${level == 'module'}">
             <div id="disconnect-buttons"></div>
@@ -54,14 +59,21 @@
             <div
                 th:each="row : ${#numbers.sequence(0, rows)}"
                 class="ghost_block"
-                th:style="|grid-row: ${row + 1}; grid-column: ${columns + 1}|">
+                th:style="|grid-row: ${row + 1}; grid-column: ${columns + 1}|"
+                th:classappend="${rows == 1 ? 'ensured_wide' : ''}">
                 <span class="fa-solid fa-plus"></span>
             </div>
         </th:block>
     </div>
 
     <div layout:fragment="additional">
-        <div layout:replace="~{block/create :: form}"></div>
+        <div
+            th:if="${canCreate}"
+            th:with="block=${emptyBlock}, group=${emptyGroup}, create=${true}"
+            class="hidden"
+            id="create-block-wrapper">
+            <div layout:replace="~{block/view :: block}"></div>
+        </div>
         <div layout:replace="~{block/edit :: form}"></div>
         <div layout:replace="~{block/delete :: overlay}"></div>
 

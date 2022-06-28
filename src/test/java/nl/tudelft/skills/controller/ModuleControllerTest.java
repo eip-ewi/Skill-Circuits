@@ -30,20 +30,19 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpSession;
 
 import nl.tudelft.labracore.api.RoleControllerApi;
-import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.dto.create.SCModuleCreateDTO;
 import nl.tudelft.skills.dto.id.SCEditionIdDTO;
 import nl.tudelft.skills.dto.patch.SCModulePatchDTO;
-import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.service.ModuleService;
-import nl.tudelft.skills.test.TestUserDetailsService;
 
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -51,6 +50,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 
 @Transactional
 @AutoConfigureMockMvc
@@ -74,30 +74,10 @@ public class ModuleControllerTest extends ControllerTest {
 	}
 
 	@Test
-	void getModulePage() {
-		String page = moduleController.getModulePage(null, db.getModuleProofTechniques().getId(), model);
-		assertThat(page).isEqualTo("module/view");
-		assertThat(model.getAttribute("module"))
-				.isEqualTo(View.convert(db.getModuleProofTechniques(), ModuleLevelModuleViewDTO.class));
-	}
-
-	@Test
-	void getModulePageCallsTasksCompleted() {
-		moduleController.getModulePage(TestUserDetailsService.assemblePerson("username"),
-				db.getModuleProofTechniques().getId(), model);
-
-		verify(moduleService).setCompletedTasksForPerson(
-				View.convert(db.getModuleProofTechniques(), ModuleLevelModuleViewDTO.class),
-				TestUserDetailsService.id);
-	}
-
-	@Test
 	@WithUserDetails("admin")
 	void createModule() throws Exception {
 		String element = mvc.perform(post("/module").with(csrf())
-				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
-						new BasicNameValuePair("name", "Module"),
-						new BasicNameValuePair("edition.id", Long.toString(db.getEditionRL().getId()))))))
+				.content(getModuleCreateFormData())
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isOk())
 				.andReturn().getResponse().getContentAsString();
@@ -113,12 +93,40 @@ public class ModuleControllerTest extends ControllerTest {
 	}
 
 	@Test
+	void createModuleSetup() throws Exception {
+		new ModuleController(moduleRepository, moduleService, session).createModuleInEditionSetup(
+				SCModuleCreateDTO.builder()
+						.name("Module").edition(new SCEditionIdDTO(db.getEditionRL().getId())).build(),
+				Mockito.mock(Model.class));
+
+		assertThat(moduleRepository.findAll().stream()
+				.filter(m -> m.getName().equals("Module")).findFirst()).isNotEmpty();
+	}
+
+	private String getModuleCreateFormData() throws Exception {
+		return EntityUtils.toString(new UrlEncodedFormEntity(List.of(
+				new BasicNameValuePair("name", "Module"),
+				new BasicNameValuePair("edition.id", Long.toString(db.getEditionRL().getId())))));
+	}
+
+	@Test
 	void deleteModule() {
 		Long moduleId = db.getModuleProofTechniques().getId();
 
 		assertThat(moduleRepository.existsById(moduleId)).isTrue();
 
 		new ModuleController(moduleRepository, moduleService, session).deleteModule(moduleId);
+
+		assertThat(moduleRepository.existsById(moduleId)).isFalse();
+	}
+
+	@Test
+	void deleteModuleSetup() {
+		Long moduleId = db.getModuleProofTechniques().getId();
+
+		assertThat(moduleRepository.existsById(moduleId)).isTrue();
+
+		new ModuleController(moduleRepository, moduleService, session).deleteModuleSetup(moduleId);
 
 		assertThat(moduleRepository.existsById(moduleId)).isFalse();
 	}

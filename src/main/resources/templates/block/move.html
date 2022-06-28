@@ -24,7 +24,11 @@
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <script th:if="${canEdit}" layout:fragment="script">
         let draggingSkill = false;
-        let circuit = document.getElementById("circuit");
+        let circuit;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            circuit = document.getElementById("circuit");
+        });
 
         document.addEventListener(
             "dragstart",
@@ -120,8 +124,8 @@
                         let row = parseInt(skill.style.gridRow.split(" / ")[0]);
                         if (row > newRows) newRows = row;
                     }
-                    document.documentElement.style.setProperty("--columns", newColumns.toString());
-                    document.documentElement.style.setProperty("--rows", newRows.toString());
+                    circuit.style.setProperty("--columns", newColumns.toString());
+                    circuit.style.setProperty("--rows", newRows.toString());
 
                     // Remove spaces if necessary, keep track of the highest row and column
                     let spaceMaxCol = 0;

@@ -17,23 +17,20 @@
  */
 package nl.tudelft.skills.controller;
 
-import java.util.Set;
-import java.util.stream.IntStream;
-
 import javax.servlet.http.HttpSession;
 
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
+import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.SCModuleCreateDTO;
 import nl.tudelft.skills.dto.patch.SCModulePatchDTO;
-import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
+import nl.tudelft.skills.dto.view.edition.EditionLevelModuleViewDTO;
 import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.service.ModuleService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -69,28 +66,7 @@ public class ModuleController {
 	@GetMapping("{id}")
 	public String getModulePage(@AuthenticatedPerson(required = false) Person person, @PathVariable Long id,
 			Model model) {
-		ModuleLevelModuleViewDTO module = View.convert(moduleRepository.findByIdOrThrow(id),
-				ModuleLevelModuleViewDTO.class);
-
-		if (person != null) {
-			moduleService.setCompletedTasksForPerson(module, person.getId());
-		}
-
-		Set<Pair<Integer, Integer>> positions = module.getFilledPositions();
-		int columns = positions.stream().mapToInt(Pair::getFirst).max().orElse(-1) + 1;
-		int rows = positions.stream().mapToInt(Pair::getSecond).max().orElse(-1) + 1;
-		Boolean studentMode = (Boolean) session.getAttribute("student-mode-" + module.getEdition().getId());
-
-		model.addAttribute("level", "module");
-		model.addAttribute("module", module);
-		model.addAttribute("columns", columns);
-		model.addAttribute("rows", rows);
-		model.addAttribute("emptySpaces", IntStream.range(0, rows).boxed()
-				.flatMap(row -> IntStream.range(0, columns).mapToObj(col -> Pair.of(col, row)))
-				.filter(pos -> !positions.contains(pos))
-				.toList());
-		model.addAttribute("studentMode", studentMode != null && studentMode);
-
+		moduleService.configureModuleModel(person, id, model, session);
 		return "module/view";
 	}
 
@@ -111,7 +87,22 @@ public class ModuleController {
 	}
 
 	/**
-	 * Deletes a module.
+	 * Creates a module, and returns a module element for the setup sidebar.
+	 *
+	 * @param  create The DTO with information to create the module
+	 * @return        A new module html element
+	 */
+	@PostMapping("setup")
+	@Transactional
+	@PreAuthorize("@authorisationService.canCreateModuleInEdition(#create.edition.id)")
+	public String createModuleInEditionSetup(SCModuleCreateDTO create, Model model) {
+		SCModule module = moduleRepository.save(create.apply());
+		model.addAttribute("module", View.convert(module, EditionLevelModuleViewDTO.class));
+		return "edition_setup/module";
+	}
+
+	/**
+	 * Deletes a module, and redirects to the edition page.
 	 *
 	 * @param  id The id of the module to delete
 	 * @return    A redirect to the edition page
@@ -131,6 +122,26 @@ public class ModuleController {
 	}
 
 	/**
+	 * Deletes a module.
+	 *
+	 * @param  id The id of the module to delete
+	 * @return    A redirect to the edition page
+	 */
+	@DeleteMapping("setup")
+	@Transactional
+	@PreAuthorize("@authorisationService.canDeleteModule(#id)")
+	public ResponseEntity<Void> deleteModuleSetup(@RequestParam Long id) {
+		SCModule module = moduleRepository.findByIdOrThrow(id);
+		module.getSubmodules().stream()
+				.flatMap(s -> s.getSkills().stream())
+				.flatMap(s -> s.getTasks().stream())
+				.forEach(t -> t.getPersons()
+						.forEach(p -> p.getTasksCompleted().remove(t)));
+		moduleRepository.delete(module);
+		return ResponseEntity.ok().build();
+	}
+
+	/**
 	 * Patches a module.
 	 *
 	 * @param  patch The patch containing the new data
@@ -142,6 +153,22 @@ public class ModuleController {
 		SCModule module = moduleRepository.findByIdOrThrow(patch.getId());
 		moduleRepository.save(patch.apply(module));
 		return ResponseEntity.ok().build();
+	}
+
+	/**
+	 * Patches a module, and returns a new edition page html element.
+	 *
+	 * @param  patch The patch containing the new data
+	 * @return       The new circuit
+	 */
+	@PatchMapping("/setup")
+	@PreAuthorize("@authorisationService.canEditModule(#patch.id)")
+	public String patchModuleSetup(SCModulePatchDTO patch, Model model) {
+		SCModule module = moduleRepository.findByIdOrThrow(patch.getId());
+		moduleRepository.save(patch.apply(module));
+
+		return SpringContext.getBean(EditionController.class).getEditionPage(module.getEdition().getId(),
+				model);
 	}
 
 	/**

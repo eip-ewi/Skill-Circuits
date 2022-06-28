@@ -17,9 +17,9 @@
  */
 package nl.tudelft.skills.dto.view.edition;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
@@ -37,7 +37,7 @@ public class EditionLevelModuleViewDTO extends View<SCModule> implements GroupVi
 
 	@NotNull
 	private Long id;
-	@NotBlank
+	@NotNull
 	private String name;
 	@NotNull
 	@PostApply
@@ -46,5 +46,14 @@ public class EditionLevelModuleViewDTO extends View<SCModule> implements GroupVi
 	@Override
 	public List<? extends BlockView> getBlocks() {
 		return submodules;
+	}
+
+	public int getSkillsCount() {
+		return submodules.stream().mapToInt(s -> s.getSkills().size()).sum();
+	}
+
+	public static EditionLevelModuleViewDTO empty() {
+		return EditionLevelModuleViewDTO.builder()
+				.id(-1L).name("").submodules(new ArrayList<>()).build();
 	}
 }

@@ -47,10 +47,11 @@ public class EditionServiceTest {
 	private EditionRepository editionRepository;
 
 	@Autowired
-	public EditionServiceTest(EditionControllerApi editionApi, EditionRepository editionRepository) {
+	public EditionServiceTest(EditionControllerApi editionApi, EditionRepository editionRepository,
+			CircuitService circuitService) {
 		this.editionApi = editionApi;
 		this.editionRepository = editionRepository;
-		editionService = new EditionService(editionApi, editionRepository);
+		editionService = new EditionService(editionApi, editionRepository, circuitService);
 	}
 
 	@Test

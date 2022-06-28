@@ -17,19 +17,28 @@
  */
 package nl.tudelft.skills.controller;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
+import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
+import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.SkillCreateDTO;
+import nl.tudelft.skills.dto.id.SkillIdDTO;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSubmoduleViewDTO;
 import nl.tudelft.skills.model.Skill;
+import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.SubmoduleRepository;
 import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.service.ModuleService;
 import nl.tudelft.skills.service.SkillService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,15 +57,19 @@ public class SkillController {
 	private final TaskRepository taskRepository;
 	private final SubmoduleRepository submoduleRepository;
 	private final SkillService skillService;
+	private final ModuleService moduleService;
+	private final HttpSession session;
 
 	@Autowired
 	public SkillController(SkillRepository skillRepository, TaskRepository taskRepository,
 			SubmoduleRepository submoduleRepository,
-			SkillService skillService) {
+			SkillService skillService, ModuleService moduleService, HttpSession session) {
 		this.skillRepository = skillRepository;
 		this.taskRepository = taskRepository;
 		this.submoduleRepository = submoduleRepository;
 		this.skillService = skillService;
+		this.moduleService = moduleService;
+		this.session = session;
 	}
 
 	/**
@@ -68,16 +81,17 @@ public class SkillController {
 	@PostMapping
 	@Transactional
 	@PreAuthorize("@authorisationService.canCreateSkill(#create.submodule.id)")
-	public String createSkill(SkillCreateDTO create, Model model) {
-		Skill skill = skillRepository.save(create.apply());
+	public String createSkill(@AuthenticatedPerson Person person, @RequestBody SkillCreateDTO create,
+			Model model) {
+		Skill skill = skillRepository.saveAndFlush(create.apply());
+		Set<Task> tasks = create.getNewItems().stream().map(dto -> {
+			dto.setSkill(SkillIdDTO.builder().id(skill.getId()).build());
+			return dto.apply();
+		}).collect(Collectors.toSet());
+		skill.setTasks(Set.copyOf(taskRepository.saveAllAndFlush(tasks)));
 
-		model.addAttribute("level", "module");
-		model.addAttribute("block", View.convert(skill, ModuleLevelSkillViewDTO.class));
-		model.addAttribute("group", skill.getSubmodule());
-		model.addAttribute("circuit", buildCircuitFromSkill(skill));
-		model.addAttribute("canEdit", true);
-		model.addAttribute("canDelete", true);
-		return "block/view";
+		moduleService.configureModuleModel(person, skill.getSubmodule().getModule().getId(), model, session);
+		return "module/view";
 	}
 
 	/**

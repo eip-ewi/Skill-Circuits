@@ -25,16 +25,6 @@
     layout:decorate="~{container}">
     <head>
         <link rel="stylesheet" th:href="@{/css/circuit.css}" />
-
-        <style th:inline="css">
-            /*<![CDATA[*/
-            :root {
-                --columns: /*[[${columns}]]*/ 5;
-                --rows: /*[[${rows}]]*/ 5;
-            }
-            /*]]>*/
-        </style>
-
         <title th:text="${edition.name}"></title>
     </head>
 
@@ -43,37 +33,14 @@
             <div
                 class="circuit__header"
                 th:with="visible = ${@editionRepository.findByIdOrThrow(edition.id).isVisible()}">
-                <h1 th:text="${edition.name}"></h1>
+                <div class="circuit__header__group">
+                    <h1 th:text="${edition.name}"></h1>
+                    <a th:href="@{|/course/${edition.course.id}|}">
+                        <span class="level_up_button fa-solid fa-turn-up fa-xl"></span>
+                    </a>
+                </div>
 
-                <div class="circuit__header__buttons">
-                    <form
-                        method="post"
-                        id="publish-edition-form"
-                        th:action="@{|/edition/${edition.id}/publish|}"
-                        th:if="${@authorisationService.canPublishEdition(edition.id) and not visible}">
-                        <button
-                            name="publish"
-                            id="publishEdition"
-                            class="circuit__button"
-                            title="publish"
-                            type="submit">
-                            Publish
-                        </button>
-                    </form>
-                    <form
-                        method="post"
-                        id="unpublish-edition-form"
-                        th:action="@{|/edition/${edition.id}/unpublish|}"
-                        th:if="${@authorisationService.canPublishEdition(edition.id) and visible}">
-                        <button
-                            name="unpublish"
-                            id="unpublishEdition"
-                            class="circuit__button"
-                            title="unpublish"
-                            type="submit">
-                            Unpublish
-                        </button>
-                    </form>
+                <div class="circuit__header__group">
                     <form
                         th:if="${@authorisationService.isAtLeastTeacherInEdition(edition.id)}"
                         method="post"
@@ -85,7 +52,15 @@
                             Enter student view
                         </button>
                     </form>
+                    <button
+                        th:unless="${studentMode}"
+                        id="open-edition-setup-sidebar"
+                        class="circuit__button"
+                        title="setup">
+                        Setup
+                    </button>
                 </div>
+                <div layout:replace="~{edition_setup/view :: setup-overlay}"></div>
             </div>
 
             <th:block

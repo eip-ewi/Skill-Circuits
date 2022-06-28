@@ -162,6 +162,9 @@
     justify-content: center;
     min-height: 2rem;
     min-width: 2rem;
+    &.ensured_wide {
+        min-width: 10rem;
+    }
     &.drag_over {
         border: 1px dashed var(--primary-dark);
     }

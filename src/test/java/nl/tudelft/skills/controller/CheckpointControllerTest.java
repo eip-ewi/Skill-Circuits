@@ -68,16 +68,7 @@ public class CheckpointControllerTest extends ControllerTest {
 	@WithUserDetails("admin")
 	public void createCheckpoint() throws Exception {
 		mvc.perform(post("/checkpoint").with(csrf())
-				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
-						new BasicNameValuePair("name", "checkpoint"),
-						new BasicNameValuePair("edition.id", Long.toString(db.getEditionRL().getId())),
-						new BasicNameValuePair("moduleId",
-								Long.toString(db.getModuleProofTechniques().getId())),
-						new BasicNameValuePair("skillIds",
-								db.getSkillImplication().getId() + "," + db.getSkillNegation().getId()),
-						new BasicNameValuePair("deadline",
-								LocalDateTime.of(2022, 1, 1, 1, 1)
-										.format(DateTimeFormatter.ISO_DATE_TIME))))))
+				.content(getCreateCheckpointFormData())
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(redirectedUrl("module/" + db.getModuleProofTechniques().getId()));
 
@@ -90,6 +81,31 @@ public class CheckpointControllerTest extends ControllerTest {
 						.containsExactlyInAnyOrder(
 								db.getSkillImplication(),
 								db.getSkillNegation());
+	}
+
+	@Test
+	@WithUserDetails("admin")
+	public void createCheckpointSetup() throws Exception {
+		mvc.perform(post("/checkpoint/setup").with(csrf())
+				.content(getCreateCheckpointFormData())
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED));
+
+		Optional<Checkpoint> checkpoint = checkpointRepository.findAll().stream()
+				.filter(cp -> cp.getName().equals("checkpoint")).findFirst();
+		assertThat(checkpoint).isNotEmpty();
+	}
+
+	private String getCreateCheckpointFormData() throws Exception {
+		return EntityUtils.toString(new UrlEncodedFormEntity(List.of(
+				new BasicNameValuePair("name", "checkpoint"),
+				new BasicNameValuePair("edition.id", Long.toString(db.getEditionRL().getId())),
+				new BasicNameValuePair("moduleId",
+						Long.toString(db.getModuleProofTechniques().getId())),
+				new BasicNameValuePair("skillIds",
+						db.getSkillImplication().getId() + "," + db.getSkillNegation().getId()),
+				new BasicNameValuePair("deadline",
+						LocalDateTime.of(2022, 1, 1, 1, 1)
+								.format(DateTimeFormatter.ISO_DATE_TIME)))));
 	}
 
 	@Test

@@ -1,0 +1,151 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{container}">
+    <div id="edition-setup-sidebar" class="sidebar hidden" layout:fragment="setup-overlay">
+        <div class="sidebar__content">
+            <div class="sidebar__header">
+                <h1>Edition setup</h1>
+                <form
+                    method="post"
+                    id="publish-edition-form"
+                    th:action="@{|/edition/${edition.id}/publish|}"
+                    th:if="${@authorisationService.canPublishEdition(edition.id) and not visible}">
+                    <button
+                        name="publish"
+                        id="publishEdition"
+                        class="circuit__button"
+                        title="publish"
+                        type="submit">
+                        Publish edition
+                    </button>
+                </form>
+                <form
+                    method="post"
+                    id="unpublish-edition-form"
+                    th:action="@{|/edition/${edition.id}/unpublish|}"
+                    th:if="${@authorisationService.canPublishEdition(edition.id) and visible}">
+                    <button
+                        name="unpublish"
+                        id="unpublishEdition"
+                        class="circuit__button"
+                        title="unpublish"
+                        type="submit">
+                        Unpublish edition
+                    </button>
+                </form>
+                <button
+                    id="close-edition-setup-sidebar"
+                    class="fa-solid fa-angle-right fa-2xl"></button>
+            </div>
+
+            <div class="sidebar__columns">
+                <div class="sidebar__column">
+                    <h2>Modules</h2>
+                    <form id="new-module-form" class="sidebar__new_item_form">
+                        <input name="edition.id" hidden th:value="${edition.id}" />
+                        <input
+                            id="new-module-name"
+                            name="name"
+                            type="text"
+                            placeholder="New Module"
+                            required />
+                        <button type="submit">create</button>
+                    </form>
+                    <ul id="module-list" class="editable-ul">
+                        <th:block th:each="module : ${edition.modules}">
+                            <th:block layout:replace="~{edition_setup/module :: module}"></th:block>
+                        </th:block>
+                    </ul>
+                </div>
+                <div class="sidebar__column">
+                    <h2>Checkpoints</h2>
+                    <form id="new-checkpoint-form" class="sidebar__new_item_form">
+                        <input name="edition.id" hidden th:value="${edition.id}" />
+                        <input
+                            id="new-checkpoint-name"
+                            name="name"
+                            type="text"
+                            placeholder="New Checkpoint"
+                            required />
+                        <button type="submit">create</button>
+                    </form>
+                    <ul id="checkpoint-list" class="editable-ul">
+                        <th:block th:each="checkpoint : ${edition.checkpointsInEdition}">
+                            <th:block
+                                layout:replace="~{edition_setup/checkpoint :: checkpoint}"></th:block>
+                        </th:block>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                $("#new-module-form").submit(e => {
+                    e.preventDefault();
+                    $.post("/module/setup", $("#new-module-form").serialize(), html => {
+                        const element = $("<div/>").append(html).children()[0];
+                        const newModuleId = $(element).data("module");
+                        const newModuleName = $(element).text();
+
+                        $(element).find(".module__edit").click(editModule);
+                        $(element).find(".module__delete").click(deleteModule);
+                        $("select[name='module.id']").append(
+                            `<option data-edit="only" value="${newModuleId}">${newModuleName}<option>`
+                        );
+
+                        $("#new-module-name").val("");
+                        $("#module-list").prepend(element);
+                    });
+                });
+
+                $("#new-checkpoint-form").submit(e => {
+                    e.preventDefault();
+                    $.post("/checkpoint/setup", $("#new-checkpoint-form").serialize(), html => {
+                        const element = $("<div/>").append(html).children()[0];
+                        $(element).find(".checkpoint__edit").click(editCheckpoint);
+                        $(element).find(".checkpoint__delete").click(deleteCheckpoint);
+                        $("#new-checkpoint-name").val("");
+                        $("#checkpoint-list").prepend(element);
+                    });
+                });
+                $("#close-edition-setup-sidebar").click(() => {
+                    $("#edition-setup-sidebar").addClass("hidden");
+                });
+                $("#open-edition-setup-sidebar").click(() => {
+                    $("#edition-setup-sidebar").removeClass("hidden");
+                });
+            });
+        </script>
+        <th:block layout:replace="~{edition_setup/module-delete :: overlay}" />
+        <th:block layout:replace="~{edition_setup/module-delete :: script}" />
+        <th:block layout:replace="~{edition_setup/module-edit :: form}" />
+        <th:block layout:replace="~{edition_setup/module-edit :: script}" />
+        <th:block layout:replace="~{edition_setup/checkpoint-delete :: overlay}" />
+        <th:block layout:replace="~{edition_setup/checkpoint-delete :: script}" />
+        <th:block layout:replace="~{edition_setup/checkpoint-edit :: form}" />
+        <th:block layout:replace="~{edition_setup/checkpoint-edit :: script}" />
+    </div>
+</html>
