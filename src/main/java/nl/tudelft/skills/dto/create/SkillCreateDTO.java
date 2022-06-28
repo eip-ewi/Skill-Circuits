@@ -38,7 +38,6 @@ public class SkillCreateDTO extends Create<Skill> {
 
 	@NotBlank
 	private String name;
-	@NotNull
 	@Builder.Default
 	private Boolean essential = false;
 	@NotNull

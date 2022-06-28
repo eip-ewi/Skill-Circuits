@@ -47,6 +47,11 @@
         }
 
         function cancelCreateBlock(block) {
+            block.find(".item").remove();
+            block.find("select > option").prop("selected", false);
+            block.find("input:not(:where([type='hidden'], [type='checkbox']))").val("");
+            block.find("input[type='checkbox']").prop("checked", true);
+
             const row = parseInt(block.css("gridRowStart"));
             const col = parseInt(block.css("gridColumnStart"));
             $("#create-block-wrapper").append(block);
@@ -59,14 +64,14 @@
             ghost.click(clickGhost);
             $("#circuit").append(ghost);
         }
+
         function createBlock(block) {
             if (!validateBlock(block)) {
                 return;
             }
-            const data = serializeBlockHeader(block);
-            const items = serializeBlockItems(block);
+            const data = serialiseBlockHeader(block);
+            const items = serialiseBlockItems(block);
 
-            data["newItems"] = items.filter(item => item.new);
             data["newItems"] = items.filter(item => item.new);
 
             data["row"] = parseInt(block.css("gridRowStart")) - 1;
@@ -77,9 +82,15 @@
                 contentType: "application/json",
                 data: JSON.stringify(data),
                 success: html => {
+                    block.find(".item").remove();
+                    block.find("select > option").prop("selected", false);
+                    block.find("input:not(:where([type='hidden'], [type='checkbox']))").val("");
+                    block.find("input[type='checkbox']").prop("checked", true);
+
                     $("#create-block-wrapper").append(block);
                     $("#circuit").replaceWith($(html).find("#circuit"));
                     // Re-fire DOMContentLoaded to re-attach event listeners and onclick functions
+                    $("*").unbind();
                     window.document.dispatchEvent(
                         new Event("DOMContentLoaded", {
                             bubbles: true,
@@ -91,9 +102,6 @@
         }
 
         document.addEventListener("DOMContentLoaded", function () {
-            $("#create-block-form").submit(function (event) {
-                event.preventDefault();
-            });
             $(".ghost_block").click(clickGhost);
         });
     </script>
