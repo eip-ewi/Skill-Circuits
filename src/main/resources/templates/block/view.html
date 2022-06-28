@@ -38,9 +38,6 @@
         th:data-checkpoint="${level == 'module'} ? ${block.checkpoint.id} : ${null}"
         layout:fragment="block">
         <div th:unless="${create}" th:id="|block-${block.id}-header|" class="block__header">
-            <h2 class="block__name">
-                <span th:id="|block-${block.id}-name|" th:text="${block.name}"></span>
-            </h2>
             <p
                 th:if="${level == 'module'}"
                 th:id="|block-${block.id}-group|"
@@ -52,6 +49,9 @@
                 class="block__group__name"
                 th:href="@{|/${groupType}/${group.id}|}"
                 th:text="${group.name}"></a>
+            <h2 class="block__name">
+                <span th:id="|block-${block.id}-name|" th:text="${block.name}"></span>
+            </h2>
         </div>
 
         <th:block layout:replace="~{block/edit :: header}"></th:block>

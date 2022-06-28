@@ -23,6 +23,9 @@
     overflow: visible;
     top: 0;
     left: 0;
+    margin-left: -2rem;
+    max-width: 1px;
+    max-height: 1px;
 
     & > .connection {
         stroke-width: 2;
