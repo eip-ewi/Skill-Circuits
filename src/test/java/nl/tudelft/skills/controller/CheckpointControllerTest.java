@@ -118,12 +118,14 @@ public class CheckpointControllerTest extends ControllerTest {
 		mvc.perform(patch("/checkpoint").with(csrf())
 				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
 						new BasicNameValuePair("id", Long.toString(db.getCheckpointLectureOne().getId())),
-						new BasicNameValuePair("name", "edited")))))
+						new BasicNameValuePair("name", "edited"),
+						new BasicNameValuePair("deadline", "2022-12-21T23:59")))))
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isOk());
 
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(db.getCheckpointLectureOne().getId());
 		assertThat(checkpoint.getName()).isEqualTo("edited");
+		assertThat(checkpoint.getDeadline()).isEqualTo(LocalDateTime.of(2022, 12, 21, 23, 59));
 	}
 
 	@Test
@@ -131,7 +133,8 @@ public class CheckpointControllerTest extends ControllerTest {
 		mvc.perform(patch("/checkpoint").with(csrf())
 				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
 						new BasicNameValuePair("id", Long.toString(db.getCheckpointLectureOne().getId())),
-						new BasicNameValuePair("name", "edited")))))
+						new BasicNameValuePair("name", "edited"),
+						new BasicNameValuePair("deadline", "2022-12-21T23:59")))))
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(redirectedUrlPattern("**/auth/login"));
 

@@ -28,6 +28,11 @@
                 <input id="edit-checkpoint-id" name="id" type="hidden" />
 
                 <input id="edit-checkpoint-name" name="name" type="text" required />
+                <input
+                    id="edit-checkpoint-deadline"
+                    name="deadline"
+                    type="datetime-local"
+                    required />
 
                 <button
                     type="button"
@@ -40,13 +45,19 @@
 
     <script th:if="${canEdit}" layout:fragment="script">
         function editCheckpoint() {
-            $(".checkpoint__name").removeClass("hidden");
-            let checkpointId = $(this).data("checkpoint");
-            let itemName = $(`#checkpoint-${checkpointId}-name`);
+            const checkpointId = $(this).data("checkpoint");
+            const checkpointDisplay = $(`#checkpoint-${checkpointId}-display`);
+            const checkpointName = $(`#checkpoint-${checkpointId}`).data("name");
+            const checkpointDeadline = $(`#checkpoint-${checkpointId}`).data("deadline");
+
             $("#edit-checkpoint-id").val(checkpointId);
-            $("#edit-checkpoint-name").val(itemName.text());
+            $("#edit-checkpoint-name").val(checkpointName);
+            const currentDeadline = luxon.DateTime.fromISO(checkpointDeadline);
+            $("#edit-checkpoint-deadline").val(currentDeadline.toFormat("yyyy-MM-dd'T'HH:mm"));
             $(`#checkpoint-${checkpointId}-body`).append($("#edit-checkpoint"));
-            itemName.addClass("hidden");
+
+            $(".checkpoint__name").removeClass("hidden");
+            checkpointDisplay.addClass("hidden");
             $(`#checkpoint-${checkpointId}-buttons`).addClass("hidden");
         }
 
@@ -58,11 +69,18 @@
                     url: `/checkpoint`,
                     data: $("#edit-checkpoint-form").serialize(),
                     success: () => {
-                        let checkpointId = $("#edit-checkpoint-id").val();
-                        let checkpointName = $(`#checkpoint-${checkpointId}-name`);
+                        const checkpointId = $("#edit-checkpoint-id").val();
+                        const checkpointName = $(`#checkpoint-${checkpointId}-name`);
+                        const checkpointDeadline = $(`#checkpoint-${checkpointId}-deadline`);
+                        const newDeadline = luxon.DateTime.fromISO(
+                            $("#edit-checkpoint-deadline").val()
+                        );
+
                         $("#edit-checkpoint-wrapper").append($("#edit-checkpoint"));
-                        checkpointName.removeClass("hidden");
                         checkpointName.text($("#edit-checkpoint-name").val());
+                        checkpointDeadline.text(formatDeadline(newDeadline));
+
+                        $(`#checkpoint-${checkpointId}-display`).removeClass("hidden");
                         $(`#checkpoint-${checkpointId}-buttons`).removeClass("hidden");
                     },
                 });
@@ -73,7 +91,7 @@
             $("#edit-checkpoint-cancel").click(function () {
                 let checkpointId = $("#edit-checkpoint-id").val();
                 $("#edit-checkpoint-wrapper").append($("#edit-checkpoint"));
-                $(`#checkpoint-${checkpointId}-name`).removeClass("hidden");
+                $(`#checkpoint-${checkpointId}-display`).removeClass("hidden");
                 $(`#checkpoint-${checkpointId}-buttons`).removeClass("hidden");
             });
         });

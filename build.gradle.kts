@@ -242,6 +242,9 @@ dependencies {
     implementation("org.webjars:webjars-locator-core")
     implementation("org.webjars:jquery:3.6.0")
     implementation("org.webjars:js-cookie:2.2.1")
+    // Better DateTime handling in JavaScript
+    implementation("org.webjars.npm:luxon:2.3.2")
+
     //// Websockets
     //implementation("org.webjars:sockjs-client:1.5.1")
     //implementation("org.webjars:stomp-websocket:2.3.4")
