@@ -17,21 +17,14 @@
  */
 package nl.tudelft.skills.controller;
 
-import java.util.Set;
-
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
-import nl.tudelft.skills.dto.view.edition.EditionLevelEditionViewDTO;
-import nl.tudelft.skills.dto.view.edition.EditionLevelModuleViewDTO;
-import nl.tudelft.skills.dto.view.edition.EditionLevelSubmoduleViewDTO;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.EditionRepository;
-import nl.tudelft.skills.service.CircuitService;
 import nl.tudelft.skills.service.EditionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -62,21 +55,7 @@ public class EditionController {
 	@GetMapping("{id}")
 	@PreAuthorize("@authorisationService.canViewEdition(#id)")
 	public String getEditionPage(@PathVariable Long id, Model model) {
-		EditionLevelEditionViewDTO edition = editionService.getEditionView(id);
-
-		Set<Pair<Integer, Integer>> positions = edition.getFilledPositions();
-		int columns = positions.stream().mapToInt(Pair::getFirst).max().orElse(0) + 1;
-		int rows = positions.stream().mapToInt(Pair::getSecond).max().orElse(0) + 1;
-		Boolean studentMode = (Boolean) session.getAttribute("student-mode-" + id);
-
-		model.addAttribute("level", "edition");
-		model.addAttribute("edition", edition);
-		CircuitService.setCircuitAttributes(model, positions, columns, rows);
-
-		model.addAttribute("emptyBlock", EditionLevelSubmoduleViewDTO.empty());
-		model.addAttribute("emptyGroup", EditionLevelModuleViewDTO.empty());
-		model.addAttribute("studentMode", studentMode != null && studentMode);
-
+		editionService.configureEditionModel(id, model, session);
 		return "edition/view";
 	}
 

@@ -19,10 +19,13 @@ package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+
+import javax.servlet.http.HttpSession;
 
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.create.SkillCreateDTO;
@@ -34,14 +37,13 @@ import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.SubmoduleRepository;
 import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.service.ModuleService;
 import nl.tudelft.skills.service.SkillService;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -54,15 +56,15 @@ public class SkillControllerTest extends ControllerTest {
 	private final SkillController skillController;
 	private final SkillRepository skillRepository;
 	private final SubmoduleRepository submoduleRepository;
-	@MockBean
-	private ModuleController moduleController;
+	private final HttpSession session;
 
 	@Autowired
 	public SkillControllerTest(SkillRepository skillRepository, TaskRepository taskRepository,
-			SkillService skillService, SubmoduleRepository submoduleRepository) {
+			SkillService skillService, SubmoduleRepository submoduleRepository, ModuleService moduleService) {
 		this.submoduleRepository = submoduleRepository;
+		this.session = mock(HttpSession.class);
 		this.skillController = new SkillController(skillRepository, taskRepository, submoduleRepository,
-				skillService);
+				skillService, moduleService, session);
 		this.skillRepository = skillRepository;
 	}
 
@@ -75,7 +77,7 @@ public class SkillControllerTest extends ControllerTest {
 				.checkpoint(new CheckpointIdDTO(db.getCheckpointLectureOne().getId()))
 				.column(10).row(11).newItems(new ArrayList<>()).build();
 
-		skillController.createSkill(null, dto, Mockito.mock(Model.class));
+		skillController.createSkill(null, dto, mock(Model.class));
 
 		assertTrue(skillRepository.findAll().stream().anyMatch(s -> s.getName().equals("New Skill")));
 	}

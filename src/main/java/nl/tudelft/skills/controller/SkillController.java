@@ -20,11 +20,11 @@ package nl.tudelft.skills.controller;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.SkillCreateDTO;
 import nl.tudelft.skills.dto.id.SkillIdDTO;
@@ -38,6 +38,7 @@ import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.SubmoduleRepository;
 import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.service.ModuleService;
 import nl.tudelft.skills.service.SkillService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,15 +57,19 @@ public class SkillController {
 	private final TaskRepository taskRepository;
 	private final SubmoduleRepository submoduleRepository;
 	private final SkillService skillService;
+	private final ModuleService moduleService;
+	private final HttpSession session;
 
 	@Autowired
 	public SkillController(SkillRepository skillRepository, TaskRepository taskRepository,
 			SubmoduleRepository submoduleRepository,
-			SkillService skillService) {
+			SkillService skillService, ModuleService moduleService, HttpSession session) {
 		this.skillRepository = skillRepository;
 		this.taskRepository = taskRepository;
 		this.submoduleRepository = submoduleRepository;
 		this.skillService = skillService;
+		this.moduleService = moduleService;
+		this.session = session;
 	}
 
 	/**
@@ -85,8 +90,8 @@ public class SkillController {
 		}).collect(Collectors.toSet());
 		skill.setTasks(Set.copyOf(taskRepository.saveAllAndFlush(tasks)));
 
-		return SpringContext.getBean(ModuleController.class)
-				.getModulePage(person, skill.getSubmodule().getModule().getId(), model);
+		moduleService.configureModuleModel(person, skill.getSubmodule().getModule().getId(), model, session);
+		return "module/view";
 	}
 
 	/**

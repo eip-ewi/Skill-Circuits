@@ -18,24 +18,66 @@
 package nl.tudelft.skills.service;
 
 import java.util.List;
+import java.util.Set;
 
+import javax.servlet.http.HttpSession;
+
+import nl.tudelft.labracore.lib.security.user.Person;
+import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
+import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
+import nl.tudelft.skills.dto.view.module.ModuleLevelSubmoduleViewDTO;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 
 @Service
 public class ModuleService {
 
 	private final ModuleRepository moduleRepository;
 	private final PersonRepository personRepository;
+	private final CircuitService circuitService;
 
-	public ModuleService(ModuleRepository moduleRepository, PersonRepository personRepository) {
+	public ModuleService(ModuleRepository moduleRepository, PersonRepository personRepository,
+			CircuitService circuitService) {
 		this.moduleRepository = moduleRepository;
 		this.personRepository = personRepository;
+		this.circuitService = circuitService;
+	}
+
+	/**
+	 * Configures the model for the module circuit view.
+	 *
+	 * @param person  The currently logged in person, null if none
+	 * @param id      The id of the module
+	 * @param model   The module to configure
+	 * @param session The http session
+	 */
+	public void configureModuleModel(Person person, Long id, Model model, HttpSession session) {
+		ModuleLevelModuleViewDTO module = View.convert(moduleRepository.findByIdOrThrow(id),
+				ModuleLevelModuleViewDTO.class);
+
+		if (person != null) {
+			setCompletedTasksForPerson(module, person.getId());
+		}
+
+		Set<Pair<Integer, Integer>> positions = module.getFilledPositions();
+		int columns = positions.stream().mapToInt(Pair::getFirst).max().orElse(0) + 1;
+		int rows = positions.stream().mapToInt(Pair::getSecond).max().orElse(0) + 1;
+		Boolean studentMode = (Boolean) session.getAttribute("student-mode-" + module.getEdition().getId());
+
+		model.addAttribute("level", "module");
+		model.addAttribute("module", module);
+		circuitService.setCircuitAttributes(model, positions, columns, rows);
+
+		model.addAttribute("emptyBlock", ModuleLevelSkillViewDTO.empty());
+		model.addAttribute("emptyGroup", ModuleLevelSubmoduleViewDTO.empty());
+		model.addAttribute("studentMode", studentMode != null && studentMode);
 	}
 
 	/**

@@ -18,6 +18,7 @@
 package nl.tudelft.skills.repository;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import nl.tudelft.skills.model.Skill;
@@ -32,5 +33,7 @@ public interface SkillRepository extends JpaRepository<Skill, Long> {
 	}
 
 	Set<Skill> findAllByIdIn(Collection<Long> ids);
+
+	List<Skill> findAllByCheckpointId(Long checkpointId);
 
 }

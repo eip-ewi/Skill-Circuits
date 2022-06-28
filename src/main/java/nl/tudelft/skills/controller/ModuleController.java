@@ -17,8 +17,6 @@
  */
 package nl.tudelft.skills.controller;
 
-import java.util.Set;
-
 import javax.servlet.http.HttpSession;
 
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
@@ -28,16 +26,11 @@ import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.SCModuleCreateDTO;
 import nl.tudelft.skills.dto.patch.SCModulePatchDTO;
 import nl.tudelft.skills.dto.view.edition.EditionLevelModuleViewDTO;
-import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
-import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
-import nl.tudelft.skills.dto.view.module.ModuleLevelSubmoduleViewDTO;
 import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.repository.ModuleRepository;
-import nl.tudelft.skills.service.CircuitService;
 import nl.tudelft.skills.service.ModuleService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -73,25 +66,7 @@ public class ModuleController {
 	@GetMapping("{id}")
 	public String getModulePage(@AuthenticatedPerson(required = false) Person person, @PathVariable Long id,
 			Model model) {
-		ModuleLevelModuleViewDTO module = View.convert(moduleRepository.findByIdOrThrow(id),
-				ModuleLevelModuleViewDTO.class);
-
-		if (person != null) {
-			moduleService.setCompletedTasksForPerson(module, person.getId());
-		}
-
-		Set<Pair<Integer, Integer>> positions = module.getFilledPositions();
-		int columns = positions.stream().mapToInt(Pair::getFirst).max().orElse(0) + 1;
-		int rows = positions.stream().mapToInt(Pair::getSecond).max().orElse(0) + 1;
-		Boolean studentMode = (Boolean) session.getAttribute("student-mode-" + module.getEdition().getId());
-
-		model.addAttribute("level", "module");
-		model.addAttribute("module", module);
-		CircuitService.setCircuitAttributes(model, positions, columns, rows);
-
-		model.addAttribute("emptyBlock", ModuleLevelSkillViewDTO.empty());
-		model.addAttribute("emptyGroup", ModuleLevelSubmoduleViewDTO.empty());
-		model.addAttribute("studentMode", studentMode != null && studentMode);
+		moduleService.configureModuleModel(person, id, model, session);
 		return "module/view";
 	}
 

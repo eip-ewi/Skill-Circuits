@@ -18,15 +18,11 @@
 package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 import javax.servlet.http.HttpSession;
 
-import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.dto.view.edition.EditionLevelCourseViewDTO;
-import nl.tudelft.skills.dto.view.edition.EditionLevelEditionViewDTO;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.service.EditionService;
@@ -54,24 +50,6 @@ public class EditionControllerTest extends ControllerTest {
 		this.editionService = mock(EditionService.class);
 		this.session = mock(HttpSession.class);
 		this.editionController = new EditionController(editionRepository, editionService, session);
-	}
-
-	@Test
-	void getEditionPage() {
-		EditionLevelEditionViewDTO mockEditionView = View.convert(db.getEditionRL(),
-				EditionLevelEditionViewDTO.class);
-		mockEditionView.setCourse(new EditionLevelCourseViewDTO(10L, "RL"));
-		mockEditionView.setName("RL");
-
-		when(editionService.getEditionView(anyLong())).thenReturn(mockEditionView);
-
-		Long editionId = db.getEditionRL().getId();
-
-		editionController.getEditionPage(editionId, model);
-
-		assertThat(model.getAttribute("edition")).isEqualTo(mockEditionView);
-
-		verify(editionService).getEditionView(editionId);
 	}
 
 	@Test

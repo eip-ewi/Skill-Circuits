@@ -37,7 +37,7 @@ public class CircuitService {
 	 * @param columns   the amount of columns in the circuit.
 	 * @param rows      the amount of rows in the circuit.
 	 */
-	public static void setCircuitAttributes(Model model, Set<Pair<Integer, Integer>> positions, int columns,
+	public void setCircuitAttributes(Model model, Set<Pair<Integer, Integer>> positions, int columns,
 			int rows) {
 		model.addAttribute("columns", columns);
 		model.addAttribute("rows", rows);

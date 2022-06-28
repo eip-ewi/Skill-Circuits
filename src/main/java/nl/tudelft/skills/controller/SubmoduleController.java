@@ -17,9 +17,9 @@
  */
 package nl.tudelft.skills.controller;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
-import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.SubmoduleCreateDTO;
 import nl.tudelft.skills.dto.patch.SubmodulePatchDTO;
@@ -31,6 +31,7 @@ import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Submodule;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.SubmoduleRepository;
+import nl.tudelft.skills.service.EditionService;
 import nl.tudelft.skills.service.SkillService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,13 +49,17 @@ public class SubmoduleController {
 	private final SubmoduleRepository submoduleRepository;
 	private final ModuleRepository moduleRepository;
 	private final SkillService skillService;
+	private final EditionService editionService;
+	private final HttpSession session;
 
 	@Autowired
 	public SubmoduleController(SubmoduleRepository submoduleRepository, ModuleRepository moduleRepository,
-			SkillService skillService) {
+			SkillService skillService, EditionService editionService, HttpSession session) {
 		this.submoduleRepository = submoduleRepository;
 		this.moduleRepository = moduleRepository;
 		this.skillService = skillService;
+		this.editionService = editionService;
+		this.session = session;
 	}
 
 	/**
@@ -67,8 +72,8 @@ public class SubmoduleController {
 	@PreAuthorize("@authorisationService.canCreateSubmodule(#create.module.id)")
 	public String createSubmodule(@RequestBody SubmoduleCreateDTO create, Model model) {
 		Submodule submodule = submoduleRepository.saveAndFlush(create.apply());
-		return SpringContext.getBean(EditionController.class)
-				.getEditionPage(submodule.getModule().getEdition().getId(), model);
+		editionService.configureEditionModel(submodule.getModule().getEdition().getId(), model, session);
+		return "edition/view";
 	}
 
 	/**

@@ -17,28 +17,63 @@
  */
 package nl.tudelft.skills.service;
 
+import java.util.Set;
+
+import javax.servlet.http.HttpSession;
+
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.edition.EditionLevelCourseViewDTO;
 import nl.tudelft.skills.dto.view.edition.EditionLevelEditionViewDTO;
+import nl.tudelft.skills.dto.view.edition.EditionLevelModuleViewDTO;
+import nl.tudelft.skills.dto.view.edition.EditionLevelSubmoduleViewDTO;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.EditionRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 
 @Service
 public class EditionService {
 
 	private EditionControllerApi editionApi;
 	private EditionRepository editionRepository;
+	private CircuitService circuitService;
 
 	@Autowired
-	public EditionService(EditionControllerApi editionApi, EditionRepository editionRepository) {
+	public EditionService(EditionControllerApi editionApi, EditionRepository editionRepository,
+			CircuitService circuitService) {
 		this.editionApi = editionApi;
 		this.editionRepository = editionRepository;
+		this.circuitService = circuitService;
+	}
+
+	/**
+	 * Configures the model for the module circuit view.
+	 *
+	 * @param id      The id of the module
+	 * @param model   The module to configure
+	 * @param session The http session
+	 */
+	public void configureEditionModel(Long id, Model model, HttpSession session) {
+		EditionLevelEditionViewDTO edition = getEditionView(id);
+
+		Set<Pair<Integer, Integer>> positions = edition.getFilledPositions();
+		int columns = positions.stream().mapToInt(Pair::getFirst).max().orElse(0) + 1;
+		int rows = positions.stream().mapToInt(Pair::getSecond).max().orElse(0) + 1;
+		Boolean studentMode = (Boolean) session.getAttribute("student-mode-" + id);
+
+		model.addAttribute("level", "edition");
+		model.addAttribute("edition", edition);
+		circuitService.setCircuitAttributes(model, positions, columns, rows);
+
+		model.addAttribute("emptyBlock", EditionLevelSubmoduleViewDTO.empty());
+		model.addAttribute("emptyGroup", EditionLevelModuleViewDTO.empty());
+		model.addAttribute("studentMode", studentMode != null && studentMode);
 	}
 
 	/**

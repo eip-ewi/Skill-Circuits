@@ -30,16 +30,13 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpSession;
 
 import nl.tudelft.labracore.api.RoleControllerApi;
-import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.create.SCModuleCreateDTO;
 import nl.tudelft.skills.dto.id.SCEditionIdDTO;
 import nl.tudelft.skills.dto.patch.SCModulePatchDTO;
-import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.service.ModuleService;
-import nl.tudelft.skills.test.TestUserDetailsService;
 
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
@@ -74,24 +71,6 @@ public class ModuleControllerTest extends ControllerTest {
 		this.roleControllerApi = roleControllerApi;
 		this.moduleRepository = moduleRepository;
 		this.session = mock(HttpSession.class);
-	}
-
-	@Test
-	void getModulePage() {
-		String page = moduleController.getModulePage(null, db.getModuleProofTechniques().getId(), model);
-		assertThat(page).isEqualTo("module/view");
-		assertThat(model.getAttribute("module"))
-				.isEqualTo(View.convert(db.getModuleProofTechniques(), ModuleLevelModuleViewDTO.class));
-	}
-
-	@Test
-	void getModulePageCallsTasksCompleted() {
-		moduleController.getModulePage(TestUserDetailsService.assemblePerson("username"),
-				db.getModuleProofTechniques().getId(), model);
-
-		verify(moduleService).setCompletedTasksForPerson(
-				View.convert(db.getModuleProofTechniques(), ModuleLevelModuleViewDTO.class),
-				TestUserDetailsService.id);
 	}
 
 	@Test

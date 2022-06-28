@@ -20,8 +20,11 @@ package nl.tudelft.skills.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import javax.servlet.http.HttpSession;
 
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
@@ -34,6 +37,7 @@ import nl.tudelft.skills.dto.patch.SubmodulePositionPatchDTO;
 import nl.tudelft.skills.model.Submodule;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.SubmoduleRepository;
+import nl.tudelft.skills.service.EditionService;
 import nl.tudelft.skills.service.SkillService;
 
 import org.junit.jupiter.api.Test;
@@ -41,7 +45,6 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -57,24 +60,25 @@ public class SubmoduleControllerTest extends ControllerTest {
 	private final SubmoduleRepository submoduleRepository;
 	private final ModuleRepository moduleRepository;
 	private final EditionControllerApi editionControllerApi;
-	@MockBean
-	private EditionController editionController;
+	private final HttpSession session;
 
 	@Autowired
 	public SubmoduleControllerTest(SubmoduleRepository submoduleRepository, SkillService skillService,
-			ModuleRepository moduleRepository, EditionControllerApi editionControllerApi) {
+			ModuleRepository moduleRepository, EditionControllerApi editionControllerApi,
+			EditionService editionService) {
 		this.moduleRepository = moduleRepository;
 		this.editionControllerApi = editionControllerApi;
+		this.session = mock(HttpSession.class);
 		this.submoduleController = new SubmoduleController(submoduleRepository, moduleRepository,
-				skillService);
+				skillService, editionService, session);
 		this.submoduleRepository = submoduleRepository;
 	}
 
 	@Test
 	@WithUserDetails("admin")
 	void createSubmodule() {
-		var edition = Mockito.mock(EditionDetailsDTO.class);
-		var course = Mockito.mock(CourseSummaryDTO.class);
+		var edition = mock(EditionDetailsDTO.class);
+		var course = mock(CourseSummaryDTO.class);
 		Mockito.when(course.getId()).thenReturn(1L);
 		Mockito.when(edition.getName()).thenReturn("Mocked Edition");
 		Mockito.when(edition.getCourse()).thenReturn(course);
@@ -84,7 +88,7 @@ public class SubmoduleControllerTest extends ControllerTest {
 				.module(new SCModuleIdDTO(db.getModuleProofTechniques().getId()))
 				.row(1).column(1).build();
 
-		submoduleController.createSubmodule(dto, Mockito.mock(Model.class));
+		submoduleController.createSubmodule(dto, mock(Model.class));
 
 		assertTrue(submoduleRepository.findAll().stream().anyMatch(s -> s.getName().equals("New Submodule")));
 	}
