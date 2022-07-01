@@ -34,7 +34,6 @@
      childIds = ${block instanceof T(nl.tudelft.skills.dto.view.BlockView)} ? ${block.childIds} : ${{}}"
         th:data-parents="${parentIds}"
         th:data-children="${childIds}"
-        th:data-essential="${level == 'module'} ? ${block.essential} : ${null}"
         th:data-checkpoint="${level == 'module'} ? ${block.checkpoint.id} : ${null}"
         layout:fragment="block">
         <div th:unless="${create}" th:id="|block-${block.id}-header|" class="block__header">
@@ -86,6 +85,10 @@
                 th:if="${canDelete}"
                 th:data-block="${block.id}"></button>
         </div>
+
+        <span class="block__info" th:if="${level == 'module'} ? ${not block.essential} : ${false}">
+            Optional
+        </span>
 
         <div data-edit="only" class="block__form__buttons">
             <button data-edit="only" type="button" class="block__edit__cancel">Cancel</button>
