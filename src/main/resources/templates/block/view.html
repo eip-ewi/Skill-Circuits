@@ -64,7 +64,7 @@
                     class="item__create fa-solid fa-plus"
                     th:data-block="${block.id}"></button>
             </li>
-            <th:block th:each="item : ${block.items}">
+            <th:block th:each="item, iter : ${block.items}">
                 <th:block th:if="${level == 'module'}">
                     <li layout:replace="~{task/view :: item}"></li>
                 </th:block>
