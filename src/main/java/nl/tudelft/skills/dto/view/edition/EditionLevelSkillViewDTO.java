@@ -36,5 +36,7 @@ public class EditionLevelSkillViewDTO extends View<Skill> implements ItemView {
 	private Long id;
 	@NotBlank
 	private String name;
+	@NotNull
+	private Boolean hidden;
 
 }

@@ -51,6 +51,10 @@ public class Skill {
 	@Builder.Default
 	private boolean essential = true;
 
+	@NotNull
+	@Builder.Default
+	private boolean hidden = false;
+
 	@Min(0)
 	@NotNull
 	@Column(name = "yPos")

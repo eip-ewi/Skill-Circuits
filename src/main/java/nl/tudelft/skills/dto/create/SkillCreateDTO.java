@@ -28,6 +28,7 @@ import nl.tudelft.librador.dto.create.Create;
 import nl.tudelft.skills.dto.id.CheckpointIdDTO;
 import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
 import nl.tudelft.skills.model.Skill;
+import org.apache.xpath.operations.Bool;
 
 @Data
 @Builder
@@ -40,6 +41,8 @@ public class SkillCreateDTO extends Create<Skill> {
 	private String name;
 	@Builder.Default
 	private Boolean essential = false;
+	@Builder.Default
+	private Boolean hidden = false;
 	@NotNull
 	private SubmoduleIdDTO submodule;
 	@NotNull

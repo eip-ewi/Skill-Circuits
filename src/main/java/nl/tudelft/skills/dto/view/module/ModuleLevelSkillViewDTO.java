@@ -43,6 +43,8 @@ public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
 	@NotNull
 	private Boolean essential;
 	@NotNull
+	private Boolean hidden;
+	@NotNull
 	private Integer row;
 	@NotNull
 	private Integer column;
