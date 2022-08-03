@@ -18,7 +18,6 @@
 package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
 
@@ -26,12 +25,15 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
-import nl.tudelft.labracore.api.CourseControllerApi;
+import nl.tudelft.labracore.api.EditionControllerApi;
+import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
+import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
+import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.model.SCEdition;
+import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.ModuleRepository;
-import nl.tudelft.skills.security.AuthorisationService;
-import nl.tudelft.skills.service.CourseService;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,17 +48,17 @@ import reactor.core.publisher.Flux;
 public class HomeControllerTest extends ControllerTest {
 
 	private final HomeController homeController;
-	private final CourseControllerApi courseApi;
-	private final CourseService courseService;
-	private final AuthorisationService authorisationService;
+	private final EditionControllerApi editionApi;
+	private final RoleControllerApi roleApi;
+	private final EditionRepository editionRepository;
 
 	@Autowired
-	public HomeControllerTest(ModuleRepository moduleRepository, CourseControllerApi courseApi) {
-		this.courseApi = courseApi;
-		this.authorisationService = mock(AuthorisationService.class);
-		this.courseService = mock(CourseService.class);
-		this.homeController = new HomeController(moduleRepository, courseService, courseApi,
-				authorisationService);
+	public HomeControllerTest(EditionControllerApi editionApi, RoleControllerApi roleApi,
+			EditionRepository editionRepository, ModuleRepository moduleRepository) {
+		this.editionApi = editionApi;
+		this.roleApi = roleApi;
+		this.editionRepository = editionRepository;
+		this.homeController = new HomeController(editionApi, roleApi, editionRepository, moduleRepository);
 	}
 
 	@Test
@@ -67,15 +69,19 @@ public class HomeControllerTest extends ControllerTest {
 	@Test
 	@SuppressWarnings("unchecked")
 	void getHomePage() {
+		SCEdition edition = db.getEditionRL();
+		edition.setVisible(true);
+		editionRepository.saveAndFlush(edition);
+
 		CourseSummaryDTO course = new CourseSummaryDTO().id(randomId());
 
-		when(courseApi.getAllCourses()).thenReturn(Flux.just(course));
+		when(editionApi.getAllEditionsActiveAtDate(any()))
+				.thenReturn(Flux.just(new EditionSummaryDTO().id(edition.getId())));
+		when(editionApi.getEditionsById(anyList()))
+				.thenReturn(Flux.just(new EditionDetailsDTO().id(edition.getId()).course(course)));
 
-		when(authorisationService.canViewCourse(anyLong())).thenReturn(true);
-		homeController.getHomePage(model);
+		homeController.getHomePage(null, model);
 
 		assertThat((List<CourseSummaryDTO>) model.getAttribute("courses")).containsExactly(course);
-
-		verify(courseApi).getAllCourses();
 	}
 }

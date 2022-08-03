@@ -139,7 +139,11 @@ val jacocoTestReport by tasks.getting(JacocoReport::class) {
 }
 
 task<Exec>("sassCompile") {
-    commandLine("sass", "src/main/resources/scss:src/main/resources/static/css")
+    if (System.getProperty("os.name").contains("windows",true)) {
+        commandLine("cmd", "/c", "sass", "src/main/resources/scss:src/main/resources/static/css")
+    } else {
+        commandLine("sass", "src/main/resources/scss:src/main/resources/static/css")
+    }
 }
 
 val processResources by tasks.getting(ProcessResources::class) {

@@ -9,7 +9,6 @@
     z-index: 10;
 
     &.highlighted {
-        --border-colour: var(--primary-green);
         outline: 2px solid var(--border-colour);
     }
     &.disabled {
@@ -23,8 +22,13 @@
         border: 2px solid var(--border-colour);
     }
 
-    &[data-essential="false"] {
-        --border-colour: #ff00ff;
+    &__info {
+        background-color: var(--primary-light);
+        border: 1px solid var(--primary-dark);
+        padding: 0.25rem 0.5rem;
+        position: absolute;
+        right: 0.5rem;
+        top: -1rem;
     }
 
     &[draggable="true"] {

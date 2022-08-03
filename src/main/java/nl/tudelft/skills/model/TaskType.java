@@ -26,7 +26,7 @@ public enum TaskType {
 		"play"
 	),
 	QUIZ(
-		"clipboard-check"
+		"clipboard-question"
 	),
 	IMPLEMENTATION(
 		"desktop"

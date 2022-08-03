@@ -132,6 +132,14 @@
             block.find("input[type='checkbox']").prop("checked", true);
 
             block.find(".item > a").append(block.find("a + .item__content"));
+
+            const items = block.find(".item");
+            items.each((i, item) => {
+                block
+                    .find(".items")
+                    .append(block.find(`.item[data-index-initial="${items.length - i - 1}"]`));
+                $(item).data("index", $(item).data("index-initial"));
+            });
         }
         function saveEditOrCreate() {
             const block = $(this).parent().parent();
@@ -171,6 +179,7 @@
                         data[name.split(".")[0]][name.split(".")[1]] = value;
                     } else data[name] = value;
                 });
+                data["index"] = item.data("index");
                 data["new"] = item.data("new") === true;
                 data["delete"] = item.data("delete") === true;
                 return data;
@@ -203,6 +212,8 @@
                 block.find(".select__items button").click(selectItemIcon);
                 block.find(".select__items > select").change(changeSelectedIcon);
             }
+            block.find(".item__up").click(moveItemUp);
+            block.find(".item__down").click(moveItemDown);
             block.find(".item__delete").click(deleteItem);
         }
 

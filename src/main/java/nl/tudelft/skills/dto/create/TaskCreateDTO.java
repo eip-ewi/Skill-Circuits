@@ -44,6 +44,8 @@ public class TaskCreateDTO extends Create<Task> {
 	@Min(0)
 	private Integer time;
 	private String link;
+	@NotNull
+	private Integer index;
 
 	@Override
 	protected void postApply(Task data) {

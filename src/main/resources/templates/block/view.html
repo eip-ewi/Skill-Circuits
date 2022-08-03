@@ -34,13 +34,9 @@
      childIds = ${block instanceof T(nl.tudelft.skills.dto.view.BlockView)} ? ${block.childIds} : ${{}}"
         th:data-parents="${parentIds}"
         th:data-children="${childIds}"
-        th:data-essential="${level == 'module'} ? ${block.essential} : ${null}"
         th:data-checkpoint="${level == 'module'} ? ${block.checkpoint.id} : ${null}"
         layout:fragment="block">
         <div th:unless="${create}" th:id="|block-${block.id}-header|" class="block__header">
-            <h2 class="block__name">
-                <span th:id="|block-${block.id}-name|" th:text="${block.name}"></span>
-            </h2>
             <p
                 th:if="${level == 'module'}"
                 th:id="|block-${block.id}-group|"
@@ -52,6 +48,9 @@
                 class="block__group__name"
                 th:href="@{|/${groupType}/${group.id}|}"
                 th:text="${group.name}"></a>
+            <h2 class="block__name">
+                <span th:id="|block-${block.id}-name|" th:text="${block.name}"></span>
+            </h2>
         </div>
 
         <th:block layout:replace="~{block/edit :: header}"></th:block>
@@ -64,7 +63,7 @@
                     class="item__create fa-solid fa-plus"
                     th:data-block="${block.id}"></button>
             </li>
-            <th:block th:each="item : ${block.items}">
+            <th:block th:each="item, iter : ${block.items}">
                 <th:block th:if="${level == 'module'}">
                     <li layout:replace="~{task/view :: item}"></li>
                 </th:block>
@@ -86,6 +85,10 @@
                 th:if="${canDelete}"
                 th:data-block="${block.id}"></button>
         </div>
+
+        <span class="block__info" th:if="${level == 'module'} ? ${not block.essential} : ${false}">
+            Optional
+        </span>
 
         <div data-edit="only" class="block__form__buttons">
             <button data-edit="only" type="button" class="block__edit__cancel">Cancel</button>

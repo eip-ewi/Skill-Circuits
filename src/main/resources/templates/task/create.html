@@ -87,6 +87,12 @@
             <span data-edit="only" class="fa-solid fa-link always_visible"></span>
         </div>
         <div class="item__buttons" data-edit="only">
+            <button
+                class="fa-solid fa-chevron-up item__up always_visible"
+                data-edit="only"></button>
+            <button
+                class="fa-solid fa-chevron-down item__down always_visible"
+                data-edit="only"></button>
             <button class="fa-solid fa-trash item__delete always_visible" data-edit="only"></button>
         </div>
     </li>
@@ -98,6 +104,11 @@
             elem.removeAttr("id");
             elem.removeClass("hidden");
             elem.children("input[type='hidden']").val(button.data("block"));
+
+            const index = button.closest(".items").children().length;
+            elem.attr("data-index", index);
+            elem.data("index", index);
+
             button.parent().after(elem);
             button.closest("ul").find("li:nth-child(2) input[name='time']").focus();
         }

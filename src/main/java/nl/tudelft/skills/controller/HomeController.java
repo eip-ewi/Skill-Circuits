@@ -17,17 +17,22 @@
  */
 package nl.tudelft.skills.controller;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
-import nl.tudelft.labracore.api.CourseControllerApi;
-import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
+import nl.tudelft.labracore.api.EditionControllerApi;
+import nl.tudelft.labracore.api.RoleControllerApi;
+import nl.tudelft.labracore.api.dto.*;
+import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
+import nl.tudelft.labracore.lib.security.user.Person;
+import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.SCModule;
+import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.ModuleRepository;
-import nl.tudelft.skills.security.AuthorisationService;
-import nl.tudelft.skills.service.CourseService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -37,32 +42,52 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class HomeController {
 
-	private CourseControllerApi courseApi;
+	private final EditionControllerApi editionApi;
+	private final RoleControllerApi roleApi;
 
-	private CourseService courseService;
-	private AuthorisationService authorisationService;
-
-	private ModuleRepository moduleRepository;
+	private final EditionRepository editionRepository;
+	private final ModuleRepository moduleRepository;
 
 	@Autowired
-	public HomeController(ModuleRepository moduleRepository, CourseService courseService,
-			CourseControllerApi courseApi, AuthorisationService authorisationService) {
+	public HomeController(EditionControllerApi editionApi, RoleControllerApi roleApi,
+			EditionRepository editionRepository, ModuleRepository moduleRepository) {
+		this.editionApi = editionApi;
+		this.roleApi = roleApi;
+		this.editionRepository = editionRepository;
 		this.moduleRepository = moduleRepository;
-		this.courseService = courseService;
-		this.courseApi = courseApi;
-		this.authorisationService = authorisationService;
 	}
 
+	/**
+	 * Gets the home page. Loads all courses that the authenticated person teaches or that have active and
+	 * visible editions.
+	 *
+	 * @param  person The authenticated person, or null if the user is unauthenticated
+	 * @param  model  The model to add details to
+	 * @return        The home page
+	 */
 	@Transactional
 	@GetMapping("/")
-	public String getHomePage(Model model) {
-		List<CourseSummaryDTO> allCourses = courseApi.getAllCourses().collectList().block()
-				.stream()
-				.filter(c -> authorisationService.canViewCourse(c.getId())
-						|| courseService.hasAtLeastOneEditionVisibleToStudents(c.getId()))
-				.toList();
+	public String getHomePage(@AuthenticatedPerson(required = false) Person person, Model model) {
+		List<EditionDetailsDTO> editions = person == null
+				? editionApi.getEditionsById(editionApi.getAllEditionsActiveAtDate(LocalDateTime.now())
+						.map(EditionSummaryDTO::getId).collectList().block()).collectList().block()
+				: editionApi.getAllEditionsActiveOrTaughtBy(person.getId()).collectList().block();
+		Set<Long> visible = editionRepository
+				.findAllById(editions.stream().map(EditionDetailsDTO::getId).toList()).stream()
+				.filter(SCEdition::isVisible).map(SCEdition::getId).collect(Collectors.toSet());
+		Set<Long> teacherIds = person == null ? Set.of()
+				: roleApi
+						.getRolesById(editions.stream().map(EditionDetailsDTO::getId).toList(),
+								List.of(person.getId()))
+						.collectList().block().stream()
+						.filter(r -> r.getType() == RoleDetailsDTO.TypeEnum.TEACHER)
+						.map(r -> r.getEdition().getId()).collect(Collectors.toSet());
 
-		model.addAttribute("courses", allCourses);
+		List<CourseSummaryDTO> courses = editions.stream()
+				.filter(e -> visible.contains(e.getId()) || teacherIds.contains(e.getId()))
+				.map(EditionDetailsDTO::getCourse).distinct().toList();
+
+		model.addAttribute("courses", courses);
 
 		// Temporarily put all modules on the home page
 		List<SCModule> allModules = moduleRepository.findAll();

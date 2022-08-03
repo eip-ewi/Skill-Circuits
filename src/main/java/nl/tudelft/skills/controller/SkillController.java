@@ -17,8 +17,8 @@
  */
 package nl.tudelft.skills.controller;
 
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Comparator;
+import java.util.List;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -27,6 +27,7 @@ import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.SkillCreateDTO;
+import nl.tudelft.skills.dto.create.TaskCreateDTO;
 import nl.tudelft.skills.dto.id.SkillIdDTO;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
@@ -84,11 +85,12 @@ public class SkillController {
 	public String createSkill(@AuthenticatedPerson Person person, @RequestBody SkillCreateDTO create,
 			Model model) {
 		Skill skill = skillRepository.saveAndFlush(create.apply());
-		Set<Task> tasks = create.getNewItems().stream().map(dto -> {
-			dto.setSkill(SkillIdDTO.builder().id(skill.getId()).build());
-			return dto.apply();
-		}).collect(Collectors.toSet());
-		skill.setTasks(Set.copyOf(taskRepository.saveAllAndFlush(tasks)));
+		List<Task> tasks = create.getNewItems().stream()
+				.sorted(Comparator.comparingInt(TaskCreateDTO::getIndex).reversed()).map(dto -> {
+					dto.setSkill(SkillIdDTO.builder().id(skill.getId()).build());
+					return dto.apply();
+				}).toList();
+		skill.setTasks(taskRepository.saveAll(tasks));
 
 		moduleService.configureModuleModel(person, skill.getSubmodule().getModule().getId(), model, session);
 		return "module/view";

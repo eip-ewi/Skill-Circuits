@@ -17,7 +17,9 @@
  */
 package nl.tudelft.skills.model;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.*;
@@ -82,7 +84,7 @@ public class Skill {
 	@EqualsAndHashCode.Exclude
 	@Cascade(CascadeType.DELETE)
 	@OneToMany(mappedBy = "skill")
-	private Set<Task> tasks = new HashSet<>();
+	private List<Task> tasks = new ArrayList<>();
 
 	@NotNull
 	@ToString.Exclude
