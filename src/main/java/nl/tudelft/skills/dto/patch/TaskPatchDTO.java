@@ -47,6 +47,8 @@ public class TaskPatchDTO extends Patch<Task> {
 	@NotNull
 	private TaskType type;
 	private String link;
+	@NotNull
+	private Integer index;
 
 	@Override
 	protected void applyOneToOne() {

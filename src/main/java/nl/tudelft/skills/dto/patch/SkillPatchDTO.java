@@ -72,14 +72,24 @@ public class SkillPatchDTO extends Patch<Skill> {
 	protected void applyOneToMany() {
 		Map<Long, Task> tasks = data.getTasks().stream()
 				.collect(Collectors.toMap(Task::getId, Function.identity()));
-		items.forEach(p -> p.apply(tasks.get(p.getId())));
+		List<Task> orderedTasks = new ArrayList<>(
+				items.stream().map(p -> p.apply(tasks.get(p.getId()))).toList());
+
+		Map<Long, Integer> order = items.stream()
+				.collect(Collectors.toMap(TaskPatchDTO::getId, TaskPatchDTO::getIndex));
 
 		TaskRepository taskRepository = SpringContext.getBean(TaskRepository.class);
-		data.getTasks().addAll(
-				newItems.stream().map(c -> taskRepository.save(c.apply())).collect(Collectors.toSet()));
+		orderedTasks.addAll(newItems.stream().map(c -> {
+			Task task = taskRepository.save(c.apply());
+			order.put(task.getId(), c.getIndex());
+			return task;
+		}).toList());
 
 		data.getTasks().stream().filter(t -> removedItems.contains(t.getId())).toList()
 				.forEach(t -> data.getTasks().remove(t));
+
+		orderedTasks.sort(Comparator.<Task>comparingInt(t -> order.get(t.getId())).reversed());
+		data.setTasks(orderedTasks);
 	}
 
 	@Override

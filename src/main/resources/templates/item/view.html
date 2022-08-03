@@ -26,6 +26,8 @@
         data-edit="always"
         class="item"
         th:id="|item-${item.id}|"
+        th:data-index="${iter.size - iter.count}"
+        th:data-index-initial="${iter.size - iter.count}"
         th:classappend="${level == 'module'} ? ${item.completed ? 'completed' : ''} : ${''}"
         layout:fragment="item">
         <input th:if="${canEdit}" name="id" type="hidden" th:value="${item.id}" />
@@ -56,6 +58,12 @@
         <div class="item__buttons" th:id="|item-${item.id}-buttons|" data-edit="only">
             <th:block layout:fragment="item-buttons">
                 <th:block th:if="${canEdit}">
+                    <button
+                        class="fa-solid fa-chevron-up item__up always_visible"
+                        data-edit="only"></button>
+                    <button
+                        class="fa-solid fa-chevron-down item__down always_visible"
+                        data-edit="only"></button>
                     <button
                         class="fa-solid fa-trash item__delete always_visible"
                         data-edit="only"></button>
