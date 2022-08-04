@@ -17,3 +17,24 @@
 #
 
 databaseChangeLog:
+  # Introduce ordering
+  - changeSet:
+      id: 1659611816234-1
+      author: ruben (generated)
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: index
+                  type: INTEGER
+            tableName: task
+  - changeSet:
+      id: 1659611816234-migrate-task-ordering
+      author: Ruben Backx
+      changes:
+        - sql:
+            comment: Keep current task ordering (by id)
+            sql: UPDATE task SET index = id;
+

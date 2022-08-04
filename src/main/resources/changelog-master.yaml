@@ -19,5 +19,5 @@
 databaseChangeLog:
   - include:
       file: "table-setup.yaml"
-#  - include:
-#      file: "migrations.yaml"
+  - include:
+      file: "migrations.yaml"
