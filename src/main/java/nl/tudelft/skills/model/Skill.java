@@ -17,10 +17,7 @@
  */
 package nl.tudelft.skills.model;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.Min;
@@ -82,6 +79,7 @@ public class Skill {
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
+	@OrderBy("index")
 	@Cascade(CascadeType.DELETE)
 	@OneToMany(mappedBy = "skill")
 	private List<Task> tasks = new ArrayList<>();
@@ -91,4 +89,11 @@ public class Skill {
 	@EqualsAndHashCode.Exclude
 	@ManyToOne
 	private Checkpoint checkpoint;
+
+	public void setTasks(List<Task> tasks) {
+		this.tasks = tasks;
+		for (int i = 0; i < tasks.size(); i++) {
+			tasks.get(i).setIndex(i);
+		}
+	}
 }

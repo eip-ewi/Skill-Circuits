@@ -60,6 +60,10 @@ public class Task {
 
 	@NotNull
 	@Builder.Default
+	private Integer index = 0;
+
+	@NotNull
+	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@ManyToMany(mappedBy = "tasks")
