@@ -27,7 +27,7 @@ databaseChangeLog:
               - column:
                   constraints:
                     nullable: false
-                  name: index
+                  name: idx
                   type: INTEGER
             tableName: task
   - changeSet:
@@ -36,5 +36,5 @@ databaseChangeLog:
       changes:
         - sql:
             comment: Keep current task ordering (by id)
-            sql: UPDATE task SET index = id;
+            sql: UPDATE task SET idx = id;
 

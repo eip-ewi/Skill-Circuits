@@ -79,7 +79,7 @@ public class Skill {
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@OrderBy("index")
+	@OrderBy("idx")
 	@Cascade(CascadeType.DELETE)
 	@OneToMany(mappedBy = "skill")
 	private List<Task> tasks = new ArrayList<>();
@@ -93,7 +93,7 @@ public class Skill {
 	public void setTasks(List<Task> tasks) {
 		this.tasks = tasks;
 		for (int i = 0; i < tasks.size(); i++) {
-			tasks.get(i).setIndex(i);
+			tasks.get(i).setIdx(i);
 		}
 	}
 }
