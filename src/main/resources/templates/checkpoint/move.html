@@ -27,17 +27,17 @@
 
         function recalculateCheckpointSkills() {
             $(".checkpoint:not(.ghost_checkpoint)").each(function () {
-                const newRow = $(this).css("grid-row");
+                const newRow = $(this).css("grid-row-start");
                 const prevCheckpointRow = Math.max(
                     ...$(".checkpoint:not(.ghost_checkpoint)")
-                        .filter((i, c) => $(c).css("grid-row") < newRow)
-                        .map((i, c) => $(c).css("grid-row"))
+                        .filter((i, c) => $(c).css("grid-row-start") < newRow)
+                        .map((i, c) => $(c).css("grid-row-start"))
                 );
                 const newSkills = $(".block")
                     .filter(
                         (i, b) =>
-                            prevCheckpointRow < $(b).css("grid-row") &&
-                            $(b).css("grid-row") <= newRow
+                            prevCheckpointRow < $(b).css("grid-row-start") &&
+                            $(b).css("grid-row-start") <= newRow
                     )
                     .map((i, b) => $(b).prop("id").substr(6));
                 const id = $(this).prop("id").substr(11);
@@ -55,6 +55,7 @@
                     processData: false,
                     contentType: "application/json",
                     success: () => {},
+                    error: () => alert("Oops something went wrong :("),
                 });
             });
         }
@@ -122,10 +123,10 @@
 
                     target.removeAttr("data-drag-over");
 
-                    const currentRow = checkpoint.css("grid-row");
-                    const newRow = target.css("grid-row");
-                    checkpoint.css("grid-row", newRow);
-                    target.css("grid-row", currentRow);
+                    const currentRow = checkpoint.css("grid-row-start");
+                    const newRow = target.css("grid-row-start");
+                    checkpoint.css("grid-row-start", newRow);
+                    target.css("grid-row-start", currentRow);
 
                     recalculateCheckpointSkills();
                 }
