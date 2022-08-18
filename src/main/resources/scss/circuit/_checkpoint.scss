@@ -7,6 +7,10 @@
     border-top: 1px dashed var(--primary-dark);
     pointer-events: none;
 
+    &[draggable="true"] {
+        cursor: grab;
+    }
+
     &__body {
         display: flex;
         align-items: center;
@@ -74,5 +78,21 @@
     .checkpoint__buttons,
     .checkpoint__create {
         display: none;
+    }
+}
+
+.circuit[data-moving="checkpoint"] > .ghost_checkpoint {
+    background-color: var(--grey-700);
+    opacity: 100;
+    pointer-events: initial;
+    &:not([data-drag-over]) {
+        border: none;
+    }
+    & .checkpoint__body {
+        opacity: 0;
+        pointer-events: none;
+    }
+    & .checkpoint__create {
+        pointer-events: none;
     }
 }
