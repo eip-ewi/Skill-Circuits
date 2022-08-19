@@ -62,11 +62,15 @@ public class SkillPatchDTO extends Patch<Skill> {
 	@NotNull
 	@Builder.Default
 	private Set<Long> removedItems = new HashSet<>();
+	@NotNull
+	@Builder.Default
+	private List<Long> requiredTaskIds = new ArrayList<>();
 
 	@Override
 	protected void applyOneToOne() {
 		updateNonNull(name, data::setName);
 		updateNonNull(essential, data::setEssential);
+		updateNonNull(hidden, data::setHidden);
 		updateNonNullId(submodule, data::setSubmodule);
 	}
 
@@ -92,6 +96,20 @@ public class SkillPatchDTO extends Patch<Skill> {
 
 		orderedTasks.sort(Comparator.<Task>comparingInt(t -> order.get(t.getId())).reversed());
 		data.setTasks(orderedTasks);
+	}
+
+	@Override
+	protected void applyManyToManyMappedBy() {
+		if (hidden) {
+			Set<Task> requiredTasks = new HashSet<>(
+					SpringContext.getBean(TaskRepository.class).findAllByIdIn(requiredTaskIds));
+			updateManyToManyMappedBy(data, data.getRequiredTasks(), requiredTasks, Task::getRequiredFor);
+			data.setRequiredTasks(requiredTasks);
+		} else {
+			updateManyToManyMappedByIds(data, data.getRequiredTasks(), Collections.emptyList(),
+					Task::getRequiredFor);
+			data.setRequiredTasks(Collections.emptySet());
+		}
 	}
 
 	@Override

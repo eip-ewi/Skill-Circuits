@@ -94,3 +94,30 @@
     background-color: var(--primary-light);
     border: 1px solid var(--primary-dark);
 }
+
+.button {
+    background-color: var(--primary-light);
+    border: 1px solid var(--primary-dark);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.25rem 0.5rem;
+    &:hover,
+    &:focus-visible {
+        background-color: var(--primary-green);
+        color: var(--primary-light);
+    }
+}
+
+.action_dialog {
+    background-color: var(--primary-light);
+    border: 1px solid var(--primary-dark);
+    bottom: 2rem;
+    left: 2rem;
+    padding: 1rem;
+    position: fixed;
+    z-index: 200;
+}
+
+input[type="checkbox"] {
+    accent-color: var(--primary-green);
+}

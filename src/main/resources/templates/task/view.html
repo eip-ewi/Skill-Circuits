@@ -37,8 +37,17 @@
                 </th:block>
             </th:block>
             <th:block layout:fragment="item-decoration">
+                <input
+                    th:if="${canEdit}"
+                    aria-label="Selected"
+                    name="selected"
+                    class="hidden"
+                    type="checkbox"
+                    th:value="${item.id}" />
                 <button
                     class="item__button"
+                    th:data-staff="${canEdit}"
+                    th:disabled="${canEdit}"
                     th:onclick="|toggleCompleted(${item.id})|"
                     th:text="${item.time}"></button>
                 <input

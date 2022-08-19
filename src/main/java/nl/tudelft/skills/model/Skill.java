@@ -55,6 +55,13 @@ public class Skill {
 	@Builder.Default
 	private boolean hidden = false;
 
+	@NotNull
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@ManyToMany(mappedBy = "requiredFor")
+	private Set<Task> requiredTasks = new HashSet<>();
+
 	@Min(0)
 	@NotNull
 	@Column(name = "yPos")

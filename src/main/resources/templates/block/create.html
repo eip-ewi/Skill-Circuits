@@ -34,23 +34,28 @@
             form.css("gridRow", (row + 1).toString());
 
             if (blockType === "skill") {
-                const checkpoint = getFirstCheckpointAfter(row);
+                let checkpoint = getFirstCheckpointAfter(row);
                 const checkPointSelect = $("#create-skill-checkpoint");
-                const showCheckpointSelect = checkpoint === undefined;
-
-                checkPointSelect.attr("hidden", !showCheckpointSelect);
-                if (!showCheckpointSelect) {
-                    checkPointSelect.val(checkpoint.prop("id").split("-")[1]);
+                if (!checkpoint) {
+                    checkpoint = $(
+                        [...$(".checkpoint:not(.ghost_checkpoint)")].sort(
+                            (a, b) => $(b).css("grid-row-start") - $(a).css("grid-row-start")
+                        )[0]
+                    );
                 }
+                checkPointSelect.val(checkpoint.prop("id").substr(11));
             }
             $(this).replaceWith(form);
+            form.attr("draggable", false);
         }
 
         function cancelCreateBlock(block) {
             block.find(".item").remove();
             block.find("select > option").prop("selected", false);
             block.find("input:not(:where([type='hidden'], [type='checkbox']))").val("");
-            block.find("input[type='checkbox']").prop("checked", true);
+            block.find("input[type='checkbox'][name='essential']").prop("checked", true);
+            block.find("input[type='checkbox'][name='hidden']").prop("checked", false);
+            block.find("button[name='select-tasks']").addClass("hidden");
 
             const row = parseInt(block.css("gridRowStart"));
             const col = parseInt(block.css("gridColumnStart"));

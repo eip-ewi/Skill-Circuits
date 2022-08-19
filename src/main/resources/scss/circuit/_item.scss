@@ -18,16 +18,24 @@
     }
 
     &__button {
-        @include button(
-            var(--primary-dark),
-            var(--primary-light),
-            var(--primary-light),
-            var(--primary-light),
-            var(--primary-green),
-            var(--primary-green)
-        );
         align-self: stretch;
         min-width: 2.5rem;
+
+        &[data-staff="true"] {
+            background-color: var(--primary-dark);
+            border: 1px solid var(--primary-light);
+            color: var(--primary-light);
+        }
+        &[data-staff="false"] {
+            @include button(
+                var(--primary-dark),
+                var(--primary-light),
+                var(--primary-light),
+                var(--primary-light),
+                var(--primary-green),
+                var(--primary-green)
+            );
+        }
 
         &__edit {
             background-color: var(--primary-dark);

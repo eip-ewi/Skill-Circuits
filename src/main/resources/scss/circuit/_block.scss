@@ -184,3 +184,10 @@
 .circuit.editing > .ghost_block {
     background-color: var(--grey-700);
 }
+.circuit[data-task-select="true"] {
+    .block__buttons,
+    .block__connect,
+    .ghost_block {
+        display: none;
+    }
+}

@@ -17,12 +17,15 @@
  */
 package nl.tudelft.skills.controller;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.transaction.Transactional;
 
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
+import nl.tudelft.skills.dto.view.TaskCompletedDTO;
+import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.TaskRepository;
@@ -51,16 +54,21 @@ public class PersonController {
 	 */
 	@PutMapping("completion/{taskId}")
 	@Transactional
-	public void updateTaskCompletedForPerson(@AuthenticatedPerson Person authPerson,
-			@PathVariable Long taskId,
-			@RequestBody boolean completed) {
+	@ResponseBody
+	public TaskCompletedDTO updateTaskCompletedForPerson(@AuthenticatedPerson Person authPerson,
+			@PathVariable Long taskId, @RequestBody boolean completed) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
 		Task task = taskRepository.findByIdOrThrow(taskId);
 		if (completed) {
 			person.getTasksCompleted().add(task);
+			// TODO skill remains visible
+			return new TaskCompletedDTO(task.getRequiredFor().stream()
+					.filter(s -> person.getTasksCompleted().containsAll(s.getRequiredTasks()))
+					.map(Skill::getId).toList());
 		} else {
 			person.getTasksCompleted().remove(task);
 		}
+		return new TaskCompletedDTO(Collections.emptyList());
 	}
 
 	/**
