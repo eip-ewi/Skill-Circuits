@@ -21,6 +21,9 @@
         --border-colour: var(--primary-green);
         border: 2px solid var(--border-colour);
     }
+    &[data-hidden="true"] {
+        border-style: dashed;
+    }
 
     &__info {
         background-color: var(--primary-light);

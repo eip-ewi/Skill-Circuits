@@ -55,7 +55,9 @@
             block.find("input:not(:where([type='hidden'], [type='checkbox']))").val("");
             block.find("input[type='checkbox'][name='essential']").prop("checked", true);
             block.find("input[type='checkbox'][name='hidden']").prop("checked", false);
-            block.find("button[name='select-tasks']").addClass("hidden");
+            block.find("button[name='select-tasks']").addClass("hidden").text("Select tasks");
+            block.find("input[name='requiredTaskIDs']").val("");
+            $("input[name='selected']").prop("checked", false);
 
             const row = parseInt(block.css("gridRowStart"));
             const col = parseInt(block.css("gridColumnStart"));
@@ -91,6 +93,13 @@
                     block.find("select > option").prop("selected", false);
                     block.find("input:not(:where([type='hidden'], [type='checkbox']))").val("");
                     block.find("input[type='checkbox']").prop("checked", true);
+                    block.find("input[type='checkbox'][name='hidden']").prop("checked", false);
+                    block
+                        .find("button[name='select-tasks']")
+                        .addClass("hidden")
+                        .text("Select tasks");
+                    block.find("input[name='requiredTaskIDs']").val("");
+                    $("input[name='selected']").prop("checked", false);
 
                     $("#create-block-wrapper").append(block);
                     $("#circuit").replaceWith($(html).find("#circuit"));

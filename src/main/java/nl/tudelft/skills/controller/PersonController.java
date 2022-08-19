@@ -61,7 +61,7 @@ public class PersonController {
 		Task task = taskRepository.findByIdOrThrow(taskId);
 		if (completed) {
 			person.getTasksCompleted().add(task);
-			// TODO skill remains visible
+			// TODO skill remains visible (see issue #90)
 			return new TaskCompletedDTO(task.getRequiredFor().stream()
 					.filter(s -> person.getTasksCompleted().containsAll(s.getRequiredTasks()))
 					.map(Skill::getId).toList());

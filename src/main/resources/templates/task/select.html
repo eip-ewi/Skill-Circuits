@@ -27,9 +27,8 @@
         class="hidden action_dialog"
         th:if="${canEdit}"
         id="select-task-dialog">
-        <span>Selecting tasks (</span>
-        <span id="select-task-amount">0</span>
-        <span>selected)</span>
+        <!-- prettier-ignore -->
+        <th:block><span>Selecting tasks (</span><span id="select-task-amount">0</span><span> selected)</span></th:block>
         <button id="select-task-cancel" class="button" type="button">Cancel</button>
         <button id="select-task-select" class="button" type="button">Select</button>
     </div>

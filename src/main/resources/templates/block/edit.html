@@ -162,15 +162,17 @@
             );
             block
                 .find("input[type='checkbox']")
-                .each((i, c) => $(c).prop("checked", $(c).data("initial")));
-            block.find("[name='requiredTaskIds']").each((i, r) => {
-                const ts = JSON.parse(`[${$(r).data("initial")}]`);
-                $(r).val(ts);
-                if (ts.length >= 1) {
-                    let number = ts.length ? "task" : "tasks";
-                    $(r).siblings("[name='select-tasks']").text(`${ts.length} ${number} selected`);
+                .each((i, checkbox) => $(checkbox).prop("checked", $(checkbox).data("initial")));
+            block.find("[name='requiredTaskIds']").each((i, requiredTasks) => {
+                const initialTasks = JSON.parse(`[${$(requiredTasks).data("initial")}]`);
+                $(requiredTasks).val(initialTasks);
+                if (initialTasks.length >= 1) {
+                    let number = initialTasks.length ? "task" : "tasks";
+                    $(requiredTasks)
+                        .siblings("[name='select-tasks']")
+                        .text(`${initialTasks.length} ${number} selected`);
                 } else {
-                    $(r).siblings("[name='select-tasks']").text("Select tasks");
+                    $(requiredTasks).siblings("[name='select-tasks']").text("Select tasks");
                 }
             });
 

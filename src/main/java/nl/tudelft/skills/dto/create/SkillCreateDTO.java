@@ -71,7 +71,6 @@ public class SkillCreateDTO extends Create<Skill> {
 		if (hidden) {
 			TaskRepository taskRepository = SpringContext.getBean(TaskRepository.class);
 			List<Task> requiredTasks = taskRepository.findAllByIdIn(requiredTaskIds);
-			data.getRequiredTasks().forEach(t -> t.getRequiredFor().remove(data));
 			requiredTasks.forEach(t -> t.getRequiredFor().add(data));
 			data.setRequiredTasks(new HashSet<>(requiredTasks));
 		}
