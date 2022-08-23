@@ -18,8 +18,7 @@
 package nl.tudelft.skills.controller;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
@@ -29,10 +28,14 @@ import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
+import nl.tudelft.librador.SpringContext;
 import nl.tudelft.skills.model.SCEdition;
-import nl.tudelft.skills.model.SCModule;
+import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.ModuleRepository;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.service.CourseService;
+import nl.tudelft.skills.service.EditionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -47,14 +50,17 @@ public class HomeController {
 
 	private final EditionRepository editionRepository;
 	private final ModuleRepository moduleRepository;
+	private final PersonRepository personRepository;
 
 	@Autowired
 	public HomeController(EditionControllerApi editionApi, RoleControllerApi roleApi,
-			EditionRepository editionRepository, ModuleRepository moduleRepository) {
+			EditionRepository editionRepository, ModuleRepository moduleRepository,
+			PersonRepository personRepository) {
 		this.editionApi = editionApi;
 		this.roleApi = roleApi;
 		this.editionRepository = editionRepository;
 		this.moduleRepository = moduleRepository;
+		this.personRepository = personRepository;
 	}
 
 	/**
@@ -87,14 +93,43 @@ public class HomeController {
 				.filter(e -> visible.contains(e.getId()) || teacherIds.contains(e.getId()))
 				.map(EditionDetailsDTO::getCourse).distinct().toList();
 
+		// Gets number of completed skills for each course
+		EditionService editionService = SpringContext.getBean(EditionService.class);
+		Map<Long, Integer> courseCompletedSkills = new HashMap<>();
+		boolean anyCompletedSkills = false;
+		if (person != null) {
+			SCPerson scperson = personRepository.findByIdOrThrow(person.getId());
+
+			for (var course : courses) {
+				Long courseId = course.getId();
+				CourseService courseService = SpringContext.getBean(CourseService.class);
+
+				int skillsDone = 0;
+				Long editionId = courseService.getLastStudentEditionForCourseOrLast(courseId);
+				if (editionId != null) {
+					SCEdition edition = editionService.getOrCreateSCEdition(editionId);
+					for (var module : edition.getModules()) {
+						for (var submodule : module.getSubmodules()) {
+							for (var skill : submodule.getSkills()) {
+								boolean skillDone = true;
+								for (var task : skill.getTasks()) {
+									if (!scperson.getTasksCompleted().contains(task)) {
+										skillDone = false;
+									}
+								}
+								skillsDone += skillDone ? 1 : 0;
+								anyCompletedSkills = anyCompletedSkills || skillDone;
+							}
+						}
+					}
+				}
+				courseCompletedSkills.put(courseId, skillsDone);
+			}
+		}
+
 		model.addAttribute("courses", courses);
-
-		// Temporarily put all modules on the home page
-		List<SCModule> allModules = moduleRepository.findAll();
-		model.addAttribute("moduleIds", allModules.stream().map(SCModule::getId).toList());
-		model.addAttribute("moduleNames",
-				allModules.stream().collect(Collectors.toMap(SCModule::getId, SCModule::getName)));
-
+		model.addAttribute("courseCompletedSkills", courseCompletedSkills);
+		model.addAttribute("anyCompletedSkills", anyCompletedSkills);
 		return "index";
 	}
 

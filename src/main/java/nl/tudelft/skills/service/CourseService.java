@@ -20,6 +20,7 @@ package nl.tudelft.skills.service;
 import java.util.Comparator;
 
 import nl.tudelft.labracore.api.CourseControllerApi;
+import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
 import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
 import nl.tudelft.librador.dto.view.View;
@@ -39,14 +40,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class CourseService {
 
 	private CourseControllerApi courseApi;
+	private EditionControllerApi editionApi;
 	private CourseRepository courseRepository;
 	private EditionRepository editionRepository;
 	private AuthorisationService authorisationService;
 
 	@Autowired
-	public CourseService(CourseControllerApi courseApi, CourseRepository courseRepository,
+	public CourseService(CourseControllerApi courseApi, EditionControllerApi editionApi,
+			CourseRepository courseRepository,
 			EditionRepository editionRepository, AuthorisationService authorisationService) {
 		this.courseApi = courseApi;
+		this.editionApi = editionApi;
 		this.courseRepository = courseRepository;
 		this.authorisationService = authorisationService;
 		this.editionRepository = editionRepository;
@@ -132,5 +136,15 @@ public class CourseService {
 	public SCCourse getOrCreateSCCourse(Long id) {
 		return courseRepository.findById(id)
 				.orElseGet(() -> courseRepository.save(SCCourse.builder().id(id).build()));
+	}
+
+	/**
+	 * Returns the number of editions in a course.
+	 *
+	 * @param  id Course id
+	 * @return    The number of editions in a course.
+	 */
+	public Long getNumberOfEditions(Long id) {
+		return editionApi.getAllEditionsByCourse(id).count().block();
 	}
 }

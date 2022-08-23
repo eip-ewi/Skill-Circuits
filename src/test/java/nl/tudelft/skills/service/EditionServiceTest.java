@@ -76,4 +76,11 @@ public class EditionServiceTest {
 
 		assertThat(editionRepository.findById(editionId)).isPresent().contains(edition);
 	}
+
+	@Test
+	public void getNumberOfSkillsInEdition() {
+		Long editionId = 1L;
+
+		assertThat(editionService.getNumberOfSkillsInEdition(editionId) == 0);
+	}
 }

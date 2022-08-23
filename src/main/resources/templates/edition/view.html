@@ -53,7 +53,7 @@
                         </button>
                     </form>
                     <button
-                        th:unless="${studentMode}"
+                        th:if="${@authorisationService.isAtLeastTeacherInEdition(edition.id)} and not ${studentMode}"
                         id="open-edition-setup-sidebar"
                         class="circuit__button"
                         title="setup">

@@ -107,4 +107,22 @@ public class EditionService {
 				.orElseGet(() -> editionRepository.save(SCEdition.builder().id(id).build()));
 	}
 
+	/**
+	 * Returns the number of skills in the edition.
+	 *
+	 * @param  id Edition id
+	 * @return    The number of skills that the edition contains.
+	 */
+	public Integer getNumberOfSkillsInEdition(Long id) {
+		SCEdition edition = getOrCreateSCEdition(id);
+
+		int skillCount = 0;
+		for (var module : edition.getModules()) {
+			for (var submodule : module.getSubmodules()) {
+				skillCount += submodule.getSkills().size();
+			}
+		}
+		return skillCount;
+	}
+
 }

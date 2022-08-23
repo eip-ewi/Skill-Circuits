@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
+import java.util.*;
 
 import javax.transaction.Transactional;
 
@@ -34,6 +34,8 @@ import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.ModuleRepository;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.service.EditionService;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,14 +53,18 @@ public class HomeControllerTest extends ControllerTest {
 	private final EditionControllerApi editionApi;
 	private final RoleControllerApi roleApi;
 	private final EditionRepository editionRepository;
+	private final PersonRepository personRepository;
 
 	@Autowired
 	public HomeControllerTest(EditionControllerApi editionApi, RoleControllerApi roleApi,
-			EditionRepository editionRepository, ModuleRepository moduleRepository) {
+			EditionRepository editionRepository, ModuleRepository moduleRepository,
+			PersonRepository personRepository, EditionService editionService) {
 		this.editionApi = editionApi;
 		this.roleApi = roleApi;
 		this.editionRepository = editionRepository;
-		this.homeController = new HomeController(editionApi, roleApi, editionRepository, moduleRepository);
+		this.personRepository = personRepository;
+		this.homeController = new HomeController(editionApi, roleApi, editionRepository, moduleRepository,
+				personRepository);
 	}
 
 	@Test
@@ -84,4 +90,5 @@ public class HomeControllerTest extends ControllerTest {
 
 		assertThat((List<CourseSummaryDTO>) model.getAttribute("courses")).containsExactly(course);
 	}
+
 }

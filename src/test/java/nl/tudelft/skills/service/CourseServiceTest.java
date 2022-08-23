@@ -27,7 +27,9 @@ import java.util.Collections;
 import java.util.List;
 
 import nl.tudelft.labracore.api.CourseControllerApi;
+import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
+import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.course.CourseLevelCourseViewDTO;
@@ -43,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Transactional
@@ -50,6 +53,7 @@ import reactor.core.publisher.Mono;
 public class CourseServiceTest {
 
 	private CourseControllerApi courseApi;
+	private EditionControllerApi editionApi;
 
 	private TestDatabaseLoader db;
 
@@ -61,13 +65,14 @@ public class CourseServiceTest {
 
 	@Autowired
 	public CourseServiceTest(CourseRepository courseRepository, EditionRepository editionRepository,
-			CourseControllerApi courseApi, TestDatabaseLoader db) {
+			CourseControllerApi courseApi, EditionControllerApi editionApi, TestDatabaseLoader db) {
 		this.courseApi = courseApi;
+		this.editionApi = editionApi;
 		this.courseRepository = courseRepository;
 		this.editionRepository = editionRepository;
 		this.db = db;
 		authorisationService = mock(AuthorisationService.class);
-		courseService = new CourseService(courseApi, courseRepository, editionRepository,
+		courseService = new CourseService(courseApi, editionApi, courseRepository, editionRepository,
 				authorisationService);
 	}
 
@@ -163,5 +168,13 @@ public class CourseServiceTest {
 		SCCourse course = courseService.getOrCreateSCCourse(courseId);
 
 		assertThat(courseRepository.findById(courseId)).isPresent().contains(course);
+	}
+
+	@Test
+	public void getNumberOfEditions() {
+		Long courseId = 0L;
+		when(editionApi.getAllEditionsByCourse(anyLong()))
+				.thenReturn(Flux.just(new EditionDetailsDTO().id(1L)));
+		assertThat(courseService.getNumberOfEditions(courseId) == 1);
 	}
 }
