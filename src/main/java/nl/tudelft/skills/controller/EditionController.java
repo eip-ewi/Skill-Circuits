@@ -17,9 +17,14 @@
  */
 package nl.tudelft.skills.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
+import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.dto.view.SCModuleSummaryDTO;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.security.AuthorisationService;
@@ -116,6 +121,19 @@ public class EditionController {
 		session.setAttribute("student-mode-" + id,
 				currentStudentMode == null || !currentStudentMode);
 		return "redirect:/edition/{id}";
+	}
+
+	/**
+	 * Gets the modules of an edition.
+	 *
+	 * @param  id The id of the edition
+	 * @return    The list of modules
+	 */
+	@GetMapping("{id}/modules")
+	@PreAuthorize("@authorisationService.isStaff()")
+	public @ResponseBody List<SCModuleSummaryDTO> getModulesOfEdition(@PathVariable Long id) {
+		return View.convert(new ArrayList<>(editionRepository.findByIdOrThrow(id).getModules()),
+				SCModuleSummaryDTO.class);
 	}
 
 }

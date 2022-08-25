@@ -17,8 +17,9 @@
  */
 package nl.tudelft.skills.service;
 
+import nl.tudelft.skills.model.AbstractSkill;
 import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.repository.SkillRepository;
+import nl.tudelft.skills.repository.AbstractSkillRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,11 +28,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SkillService {
 
-	private final SkillRepository skillRepository;
+	private final AbstractSkillRepository abstractSkillRepository;
 
 	@Autowired
-	public SkillService(SkillRepository skillRepository) {
-		this.skillRepository = skillRepository;
+	public SkillService(AbstractSkillRepository abstractSkillRepository) {
+		this.abstractSkillRepository = abstractSkillRepository;
 	}
 
 	/**
@@ -41,11 +42,13 @@ public class SkillService {
 	 * @return    The deleted skill
 	 */
 	@Transactional
-	public Skill deleteSkill(Long id) {
-		Skill skill = skillRepository.findByIdOrThrow(id);
-		skill.getChildren().forEach(c -> c.getParents().remove(skill));
-		skill.getTasks().forEach(t -> t.getPersons().forEach(p -> p.getTasksCompleted().remove(t)));
-		skillRepository.delete(skill);
+	public AbstractSkill deleteSkill(Long id) {
+		AbstractSkill skill = abstractSkillRepository.findByIdOrThrow(id);
+		if (skill instanceof Skill s) {
+			s.getChildren().forEach(c -> c.getParents().remove(skill));
+			s.getTasks().forEach(t -> t.getPersons().forEach(p -> p.getTasksCompleted().remove(t)));
+		}
+		abstractSkillRepository.delete(skill);
 		return skill;
 	}
 

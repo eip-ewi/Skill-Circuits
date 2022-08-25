@@ -26,6 +26,7 @@ import javax.validation.Valid;
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.dto.create.ExternalSkillCreateDTO;
 import nl.tudelft.skills.dto.create.SkillCreateDTO;
 import nl.tudelft.skills.dto.create.TaskCreateDTO;
 import nl.tudelft.skills.dto.id.SkillIdDTO;
@@ -34,11 +35,8 @@ import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSubmoduleViewDTO;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.repository.SkillRepository;
-import nl.tudelft.skills.repository.SubmoduleRepository;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.model.*;
+import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.service.ModuleService;
 import nl.tudelft.skills.service.SkillService;
 
@@ -55,6 +53,8 @@ import org.springframework.web.bind.annotation.*;
 public class SkillController {
 
 	private final SkillRepository skillRepository;
+	private final ExternalSkillRepository externalSkillRepository;
+	private final AbstractSkillRepository abstractSkillRepository;
 	private final TaskRepository taskRepository;
 	private final SubmoduleRepository submoduleRepository;
 	private final SkillService skillService;
@@ -62,10 +62,13 @@ public class SkillController {
 	private final HttpSession session;
 
 	@Autowired
-	public SkillController(SkillRepository skillRepository, TaskRepository taskRepository,
-			SubmoduleRepository submoduleRepository,
-			SkillService skillService, ModuleService moduleService, HttpSession session) {
+	public SkillController(SkillRepository skillRepository, ExternalSkillRepository externalSkillRepository,
+			AbstractSkillRepository abstractSkillRepository, TaskRepository taskRepository,
+			SubmoduleRepository submoduleRepository, SkillService skillService, ModuleService moduleService,
+			HttpSession session) {
 		this.skillRepository = skillRepository;
+		this.externalSkillRepository = externalSkillRepository;
+		this.abstractSkillRepository = abstractSkillRepository;
 		this.taskRepository = taskRepository;
 		this.submoduleRepository = submoduleRepository;
 		this.skillService = skillService;
@@ -100,7 +103,7 @@ public class SkillController {
 	 * Creates a skill.
 	 *
 	 * @param  create The DTO with information to create the skill
-	 * @return        A new skill html element
+	 * @return        A new circuit html element
 	 */
 	@PostMapping
 	@Transactional
@@ -120,6 +123,23 @@ public class SkillController {
 	}
 
 	/**
+	 * Creates an external skill.
+	 *
+	 * @param  create The DTO with information to create the skill
+	 * @return        A new circuit html element
+	 */
+	@Transactional
+	@PostMapping("external")
+	@PreAuthorize("@authorisationService.canCreateSkillInModule(#create.module.id)")
+	public String createSkill(@AuthenticatedPerson Person person, @RequestBody ExternalSkillCreateDTO create,
+			Model model) {
+		ExternalSkill skill = externalSkillRepository.saveAndFlush(create.apply());
+
+		moduleService.configureModuleModel(person, skill.getModule().getId(), model, session);
+		return "module/view";
+	}
+
+	/**
 	 * Deletes a skill.
 	 *
 	 * @param  id The id of the skill to delete
@@ -129,9 +149,10 @@ public class SkillController {
 	@Transactional
 	@PreAuthorize("@authorisationService.canDeleteSkill(#id)")
 	public String deleteSkill(@RequestParam Long id, @RequestParam String page) {
-		Skill skill = skillService.deleteSkill(id);
-		return page.equals("block") ? "redirect:/module/" + skill.getSubmodule().getModule().getId()
-				: "redirect:/edition/" + skill.getSubmodule().getModule().getEdition().getId();
+		AbstractSkill skill = skillService.deleteSkill(id);
+		SCModule module = skill instanceof ExternalSkill s ? s.getModule() : skill.getSubmodule().getModule();
+		return page.equals("block") ? "redirect:/module/" + module.getId()
+				: "redirect:/edition/" + module.getEdition().getId();
 	}
 
 	/**
@@ -191,8 +212,8 @@ public class SkillController {
 	@PreAuthorize("@authorisationService.canEditSkill(#id)")
 	public ResponseEntity<Void> updateSkillPosition(@PathVariable Long id,
 			@RequestBody SkillPositionPatchDTO patch) {
-		Skill skill = skillRepository.findByIdOrThrow(id);
-		skillRepository.save(patch.apply(skill));
+		AbstractSkill skill = abstractSkillRepository.findByIdOrThrow(id);
+		abstractSkillRepository.save(patch.apply(skill));
 		return ResponseEntity.ok().build();
 	}
 
@@ -207,12 +228,12 @@ public class SkillController {
 	@PostMapping("connect/{parentId}/{childId}")
 	@PreAuthorize("@authorisationService.canEditSkill(#parentId) or @authorisationService.canEditSkill(#childId)")
 	public ResponseEntity<Void> connectSkill(@PathVariable Long parentId, @PathVariable Long childId) {
-		Skill parent = skillRepository.findByIdOrThrow(parentId);
-		Skill child = skillRepository.findByIdOrThrow(childId);
+		AbstractSkill parent = abstractSkillRepository.findByIdOrThrow(parentId);
+		AbstractSkill child = abstractSkillRepository.findByIdOrThrow(childId);
 		parent.getChildren().add(child);
 		child.getParents().add(parent);
-		skillRepository.save(parent);
-		skillRepository.save(child);
+		abstractSkillRepository.save(parent);
+		abstractSkillRepository.save(child);
 		return ResponseEntity.ok().build();
 	}
 
@@ -227,12 +248,12 @@ public class SkillController {
 	@PostMapping("disconnect/{parentId}/{childId}")
 	@PreAuthorize("@authorisationService.canEditSkill(#parentId) or @authorisationService.canEditSkill(#childId)")
 	public ResponseEntity<Void> disconnectSkill(@PathVariable Long parentId, @PathVariable Long childId) {
-		Skill parent = skillRepository.findByIdOrThrow(parentId);
-		Skill child = skillRepository.findByIdOrThrow(childId);
+		AbstractSkill parent = abstractSkillRepository.findByIdOrThrow(parentId);
+		AbstractSkill child = abstractSkillRepository.findByIdOrThrow(childId);
 		parent.getChildren().remove(child);
 		child.getParents().remove(parent);
-		skillRepository.save(parent);
-		skillRepository.save(child);
+		abstractSkillRepository.save(parent);
+		abstractSkillRepository.save(child);
 		return ResponseEntity.ok().build();
 	}
 

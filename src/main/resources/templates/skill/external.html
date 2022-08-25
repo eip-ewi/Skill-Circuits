@@ -1,0 +1,68 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div
+        th:id="|block-${block.id}|"
+        class="block"
+        th:style="|grid-row: ${block.row + 1}; grid-column: ${block.column + 1}|"
+        th:draggable="${canEdit}"
+        th:data-create="${create}"
+        th:with="
+     parentIds = ${block instanceof T(nl.tudelft.skills.dto.view.BlockView)} ? ${block.parentIds} : ${{}},
+     childIds = ${block instanceof T(nl.tudelft.skills.dto.view.BlockView)} ? ${block.childIds} : ${{}}"
+        th:data-parents="${parentIds}"
+        th:data-children="${childIds}"
+        data-external
+        layout:fragment="block">
+        <div th:id="|block-${block.id}-header|" class="block__header">
+            <a
+                th:id="|block-${block.id}-group|"
+                class="block__group__name"
+                th:href="@{|/module/${block.module.id}|}"
+                th:text="${block.module.name}"></a>
+            <h2 class="block__name">
+                <span th:id="|block-${block.id}-name|" th:text="${block.skill.name}"></span>
+            </h2>
+        </div>
+
+        <div class="block__buttons">
+            <button
+                data-edit="always"
+                class="fa-solid fa-trash block__delete"
+                th:if="${canDelete}"
+                th:data-block="${block.id}"></button>
+        </div>
+
+        <span class="block__info">External</span>
+
+        <th:block th:if="${canEdit}">
+            <div class="block__connect from" th:data-skill="${block.id}">
+                <button><span class="fa-solid fa-link"></span></button>
+            </div>
+            <div class="hidden block__connect to" th:data-skill="${block.id}">
+                <button><span class="fa-solid fa-link"></span></button>
+            </div>
+        </th:block>
+    </div>
+</html>

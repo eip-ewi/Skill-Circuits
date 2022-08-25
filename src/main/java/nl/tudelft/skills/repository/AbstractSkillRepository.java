@@ -15,40 +15,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.patch;
+package nl.tudelft.skills.repository;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import java.util.Collection;
+import java.util.Set;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import nl.tudelft.librador.dto.patch.Patch;
 import nl.tudelft.skills.model.AbstractSkill;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class SkillPositionPatchDTO extends Patch<AbstractSkill> {
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
-	@Min(0)
-	@NotNull
-	private Integer column;
-	@Min(0)
-	@NotNull
-	private Integer row;
+public interface AbstractSkillRepository extends JpaRepository<AbstractSkill, Long> {
 
-	@Override
-	protected void applyOneToOne() {
-		updateNonNull(column, data::setColumn);
-		updateNonNull(row, data::setRow);
+	default AbstractSkill findByIdOrThrow(Long id) {
+		return findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("AbstractSkill was not found: " + id));
 	}
 
-	@Override
-	protected void validate() {
-	}
+	Set<AbstractSkill> findAllByIdIn(Collection<Long> ids);
+
 }

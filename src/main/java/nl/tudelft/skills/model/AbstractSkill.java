@@ -21,46 +21,48 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
-
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
+import lombok.experimental.SuperBuilder;
 
 @Data
 @Entity
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SCModule {
+@Inheritance(strategy = InheritanceType.JOINED)
+public abstract class AbstractSkill {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
 
+	@Min(0)
 	@NotNull
-	@ManyToOne
-	private SCEdition edition;
+	@Column(name = "yPos")
+	private Integer row;
 
-	@NotBlank
-	private String name;
-
+	@Min(0)
 	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@Cascade(CascadeType.DELETE)
-	@OneToMany(mappedBy = "module")
-	private Set<Submodule> submodules = new HashSet<>();
+	@Column(name = "xPos")
+	private Integer column;
 
 	@NotNull
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@Cascade(CascadeType.DELETE)
-	@OneToMany(mappedBy = "module")
-	private Set<ExternalSkill> externalSkills = new HashSet<>();
+	@ManyToMany
+	private Set<AbstractSkill> parents = new HashSet<>();
+
+	@NotNull
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@ManyToMany(mappedBy = "parents")
+	private Set<AbstractSkill> children = new HashSet<>();
+
+	public abstract Submodule getSubmodule();
 
 }

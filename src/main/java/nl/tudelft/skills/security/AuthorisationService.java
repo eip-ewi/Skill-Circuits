@@ -29,6 +29,10 @@ import nl.tudelft.labracore.lib.security.LabradorUserDetails;
 import nl.tudelft.labracore.lib.security.user.DefaultRole;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.cache.RoleCacheManager;
+import nl.tudelft.skills.model.AbstractSkill;
+import nl.tudelft.skills.model.ExternalSkill;
+import nl.tudelft.skills.model.SCModule;
+import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +49,8 @@ public class AuthorisationService {
 	private ModuleRepository moduleRepository;
 	private SubmoduleRepository submoduleRepository;
 	private SkillRepository skillRepository;
+
+	private AbstractSkillRepository abstractSkillRepository;
 	private TaskRepository taskRepository;
 	private CheckpointRepository checkpointRepository;
 
@@ -54,6 +60,7 @@ public class AuthorisationService {
 	public AuthorisationService(RoleCacheManager roleCache, EditionRepository editionRepository,
 			ModuleRepository moduleRepository, SubmoduleRepository submoduleRepository,
 			SkillRepository skillRepository, TaskRepository taskRepository,
+			AbstractSkillRepository abstractSkillRepository,
 			CheckpointRepository checkpointRepository,
 			CourseControllerApi courseControllerApi) {
 		this.roleCache = roleCache;
@@ -61,6 +68,7 @@ public class AuthorisationService {
 		this.editionRepository = editionRepository;
 		this.moduleRepository = moduleRepository;
 		this.submoduleRepository = submoduleRepository;
+		this.abstractSkillRepository = abstractSkillRepository;
 		this.skillRepository = skillRepository;
 		this.taskRepository = taskRepository;
 		this.checkpointRepository = checkpointRepository;
@@ -94,12 +102,21 @@ public class AuthorisationService {
 	/**
 	 * Gets whether the authenticated user is an admin.
 	 *
-	 * @return The iff the authenticated user is an admin
+	 * @return True iff the authenticated user is an admin
 	 */
 	public boolean isAdmin() {
 		if (!isAuthenticated())
 			return false;
 		return getAuthPerson().getDefaultRole() == DefaultRole.ADMIN;
+	}
+
+	/**
+	 * Gets whether the authenticated user is staff.
+	 *
+	 * @return True iff the authenticated user is staff
+	 */
+	public boolean isStaff() {
+		return getAuthPerson().getDefaultRole() == DefaultRole.TEACHER;
 	}
 
 	/**
@@ -272,6 +289,17 @@ public class AuthorisationService {
 	}
 
 	/**
+	 * Gets whether the authenticated user can create a skill in a module.
+	 *
+	 * @param  moduleId The id of the module
+	 * @return          True iff the user can create skills in the module
+	 */
+	public boolean canCreateSkillInModule(Long moduleId) {
+		return canCreateSkillInEdition(
+				moduleRepository.findByIdOrThrow(moduleId).getEdition().getId());
+	}
+
+	/**
 	 * Gets whether the authenticated user can create a skill in a submodule.
 	 *
 	 * @param  submoduleId The id of the submodule
@@ -300,8 +328,12 @@ public class AuthorisationService {
 	 */
 	@Transactional
 	public boolean canEditSkill(Long skillId) {
-		return canEditSkillInEdition(
-				skillRepository.findByIdOrThrow(skillId).getSubmodule().getModule().getEdition().getId());
+		AbstractSkill skill = abstractSkillRepository.findByIdOrThrow(skillId);
+		if (skill instanceof Skill) {
+			return canEditSkillInEdition(((Skill) skill).getSubmodule().getModule().getEdition().getId());
+		} else {
+			return canEditCheckpointInEdition(((ExternalSkill) skill).getModule().getEdition().getId());
+		}
 	}
 
 	/**
@@ -321,8 +353,9 @@ public class AuthorisationService {
 	 * @return         True iff the user can delete the skill
 	 */
 	public boolean canDeleteSkill(Long skillId) {
-		return canDeleteSkillInEdition(
-				skillRepository.findByIdOrThrow(skillId).getSubmodule().getModule().getEdition().getId());
+		AbstractSkill skill = abstractSkillRepository.findByIdOrThrow(skillId);
+		SCModule module = skill instanceof ExternalSkill s ? s.getModule() : skill.getSubmodule().getModule();
+		return canDeleteSkillInEdition(module.getEdition().getId());
 	}
 
 	/**

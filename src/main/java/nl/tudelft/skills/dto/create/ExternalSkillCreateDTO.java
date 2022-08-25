@@ -15,52 +15,34 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.model;
+package nl.tudelft.skills.dto.create;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
-
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
+import nl.tudelft.labracore.api.dto.ModuleIdDTO;
+import nl.tudelft.librador.dto.create.Create;
+import nl.tudelft.skills.dto.id.SkillIdDTO;
+import nl.tudelft.skills.model.ExternalSkill;
 
 @Data
-@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SCModule {
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private Long id;
+@EqualsAndHashCode(callSuper = false)
+public class ExternalSkillCreateDTO extends Create<ExternalSkill> {
 
 	@NotNull
-	@ManyToOne
-	private SCEdition edition;
-
-	@NotBlank
-	private String name;
-
+	private ModuleIdDTO module;
 	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@Cascade(CascadeType.DELETE)
-	@OneToMany(mappedBy = "module")
-	private Set<Submodule> submodules = new HashSet<>();
-
+	private SkillIdDTO skill;
 	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@Cascade(CascadeType.DELETE)
-	@OneToMany(mappedBy = "module")
-	private Set<ExternalSkill> externalSkills = new HashSet<>();
+	private Integer row;
+	@NotNull
+	private Integer column;
 
+	@Override
+	public Class<ExternalSkill> clazz() {
+		return ExternalSkill.class;
+	}
 }

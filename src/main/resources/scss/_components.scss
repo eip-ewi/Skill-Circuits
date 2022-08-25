@@ -146,11 +146,21 @@ input[type="checkbox"] {
         font-size: 1rem;
         min-width: 12rem;
         padding: 0.5rem 1rem;
+
         &:hover,
         &:focus-visible,
         &[data-active="true"] {
             background-color: var(--primary-green);
             color: var(--primary-light);
         }
+    }
+}
+
+.grid {
+    --grid-gap: 0.5rem;
+    display: grid;
+    gap: var(--grid-gap);
+    &.two-col {
+        grid-template-columns: 1fr 1fr;
     }
 }

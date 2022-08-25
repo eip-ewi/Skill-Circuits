@@ -20,32 +20,28 @@ package nl.tudelft.skills.model;
 import java.util.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 
 @Data
 @Entity
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Skill {
+public class Skill extends AbstractSkill {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private Long id;
+	@NotBlank
+	private String name;
 
 	@NotNull
 	@ManyToOne
 	private Submodule submodule;
-
-	@NotBlank
-	private String name;
 
 	@NotNull
 	@Builder.Default
@@ -62,30 +58,6 @@ public class Skill {
 	@ManyToMany(mappedBy = "requiredFor")
 	private Set<Task> requiredTasks = new HashSet<>();
 
-	@Min(0)
-	@NotNull
-	@Column(name = "yPos")
-	private Integer row;
-
-	@Min(0)
-	@NotNull
-	@Column(name = "xPos")
-	private Integer column;
-
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany
-	private Set<Skill> parents = new HashSet<>();
-
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany(mappedBy = "parents")
-	private Set<Skill> children = new HashSet<>();
-
 	@NotNull
 	@Builder.Default
 	@ToString.Exclude
@@ -100,6 +72,14 @@ public class Skill {
 	@EqualsAndHashCode.Exclude
 	@ManyToOne
 	private Checkpoint checkpoint;
+
+	@NotNull
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@Cascade(CascadeType.DELETE)
+	@OneToMany(mappedBy = "skill")
+	private Set<ExternalSkill> externalSkills = new HashSet<>();
 
 	public void setTasks(List<Task> tasks) {
 		this.tasks = tasks;

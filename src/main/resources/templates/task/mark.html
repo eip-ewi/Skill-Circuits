@@ -127,6 +127,8 @@
         }
         function updateBlockState(blockId) {
             const block = $(`#block-${blockId}`);
+            if (block.hasAttribute("data-external")) return;
+
             block.removeClass("completed active disabled");
 
             if (block.find(".item").not(".completed").length === 0) {

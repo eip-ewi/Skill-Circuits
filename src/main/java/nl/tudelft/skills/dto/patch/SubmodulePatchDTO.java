@@ -31,6 +31,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import nl.tudelft.librador.dto.patch.Patch;
 import nl.tudelft.skills.dto.id.SCModuleIdDTO;
+import nl.tudelft.skills.model.AbstractSkill;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Submodule;
 
@@ -63,7 +64,7 @@ public class SubmodulePatchDTO extends Patch<Submodule> {
 	@Override
 	protected void applyOneToMany() {
 		Map<Long, Skill> skills = data.getSkills().stream()
-				.collect(Collectors.toMap(Skill::getId, Function.identity()));
+				.collect(Collectors.toMap(AbstractSkill::getId, Function.identity()));
 		items.forEach(p -> p.apply(skills.get(p.getId())));
 
 		data.getSkills().stream().filter(s -> removedItems.contains(s.getId())).toList()
@@ -72,7 +73,7 @@ public class SubmodulePatchDTO extends Patch<Submodule> {
 
 	@Override
 	protected void validate() {
-		Set<Long> skillIds = data.getSkills().stream().map(Skill::getId).collect(Collectors.toSet());
+		Set<Long> skillIds = data.getSkills().stream().map(AbstractSkill::getId).collect(Collectors.toSet());
 		if (!skillIds.containsAll(
 				items.stream().map(SubmoduleLevelSkillPatchDTO::getId).collect(Collectors.toSet()))) {
 			errors.rejectValue("items", "itemNotInSubmodule", "Item is not in submodule");

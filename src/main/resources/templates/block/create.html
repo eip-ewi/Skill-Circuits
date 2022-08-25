@@ -22,10 +22,80 @@
     lang="en"
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div
+        layout:fragment="external-form"
+        th:if="${canCreate}"
+        id="create-external-wrapper"
+        class="hidden">
+        <div id="external-form" class="block" data-children="[]">
+            <input name="module.id" type="hidden" th:value="${module.id}" />
+
+            <div class="grid two-col">
+                <label for="external-course">Course</label>
+                <select id="external-course" class="selectbox">
+                    <option th:value="${null}">Select course</option>
+                    <option
+                        th:each="course : ${courses}"
+                        th:value="${course.id}"
+                        th:text="${course.name}"></option>
+                </select>
+                <label for="external-edition">Edition</label>
+                <select id="external-edition" disabled class="selectbox">
+                    <option>Edition</option>
+                </select>
+                <label for="external-module">Module</label>
+                <select id="external-module" disabled class="selectbox">
+                    <option>Module</option>
+                </select>
+                <label for="external-skill">Skill</label>
+                <select id="external-skill" disabled class="selectbox">
+                    <option>Skill</option>
+                </select>
+            </div>
+
+            <div class="block__form__buttons">
+                <button type="button" id="cancel-external">Cancel</button>
+                <button type="submit" id="save-external">Save</button>
+            </div>
+        </div>
+    </div>
+
     <script th:if="${canCreate}" layout:fragment="script">
-        function clickGhost() {
-            const col = parseInt($(this).css("gridColumn").split(" / ")[0]) - 1;
-            const row = parseInt($(this).css("gridRow").split(" / ")[0]) - 1;
+        function resetExternalFields() {
+            const selects = $("#external-form select:not(#external-course)");
+            selects.find("option").remove();
+            selects.prop("disabled", true);
+            $("#external-course").val(null);
+            $("#external-edition").append($("<option>Edition</option>"));
+            $("#external-module").append($("<option>Module</option>"));
+            $("#external-skill").append($("<option>Skill</option>"));
+        }
+
+        function selectExternal(top, down) {
+            return function () {
+                const topSelect = $(`#external-${top}`);
+                const downSelect = $(`#external-${down}`);
+                if (topSelect.val()) {
+                    $.get(`/${top}/${topSelect.val()}/${down}s`, function (options) {
+                        downSelect.children().remove();
+                        for (let option of options) {
+                            downSelect.append(
+                                $(`<option value="${option.id}">${option.name}</option>`)
+                            );
+                        }
+                        downSelect.prop("disabled", false);
+                        downSelect.change();
+                    });
+                } else if (top === "course") {
+                    resetExternalFields();
+                }
+            };
+        }
+
+        function clickGhostRegular() {
+            const ghost = $(this).parent();
+            const col = parseInt(ghost.css("gridColumn").split(" / ")[0]) - 1;
+            const row = parseInt(ghost.css("gridRow").split(" / ")[0]) - 1;
             const form = $("#create-block-wrapper > .block");
 
             form.data("editing", true);
@@ -45,8 +115,20 @@
                 }
                 checkPointSelect.val(checkpoint.prop("id").substr(11));
             }
-            $(this).replaceWith(form);
+            ghost.replaceWith(form);
             form.attr("draggable", false);
+        }
+
+        function clickGhostExternal() {
+            const ghost = $(this).parent();
+            const col = parseInt(ghost.css("gridColumn").split(" / ")[0]) - 1;
+            const row = parseInt(ghost.css("gridRow").split(" / ")[0]) - 1;
+            const form = $("#create-external-wrapper > .block");
+
+            form.css("gridColumn", (col + 1).toString());
+            form.css("gridRow", (row + 1).toString());
+
+            ghost.replaceWith(form);
         }
 
         function cancelCreateBlock(block) {
@@ -65,10 +147,33 @@
 
             const ghost = $(
                 `<div class="ghost_block" style="grid-row: ${row}; grid-column: ${col}">
-                    <span class="fa-solid fa-plus"></span>
+                    <button data-type="regular" class="fa-solid fa-plus"></button>
                 </div>`
             );
-            ghost.click(clickGhost);
+            if (blockType === "skill") {
+                ghost.append($(`<button data-type="external" class="fa-solid fa-link"></button>`));
+            }
+            ghost.children("[data-type='regular']").click(clickGhostRegular);
+            ghost.children("[data-type='external']").click(clickGhostExternal);
+            $("#circuit").append(ghost);
+        }
+
+        function cancelCreateExternal() {
+            const block = $(this).closest(".block");
+            resetExternalFields();
+
+            const row = parseInt(block.css("gridRowStart"));
+            const col = parseInt(block.css("gridColumnStart"));
+            $("#create-external-wrapper").append(block);
+
+            const ghost = $(
+                `<div class="ghost_block" style="grid-row: ${row}; grid-column: ${col}">
+                    <button data-type="regular" class="fa-solid fa-plus"></button>
+                    <button data-type="external" class="fa-solid fa-link"></button>
+                </div>`
+            );
+            ghost.children("[data-type='regular']").click(clickGhostRegular);
+            ghost.children("[data-type='external']").click(clickGhostExternal);
             $("#circuit").append(ghost);
         }
 
@@ -115,8 +220,43 @@
             });
         }
 
+        function createExternal() {
+            const block = $(this).closest(".block");
+            const data = {
+                module: { id: $("#external-form input[name='module.id']").val() },
+                skill: { id: $("#external-skill").val() },
+                row: parseInt(block.css("gridRowStart")) - 1,
+                column: parseInt(block.css("gridColumnStart")) - 1,
+            };
+            $.post({
+                url: `/skill/external`,
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: html => {
+                    resetExternalFields();
+
+                    $("#create-external-wrapper").append(block);
+                    $("#circuit").replaceWith($(html).find("#circuit"));
+                    // Re-fire DOMContentLoaded to re-attach event listeners and onclick functions
+                    $("*").unbind();
+                    window.document.dispatchEvent(
+                        new Event("DOMContentLoaded", {
+                            bubbles: true,
+                            cancelable: true,
+                        })
+                    );
+                },
+            });
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
-            $(".ghost_block").click(clickGhost);
+            $(".ghost_block button[data-type='regular']").click(clickGhostRegular);
+            $(".ghost_block button[data-type='external']").click(clickGhostExternal);
+            $("#external-course").change(selectExternal("course", "edition"));
+            $("#external-edition").change(selectExternal("edition", "module"));
+            $("#external-module").change(selectExternal("module", "skill"));
+            $("#cancel-external").click(cancelCreateExternal);
+            $("#save-external").click(createExternal);
         });
     </script>
 </html>

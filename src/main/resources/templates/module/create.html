@@ -63,7 +63,7 @@
                     $(`#${element.id} > .block__buttons > .block__delete`).click(deleteModule);
 
                     $("#blocks").append($('<div class="ghost_block fa-solid fa-plus"></div>'));
-                    $(".ghost_block").click(clickOnBlockGhost);
+                    $(".ghost_block button[data-type='regular']").click(clickOnBlockGhost);
                 });
             });
 
@@ -71,10 +71,10 @@
                 $("#create-module-wrapper").append($("#create-module"));
                 $("#create-module-name").val("");
                 $("#blocks").append($('<div class="ghost_block fa-solid fa-plus"></div>'));
-                $(".ghost_block").click(clickOnBlockGhost);
+                $(".ghost_block button[data-type='regular']").click(clickOnBlockGhost);
             });
 
-            $(".ghost_block").click(clickOnBlockGhost);
+            $(".ghost_block button[data-type='regular']").click(clickOnBlockGhost);
         });
     </script>
 </html>

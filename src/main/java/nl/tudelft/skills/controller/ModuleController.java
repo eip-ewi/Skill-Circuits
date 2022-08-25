@@ -17,6 +17,8 @@
  */
 package nl.tudelft.skills.controller;
 
+import java.util.List;
+
 import javax.servlet.http.HttpSession;
 
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
@@ -25,6 +27,7 @@ import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.SCModuleCreateDTO;
 import nl.tudelft.skills.dto.patch.SCModulePatchDTO;
+import nl.tudelft.skills.dto.view.SkillSummaryDTO;
 import nl.tudelft.skills.dto.view.edition.EditionLevelModuleViewDTO;
 import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.repository.ModuleRepository;
@@ -186,4 +189,16 @@ public class ModuleController {
 		return "redirect:/module/{id}";
 	}
 
+	/**
+	 * Gets the skills of a module.
+	 *
+	 * @param  id The id of the module
+	 * @return    The list of skills
+	 */
+	@GetMapping("{id}/skills")
+	@PreAuthorize("@authorisationService.isStaff()")
+	public @ResponseBody List<SkillSummaryDTO> getSkillsOfModule(@PathVariable Long id) {
+		return View.convert(moduleRepository.findByIdOrThrow(id).getSubmodules().stream()
+				.flatMap(s -> s.getSkills().stream()).toList(), SkillSummaryDTO.class);
+	}
 }
