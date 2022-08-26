@@ -17,7 +17,9 @@
  */
 package nl.tudelft.skills.model;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.*;
@@ -44,7 +46,7 @@ public class SCEdition {
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@OneToMany(mappedBy = "edition")
-	private Set<SCModule> modules = new HashSet<>();
+	private List<SCModule> modules = new ArrayList<>();
 
 	@NotNull
 	@Builder.Default

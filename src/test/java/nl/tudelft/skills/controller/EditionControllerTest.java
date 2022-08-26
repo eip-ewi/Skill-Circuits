@@ -25,6 +25,7 @@ import javax.servlet.http.HttpSession;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.EditionRepository;
+import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.EditionService;
 
 import org.junit.jupiter.api.Test;
@@ -45,11 +46,13 @@ public class EditionControllerTest extends ControllerTest {
 	private final HttpSession session;
 
 	@Autowired
-	public EditionControllerTest(EditionRepository editionRepository) {
+	public EditionControllerTest(EditionRepository editionRepository,
+			AuthorisationService authorisationService) {
 		this.editionRepository = editionRepository;
 		this.editionService = mock(EditionService.class);
 		this.session = mock(HttpSession.class);
-		this.editionController = new EditionController(editionRepository, editionService, session);
+		this.editionController = new EditionController(editionRepository, editionService,
+				authorisationService, session);
 	}
 
 	@Test
