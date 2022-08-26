@@ -40,7 +40,7 @@
                     th:href="@{|/edition/${edition.id}|}">
                     <h2 th:text="${edition.name}"></h2>
                     <h5
-                        th:text="|${@editionService.getNumberOfSkillsInEdition(edition.id)} skills|"></h5>
+                        th:text="|${@skillRepository.countBySubmoduleModuleEditionId(edition.id)} skills|"></h5>
                 </a>
             </div>
         </div>

@@ -144,7 +144,7 @@ public class CourseService {
 	 * @param  id Course id
 	 * @return    The number of editions in a course.
 	 */
-	public Long getNumberOfEditions(Long id) {
-		return editionApi.getAllEditionsByCourse(id).count().block();
+	public Integer getNumberOfEditions(Long id) {
+		return editionApi.getAllEditionsByCourse(id).count().block().intValue();
 	}
 }

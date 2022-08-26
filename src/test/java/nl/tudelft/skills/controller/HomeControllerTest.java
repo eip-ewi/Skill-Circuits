@@ -18,6 +18,8 @@
 package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
 
@@ -32,9 +34,12 @@ import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.model.SCEdition;
+import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.service.CourseService;
 import nl.tudelft.skills.service.EditionService;
 
 import org.junit.jupiter.api.Test;
@@ -54,6 +59,8 @@ public class HomeControllerTest extends ControllerTest {
 	private final RoleControllerApi roleApi;
 	private final EditionRepository editionRepository;
 	private final PersonRepository personRepository;
+	private final EditionService editionService;
+	private final CourseService courseService;
 
 	@Autowired
 	public HomeControllerTest(EditionControllerApi editionApi, RoleControllerApi roleApi,
@@ -63,8 +70,10 @@ public class HomeControllerTest extends ControllerTest {
 		this.roleApi = roleApi;
 		this.editionRepository = editionRepository;
 		this.personRepository = personRepository;
+		this.editionService = editionService;
+		this.courseService = mock(CourseService.class);
 		this.homeController = new HomeController(editionApi, roleApi, editionRepository, moduleRepository,
-				personRepository);
+				personRepository, editionService, courseService);
 	}
 
 	@Test
@@ -89,6 +98,42 @@ public class HomeControllerTest extends ControllerTest {
 		homeController.getHomePage(null, model);
 
 		assertThat((List<CourseSummaryDTO>) model.getAttribute("courses")).containsExactly(course);
+	}
+
+	@Test
+	void getCompletedSkillsFalse() {
+		List<CourseSummaryDTO> courses = new ArrayList<>(
+				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
+		Set<Task> tasks = new HashSet<>();
+		tasks.add(db.getTaskRead12());
+		SCPerson person = new SCPerson();
+		person.setTasksCompleted(tasks);
+		Map<Long, Integer> courseCompletedSkills = new HashMap<>();
+		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
+				.thenReturn(db.getEditionRL().getId());
+
+		// There are no completed skills in the course
+		assertFalse(homeController.getCompletedSkills(courses, courseCompletedSkills, person));
+		assertThat(courseCompletedSkills.get(db.getCourseRL().getId()) == 0);
+	}
+
+	@Test
+	void getCompletedSkillsTrue() {
+		List<CourseSummaryDTO> courses = new ArrayList<>(
+				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
+		Set<Task> tasks = new HashSet<>();
+		tasks.add(db.getTaskRead12());
+		tasks.add(db.getTaskDo12ae());
+		SCPerson person = new SCPerson();
+		person.setTasksCompleted(tasks);
+		Map<Long, Integer> courseCompletedSkills = new HashMap<>();
+
+		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
+				.thenReturn(db.getEditionRL().getId());
+
+		// There is one completed skill in the course
+		assertTrue(homeController.getCompletedSkills(courses, courseCompletedSkills, person));
+		assertThat(courseCompletedSkills.get(db.getCourseRL().getId()) == 1);
 	}
 
 }

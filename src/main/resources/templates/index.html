@@ -47,7 +47,7 @@
                             <h2 th:text="${course.code}"></h2>
                             <h2 th:text="${course.name}"></h2>
                             <h5
-                                th:text="|${courseCompletedSkills.get(course.id)} / ${@editionService.getNumberOfSkillsInEdition(@courseService.getLastStudentEditionForCourseOrLast(course.id))} skills completed|"></h5>
+                                th:text="|${courseCompletedSkills.get(course.id)} / ${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastStudentEditionForCourseOrLast(course.id))} skills completed|"></h5>
                         </a>
                     </th:block>
 
@@ -72,7 +72,7 @@
                             <h2 th:text="${course.code}"></h2>
                             <h2 th:text="${course.name}"></h2>
                             <h5
-                                th:text="|${@editionService.getNumberOfSkillsInEdition(@courseService.getLastEditionForCourse(course.id))} skills|"></h5>
+                                th:text="|${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastEditionForCourse(course.id))} skills|"></h5>
                         </a>
                     </th:block>
 
@@ -84,7 +84,7 @@
                             <h2 th:text="${course.code}"></h2>
                             <h2 th:text="${course.name}"></h2>
                             <h5
-                                th:text="|${@editionService.getNumberOfSkillsInEdition(@courseService.getLastStudentEditionForCourseOrLast(course.id))} skills|"></h5>
+                                th:text="|${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastStudentEditionForCourseOrLast(course.id))} skills|"></h5>
                         </a>
                     </th:block>
                 </th:block>

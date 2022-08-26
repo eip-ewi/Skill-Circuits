@@ -36,4 +36,6 @@ public interface SkillRepository extends JpaRepository<Skill, Long> {
 
 	List<Skill> findAllByCheckpointId(Long checkpointId);
 
+	Integer countBySubmoduleModuleEditionId(Long editionId);
+
 }
