@@ -116,7 +116,7 @@ public class AuthorisationService {
 	 * @return True iff the authenticated user is staff
 	 */
 	public boolean isStaff() {
-		return getAuthPerson().getDefaultRole() == DefaultRole.TEACHER;
+		return isAdmin() || getAuthPerson().getDefaultRole() == DefaultRole.TEACHER;
 	}
 
 	/**
