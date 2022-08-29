@@ -23,6 +23,7 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
+import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.BlockView;
 import nl.tudelft.skills.dto.view.ItemView;
@@ -30,6 +31,7 @@ import nl.tudelft.skills.dto.view.SCModuleSummaryDTO;
 import nl.tudelft.skills.dto.view.SkillSummaryDTO;
 import nl.tudelft.skills.model.AbstractSkill;
 import nl.tudelft.skills.model.ExternalSkill;
+import nl.tudelft.skills.repository.SkillRepository;
 
 @Data
 @Builder
@@ -58,6 +60,8 @@ public class ModuleLevelExternalSkillViewDTO extends View<ExternalSkill> impleme
 		super.postApply();
 		this.parentIds = data.getParents().stream().map(AbstractSkill::getId).toList();
 		this.childIds = data.getChildren().stream().map(AbstractSkill::getId).toList();
+		this.module = View.convert(SpringContext.getBean(SkillRepository.class).findByIdOrThrow(skill.getId())
+				.getSubmodule().getModule(), SCModuleSummaryDTO.class);
 	}
 
 	@Override
