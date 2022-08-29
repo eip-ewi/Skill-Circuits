@@ -20,8 +20,8 @@ package nl.tudelft.skills.dto.create;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
-import nl.tudelft.labracore.api.dto.ModuleIdDTO;
 import nl.tudelft.librador.dto.create.Create;
+import nl.tudelft.skills.dto.id.SCModuleIdDTO;
 import nl.tudelft.skills.dto.id.SkillIdDTO;
 import nl.tudelft.skills.model.ExternalSkill;
 
@@ -33,7 +33,7 @@ import nl.tudelft.skills.model.ExternalSkill;
 public class ExternalSkillCreateDTO extends Create<ExternalSkill> {
 
 	@NotNull
-	private ModuleIdDTO module;
+	private SCModuleIdDTO module;
 	@NotNull
 	private SkillIdDTO skill;
 	@NotNull

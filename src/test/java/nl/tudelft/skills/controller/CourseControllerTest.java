@@ -17,7 +17,7 @@
  */
 package nl.tudelft.skills.controller;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
@@ -26,13 +26,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
+import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.course.CourseLevelCourseViewDTO;
+import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.CourseRepository;
+import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.service.CourseService;
 
 import org.junit.jupiter.api.Test;
@@ -50,14 +54,18 @@ public class CourseControllerTest extends ControllerTest {
 
 	private final CourseController courseController;
 	private final CourseService courseService;
+	private final EditionRepository editionRepository;
+
+	private final CourseControllerApi courseApi;
 
 	@Autowired
-	private CourseControllerApi courseApi;
-
-	@Autowired
-	public CourseControllerTest(CourseRepository courseRepository) {
+	public CourseControllerTest(CourseRepository courseRepository, CourseControllerApi courseApi,
+			EditionRepository editionRepository) {
 		this.courseService = mock(CourseService.class);
-		this.courseController = new CourseController(courseRepository, courseService);
+		this.courseApi = courseApi;
+		this.editionRepository = editionRepository;
+		this.courseController = new CourseController(courseRepository, courseService, courseApi,
+				editionRepository);
 	}
 
 	@Test
@@ -88,4 +96,20 @@ public class CourseControllerTest extends ControllerTest {
 		mvc.perform(get("/course/{id}", db.getCourseRL().getId()))
 				.andExpect(status().is3xxRedirection());
 	}
+
+	@Test
+	void getEditionsOfCourse() {
+		EditionSummaryDTO edition1 = new EditionSummaryDTO().id(randomId());
+		EditionSummaryDTO edition2 = new EditionSummaryDTO().id(randomId());
+		EditionSummaryDTO edition3 = new EditionSummaryDTO().id(randomId());
+		editionRepository.save(SCEdition.builder().id(edition1.getId()).build());
+		editionRepository.save(SCEdition.builder().id(edition2.getId()).build());
+
+		Long courseId = randomId();
+		when(courseApi.getCourseById(courseId)).thenReturn(
+				Mono.just(new CourseDetailsDTO().editions(List.of(edition1, edition2, edition3))));
+
+		assertThat(courseController.getEditionsOfCourse(courseId)).isEqualTo(List.of(edition1, edition2));
+	}
+
 }

@@ -332,7 +332,7 @@ public class AuthorisationService {
 		if (skill instanceof Skill) {
 			return canEditSkillInEdition(((Skill) skill).getSubmodule().getModule().getEdition().getId());
 		} else {
-			return canEditCheckpointInEdition(((ExternalSkill) skill).getModule().getEdition().getId());
+			return canEditSkillInEdition(((ExternalSkill) skill).getModule().getEdition().getId());
 		}
 	}
 
@@ -519,6 +519,36 @@ public class AuthorisationService {
 	 */
 	public boolean isStudentInEdition(Long editionId) {
 		return getRoleInEdition(editionId) == STUDENT;
+	}
+
+	/**
+	 * Checks whether the authenticated user can get the editions of a course.
+	 *
+	 * @param  courseId The id of the course
+	 * @return          True iff true user can get the editions of the course
+	 */
+	public boolean canGetEditionsOfCourse(Long courseId) {
+		return isStaff();
+	}
+
+	/**
+	 * Checks whether the authenticated user can get the modules of a edition.
+	 *
+	 * @param  editionId The id of the edition
+	 * @return           True iff true user can get the modules of the edition
+	 */
+	public boolean canGetModulesOfEdition(Long editionId) {
+		return isStaff();
+	}
+
+	/**
+	 * Checks whether the authenticated user can get the skills of a module.
+	 *
+	 * @param  moduleId The id of the module
+	 * @return          True iff true user can get the skills of the module
+	 */
+	public boolean canGetSkillsOfModule(Long moduleId) {
+		return isStaff();
 	}
 
 }

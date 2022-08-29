@@ -52,6 +52,9 @@ public class TestUserDetailsService implements UserDetailsService {
 		if (username.equals("admin")) {
 			user.setDefaultRole(DefaultRole.ADMIN);
 		}
+		if (username.contains("teacher")) {
+			user.setDefaultRole(DefaultRole.TEACHER);
+		}
 		return new LabradorUserDetails(user);
 	}
 }

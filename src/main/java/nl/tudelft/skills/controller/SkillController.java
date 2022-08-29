@@ -134,6 +134,7 @@ public class SkillController {
 	public String createSkill(@AuthenticatedPerson Person person, @RequestBody ExternalSkillCreateDTO create,
 			Model model) {
 		ExternalSkill skill = externalSkillRepository.saveAndFlush(create.apply());
+		skill.setSkill(skillRepository.findByIdOrThrow(skill.getSkill().getId()));
 
 		moduleService.configureModuleModel(person, skill.getModule().getId(), model, session);
 		return "module/view";

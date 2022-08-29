@@ -30,6 +30,7 @@ import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.cache.RoleCacheManager;
+import nl.tudelft.skills.model.ExternalSkill;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.test.TestDatabaseLoader;
@@ -65,6 +66,8 @@ public class AuthorisationServiceTest {
 	private final SkillRepository skillRepository;
 	private final TaskRepository taskRepository;
 	private final CheckpointRepository checkpointRepository;
+	private final AbstractSkillRepository abstractSkillRepository;
+	private final ExternalSkillRepository externalSkillRepository;
 
 	@Autowired
 	public AuthorisationServiceTest(RoleCacheManager roleCacheManager,
@@ -74,7 +77,9 @@ public class AuthorisationServiceTest {
 			ModuleRepository moduleRepository,
 			SubmoduleRepository submoduleRepository,
 			SkillRepository skillRepository,
-			TaskRepository taskRepository, CheckpointRepository checkpointRepository) {
+			TaskRepository taskRepository, CheckpointRepository checkpointRepository,
+			AbstractSkillRepository abstractSkillRepository,
+			ExternalSkillRepository externalSkillRepository) {
 		this.authorisationService = authorisationService;
 		this.roleCacheManager = roleCacheManager;
 		this.roleApi = roleApi;
@@ -85,6 +90,8 @@ public class AuthorisationServiceTest {
 		this.skillRepository = skillRepository;
 		this.taskRepository = taskRepository;
 		this.checkpointRepository = checkpointRepository;
+		this.abstractSkillRepository = abstractSkillRepository;
+		this.externalSkillRepository = externalSkillRepository;
 
 		this.courseApi = mock(CourseControllerApi.class);
 	}
@@ -115,6 +122,18 @@ public class AuthorisationServiceTest {
 		assertThat(authorisationService.isAdmin()).isEqualTo(expected);
 	}
 
+	@Test
+	@WithUserDetails("teacher")
+	void isStaff() {
+		assertThat(authorisationService.isStaff()).isTrue();
+	}
+
+	@Test
+	@WithUserDetails("username")
+	void isNotStaff() {
+		assertThat(authorisationService.isStaff()).isFalse();
+	}
+
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
@@ -123,7 +142,7 @@ public class AuthorisationServiceTest {
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
 				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
-				checkpointRepository,
+				abstractSkillRepository, checkpointRepository,
 				courseApi);
 		when(courseApi.getCourseById(anyLong()))
 				.thenReturn(Mono.just(new CourseDetailsDTO().id(db.getCourseRL().getId())
@@ -140,7 +159,7 @@ public class AuthorisationServiceTest {
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
 				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
-				checkpointRepository,
+				abstractSkillRepository, checkpointRepository,
 				courseApi);
 
 		assertThat(authorisationService.canViewEdition(db.getEditionRL().getId())).isEqualTo(expected);
@@ -154,7 +173,7 @@ public class AuthorisationServiceTest {
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
 				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
-				checkpointRepository,
+				abstractSkillRepository, checkpointRepository,
 				courseApi);
 
 		SCEdition edition = db.getEditionRL();
@@ -282,6 +301,15 @@ public class AuthorisationServiceTest {
 				.isEqualTo(expected);
 	}
 
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canCreateSkillInModule(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canCreateSkillInEdition(db.getEditionRL().getId()))
+				.isEqualTo(expected);
+	}
+
 	@Transactional
 	@ParameterizedTest
 	@WithUserDetails("username")
@@ -308,6 +336,21 @@ public class AuthorisationServiceTest {
 		assertThat(authorisationService.canEditSkill(db.getSkillAssumption().getId())).isEqualTo(expected);
 	}
 
+	@Transactional
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canEditExternalSkill(String role, boolean expected) {
+		Long id = externalSkillRepository.save(ExternalSkill.builder()
+				.module(db.getModuleProofTechniques())
+				.skill(db.getSkillAssumption())
+				.row(1)
+				.column(1)
+				.build()).getId();
+		mockRole(role);
+		assertThat(authorisationService.canEditSkill(id)).isEqualTo(expected);
+	}
+
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
@@ -324,6 +367,21 @@ public class AuthorisationServiceTest {
 	void canDeleteSkill(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canDeleteSkill(db.getSkillAssumption().getId())).isEqualTo(expected);
+	}
+
+	@Transactional
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canDeleteExternalSkill(String role, boolean expected) {
+		Long id = externalSkillRepository.save(ExternalSkill.builder()
+				.module(db.getModuleProofTechniques())
+				.skill(db.getSkillAssumption())
+				.row(1)
+				.column(1)
+				.build()).getId();
+		mockRole(role);
+		assertThat(authorisationService.canDeleteSkill(id)).isEqualTo(expected);
 	}
 
 	@Transactional
@@ -398,7 +456,7 @@ public class AuthorisationServiceTest {
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
 				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
-				checkpointRepository,
+				abstractSkillRepository, checkpointRepository,
 				courseApi);
 
 		when(courseApi.getCourseById(anyLong()))
@@ -457,6 +515,27 @@ public class AuthorisationServiceTest {
 	void isStudentInEdition(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.isStudentInEdition(db.getEditionRL().getId())).isEqualTo(expected);
+	}
+
+	@Test
+	@Transactional
+	@WithUserDetails("teacher")
+	void canGetEditionsOfCourse() {
+		assertThat(authorisationService.canGetEditionsOfCourse(db.getCourseRL().getId())).isTrue();
+	}
+
+	@Test
+	@Transactional
+	@WithUserDetails("teacher")
+	void canGetModulesOfEdition() {
+		assertThat(authorisationService.canGetModulesOfEdition(db.getEditionRL().getId())).isTrue();
+	}
+
+	@Test
+	@Transactional
+	@WithUserDetails("teacher")
+	void canGetSkillsOfModule() {
+		assertThat(authorisationService.canGetSkillsOfModule(db.getModuleProofTechniques().getId())).isTrue();
 	}
 
 	private void mockRole(String role) {

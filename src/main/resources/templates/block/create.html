@@ -79,6 +79,11 @@
                     $.get(`/${top}/${topSelect.val()}/${down}s`, function (options) {
                         downSelect.children().remove();
                         for (let option of options) {
+                            if (
+                                down === "module" &&
+                                option.id === parseInt($("#external-form [name='module.id']").val())
+                            )
+                                continue;
                             downSelect.append(
                                 $(`<option value="${option.id}">${option.name}</option>`)
                             );

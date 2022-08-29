@@ -44,8 +44,8 @@ public class SkillService {
 	@Transactional
 	public AbstractSkill deleteSkill(Long id) {
 		AbstractSkill skill = abstractSkillRepository.findByIdOrThrow(id);
+		skill.getChildren().forEach(c -> c.getParents().remove(skill));
 		if (skill instanceof Skill s) {
-			s.getChildren().forEach(c -> c.getParents().remove(skill));
 			s.getTasks().forEach(t -> t.getPersons().forEach(p -> p.getTasksCompleted().remove(t)));
 		}
 		abstractSkillRepository.delete(skill);

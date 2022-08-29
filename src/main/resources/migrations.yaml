@@ -163,14 +163,14 @@ databaseChangeLog:
                   constraints:
                     nullable: false
                     primaryKey: true
-                    primaryKeyName: CONSTRAINT_4
+                    primaryKeyName: CONSTRAINT_4A
                   name: children_id
                   type: BIGINT
               - column:
                   constraints:
                     nullable: false
                     primaryKey: true
-                    primaryKeyName: CONSTRAINT_4
+                    primaryKeyName: CONSTRAINT_4A
                   name: parents_id
                   type: BIGINT
             tableName: abstract_skill_parents
@@ -191,7 +191,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
                     primaryKey: true
-                    primaryKeyName: CONSTRAINT_F
+                    primaryKeyName: CONSTRAINT_FA
                   name: id
                   type: BIGINT
               - column:

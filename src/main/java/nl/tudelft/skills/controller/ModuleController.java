@@ -196,7 +196,7 @@ public class ModuleController {
 	 * @return    The list of skills
 	 */
 	@GetMapping("{id}/skills")
-	@PreAuthorize("@authorisationService.isStaff()")
+	@PreAuthorize("@authorisationService.canGetSkillsOfModule(#id)")
 	public @ResponseBody List<SkillSummaryDTO> getSkillsOfModule(@PathVariable Long id) {
 		return View.convert(moduleRepository.findByIdOrThrow(id).getSubmodules().stream()
 				.flatMap(s -> s.getSkills().stream()).toList(), SkillSummaryDTO.class);

@@ -130,7 +130,7 @@ public class EditionController {
 	 * @return    The list of modules
 	 */
 	@GetMapping("{id}/modules")
-	@PreAuthorize("@authorisationService.isStaff()")
+	@PreAuthorize("@authorisationService.canGetModulesOfEdition(#id)")
 	public @ResponseBody List<SCModuleSummaryDTO> getModulesOfEdition(@PathVariable Long id) {
 		return View.convert(new ArrayList<>(editionRepository.findByIdOrThrow(id).getModules()),
 				SCModuleSummaryDTO.class);
