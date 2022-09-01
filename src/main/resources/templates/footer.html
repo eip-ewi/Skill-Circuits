@@ -21,16 +21,10 @@
 <html
     lang="en"
     xmlns:th="http://www.thymeleaf.org"
-    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-    layout:decorate="~{layout}">
-    <body>
-        <div class="container" layout:fragment="container">
-            <div layout:replace="~{header :: header}"></div>
-            <main class="main-section">
-                <th:block layout:fragment="content" class="content">Content goes here.</th:block>
-            </main>
-            <div layout:replace="~{footer :: footer}"></div>
-            <div layout:replace="~{components/select_or_new :: script}"></div>
-        </div>
-    </body>
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <footer layout:fragment="footer" class="footer">
+        <span>Skill Circuits is open source. View the source code</span>
+        <a target="_blank" href="https://github.com/eip-ewi/Skill-Circuits">here</a>
+        <span>.</span>
+    </footer>
 </html>
