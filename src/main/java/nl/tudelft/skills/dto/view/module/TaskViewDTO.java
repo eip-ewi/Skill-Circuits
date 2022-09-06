@@ -46,4 +46,11 @@ public class TaskViewDTO extends View<Task> implements ItemView {
 	@Builder.Default
 	private boolean completed = false;
 
+	private Integer completedCount;
+
+	@Override
+	public void postApply() {
+		super.postApply();
+		completedCount = data.getPersons().size();
+	}
 }

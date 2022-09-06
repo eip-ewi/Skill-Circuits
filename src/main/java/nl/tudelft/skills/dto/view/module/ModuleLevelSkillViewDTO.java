@@ -49,6 +49,7 @@ public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
 	@NotNull
 	private CheckpointViewDTO checkpoint;
 	@NotNull
+	@PostApply
 	private List<TaskViewDTO> tasks;
 	@NotNull
 	private List<Long> parentIds;

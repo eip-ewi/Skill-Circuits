@@ -58,6 +58,7 @@
                 <th:block layout:replace="~{task/edit :: icon}"></th:block>
             </th:block>
             <th:block layout:fragment="item-after-content">
+                <span th:if="${canEdit}" th:text="|(${item.completedCount})|"></span>
                 <span
                     th:if="${item.link}"
                     th:id="|item-${item.id}-link-icon|"
