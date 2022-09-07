@@ -1,5 +1,6 @@
 @import "vars";
 @import "header";
+@import "footer";
 @import "overlay";
 @import "components";
 
@@ -16,6 +17,16 @@
 .content {
     padding: 2rem;
     position: relative;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.main-section {
+    flex-grow: 1;
 }
 
 .hidden {

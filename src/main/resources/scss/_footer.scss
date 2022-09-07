@@ -1,0 +1,15 @@
+.footer {
+    background-color: var(--primary-light);
+    min-width: 100%;
+    padding: 0.75rem 2rem;
+    text-align: right;
+
+    a {
+        color: var(--primary-green);
+        text-decoration: none;
+        &:hover,
+        &:focus-visible {
+            color: var(--secondary-green);
+        }
+    }
+}
