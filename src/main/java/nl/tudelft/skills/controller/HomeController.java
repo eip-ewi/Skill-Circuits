@@ -99,15 +99,14 @@ public class HomeController {
 
 		// Gets number of completed skills for each course
 		Map<Long, Integer> completedSkillsPerCourse = new HashMap<>();
-		boolean isAnySkillCompleted = false;
 		if (person != null) {
 			SCPerson scperson = personRepository.findByIdOrThrow(person.getId());
 
 			completedSkillsPerCourse = getCompletedSkillsPerCourse(courses, scperson);
-			isAnySkillCompleted = completedSkillsPerCourse.entrySet().stream()
-					.anyMatch(e -> e.getValue() > 0);
 		}
 
+		boolean isAnySkillCompleted = completedSkillsPerCourse.entrySet().stream()
+				.anyMatch(e -> e.getValue() > 0);
 		model.addAttribute("courses", courses);
 		model.addAttribute("completedSkillsPerCourse", completedSkillsPerCourse);
 		model.addAttribute("isAnySkillCompleted", isAnySkillCompleted);
