@@ -33,21 +33,21 @@
         <div layout:fragment="content">
             <h1>Welcome to Skill Circuits</h1>
 
-            <h2 th:if="${@authorisationService.isAuthenticated()} and ${anyCompletedSkills}">
+            <h2 th:if="${@authorisationService.isAuthenticated()} and ${isAnySkillCompleted}">
                 Your Courses
             </h2>
 
             <div class="blocks">
                 <th:block th:each="course : ${courses}">
                     <th:block
-                        th:if="${@authorisationService.isAuthenticated()} and not ${@authorisationService.canViewCourse(course.id)} and ${courseCompletedSkills.get(course.id)} > 0">
+                        th:if="${@authorisationService.isAuthenticated()} and not ${@authorisationService.canViewCourse(course.id)} and ${completedSkillsPerCourse.get(course.id)} > 0">
                         <a
                             class="block"
                             th:href="@{|/edition/${@courseService.getLastStudentEditionForCourseOrLast(course.id)}|}">
                             <h2 th:text="${course.code}"></h2>
                             <h2 th:text="${course.name}"></h2>
                             <h5
-                                th:text="|${courseCompletedSkills.get(course.id)} / ${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastStudentEditionForCourseOrLast(course.id))} skills completed|"></h5>
+                                th:text="|${completedSkillsPerCourse.get(course.id)} / ${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastStudentEditionForCourseOrLast(course.id))} skills completed|"></h5>
                         </a>
                     </th:block>
 
@@ -77,7 +77,7 @@
                     </th:block>
 
                     <th:block
-                        th:if="${@authorisationService.isAuthenticated()} and not ${@authorisationService.canViewCourse(course.id)} and ${courseCompletedSkills.get(course.id)}==0">
+                        th:if="${@authorisationService.isAuthenticated()} and not ${@authorisationService.canViewCourse(course.id)} and ${completedSkillsPerCourse.get(course.id)}==0">
                         <a
                             class="block"
                             th:href="@{|/edition/${@courseService.getLastStudentEditionForCourseOrLast(course.id)}|}">

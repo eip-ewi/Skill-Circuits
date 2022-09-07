@@ -108,12 +108,15 @@ public class HomeControllerTest extends ControllerTest {
 		tasks.add(db.getTaskRead12());
 		SCPerson person = new SCPerson();
 		person.setTasksCompleted(tasks);
-		Map<Long, Integer> courseCompletedSkills = new HashMap<>();
+
 		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
 				.thenReturn(db.getEditionRL().getId());
 
 		// There are no completed skills in the course
-		assertFalse(homeController.getCompletedSkills(courses, courseCompletedSkills, person));
+		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
+				person);
+
+		assertFalse(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
 		assertThat(courseCompletedSkills.get(db.getCourseRL().getId()) == 0);
 	}
 
@@ -126,13 +129,14 @@ public class HomeControllerTest extends ControllerTest {
 		tasks.add(db.getTaskDo12ae());
 		SCPerson person = new SCPerson();
 		person.setTasksCompleted(tasks);
-		Map<Long, Integer> courseCompletedSkills = new HashMap<>();
 
 		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
 				.thenReturn(db.getEditionRL().getId());
 
 		// There is one completed skill in the course
-		assertTrue(homeController.getCompletedSkills(courses, courseCompletedSkills, person));
+		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
+				person);
+		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
 		assertThat(courseCompletedSkills.get(db.getCourseRL().getId()) == 1);
 	}
 

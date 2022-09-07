@@ -78,9 +78,6 @@ public class HomeController {
 	@Transactional
 	@GetMapping("/")
 	public String getHomePage(@AuthenticatedPerson(required = false) Person person, Model model) {
-		if (person != null)
-			System.out.println("HERE\n"
-					+ editionApi.getAllEditionsActiveOrTaughtBy(person.getId()).collectList().block());
 		List<EditionDetailsDTO> editions = person == null
 				? editionApi.getEditionsById(editionApi.getAllEditionsActiveAtDate(LocalDateTime.now())
 						.map(EditionSummaryDTO::getId).collectList().block()).collectList().block()
@@ -101,58 +98,50 @@ public class HomeController {
 				.map(EditionDetailsDTO::getCourse).distinct().toList();
 
 		// Gets number of completed skills for each course
-		Map<Long, Integer> courseCompletedSkills = new HashMap<>();
-		boolean anyCompletedSkills = false;
+		Map<Long, Integer> completedSkillsPerCourse = new HashMap<>();
+		boolean isAnySkillCompleted = false;
 		if (person != null) {
 			SCPerson scperson = personRepository.findByIdOrThrow(person.getId());
 
-			anyCompletedSkills = getCompletedSkills(courses, courseCompletedSkills, scperson);
+			completedSkillsPerCourse = getCompletedSkillsPerCourse(courses, scperson);
+			isAnySkillCompleted = completedSkillsPerCourse.entrySet().stream()
+					.anyMatch(e -> e.getValue() > 0);
 		}
 
 		model.addAttribute("courses", courses);
-		model.addAttribute("courseCompletedSkills", courseCompletedSkills);
-		model.addAttribute("anyCompletedSkills", anyCompletedSkills);
+		model.addAttribute("completedSkillsPerCourse", completedSkillsPerCourse);
+		model.addAttribute("isAnySkillCompleted", isAnySkillCompleted);
 		return "index";
 	}
 
 	/**
-	 * Creates a map of courses and the number of skills completed in a respective edition in that course.
-	 * Returns if there are any courses with completed skills.
+	 * Returns a map of courses and the number of skills completed in a respective edition in that course.
 	 *
-	 * @param  courses               List of courses
-	 * @param  courseCompletedSkills map of courses and number of completed skills in that course (in the
-	 *                               relevant edition)
-	 * @param  scperson              person
-	 * @return                       True if the person has any completed skills, false otherwise.
+	 * @param  courses  List of courses
+	 * @param  scperson person
+	 * @return          Map containing number of completed skills per course.
 	 */
-	public boolean getCompletedSkills(List<CourseSummaryDTO> courses,
-			Map<Long, Integer> courseCompletedSkills, SCPerson scperson) {
-		boolean anyCompletedSkills = false;
+	public Map<Long, Integer> getCompletedSkillsPerCourse(List<CourseSummaryDTO> courses, SCPerson scperson) {
+		Map<Long, Integer> completedSkillsPerCourse = new HashMap<>();
 		for (var course : courses) {
 			Long courseId = course.getId();
 
 			int skillsDone = 0;
 			Long editionId = courseService.getLastStudentEditionForCourseOrLast(courseId);
+
 			if (editionId != null) {
 				SCEdition edition = editionService.getOrCreateSCEdition(editionId);
-				for (var module : edition.getModules()) {
-					for (var submodule : module.getSubmodules()) {
-						for (var skill : submodule.getSkills()) {
-							boolean skillDone = skill.getTasks().size() > 0;
-							for (var task : skill.getTasks()) {
-								if (!scperson.getTasksCompleted().contains(task)) {
-									skillDone = false;
-								}
-							}
-							skillsDone += skillDone ? 1 : 0;
-							anyCompletedSkills = anyCompletedSkills || skillDone;
-						}
-					}
-				}
+				skillsDone = (int) edition.getModules().stream()
+						.flatMap(m -> m.getSubmodules().stream())
+						.flatMap(s -> s.getSkills().stream())
+						.filter(s -> s.getTasks().size() > 0
+								&& scperson.getTasksCompleted().containsAll(s.getTasks()))
+						.count();
 			}
-			courseCompletedSkills.put(courseId, skillsDone);
+
+			completedSkillsPerCourse.put(courseId, skillsDone);
 		}
-		return anyCompletedSkills;
+		return completedSkillsPerCourse;
 	}
 
 	/**
