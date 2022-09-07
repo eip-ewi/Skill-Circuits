@@ -46,8 +46,9 @@
                             th:href="@{|/edition/${@courseService.getLastStudentEditionForCourseOrLast(course.id)}|}">
                             <h2 th:text="${course.code}"></h2>
                             <h2 th:text="${course.name}"></h2>
-                            <h5
-                                th:text="|${completedSkillsPerCourse.get(course.id)} / ${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastStudentEditionForCourseOrLast(course.id))} skills completed|"></h5>
+                            <h3
+                                style="font-size: 0.8rem"
+                                th:text="|${completedSkillsPerCourse.get(course.id)} / ${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastStudentEditionForCourseOrLast(course.id))} skills completed|"></h3>
                         </a>
                     </th:block>
 
@@ -55,8 +56,9 @@
                         <a class="block" th:href="@{|/course/${course.id}|}">
                             <h2 th:text="${course.code}"></h2>
                             <h2 th:text="${course.name}"></h2>
-                            <h5
-                                th:text="|${@courseService.getNumberOfEditions(course.id)} editions|"></h5>
+                            <h3
+                                style="font-size: 0.8rem"
+                                th:text="|${@courseService.getNumberOfEditions(course.id)} editions|"></h3>
                         </a>
                     </th:block>
                 </th:block>
@@ -71,8 +73,9 @@
                             th:href="@{|/edition/${@courseService.getLastEditionForCourse(course.id)}|}">
                             <h2 th:text="${course.code}"></h2>
                             <h2 th:text="${course.name}"></h2>
-                            <h5
-                                th:text="|${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastEditionForCourse(course.id))} skills|"></h5>
+                            <h3
+                                style="font-size: 0.8rem"
+                                th:text="|${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastEditionForCourse(course.id))} skills|"></h3>
                         </a>
                     </th:block>
 
@@ -83,8 +86,9 @@
                             th:href="@{|/edition/${@courseService.getLastStudentEditionForCourseOrLast(course.id)}|}">
                             <h2 th:text="${course.code}"></h2>
                             <h2 th:text="${course.name}"></h2>
-                            <h5
-                                th:text="|${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastStudentEditionForCourseOrLast(course.id))} skills|"></h5>
+                            <h3
+                                style="font-size: 0.8rem"
+                                th:text="|${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastStudentEditionForCourseOrLast(course.id))} skills|"></h3>
                         </a>
                     </th:block>
                 </th:block>

@@ -40,6 +40,7 @@
                     th:href="@{|/edition/${edition.id}|}">
                     <h2 th:text="${edition.name}"></h2>
                     <h5
+                        style="font-size: 0.8rem"
                         th:text="|${@skillRepository.countBySubmoduleModuleEditionId(edition.id)} skills|"></h5>
                 </a>
             </div>
