@@ -76,12 +76,18 @@
                         const newDeadline = luxon.DateTime.fromISO(
                             $("#edit-checkpoint-deadline").val()
                         );
+                        const newName = $("#edit-checkpoint-name").val();
 
                         $("#edit-checkpoint-wrapper").append($("#edit-checkpoint"));
-                        checkpointName.text($("#edit-checkpoint-name").val());
+
+                        const checkpoint = $(`#checkpoint-${checkpointId}`);
+
+                        checkpointName.text(newName);
                         checkpointDeadline.text(formatDeadline(newDeadline));
 
-                        $(`#checkpoint-${checkpointId}`).attr("draggable", true);
+                        checkpoint.attr("draggable", true);
+                        checkpoint.data("deadline", newDeadline);
+                        checkpoint.data("name", newName);
                         $(`#checkpoint-${checkpointId}-display`).removeClass("hidden");
                         $(`#checkpoint-${checkpointId}-buttons`).removeClass("hidden");
                     },
