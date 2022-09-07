@@ -78,6 +78,8 @@
                         xOffset = idx * -xStepSize;
                     }
                     for (let child of children) {
+                        if (child.length === 0) continue;
+
                         const line = $(document.createElementNS(SVG_NAMESPACE, "polyline"))
                             .attr("data-child", child.prop("id"))
                             .attr("data-parent", block.prop("id"))

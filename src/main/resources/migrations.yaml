@@ -37,4 +37,86 @@ databaseChangeLog:
         - sql:
             comment: Keep current task ordering (by id)
             sql: UPDATE task SET idx = id;
-
+  - changeSet:
+      id: 1660912175253-1
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_EC
+                  name: required_tasks_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_EC
+                  name: required_for_id
+                  type: BIGINT
+            tableName: task_required_for
+  - changeSet:
+      id: 1660912175253-2
+      author: ruben (generated)
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: hidden
+                  type: BOOLEAN
+            tableName: skill
+  - changeSet:
+      id: 1660912175253-3
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: required_tasks_id
+            indexName: FKog5wjbi2d5d2f9i3kl7cyu58a_INDEX_E
+            tableName: task_required_for
+  - changeSet:
+      id: 1660912175253-4
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: required_for_id
+            indexName: FKtjvvl1ice8hcviw4lstna196b_INDEX_E
+            tableName: task_required_for
+  - changeSet:
+      id: 1660912175253-5
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: required_tasks_id
+            baseTableName: task_required_for
+            constraintName: FKog5wjbi2d5d2f9i3kl7cyu58a
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: task
+            validate: true
+  - changeSet:
+      id: 1660912175253-6
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: required_for_id
+            baseTableName: task_required_for
+            constraintName: FKtjvvl1ice8hcviw4lstna196b
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: skill
+            validate: true

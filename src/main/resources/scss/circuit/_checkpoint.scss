@@ -70,3 +70,9 @@
         }
     }
 }
+.circuit[data-task-select="true"] {
+    .checkpoint__buttons,
+    .checkpoint__create {
+        display: none;
+    }
+}

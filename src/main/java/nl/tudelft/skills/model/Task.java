@@ -83,4 +83,11 @@ public class Task {
 	@ManyToMany(mappedBy = "tasksCompleted")
 	private Set<SCPerson> persons = new HashSet<>();
 
+	@NotNull
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@ManyToMany
+	private Set<Skill> requiredFor = new HashSet<>();
+
 }

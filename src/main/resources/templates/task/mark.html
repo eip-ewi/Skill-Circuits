@@ -89,7 +89,16 @@
                     data: JSON.stringify(completed),
                     processData: false,
                     contentType: "application/json",
-                    success: () => {},
+                    success: skills => {
+                        // Hidden skills to show
+                        skills.showSkills.forEach(s =>
+                            $.get(`/skill/${s}`, html => {
+                                const skill = $($("<div/>").append(html).children()[0]);
+                                $("#circuit").append(skill);
+                                recalculateConnections();
+                            })
+                        );
+                    },
                 });
             } else {
                 // If there is no authenticated person, also store in cookie storage

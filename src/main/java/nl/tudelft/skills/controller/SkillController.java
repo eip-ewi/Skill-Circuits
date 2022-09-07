@@ -74,6 +74,29 @@ public class SkillController {
 	}
 
 	/**
+	 * Gets a single skill by id.
+	 *
+	 * @param  id The id of the skill
+	 * @return    The skill html element
+	 */
+	@GetMapping("{id}")
+	public String getSkill(@PathVariable Long id, Model model) {
+		Skill skill = skillRepository.findByIdOrThrow(id);
+		ModuleLevelSkillViewDTO view = View.convert(skill, ModuleLevelSkillViewDTO.class);
+		view.setCompletedRequiredTasks(true);
+
+		model.addAttribute("level", "module");
+		model.addAttribute("groupType", "submodule");
+		model.addAttribute("block", view);
+		model.addAttribute("group", skill.getSubmodule());
+		model.addAttribute("circuit", buildCircuitFromSkill(skill));
+		model.addAttribute("canEdit", false);
+		model.addAttribute("canDelete", false);
+
+		return "block/view";
+	}
+
+	/**
 	 * Creates a skill.
 	 *
 	 * @param  create The DTO with information to create the skill
@@ -126,6 +149,7 @@ public class SkillController {
 		taskRepository.findAllByIdIn(patch.getRemovedItems())
 				.forEach(t -> t.getPersons().forEach(p -> p.getTasksCompleted().remove(t)));
 		taskRepository.deleteAllByIdIn(patch.getRemovedItems());
+		taskRepository.saveAll(skill.getRequiredTasks());
 
 		model.addAttribute("level", "module");
 		model.addAttribute("groupType", "submodule");

@@ -15,28 +15,36 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view.edition;
+package nl.tudelft.skills.dto.id;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+import nl.tudelft.librador.dto.id.IdDTO;
+import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.repository.TaskRepository;
 
-import lombok.*;
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.ItemView;
-import nl.tudelft.skills.model.Skill;
+import org.springframework.data.repository.CrudRepository;
 
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class EditionLevelSkillViewDTO extends View<Skill> implements ItemView {
+@EqualsAndHashCode(callSuper = true)
+public class TaskIdDTO extends IdDTO<Task, Long> {
 
-	@NotNull
-	private Long id;
-	@NotBlank
-	private String name;
-	@NotNull
-	private Boolean hidden;
+	public TaskIdDTO(Long id) {
+		super(id);
+	}
+
+	@Override
+	public Class<? extends CrudRepository<Task, Long>> repositoryClass() {
+		return TaskRepository.class;
+	}
+
+	@Override
+	public Class<? extends Task> targetClass() {
+		return Task.class;
+	}
 
 }

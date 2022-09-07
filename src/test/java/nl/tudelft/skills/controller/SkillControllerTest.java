@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import javax.servlet.http.HttpSession;
 
@@ -75,6 +76,7 @@ public class SkillControllerTest extends ControllerTest {
 				.name("New Skill")
 				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
 				.checkpoint(new CheckpointIdDTO(db.getCheckpointLectureOne().getId()))
+				.requiredTaskIds(Collections.emptyList())
 				.column(10).row(11).newItems(new ArrayList<>()).build();
 
 		skillController.createSkill(null, dto, mock(Model.class));
