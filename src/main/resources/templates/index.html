@@ -33,46 +33,68 @@
         <div layout:fragment="content">
             <h1>Welcome to Skill Circuits</h1>
 
-            <h2>Courses</h2>
+            <h2 th:if="${@authorisationService.isAuthenticated()} and ${isAnySkillCompleted}">
+                Your Courses
+            </h2>
 
+            <div class="blocks">
+                <th:block th:each="course : ${courses}">
+                    <th:block
+                        th:if="${@authorisationService.isAuthenticated()} and not ${@authorisationService.canViewCourse(course.id)} and ${completedSkillsPerCourse.get(course.id)} > 0">
+                        <a
+                            class="block"
+                            th:href="@{|/edition/${@courseService.getLastStudentEditionForCourseOrLast(course.id)}|}">
+                            <h2 th:text="${course.code}"></h2>
+                            <h2 th:text="${course.name}"></h2>
+                            <h3
+                                style="font-size: 0.8rem"
+                                th:text="|${completedSkillsPerCourse.get(course.id)} / ${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastStudentEditionForCourseOrLast(course.id))} skills completed|"></h3>
+                        </a>
+                    </th:block>
+
+                    <th:block th:if="${@authorisationService.canViewCourse(course.id)}">
+                        <a class="block" th:href="@{|/course/${course.id}|}">
+                            <h2 th:text="${course.code}"></h2>
+                            <h2 th:text="${course.name}"></h2>
+                            <h3
+                                style="font-size: 0.8rem"
+                                th:text="|${@courseService.getNumberOfEditions(course.id)} editions|"></h3>
+                        </a>
+                    </th:block>
+                </th:block>
+            </div>
+
+            <h2>Available Courses</h2>
             <div class="blocks">
                 <th:block th:each="course : ${courses}">
                     <th:block th:if="not${@authorisationService.isAuthenticated()}">
                         <a
                             class="block"
                             th:href="@{|/edition/${@courseService.getLastEditionForCourse(course.id)}|}">
+                            <h2 th:text="${course.code}"></h2>
                             <h2 th:text="${course.name}"></h2>
+                            <h3
+                                style="font-size: 0.8rem"
+                                th:text="|${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastEditionForCourse(course.id))} skills|"></h3>
                         </a>
                     </th:block>
 
                     <th:block
-                        th:if="${@authorisationService.isAuthenticated()} and not ${@authorisationService.canViewCourse(course.id)}">
+                        th:if="${@authorisationService.isAuthenticated()} and not ${@authorisationService.canViewCourse(course.id)} and ${completedSkillsPerCourse.get(course.id)}==0">
                         <a
                             class="block"
                             th:href="@{|/edition/${@courseService.getLastStudentEditionForCourseOrLast(course.id)}|}">
+                            <h2 th:text="${course.code}"></h2>
                             <h2 th:text="${course.name}"></h2>
-                        </a>
-                    </th:block>
-
-                    <th:block th:if="${@authorisationService.canViewCourse(course.id)}">
-                        <a class="block" th:href="@{|/course/${course.id}|}">
-                            <h2 th:text="${course.name}"></h2>
+                            <h3
+                                style="font-size: 0.8rem"
+                                th:text="|${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastStudentEditionForCourseOrLast(course.id))} skills|"></h3>
                         </a>
                     </th:block>
                 </th:block>
             </div>
 
             <br />
-
-            <h2>Modules</h2>
-
-            <ul>
-                <li th:each="moduleId : ${moduleIds}">
-                    <a
-                        th:href="@{|/module/${moduleId}|}"
-                        th:text="${moduleNames.get(moduleId)}"></a>
-                </li>
-            </ul>
         </div>
     </body>
 </html>

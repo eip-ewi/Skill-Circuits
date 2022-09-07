@@ -76,4 +76,5 @@ public class EditionServiceTest {
 
 		assertThat(editionRepository.findById(editionId)).isPresent().contains(edition);
 	}
+
 }
