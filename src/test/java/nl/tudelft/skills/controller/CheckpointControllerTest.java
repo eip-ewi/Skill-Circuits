@@ -181,6 +181,20 @@ public class CheckpointControllerTest extends ControllerTest {
 
 	@Test
 	@WithUserDetails("admin")
+	public void setSkillsForCheckpoint() {
+		var res = checkpointController.setSkillsForCheckpoint(db.getCheckpointLectureTwo().getId(),
+				List.of(db.getSkillImplication().getId()));
+
+		assertThat(res).isEqualTo(new ResponseEntity<>(HttpStatus.OK));
+
+		assertThat(db.getSkillImplication().getCheckpoint())
+				.isEqualTo(db.getCheckpointLectureTwo());
+		Checkpoint checkpoint = db.getCheckpointLectureTwo();
+		assertThat(checkpoint.getSkills()).containsExactly(db.getSkillImplication());
+	}
+
+	@Test
+	@WithUserDetails("admin")
 	public void addSkillsToCheckpoint() {
 		var res = checkpointController.addSkillsToCheckpoint(db.getCheckpointLectureTwo().getId(),
 				List.of(db.getSkillImplication().getId()));

@@ -38,7 +38,7 @@
                     event.dataTransfer.dropEffect = "move";
                     event.target.style.opacity = 0.5;
                     draggingSkill = true;
-                    circuit.classList.add("editing");
+                    $(circuit).attr("data-moving", "block");
                 }
             },
             false
@@ -49,7 +49,7 @@
                 if (event.target.classList.contains("block")) {
                     event.target.style.opacity = "";
                     draggingSkill = false;
-                    circuit.classList.remove("editing");
+                    $(circuit).removeAttr("data-moving");
                 }
             },
             false
@@ -175,6 +175,9 @@
                     }
 
                     recalculateConnections();
+                    if (blockType === "skill") {
+                        recalculateCheckpointSkills();
+                    }
                 }
             },
             false

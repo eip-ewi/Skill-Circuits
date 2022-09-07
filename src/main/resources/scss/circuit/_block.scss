@@ -184,7 +184,7 @@
     }
     @include show-only-when("*", ":hover");
 }
-.circuit.editing > .ghost_block {
+.circuit[data-moving="block"] > .ghost_block {
     background-color: var(--grey-700);
 }
 .circuit[data-task-select="true"] {

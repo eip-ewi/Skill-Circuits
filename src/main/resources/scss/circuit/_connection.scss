@@ -16,6 +16,7 @@
         &:not(.highlighted) {
             visibility: hidden;
         }
+        z-index: 20;
     }
 }
 #connections {

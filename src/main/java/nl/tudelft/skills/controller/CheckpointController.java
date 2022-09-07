@@ -66,6 +66,19 @@ public class CheckpointController {
 	}
 
 	@Transactional
+	@PutMapping("{id}/skills")
+	@PreAuthorize("@authorisationService.canEditCheckpoint({#id})")
+	public ResponseEntity<Void> setSkillsForCheckpoint(@PathVariable Long id,
+			@RequestBody List<Long> skillIds) {
+		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(id);
+		Set<Skill> skills = skillRepository.findAllByIdIn(skillIds);
+		checkpoint.setSkills(skills);
+		skills.forEach(skill -> skill.setCheckpoint(checkpoint));
+
+		return ResponseEntity.ok().build();
+	}
+
+	@Transactional
 	@PostMapping("{id}/skills")
 	@PreAuthorize("@authorisationService.canEditCheckpoint(#id)")
 	public ResponseEntity<Void> addSkillsToCheckpoint(@PathVariable Long id,
