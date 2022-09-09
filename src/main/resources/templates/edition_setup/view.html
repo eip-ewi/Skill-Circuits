@@ -23,7 +23,11 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
     layout:decorate="~{container}">
-    <div id="edition-setup-sidebar" class="sidebar hidden" layout:fragment="setup-overlay">
+    <div
+        id="edition-setup-sidebar"
+        class="sidebar hidden"
+        th:if="${@authorisationService.canEditEdition(edition.id)}"
+        layout:fragment="setup-overlay">
         <div class="sidebar__content">
             <div class="sidebar__header">
                 <h1>Edition setup</h1>

@@ -92,7 +92,7 @@ public class CourseServiceTest {
 	public void hasAtLeastOneEditionVisibleToStudents() {
 		when(courseApi.getCourseById(anyLong())).thenReturn(
 				Mono.just(new CourseDetailsDTO().editions(List.of(new EditionSummaryDTO().id(1L)))));
-		SCEdition edition = new SCEdition(1L, true, Collections.emptySet(), Collections.emptySet());
+		SCEdition edition = new SCEdition(1L, true, Collections.emptyList(), Collections.emptySet());
 		editionRepository.save(edition);
 
 		assertThat(courseService.hasAtLeastOneEditionVisibleToStudents(1L));

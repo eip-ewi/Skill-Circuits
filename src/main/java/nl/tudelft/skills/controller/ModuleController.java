@@ -168,7 +168,7 @@ public class ModuleController {
 		moduleRepository.save(patch.apply(module));
 
 		return SpringContext.getBean(EditionController.class).getEditionPage(module.getEdition().getId(),
-				model);
+				"circuit", model);
 	}
 
 	/**

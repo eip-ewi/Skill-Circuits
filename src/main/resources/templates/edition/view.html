@@ -25,24 +25,25 @@
     layout:decorate="~{container}">
     <head>
         <link rel="stylesheet" th:href="@{/css/circuit.css}" />
-        <title th:text="${edition.name}"></title>
+        <title th:text="|${edition.course.name} - ${edition.name}|"></title>
     </head>
 
     <body>
         <div layout:fragment="content">
             <div
                 class="circuit__header"
+                th:style="${@authorisationService.canEditEdition(edition.id) and not studentMode} ? '' : 'margin-bottom: 0;'"
                 th:with="visible = ${@editionRepository.findByIdOrThrow(edition.id).isVisible()}">
                 <div class="circuit__header__group">
                     <h1 th:text="${edition.name}"></h1>
-                    <a th:href="@{|/course/${edition.course.id}|}">
-                        <span class="level_up_button fa-solid fa-turn-up fa-xl"></span>
-                    </a>
+                    <!--                    <a th:href="@{|/course/${edition.course.id}|}">-->
+                    <!--                        <span class="level_up_button fa-solid fa-turn-up fa-xl"></span>-->
+                    <!--                    </a>-->
                 </div>
 
                 <div class="circuit__header__group">
                     <form
-                        th:if="${@authorisationService.isAtLeastTeacherInEdition(edition.id)}"
+                        th:if="${@authorisationService.canEditEdition(edition.id)}"
                         method="post"
                         th:action="@{|/edition/${edition.id}/studentmode|}">
                         <button th:if="${studentMode}" type="submit" class="circuit__button">
@@ -53,7 +54,7 @@
                         </button>
                     </form>
                     <button
-                        th:if="${@authorisationService.isAtLeastTeacherInEdition(edition.id)} and not ${studentMode}"
+                        th:if="${@authorisationService.canEditEdition(edition.id) and not studentMode}"
                         id="open-edition-setup-sidebar"
                         class="circuit__button"
                         title="setup">
@@ -62,6 +63,26 @@
                 </div>
                 <div layout:replace="~{edition_setup/view :: setup-overlay}"></div>
             </div>
+
+            <form
+                th:if="${not @authorisationService.canEditEdition(edition.id) or studentMode}"
+                class="tabs"
+                th:with="view = ${param?.view}">
+                <button
+                    class="tab"
+                    name="view"
+                    value="modules"
+                    th:data-active="${view == 'circuit'}">
+                    Modules
+                </button>
+                <button
+                    class="tab"
+                    name="view"
+                    value="circuit"
+                    th:data-active="${view != 'circuit'}">
+                    Circuit
+                </button>
+            </form>
 
             <th:block
                 th:with="circuit = ${edition},
