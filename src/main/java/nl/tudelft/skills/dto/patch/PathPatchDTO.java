@@ -15,41 +15,42 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.model;
+package nl.tudelft.skills.dto.patch;
 
-import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import nl.tudelft.librador.dto.patch.Patch;
+import nl.tudelft.skills.dto.id.TaskIdDTO;
+import nl.tudelft.skills.model.Path;
 
 @Data
-@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Path {
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+public class PathPatchDTO extends Patch<Path> {
+	@NotNull
 	private Long id;
 
 	@NotBlank
 	private String name;
 
-	@NotNull
-	@ManyToOne
-	@ToString.Exclude
-	private SCEdition edition;
+	private Set<TaskIdDTO> tasks;
 
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany(mappedBy = "paths")
-	private Set<Task> tasks = new HashSet<>();
+	@Override
+	protected void applyOneToOne() {
+		updateNonNull(name, data::setName);
+		//        updateNonNull(tasks, data::setTasks); TODO one to many?
+	}
 
+	@Override
+	protected void validate() {
+
+	}
 }

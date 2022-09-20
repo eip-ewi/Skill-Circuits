@@ -17,39 +17,37 @@
  */
 package nl.tudelft.skills.model;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 import lombok.*;
+import nl.tudelft.skills.model.labracore.SCPerson;
 
 @Data
 @Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Path {
+public class PathPreference {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private Long id;
+	Long id;
 
-	@NotBlank
-	private String name;
-
-	@NotNull
-	@ManyToOne
 	@ToString.Exclude
-	private SCEdition edition;
+	@EqualsAndHashCode.Exclude
+	private Long pathId; // TODO validate
 
-	@NotNull
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	private Long editionId; // TODO validate
+
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@ManyToOne
+	private SCPerson person;
+
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToMany(mappedBy = "paths")
-	private Set<Task> tasks = new HashSet<>();
-
+	private boolean hasPreference = false;
 }

@@ -38,6 +38,7 @@
                     <th:block layout:fragment="item-before-content"></th:block>
                     <th:block layout:fragment="item-name">
                         <span
+                            th:if="(${level == 'module'} and ${item.visibility}) or ${level != 'module'}"
                             th:id="|item-${item.id}-name|"
                             class="item__name"
                             th:text="${item.name}"></span>

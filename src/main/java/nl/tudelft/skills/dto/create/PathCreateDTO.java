@@ -15,41 +15,37 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.model;
+package nl.tudelft.skills.dto.create;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
+import nl.tudelft.librador.dto.create.Create;
+import nl.tudelft.skills.dto.id.SCEditionIdDTO;
+import nl.tudelft.skills.model.Path;
+import nl.tudelft.skills.model.Task;
 
 @Data
-@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Path {
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private Long id;
+@EqualsAndHashCode(callSuper = false)
+public class PathCreateDTO extends Create<Path> {
 
 	@NotBlank
 	private String name;
-
 	@NotNull
-	@ManyToOne
-	@ToString.Exclude
-	private SCEdition edition;
-
+	private SCEditionIdDTO edition;
 	@NotNull
 	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany(mappedBy = "paths")
 	private Set<Task> tasks = new HashSet<>();
 
+	@Override
+	public Class<Path> clazz() {
+		return Path.class;
+	}
 }

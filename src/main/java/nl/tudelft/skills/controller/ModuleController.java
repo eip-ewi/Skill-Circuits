@@ -191,6 +191,21 @@ public class ModuleController {
 	}
 
 	/**
+	 * Toggles path edit mode for a specific edition from a module.
+	 *
+	 * @param  id The id of the module
+	 * @return    The module page
+	 */
+	@PostMapping("{id}/pathEditMode")
+	public String togglePathEditMode(@PathVariable Long id) {
+		Long editionId = moduleRepository.findByIdOrThrow(id).getEdition().getId();
+		Boolean currentMode = (Boolean) session.getAttribute("path-edit-mode-" + editionId);
+		session.setAttribute("path-edit-mode-" + editionId,
+				currentMode == null || !currentMode);
+		return "redirect:/module/{id}";
+	}
+
+	/**
 	 * Gets the skills of a module.
 	 *
 	 * @param  id The id of the module

@@ -39,17 +39,65 @@
                 </div>
 
                 <div class="circuit__header__group">
+                    <select
+                        th:if="${@editionService.getPaths(module.edition.id).size() > 0}"
+                        class="circuit__dropdown selectbox"
+                        data-type="path-select"
+                        th:data-edition="${module.edition.id}"
+                        id="blah">
+                        <option th:value="${0}" selected>No path</option>
+                        <option
+                            value="new"
+                            th:id="|${id}-new|"
+                            th:val="new"
+                            th:text="New..."></option>
+                        <option
+                            th:each="path : ${@editionService.getPaths(module.edition.id)}"
+                            th:value="${path.id}"
+                            th:text="${path.name}"></option>
+                    </select>
+
+                    <form
+                        th:if="${@authorisationService.isAtLeastTeacherInEdition(module.edition.id)} and not ${studentMode}"
+                        method="post"
+                        th:action="@{|/module/${module.id}/pathEditMode|}">
+                        <button th:if="${pathEditMode}" type="submit" class="circuit__button">
+                            Exit path edit view
+                        </button>
+                        <button th:unless="${pathEditMode}" type="submit" class="circuit__button">
+                            Enter path edit view
+                        </button>
+                    </form>
                     <form
                         th:if="${@authorisationService.isAtLeastTeacherInEdition(module.edition.id)}"
                         method="post"
-                        th:action="@{|/module/${module.id}/studentmode|}">
-                        <button th:if="${studentMode}" type="submit" class="circuit__button">
-                            Exit student view
-                        </button>
-                        <button th:unless="${studentMode}" type="submit" class="circuit__button">
-                            Enter student view
-                        </button>
+                        th:action="@{|/path/${module.edition.id}/${selectedPathId}/default|}">
+                        <button
+                            th:if="${pathEditMode} and ${selectedPathId} != ${defaultPathId}"
+                            type="submit"
+                            class="circuit__button fa-regular fa-star"></button>
+                        <button
+                            th:if="${pathEditMode} and ${selectedPathId} == ${defaultPathId}"
+                            type="submit"
+                            class="circuit__button fa-solid fa-star"></button>
                     </form>
+
+                    <div class="circuit__header__group">
+                        <form
+                            th:if="${@authorisationService.isAtLeastTeacherInEdition(module.edition.id)} and not ${pathEditMode}"
+                            method="post"
+                            th:action="@{|/module/${module.id}/studentmode|}">
+                            <button th:if="${studentMode}" type="submit" class="circuit__button">
+                                Exit student view
+                            </button>
+                            <button
+                                th:unless="${studentMode}"
+                                type="submit"
+                                class="circuit__button">
+                                Enter student view
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
 
@@ -82,6 +130,7 @@
                     const itemType = "task";
                 </script>
                 <div layout:replace="~{circuit/view :: script}"></div>
+                <div layout:replace="~{path/switch :: script}"></div>
 
                 <div layout:replace="~{task/create :: script}"></div>
                 <div layout:replace="~{task/edit :: script}"></div>

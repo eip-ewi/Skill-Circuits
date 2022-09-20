@@ -18,18 +18,19 @@
 package nl.tudelft.skills.service;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
 
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
+import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.edition.EditionLevelCourseViewDTO;
-import nl.tudelft.skills.dto.view.edition.EditionLevelEditionViewDTO;
-import nl.tudelft.skills.dto.view.edition.EditionLevelModuleViewDTO;
-import nl.tudelft.skills.dto.view.edition.EditionLevelSubmoduleViewDTO;
+import nl.tudelft.skills.dto.view.edition.*;
+import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.EditionRepository;
+import nl.tudelft.skills.repository.PathRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -93,6 +94,31 @@ public class EditionService {
 		view.setCourse(
 				new EditionLevelCourseViewDTO(edition.getCourse().getId(), edition.getCourse().getName()));
 		return view;
+	}
+
+	/**
+	 * Returns a list of PathViewDTOs with all the paths in this edition.
+	 *
+	 * @param  editionId Edition id.
+	 * @return           List of PathViewDTOs for edition with id.
+	 */
+	public Set<PathViewDTO> getPaths(Long editionId) {
+		return editionRepository.findById(editionId).get()
+				.getPaths().stream().map(p -> View.convert(p, PathViewDTO.class))
+				.collect(Collectors.toSet());
+	}
+
+	/**
+	 * Returns the default path for an edition if it exists.
+	 *
+	 * @param  editionId The edition id
+	 * @return           The defualt path of an edition if it exists, null otherwise.
+	 */
+	public Path getDefaultPath(Long editionId) {
+		PathRepository pathRepository = SpringContext.getBean(PathRepository.class);
+		if (editionRepository.findById(editionId).get().getDefaultPathId() == null)
+			return null;
+		return pathRepository.findById(editionRepository.findById(editionId).get().getDefaultPathId()).get();
 	}
 
 	/**

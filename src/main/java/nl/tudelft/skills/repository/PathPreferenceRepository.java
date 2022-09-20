@@ -15,41 +15,22 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.model;
+package nl.tudelft.skills.repository;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import nl.tudelft.skills.model.PathPreference;
 
-import lombok.*;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
-@Data
-@Entity
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class Path {
+public interface PathPreferenceRepository extends JpaRepository<PathPreference, Long> {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private Long id;
+	default PathPreference findByIdOrThrow(Long id) {
+		return findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("PathPreference was not found: " + id));
+	}
 
-	@NotBlank
-	private String name;
-
-	@NotNull
-	@ManyToOne
-	@ToString.Exclude
-	private SCEdition edition;
-
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany(mappedBy = "paths")
-	private Set<Task> tasks = new HashSet<>();
+	List<PathPreference> findAllByPathId(Long pathId);
 
 }

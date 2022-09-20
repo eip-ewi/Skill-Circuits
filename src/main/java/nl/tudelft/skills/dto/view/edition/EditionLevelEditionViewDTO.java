@@ -61,6 +61,7 @@ public class EditionLevelEditionViewDTO extends View<SCEdition> implements Circu
 		return modules;
 	}
 
+	@Override
 	public void postApply() {
 		super.postApply();
 		this.checkpointsInEdition = View.convert(

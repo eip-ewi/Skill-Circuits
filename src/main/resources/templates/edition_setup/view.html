@@ -102,6 +102,24 @@
                         </th:block>
                     </ul>
                 </div>
+                <div class="sidebar__column">
+                    <h2>Paths</h2>
+                    <form id="new-path-form" class="sidebar__new_item_form">
+                        <input name="edition.id" hidden th:value="${edition.id}" />
+                        <input
+                            id="new-path-name"
+                            name="name"
+                            type="text"
+                            placeholder="New Path"
+                            required />
+                        <button type="submit">create</button>
+                    </form>
+                    <ul id="path-list" class="editable-ul">
+                        <th:block th:each="path : ${@editionService.getPaths(edition.id)}">
+                            <th:block layout:replace="~{edition_setup/path :: path}"></th:block>
+                        </th:block>
+                    </ul>
+                </div>
             </div>
         </div>
 
@@ -135,6 +153,16 @@
                         $("#checkpoint-list").prepend(element);
                     });
                 });
+                $("#new-path-form").submit(e => {
+                    e.preventDefault();
+                    $.post("/path/setup", $("#new-path-form").serialize(), html => {
+                        const element = $("<div/>").append(html).children()[0];
+                        $(element).find(".path__edit").click(editPath);
+                        $(element).find(".path__delete").click(deletePath);
+                        $("#new-path-name").val("");
+                        $("#path-list").prepend(element);
+                    });
+                });
                 $("#close-edition-setup-sidebar").click(() => {
                     $("#edition-setup-sidebar").addClass("hidden");
                 });
@@ -147,9 +175,15 @@
         <th:block layout:replace="~{edition_setup/module-delete :: script}" />
         <th:block layout:replace="~{edition_setup/module-edit :: form}" />
         <th:block layout:replace="~{edition_setup/module-edit :: script}" />
+
         <th:block layout:replace="~{edition_setup/checkpoint-delete :: overlay}" />
         <th:block layout:replace="~{edition_setup/checkpoint-delete :: script}" />
         <th:block layout:replace="~{edition_setup/checkpoint-edit :: form}" />
         <th:block layout:replace="~{edition_setup/checkpoint-edit :: script}" />
+
+        <th:block layout:replace="~{edition_setup/path-delete :: overlay}" />
+        <th:block layout:replace="~{edition_setup/path-delete :: script}" />
+        <th:block layout:replace="~{edition_setup/path-edit :: form}" />
+        <th:block layout:replace="~{edition_setup/path-edit :: script}" />
     </div>
 </html>

@@ -15,41 +15,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.model;
+package nl.tudelft.skills.dto.view.edition;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
+import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.model.Path;
 
 @Data
-@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Path {
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+@EqualsAndHashCode(callSuper = false)
+public class PathViewDTO extends View<Path> {
+	@NotNull
 	private Long id;
-
 	@NotBlank
 	private String name;
-
-	@NotNull
-	@ManyToOne
-	@ToString.Exclude
-	private SCEdition edition;
-
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany(mappedBy = "paths")
-	private Set<Task> tasks = new HashSet<>();
-
 }

@@ -33,6 +33,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
 	List<Task> findAllByIdIn(Collection<Long> id);
 
+	List<Task> findAllBySkillSubmoduleModuleEditionId(Long editionId);
+
 	void deleteAllByIdIn(Collection<Long> id);
 
 }
