@@ -475,6 +475,16 @@ public class AuthorisationService {
 	}
 
 	/**
+	 * Gets whether the authenticated user can view both tasks in and out of a path.
+	 *
+	 * @param  editionId The edition id.
+	 * @return           True iff the user can view tasks not in path.
+	 */
+	public boolean canViewThroughPath(Long editionId) {
+		return isAtLeastTeacherInEdition(editionId);
+	}
+
+	/**
 	 * Gets the authenticated user's role in an edition.
 	 *
 	 * @param  editionId The id of the edition

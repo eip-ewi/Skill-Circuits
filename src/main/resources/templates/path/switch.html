@@ -22,13 +22,13 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <script layout:fragment="script" th:inline="javascript">
-        addEventListener("DOMContentLoaded", function () {
-            $('[data-type="path-select"]').change(function () {
+        document.addEventListener("DOMContentLoaded", function () {
+            $("#path-dropdown").change(function () {
                 if ($(this).find(":selected").val() === "new") {
                     $(this).siblings("input").prop("type", "text");
                     $(this).siblings("input").val("");
                 } else {
-                    let editionId = document.querySelector("#blah").dataset.edition;
+                    let editionId = $(this).data("edition");
                     let pathId = $(this).find(":selected").val();
                     $.ajax({
                         type: "post",
@@ -40,6 +40,20 @@
                         },
                     });
                 }
+            });
+
+            $("#default-path-dropdown").change(function () {
+                let editionId = $(this).data("edition");
+                let pathId = $(this).find(":selected").val();
+                $.ajax({
+                    type: "post",
+                    url: `/path/${editionId}/${pathId}/default/`,
+                    processData: false,
+                    contentType: "application/json",
+                    success: () => {
+                        location.reload();
+                    },
+                });
             });
         });
     </script>

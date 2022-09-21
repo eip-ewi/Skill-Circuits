@@ -72,6 +72,7 @@ public class PathController {
 	@PostMapping("{editionId}/{pathId}/preference")
 	public ResponseEntity<Void> updateUserPathPreference(@AuthenticatedPerson(required = false) Person person,
 			@PathVariable Long editionId, @PathVariable Long pathId) {
+		// TODO send path as variable instead and have no path id (in selected path from module controller be null instead of 0)
 		Path path = pathRepository.findById(pathId).orElse(null);
 		SCEdition edition = SpringContext.getBean(EditionRepository.class).findByIdOrThrow(editionId);
 

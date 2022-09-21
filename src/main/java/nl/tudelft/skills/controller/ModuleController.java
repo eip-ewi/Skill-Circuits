@@ -191,21 +191,6 @@ public class ModuleController {
 	}
 
 	/**
-	 * Toggles path edit mode for a specific edition from a module.
-	 *
-	 * @param  id The id of the module
-	 * @return    The module page
-	 */
-	@PostMapping("{id}/pathEditMode")
-	public String togglePathEditMode(@PathVariable Long id) {
-		Long editionId = moduleRepository.findByIdOrThrow(id).getEdition().getId();
-		Boolean currentMode = (Boolean) session.getAttribute("path-edit-mode-" + editionId);
-		session.setAttribute("path-edit-mode-" + editionId,
-				currentMode == null || !currentMode);
-		return "redirect:/module/{id}";
-	}
-
-	/**
 	 * Gets the skills of a module.
 	 *
 	 * @param  id The id of the module
@@ -215,6 +200,7 @@ public class ModuleController {
 	@PreAuthorize("@authorisationService.canGetSkillsOfModule(#id)")
 	public @ResponseBody List<SkillSummaryDTO> getSkillsOfModule(@PathVariable Long id) {
 		return View.convert(moduleRepository.findByIdOrThrow(id).getSubmodules().stream()
-				.flatMap(s -> s.getSkills().stream()).toList(), SkillSummaryDTO.class);
+			.flatMap(s -> s.getSkills().stream()).toList(), SkillSummaryDTO.class);
 	}
+
 }

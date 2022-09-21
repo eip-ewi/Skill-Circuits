@@ -38,10 +38,17 @@
                     <th:block layout:fragment="item-before-content"></th:block>
                     <th:block layout:fragment="item-name">
                         <span
-                            th:if="(${level == 'module'} and ${item.visibility}) or ${level != 'module'}"
+                            th:if="not ${canEdit} and ((${level == 'module'} and ${item.visibility}) or ${level != 'module'})"
                             th:id="|item-${item.id}-name|"
                             class="item__name"
-                            th:text="${item.name}"></span>
+                            th:text="${item.name}"
+                            th:data-black="true"></span>
+                        <span
+                            th:if="${canEdit}"
+                            th:id="|item-${item.id}-name|"
+                            class="item__name"
+                            th:text="${item.name}"
+                            th:data-black="(${level == 'module'} and ${item.visibility}) or ${level != 'module'}"></span>
                         <input
                             type="text"
                             data-edit="only"

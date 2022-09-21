@@ -119,6 +119,24 @@
                             <th:block layout:replace="~{edition_setup/path :: path}"></th:block>
                         </th:block>
                     </ul>
+
+                    <h3 th:if="${@editionService.getPaths(edition.id).size() > 0}">Default path</h3>
+                    <select
+                        th:if="${@editionService.getPaths(edition.id).size() > 0}"
+                        class="circuit__dropdown selectbox"
+                        th:data-edition="${edition.id}"
+                        id="default-path-dropdown">
+                        <option
+                            th:value="${0}"
+                            th:selected="${@editionService.getDefaultPath(edition.id) == null}">
+                            No path
+                        </option>
+                        <option
+                            th:each="path : ${@editionService.getPaths(edition.id)}"
+                            th:value="${path.id}"
+                            th:text="${path.name}"
+                            th:selected="${@editionService.getDefaultPath(edition.id) != null} and ${path.id.equals(@editionService.getDefaultPath(edition.id).id)}"></option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -180,6 +198,8 @@
         <th:block layout:replace="~{edition_setup/checkpoint-delete :: script}" />
         <th:block layout:replace="~{edition_setup/checkpoint-edit :: form}" />
         <th:block layout:replace="~{edition_setup/checkpoint-edit :: script}" />
+
+        <div layout:replace="~{path/switch :: script}"></div>
 
         <th:block layout:replace="~{edition_setup/path-delete :: overlay}" />
         <th:block layout:replace="~{edition_setup/path-delete :: script}" />

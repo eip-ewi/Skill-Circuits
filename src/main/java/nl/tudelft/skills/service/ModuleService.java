@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.service;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,6 +39,7 @@ import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.PathRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.security.AuthorisationService;
 
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
@@ -84,28 +86,34 @@ public class ModuleService {
 		Boolean studentMode = (Boolean) session.getAttribute("student-mode-" + module.getEdition().getId());
 
 		// Paths
-		Path path = getDefaultOrPreferredPath(person, module.getEdition().getId());
+		Path path = getDefaultOrPreferredPath((person != null ? person.getId() : null),
+				module.getEdition().getId());
 		Path defaultPath = SpringContext.getBean(EditionService.class)
 				.getDefaultPath(module.getEdition().getId());
 		Long defaultPathId = defaultPath != null ? defaultPath.getId() : 0;
 
-		Boolean pathEditMode = (Boolean) session
-				.getAttribute("path-edit-mode-" + module.getEdition().getId());
-		if (path != null && (pathEditMode == null || !pathEditMode)) {
-			// Show only skills & tasks on followed path
-			Set<Long> taskIds = path.getTasks().stream().map(Task::getId).collect(Collectors.toSet());
-			// eliminate all skills that have no tasks in the selected path
-			module.getSubmodules().stream().flatMap(s -> s.getSkills().stream()).forEach(
-					s -> s.setTasks(s.getTasks().stream().filter(t -> taskIds.contains(t.getId())).toList()));
-		} else if (path != null && (pathEditMode != null && pathEditMode)) {
-			Set<Long> taskIds = path.getTasks().stream().map(Task::getId).collect(Collectors.toSet());
-			// TODO task not in edition should appear partially visible
-			module.getSubmodules().stream().flatMap(s -> s.getSkills().stream())
-					.forEach(s -> s.setTasks(s.getTasks().stream().map(t -> {
-						t.setVisibility(taskIds.contains(t.getId()));
-						return t;
-					}).toList()));
+		Set<Long> taskIds = path == null ? new HashSet<>()
+				: path.getTasks().stream().map(Task::getId).collect(Collectors.toSet());
 
+		AuthorisationService authorisationService = SpringContext.getBean(AuthorisationService.class);
+		if (path != null) {
+			// if path is selected (doesn't apply for no-path), show only skills & tasks on followed path
+			if (!(authorisationService.canViewThroughPath(module.getEdition().getId())
+					&& (studentMode == null || !studentMode))) {
+				// tasks not in path get removed
+				// TODO eliminate all skills that have no tasks in the selected path
+				module.getSubmodules().stream().flatMap(s -> s.getSkills().stream()).forEach(
+						s -> s.setTasks(
+								s.getTasks().stream().filter(t -> taskIds.contains(t.getId())).toList()));
+			} else {
+				// tasks not in path get visibility property false
+				module.getSubmodules().stream().flatMap(s -> s.getSkills().stream()).forEach(
+						s -> s.setTasks(s.getTasks().stream().map(t -> {
+							t.setVisibility(taskIds.contains(t.getId()));
+							return t;
+						}).toList()));
+
+			}
 		}
 
 		model.addAttribute("level", "module");
@@ -116,15 +124,13 @@ public class ModuleService {
 		model.addAttribute("emptyGroup", ModuleLevelSubmoduleViewDTO.empty());
 		model.addAttribute("studentMode", studentMode != null && studentMode);
 
-		model.addAttribute("selectedPathId", path != null ? path.getId() : 0);// TODO
-		model.addAttribute("defaultPathId", defaultPathId);// TODO do through editionViewDTO instead
-		model.addAttribute("defaultPathId", defaultPathId);// TODO do through editionViewDTO instead
-		model.addAttribute("pathEditMode", pathEditMode);
+		model.addAttribute("selectedPathId", path != null ? path.getId() : 0);// TODO do null instead of 0
+		model.addAttribute("tasksInPathIds", taskIds);
 
 		EditionDetailsDTO edition = editionApi.getEditionById(module.getEdition().getId()).block();
 		CourseDetailsDTO course = courseApi.getCourseById(edition.getCourse().getId()).block();
 		model.addAttribute("courses",
-				courseApi.getAllCoursesByProgram(course.getProgram().getId()).collectList().block());
+			courseApi.getAllCoursesByProgram(course.getProgram().getId()).collectList().block());
 	}
 
 	/**
@@ -151,19 +157,18 @@ public class ModuleService {
 	/**
 	 * Return the followed path in an edition. This is either the user preferred path or the default one.
 	 *
-	 * @param  person    Authenticated person
+	 * @param  personId  Authenticated person id, or null if not authenticated
 	 * @param  editionId Edition id.
 	 * @return           Followed path.
 	 */
-	public Path getDefaultOrPreferredPath(Person person, Long editionId) {
-		// TODO move to EditionService instead ?
+	public Path getDefaultOrPreferredPath(Long personId, Long editionId) {
 		EditionService editionService = SpringContext.getBean(EditionService.class);
 
 		Path path = editionService.getDefaultPath(editionId);
 
 		PersonService personService = SpringContext.getBean(PersonService.class);
-		if (person != null && personService.getPathForEdition(person.getId(), editionId).isPresent()) {
-			PathPreference pathPreference = personService.getPathForEdition(person.getId(), editionId).get();
+		if (personId != null && personService.getPathForEdition(personId, editionId).isPresent()) {
+			PathPreference pathPreference = personService.getPathForEdition(personId, editionId).get();
 			if (pathPreference != null && pathPreference.getPathId() != null) {
 				path = SpringContext.getBean(PathRepository.class).findById(pathPreference.getPathId()).get();
 

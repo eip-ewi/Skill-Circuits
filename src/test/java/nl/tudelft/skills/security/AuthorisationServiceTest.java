@@ -476,6 +476,16 @@ public class AuthorisationServiceTest {
 				.isEqualTo(expected);
 	}
 
+	@Transactional
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canViewThroughPath(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canViewThroughPath(db.getEditionRL().getId()))
+				.isEqualTo(expected);
+	}
+
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER", "HEAD_TA", "TA", "STUDENT" })

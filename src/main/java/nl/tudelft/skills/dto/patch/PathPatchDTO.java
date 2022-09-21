@@ -17,36 +17,42 @@
  */
 package nl.tudelft.skills.dto.patch;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.patch.Patch;
-import nl.tudelft.skills.dto.id.TaskIdDTO;
 import nl.tudelft.skills.model.Path;
+import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.repository.TaskRepository;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public class PathPatchDTO extends Patch<Path> {
 	@NotNull
 	private Long id;
 
-	@NotBlank
 	private String name;
 
-	private Set<TaskIdDTO> tasks;
+	private List<Long> taskIds;
 
 	@Override
 	protected void applyOneToOne() {
 		updateNonNull(name, data::setName);
-		//        updateNonNull(tasks, data::setTasks); TODO one to many?
+	}
+
+	@Override
+	protected void applyManyToManyMappedBy() {
+		TaskRepository taskRepository = SpringContext.getBean(TaskRepository.class);
+		Set<Task> tasksInPath = new HashSet<>(taskRepository.findAllByIdIn(taskIds));
+		updateManyToManyMappedBy(data, data.getTasks(), tasksInPath, Task::getPaths);
 	}
 
 	@Override
