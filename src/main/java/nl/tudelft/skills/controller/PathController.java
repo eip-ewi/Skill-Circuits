@@ -69,11 +69,11 @@ public class PathController {
 	 * @return
 	 */
 	@Transactional
-	@PostMapping("{editionId}/{pathId}/preference")
+	@PostMapping("{editionId}/preference")
 	public ResponseEntity<Void> updateUserPathPreference(@AuthenticatedPerson(required = false) Person person,
-			@PathVariable Long editionId, @PathVariable Long pathId) {
-		// TODO send path as variable instead and have no path id (in selected path from module controller be null instead of 0)
-		Path path = pathRepository.findById(pathId).orElse(null);
+			@PathVariable Long editionId, @RequestParam(required = false) Long pathId) {
+
+		Path path = pathId == null ? null : pathRepository.findById(pathId).orElse(null);
 		SCEdition edition = SpringContext.getBean(EditionRepository.class).findByIdOrThrow(editionId);
 
 		// TODO currently pg path is only redirected if user is logged in. Also make it work for no auth
@@ -110,19 +110,15 @@ public class PathController {
 	 * @return
 	 */
 	@Transactional
-	@PostMapping("{editionId}/{pathId}/default")
+	@PostMapping("{editionId}/default")
 	public ResponseEntity<Void> updateDefaultPathForEdition(
 			@AuthenticatedPerson(required = false) Person person, @PathVariable Long editionId,
-			@PathVariable Long pathId) {
+			@RequestParam(required = false) Long pathId) {
 		EditionRepository editionRepository = SpringContext.getBean(EditionRepository.class);
 		SCEdition edition = editionRepository.getById(editionId);
 
-		// TODO remove this by getting nullable pathId
-		if (pathId != 0) {
-			edition.setDefaultPathId(pathId);
-		} else {
-			edition.setDefaultPathId(null);
-		}
+		edition.setDefaultPathId(pathId);
+
 		// Remove previously saved path TODO remove comments?
 		//        Path path = editionRepository.findById(editionId).get().getPaths().stream().filter(p->p.isEditionDefaultPath()).findFirst().orElse(null);
 		//        if (path != null) {

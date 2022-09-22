@@ -28,8 +28,6 @@
                 data["id"] = $("#path-dropdown").val();
                 data["taskIds"] = result;
 
-                console.log("here");
-                console.log(result);
                 $.ajax({
                     type: "PATCH",
                     url: `/path`,

@@ -124,7 +124,7 @@ public class ModuleService {
 		model.addAttribute("emptyGroup", ModuleLevelSubmoduleViewDTO.empty());
 		model.addAttribute("studentMode", studentMode != null && studentMode);
 
-		model.addAttribute("selectedPathId", path != null ? path.getId() : 0);// TODO do null instead of 0
+		model.addAttribute("selectedPathId", path != null ? path.getId() : null);
 		model.addAttribute("tasksInPathIds", taskIds);
 
 		EditionDetailsDTO edition = editionApi.getEditionById(module.getEdition().getId()).block();

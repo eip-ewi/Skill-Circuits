@@ -45,7 +45,7 @@
                         data-type="path-select"
                         th:data-edition="${module.edition.id}"
                         id="path-dropdown">
-                        <option th:value="${0}" th:selected="${selectedPathId == 0}">
+                        <option th:value="${null}" th:selected="${selectedPathId == null}">
                             No path
                         </option>
                         <option

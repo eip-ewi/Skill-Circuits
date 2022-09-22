@@ -30,11 +30,12 @@
                 } else {
                     let editionId = $(this).data("edition");
                     let pathId = $(this).find(":selected").val();
+                    let data = {};
+                    data["pathId"] = pathId;
                     $.ajax({
                         type: "post",
-                        url: `/path/${editionId}/${pathId}/preference/`,
-                        processData: false,
-                        contentType: "application/json",
+                        url: `/path/${editionId}/preference/`,
+                        data: data,
                         success: () => {
                             location.reload();
                         },
@@ -45,11 +46,12 @@
             $("#default-path-dropdown").change(function () {
                 let editionId = $(this).data("edition");
                 let pathId = $(this).find(":selected").val();
+                let data = {};
+                data["pathId"] = pathId;
                 $.ajax({
                     type: "post",
-                    url: `/path/${editionId}/${pathId}/default/`,
-                    processData: false,
-                    contentType: "application/json",
+                    url: `/path/${editionId}/default/`,
+                    data: data,
                     success: () => {
                         location.reload();
                     },
