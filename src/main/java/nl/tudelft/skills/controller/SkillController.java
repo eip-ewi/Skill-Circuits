@@ -18,7 +18,9 @@
 package nl.tudelft.skills.controller;
 
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -59,6 +61,7 @@ public class SkillController {
 	private final TaskRepository taskRepository;
 	private final SubmoduleRepository submoduleRepository;
 	private final CheckpointRepository checkpointRepository;
+	private final PathRepository pathRepository;
 	private final SkillService skillService;
 	private final ModuleService moduleService;
 	private final HttpSession session;
@@ -67,6 +70,7 @@ public class SkillController {
 	public SkillController(SkillRepository skillRepository, ExternalSkillRepository externalSkillRepository,
 			AbstractSkillRepository abstractSkillRepository, TaskRepository taskRepository,
 			SubmoduleRepository submoduleRepository, CheckpointRepository checkpointRepository,
+			PathRepository pathRepository,
 			SkillService skillService, ModuleService moduleService,
 			HttpSession session) {
 		this.skillRepository = skillRepository;
@@ -75,6 +79,7 @@ public class SkillController {
 		this.taskRepository = taskRepository;
 		this.submoduleRepository = submoduleRepository;
 		this.checkpointRepository = checkpointRepository;
+		this.pathRepository = pathRepository;
 		this.skillService = skillService;
 		this.moduleService = moduleService;
 		this.session = session;
@@ -125,7 +130,18 @@ public class SkillController {
 					return dto.apply();
 				}).toList();
 		skill.setTasks(taskRepository.saveAll(tasks));
+
 		checkpointRepository.findBySkillsContains(skill).getSkills().add(skill);
+
+		// New tasks will be included in all paths by default
+		SCEdition edition = skill.getSubmodule().getModule().getEdition();
+
+		Set<Path> paths = new HashSet<>(
+				pathRepository.findAllById(edition.getPaths().stream().map(Path::getId).toList()));
+		tasks.forEach(t -> {
+			t.setPaths(paths);
+			taskRepository.save(t);
+		});
 
 		moduleService.configureModuleModel(person, skill.getSubmodule().getModule().getId(), model, session);
 		return "module/view";

@@ -62,7 +62,7 @@
                         th:if="${@authorisationService.isAtLeastTeacherInEdition(module.edition.id)} and not ${studentMode}"
                         th:value="${tasksInPathIds}" />
                     <button
-                        th:if="${@authorisationService.isAtLeastTeacherInEdition(module.edition.id)} and not ${studentMode}"
+                        th:if="${@authorisationService.isAtLeastTeacherInEdition(module.edition.id)} and not ${studentMode} and not ${selectedPathId == null}"
                         type="submit"
                         class="circuit__button"
                         name="edit-path-tasks"
