@@ -76,15 +76,12 @@ public class PathController {
 		Path path = pathId == null ? null : pathRepository.findById(pathId).orElse(null);
 		SCEdition edition = SpringContext.getBean(EditionRepository.class).findByIdOrThrow(editionId);
 
-		// TODO currently pg path is only redirected if user is logged in. Also make it work for no auth
 		if (person != null) {
 			// Save path preference for person
 			SCPerson scPerson = personService.getOrCreateSCPerson(person.getId());
 			PathPreference pathPreference = PathPreference.builder().hasPreference(true).editionId(editionId)
 					.pathId(path != null ? path.getId() : null).person(scPerson).build();
 			pathPreference = SpringContext.getBean(PathPreferenceRepository.class).save(pathPreference);
-
-			// Remove pastPref
 
 			// Save newly selected path
 			Set<PathPreference> updatedSet = scPerson.getPathPreferences().stream().map(p -> {
@@ -118,21 +115,6 @@ public class PathController {
 		SCEdition edition = editionRepository.getById(editionId);
 
 		edition.setDefaultPathId(pathId);
-
-		// Remove previously saved path TODO remove comments?
-		//        Path path = editionRepository.findById(editionId).get().getPaths().stream().filter(p->p.isEditionDefaultPath()).findFirst().orElse(null);
-		//        if (path != null) {
-		//            path.setEditionDefaultPath(false);
-		//            pathRepository.save(path);
-		//        }
-		//
-		//        // Set selected path as default
-		//        Path newDefaultPath;
-		//        if (pathId != 0) {
-		//            newDefaultPath = pathRepository.findByIdOrThrow(pathId);
-		//            newDefaultPath.setEditionDefaultPath(true);
-		//            pathRepository.save(newDefaultPath);
-		//        }
 
 		return ResponseEntity.ok().build();
 	}

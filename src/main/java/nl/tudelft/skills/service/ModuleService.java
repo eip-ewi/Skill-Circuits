@@ -101,7 +101,6 @@ public class ModuleService {
 			if (!(authorisationService.canViewThroughPath(module.getEdition().getId())
 					&& (studentMode == null || !studentMode))) {
 				// tasks not in path get removed
-				// TODO eliminate all skills that have no tasks in the selected path
 				module.getSubmodules().stream().flatMap(s -> s.getSkills().stream()).forEach(
 						s -> s.setTasks(
 								s.getTasks().stream().filter(t -> taskIds.contains(t.getId())).toList()));
