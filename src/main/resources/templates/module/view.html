@@ -46,7 +46,7 @@
                         th:data-edition="${module.edition.id}"
                         id="path-dropdown">
                         <option th:value="${null}" th:selected="${selectedPathId == null}">
-                            No path
+                            Show all
                         </option>
                         <option
                             th:each="path : ${@editionService.getPaths(module.edition.id)}"
@@ -54,7 +54,6 @@
                             th:text="${path.name}"
                             th:selected="${path.id == selectedPathId}"></option>
                     </select>
-                    `
 
                     <input
                         type="hidden"

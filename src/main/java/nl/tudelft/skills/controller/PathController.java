@@ -17,12 +17,8 @@
  */
 package nl.tudelft.skills.controller;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.PathCreateDTO;
 import nl.tudelft.skills.dto.patch.PathPatchDTO;
@@ -34,6 +30,7 @@ import nl.tudelft.skills.repository.PathPreferenceRepository;
 import nl.tudelft.skills.repository.PathRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.service.PathService;
 import nl.tudelft.skills.service.PersonService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,14 +48,25 @@ public class PathController {
 
 	private PathRepository pathRepository;
 	private PersonRepository personRepository;
+	private EditionRepository editionRepository;
+	private TaskRepository taskRepository;
+	private PathPreferenceRepository pathPreferenceRepository;
+	private PathService pathService;
+
 	private PersonService personService;
 
 	@Autowired
 	public PathController(PathRepository pathRepository, PersonRepository personRepository,
-			PersonService personService) {
+			EditionRepository editionRepository, TaskRepository taskRepository,
+			PathPreferenceRepository pathPreferenceRepository, PersonService personService,
+			PathService pathService) {
 		this.pathRepository = pathRepository;
 		this.personRepository = personRepository;
+		this.editionRepository = editionRepository;
+		this.taskRepository = taskRepository;
+		this.pathPreferenceRepository = pathPreferenceRepository;
 		this.personService = personService;
+		this.pathService = pathService;
 	}
 
 	/**
@@ -74,27 +82,22 @@ public class PathController {
 			@PathVariable Long editionId, @RequestParam(required = false) Long pathId) {
 
 		Path path = pathId == null ? null : pathRepository.findById(pathId).orElse(null);
-		SCEdition edition = SpringContext.getBean(EditionRepository.class).findByIdOrThrow(editionId);
+		SCEdition edition = editionRepository.findByIdOrThrow(editionId);
 
 		if (person != null) {
 			// Save path preference for person
 			SCPerson scPerson = personService.getOrCreateSCPerson(person.getId());
-			PathPreference pathPreference = PathPreference.builder().hasPreference(true).editionId(editionId)
-					.pathId(path != null ? path.getId() : null).person(scPerson).build();
-			pathPreference = SpringContext.getBean(PathPreferenceRepository.class).save(pathPreference);
+			PathPreference pathPreference = PathPreference.builder().edition(edition)
+					.path(path).person(scPerson).build();
 
-			// Save newly selected path
-			Set<PathPreference> updatedSet = scPerson.getPathPreferences().stream().map(p -> {
-				if (p.getEditionId().equals(editionId)) {
-					p.setPathId(path != null ? path.getId() : null);
-				}
-				return p;
-			}).collect(Collectors.toSet());
+			// Remove all path preferences for this given user and edition
+			pathPreferenceRepository.findAllByPersonIdAndEditionId(scPerson.getId(), editionId).stream()
+					.filter(pp -> pp.getPath().getId().equals(pathId)).forEach(pp -> {
+						pathPreferenceRepository.delete(pp);
+					});
 
-			scPerson.setPathPreferences(updatedSet);
+			pathPreferenceRepository.save(pathPreference);
 
-			PersonRepository personRepository = SpringContext.getBean(PersonRepository.class);
-			personRepository.save(scPerson);
 		}
 		return ResponseEntity.ok().build();
 	}
@@ -102,19 +105,18 @@ public class PathController {
 	/**
 	 * Saves person path preference for an edition.
 	 *
-	 * @param  person
 	 * @param  pathId The path id.
 	 * @return
 	 */
 	@Transactional
 	@PostMapping("{editionId}/default")
-	public ResponseEntity<Void> updateDefaultPathForEdition(
-			@AuthenticatedPerson(required = false) Person person, @PathVariable Long editionId,
+	@PreAuthorize("@authorisationService.canEditPathInEdition(#editionId)")
+	public ResponseEntity<Void> updateDefaultPathForEdition(@PathVariable Long editionId,
 			@RequestParam(required = false) Long pathId) {
-		EditionRepository editionRepository = SpringContext.getBean(EditionRepository.class);
 		SCEdition edition = editionRepository.getById(editionId);
 
-		edition.setDefaultPathId(pathId);
+		Path path = pathRepository.findByIdOrThrow(pathId);
+		edition.setDefaultPath(path);
 
 		return ResponseEntity.ok().build();
 	}
@@ -128,21 +130,18 @@ public class PathController {
 		// Remove path from tasks
 		path.getTasks().forEach(task -> {
 			task.getPaths().remove(path);
-			TaskRepository taskRepository = SpringContext.getBean(TaskRepository.class);
 			taskRepository.save(task);
 		});
 
 		// Remove path from edition default
-		EditionRepository editionRepository = SpringContext.getBean(EditionRepository.class);
 		SCEdition edition = editionRepository.findById(path.getEdition().getId()).get();
-		if (edition.getDefaultPathId() != null && edition.getDefaultPathId().equals(path.getId())) {
-			edition.setDefaultPathId(null);
+		if (edition.getDefaultPath() != null && edition.getDefaultPath().equals(path)) {
+			edition.setDefaultPath(null);
 			editionRepository.save(edition);
 		}
 
 		// Remove path from user preferences
-		PathPreferenceRepository pathPreferenceRepository = SpringContext
-				.getBean(PathPreferenceRepository.class);
+
 		pathPreferenceRepository.findAllByPathId(path.getId()).forEach(pref -> {
 			SCPerson person = personRepository.findByIdOrThrow(pref.getPerson().getId());
 			person.setPathPreferences(null);
@@ -169,7 +168,6 @@ public class PathController {
 		Path path = pathRepository.saveAndFlush(dto.apply());
 
 		// By default, all tasks are added to a new path
-		TaskRepository taskRepository = SpringContext.getBean(TaskRepository.class);
 		taskRepository.findAllBySkillSubmoduleModuleEditionId(path.getEdition().getId()).forEach(t -> {
 			t.getPaths().add(path);
 			taskRepository.save(t);
@@ -184,8 +182,19 @@ public class PathController {
 	@PatchMapping
 	@PreAuthorize("@authorisationService.canEditPath(#patch.id)")
 	public ResponseEntity<Void> patchPath(PathPatchDTO patch) {
-		Path path = pathRepository.findByIdOrThrow(patch.getId());
-		pathRepository.save(patch.apply(path));
+		Path oldPath = pathRepository.findByIdOrThrow(patch.getId());
+
+		// apply only updates name of path
+		Path path = pathRepository.save(patch.apply(oldPath));
+
+		pathService.updateTasksInPathManyToMany(patch, path);
+
+		// Update  default path in edition
+		SCEdition edition = editionRepository.findById(oldPath.getEdition().getId()).get();
+		if (edition.getDefaultPath() != null && edition.getDefaultPath().equals(oldPath)) {
+			edition.setDefaultPath(path);
+			editionRepository.save(edition);
+		}
 
 		return ResponseEntity.ok().build();
 	}

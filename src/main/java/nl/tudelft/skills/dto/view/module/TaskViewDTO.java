@@ -48,9 +48,12 @@ public class TaskViewDTO extends View<Task> implements ItemView {
 
 	private Integer completedCount;
 
-	// Visibility in a path
+	/**
+	 * Visibility of a task is set to true if it is part of the path currently displayed.
+	 */
 	@Builder.Default
-	private boolean visibility = true;
+	@NotNull
+	private boolean visible = true;
 
 	@Override
 	public void postApply() {

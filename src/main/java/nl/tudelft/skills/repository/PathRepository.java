@@ -17,6 +17,8 @@
  */
 package nl.tudelft.skills.repository;
 
+import java.util.List;
+
 import nl.tudelft.skills.model.Path;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,5 +29,7 @@ public interface PathRepository extends JpaRepository<Path, Long> {
 	default Path findByIdOrThrow(Long id) {
 		return findById(id).orElseThrow(() -> new ResourceNotFoundException("Path was not found: " + id));
 	}
+
+	List<Path> findAllByEditionId(Long editionId);
 
 }

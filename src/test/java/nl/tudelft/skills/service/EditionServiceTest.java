@@ -18,6 +18,8 @@
 package nl.tudelft.skills.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
@@ -77,4 +79,19 @@ public class EditionServiceTest {
 		assertThat(editionRepository.findById(editionId)).isPresent().contains(edition);
 	}
 
+	@Test
+	public void getDefaultPath() {
+		Long editionId = 1L;
+		editionService.getOrCreateSCEdition(editionId);
+
+		assertNull(editionService.getDefaultPath(editionId));
+	}
+
+	@Test
+	public void getPaths() {
+		Long editionId = 1L;
+		editionService.getOrCreateSCEdition(editionId);
+
+		assertTrue(editionService.getPaths(editionId).isEmpty());
+	}
 }

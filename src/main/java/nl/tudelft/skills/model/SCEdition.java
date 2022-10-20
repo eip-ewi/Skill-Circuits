@@ -64,5 +64,6 @@ public class SCEdition {
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
 	@Builder.Default
-	private Long defaultPathId = null; // TODO Validate correct id
+	@OneToOne
+	private Path defaultPath = null;
 }

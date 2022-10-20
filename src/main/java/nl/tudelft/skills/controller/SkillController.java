@@ -136,8 +136,7 @@ public class SkillController {
 		// New tasks will be included in all paths by default
 		SCEdition edition = skill.getSubmodule().getModule().getEdition();
 
-		Set<Path> paths = new HashSet<>(
-				pathRepository.findAllById(edition.getPaths().stream().map(Path::getId).toList()));
+		Set<Path> paths = new HashSet<>(pathRepository.findAllByEditionId(edition.getId()));
 		tasks.forEach(t -> {
 			t.setPaths(paths);
 			taskRepository.save(t);

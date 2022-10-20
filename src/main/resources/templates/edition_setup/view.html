@@ -129,7 +129,7 @@
                         <option
                             th:value="${null}"
                             th:selected="${@editionService.getDefaultPath(edition.id) == null}">
-                            No path
+                            Show all
                         </option>
                         <option
                             th:each="path : ${@editionService.getPaths(edition.id)}"

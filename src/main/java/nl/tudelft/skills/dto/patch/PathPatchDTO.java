@@ -17,18 +17,13 @@
  */
 package nl.tudelft.skills.dto.patch;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
-import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.patch.Patch;
 import nl.tudelft.skills.model.Path;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.repository.TaskRepository;
 
 @Data
 @Builder
@@ -41,18 +36,12 @@ public class PathPatchDTO extends Patch<Path> {
 
 	private String name;
 
-	private List<Long> taskIds;
+	@Builder.Default
+	private List<Long> taskIds = new ArrayList<>();
 
 	@Override
 	protected void applyOneToOne() {
 		updateNonNull(name, data::setName);
-	}
-
-	@Override
-	protected void applyManyToManyMappedBy() {
-		TaskRepository taskRepository = SpringContext.getBean(TaskRepository.class);
-		Set<Task> tasksInPath = new HashSet<>(taskRepository.findAllByIdIn(taskIds));
-		updateManyToManyMappedBy(data, data.getTasks(), tasksInPath, Task::getPaths);
 	}
 
 	@Override

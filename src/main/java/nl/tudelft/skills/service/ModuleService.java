@@ -52,14 +52,21 @@ public class ModuleService {
 	private final ModuleRepository moduleRepository;
 	private final PersonRepository personRepository;
 	private final CircuitService circuitService;
+	private final PersonService personService;
+	private final PathRepository pathRepository;
+	private final EditionService editionService;
 	private final CourseControllerApi courseApi;
 	private final EditionControllerApi editionApi;
 
 	public ModuleService(ModuleRepository moduleRepository, PersonRepository personRepository,
-			CircuitService circuitService, CourseControllerApi courseApi, EditionControllerApi editionApi) {
+			CircuitService circuitService, PersonService personService, PathRepository pathRepository,
+			EditionService editionService, CourseControllerApi courseApi, EditionControllerApi editionApi) {
 		this.moduleRepository = moduleRepository;
 		this.personRepository = personRepository;
 		this.circuitService = circuitService;
+		this.personService = personService;
+		this.pathRepository = pathRepository;
+		this.editionService = editionService;
 		this.courseApi = courseApi;
 		this.editionApi = editionApi;
 	}
@@ -88,7 +95,7 @@ public class ModuleService {
 		// Paths
 		Path path = getDefaultOrPreferredPath((person != null ? person.getId() : null),
 				module.getEdition().getId());
-		Path defaultPath = SpringContext.getBean(EditionService.class)
+		Path defaultPath = editionService
 				.getDefaultPath(module.getEdition().getId());
 		Long defaultPathId = defaultPath != null ? defaultPath.getId() : 0;
 
@@ -108,7 +115,7 @@ public class ModuleService {
 				// tasks not in path get visibility property false
 				module.getSubmodules().stream().flatMap(s -> s.getSkills().stream()).forEach(
 						s -> s.setTasks(s.getTasks().stream().map(t -> {
-							t.setVisibility(taskIds.contains(t.getId()));
+							t.setVisible(taskIds.contains(t.getId()));
 							return t;
 						}).toList()));
 
@@ -161,15 +168,14 @@ public class ModuleService {
 	 * @return           Followed path.
 	 */
 	public Path getDefaultOrPreferredPath(Long personId, Long editionId) {
-		EditionService editionService = SpringContext.getBean(EditionService.class);
 
 		Path path = editionService.getDefaultPath(editionId);
 
-		PersonService personService = SpringContext.getBean(PersonService.class);
 		if (personId != null && personService.getPathForEdition(personId, editionId).isPresent()) {
 			PathPreference pathPreference = personService.getPathForEdition(personId, editionId).get();
-			if (pathPreference != null && pathPreference.getPathId() != null) {
-				path = SpringContext.getBean(PathRepository.class).findById(pathPreference.getPathId()).get();
+			if (pathPreference != null && pathPreference.getPath() != null) {
+				path = pathRepository.findById(pathPreference.getPath().getId())
+						.get();
 
 			} else {
 				path = null;

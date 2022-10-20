@@ -31,23 +31,20 @@ public class PathPreference {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	Long id;
+	private Long id;
 
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	private Long pathId; // TODO validate
+	@ManyToOne
+	private Path path;
 
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	private Long editionId; // TODO validate
+	@ManyToOne
+	private SCEdition edition;
 
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@ManyToOne
 	private SCPerson person;
-
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	private boolean hasPreference = false;
 }

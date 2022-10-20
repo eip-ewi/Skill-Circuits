@@ -24,13 +24,11 @@ import javax.servlet.http.HttpSession;
 
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
-import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.edition.*;
 import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.EditionRepository;
-import nl.tudelft.skills.repository.PathRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -112,13 +110,10 @@ public class EditionService {
 	 * Returns the default path for an edition if it exists.
 	 *
 	 * @param  editionId The edition id
-	 * @return           The defualt path of an edition if it exists, null otherwise.
+	 * @return           The default path of an edition if it exists, null otherwise.
 	 */
 	public Path getDefaultPath(Long editionId) {
-		PathRepository pathRepository = SpringContext.getBean(PathRepository.class);
-		if (editionRepository.findById(editionId).get().getDefaultPathId() == null)
-			return null;
-		return pathRepository.findById(editionRepository.findById(editionId).get().getDefaultPathId()).get();
+		return editionRepository.findById(editionId).get().getDefaultPath();
 	}
 
 	/**

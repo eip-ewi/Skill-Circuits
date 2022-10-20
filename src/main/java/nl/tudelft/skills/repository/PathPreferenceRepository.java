@@ -33,4 +33,7 @@ public interface PathPreferenceRepository extends JpaRepository<PathPreference, 
 
 	List<PathPreference> findAllByPathId(Long pathId);
 
+	List<PathPreference> findAllByPersonIdAndEditionId(Long personId, Long editionId);
+
+	boolean existsByPathId(Long pathId);
 }

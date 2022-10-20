@@ -17,9 +17,6 @@
  */
 package nl.tudelft.skills.dto.create;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -27,7 +24,6 @@ import lombok.*;
 import nl.tudelft.librador.dto.create.Create;
 import nl.tudelft.skills.dto.id.SCEditionIdDTO;
 import nl.tudelft.skills.model.Path;
-import nl.tudelft.skills.model.Task;
 
 @Data
 @Builder
@@ -40,9 +36,6 @@ public class PathCreateDTO extends Create<Path> {
 	private String name;
 	@NotNull
 	private SCEditionIdDTO edition;
-	@NotNull
-	@Builder.Default
-	private Set<Task> tasks = new HashSet<>();
 
 	@Override
 	public Class<Path> clazz() {

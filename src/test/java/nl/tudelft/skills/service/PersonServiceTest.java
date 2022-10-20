@@ -17,49 +17,50 @@
  */
 package nl.tudelft.skills.service;
 
-import java.util.Optional;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import nl.tudelft.skills.model.PathPreference;
+import java.util.Collections;
+
+import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-public class PersonService {
+@Transactional
+@SpringBootTest(classes = TestSkillCircuitsApplication.class)
+public class PersonServiceTest {
 
 	private PersonRepository personRepository;
 
+	private PersonService personService;
+
 	@Autowired
-	public PersonService(PersonRepository personRepository) {
+	public PersonServiceTest(PersonRepository personRepository) {
 		this.personRepository = personRepository;
+		personService = new PersonService(personRepository);
 	}
 
-	/**
-	 * Get user saved path for an edition.
-	 *
-	 * @param  personId  person id.
-	 * @param  editionId edition id.
-	 * @return           path followed in edition by person or none if none was saved or path is no-path.
-	 */
-	public Optional<PathPreference> getPathForEdition(Long personId, Long editionId) {
-		SCPerson scPerson = personRepository.findByIdOrThrow(personId);
-		Optional<PathPreference> p = scPerson.getPathPreferences().stream()
-				.filter(x -> x.getEdition().getId().equals(editionId)).findFirst();
-		return p;
+	@Test
+	public void getOrCreateSCPerson() {
+		Long personId = 1L;
+		assertThat(personRepository.findById(personId)).isNotPresent();
+
+		SCPerson person = personService.getOrCreateSCPerson(personId);
+		assertThat(personRepository.findById(personId)).isPresent();
 	}
 
-	/**
-	 * Returns a SCPerson by person id. If it doesn't exist, creates one.
-	 *
-	 * @param  personId The id of the person
-	 * @return          The SCPerson with id.
-	 */
-	@Transactional
-	public SCPerson getOrCreateSCPerson(Long personId) {
-		return personRepository.findById(personId)
-				.orElseGet(() -> personRepository.save(SCPerson.builder().id(personId).build()));
+	@Test
+	public void getPathForEdition() {
+		Long editionId = 1L;
+		SCPerson person = SCPerson.builder().pathPreferences(Collections.emptySet()).id(2L).build();
+		person = personRepository.save(person);
+
+		assertThat(personService.getPathForEdition(person.getId(), editionId)).isNotPresent();
+
 	}
+
 }
