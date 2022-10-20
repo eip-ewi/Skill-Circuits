@@ -54,6 +54,9 @@ public class PathServiceTest {
 
 		assertTrue(db.getTaskRead11().getPaths().stream().anyMatch(p -> p.getId().equals(path.getId())));
 		assertFalse(db.getTaskRead12().getPaths().stream().anyMatch(p -> p.getId().equals(path.getId())));
+
+		assertFalse(db.getPathFinderPath().getTasks().contains(db.getTaskRead12()));
+		assertTrue(db.getPathFinderPath().getTasks().contains(db.getTaskRead11()));
 	}
 
 }

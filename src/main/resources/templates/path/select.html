@@ -33,7 +33,7 @@
                     url: `/path`,
                     data: data,
                     success: () => {
-                        location.reload();
+                        window.location.reload(true);
                         $("[name='edit-path-tasks']").removeClass("hidden");
                     },
                 });

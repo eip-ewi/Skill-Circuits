@@ -19,6 +19,7 @@ package nl.tudelft.skills.service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import nl.tudelft.skills.dto.patch.PathPatchDTO;
@@ -52,6 +53,10 @@ public class PathService {
 	 */
 	@Transactional
 	public void updateTasksInPathManyToMany(PathPatchDTO patch, Path path) {
+
+		Set<Task> updtTasks = taskRepository.findAllByIdIn(patch.getTaskIds()).stream()
+				.collect(Collectors.toSet());
+
 		// update tasks in path
 		List<Task> oldTasks = taskRepository
 				.findAllByIdIn(path.getTasks().stream().map(Task::getId).toList());
@@ -61,13 +66,15 @@ public class PathService {
 				.forEach(t -> t.setPaths(t.getPaths().stream().filter(p -> !p.getId().equals(path.getId()))
 						.collect(Collectors.toSet())));
 
-		taskRepository.saveAll(oldTasks);
+		taskRepository.saveAllAndFlush(oldTasks);
 
-		//cock
 		// add tasks that were not previously in path
 		HashSet<Task> newTasks = new HashSet<>(taskRepository.findAllByIdIn(patch.getTaskIds()));
 		newTasks.stream().filter(t -> !path.getTasks().contains(t))
 				.forEach(t -> t.getPaths().add(path));
-		taskRepository.saveAll(newTasks);
+		taskRepository.saveAllAndFlush(newTasks);
+
+		path.setTasks(updtTasks);
+		pathRepository.save(path);
 	}
 }

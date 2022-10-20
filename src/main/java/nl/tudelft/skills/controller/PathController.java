@@ -91,8 +91,8 @@ public class PathController {
 					.path(path).person(scPerson).build();
 
 			// Remove all path preferences for this given user and edition
-			pathPreferenceRepository.findAllByPersonIdAndEditionId(scPerson.getId(), editionId).stream()
-					.filter(pp -> pp.getPath().getId().equals(pathId)).forEach(pp -> {
+			pathPreferenceRepository.findAllByPersonIdAndEditionId(scPerson.getId(), editionId)
+					.forEach(pp -> {
 						pathPreferenceRepository.delete(pp);
 					});
 

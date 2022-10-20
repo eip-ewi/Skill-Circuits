@@ -95,9 +95,6 @@ public class ModuleService {
 		// Paths
 		Path path = getDefaultOrPreferredPath((person != null ? person.getId() : null),
 				module.getEdition().getId());
-		Path defaultPath = editionService
-				.getDefaultPath(module.getEdition().getId());
-		Long defaultPathId = defaultPath != null ? defaultPath.getId() : 0;
 
 		Set<Long> taskIds = path == null ? new HashSet<>()
 				: path.getTasks().stream().map(Task::getId).collect(Collectors.toSet());
