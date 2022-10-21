@@ -26,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import javax.servlet.http.HttpSession;
 
@@ -34,6 +35,7 @@ import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.create.SCModuleCreateDTO;
 import nl.tudelft.skills.dto.id.SCEditionIdDTO;
 import nl.tudelft.skills.dto.patch.SCModulePatchDTO;
+import nl.tudelft.skills.dto.view.SkillSummaryDTO;
 import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.service.ModuleService;
@@ -157,5 +159,19 @@ public class ModuleControllerTest extends ControllerTest {
 		verify(session).setAttribute("student-mode-" + db.getEditionRL().getId(), false);
 		moduleController.toggleStudentMode(db.getModuleProofTechniques().getId());
 		verify(session, times(2)).setAttribute("student-mode-" + db.getEditionRL().getId(), true);
+	}
+
+	@Test
+	void getSkillsOfModule() {
+		ModuleController moduleController = new ModuleController(moduleRepository, moduleService, session);
+		assertThat(moduleController.getSkillsOfModule(db.getModuleProofTechniques().getId()))
+				.isEqualTo(Stream
+						.of(db.getSkillDividingIntoCases(), db.getSkillCasesPractice(),
+								db.getSkillContradictionPractice(), db.getSkillNegateImplications(),
+								db.getSkillContrapositivePractice(), db.getSkillNegation(),
+								db.getSkillVariables(), db.getSkillImplication(), db.getSkillAssumption(),
+								db.getSkillGeneralisationPractice(), db.getSkillProofOutline(),
+								db.getSkillTransitiveProperty(), db.getSkillInductionPractice())
+						.map(s -> mapper.map(s, SkillSummaryDTO.class)).toList());
 	}
 }

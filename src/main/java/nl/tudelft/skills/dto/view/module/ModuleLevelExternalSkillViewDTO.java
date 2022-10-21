@@ -17,76 +17,60 @@
  */
 package nl.tudelft.skills.dto.view.module;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
+import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.BlockView;
 import nl.tudelft.skills.dto.view.ItemView;
-import nl.tudelft.skills.dto.view.checkpoint.CheckpointViewDTO;
+import nl.tudelft.skills.dto.view.SCModuleSummaryDTO;
+import nl.tudelft.skills.dto.view.SkillSummaryDTO;
 import nl.tudelft.skills.model.AbstractSkill;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.ExternalSkill;
+import nl.tudelft.skills.repository.SkillRepository;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
+public class ModuleLevelExternalSkillViewDTO extends View<ExternalSkill> implements BlockView {
 
 	@NotNull
 	private Long id;
 	@NotNull
-	private String name;
+	private SkillSummaryDTO skill;
 	@NotNull
-	private Boolean essential;
-	@NotNull
-	private Boolean hidden;
+	private SCModuleSummaryDTO module;
 	@NotNull
 	private Integer row;
 	@NotNull
 	private Integer column;
 	@NotNull
-	private CheckpointViewDTO checkpoint;
-	@NotNull
-	@PostApply
-	private List<TaskViewDTO> tasks;
-	@NotNull
 	private List<Long> parentIds;
 	@NotNull
 	private List<Long> childIds;
-	@NotNull
-	private List<Long> requiredTaskIds;
-	@NotNull
-	@Builder.Default
-	private Boolean completedRequiredTasks = false;
 
 	@Override
 	public void postApply() {
 		super.postApply();
 		this.parentIds = data.getParents().stream().map(AbstractSkill::getId).toList();
 		this.childIds = data.getChildren().stream().map(AbstractSkill::getId).toList();
-		this.requiredTaskIds = data.getRequiredTasks().stream().map(Task::getId).toList();
+		this.module = View.convert(SpringContext.getBean(SkillRepository.class).findByIdOrThrow(skill.getId())
+				.getSubmodule().getModule(), SCModuleSummaryDTO.class);
 	}
 
 	@Override
 	public List<? extends ItemView> getItems() {
-		return tasks;
+		return Collections.emptyList();
 	}
 
 	public List<Long> getChildIds() {
 		return childIds;
 	}
 
-	public static ModuleLevelSkillViewDTO empty() {
-		return ModuleLevelSkillViewDTO.builder().id(-1L).name("").essential(true).hidden(false).row(-1)
-				.column(-1)
-				.checkpoint(CheckpointViewDTO.empty()).tasks(new ArrayList<>())
-				.parentIds(new ArrayList<>()).childIds(new ArrayList<>())
-				.requiredTaskIds(new ArrayList<>()).build();
-	}
 }

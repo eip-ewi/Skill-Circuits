@@ -37,7 +37,7 @@ public abstract class ControllerTest {
 	private static final Random random = new Random(42L);
 
 	@Autowired
-	private ModelMapper mapper;
+	protected ModelMapper mapper;
 
 	@Autowired
 	protected TestDatabaseLoader db;

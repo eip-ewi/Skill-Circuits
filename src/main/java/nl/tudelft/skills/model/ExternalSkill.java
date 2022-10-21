@@ -17,50 +17,31 @@
  */
 package nl.tudelft.skills.model;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
+import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
-
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
+import lombok.experimental.SuperBuilder;
 
 @Data
 @Entity
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SCModule {
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private Long id;
+@EqualsAndHashCode(callSuper = true)
+public class ExternalSkill extends AbstractSkill {
 
 	@NotNull
 	@ManyToOne
-	private SCEdition edition;
-
-	@NotBlank
-	private String name;
+	private SCModule module;
 
 	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@Cascade(CascadeType.DELETE)
-	@OneToMany(mappedBy = "module")
-	private Set<Submodule> submodules = new HashSet<>();
+	@ManyToOne
+	private Skill skill;
 
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@Cascade(CascadeType.DELETE)
-	@OneToMany(mappedBy = "module")
-	private Set<ExternalSkill> externalSkills = new HashSet<>();
-
+	@Override
+	public Submodule getSubmodule() {
+		return skill.getSubmodule();
+	}
 }

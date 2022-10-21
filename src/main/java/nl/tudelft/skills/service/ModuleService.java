@@ -22,6 +22,10 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
 
+import nl.tudelft.labracore.api.CourseControllerApi;
+import nl.tudelft.labracore.api.EditionControllerApi;
+import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
+import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
@@ -42,12 +46,16 @@ public class ModuleService {
 	private final ModuleRepository moduleRepository;
 	private final PersonRepository personRepository;
 	private final CircuitService circuitService;
+	private final CourseControllerApi courseApi;
+	private final EditionControllerApi editionApi;
 
 	public ModuleService(ModuleRepository moduleRepository, PersonRepository personRepository,
-			CircuitService circuitService) {
+			CircuitService circuitService, CourseControllerApi courseApi, EditionControllerApi editionApi) {
 		this.moduleRepository = moduleRepository;
 		this.personRepository = personRepository;
 		this.circuitService = circuitService;
+		this.courseApi = courseApi;
+		this.editionApi = editionApi;
 	}
 
 	/**
@@ -78,6 +86,11 @@ public class ModuleService {
 		model.addAttribute("emptyBlock", ModuleLevelSkillViewDTO.empty());
 		model.addAttribute("emptyGroup", ModuleLevelSubmoduleViewDTO.empty());
 		model.addAttribute("studentMode", studentMode != null && studentMode);
+
+		EditionDetailsDTO edition = editionApi.getEditionById(module.getEdition().getId()).block();
+		CourseDetailsDTO course = courseApi.getCourseById(edition.getCourse().getId()).block();
+		model.addAttribute("courses",
+				courseApi.getAllCoursesByProgram(course.getProgram().getId()).collectList().block());
 	}
 
 	/**

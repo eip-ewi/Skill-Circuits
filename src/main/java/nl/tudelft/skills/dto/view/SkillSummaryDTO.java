@@ -15,52 +15,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.model;
+package nl.tudelft.skills.dto.view;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
-
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
+import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.model.Skill;
 
 @Data
-@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SCModule {
+@EqualsAndHashCode(callSuper = false)
+public class SkillSummaryDTO extends View<Skill> {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	@NotNull
 	private Long id;
-
 	@NotNull
-	@ManyToOne
-	private SCEdition edition;
-
-	@NotBlank
 	private String name;
-
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@Cascade(CascadeType.DELETE)
-	@OneToMany(mappedBy = "module")
-	private Set<Submodule> submodules = new HashSet<>();
-
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@Cascade(CascadeType.DELETE)
-	@OneToMany(mappedBy = "module")
-	private Set<ExternalSkill> externalSkills = new HashSet<>();
 
 }

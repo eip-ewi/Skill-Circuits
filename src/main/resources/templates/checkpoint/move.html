@@ -34,6 +34,7 @@
                         .map((i, c) => $(c).css("grid-row-start"))
                 );
                 const newSkills = $(".block")
+                    .filter((i, b) => $(b).prop("id").startsWith("block-"))
                     .filter(
                         (i, b) =>
                             prevCheckpointRow < $(b).css("grid-row-start") &&

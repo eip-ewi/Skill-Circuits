@@ -27,7 +27,7 @@ import nl.tudelft.skills.dto.patch.SubmodulePositionPatchDTO;
 import nl.tudelft.skills.dto.view.edition.EditionLevelEditionViewDTO;
 import nl.tudelft.skills.dto.view.edition.EditionLevelModuleViewDTO;
 import nl.tudelft.skills.dto.view.edition.EditionLevelSubmoduleViewDTO;
-import nl.tudelft.skills.model.Skill;
+import nl.tudelft.skills.model.AbstractSkill;
 import nl.tudelft.skills.model.Submodule;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.SubmoduleRepository;
@@ -87,7 +87,7 @@ public class SubmoduleController {
 	@PreAuthorize("@authorisationService.canDeleteSubmodule(#id)")
 	public String deleteSubmodule(@RequestParam Long id, @RequestParam String page) {
 		Submodule submodule = submoduleRepository.findByIdOrThrow(id);
-		submodule.getSkills().stream().map(Skill::getId).forEach(skillService::deleteSkill);
+		submodule.getSkills().stream().map(AbstractSkill::getId).forEach(skillService::deleteSkill);
 		submoduleRepository.delete(submodule);
 		return "redirect:/edition/" + submodule.getModule().getEdition().getId(); // TODO redirect to track page
 	}

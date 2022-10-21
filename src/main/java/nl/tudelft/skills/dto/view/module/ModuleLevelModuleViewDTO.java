@@ -29,8 +29,8 @@ import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.CircuitView;
 import nl.tudelft.skills.dto.view.GroupView;
 import nl.tudelft.skills.dto.view.checkpoint.CheckpointViewDTO;
+import nl.tudelft.skills.model.AbstractSkill;
 import nl.tudelft.skills.model.SCModule;
-import nl.tudelft.skills.model.Skill;
 
 import org.springframework.data.util.Pair;
 
@@ -58,6 +58,10 @@ public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitV
 	@PostApply
 	private List<CheckpointViewDTO> checkpointsInEdition;
 
+	@NotNull
+	@PostApply
+	private List<ModuleLevelExternalSkillViewDTO> externalSkillList;
+
 	@Override
 	public List<? extends GroupView> getGroups() {
 		return submodules;
@@ -71,11 +75,14 @@ public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitV
 				.map(cp -> View.convert(cp, CheckpointViewDTO.class)).toList();
 		// get all checkpoints that contain a skill that is in this module
 		Set<Long> skillIdsInModule = data.getSubmodules().stream()
-				.flatMap(sub -> sub.getSkills().stream().map(Skill::getId)).collect(Collectors.toSet());
+				.flatMap(sub -> sub.getSkills().stream().map(AbstractSkill::getId))
+				.collect(Collectors.toSet());
 		this.checkpoints = data.getEdition().getCheckpoints().stream()
 				.filter(checkpoint -> checkpoint.getSkills().stream()
 						.anyMatch(skill -> skillIdsInModule.contains(skill.getId())))
 				.map(checkpoint -> View.convert(checkpoint, CheckpointViewDTO.class)).toList();
+		this.externalSkillList = data.getExternalSkills().stream()
+				.map(s -> View.convert(s, ModuleLevelExternalSkillViewDTO.class)).toList();
 	}
 
 	@Override
