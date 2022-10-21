@@ -33,6 +33,7 @@ import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.create.PathCreateDTO;
 import nl.tudelft.skills.dto.id.SCEditionIdDTO;
 import nl.tudelft.skills.dto.patch.PathPatchDTO;
+import nl.tudelft.skills.model.PathPreference;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.EditionRepository;
@@ -145,6 +146,25 @@ public class PathControllerTest extends ControllerTest {
 
 		// Checks that deleted path doesn't appear in task
 		assertEquals(0, db.getTaskRead12().getPaths().size());
+	}
+
+	@Test
+	@WithUserDetails("admin")
+	void deletePathHasPathPref() {
+		Long pathId = db.getPathFinderPath().getId();
+
+		// Setup path preference with path
+		PathPreference pathPreference = PathPreference.builder().path(db.getPathFinderPath())
+				.edition(db.getEditionRL()).person(db.getPerson()).build();
+		pathPreferenceRepository.save(pathPreference);
+
+		assertTrue(pathPreferenceRepository.existsByPathId(pathId));
+
+		pathController.deletePath(pathId);
+
+		// Checks that deleted path doesn't appear in path preference
+		assertFalse(pathPreferenceRepository.existsByPathId(pathId));
+
 	}
 
 	@Test
