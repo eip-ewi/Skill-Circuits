@@ -63,12 +63,13 @@ public class EditionController {
 	 * @return       The page to load
 	 */
 	@GetMapping("{id}")
-	@PreAuthorize("@authorisationService.canViewEdition(#id)")
+	@PreAuthorize("@authorisationService.isAuthenticated() and @authorisationService.canViewEdition(#id)")
 	public String getEditionPage(@PathVariable Long id, @RequestParam(required = false) String view,
 			Model model) {
 		editionService.configureEditionModel(id, model, session);
-		if (authorisationService.canEditEdition(id) && view == null)
+		if (authorisationService.canEditEdition(id) && view == null) {
 			view = "circuit";
+		}
 		return "circuit".equals(view) ? "edition/view"
 				: "edition/modules";
 	}
