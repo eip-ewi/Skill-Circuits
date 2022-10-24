@@ -56,11 +56,44 @@
         </select>
 
         <th:block th:if="${level == 'module'}">
+            <div id="create-skill-checkpoint" data-edit="only" th:if="${create}">
+                <select
+                    class="selectbox font_size_regular"
+                    data-edit="only"
+                    th:id="create-skill-checkpoint-select"
+                    name="checkpoint.id">
+                    <option
+                        data-edit="only"
+                        value="new"
+                        th:id="create-skill-checkpoint-new"
+                        th:val="new"
+                        th:text="New..."></option>
+                    <option
+                        data-edit="only"
+                        th:each="checkpoint: ${circuit.checkpointsInEdition}"
+                        th:id="|create-skill-checkpoint-option-${checkpoint.id}|"
+                        th:value="${checkpoint.id}"
+                        th:text="${checkpoint.name}"
+                        th:data-deadline="${checkpoint.deadline}"></option>
+                </select>
+                <input
+                    data-edit="only"
+                    th:id="create-skill-checkpoint-input"
+                    th:name="checkpointCreate.name"
+                    type="hidden"
+                    required />
+                <input
+                    data-edit="only"
+                    id="create-skill-checkpoint-deadline"
+                    name="checkpointCreate.deadline"
+                    type="hidden"
+                    th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')+'T'+#dates.format(#dates.createNow(), 'HH:mm')}" />
+            </div>
             <input
-                id="create-skill-checkpoint"
-                name="checkpoint.id"
+                id="create-skill-checkpoint-edition"
+                name="checkpointCreate.edition.id"
                 type="hidden"
-                th:if="${create}" />
+                th:value="${circuit.edition.id}" />
         </th:block>
 
         <div data-edit="only" th:if="${level == 'module'}">
@@ -207,8 +240,11 @@
                 .serializeArray()
                 .forEach(field => {
                     if (field.name.includes(".")) {
-                        data[field.name.split(".")[0]] = {};
-                        data[field.name.split(".")[0]][field.name.split(".")[1]] = field.value;
+                        const split = field.name.split(".");
+                        if (!(split[0] in data)) {
+                            data[split[0]] = {};
+                        }
+                        data[split[0]][split[1]] = field.value;
                     } else data[field.name] = field.value;
                 });
             if (blockType === "skill") {

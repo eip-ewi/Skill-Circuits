@@ -66,13 +66,13 @@ public class SkillControllerTest extends ControllerTest {
 	public SkillControllerTest(SkillRepository skillRepository, TaskRepository taskRepository,
 			SkillService skillService, SubmoduleRepository submoduleRepository,
 			ExternalSkillRepository externalSkillRepository,
-			AbstractSkillRepository abstractSkillRepository) {
+			AbstractSkillRepository abstractSkillRepository, CheckpointRepository checkpointRepository) {
 		this.submoduleRepository = submoduleRepository;
 		this.session = mock(HttpSession.class);
 		this.moduleService = mock(ModuleService.class);
 		this.skillController = new SkillController(skillRepository, externalSkillRepository,
 				abstractSkillRepository, taskRepository,
-				submoduleRepository, skillService, moduleService, session);
+				submoduleRepository, checkpointRepository, skillService, moduleService, session);
 		this.skillRepository = skillRepository;
 		this.abstractSkillRepository = abstractSkillRepository;
 	}

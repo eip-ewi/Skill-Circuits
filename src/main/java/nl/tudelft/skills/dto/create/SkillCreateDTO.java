@@ -48,8 +48,8 @@ public class SkillCreateDTO extends Create<Skill> {
 	private Boolean hidden = false;
 	@NotNull
 	private SubmoduleIdDTO submodule;
-	@NotNull
 	private CheckpointIdDTO checkpoint;
+	private CheckpointCreateDTO checkpointCreate;
 	@Min(0)
 	@NotNull
 	private Integer row;
@@ -73,6 +73,14 @@ public class SkillCreateDTO extends Create<Skill> {
 			List<Task> requiredTasks = taskRepository.findAllByIdIn(requiredTaskIds);
 			requiredTasks.forEach(t -> t.getRequiredFor().add(data));
 			data.setRequiredTasks(new HashSet<>(requiredTasks));
+		}
+	}
+
+	@Override
+	public void validate() {
+		if (checkpoint == null && checkpointCreate == null) {
+			errors.rejectValue("checkpoint", "noCheckpointForSkill",
+					"Skill needs either a new checkpoint or a checkpointId");
 		}
 	}
 }
