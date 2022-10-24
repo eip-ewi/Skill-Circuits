@@ -42,26 +42,43 @@
                 <div layout:replace="~{block/view :: block}"></div>
             </th:block>
         </th:block>
+        <th:block th:if="${level == 'module'}">
+            <th:block th:each="block : ${module.externalSkillList}">
+                <div layout:replace="~{skill/external :: block}"></div>
+            </th:block>
+        </th:block>
 
         <th:block th:if="${canEdit}">
             <div
                 th:each="pos : ${emptySpaces}"
                 class="ghost_block"
                 th:style="|grid-row: ${pos.second + 1}; grid-column: ${pos.first + 1}|">
-                <span class="fa-solid fa-plus"></span>
+                <button data-type="regular" class="fa-solid fa-plus"></button>
+                <button
+                    th:if="${level == 'module'}"
+                    data-type="external"
+                    class="fa-solid fa-link"></button>
             </div>
             <div
                 th:each="col : ${#numbers.sequence(0, columns - 1)}"
                 class="ghost_block"
                 th:style="|grid-row: ${rows + 1}; grid-column: ${col + 1}|">
-                <span class="fa-solid fa-plus"></span>
+                <button data-type="regular" class="fa-solid fa-plus"></button>
+                <button
+                    th:if="${level == 'module'}"
+                    data-type="external"
+                    class="fa-solid fa-link"></button>
             </div>
             <div
                 th:each="row : ${#numbers.sequence(0, rows)}"
                 class="ghost_block"
                 th:style="|grid-row: ${row + 1}; grid-column: ${columns + 1}|"
                 th:classappend="${rows == 1 ? 'ensured_wide' : ''}">
-                <span class="fa-solid fa-plus"></span>
+                <button data-type="regular" class="fa-solid fa-plus"></button>
+                <button
+                    th:if="${level == 'module'}"
+                    data-type="external"
+                    class="fa-solid fa-link"></button>
             </div>
         </th:block>
     </div>

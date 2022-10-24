@@ -52,7 +52,8 @@ public class CheckpointService {
 			if (!curr.getCheckpoint().equals(checkpoint)) {
 				return Optional.of(curr.getCheckpoint());
 			}
-			queue.addAll(curr.getChildren());
+			queue.addAll(
+					curr.getChildren().stream().filter(s -> s instanceof Skill).map(s -> (Skill) s).toList());
 		}
 		return Optional.empty();
 	}

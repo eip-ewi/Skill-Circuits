@@ -18,8 +18,7 @@
 package nl.tudelft.skills.controller;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
@@ -30,9 +29,12 @@ import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.model.SCEdition;
-import nl.tudelft.skills.model.SCModule;
+import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.ModuleRepository;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.service.CourseService;
+import nl.tudelft.skills.service.EditionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -47,14 +49,22 @@ public class HomeController {
 
 	private final EditionRepository editionRepository;
 	private final ModuleRepository moduleRepository;
+	private final PersonRepository personRepository;
+
+	private final EditionService editionService;
+	private final CourseService courseService;
 
 	@Autowired
 	public HomeController(EditionControllerApi editionApi, RoleControllerApi roleApi,
-			EditionRepository editionRepository, ModuleRepository moduleRepository) {
+			EditionRepository editionRepository, ModuleRepository moduleRepository,
+			PersonRepository personRepository, EditionService editionService, CourseService courseService) {
 		this.editionApi = editionApi;
 		this.roleApi = roleApi;
 		this.editionRepository = editionRepository;
 		this.moduleRepository = moduleRepository;
+		this.personRepository = personRepository;
+		this.editionService = editionService;
+		this.courseService = courseService;
 	}
 
 	/**
@@ -87,15 +97,50 @@ public class HomeController {
 				.filter(e -> visible.contains(e.getId()) || teacherIds.contains(e.getId()))
 				.map(EditionDetailsDTO::getCourse).distinct().toList();
 
+		// Gets number of completed skills for each course
+		Map<Long, Integer> completedSkillsPerCourse = new HashMap<>();
+		if (person != null) {
+			SCPerson scperson = personRepository.findByIdOrThrow(person.getId());
+
+			completedSkillsPerCourse = getCompletedSkillsPerCourse(courses, scperson);
+		}
+
+		boolean isAnySkillCompleted = completedSkillsPerCourse.entrySet().stream()
+				.anyMatch(e -> e.getValue() > 0);
 		model.addAttribute("courses", courses);
-
-		// Temporarily put all modules on the home page
-		List<SCModule> allModules = moduleRepository.findAll();
-		model.addAttribute("moduleIds", allModules.stream().map(SCModule::getId).toList());
-		model.addAttribute("moduleNames",
-				allModules.stream().collect(Collectors.toMap(SCModule::getId, SCModule::getName)));
-
+		model.addAttribute("completedSkillsPerCourse", completedSkillsPerCourse);
+		model.addAttribute("isAnySkillCompleted", isAnySkillCompleted);
 		return "index";
+	}
+
+	/**
+	 * Returns a map of courses and the number of skills completed in a respective edition in that course.
+	 *
+	 * @param  courses  List of courses
+	 * @param  scperson person
+	 * @return          Map containing number of completed skills per course.
+	 */
+	public Map<Long, Integer> getCompletedSkillsPerCourse(List<CourseSummaryDTO> courses, SCPerson scperson) {
+		Map<Long, Integer> completedSkillsPerCourse = new HashMap<>();
+		for (var course : courses) {
+			Long courseId = course.getId();
+
+			int skillsDone = 0;
+			Long editionId = courseService.getLastStudentEditionForCourseOrLast(courseId);
+
+			if (editionId != null) {
+				SCEdition edition = editionService.getOrCreateSCEdition(editionId);
+				skillsDone = (int) edition.getModules().stream()
+						.flatMap(m -> m.getSubmodules().stream())
+						.flatMap(s -> s.getSkills().stream())
+						.filter(s -> s.getTasks().size() > 0
+								&& scperson.getTasksCompleted().containsAll(s.getTasks()))
+						.count();
+			}
+
+			completedSkillsPerCourse.put(courseId, skillsDone);
+		}
+		return completedSkillsPerCourse;
 	}
 
 	/**

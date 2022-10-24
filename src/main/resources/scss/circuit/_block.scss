@@ -21,6 +21,9 @@
         --border-colour: var(--primary-green);
         border: 2px solid var(--border-colour);
     }
+    &[data-hidden="true"] {
+        border-style: dashed;
+    }
 
     &__info {
         background-color: var(--primary-light);
@@ -160,10 +163,11 @@
 }
 
 .ghost_block {
-    align-items: center;
+    align-items: stretch;
     display: grid;
     font-size: 1.5rem;
-    justify-content: center;
+    gap: 0.5rem;
+    grid-template-columns: 1fr 1fr;
     min-height: 2rem;
     min-width: 2rem;
     &.ensured_wide {
@@ -173,14 +177,33 @@
         border: 1px dashed var(--primary-dark);
     }
     &:hover,
-    &:focus-visible {
+    &:focus-within {
+        & button {
+            opacity: 40%;
+        }
+    }
+    & button {
         background-color: var(--primary-light);
         border: 1px dotted var(--primary-dark);
+        font-size: inherit;
         cursor: pointer;
-        opacity: 50%;
+        &:hover,
+        &:focus-visible {
+            opacity: 60%;
+        }
+        &:last-child[data-type="regular"] {
+            grid-column: span 2;
+        }
     }
     @include show-only-when("*", ":hover");
 }
-.circuit.editing > .ghost_block {
+.circuit[data-moving="block"] > .ghost_block {
     background-color: var(--grey-700);
+}
+.circuit[data-task-select="true"] {
+    .block__buttons,
+    .block__connect,
+    .ghost_block {
+        display: none;
+    }
 }

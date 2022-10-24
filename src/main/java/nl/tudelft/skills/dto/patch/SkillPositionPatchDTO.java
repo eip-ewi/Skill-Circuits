@@ -26,14 +26,14 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import nl.tudelft.librador.dto.patch.Patch;
-import nl.tudelft.skills.model.Skill;
+import nl.tudelft.skills.model.AbstractSkill;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class SkillPositionPatchDTO extends Patch<Skill> {
+public class SkillPositionPatchDTO extends Patch<AbstractSkill> {
 
 	@Min(0)
 	@NotNull

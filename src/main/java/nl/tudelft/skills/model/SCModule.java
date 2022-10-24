@@ -55,4 +55,12 @@ public class SCModule {
 	@OneToMany(mappedBy = "module")
 	private Set<Submodule> submodules = new HashSet<>();
 
+	@NotNull
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@Cascade(CascadeType.DELETE)
+	@OneToMany(mappedBy = "module")
+	private Set<ExternalSkill> externalSkills = new HashSet<>();
+
 }

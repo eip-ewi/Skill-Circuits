@@ -1,0 +1,83 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{container}">
+    <head>
+        <link rel="stylesheet" th:href="@{/css/blocks.css}" />
+
+        <title th:text="|${edition.course.name} - ${edition.name}|"></title>
+    </head>
+
+    <body>
+        <div layout:fragment="content">
+            <div style="display: flex; justify-content: space-between">
+                <div>
+                    <h1 th:text="|${edition.course.name} - ${edition.name}|"></h1>
+                </div>
+                <div>
+                    <form
+                        th:if="${@authorisationService.canEditEdition(edition.id)}"
+                        method="post"
+                        th:action="@{|/edition/${edition.id}/studentmode|}">
+                        <button
+                            th:if="${studentMode}"
+                            type="submit"
+                            class="button"
+                            style="font-size: 1.25rem; padding: 0.5rem 1rem">
+                            Exit student view
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <form class="tabs" th:with="view = ${param?.view}">
+                <button
+                    class="tab"
+                    name="view"
+                    value="modules"
+                    th:data-active="${view != 'circuit'}">
+                    Modules
+                </button>
+                <button
+                    class="tab"
+                    name="view"
+                    value="circuit"
+                    th:data-active="${view == 'circuit'}">
+                    Circuit
+                </button>
+            </form>
+
+            <div class="blocks">
+                <th:block th:each="module : ${edition.modules}">
+                    <a class="block" th:href="@{|/module/${module.id}|}">
+                        <h2 th:text="${module.name}"></h2>
+                        <h3
+                            style="font-size: 0.8rem"
+                            th:text="|${@skillRepository.countBySubmoduleModuleId(module.id)} skills|"></h3>
+                    </a>
+                </th:block>
+            </div>
+        </div>
+    </body>
+</html>

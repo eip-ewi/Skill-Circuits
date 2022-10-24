@@ -1,0 +1,83 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div
+        layout:fragment="dialog"
+        class="hidden action_dialog"
+        th:if="${canEdit}"
+        id="select-task-dialog">
+        <!-- prettier-ignore -->
+        <th:block><span>Selecting tasks (</span><span id="select-task-amount">0</span><span> selected)</span></th:block>
+        <button id="select-task-cancel" class="button" type="button">Cancel</button>
+        <button id="select-task-select" class="button" type="button">Select</button>
+    </div>
+
+    <script layout:fragment="script">
+        let taskInput;
+        let taskSelectCallBack;
+        function openTaskSelect(input, callback) {
+            const checkboxes = $(".item input[name='selected']");
+            checkboxes.removeClass("hidden");
+            checkboxes.css("pointer-events", "initial");
+            $(".circuit").attr("data-task-select", true);
+            $(".block").css("pointer-events", "none");
+            $(".checkpoint").css("pointer-events", "none");
+            $("#select-task-dialog").removeClass("hidden");
+            JSON.parse(`[${input.val()}]`).forEach(i =>
+                $(`.item input[name='selected'][value='${i}']`).prop("checked", true).change()
+            );
+            taskInput = input;
+            taskSelectCallback = callback;
+        }
+        function closeTaskSelect(save) {
+            const checkboxes = $(".item input[name='selected']");
+            checkboxes.addClass("hidden");
+            $(".circuit").removeAttr("data-task-select");
+            $(".block").css("pointer-events", "");
+            $(".checkpoint").css("pointer-events", "");
+            $("#select-task-dialog").addClass("hidden");
+            if (save) {
+                let value = [
+                    ...checkboxes.filter((i, c) => $(c).prop("checked")).map((i, c) => $(c).val()),
+                ];
+                taskInput.val(value);
+                if (taskSelectCallback) taskSelectCallback(value);
+            }
+            checkboxes.prop("checked", false);
+            $("#select-task-amount").text(0);
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            $("#select-task-cancel").click(() => closeTaskSelect(false));
+            $("#select-task-select").click(() => closeTaskSelect(true));
+            $(".item input[name='selected']").change(function () {
+                const amount = $("#select-task-amount");
+                if ($(this).prop("checked")) {
+                    amount.text(parseInt(amount.text()) + 1);
+                } else {
+                    amount.text(amount.text() - 1);
+                }
+            });
+        });
+    </script>
+</html>

@@ -17,11 +17,17 @@
  */
 package nl.tudelft.skills.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
+import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.dto.view.SCModuleSummaryDTO;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.EditionRepository;
+import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.EditionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,13 +41,16 @@ import org.springframework.web.bind.annotation.*;
 public class EditionController {
 	private EditionRepository editionRepository;
 	private EditionService editionService;
+	private AuthorisationService authorisationService;
 	private HttpSession session;
 
 	@Autowired
 	public EditionController(EditionRepository editionRepository, EditionService editionService,
+			AuthorisationService authorisationService,
 			HttpSession session) {
 		this.editionRepository = editionRepository;
 		this.editionService = editionService;
+		this.authorisationService = authorisationService;
 		this.session = session;
 	}
 
@@ -49,14 +58,20 @@ public class EditionController {
 	 * Gets the page for a single edition. This page contains a list with all modules in the edition.
 	 *
 	 * @param  id    The id of the edition
+	 * @param  view  The view, either modules or circuit
 	 * @param  model The model to add data to
 	 * @return       The page to load
 	 */
 	@GetMapping("{id}")
-	@PreAuthorize("@authorisationService.canViewEdition(#id)")
-	public String getEditionPage(@PathVariable Long id, Model model) {
+	@PreAuthorize("@authorisationService.isAuthenticated() and @authorisationService.canViewEdition(#id)")
+	public String getEditionPage(@PathVariable Long id, @RequestParam(required = false) String view,
+			Model model) {
 		editionService.configureEditionModel(id, model, session);
-		return "edition/view";
+		if (authorisationService.canEditEdition(id) && view == null) {
+			view = "circuit";
+		}
+		return "circuit".equals(view) ? "edition/view"
+				: "edition/modules";
 	}
 
 	/**
@@ -107,6 +122,19 @@ public class EditionController {
 		session.setAttribute("student-mode-" + id,
 				currentStudentMode == null || !currentStudentMode);
 		return "redirect:/edition/{id}";
+	}
+
+	/**
+	 * Gets the modules of an edition.
+	 *
+	 * @param  id The id of the edition
+	 * @return    The list of modules
+	 */
+	@GetMapping("{id}/modules")
+	@PreAuthorize("@authorisationService.canGetModulesOfEdition(#id)")
+	public @ResponseBody List<SCModuleSummaryDTO> getModulesOfEdition(@PathVariable Long id) {
+		return View.convert(new ArrayList<>(editionRepository.findByIdOrThrow(id).getModules()),
+				SCModuleSummaryDTO.class);
 	}
 
 }

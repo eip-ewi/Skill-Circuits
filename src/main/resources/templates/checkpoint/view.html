@@ -26,6 +26,7 @@
         th:id="|checkpoint-${checkpoint.id}|"
         th:data-deadline="${#temporals.formatISO(checkpoint.deadline)}"
         th:data-name="${checkpoint.name}"
+        th:draggable="${canEdit}"
         class="checkpoint"
         layout:fragment="checkpoint">
         <div class="checkpoint__body" th:id="|checkpoint-${checkpoint.id}-body|">
@@ -94,6 +95,5 @@
                 addGhostCheckpoints();
             }
         });
-        document.addEventListener("drop", updateCheckpointPositions);
     </script>
 </html>

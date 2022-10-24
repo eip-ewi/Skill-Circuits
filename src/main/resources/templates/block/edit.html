@@ -55,24 +55,18 @@
                 th:text="${g.name}"></option>
         </select>
 
-        <div data-edit="only" th:if="${level == 'module' && create != null}">
-            <select
-                data-edit="only"
+        <th:block th:if="${level == 'module'}">
+            <input
                 id="create-skill-checkpoint"
-                class="selectbox font_size_regular"
                 name="checkpoint.id"
-                required>
-                <option
-                    data-edit="only"
-                    th:each="checkpoint : ${module.checkpointsInEdition}"
-                    th:value="${checkpoint.id}"
-                    th:text="${checkpoint.name}"></option>
-            </select>
-        </div>
+                type="hidden"
+                th:if="${create}" />
+        </th:block>
 
         <div data-edit="only" th:if="${level == 'module'}">
             <input
                 data-edit="only"
+                th:data-initial="${block.essential}"
                 type="checkbox"
                 th:id="|essential-checkbox-${block.id}|"
                 name="essential"
@@ -88,6 +82,43 @@
                 </span>
             </span>
         </div>
+
+        <div data-edit="only" th:if="${level == 'module'}">
+            <input
+                data-edit="only"
+                type="checkbox"
+                th:data-initial="${block.hidden}"
+                th:id="|hidden-checkbox-${block.id}|"
+                name="hidden"
+                value="true"
+                th:checked="${block.hidden}" />
+            <span data-edit="only">
+                <label data-edit="only" th:for="|hidden-checkbox-${block.id}|">Hidden</label>
+                <span data-edit="only" class="info_icon">
+                    <sup data-edit="only" class="fa-solid fa-info-circle"></sup>
+                    <span data-edit="only" class="info_icon__text">
+                        This skill will not be displayed until a configurable set of tasks has been
+                        completed.
+                    </span>
+                </span>
+            </span>
+        </div>
+
+        <th:block th:if="${level == 'module'}">
+            <button
+                class="button"
+                th:classappend="${block.hidden} ? '' : 'hidden'"
+                name="select-tasks"
+                type="button"
+                data-edit="only"
+                th:text="${block.requiredTaskIds.isEmpty()} ? 'Select tasks' : (${block.requiredTaskIds.size() == 1} ? '1 task selected' : ${block.requiredTaskIds.size() + ' tasks selected'})"></button>
+            <input
+                type="hidden"
+                name="requiredTaskIds"
+                th:with="ids = ${block.requiredTaskIds.toString()}"
+                th:data-initial="${ids.substring(1, ids.length()-1)}"
+                th:value="${ids.substring(1, ids.length()-1)}" />
+        </th:block>
     </form>
 
     <script th:if="${canEdit}" layout:fragment="script">
@@ -129,7 +160,21 @@
             $(`#${block.attr("id")} select`).each((i, field) =>
                 $(field).val($(field).data("initial")).change()
             );
-            block.find("input[type='checkbox']").prop("checked", true);
+            block
+                .find("input[type='checkbox']")
+                .each((i, checkbox) => $(checkbox).prop("checked", $(checkbox).data("initial")));
+            block.find("[name='requiredTaskIds']").each((i, requiredTasks) => {
+                const initialTasks = JSON.parse(`[${$(requiredTasks).data("initial")}]`);
+                $(requiredTasks).val(initialTasks);
+                if (initialTasks.length >= 1) {
+                    let number = initialTasks.length ? "task" : "tasks";
+                    $(requiredTasks)
+                        .siblings("[name='select-tasks']")
+                        .text(`${initialTasks.length} ${number} selected`);
+                } else {
+                    $(requiredTasks).siblings("[name='select-tasks']").text("Select tasks");
+                }
+            });
 
             block.find(".item > a").append(block.find("a + .item__content"));
 
@@ -166,6 +211,11 @@
                         data[field.name.split(".")[0]][field.name.split(".")[1]] = field.value;
                     } else data[field.name] = field.value;
                 });
+            if (blockType === "skill") {
+                data["requiredTaskIds"] = JSON.parse(
+                    `[${block.find("[name='requiredTaskIds']").val()}]`
+                );
+            }
             return data;
         }
         function serialiseBlockItems(block) {
@@ -211,6 +261,8 @@
                 block.find(".item__create").click(createItem);
                 block.find(".select__items button").click(selectItemIcon);
                 block.find(".select__items > select").change(changeSelectedIcon);
+                block.find("input[name='hidden']").click(toggleRequiredTasksButton);
+                block.find("button[name='select-tasks']").click(selectRequiredTasks);
             }
             block.find(".item__up").click(moveItemUp);
             block.find(".item__down").click(moveItemDown);
@@ -241,11 +293,27 @@
                 },
             });
         }
+        function selectRequiredTasks() {
+            openTaskSelect($(this).siblings("[name='requiredTaskIds']"), ts => {
+                if (ts.length >= 1) {
+                    let number = ts.length === 1 ? "task" : "tasks";
+                    $(this).text(`${ts.length} ${number} selected`);
+                } else {
+                    $(this).text("Select tasks");
+                }
+            });
+        }
+        function toggleRequiredTasksButton() {
+            $(this).closest(".block").find("button[name='select-tasks']").toggleClass("hidden");
+        }
 
         document.addEventListener("DOMContentLoaded", function () {
             $(".block__edit").click(editBlock);
             $(".block__edit__cancel").click(cancelEditOrCreateBlock);
             $(".block__edit__save").click(saveEditOrCreate);
+
+            $("input[name='hidden']").click(toggleRequiredTasksButton);
+            $("button[name='select-tasks']").click(selectRequiredTasks);
         });
     </script>
 </html>

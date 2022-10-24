@@ -37,4 +37,336 @@ databaseChangeLog:
         - sql:
             comment: Keep current task ordering (by id)
             sql: UPDATE task SET idx = id;
+  # Hidden skills
+  - changeSet:
+      id: 1660912175253-1
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_EC
+                  name: required_tasks_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_EC
+                  name: required_for_id
+                  type: BIGINT
+            tableName: task_required_for
+  - changeSet:
+      id: 1660912175253-2
+      author: ruben (generated)
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: hidden
+                  type: BOOLEAN
+            tableName: skill
+  - changeSet:
+      id: 1660912175253-3
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: required_tasks_id
+            indexName: FKog5wjbi2d5d2f9i3kl7cyu58a_INDEX_E
+            tableName: task_required_for
+  - changeSet:
+      id: 1660912175253-4
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: required_for_id
+            indexName: FKtjvvl1ice8hcviw4lstna196b_INDEX_E
+            tableName: task_required_for
+  - changeSet:
+      id: 1660912175253-5
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: required_tasks_id
+            baseTableName: task_required_for
+            constraintName: FKog5wjbi2d5d2f9i3kl7cyu58a
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: task
+            validate: true
+  - changeSet:
+      id: 1660912175253-6
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: required_for_id
+            baseTableName: task_required_for
+            constraintName: FKtjvvl1ice8hcviw4lstna196b
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: skill
+            validate: true
+  # External skills
+  - changeSet:
+      id: 1661766741710-1
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_9
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: x_pos
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: y_pos
+                  type: INT
+            tableName: abstract_skill
+  - changeSet:
+      id: 1661766741710-migrate-skill-positions
+      author: Ruben Backx
+      changes:
+      - sql:
+          comment: Migrate skill positions
+          sql: INSERT INTO abstract_skill (id, x_pos, y_pos) SELECT id, x_pos, y_pos FROM skill;
+  - changeSet:
+      id: 1661766741710-2
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_4A
+                  name: children_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_4A
+                  name: parents_id
+                  type: BIGINT
+            tableName: abstract_skill_parents
+  - changeSet:
+      id: 1661764054983-migrate-skill-parents
+      author: Ruben Backx
+      changes:
+      - sql:
+          comment: Migrate skill parents
+          sql: INSERT INTO abstract_skill_parents SELECT * FROM skill_parents;
+  - changeSet:
+      id: 1661766741710-6
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_FA
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: module_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: skill_id
+                  type: BIGINT
+            tableName: external_skill
+  - changeSet:
+      id: 1661766741710-10
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: module_id
+            indexName: FK1qux3xj9lydkqa60yuhlno76j_INDEX_F
+            tableName: external_skill
+  - changeSet:
+      id: 1661766741710-14
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: skill_id
+            indexName: FKaqmetn1jao3dox4bd66lx81a7_INDEX_F
+            tableName: external_skill
+  - changeSet:
+      id: 1661766741710-15
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: parents_id
+            indexName: FKd5d1lbs5mpe1of1aq1svoi6ve_INDEX_4
+            tableName: abstract_skill_parents
+  - changeSet:
+      id: 1661766741710-16
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: children_id
+            indexName: FKm8mjb7qnextnjh33sgpwsiqim_INDEX_4
+            tableName: abstract_skill_parents
+  - changeSet:
+      id: 1661766741710-21
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: module_id
+            baseTableName: external_skill
+            constraintName: FK1qux3xj9lydkqa60yuhlno76j
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: scmodule
+            validate: true
+  - changeSet:
+      id: 1661766741710-25
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: id
+            baseTableName: external_skill
+            constraintName: FK9tooj2x9oyumrjmqjlkv7i3om
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: abstract_skill
+            validate: true
+  - changeSet:
+      id: 1661766741710-26
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: skill_id
+            baseTableName: external_skill
+            constraintName: FKaqmetn1jao3dox4bd66lx81a7
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: skill
+            validate: true
+  - changeSet:
+      id: 1661766741710-27
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: parents_id
+            baseTableName: abstract_skill_parents
+            constraintName: FKd5d1lbs5mpe1of1aq1svoi6ve
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: abstract_skill
+            validate: true
+  - changeSet:
+      id: 1661766741710-28
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: children_id
+            baseTableName: abstract_skill_parents
+            constraintName: FKm8mjb7qnextnjh33sgpwsiqim
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: abstract_skill
+            validate: true
+  - changeSet:
+      id: 1661766741710-32
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: id
+            baseTableName: skill
+            constraintName: FKpgc19ygtewus63d76ogq7ltt0
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: abstract_skill
+            validate: true
+  - changeSet:
+      id: 1661766741710-34
+      author: ruben (generated)
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: skill_parents
+            constraintName: FKi3rncw39bg0yvw2e79jkchrkl
+  - changeSet:
+      id: 1661766741710-35
+      author: ruben (generated)
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: skill_parents
+            constraintName: FKnb8ad4t5c3fy0olkqmj31n27e
+  - changeSet:
+      id: 1661766741710-36
+      author: ruben (generated)
+      changes:
+        - dropTable:
+            tableName: skill_parents
+  - changeSet:
+      id: 1661766741710-37
+      author: ruben (generated)
+      changes:
+        - dropColumn:
+            columnName: x_pos
+            tableName: skill
+  - changeSet:
+      id: 1661766741710-38
+      author: ruben (generated)
+      changes:
+        - dropColumn:
+            columnName: y_pos
+            tableName: skill
 

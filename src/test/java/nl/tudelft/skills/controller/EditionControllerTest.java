@@ -20,11 +20,15 @@ package nl.tudelft.skills.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
+import java.util.List;
+
 import javax.servlet.http.HttpSession;
 
 import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.dto.view.SCModuleSummaryDTO;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.EditionRepository;
+import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.EditionService;
 
 import org.junit.jupiter.api.Test;
@@ -45,11 +49,13 @@ public class EditionControllerTest extends ControllerTest {
 	private final HttpSession session;
 
 	@Autowired
-	public EditionControllerTest(EditionRepository editionRepository) {
+	public EditionControllerTest(EditionRepository editionRepository,
+			AuthorisationService authorisationService) {
 		this.editionRepository = editionRepository;
 		this.editionService = mock(EditionService.class);
 		this.session = mock(HttpSession.class);
-		this.editionController = new EditionController(editionRepository, editionService, session);
+		this.editionController = new EditionController(editionRepository, editionService,
+				authorisationService, session);
 	}
 
 	@Test
@@ -93,6 +99,12 @@ public class EditionControllerTest extends ControllerTest {
 		verify(session).setAttribute("student-mode-" + db.getEditionRL().getId(), false);
 		editionController.toggleStudentMode(db.getEditionRL().getId());
 		verify(session, times(2)).setAttribute("student-mode-" + db.getEditionRL().getId(), true);
+	}
+
+	@Test
+	void getModulesOfEdition() {
+		assertThat(editionController.getModulesOfEdition(db.getEditionRL().getId()))
+				.isEqualTo(List.of(mapper.map(db.getModuleProofTechniques(), SCModuleSummaryDTO.class)));
 	}
 
 }

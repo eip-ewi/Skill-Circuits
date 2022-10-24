@@ -24,6 +24,7 @@
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <li
         layout:fragment="form"
+        th:if="${canEdit}"
         id="create-task"
         class="hidden item"
         data-edit="only"

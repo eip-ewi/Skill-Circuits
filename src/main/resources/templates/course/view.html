@@ -32,7 +32,6 @@
     <body>
         <div layout:fragment="content">
             <h1 th:text="${course.name}"></h1>
-            <h1 th:text="${course.code}"></h1>
 
             <div class="blocks">
                 <a
@@ -40,6 +39,9 @@
                     th:each="edition : ${course.editions}"
                     th:href="@{|/edition/${edition.id}|}">
                     <h2 th:text="${edition.name}"></h2>
+                    <h5
+                        style="font-size: 0.8rem"
+                        th:text="|${@skillRepository.countBySubmoduleModuleEditionId(edition.id)} skills|"></h5>
                 </a>
             </div>
         </div>

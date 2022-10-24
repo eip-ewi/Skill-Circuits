@@ -1,0 +1,138 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <script th:if="${canEdit}" layout:fragment="script">
+        let draggingCheckpoint = false;
+
+        function recalculateCheckpointSkills() {
+            $(".checkpoint:not(.ghost_checkpoint)").each(function () {
+                const newRow = $(this).css("grid-row-start");
+                const prevCheckpointRow = Math.max(
+                    ...$(".checkpoint:not(.ghost_checkpoint)")
+                        .filter((i, c) => $(c).css("grid-row-start") < newRow)
+                        .map((i, c) => $(c).css("grid-row-start"))
+                );
+                const newSkills = $(".block")
+                    .filter((i, b) => $(b).prop("id").startsWith("block-"))
+                    .filter(
+                        (i, b) =>
+                            prevCheckpointRow < $(b).css("grid-row-start") &&
+                            $(b).css("grid-row-start") <= newRow
+                    )
+                    .map((i, b) => $(b).prop("id").substr(6));
+                const id = $(this).prop("id").substr(11);
+
+                newSkills.each((i, b) => {
+                    const skill = $(`#block-${b}`);
+                    skill.data("checkpoint", id);
+                    skill.attr("data-checkpoint", id);
+                });
+
+                $.ajax({
+                    type: "PUT",
+                    url: `/checkpoint/${id}/skills`,
+                    data: JSON.stringify([...newSkills]),
+                    processData: false,
+                    contentType: "application/json",
+                    success: () => {},
+                    error: () => alert("Oops something went wrong :("),
+                });
+            });
+        }
+
+        document.addEventListener(
+            "dragstart",
+            function (event) {
+                if (event.target.classList.contains("checkpoint")) {
+                    event.dataTransfer.setData("text/plain", event.target.id);
+                    event.dataTransfer.dropEffect = "move";
+                    draggingCheckpoint = true;
+                    $("#circuit").attr("data-moving", "checkpoint");
+                }
+            },
+            false
+        );
+        document.addEventListener(
+            "dragend",
+            function (event) {
+                if (event.target.classList.contains("checkpoint")) {
+                    draggingCheckpoint = false;
+                    $("#circuit").removeAttr("data-moving");
+                }
+            },
+            false
+        );
+
+        document.addEventListener(
+            "dragenter",
+            function (event) {
+                if ($(event.target).hasClass("ghost_checkpoint") && draggingCheckpoint) {
+                    $(event.target).attr("data-drag-over", true);
+                }
+            },
+            false
+        );
+        document.addEventListener(
+            "dragleave",
+            function (event) {
+                if ($(event.target).hasClass("ghost_checkpoint")) {
+                    $(event.target).removeAttr("data-drag-over");
+                }
+            },
+            false
+        );
+
+        document.addEventListener(
+            "dragover",
+            function (event) {
+                if ($(event.target).hasClass("ghost_checkpoint") && draggingCheckpoint) {
+                    event.preventDefault();
+                    event.dataTransfer.dropEffect = "move";
+                }
+            },
+            false
+        );
+        document.addEventListener(
+            "drop",
+            function (event) {
+                if ($(event.target).hasClass("ghost_checkpoint") && draggingCheckpoint) {
+                    event.preventDefault();
+
+                    const checkpoint = $(`#${event.dataTransfer.getData("text/plain")}`);
+                    const target = $(event.target);
+
+                    target.removeAttr("data-drag-over");
+
+                    const currentRow = checkpoint.css("grid-row-start");
+                    const newRow = target.css("grid-row-start");
+                    checkpoint.css("grid-row-start", newRow);
+                    target.css("grid-row-start", currentRow);
+
+                    recalculateCheckpointSkills();
+                }
+            },
+            false
+        );
+    </script>
+</html>

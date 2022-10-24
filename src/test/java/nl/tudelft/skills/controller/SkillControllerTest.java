@@ -24,19 +24,22 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import javax.servlet.http.HttpSession;
 
 import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.dto.create.ExternalSkillCreateDTO;
 import nl.tudelft.skills.dto.create.SkillCreateDTO;
 import nl.tudelft.skills.dto.id.CheckpointIdDTO;
+import nl.tudelft.skills.dto.id.SCModuleIdDTO;
+import nl.tudelft.skills.dto.id.SkillIdDTO;
 import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
+import nl.tudelft.skills.model.ExternalSkill;
 import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.repository.SkillRepository;
-import nl.tudelft.skills.repository.SubmoduleRepository;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.service.ModuleService;
 import nl.tudelft.skills.service.SkillService;
 
@@ -44,7 +47,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 
@@ -54,32 +56,52 @@ import org.springframework.ui.Model;
 public class SkillControllerTest extends ControllerTest {
 
 	private final SkillController skillController;
+	private final AbstractSkillRepository abstractSkillRepository;
 	private final SkillRepository skillRepository;
+	private final ModuleService moduleService;
 	private final SubmoduleRepository submoduleRepository;
 	private final HttpSession session;
 
 	@Autowired
 	public SkillControllerTest(SkillRepository skillRepository, TaskRepository taskRepository,
-			SkillService skillService, SubmoduleRepository submoduleRepository, ModuleService moduleService) {
+			SkillService skillService, SubmoduleRepository submoduleRepository,
+			ExternalSkillRepository externalSkillRepository,
+			AbstractSkillRepository abstractSkillRepository) {
 		this.submoduleRepository = submoduleRepository;
 		this.session = mock(HttpSession.class);
-		this.skillController = new SkillController(skillRepository, taskRepository, submoduleRepository,
-				skillService, moduleService, session);
+		this.moduleService = mock(ModuleService.class);
+		this.skillController = new SkillController(skillRepository, externalSkillRepository,
+				abstractSkillRepository, taskRepository,
+				submoduleRepository, skillService, moduleService, session);
 		this.skillRepository = skillRepository;
+		this.abstractSkillRepository = abstractSkillRepository;
 	}
 
 	@Test
-	@WithUserDetails("admin")
 	void createSkill() {
 		var dto = SkillCreateDTO.builder()
 				.name("New Skill")
 				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
 				.checkpoint(new CheckpointIdDTO(db.getCheckpointLectureOne().getId()))
+				.requiredTaskIds(Collections.emptyList())
 				.column(10).row(11).newItems(new ArrayList<>()).build();
 
 		skillController.createSkill(null, dto, mock(Model.class));
 
 		assertTrue(skillRepository.findAll().stream().anyMatch(s -> s.getName().equals("New Skill")));
+	}
+
+	@Test
+	void createExternalSkill() {
+		var dto = ExternalSkillCreateDTO.builder()
+				.module(new SCModuleIdDTO(db.getModuleProofTechniques().getId()))
+				.skill(new SkillIdDTO(db.getSkillAssumption().getId()))
+				.column(10).row(11).build();
+
+		skillController.createSkill(null, dto, mock(Model.class));
+
+		assertTrue(abstractSkillRepository.findAll().stream().anyMatch(s -> s instanceof ExternalSkill es
+				&& skillRepository.findByIdOrThrow(es.getSkill().getId()).getName().equals("Assumption")));
 	}
 
 	@Test

@@ -18,10 +18,12 @@
 package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
+import java.util.*;
 
 import javax.transaction.Transactional;
 
@@ -32,8 +34,13 @@ import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.model.SCEdition;
+import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.ModuleRepository;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.service.CourseService;
+import nl.tudelft.skills.service.EditionService;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,14 +58,22 @@ public class HomeControllerTest extends ControllerTest {
 	private final EditionControllerApi editionApi;
 	private final RoleControllerApi roleApi;
 	private final EditionRepository editionRepository;
+	private final PersonRepository personRepository;
+	private final EditionService editionService;
+	private final CourseService courseService;
 
 	@Autowired
 	public HomeControllerTest(EditionControllerApi editionApi, RoleControllerApi roleApi,
-			EditionRepository editionRepository, ModuleRepository moduleRepository) {
+			EditionRepository editionRepository, ModuleRepository moduleRepository,
+			PersonRepository personRepository, EditionService editionService) {
 		this.editionApi = editionApi;
 		this.roleApi = roleApi;
 		this.editionRepository = editionRepository;
-		this.homeController = new HomeController(editionApi, roleApi, editionRepository, moduleRepository);
+		this.personRepository = personRepository;
+		this.editionService = editionService;
+		this.courseService = mock(CourseService.class);
+		this.homeController = new HomeController(editionApi, roleApi, editionRepository, moduleRepository,
+				personRepository, editionService, courseService);
 	}
 
 	@Test
@@ -84,4 +99,45 @@ public class HomeControllerTest extends ControllerTest {
 
 		assertThat((List<CourseSummaryDTO>) model.getAttribute("courses")).containsExactly(course);
 	}
+
+	@Test
+	void getCompletedSkillsFalse() {
+		List<CourseSummaryDTO> courses = new ArrayList<>(
+				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
+		Set<Task> tasks = new HashSet<>();
+		tasks.add(db.getTaskRead12());
+		SCPerson person = new SCPerson();
+		person.setTasksCompleted(tasks);
+
+		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
+				.thenReturn(db.getEditionRL().getId());
+
+		// There are no completed skills in the course
+		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
+				person);
+
+		assertFalse(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
+		assertThat(courseCompletedSkills.get(db.getCourseRL().getId()) == 0);
+	}
+
+	@Test
+	void getCompletedSkillsTrue() {
+		List<CourseSummaryDTO> courses = new ArrayList<>(
+				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
+		Set<Task> tasks = new HashSet<>();
+		tasks.add(db.getTaskRead12());
+		tasks.add(db.getTaskDo12ae());
+		SCPerson person = new SCPerson();
+		person.setTasksCompleted(tasks);
+
+		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
+				.thenReturn(db.getEditionRL().getId());
+
+		// There is one completed skill in the course
+		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
+				person);
+		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
+		assertThat(courseCompletedSkills.get(db.getCourseRL().getId()) == 1);
+	}
+
 }

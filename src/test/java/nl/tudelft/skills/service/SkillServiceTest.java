@@ -20,7 +20,7 @@ package nl.tudelft.skills.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.repository.SkillRepository;
+import nl.tudelft.skills.repository.AbstractSkillRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.test.TestDatabaseLoader;
 
@@ -33,13 +33,13 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
 public class SkillServiceTest {
 
-	private final SkillRepository skillRepository;
+	private final AbstractSkillRepository skillRepository;
 	private final SkillService skillService;
 
 	private TestDatabaseLoader db;
 
 	@Autowired
-	public SkillServiceTest(SkillRepository skillRepository, TaskRepository taskRepository,
+	public SkillServiceTest(AbstractSkillRepository skillRepository, TaskRepository taskRepository,
 			TestDatabaseLoader db) {
 		this.skillRepository = skillRepository;
 		this.db = db;
