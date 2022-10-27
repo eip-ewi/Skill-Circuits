@@ -59,7 +59,7 @@
                         type="hidden"
                         id="tasks-in-path-edit-input"
                         th:if="${@authorisationService.isAtLeastTeacherInEdition(module.edition.id)} and not ${studentMode}"
-                        th:value="${tasksInPathIds}" />
+                        th:value="${#strings.listJoin(tasksInPathIds, ',')}" />
                     <button
                         th:if="${@authorisationService.isAtLeastTeacherInEdition(module.edition.id)} and not ${studentMode} and not ${selectedPathId == null}"
                         type="submit"
