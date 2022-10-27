@@ -200,7 +200,7 @@ public class ModuleController {
 	@PreAuthorize("@authorisationService.canGetSkillsOfModule(#id)")
 	public @ResponseBody List<SkillSummaryDTO> getSkillsOfModule(@PathVariable Long id) {
 		return View.convert(moduleRepository.findByIdOrThrow(id).getSubmodules().stream()
-			.flatMap(s -> s.getSkills().stream()).toList(), SkillSummaryDTO.class);
+				.flatMap(s -> s.getSkills().stream()).toList(), SkillSummaryDTO.class);
 	}
 
 }

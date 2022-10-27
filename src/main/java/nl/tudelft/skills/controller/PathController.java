@@ -141,7 +141,6 @@ public class PathController {
 		}
 
 		// Remove path from user preferences
-
 		pathPreferenceRepository.findAllByPathId(path.getId()).forEach(pref -> {
 			SCPerson person = personRepository.findByIdOrThrow(pref.getPerson().getId());
 			person.setPathPreferences(null);

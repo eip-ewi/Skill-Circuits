@@ -403,14 +403,14 @@ databaseChangeLog:
                   constraints:
                     nullable: false
                     primaryKey: true
-                    primaryKeyName: CONSTRAINT_4A
+                    primaryKeyName: CONSTRAINT_4B
                   name: tasks_id
                   type: BIGINT
               - column:
                   constraints:
                     nullable: false
                     primaryKey: true
-                    primaryKeyName: CONSTRAINT_4A
+                    primaryKeyName: CONSTRAINT_4B
                   name: paths_id
                   type: BIGINT
             tableName: task_paths

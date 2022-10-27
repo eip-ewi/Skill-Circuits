@@ -53,7 +53,7 @@ public class TaskViewDTO extends View<Task> implements ItemView {
 	 */
 	@Builder.Default
 	@NotNull
-	private boolean visible = true;
+	private Boolean visible = true;
 
 	@Override
 	public void postApply() {

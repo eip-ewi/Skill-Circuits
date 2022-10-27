@@ -28,7 +28,6 @@ import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
@@ -51,6 +50,7 @@ public class ModuleService {
 
 	private final ModuleRepository moduleRepository;
 	private final PersonRepository personRepository;
+	private final AuthorisationService authorisationService;
 	private final CircuitService circuitService;
 	private final PersonService personService;
 	private final PathRepository pathRepository;
@@ -59,10 +59,12 @@ public class ModuleService {
 	private final EditionControllerApi editionApi;
 
 	public ModuleService(ModuleRepository moduleRepository, PersonRepository personRepository,
-			CircuitService circuitService, PersonService personService, PathRepository pathRepository,
+			AuthorisationService authorisationService, CircuitService circuitService,
+			PersonService personService, PathRepository pathRepository,
 			EditionService editionService, CourseControllerApi courseApi, EditionControllerApi editionApi) {
 		this.moduleRepository = moduleRepository;
 		this.personRepository = personRepository;
+		this.authorisationService = authorisationService;
 		this.circuitService = circuitService;
 		this.personService = personService;
 		this.pathRepository = pathRepository;
@@ -99,7 +101,6 @@ public class ModuleService {
 		Set<Long> taskIds = path == null ? new HashSet<>()
 				: path.getTasks().stream().map(Task::getId).collect(Collectors.toSet());
 
-		AuthorisationService authorisationService = SpringContext.getBean(AuthorisationService.class);
 		if (path != null) {
 			// if path is selected (doesn't apply for no-path), show only skills & tasks on followed path
 			if (!(authorisationService.canViewThroughPath(module.getEdition().getId())
@@ -133,7 +134,7 @@ public class ModuleService {
 		EditionDetailsDTO edition = editionApi.getEditionById(module.getEdition().getId()).block();
 		CourseDetailsDTO course = courseApi.getCourseById(edition.getCourse().getId()).block();
 		model.addAttribute("courses",
-			courseApi.getAllCoursesByProgram(course.getProgram().getId()).collectList().block());
+				courseApi.getAllCoursesByProgram(course.getProgram().getId()).collectList().block());
 	}
 
 	/**

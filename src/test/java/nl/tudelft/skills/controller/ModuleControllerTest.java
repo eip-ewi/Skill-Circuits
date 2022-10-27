@@ -166,10 +166,15 @@ public class ModuleControllerTest extends ControllerTest {
 		ModuleController moduleController = new ModuleController(moduleRepository, moduleService, session);
 		assertThat(moduleController.getSkillsOfModule(db.getModuleProofTechniques().getId()))
 				.isEqualTo(Stream
-						.of(db.getSkillDividingIntoCases(), db.getSkillCasesPractice(),
-								db.getSkillContradictionPractice(), db.getSkillNegateImplications(),
-								db.getSkillContrapositivePractice(), db.getSkillNegation(),
-								db.getSkillVariables(), db.getSkillImplication(), db.getSkillAssumption(),
+						.of(
+								db.getSkillVariables(),
+								db.getSkillNegation(),
+								db.getSkillImplication(),
+								db.getSkillNegateImplications(),
+								db.getSkillContrapositivePractice(),
+								db.getSkillDividingIntoCases(), db.getSkillCasesPractice(),
+								db.getSkillContradictionPractice(),
+								db.getSkillAssumption(),
 								db.getSkillGeneralisationPractice(), db.getSkillProofOutline(),
 								db.getSkillTransitiveProperty(), db.getSkillInductionPractice())
 						.map(s -> mapper.map(s, SkillSummaryDTO.class)).toList());

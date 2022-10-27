@@ -90,7 +90,7 @@ public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitV
 				.toList();
 		// get all external skills in edition
 		this.externalSkillList = data.getExternalSkills().stream()
-			.map(s -> View.convert(s, ModuleLevelExternalSkillViewDTO.class)).toList();
+				.map(s -> View.convert(s, ModuleLevelExternalSkillViewDTO.class)).toList();
 
 	}
 

@@ -79,7 +79,7 @@ public class AuthorisationServiceTest {
 			SubmoduleRepository submoduleRepository,
 			SkillRepository skillRepository,
 			TaskRepository taskRepository, CheckpointRepository checkpointRepository,
-			PathRepository pathRepository, 
+			PathRepository pathRepository,
 			AbstractSkillRepository abstractSkillRepository,
 			ExternalSkillRepository externalSkillRepository) {
 		this.authorisationService = authorisationService;

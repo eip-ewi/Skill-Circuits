@@ -45,8 +45,7 @@ public class PathService {
 	}
 
 	/**
-	 * Updates tasks in a path. This should be done by PatchDTO applyManyToManyMappedBy(), but there is a
-	 * problem with tests and SpringContext.getBean().
+	 * Updates tasks in a path.
 	 *
 	 * @param patch New path patch dto.
 	 * @param path  New path.
