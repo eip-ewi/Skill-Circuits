@@ -19,17 +19,21 @@ package nl.tudelft.skills.repository;
 
 import java.util.List;
 
-import nl.tudelft.skills.model.Path;
+import nl.tudelft.skills.model.PathPreference;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
-public interface PathRepository extends JpaRepository<Path, Long> {
+public interface PathPreferenceRepository extends JpaRepository<PathPreference, Long> {
 
-	default Path findByIdOrThrow(Long id) {
-		return findById(id).orElseThrow(() -> new ResourceNotFoundException("Path was not found: " + id));
+	default PathPreference findByIdOrThrow(Long id) {
+		return findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("PathPreference was not found: " + id));
 	}
 
-	List<Path> findAllByEditionId(Long editionId);
+	List<PathPreference> findAllByPathId(Long pathId);
 
+	List<PathPreference> findAllByPersonIdAndEditionId(Long personId, Long editionId);
+
+	boolean existsByPathId(Long pathId);
 }

@@ -369,4 +369,265 @@ databaseChangeLog:
         - dropColumn:
             columnName: y_pos
             tableName: skill
-
+  # Paths
+  - changeSet:
+      id: 1666277687515-1
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_2
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: edition_id
+                  type: BIGINT
+              - column:
+                  name: path_id
+                  type: BIGINT
+              - column:
+                  name: person_id
+                  type: BIGINT
+            tableName: path_preference
+  - changeSet:
+      id: 1666277687515-2
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_4B
+                  name: tasks_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_4B
+                  name: paths_id
+                  type: BIGINT
+            tableName: task_paths
+  - changeSet:
+      id: 1666277687515-3
+      author: ruben (generated)
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: default_path_id
+                  type: BIGINT
+            tableName: scedition
+  - changeSet:
+      id: 1666277687515-4
+      author: ruben (generated)
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: edition_id
+                  type: BIGINT
+            tableName: path
+  - changeSet:
+      id: 1666277687515-5
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: tasks_id
+            indexName: FK38oua7on7grmm8n1suxy75km5_INDEX_4
+            tableName: task_paths
+  - changeSet:
+      id: 1666277687515-6
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: edition_id
+            indexName: FK5ya45ljgxlk5ltbdf8japsbyd_INDEX_3
+            tableName: path
+  - changeSet:
+      id: 1666277687515-7
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: edition_id
+            indexName: FK6n3tmsuu1xv03u260k7g44ac7_INDEX_2
+            tableName: path_preference
+  - changeSet:
+      id: 1666277687515-8
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: person_id
+            indexName: FKftscxjndqe8rfewve36yor67a_INDEX_2
+            tableName: path_preference
+  - changeSet:
+      id: 1666277687515-9
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: path_id
+            indexName: FKjny4cbic5teg6obff33bj36r2_INDEX_2
+            tableName: path_preference
+  - changeSet:
+      id: 1666277687515-10
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: paths_id
+            indexName: FKl23e8jwownkl53dwh7c9bj5w6_INDEX_4
+            tableName: task_paths
+  - changeSet:
+      id: 1666277687515-11
+      author: ruben (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: default_path_id
+            indexName: FKmh9dharmdw9id0ky3sectj1c1_INDEX_5
+            tableName: scedition
+  - changeSet:
+      id: 1666277687515-12
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: tasks_id
+            baseTableName: task_paths
+            constraintName: FK38oua7on7grmm8n1suxy75km5
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: task
+            validate: true
+  - changeSet:
+      id: 1666277687515-13
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: edition_id
+            baseTableName: path
+            constraintName: FK5ya45ljgxlk5ltbdf8japsbyd
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: scedition
+            validate: true
+  - changeSet:
+      id: 1666277687515-14
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: edition_id
+            baseTableName: path_preference
+            constraintName: FK6n3tmsuu1xv03u260k7g44ac7
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: scedition
+            validate: true
+  - changeSet:
+      id: 1666277687515-15
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: person_id
+            baseTableName: path_preference
+            constraintName: FKftscxjndqe8rfewve36yor67a
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: scperson
+            validate: true
+  - changeSet:
+      id: 1666277687515-16
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: path_id
+            baseTableName: path_preference
+            constraintName: FKjny4cbic5teg6obff33bj36r2
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: path
+            validate: true
+  - changeSet:
+      id: 1666277687515-17
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: paths_id
+            baseTableName: task_paths
+            constraintName: FKl23e8jwownkl53dwh7c9bj5w6
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: path
+            validate: true
+  - changeSet:
+      id: 1666277687515-18
+      author: ruben (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: default_path_id
+            baseTableName: scedition
+            constraintName: FKmh9dharmdw9id0ky3sectj1c1
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: path
+            validate: true
+  - changeSet:
+      id: 1666277687515-19
+      author: ruben (generated)
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: path_tasks
+            constraintName: FK8d8e7lpvv6jxa6jkt1kexaq6j
+  - changeSet:
+      id: 1666277687515-20
+      author: ruben (generated)
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: path_tasks
+            constraintName: FKgk7imq9p338vghn5rno8d32ca
+  - changeSet:
+      id: 1666277687515-21
+      author: ruben (generated)
+      changes:
+        - dropTable:
+            tableName: path_tasks

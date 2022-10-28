@@ -202,4 +202,5 @@ public class ModuleController {
 		return View.convert(moduleRepository.findByIdOrThrow(id).getSubmodules().stream()
 				.flatMap(s -> s.getSkills().stream()).toList(), SkillSummaryDTO.class);
 	}
+
 }

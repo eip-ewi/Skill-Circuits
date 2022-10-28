@@ -1,0 +1,62 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <script layout:fragment="script" th:inline="javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+            $("#path-dropdown").change(function () {
+                if ($(this).find(":selected").val() === "new") {
+                    $(this).siblings("input").prop("type", "text");
+                    $(this).siblings("input").val("");
+                } else {
+                    let editionId = $(this).data("edition");
+                    let pathId = $(this).find(":selected").val();
+                    let data = {};
+                    data["pathId"] = pathId;
+                    $.ajax({
+                        type: "post",
+                        url: `/path/${editionId}/preference/`,
+                        data: data,
+                        success: () => {
+                            location.reload();
+                        },
+                    });
+                }
+            });
+
+            $("#default-path-dropdown").change(function () {
+                let editionId = $(this).data("edition");
+                let pathId = $(this).find(":selected").val();
+                let data = {};
+                data["pathId"] = pathId;
+                $.ajax({
+                    type: "post",
+                    url: `/path/${editionId}/default/`,
+                    data: data,
+                    success: () => {
+                        location.reload();
+                    },
+                });
+            });
+        });
+    </script>
+</html>

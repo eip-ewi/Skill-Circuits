@@ -39,17 +39,54 @@
                 </div>
 
                 <div class="circuit__header__group">
-                    <form
-                        th:if="${@authorisationService.isAtLeastTeacherInEdition(module.edition.id)}"
-                        method="post"
-                        th:action="@{|/module/${module.id}/studentmode|}">
-                        <button th:if="${studentMode}" type="submit" class="circuit__button">
-                            Exit student view
-                        </button>
-                        <button th:unless="${studentMode}" type="submit" class="circuit__button">
-                            Enter student view
-                        </button>
-                    </form>
+                    <select
+                        th:if="${@editionService.getPaths(module.edition.id).size() > 0}"
+                        class="circuit__dropdown selectbox"
+                        data-type="path-select"
+                        th:data-edition="${module.edition.id}"
+                        id="path-dropdown">
+                        <option th:value="${null}" th:selected="${selectedPathId == null}">
+                            Show all
+                        </option>
+                        <option
+                            th:each="path : ${@editionService.getPaths(module.edition.id)}"
+                            th:value="${path.id}"
+                            th:text="${path.name}"
+                            th:selected="${path.id == selectedPathId}"></option>
+                    </select>
+
+                    <input
+                        type="hidden"
+                        id="tasks-in-path-edit-input"
+                        th:if="${@authorisationService.isAtLeastTeacherInEdition(module.edition.id)} and not ${studentMode}"
+                        th:value="${#strings.listJoin(tasksInPathIds, ',')}" />
+                    <button
+                        th:if="${@authorisationService.isAtLeastTeacherInEdition(module.edition.id)} and not ${studentMode} and not ${selectedPathId == null}"
+                        type="submit"
+                        class="circuit__button"
+                        name="edit-path-tasks"
+                        th:data-task-ids="${tasksInPathIds}"
+                        th:data-module-id="${module.id}">
+                        Edit path
+                    </button>
+
+                    <div class="circuit__header__group">
+                        <form
+                            style="display: flex"
+                            th:if="${@authorisationService.isAtLeastTeacherInEdition(module.edition.id)}"
+                            method="post"
+                            th:action="@{|/module/${module.id}/studentmode|}">
+                            <button th:if="${studentMode}" type="submit" class="circuit__button">
+                                Exit student view
+                            </button>
+                            <button
+                                th:unless="${studentMode}"
+                                type="submit"
+                                class="circuit__button">
+                                Enter student view
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
 
@@ -82,6 +119,8 @@
                     const itemType = "task";
                 </script>
                 <div layout:replace="~{circuit/view :: script}"></div>
+                <div layout:replace="~{path/switch :: script}"></div>
+                <div layout:replace="~{path/select :: script}"></div>
 
                 <div layout:replace="~{task/create :: script}"></div>
                 <div layout:replace="~{task/edit :: script}"></div>

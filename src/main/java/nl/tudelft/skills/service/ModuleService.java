@@ -17,6 +17,8 @@
  */
 package nl.tudelft.skills.service;
 
+import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,9 +33,13 @@ import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSubmoduleViewDTO;
+import nl.tudelft.skills.model.Path;
+import nl.tudelft.skills.model.PathPreference;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.ModuleRepository;
+import nl.tudelft.skills.repository.PathRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.security.AuthorisationService;
 
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
@@ -45,15 +51,25 @@ public class ModuleService {
 
 	private final ModuleRepository moduleRepository;
 	private final PersonRepository personRepository;
+	private final AuthorisationService authorisationService;
 	private final CircuitService circuitService;
+	private final PersonService personService;
+	private final PathRepository pathRepository;
+	private final EditionService editionService;
 	private final CourseControllerApi courseApi;
 	private final EditionControllerApi editionApi;
 
 	public ModuleService(ModuleRepository moduleRepository, PersonRepository personRepository,
-			CircuitService circuitService, CourseControllerApi courseApi, EditionControllerApi editionApi) {
+			AuthorisationService authorisationService, CircuitService circuitService,
+			PersonService personService, PathRepository pathRepository,
+			EditionService editionService, CourseControllerApi courseApi, EditionControllerApi editionApi) {
 		this.moduleRepository = moduleRepository;
 		this.personRepository = personRepository;
+		this.authorisationService = authorisationService;
 		this.circuitService = circuitService;
+		this.personService = personService;
+		this.pathRepository = pathRepository;
+		this.editionService = editionService;
 		this.courseApi = courseApi;
 		this.editionApi = editionApi;
 	}
@@ -79,6 +95,32 @@ public class ModuleService {
 		int rows = positions.stream().mapToInt(Pair::getSecond).max().orElse(0) + 1;
 		Boolean studentMode = (Boolean) session.getAttribute("student-mode-" + module.getEdition().getId());
 
+		// Paths
+		Path path = getDefaultOrPreferredPath((person != null ? person.getId() : null),
+				module.getEdition().getId());
+
+		Set<Long> taskIds = path == null ? new HashSet<>()
+				: path.getTasks().stream().map(Task::getId).collect(Collectors.toSet());
+
+		if (path != null) {
+			// if path is selected (doesn't apply for no-path), show only skills & tasks on followed path
+			if (!(authorisationService.canViewThroughPath(module.getEdition().getId())
+					&& (studentMode == null || !studentMode))) {
+				// tasks not in path get removed
+				module.getSubmodules().stream().flatMap(s -> s.getSkills().stream()).forEach(
+						s -> s.setTasks(
+								s.getTasks().stream().filter(t -> taskIds.contains(t.getId())).toList()));
+			} else {
+				// tasks not in path get visibility property false
+				module.getSubmodules().stream().flatMap(s -> s.getSkills().stream()).forEach(
+						s -> s.setTasks(s.getTasks().stream().map(t -> {
+							t.setVisible(taskIds.contains(t.getId()));
+							return t;
+						}).toList()));
+
+			}
+		}
+
 		model.addAttribute("level", "module");
 		model.addAttribute("module", module);
 		circuitService.setCircuitAttributes(model, positions, columns, rows);
@@ -86,6 +128,9 @@ public class ModuleService {
 		model.addAttribute("emptyBlock", ModuleLevelSkillViewDTO.empty());
 		model.addAttribute("emptyGroup", ModuleLevelSubmoduleViewDTO.empty());
 		model.addAttribute("studentMode", studentMode != null && studentMode);
+
+		model.addAttribute("selectedPathId", path != null ? path.getId() : null);
+		model.addAttribute("tasksInPathIds", taskIds);
 
 		EditionDetailsDTO edition = editionApi.getEditionById(module.getEdition().getId()).block();
 		CourseDetailsDTO course = courseApi.getCourseById(edition.getCourse().getId()).block();
@@ -112,6 +157,27 @@ public class ModuleService {
 					skill.getTasks()
 							.forEach(task -> task.setCompleted(completedTasks.contains(task.getId())));
 				});
+	}
+
+	/**
+	 * Return the followed path in an edition. This is either the user preferred path or the default one.
+	 *
+	 * @param  personId  Authenticated person id, or null if not authenticated
+	 * @param  editionId Edition id.
+	 * @return           Followed path.
+	 */
+	public Path getDefaultOrPreferredPath(Long personId, Long editionId) {
+
+		Path path = editionService.getDefaultPath(editionId);
+
+		Optional<PathPreference> preference = personService.getPathForEdition(personId, editionId);
+		if (personId == null || preference.isEmpty()) {
+			return path;
+		}
+
+		return preference.filter(p -> p.getPath() != null)
+				.flatMap(p -> pathRepository.findById(p.getPath().getId())).orElse(null);
+
 	}
 
 }

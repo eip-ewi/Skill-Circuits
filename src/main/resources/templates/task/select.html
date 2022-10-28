@@ -57,6 +57,7 @@
             $(".block").css("pointer-events", "");
             $(".checkpoint").css("pointer-events", "");
             $("#select-task-dialog").addClass("hidden");
+            $("[name='edit-path-tasks']").removeClass("hidden");
             if (save) {
                 let value = [
                     ...checkboxes.filter((i, c) => $(c).prop("checked")).map((i, c) => $(c).val()),

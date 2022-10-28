@@ -53,6 +53,7 @@ public class AuthorisationService {
 	private AbstractSkillRepository abstractSkillRepository;
 	private TaskRepository taskRepository;
 	private CheckpointRepository checkpointRepository;
+	private PathRepository pathRepository;
 
 	private CourseControllerApi courseApi;
 
@@ -60,8 +61,8 @@ public class AuthorisationService {
 	public AuthorisationService(RoleCacheManager roleCache, EditionRepository editionRepository,
 			ModuleRepository moduleRepository, SubmoduleRepository submoduleRepository,
 			SkillRepository skillRepository, TaskRepository taskRepository,
+			CheckpointRepository checkpointRepository, PathRepository pathRepository,
 			AbstractSkillRepository abstractSkillRepository,
-			CheckpointRepository checkpointRepository,
 			CourseControllerApi courseControllerApi) {
 		this.roleCache = roleCache;
 
@@ -72,6 +73,7 @@ public class AuthorisationService {
 		this.skillRepository = skillRepository;
 		this.taskRepository = taskRepository;
 		this.checkpointRepository = checkpointRepository;
+		this.pathRepository = pathRepository;
 
 		this.courseApi = courseControllerApi;
 	}
@@ -428,6 +430,58 @@ public class AuthorisationService {
 	 */
 	public boolean canCreateCheckpointInEdition(Long editionId) {
 		return canEditCheckpointInEdition(editionId);
+	}
+
+	/**
+	 * Gets whether the authenticated user can create a path in edition.
+	 *
+	 * @param  editionId The id of the edition
+	 * @return           True iff the user can create a path in an edition.
+	 */
+	public boolean canCreatePathInEdition(Long editionId) {
+		return isAtLeastTeacherInEdition(editionId);
+	}
+
+	/**
+	 * Gets whether the authenticated user can modify elements relating to paths in edition.
+	 *
+	 * @param  editionId The id of the edition
+	 * @return           True iff the user can modify path related elements in edition.
+	 */
+	public boolean canEditPathInEdition(Long editionId) {
+		return isAtLeastTeacherInEdition(editionId);
+	}
+
+	/**
+	 * Gets whether the authenticated user can delete a path
+	 *
+	 * @param  pathId The id of the path
+	 * @return        True iff the user can delete the path
+	 */
+	public boolean canDeletePath(Long pathId) {
+		return canEditPathInEdition(
+				pathRepository.findByIdOrThrow(pathId).getEdition().getId());
+	}
+
+	/**
+	 * Gets whether the authenticated user can edit a path
+	 *
+	 * @param  pathId The id of the path
+	 * @return        True iff the user can edit the path
+	 */
+	public boolean canEditPath(Long pathId) {
+		return canEditPathInEdition(
+				pathRepository.findByIdOrThrow(pathId).getEdition().getId());
+	}
+
+	/**
+	 * Gets whether the authenticated user can view both tasks in and out of a path.
+	 *
+	 * @param  editionId The edition id.
+	 * @return           True iff the user can view tasks not in path.
+	 */
+	public boolean canViewThroughPath(Long editionId) {
+		return isAtLeastTeacherInEdition(editionId);
 	}
 
 	/**

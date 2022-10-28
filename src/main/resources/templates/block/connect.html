@@ -35,6 +35,27 @@
                     parseFloat(getComputedStyle(document.documentElement).fontSize)
                 );
             }
+
+            /**
+             * Returns whether a block is not transitively connected to its parent.
+             *
+             * @param {jQuery} element The element that needs to be checked.
+             * @param {jQuery[]} childArray All the elements that are children of the parent.
+             * @param {jQuery} root The element that is parent of all the children.
+             * @returns {boolean} False when a block is transitively connected to it's parent, otherwise True.
+             */
+            function isNotTransitivelyConnected(element, childArray, root) {
+                if (element[0] === root) return true;
+                if (childArray.includes(element[0])) return false;
+
+                const parents = element.data("parents").map(parent => $(`#block-${parent}`));
+                if (parents.length === 0) return true;
+
+                return parents.every(parent =>
+                    isNotTransitivelyConnected(parent, childArray, root)
+                );
+            }
+
             function calculateConnections() {
                 /*<![CDATA[*/
                 let canEdit = /*[[${canEdit}]]*/ false;
@@ -52,7 +73,17 @@
                 blocks.forEach(block => {
                     block = $(block);
 
-                    let children = block.data("children").map(child => $(`#block-${child}`));
+                    const children = block
+                        .data("children")
+                        .map(child => $(`#block-${child}`))
+                        .filter((element, index, array) => {
+                            return isNotTransitivelyConnected(
+                                element,
+                                array.filter(i => i !== element).map(e => e[0]),
+                                block
+                            );
+                        });
+
                     children.sort(
                         (c1, c2) => c1.css("gridColumnStart") - c2.css("gridColumnStart")
                     );

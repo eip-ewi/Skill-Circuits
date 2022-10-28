@@ -17,6 +17,14 @@
         }
     }
 
+    &__name[data-black="true"] {
+        color: var(--primary-dark);
+    }
+
+    &__name[data-black="false"] {
+        color: var(--grey-500);
+    }
+
     &__button {
         align-self: stretch;
         min-width: 2.5rem;

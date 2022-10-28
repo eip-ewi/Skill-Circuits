@@ -73,7 +73,7 @@ public class Task {
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToMany(mappedBy = "tasks")
+	@ManyToMany
 	private Set<Path> paths = new HashSet<>();
 
 	@NotNull

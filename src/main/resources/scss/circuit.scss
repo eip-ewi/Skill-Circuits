@@ -46,4 +46,14 @@
             color: var(--primary-light);
         }
     }
+
+    &__dropdown {
+        flex-direction: column;
+        right: 1rem;
+        background-color: var(--background-colour);
+        border: 1px solid var(--primary-dark);
+        list-style: none;
+        padding: 0.5rem 0;
+        font-size: 1.25rem;
+    }
 }

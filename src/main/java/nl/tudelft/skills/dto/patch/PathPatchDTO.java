@@ -15,21 +15,37 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.repository;
+package nl.tudelft.skills.dto.patch;
 
-import java.util.List;
+import java.util.*;
 
+import javax.validation.constraints.NotNull;
+
+import lombok.*;
+import nl.tudelft.librador.dto.patch.Patch;
 import nl.tudelft.skills.model.Path;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
+public class PathPatchDTO extends Patch<Path> {
+	@NotNull
+	private Long id;
 
-public interface PathRepository extends JpaRepository<Path, Long> {
+	private String name;
 
-	default Path findByIdOrThrow(Long id) {
-		return findById(id).orElseThrow(() -> new ResourceNotFoundException("Path was not found: " + id));
+	@Builder.Default
+	private List<Long> taskIds = new ArrayList<>();
+
+	@Override
+	protected void applyOneToOne() {
+		updateNonNull(name, data::setName);
 	}
 
-	List<Path> findAllByEditionId(Long editionId);
+	@Override
+	protected void validate() {
 
+	}
 }

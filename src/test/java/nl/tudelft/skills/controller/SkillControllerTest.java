@@ -23,18 +23,18 @@ import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 
 import javax.servlet.http.HttpSession;
 
+import nl.tudelft.librador.SpringContext;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.dto.create.CheckpointCreateDTO;
 import nl.tudelft.skills.dto.create.ExternalSkillCreateDTO;
 import nl.tudelft.skills.dto.create.SkillCreateDTO;
-import nl.tudelft.skills.dto.id.CheckpointIdDTO;
-import nl.tudelft.skills.dto.id.SCModuleIdDTO;
-import nl.tudelft.skills.dto.id.SkillIdDTO;
-import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
+import nl.tudelft.skills.dto.id.*;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
 import nl.tudelft.skills.model.ExternalSkill;
@@ -60,19 +60,31 @@ public class SkillControllerTest extends ControllerTest {
 	private final SkillRepository skillRepository;
 	private final ModuleService moduleService;
 	private final SubmoduleRepository submoduleRepository;
+	private final ExternalSkillRepository externalSkillRepository;
+	private final TaskRepository taskRepository;
+	private final CheckpointRepository checkpointRepository;
+	private final PathRepository pathRepository;
+	private final SkillService skillService;
 	private final HttpSession session;
 
 	@Autowired
 	public SkillControllerTest(SkillRepository skillRepository, TaskRepository taskRepository,
 			SkillService skillService, SubmoduleRepository submoduleRepository,
 			ExternalSkillRepository externalSkillRepository,
-			AbstractSkillRepository abstractSkillRepository) {
+			AbstractSkillRepository abstractSkillRepository, CheckpointRepository checkpointRepository,
+			PathRepository pathRepository) {
 		this.submoduleRepository = submoduleRepository;
 		this.session = mock(HttpSession.class);
 		this.moduleService = mock(ModuleService.class);
+		this.externalSkillRepository = externalSkillRepository;
+		this.taskRepository = taskRepository;
+		this.checkpointRepository = checkpointRepository;
+		this.pathRepository = pathRepository;
+		this.skillService = skillService;
 		this.skillController = new SkillController(skillRepository, externalSkillRepository,
 				abstractSkillRepository, taskRepository,
-				submoduleRepository, skillService, moduleService, session);
+				submoduleRepository, checkpointRepository, pathRepository, skillService, moduleService,
+				session);
 		this.skillRepository = skillRepository;
 		this.abstractSkillRepository = abstractSkillRepository;
 	}
@@ -89,6 +101,36 @@ public class SkillControllerTest extends ControllerTest {
 		skillController.createSkill(null, dto, mock(Model.class));
 
 		assertTrue(skillRepository.findAll().stream().anyMatch(s -> s.getName().equals("New Skill")));
+	}
+
+	@Test
+	void createSkillWithNewCheckpoint() {
+		var dto = SkillCreateDTO.builder()
+				.name("New skill with new checkpoint")
+				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
+				.checkpointCreate(CheckpointCreateDTO.builder()
+						.edition(new SCEditionIdDTO(
+								db.getSubmoduleCases().getModule().getEdition().getId()))
+						.deadline(LocalDateTime.of(2022, 1, 1, 0, 0, 0))
+						.name("New Checkpoint").build())
+				.requiredTaskIds(Collections.emptyList())
+				.column(10).row(11).newItems(new ArrayList<>()).build();
+
+		// This fixes flaky tests by ensuring the right beans are used.
+		SkillController skc = new SkillController(SpringContext.getBean(SkillRepository.class),
+				externalSkillRepository,
+				abstractSkillRepository, taskRepository,
+				submoduleRepository, SpringContext.getBean(CheckpointRepository.class), pathRepository,
+				skillService,
+				moduleService, session);
+
+		skc.createSkill(null, dto, mock(Model.class));
+
+		assertTrue(skillRepository.findAll().stream()
+				.anyMatch(s -> s.getName().equals("New skill with new checkpoint")));
+		assertThat(skillRepository.findAll().stream()
+				.filter(s -> s.getName().equals("New skill with new checkpoint")).findFirst().get()
+				.getCheckpoint().getName()).isEqualTo("New Checkpoint");
 	}
 
 	@Test

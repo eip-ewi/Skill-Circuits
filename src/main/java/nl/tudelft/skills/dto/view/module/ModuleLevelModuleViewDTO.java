@@ -29,6 +29,7 @@ import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.CircuitView;
 import nl.tudelft.skills.dto.view.GroupView;
 import nl.tudelft.skills.dto.view.checkpoint.CheckpointViewDTO;
+import nl.tudelft.skills.dto.view.edition.PathViewDTO;
 import nl.tudelft.skills.model.AbstractSkill;
 import nl.tudelft.skills.model.SCModule;
 
@@ -59,6 +60,9 @@ public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitV
 	private List<CheckpointViewDTO> checkpointsInEdition;
 
 	@NotNull
+	private List<PathViewDTO> paths;
+
+	@NotNull
 	@PostApply
 	private List<ModuleLevelExternalSkillViewDTO> externalSkillList;
 
@@ -81,13 +85,22 @@ public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitV
 				.filter(checkpoint -> checkpoint.getSkills().stream()
 						.anyMatch(skill -> skillIdsInModule.contains(skill.getId())))
 				.map(checkpoint -> View.convert(checkpoint, CheckpointViewDTO.class)).toList();
+		// get all paths in this edition
+		this.paths = data.getEdition().getPaths().stream().map(p -> View.convert(p, PathViewDTO.class))
+				.toList();
+		// get all external skills in edition
 		this.externalSkillList = data.getExternalSkills().stream()
 				.map(s -> View.convert(s, ModuleLevelExternalSkillViewDTO.class)).toList();
+
 	}
 
 	@Override
 	public Set<Pair<Integer, Integer>> getFilledPositions() {
-		return submodules.stream().flatMap(m -> m.getSkills().stream())
+		var externalPositions = externalSkillList.stream()
 				.map(s -> Pair.of(s.getColumn(), s.getRow())).collect(Collectors.toSet());
+		var skillPositions = submodules.stream().flatMap(m -> m.getSkills().stream())
+				.map(s -> Pair.of(s.getColumn(), s.getRow())).collect(Collectors.toSet());
+		externalPositions.addAll(skillPositions);
+		return externalPositions;
 	}
 }

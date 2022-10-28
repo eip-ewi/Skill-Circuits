@@ -18,16 +18,15 @@
 package nl.tudelft.skills.service;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
 
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.edition.EditionLevelCourseViewDTO;
-import nl.tudelft.skills.dto.view.edition.EditionLevelEditionViewDTO;
-import nl.tudelft.skills.dto.view.edition.EditionLevelModuleViewDTO;
-import nl.tudelft.skills.dto.view.edition.EditionLevelSubmoduleViewDTO;
+import nl.tudelft.skills.dto.view.edition.*;
+import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.EditionRepository;
 
@@ -67,6 +66,8 @@ public class EditionService {
 		int rows = positions.stream().mapToInt(Pair::getSecond).max().orElse(0) + 1;
 		Boolean studentMode = (Boolean) session.getAttribute("student-mode-" + id);
 
+		Set<PathViewDTO> pathsInEdition = getPaths(edition.getId());
+
 		model.addAttribute("level", "edition");
 		model.addAttribute("edition", edition);
 		circuitService.setCircuitAttributes(model, positions, columns, rows);
@@ -74,6 +75,8 @@ public class EditionService {
 		model.addAttribute("emptyBlock", EditionLevelSubmoduleViewDTO.empty());
 		model.addAttribute("emptyGroup", EditionLevelModuleViewDTO.empty());
 		model.addAttribute("studentMode", studentMode != null && studentMode);
+
+		model.addAttribute("paths", pathsInEdition);
 	}
 
 	/**
@@ -93,6 +96,28 @@ public class EditionService {
 		view.setCourse(
 				new EditionLevelCourseViewDTO(edition.getCourse().getId(), edition.getCourse().getName()));
 		return view;
+	}
+
+	/**
+	 * Returns a list of PathViewDTOs with all the paths in this edition.
+	 *
+	 * @param  editionId Edition id.
+	 * @return           List of PathViewDTOs for edition with id.
+	 */
+	public Set<PathViewDTO> getPaths(Long editionId) {
+		return editionRepository.findById(editionId).get()
+				.getPaths().stream().map(p -> View.convert(p, PathViewDTO.class))
+				.collect(Collectors.toSet());
+	}
+
+	/**
+	 * Returns the default path for an edition if it exists.
+	 *
+	 * @param  editionId The edition id
+	 * @return           The default path of an edition if it exists, null otherwise.
+	 */
+	public Path getDefaultPath(Long editionId) {
+		return editionRepository.findById(editionId).get().getDefaultPath();
 	}
 
 	/**

@@ -39,7 +39,7 @@ import nl.tudelft.skills.repository.SkillRepository;
 public class CheckpointViewDTO extends View<Checkpoint> {
 
 	@NotNull
-	private long id;
+	private Long id;
 	@NotNull
 	private String name;
 
@@ -58,7 +58,7 @@ public class CheckpointViewDTO extends View<Checkpoint> {
 
 	public static CheckpointViewDTO empty() {
 		return CheckpointViewDTO.builder()
-				.id(-1)
+				.id(-1L)
 				.name("").skillIds(new ArrayList<>())
 				.build();
 	}

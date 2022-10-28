@@ -1,0 +1,82 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <dialog
+        th:if="${@authorisationService.canEditPathInEdition(edition.id)}"
+        layout:fragment="overlay"
+        class="overlay"
+        id="delete-path-overlay">
+        <form id="delete-path-form" class="confirmation" th:action="@{/path}" th:method="delete">
+            <input id="delete-path-id" name="id" type="hidden" />
+
+            <p>
+                Are you sure you want to delete
+                <span id="delete-path-name"></span>
+                ?
+            </p>
+
+            <div class="confirmation__buttons">
+                <button type="button" onclick="toggleOverlay('delete-path-overlay')">Cancel</button>
+                <button type="submit">Delete path</button>
+            </div>
+        </form>
+    </dialog>
+
+    <script
+        th:if="${@authorisationService.canEditPathInEdition(edition.id)}"
+        layout:fragment="script">
+        function deletePath(event) {
+            toggleOverlay("delete-path-overlay");
+            const pathId = $(this).data("path");
+            const pathName = $(`#path-${pathId}-name`).text();
+
+            $("#delete-path-id").val(pathId);
+            $("#delete-path-name").text(pathName);
+            $("#delete-path-conflict-warning").addClass("hidden");
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            $(".path__delete").click(deletePath);
+
+            $("#delete-path-form").submit(e => {
+                e.preventDefault();
+                $.ajax({
+                    url: "/path",
+                    type: "DELETE",
+                    data: $("#delete-path-form").serialize(),
+                    success: () => {
+                        toggleOverlay("delete-path-overlay");
+                        let pathId = $("#delete-path-id").val();
+                        $(`#path-${pathId}`).remove();
+
+                        $("#default-path-dropdown")
+                            .children("option")
+                            .filter((i, opt) => $(opt).val() === pathId)
+                            .remove();
+                    },
+                });
+            });
+        });
+    </script>
+</html>

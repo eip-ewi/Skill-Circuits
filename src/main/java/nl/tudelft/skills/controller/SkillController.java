@@ -18,7 +18,9 @@
 package nl.tudelft.skills.controller;
 
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -29,6 +31,7 @@ import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.ExternalSkillCreateDTO;
 import nl.tudelft.skills.dto.create.SkillCreateDTO;
 import nl.tudelft.skills.dto.create.TaskCreateDTO;
+import nl.tudelft.skills.dto.id.CheckpointIdDTO;
 import nl.tudelft.skills.dto.id.SkillIdDTO;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
@@ -57,6 +60,8 @@ public class SkillController {
 	private final AbstractSkillRepository abstractSkillRepository;
 	private final TaskRepository taskRepository;
 	private final SubmoduleRepository submoduleRepository;
+	private final CheckpointRepository checkpointRepository;
+	private final PathRepository pathRepository;
 	private final SkillService skillService;
 	private final ModuleService moduleService;
 	private final HttpSession session;
@@ -64,13 +69,17 @@ public class SkillController {
 	@Autowired
 	public SkillController(SkillRepository skillRepository, ExternalSkillRepository externalSkillRepository,
 			AbstractSkillRepository abstractSkillRepository, TaskRepository taskRepository,
-			SubmoduleRepository submoduleRepository, SkillService skillService, ModuleService moduleService,
+			SubmoduleRepository submoduleRepository, CheckpointRepository checkpointRepository,
+			PathRepository pathRepository,
+			SkillService skillService, ModuleService moduleService,
 			HttpSession session) {
 		this.skillRepository = skillRepository;
 		this.externalSkillRepository = externalSkillRepository;
 		this.abstractSkillRepository = abstractSkillRepository;
 		this.taskRepository = taskRepository;
 		this.submoduleRepository = submoduleRepository;
+		this.checkpointRepository = checkpointRepository;
+		this.pathRepository = pathRepository;
 		this.skillService = skillService;
 		this.moduleService = moduleService;
 		this.session = session;
@@ -110,6 +119,10 @@ public class SkillController {
 	@PreAuthorize("@authorisationService.canCreateSkill(#create.submodule.id)")
 	public String createSkill(@AuthenticatedPerson Person person, @RequestBody SkillCreateDTO create,
 			Model model) {
+		if (create.getCheckpoint() == null) {
+			create.setCheckpoint(new CheckpointIdDTO(
+					checkpointRepository.saveAndFlush(create.getCheckpointCreate().apply()).getId()));
+		}
 		Skill skill = skillRepository.saveAndFlush(create.apply());
 		List<Task> tasks = create.getNewItems().stream()
 				.sorted(Comparator.comparingInt(TaskCreateDTO::getIndex).reversed()).map(dto -> {
@@ -117,6 +130,17 @@ public class SkillController {
 					return dto.apply();
 				}).toList();
 		skill.setTasks(taskRepository.saveAll(tasks));
+
+		checkpointRepository.findBySkillsContains(skill).getSkills().add(skill);
+
+		// New tasks will be included in all paths by default
+		SCEdition edition = skill.getSubmodule().getModule().getEdition();
+
+		Set<Path> paths = new HashSet<>(pathRepository.findAllByEditionId(edition.getId()));
+		tasks.forEach(t -> {
+			t.setPaths(paths);
+			taskRepository.save(t);
+		});
 
 		moduleService.configureModuleModel(person, skill.getSubmodule().getModule().getId(), model, session);
 		return "module/view";

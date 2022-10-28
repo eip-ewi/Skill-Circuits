@@ -20,6 +20,8 @@ package nl.tudelft.skills;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -65,6 +67,8 @@ public class DevDatabaseLoader {
 	private EditionControllerApi editionApi;
 	@Autowired
 	private PersonRepository personRepository;
+	@Autowired
+	private PathRepository pathRepository;
 
 	private SCPerson person = SCPerson.builder().id(1L).build();
 
@@ -72,6 +76,9 @@ public class DevDatabaseLoader {
 
 	private CourseSummaryDTO course;
 	private SCEdition scEdition;
+
+	private Path pathFinderPath;
+	private Path explorerPath;
 
 	private SCCourse scCourse;
 
@@ -128,6 +135,7 @@ public class DevDatabaseLoader {
 
 		initCourse();
 		initEdition();
+		initPaths();
 		initModules();
 		initSubmodules();
 		initCheckpoints();
@@ -154,6 +162,17 @@ public class DevDatabaseLoader {
 	private void initEdition() {
 		scEdition = editionRepository.save(SCEdition.builder()
 				.id(edition.getId())
+				.build());
+	}
+
+	private void initPaths() {
+		pathFinderPath = pathRepository.save(Path.builder()
+				.edition(scEdition)
+				.name("Pathfinder")
+				.build());
+		explorerPath = pathRepository.save(Path.builder()
+				.edition(scEdition)
+				.name("Explorer")
 				.build());
 	}
 
@@ -356,7 +375,7 @@ public class DevDatabaseLoader {
 
 	private void initTasks() {
 		taskRepository.save(Task.builder().name("Read chapter 1.2").skill(skillImplication).time(7)
-				.type(TaskType.READING).build());
+				.type(TaskType.READING).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
 		taskRepository.save(Task.builder().name("Do exercise 1.2a-e").skill(skillImplication).time(10)
 				.type(TaskType.EXERCISE).build());
 		taskRepository.save(Task.builder().name("Read chapter 1.1").skill(skillNegation)

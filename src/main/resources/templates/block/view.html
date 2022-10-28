@@ -66,6 +66,9 @@
                     class="item__create fa-solid fa-plus"
                     th:data-block="${block.id}"></button>
             </li>
+            <h3 style="font-size: 0.8rem" th:if="${block.items.size() == 0 and level == 'module'}">
+                This skill has no tasks in this path
+            </h3>
             <th:block th:each="item, iter : ${block.items}">
                 <th:block th:if="${level == 'module'}">
                     <li layout:replace="~{task/view :: item}"></li>

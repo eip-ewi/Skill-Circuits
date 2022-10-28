@@ -55,4 +55,15 @@ public class SCEdition {
 	@OneToMany(mappedBy = "edition")
 	private Set<Checkpoint> checkpoints = new HashSet<>();
 
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
+	@OneToMany(mappedBy = "edition")
+	@Builder.Default
+	private Set<Path> paths = new HashSet<>();
+
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
+	@Builder.Default
+	@OneToOne
+	private Path defaultPath = null;
 }
