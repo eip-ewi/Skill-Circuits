@@ -67,10 +67,14 @@
                     url: `/path`,
                     data: $("#edit-path-form").serialize(),
                     success: () => {
-                        $(`#path-${$("#edit-path-id").val()}-name`).text(
-                            $("#edit-path-name").val()
-                            // $("#ed")
-                        );
+                        let pathId = $("#edit-path-id").val();
+                        $(`#path-${pathId}-name`).text($("#edit-path-name").val());
+
+                        $("#default-path-dropdown")
+                            .children("option")
+                            .filter((i, opt) => $(opt).val() === pathId)
+                            .text($("#edit-path-name").val());
+
                         cancelEditPath();
                     },
                 });

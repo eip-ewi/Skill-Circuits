@@ -46,9 +46,8 @@ public class PersonService {
 	 */
 	public Optional<PathPreference> getPathForEdition(Long personId, Long editionId) {
 		SCPerson scPerson = personRepository.findByIdOrThrow(personId);
-		Optional<PathPreference> p = scPerson.getPathPreferences().stream()
-				.filter(x -> x.getEdition().getId().equals(editionId)).findFirst();
-		return p;
+		return scPerson.getPathPreferences().stream()
+				.filter(pp -> pp.getEdition().getId().equals(editionId)).findFirst();
 	}
 
 	/**

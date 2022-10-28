@@ -78,27 +78,25 @@ public class PathController {
 	 */
 	@Transactional
 	@PostMapping("{editionId}/preference")
-	public ResponseEntity<Void> updateUserPathPreference(@AuthenticatedPerson(required = false) Person person,
+	public ResponseEntity<Void> updateUserPathPreference(@AuthenticatedPerson Person person,
 			@PathVariable Long editionId, @RequestParam(required = false) Long pathId) {
 
 		Path path = pathId == null ? null : pathRepository.findById(pathId).orElse(null);
 		SCEdition edition = editionRepository.findByIdOrThrow(editionId);
 
-		if (person != null) {
-			// Save path preference for person
-			SCPerson scPerson = personService.getOrCreateSCPerson(person.getId());
-			PathPreference pathPreference = PathPreference.builder().edition(edition)
-					.path(path).person(scPerson).build();
+		// Save path preference for person
+		SCPerson scPerson = personService.getOrCreateSCPerson(person.getId());
+		PathPreference pathPreference = PathPreference.builder().edition(edition)
+				.path(path).person(scPerson).build();
 
-			// Remove all path preferences for this given user and edition
-			pathPreferenceRepository.findAllByPersonIdAndEditionId(scPerson.getId(), editionId)
-					.forEach(pp -> {
-						pathPreferenceRepository.delete(pp);
-					});
+		// Remove all path preferences for this given user and edition
+		pathPreferenceRepository.findAllByPersonIdAndEditionId(scPerson.getId(), editionId)
+				.forEach(pp -> {
+					pathPreferenceRepository.delete(pp);
+				});
 
-			pathPreferenceRepository.save(pathPreference);
+		pathPreferenceRepository.save(pathPreference);
 
-		}
 		return ResponseEntity.ok().build();
 	}
 

@@ -55,6 +55,8 @@ public class EditionLevelEditionViewDTO extends View<SCEdition> implements Circu
 	@NotNull
 	@PostApply
 	private List<CheckpointViewDTO> checkpointsInEdition;
+	@NotNull
+	private Set<PathViewDTO> paths;
 
 	@Override
 	public List<? extends GroupView> getGroups() {

@@ -66,6 +66,8 @@ public class EditionService {
 		int rows = positions.stream().mapToInt(Pair::getSecond).max().orElse(0) + 1;
 		Boolean studentMode = (Boolean) session.getAttribute("student-mode-" + id);
 
+		Set<PathViewDTO> pathsInEdition = getPaths(edition.getId());
+
 		model.addAttribute("level", "edition");
 		model.addAttribute("edition", edition);
 		circuitService.setCircuitAttributes(model, positions, columns, rows);
@@ -73,6 +75,8 @@ public class EditionService {
 		model.addAttribute("emptyBlock", EditionLevelSubmoduleViewDTO.empty());
 		model.addAttribute("emptyGroup", EditionLevelModuleViewDTO.empty());
 		model.addAttribute("studentMode", studentMode != null && studentMode);
+
+		model.addAttribute("paths", pathsInEdition);
 	}
 
 	/**

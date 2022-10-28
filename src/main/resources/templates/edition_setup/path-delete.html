@@ -67,7 +67,13 @@
                     data: $("#delete-path-form").serialize(),
                     success: () => {
                         toggleOverlay("delete-path-overlay");
-                        $(`#path-${$("#delete-path-id").val()}`).remove();
+                        let pathId = $("#delete-path-id").val();
+                        $(`#path-${pathId}`).remove();
+
+                        $("#default-path-dropdown")
+                            .children("option")
+                            .filter((i, opt) => $(opt).val() === pathId)
+                            .remove();
                     },
                 });
             });

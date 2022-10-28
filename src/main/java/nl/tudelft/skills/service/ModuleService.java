@@ -18,6 +18,7 @@
 package nl.tudelft.skills.service;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -169,17 +170,14 @@ public class ModuleService {
 
 		Path path = editionService.getDefaultPath(editionId);
 
-		if (personId != null && personService.getPathForEdition(personId, editionId).isPresent()) {
-			PathPreference pathPreference = personService.getPathForEdition(personId, editionId).get();
-			if (pathPreference != null && pathPreference.getPath() != null) {
-				path = pathRepository.findById(pathPreference.getPath().getId())
-						.get();
-
-			} else {
-				path = null;
-			}
+		Optional<PathPreference> preference = personService.getPathForEdition(personId, editionId);
+		if (personId == null || preference.isEmpty()) {
+			return path;
 		}
-		return path;
+
+		return preference.filter(p -> p.getPath() != null)
+				.flatMap(p -> pathRepository.findById(p.getPath().getId())).orElse(null);
+
 	}
 
 }

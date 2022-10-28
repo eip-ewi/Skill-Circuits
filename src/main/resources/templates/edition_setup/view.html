@@ -115,14 +115,14 @@
                         <button type="submit">create</button>
                     </form>
                     <ul id="path-list" class="editable-ul">
-                        <th:block th:each="path : ${@editionService.getPaths(edition.id)}">
+                        <th:block th:each="path : ${edition.paths}">
                             <th:block layout:replace="~{edition_setup/path :: path}"></th:block>
                         </th:block>
                     </ul>
 
-                    <h3 th:if="${@editionService.getPaths(edition.id).size() > 0}">Default path</h3>
+                    <h3 th:if="${edition.paths.size() > 0}">Default path</h3>
                     <select
-                        th:if="${@editionService.getPaths(edition.id).size() > 0}"
+                        th:if="${edition.paths.size() > 0}"
                         class="circuit__dropdown selectbox"
                         th:data-edition="${edition.id}"
                         id="default-path-dropdown">
@@ -132,7 +132,7 @@
                             Show all
                         </option>
                         <option
-                            th:each="path : ${@editionService.getPaths(edition.id)}"
+                            th:each="path : ${edition.paths}"
                             th:value="${path.id}"
                             th:text="${path.name}"
                             th:selected="${@editionService.getDefaultPath(edition.id) != null} and ${path.id.equals(@editionService.getDefaultPath(edition.id).id)}"></option>
@@ -175,10 +175,18 @@
                     e.preventDefault();
                     $.post("/path/setup", $("#new-path-form").serialize(), html => {
                         const element = $("<div/>").append(html).children()[0];
+
                         $(element).find(".path__edit").click(editPath);
                         $(element).find(".path__delete").click(deletePath);
                         $("#new-path-name").val("");
                         $("#path-list").prepend(element);
+
+                        const option = $(
+                            `<option value="${$(element).data("path")}">${$(element)
+                                .find(".path__name")
+                                .text()}</option>`
+                        );
+                        $("#default-path-dropdown").append(option);
                     });
                 });
                 $("#close-edition-setup-sidebar").click(() => {
