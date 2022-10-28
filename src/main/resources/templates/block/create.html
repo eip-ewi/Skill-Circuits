@@ -220,6 +220,19 @@
                         .addClass("hidden")
                         .text("Select tasks");
                     block.find("input[name='requiredTaskIDs']").val("");
+
+                    const cpOptions = block.find("select[name='checkpoint.id'] option");
+                    $(html)
+                        .find(".checkpoint")
+                        .each((_, cp) => {
+                            const id = $(cp).prop("id").substring(11);
+                            const deadline = $(cp).data("deadline");
+                            if (cpOptions.has(`[value='${id}'`).length === 0) {
+                                block.find("select[name='checkpoint.id']")
+                                    .append(`<option id='create-skill-checkpoint-option-${id}'
+                                 data-edit="only" value=${id} data-deadline=${deadline}/>`);
+                            }
+                        });
                     $("input[name='selected']").prop("checked", false);
 
                     $("#create-block-wrapper").append(block);
