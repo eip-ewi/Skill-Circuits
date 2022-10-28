@@ -15,21 +15,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.repository;
+package nl.tudelft.skills.dto.create;
 
-import java.util.List;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
+import lombok.*;
+import nl.tudelft.librador.dto.create.Create;
+import nl.tudelft.skills.dto.id.SCEditionIdDTO;
 import nl.tudelft.skills.model.Path;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
+public class PathCreateDTO extends Create<Path> {
 
-public interface PathRepository extends JpaRepository<Path, Long> {
+	@NotBlank
+	private String name;
+	@NotNull
+	private SCEditionIdDTO edition;
 
-	default Path findByIdOrThrow(Long id) {
-		return findById(id).orElseThrow(() -> new ResourceNotFoundException("Path was not found: " + id));
+	@Override
+	public Class<Path> clazz() {
+		return Path.class;
 	}
-
-	List<Path> findAllByEditionId(Long editionId);
-
 }

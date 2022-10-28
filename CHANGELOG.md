@@ -11,8 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNRELEASED]
 ### Added
-- When creating a skill on an empty module page, a checkpoint can be created or selected for that skill.
+ - Paths: tasks can be added to a path, only those skills are then displayed when that path is selected
+ - Teachers can set a default path
+ - Students can select a preferred path
+
 ### Changed
+ - When creating a skill on an empty module page, a checkpoint can be created or selected for that skill.
  - Transitive connections no longer display
 
 ### Fixed

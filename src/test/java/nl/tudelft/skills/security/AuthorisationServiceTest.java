@@ -66,6 +66,7 @@ public class AuthorisationServiceTest {
 	private final SkillRepository skillRepository;
 	private final TaskRepository taskRepository;
 	private final CheckpointRepository checkpointRepository;
+	private final PathRepository pathRepository;
 	private final AbstractSkillRepository abstractSkillRepository;
 	private final ExternalSkillRepository externalSkillRepository;
 
@@ -78,6 +79,7 @@ public class AuthorisationServiceTest {
 			SubmoduleRepository submoduleRepository,
 			SkillRepository skillRepository,
 			TaskRepository taskRepository, CheckpointRepository checkpointRepository,
+			PathRepository pathRepository,
 			AbstractSkillRepository abstractSkillRepository,
 			ExternalSkillRepository externalSkillRepository) {
 		this.authorisationService = authorisationService;
@@ -90,6 +92,7 @@ public class AuthorisationServiceTest {
 		this.skillRepository = skillRepository;
 		this.taskRepository = taskRepository;
 		this.checkpointRepository = checkpointRepository;
+		this.pathRepository = pathRepository;
 		this.abstractSkillRepository = abstractSkillRepository;
 		this.externalSkillRepository = externalSkillRepository;
 
@@ -142,7 +145,8 @@ public class AuthorisationServiceTest {
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
 				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
-				abstractSkillRepository, checkpointRepository,
+				checkpointRepository, pathRepository,
+				abstractSkillRepository,
 				courseApi);
 		when(courseApi.getCourseById(anyLong()))
 				.thenReturn(Mono.just(new CourseDetailsDTO().id(db.getCourseRL().getId())
@@ -159,7 +163,7 @@ public class AuthorisationServiceTest {
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
 				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
-				abstractSkillRepository, checkpointRepository,
+				checkpointRepository, pathRepository, abstractSkillRepository,
 				courseApi);
 
 		assertThat(authorisationService.canViewEdition(db.getEditionRL().getId())).isEqualTo(expected);
@@ -173,7 +177,7 @@ public class AuthorisationServiceTest {
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
 				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
-				abstractSkillRepository, checkpointRepository,
+				checkpointRepository, pathRepository, abstractSkillRepository,
 				courseApi);
 
 		SCEdition edition = db.getEditionRL();
@@ -301,6 +305,7 @@ public class AuthorisationServiceTest {
 				.isEqualTo(expected);
 	}
 
+	@Transactional
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
@@ -310,7 +315,6 @@ public class AuthorisationServiceTest {
 				.isEqualTo(expected);
 	}
 
-	@Transactional
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
@@ -432,6 +436,56 @@ public class AuthorisationServiceTest {
 				.isEqualTo(expected);
 	}
 
+	@Transactional
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canCreatePathInEdition(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canCreatePathInEdition(db.getEditionRL().getId()))
+				.isEqualTo(expected);
+	}
+
+	@Transactional
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canEditPathInEdition(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canEditPathInEdition(db.getEditionRL().getId()))
+				.isEqualTo(expected);
+	}
+
+	@Transactional
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canEditPath(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canEditPath(db.getPathFinderPath().getId()))
+				.isEqualTo(expected);
+	}
+
+	@Transactional
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canDeletePath(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canDeletePath(db.getPathFinderPath().getId()))
+				.isEqualTo(expected);
+	}
+
+	@Transactional
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canViewThroughPath(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canViewThroughPath(db.getEditionRL().getId()))
+				.isEqualTo(expected);
+	}
+
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER", "HEAD_TA", "TA", "STUDENT" })
@@ -456,7 +510,7 @@ public class AuthorisationServiceTest {
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
 				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
-				abstractSkillRepository, checkpointRepository,
+				checkpointRepository, pathRepository, abstractSkillRepository,
 				courseApi);
 
 		when(courseApi.getCourseById(anyLong()))

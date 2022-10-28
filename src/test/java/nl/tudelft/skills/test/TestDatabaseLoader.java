@@ -20,19 +20,13 @@ package nl.tudelft.skills.test;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import nl.tudelft.skills.model.Badge;
-import nl.tudelft.skills.model.Checkpoint;
-import nl.tudelft.skills.model.Inventory;
-import nl.tudelft.skills.model.SCCourse;
-import nl.tudelft.skills.model.SCEdition;
-import nl.tudelft.skills.model.SCModule;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Submodule;
-import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.BadgeRepository;
 import nl.tudelft.skills.repository.CheckpointRepository;
@@ -93,6 +87,8 @@ public class TestDatabaseLoader {
 
 	private SCEdition editionRL2021 = SCEdition.builder().build();
 
+	private Path pathFinderPath = Path.builder().edition(editionRL2021).name("Pathfinder").build();
+
 	private SCModule moduleProofTechniques = SCModule.builder().name("Proof Techniques")
 			.build();
 
@@ -141,7 +137,8 @@ public class TestDatabaseLoader {
 	private Skill skillInductionPractice = Skill.builder().name("Induction Practice")
 			.row(6).column(2).build();
 
-	private Task taskRead12 = Task.builder().name("Read chapter 1.2").time(1).build();
+	private Task taskRead12 = Task.builder().name("Read chapter 1.2").time(1)
+			.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build();
 	private Task taskDo12ae = Task.builder().name("Do exercise 1.2a-e").time(3).build();
 	private Task taskRead11 = Task.builder().name("Read chapter 1.1").time(5).build();
 	private Task taskDo11ad = Task.builder().name("Do exercise 1.1a-d").time(7).build();
@@ -161,6 +158,10 @@ public class TestDatabaseLoader {
 
 	public SCEdition getEditionRL() {
 		return editionRepository.findByIdOrThrow(editionRL2021.getId());
+	}
+
+	public Path getPathFinderPath() {
+		return pathRepository.findByIdOrThrow(pathFinderPath.getId());
 	}
 
 	public SCModule getModuleProofTechniques() {
@@ -295,6 +296,7 @@ public class TestDatabaseLoader {
 	private void init() {
 		initCourse();
 		initEdition();
+		initPaths();
 		initModule();
 		initSubmodule();
 		initCheckpoint();
@@ -312,6 +314,10 @@ public class TestDatabaseLoader {
 	private void initEdition() {
 		editionRL2021.setId(EDITION_ID);
 		editionRL2021 = editionRepository.save(editionRL2021);
+	}
+
+	private void initPaths() {
+		pathRepository.save(pathFinderPath);
 	}
 
 	private void initModule() {

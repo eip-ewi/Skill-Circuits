@@ -63,6 +63,7 @@ public class SkillControllerTest extends ControllerTest {
 	private final ExternalSkillRepository externalSkillRepository;
 	private final TaskRepository taskRepository;
 	private final CheckpointRepository checkpointRepository;
+	private final PathRepository pathRepository;
 	private final SkillService skillService;
 	private final HttpSession session;
 
@@ -70,17 +71,20 @@ public class SkillControllerTest extends ControllerTest {
 	public SkillControllerTest(SkillRepository skillRepository, TaskRepository taskRepository,
 			SkillService skillService, SubmoduleRepository submoduleRepository,
 			ExternalSkillRepository externalSkillRepository,
-			AbstractSkillRepository abstractSkillRepository, CheckpointRepository checkpointRepository) {
+			AbstractSkillRepository abstractSkillRepository, CheckpointRepository checkpointRepository,
+			PathRepository pathRepository) {
 		this.submoduleRepository = submoduleRepository;
 		this.session = mock(HttpSession.class);
 		this.moduleService = mock(ModuleService.class);
 		this.externalSkillRepository = externalSkillRepository;
 		this.taskRepository = taskRepository;
 		this.checkpointRepository = checkpointRepository;
+		this.pathRepository = pathRepository;
 		this.skillService = skillService;
 		this.skillController = new SkillController(skillRepository, externalSkillRepository,
 				abstractSkillRepository, taskRepository,
-				submoduleRepository, checkpointRepository, skillService, moduleService, session);
+				submoduleRepository, checkpointRepository, pathRepository, skillService, moduleService,
+				session);
 		this.skillRepository = skillRepository;
 		this.abstractSkillRepository = abstractSkillRepository;
 	}
@@ -116,7 +120,8 @@ public class SkillControllerTest extends ControllerTest {
 		SkillController skc = new SkillController(SpringContext.getBean(SkillRepository.class),
 				externalSkillRepository,
 				abstractSkillRepository, taskRepository,
-				submoduleRepository, SpringContext.getBean(CheckpointRepository.class), skillService,
+				submoduleRepository, SpringContext.getBean(CheckpointRepository.class), pathRepository,
+				skillService,
 				moduleService, session);
 
 		skc.createSkill(null, dto, mock(Model.class));

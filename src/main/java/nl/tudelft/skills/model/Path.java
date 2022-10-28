@@ -41,10 +41,15 @@ public class Path {
 	private String name;
 
 	@NotNull
+	@ManyToOne
+	@ToString.Exclude
+	private SCEdition edition;
+
+	@NotNull
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToMany
+	@ManyToMany(mappedBy = "paths")
 	private Set<Task> tasks = new HashSet<>();
 
 }

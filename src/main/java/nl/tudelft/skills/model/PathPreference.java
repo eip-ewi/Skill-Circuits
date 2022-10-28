@@ -15,21 +15,36 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.repository;
+package nl.tudelft.skills.model;
 
-import java.util.List;
+import javax.persistence.*;
 
-import nl.tudelft.skills.model.Path;
+import lombok.*;
+import nl.tudelft.skills.model.labracore.SCPerson;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+@Data
+@Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class PathPreference {
 
-public interface PathRepository extends JpaRepository<Path, Long> {
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	private Long id;
 
-	default Path findByIdOrThrow(Long id) {
-		return findById(id).orElseThrow(() -> new ResourceNotFoundException("Path was not found: " + id));
-	}
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@ManyToOne
+	private Path path;
 
-	List<Path> findAllByEditionId(Long editionId);
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@ManyToOne
+	private SCEdition edition;
 
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@ManyToOne
+	private SCPerson person;
 }

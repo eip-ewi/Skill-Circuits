@@ -20,15 +20,12 @@ package nl.tudelft.skills.model.labracore;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
 import nl.tudelft.skills.model.Inventory;
+import nl.tudelft.skills.model.PathPreference;
 import nl.tudelft.skills.model.Task;
 
 @Data
@@ -51,4 +48,9 @@ public class SCPerson {
 	@OneToOne(cascade = CascadeType.ALL)
 	private Inventory inventory;
 
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@OneToMany(mappedBy = "person")
+	private Set<PathPreference> pathPreferences = new HashSet<>();
 }

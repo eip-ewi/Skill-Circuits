@@ -17,10 +17,13 @@
  */
 package nl.tudelft.skills.dto.view.module;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
 import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.dto.view.edition.PathViewDTO;
 import nl.tudelft.skills.model.SCEdition;
 
 @Data
@@ -31,4 +34,19 @@ import nl.tudelft.skills.model.SCEdition;
 public class ModuleLevelEditionViewDTO extends View<SCEdition> {
 	@NotNull
 	private Long id;
+
+	@NotNull
+	private List<PathViewDTO> pathViews;
+
+	@Override
+	public void postApply() {
+		super.postApply();
+		// get all paths in this edition
+		this.pathViews = data.getPaths().stream().map(p -> View.convert(p, PathViewDTO.class)).toList();
+	}
+
+	public List<PathViewDTO> getPaths() {
+		return pathViews;
+	}
+
 }
