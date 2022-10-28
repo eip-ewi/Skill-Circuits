@@ -13,5 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+ - Transitive connections no longer display
 
 ### Fixed
+ - Grid does not function properly if the last row or column is only external skills
+
