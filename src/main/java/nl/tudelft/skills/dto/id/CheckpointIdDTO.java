@@ -20,6 +20,7 @@ package nl.tudelft.skills.dto.id;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import nl.tudelft.librador.dto.id.IdDTO;
 import nl.tudelft.skills.model.Checkpoint;
@@ -31,6 +32,7 @@ import org.springframework.data.repository.CrudRepository;
 @SuperBuilder
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class CheckpointIdDTO extends IdDTO<Checkpoint, Long> {
 	public CheckpointIdDTO(Long id) {
 		super(id);

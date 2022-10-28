@@ -18,6 +18,7 @@
 package nl.tudelft.skills.repository;
 
 import nl.tudelft.skills.model.Checkpoint;
+import nl.tudelft.skills.model.Skill;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -29,4 +30,5 @@ public interface CheckpointRepository extends JpaRepository<Checkpoint, Long> {
 				.orElseThrow(() -> new ResourceNotFoundException("Checkpoint was not found: " + id));
 	}
 
+	Checkpoint findBySkillsContains(Skill skill);
 }

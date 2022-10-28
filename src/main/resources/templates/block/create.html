@@ -109,16 +109,23 @@
             form.css("gridRow", (row + 1).toString());
 
             if (blockType === "skill") {
-                let checkpoint = getFirstCheckpointAfter(row);
-                const checkPointSelect = $("#create-skill-checkpoint");
-                if (!checkpoint) {
-                    checkpoint = $(
-                        [...$(".checkpoint:not(.ghost_checkpoint)")].sort(
-                            (a, b) => $(b).css("grid-row-start") - $(a).css("grid-row-start")
-                        )[0]
-                    );
+                const cps = $(".checkpoint:not(.ghost_checkpoint)");
+                const checkpointDiv = $("#create-skill-checkpoint");
+                const checkpointSelect = $("#create-skill-checkpoint-select");
+                if (cps.length === 0) {
+                    checkpointDiv.show();
+                    checkpointSelect.change();
+                } else {
+                    checkpointDiv.hide();
+                    const checkpoint =
+                        getFirstCheckpointAfter(row) ||
+                        $(
+                            [...cps].sort(
+                                (a, b) => $(b).css("grid-row-start") - $(a).css("grid-row-start")
+                            )[0]
+                        );
+                    checkpointSelect.val(checkpoint.prop("id").substr(11));
                 }
-                checkPointSelect.val(checkpoint.prop("id").substr(11));
             }
             ghost.replaceWith(form);
             form.attr("draggable", false);
@@ -187,6 +194,10 @@
                 return;
             }
             const data = serialiseBlockHeader(block);
+
+            if ("checkpoint" in data && data["checkpoint"]["id"] === "new") {
+                delete data.checkpoint;
+            }
             const items = serialiseBlockItems(block);
 
             data["newItems"] = items.filter(item => item.new);
@@ -209,6 +220,19 @@
                         .addClass("hidden")
                         .text("Select tasks");
                     block.find("input[name='requiredTaskIDs']").val("");
+
+                    const cpOptions = block.find("select[name='checkpoint.id'] option");
+                    $(html)
+                        .find(".checkpoint")
+                        .each((_, cp) => {
+                            const id = $(cp).prop("id").substring(11);
+                            const deadline = $(cp).data("deadline");
+                            if (cpOptions.has(`[value='${id}'`).length === 0) {
+                                block.find("select[name='checkpoint.id']")
+                                    .append(`<option id='create-skill-checkpoint-option-${id}'
+                                 data-edit="only" value=${id} data-deadline=${deadline}/>`);
+                            }
+                        });
                     $("input[name='selected']").prop("checked", false);
 
                     $("#create-block-wrapper").append(block);
@@ -255,6 +279,21 @@
         }
 
         document.addEventListener("DOMContentLoaded", function () {
+            $("#create-skill-checkpoint-select").change(function () {
+                const selected = $(this).val();
+                const nameInput = $("#create-skill-checkpoint-input");
+                const deadlineInput = $("#create-skill-checkpoint-deadline");
+
+                if (selected === "new") {
+                    nameInput.attr("type", "text");
+                    nameInput.val("");
+                    deadlineInput.attr("type", "datetime-local");
+                } else {
+                    nameInput.attr("type", "hidden");
+                    nameInput.val(selected);
+                    deadlineInput.attr("type", "hidden");
+                }
+            });
             $(".ghost_block button[data-type='regular']").click(clickGhostRegular);
             $(".ghost_block button[data-type='external']").click(clickGhostExternal);
             $("#external-course").change(selectExternal("course", "edition"));
