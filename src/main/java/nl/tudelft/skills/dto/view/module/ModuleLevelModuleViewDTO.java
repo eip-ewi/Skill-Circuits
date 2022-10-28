@@ -87,7 +87,11 @@ public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitV
 
 	@Override
 	public Set<Pair<Integer, Integer>> getFilledPositions() {
-		return submodules.stream().flatMap(m -> m.getSkills().stream())
+		var externalPositions = externalSkillList.stream()
 				.map(s -> Pair.of(s.getColumn(), s.getRow())).collect(Collectors.toSet());
+		var skillPositions = submodules.stream().flatMap(m -> m.getSkills().stream())
+				.map(s -> Pair.of(s.getColumn(), s.getRow())).collect(Collectors.toSet());
+		externalPositions.addAll(skillPositions);
+		return externalPositions;
 	}
 }
