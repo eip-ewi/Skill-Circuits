@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNRELEASED]
 ### Added
-
+- When creating a skill on an empty module page, a checkpoint can be created or selected for that skill.
 ### Changed
 
 ### Fixed
