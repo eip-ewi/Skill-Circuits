@@ -23,18 +23,17 @@ import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 
 import javax.servlet.http.HttpSession;
 
 import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.dto.create.CheckpointCreateDTO;
 import nl.tudelft.skills.dto.create.ExternalSkillCreateDTO;
 import nl.tudelft.skills.dto.create.SkillCreateDTO;
-import nl.tudelft.skills.dto.id.CheckpointIdDTO;
-import nl.tudelft.skills.dto.id.SCModuleIdDTO;
-import nl.tudelft.skills.dto.id.SkillIdDTO;
-import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
+import nl.tudelft.skills.dto.id.*;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
 import nl.tudelft.skills.model.ExternalSkill;
@@ -89,6 +88,28 @@ public class SkillControllerTest extends ControllerTest {
 		skillController.createSkill(null, dto, mock(Model.class));
 
 		assertTrue(skillRepository.findAll().stream().anyMatch(s -> s.getName().equals("New Skill")));
+	}
+
+	@Test
+	void createSkillWithNewCheckpoint() {
+		var dto = SkillCreateDTO.builder()
+				.name("New skill with new checkpoint")
+				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
+				.checkpointCreate(CheckpointCreateDTO.builder()
+						.edition(new SCEditionIdDTO(
+								db.getSubmoduleCases().getModule().getEdition().getId()))
+						.deadline(LocalDateTime.of(2022, 1, 1, 0, 0, 0))
+						.name("New Checkpoint").build())
+				.requiredTaskIds(Collections.emptyList())
+				.column(10).row(11).newItems(new ArrayList<>()).build();
+
+		skillController.createSkill(null, dto, mock(Model.class));
+
+		assertTrue(skillRepository.findAll().stream()
+				.anyMatch(s -> s.getName().equals("New skill with new checkpoint")));
+		assertThat(skillRepository.findAll().stream()
+				.filter(s -> s.getName().equals("New skill with new checkpoint")).findFirst().get()
+				.getCheckpoint().getName()).isEqualTo("New Checkpoint");
 	}
 
 	@Test
