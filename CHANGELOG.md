@@ -10,15 +10,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [UNRELEASED]
+
+## [2.2.0]
 ### Added
- - Paths: tasks can be added to a path, only those skills are then displayed when that path is selected
- - Teachers can set a default path
- - Students can select a preferred path
+ - Paths: tasks can be added to a path, only those skills are then displayed when that path is selected (@mcoman)
+ - Teachers can set a default path (@mcoman)
+ - Students can select a preferred path (@mcoman)
 
 ### Changed
- - When creating a skill on an empty module page, a checkpoint can be created or selected for that skill.
- - Transitive connections no longer display
+ - When creating a skill on an empty module page, a checkpoint can be created or selected for that skill (@okaaij)
+ - Transitive connections no longer display (@wjbreedveld)
 
 ### Fixed
- - Grid does not function properly if the last row or column is only external skills
+ - Grid does not function properly if the last row or column is only external skills (@okaaij)
+
 
