@@ -29,6 +29,7 @@ import java.util.Collections;
 
 import javax.servlet.http.HttpSession;
 
+import nl.tudelft.librador.SpringContext;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.create.CheckpointCreateDTO;
 import nl.tudelft.skills.dto.create.ExternalSkillCreateDTO;
@@ -59,6 +60,10 @@ public class SkillControllerTest extends ControllerTest {
 	private final SkillRepository skillRepository;
 	private final ModuleService moduleService;
 	private final SubmoduleRepository submoduleRepository;
+	private final ExternalSkillRepository externalSkillRepository;
+	private final TaskRepository taskRepository;
+	private final CheckpointRepository checkpointRepository;
+	private final SkillService skillService;
 	private final HttpSession session;
 
 	@Autowired
@@ -69,6 +74,10 @@ public class SkillControllerTest extends ControllerTest {
 		this.submoduleRepository = submoduleRepository;
 		this.session = mock(HttpSession.class);
 		this.moduleService = mock(ModuleService.class);
+		this.externalSkillRepository = externalSkillRepository;
+		this.taskRepository = taskRepository;
+		this.checkpointRepository = checkpointRepository;
+		this.skillService = skillService;
 		this.skillController = new SkillController(skillRepository, externalSkillRepository,
 				abstractSkillRepository, taskRepository,
 				submoduleRepository, checkpointRepository, skillService, moduleService, session);
@@ -103,7 +112,14 @@ public class SkillControllerTest extends ControllerTest {
 				.requiredTaskIds(Collections.emptyList())
 				.column(10).row(11).newItems(new ArrayList<>()).build();
 
-		skillController.createSkill(null, dto, mock(Model.class));
+		// This fixes flaky tests by ensuring the right beans are used.
+		SkillController skc = new SkillController(SpringContext.getBean(SkillRepository.class),
+				externalSkillRepository,
+				abstractSkillRepository, taskRepository,
+				submoduleRepository, SpringContext.getBean(CheckpointRepository.class), skillService,
+				moduleService, session);
+
+		skc.createSkill(null, dto, mock(Model.class));
 
 		assertTrue(skillRepository.findAll().stream()
 				.anyMatch(s -> s.getName().equals("New skill with new checkpoint")));
