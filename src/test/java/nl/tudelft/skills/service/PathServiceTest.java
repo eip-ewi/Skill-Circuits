@@ -17,8 +17,7 @@
  */
 package nl.tudelft.skills.service;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
@@ -52,11 +51,13 @@ public class PathServiceTest {
 				.taskIds(List.of(db.getTaskRead11().getId())).build();
 		pathService.updateTasksInPathManyToMany(patchDTO, path);
 
-		assertTrue(db.getTaskRead11().getPaths().stream().anyMatch(p -> p.getId().equals(path.getId())));
-		assertFalse(db.getTaskRead12().getPaths().stream().anyMatch(p -> p.getId().equals(path.getId())));
+		assertThat(db.getTaskRead11().getPaths())
+				.anySatisfy(p -> assertThat(p.getId()).isEqualTo(path.getId()));
+		assertThat(db.getTaskRead12().getPaths())
+				.noneSatisfy(p -> assertThat(p.getId()).isEqualTo(path.getId()));
 
-		assertFalse(db.getPathFinderPath().getTasks().contains(db.getTaskRead12()));
-		assertTrue(db.getPathFinderPath().getTasks().contains(db.getTaskRead11()));
+		assertThat(db.getPathFinderPath().getTasks()).contains(db.getTaskRead11());
+		assertThat(db.getPathFinderPath().getTasks()).doesNotContain(db.getTaskRead12());
 	}
 
 }

@@ -27,7 +27,9 @@
                 let data = {};
                 data["id"] = $("#path-dropdown").val();
                 data["taskIds"] = result;
-
+                /*<![CDATA[*/
+                data["moduleId"] = /*[[${circuit.id}]]*/ null;
+                /*]]>*/
                 $.ajax({
                     type: "PATCH",
                     url: `/path`,
