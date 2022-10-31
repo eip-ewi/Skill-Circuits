@@ -192,11 +192,22 @@ public class SkillController {
 	@PreAuthorize("@authorisationService.canEditSkill(#patch.id)")
 	public String patchSkill(@Valid @RequestBody SkillPatchDTO patch, Model model) {
 		Skill skill = skillRepository.findByIdOrThrow(patch.getId());
+		List<Task> oldTasks = skill.getTasks();
 		skillRepository.save(patch.apply(skill));
 		taskRepository.findAllByIdIn(patch.getRemovedItems())
 				.forEach(t -> t.getPersons().forEach(p -> p.getTasksCompleted().remove(t)));
 		taskRepository.deleteAllByIdIn(patch.getRemovedItems());
 		taskRepository.saveAll(skill.getRequiredTasks());
+
+		// New tasks will be included in all paths by default
+		SCEdition edition = skill.getSubmodule().getModule().getEdition();
+
+		Set<Path> paths = new HashSet<>(pathRepository.findAllByEditionId(edition.getId()));
+		skillRepository.findByIdOrThrow(skill.getId()).getTasks().stream().filter(t -> !oldTasks.contains(t))
+				.forEach(t -> {
+					t.setPaths(paths);
+					taskRepository.save(t);
+				});
 
 		model.addAttribute("level", "module");
 		model.addAttribute("groupType", "submodule");
