@@ -45,35 +45,37 @@ public class PathService {
 	}
 
 	/**
-	 * Updates tasks in a path.
+	 * Updates tasks in a path. If the patch has a moduleId this only creates or deletes tasks in that module.
 	 *
 	 * @param patch New path patch dto.
 	 * @param path  New path.
 	 */
 	@Transactional
 	public void updateTasksInPathManyToMany(PathPatchDTO patch, Path path) {
-
-		Set<Task> updtTasks = taskRepository.findAllByIdIn(patch.getTaskIds()).stream()
-				.collect(Collectors.toSet());
-
-		// update tasks in path
 		List<Task> oldTasks = taskRepository
 				.findAllByIdIn(path.getTasks().stream().map(Task::getId).toList());
 
+		Set<Task> selectedTasks = new HashSet<>(taskRepository.findAllByIdIn(patch.getTaskIds()));
+
 		// remove tasks that are not in path
-		oldTasks.stream().filter(t -> !patch.getTaskIds().contains(t.getId()))
+		// if the patch has a moduleId, remove only tasks that are in this module
+		Set<Task> removedTasks = oldTasks.stream().filter(t -> !patch.getTaskIds().contains(t.getId())
+				&& (patch.getModuleId() == null
+						|| t.getSkill().getSubmodule().getModule().getId().equals(patch.getModuleId())))
+				.collect(Collectors.toSet());
+		removedTasks
 				.forEach(t -> t.setPaths(t.getPaths().stream().filter(p -> !p.getId().equals(path.getId()))
 						.collect(Collectors.toSet())));
-
 		taskRepository.saveAllAndFlush(oldTasks);
 
 		// add tasks that were not previously in path
-		HashSet<Task> newTasks = new HashSet<>(taskRepository.findAllByIdIn(patch.getTaskIds()));
-		newTasks.stream().filter(t -> !path.getTasks().contains(t))
-				.forEach(t -> t.getPaths().add(path));
-		taskRepository.saveAllAndFlush(newTasks);
+		selectedTasks.forEach(t -> t.getPaths().add(path));
+		taskRepository.saveAllAndFlush(selectedTasks);
 
-		path.setTasks(updtTasks);
+		Set<Task> newTasks = new HashSet<>(oldTasks);
+		newTasks.removeAll(removedTasks);
+		newTasks.addAll(selectedTasks);
+		path.setTasks(newTasks);
 		pathRepository.save(path);
 	}
 }

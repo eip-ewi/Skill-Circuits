@@ -39,6 +39,8 @@ public class PathPatchDTO extends Patch<Path> {
 	@Builder.Default
 	private List<Long> taskIds = new ArrayList<>();
 
+	private Long moduleId;
+
 	@Override
 	protected void applyOneToOne() {
 		updateNonNull(name, data::setName);
