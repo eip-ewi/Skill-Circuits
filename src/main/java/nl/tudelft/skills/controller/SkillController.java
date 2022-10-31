@@ -35,6 +35,7 @@ import nl.tudelft.skills.dto.id.CheckpointIdDTO;
 import nl.tudelft.skills.dto.id.SkillIdDTO;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
+import nl.tudelft.skills.dto.view.module.ModuleLevelEditionViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSubmoduleViewDTO;
@@ -222,6 +223,8 @@ public class SkillController {
 						.map(s -> ModuleLevelSubmoduleViewDTO.builder().id(s.getId()).name(s.getName())
 								.build())
 						.toList())
+				.edition(ModuleLevelEditionViewDTO.builder()
+						.id(skill.getSubmodule().getModule().getEdition().getId()).build())
 				.build();
 	}
 
