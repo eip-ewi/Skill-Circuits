@@ -73,13 +73,12 @@
     <script
         th:if="${@authorisationService.canEditCheckpointInEdition(circuit.edition.id)}"
         layout:fragment="script">
-        function addGhostCheckpoints() {
+        function updateGhostCheckpoints() {
             const circuit = $("#circuit");
             const rowsInGrid = [...Array(parseInt(circuit.css("--rows"))).keys()];
-            const rowsWithCheckpoints = [...$(".checkpoint")].map(cp =>
+            const rowsWithCheckpoints = [...$(".checkpoint:not(.ghost_checkpoint)")].map(cp =>
                 parseInt(cp.style.gridRowStart)
             );
-
             $(".ghost_checkpoint").remove();
             rowsInGrid
                 .filter(r => !rowsWithCheckpoints.includes(r))

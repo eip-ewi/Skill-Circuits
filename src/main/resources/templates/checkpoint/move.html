@@ -26,9 +26,12 @@
         let draggingCheckpoint = false;
 
         function recalculateCheckpointSkills() {
-            const checkpoints = $(".checkpoint:not(.ghost_checkpoint)")
+            const checkpoints = $(".checkpoint:not(.ghost_checkpoint)");
             checkpoints.each(function () {
-                const isLast = checkpoints.filter((i, c) => $(c).css("grid-row-start") > $(this).css("grid-row-start")).length === 0
+                const isLast =
+                    checkpoints.filter(
+                        (i, c) => $(c).css("grid-row-start") > $(this).css("grid-row-start")
+                    ).length === 0;
                 const newRow = $(this).css("grid-row-start");
                 const prevCheckpointRow = Math.max(
                     ...checkpoints
@@ -63,12 +66,14 @@
                 });
             });
             updateCheckpointPositions();
+            updateGhostCheckpoints();
         }
 
         document.addEventListener(
             "dragstart",
             function (event) {
                 if (event.target.classList.contains("checkpoint")) {
+                    updateGhostCheckpoints();
                     event.dataTransfer.setData("text/plain", event.target.id);
                     event.dataTransfer.dropEffect = "move";
                     draggingCheckpoint = true;

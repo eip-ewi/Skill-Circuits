@@ -63,9 +63,19 @@
                     checkpointRows.set(checkpoint, row);
                 }
             });
-            [...$(".checkpoint")].forEach(cp =>
-                $(cp).css("grid-row", checkpointRows.get(cp.id.split("-")[1]))
-            );
+            const checkpoints = $(".checkpoint:not(.ghost_checkpoint)");
+            checkpoints.each((i, cp) => {
+                $(cp).css("grid-row", checkpointRows.get(cp.id.split("-")[1]));
+                $(cp).prop("draggable", true);
+            });
+            //find last checkpoint and make it non-draggable
+            [...checkpoints]
+                .reduce((acc, cp) => {
+                    return acc == null || $(acc).css("grid-row-start") < $(cp).css("grid-row-start")
+                        ? $(cp)
+                        : acc;
+                }, null)
+                .prop("draggable", false);
         }
         function formatDeadline(isoTime) {
             const deadline = luxon.DateTime.fromISO(isoTime);
@@ -91,8 +101,8 @@
         document.addEventListener("DOMContentLoaded", function () {
             updateCheckpointPositions();
             updateCheckpointDeadlines();
-            if (typeof addGhostCheckpoints === "function") {
-                addGhostCheckpoints();
+            if (typeof updateGhostCheckpoints === "function") {
+                updateGhostCheckpoints();
             }
         });
     </script>
