@@ -68,14 +68,7 @@
                 $(cp).css("grid-row", checkpointRows.get(cp.id.split("-")[1]));
                 $(cp).prop("draggable", true);
             });
-            //find last checkpoint and make it non-draggable
-            [...checkpoints]
-                .reduce((acc, cp) => {
-                    return acc == null || $(acc).css("grid-row-start") < $(cp).css("grid-row-start")
-                        ? $(cp)
-                        : acc;
-                }, null)
-                .prop("draggable", false);
+            getLastCheckpoint().prop("draggable", false);
         }
         function formatDeadline(isoTime) {
             const deadline = luxon.DateTime.fromISO(isoTime);
@@ -97,6 +90,13 @@
                 const deadline = formatDeadline($(this).data("deadline"));
                 $(this).find(".checkpoint__deadline").text(deadline);
             });
+        }
+        function getLastCheckpoint() {
+            return [...$(".checkpoint:not(.ghost_checkpoint)")].reduce((acc, cp) => {
+                return acc == null || $(acc).css("grid-row-start") < $(cp).css("grid-row-start")
+                    ? $(cp)
+                    : acc;
+            }, null);
         }
         document.addEventListener("DOMContentLoaded", function () {
             updateCheckpointPositions();
