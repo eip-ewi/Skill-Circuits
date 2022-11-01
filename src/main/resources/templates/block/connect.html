@@ -76,6 +76,7 @@
                     const children = block
                         .data("children")
                         .map(child => $(`#block-${child}`))
+                        .filter(c => c.length !== 0)
                         .filter((element, index, array) => {
                             return isNotTransitivelyConnected(
                                 element,

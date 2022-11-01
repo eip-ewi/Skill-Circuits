@@ -4,7 +4,7 @@ import nl.javadude.gradle.plugins.license.DownloadLicensesExtension
 import nl.javadude.gradle.plugins.license.LicenseExtension
 
 group = "nl.tudelft.skills"
-version = "2.2.0"
+version = "2.2.1"
 
 val javaVersion = JavaVersion.VERSION_17
 
