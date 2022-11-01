@@ -11,6 +11,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNRELEASED]
 
+### Added
+
+### Changed
+
+### Fixed
+
+## [2.2.1]
+
+### Changed
+ - When creating a skill outside of checkpoint, you can now create a checkpoint in there. (@okaaij)
+### Fixed
+ - Fixed ghosts after moving a checkpoints (@okaaij)
+ - Fixed moving a skill outside of the checkpoints (@okaaij)
+ - Fixed filtering transitive connections with hidden skills (@stefanhugtenbu)
+
 ## [2.2.0]
 ### Added
  - Paths: tasks can be added to a path, only those skills are then displayed when that path is selected (@mcoman)
