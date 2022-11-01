@@ -26,19 +26,25 @@
         let draggingCheckpoint = false;
 
         function recalculateCheckpointSkills() {
-            $(".checkpoint:not(.ghost_checkpoint)").each(function () {
+            const checkpoints = $(".checkpoint:not(.ghost_checkpoint)");
+            checkpoints.each(function () {
+                const isLast =
+                    checkpoints.filter(
+                        (i, c) => $(c).css("grid-row-start") > $(this).css("grid-row-start")
+                    ).length === 0;
                 const newRow = $(this).css("grid-row-start");
                 const prevCheckpointRow = Math.max(
-                    ...$(".checkpoint:not(.ghost_checkpoint)")
+                    ...checkpoints
                         .filter((i, c) => $(c).css("grid-row-start") < newRow)
                         .map((i, c) => $(c).css("grid-row-start"))
                 );
+                //if this is the last checkpoint, also add all skills after this row.
                 const newSkills = $(".block")
                     .filter((i, b) => $(b).prop("id").startsWith("block-"))
                     .filter(
                         (i, b) =>
                             prevCheckpointRow < $(b).css("grid-row-start") &&
-                            $(b).css("grid-row-start") <= newRow
+                            (isLast || $(b).css("grid-row-start") <= newRow)
                     )
                     .map((i, b) => $(b).prop("id").substr(6));
                 const id = $(this).prop("id").substr(11);
@@ -59,12 +65,15 @@
                     error: () => alert("Oops something went wrong :("),
                 });
             });
+            updateCheckpointPositions();
+            updateGhostCheckpoints();
         }
 
         document.addEventListener(
             "dragstart",
             function (event) {
                 if (event.target.classList.contains("checkpoint")) {
+                    updateGhostCheckpoints();
                     event.dataTransfer.setData("text/plain", event.target.id);
                     event.dataTransfer.dropEffect = "move";
                     draggingCheckpoint = true;
