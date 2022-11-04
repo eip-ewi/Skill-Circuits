@@ -99,8 +99,8 @@
 
         function clickGhostRegular() {
             const ghost = $(this).parent();
-            const col = parseInt(ghost.css("gridColumn").split(" / ")[0]) - 1;
-            const row = parseInt(ghost.css("gridRow").split(" / ")[0]) - 1;
+            const col = getCol(ghost) - 1;
+            const row = getRow(ghost) - 1;
             const form = $("#create-block-wrapper > .block");
 
             form.data("editing", true);
@@ -114,7 +114,7 @@
                 const checkpointSelect = $("#create-skill-checkpoint-select");
                 // Allow for creating a new checkpoint
                 // if there are no checkpoints or if this block is created outside of checkpoints
-                if (cps.length === 0 || row >= getLastCheckpoint().css("grid-row-start")) {
+                if (cps.length === 0 || row >= getRow(getLastCheckpoint())) {
                     const checkpoints = $(".checkpoint:not(.ghost_checkpoint)").map((i, cp) =>
                         $(cp).attr("id").substring(11)
                     );
@@ -132,11 +132,7 @@
                     checkpointDiv.hide();
                     const checkpoint =
                         getFirstCheckpointAfter(row) ||
-                        $(
-                            [...cps].sort(
-                                (a, b) => $(b).css("grid-row-start") - $(a).css("grid-row-start")
-                            )[0]
-                        );
+                        $([...cps].sort((a, b) => getRow(b) - getRow(a))[0]);
                     checkpointSelect.val(checkpoint.prop("id").substr(11));
                 }
             }
@@ -146,8 +142,8 @@
 
         function clickGhostExternal() {
             const ghost = $(this).parent();
-            const col = parseInt(ghost.css("gridColumn").split(" / ")[0]) - 1;
-            const row = parseInt(ghost.css("gridRow").split(" / ")[0]) - 1;
+            const col = getCol(ghost) - 1;
+            const row = getRow(ghost) - 1;
             const form = $("#create-external-wrapper > .block");
 
             form.css("gridColumn", (col + 1).toString());
@@ -166,8 +162,8 @@
             block.find("input[name='requiredTaskIDs']").val("");
             $("input[name='selected']").prop("checked", false);
 
-            const row = parseInt(block.css("gridRowStart"));
-            const col = parseInt(block.css("gridColumnStart"));
+            const row = getRow(block);
+            const col = getCol(block);
             $("#create-block-wrapper").append(block);
 
             const ghost = $(
@@ -187,8 +183,8 @@
             const block = $(this).closest(".block");
             resetExternalFields();
 
-            const row = parseInt(block.css("gridRowStart"));
-            const col = parseInt(block.css("gridColumnStart"));
+            const row = getRow(block);
+            const col = getRow(block);
             $("#create-external-wrapper").append(block);
 
             const ghost = $(
@@ -215,8 +211,8 @@
 
             data["newItems"] = items.filter(item => item.new);
 
-            data["row"] = parseInt(block.css("gridRowStart")) - 1;
-            data["column"] = parseInt(block.css("gridColumnStart")) - 1;
+            data["row"] = getRow(block) - 1;
+            data["column"] = getCol(block) - 1;
 
             $.post({
                 url: `/${blockType}`,
@@ -268,8 +264,8 @@
             const data = {
                 module: { id: $("#external-form input[name='module.id']").val() },
                 skill: { id: $("#external-skill").val() },
-                row: parseInt(block.css("gridRowStart")) - 1,
-                column: parseInt(block.css("gridColumnStart")) - 1,
+                row: getRow(block) - 1,
+                column: getCol(block) - 1,
             };
             $.post({
                 url: `/skill/external`,
