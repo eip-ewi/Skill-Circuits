@@ -58,7 +58,7 @@
             const checkpointRows = new Map();
             [...$(".block")].forEach(skill => {
                 const checkpoint = $(skill).attr("data-checkpoint");
-                const row = $(skill).css("grid-row-start");
+                const row = getRow(skill);
                 if (!checkpointRows.has(checkpoint) || checkpointRows.get(checkpoint) < row) {
                     checkpointRows.set(checkpoint, row);
                 }
@@ -93,9 +93,7 @@
         }
         function getLastCheckpoint() {
             return [...$(".checkpoint:not(.ghost_checkpoint)")].reduce((acc, cp) => {
-                return acc == null || $(acc).css("grid-row-start") < $(cp).css("grid-row-start")
-                    ? $(cp)
-                    : acc;
+                return acc == null || getRow(acc) < getRow(cp) ? $(cp) : acc;
             }, null);
         }
         document.addEventListener("DOMContentLoaded", function () {

@@ -107,5 +107,14 @@
 
         <div layout:replace="~{item/edit :: script}"></div>
         <div layout:replace="~{item/delete :: script}"></div>
+
+        <script>
+            function getRow(obj) {
+                return parseInt($(obj).css("grid-row-start"));
+            }
+            function getCol(obj) {
+                return parseInt($(obj).css("grid-column-start"));
+            }
+        </script>
     </th:block>
 </html>

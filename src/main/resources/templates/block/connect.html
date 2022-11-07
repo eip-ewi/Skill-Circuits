@@ -66,7 +66,7 @@
 
                 let skillsOnLevel = {};
                 blocks.forEach(skill => {
-                    const skillRow = $(skill).css("gridRowStart");
+                    const skillRow = getRow(skill);
                     if (skillsOnLevel[skillRow] === undefined) skillsOnLevel[skillRow] = [];
                     skillsOnLevel[skillRow].push($(skill));
                 });
@@ -85,16 +85,11 @@
                             );
                         });
 
-                    children.sort(
-                        (c1, c2) => c1.css("gridColumnStart") - c2.css("gridColumnStart")
-                    );
+                    children.sort((c1, c2) => getCol(c1) - getCol(c2));
 
                     const closestChildOnSameColumn = children
-                        .filter(
-                            child =>
-                                $(child).css("gridColumnStart") === block.css("gridColumnStart")
-                        )
-                        .sort((c1, c2) => c1.css("gridRowStart") - c2.css("gridRowStart"))[0];
+                        .filter(child => getCol(child) === getCol(block))
+                        .sort((c1, c2) => getRow(c1) - getRow(c2))[0];
 
                     const circuitY = $("#circuit").offset().top;
 
@@ -119,7 +114,7 @@
                             .mouseenter(overConnection)
                             .mouseout(outConnection);
 
-                        const childRow = child.css("gridRowStart");
+                        const childRow = getRow(child);
 
                         const fromX = parentX + xOffset;
                         const yOffset =
@@ -210,9 +205,9 @@
 
                     // Enable 'connect to' button for all skills on lower levels
                     // that don't have a connection to this skill already.
-                    let row = parseInt($(this).parent().parent().css("gridRowStart"));
+                    let row = getRow($(this).parent().parent());
                     $(".block")
-                        .filter((i, s) => parseInt($(s).css("gridRowStart")) > row)
+                        .filter((i, s) => getRow(s) > row)
                         .filter(
                             (i, s) =>
                                 !$(this)
