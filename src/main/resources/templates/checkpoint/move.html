@@ -28,23 +28,16 @@
         function recalculateCheckpointSkills() {
             const checkpoints = $(".checkpoint:not(.ghost_checkpoint)");
             checkpoints.each(function () {
-                const isLast =
-                    checkpoints.filter(
-                        (i, c) => $(c).css("grid-row-start") > $(this).css("grid-row-start")
-                    ).length === 0;
-                const newRow = $(this).css("grid-row-start");
+                const isLast = checkpoints.filter((i, c) => getRow(c) > getRow(this)).length === 0;
+                const newRow = getRow(this);
                 const prevCheckpointRow = Math.max(
-                    ...checkpoints
-                        .filter((i, c) => $(c).css("grid-row-start") < newRow)
-                        .map((i, c) => $(c).css("grid-row-start"))
+                    ...checkpoints.filter((i, c) => getRow(c) < newRow).map((i, c) => getRow(c))
                 );
                 //if this is the last checkpoint, also add all skills after this row.
                 const newSkills = $(".block")
                     .filter((i, b) => $(b).prop("id").startsWith("block-"))
                     .filter(
-                        (i, b) =>
-                            prevCheckpointRow < $(b).css("grid-row-start") &&
-                            (isLast || $(b).css("grid-row-start") <= newRow)
+                        (i, b) => prevCheckpointRow < getRow(b) && (isLast || getRow(b) <= newRow)
                     )
                     .map((i, b) => $(b).prop("id").substr(6));
                 const id = $(this).prop("id").substr(11);
@@ -133,8 +126,8 @@
 
                     target.removeAttr("data-drag-over");
 
-                    const currentRow = checkpoint.css("grid-row-start");
-                    const newRow = target.css("grid-row-start");
+                    const currentRow = getRow(checkpoint);
+                    const newRow = getRow(target);
                     checkpoint.css("grid-row-start", newRow);
                     target.css("grid-row-start", currentRow);
 

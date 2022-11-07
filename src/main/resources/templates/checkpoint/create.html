@@ -77,7 +77,7 @@
             const circuit = $("#circuit");
             const rowsInGrid = [...Array(parseInt(circuit.css("--rows"))).keys()];
             const rowsWithCheckpoints = [...$(".checkpoint:not(.ghost_checkpoint)")].map(cp =>
-                parseInt(cp.style.gridRowStart)
+                getRow(cp)
             );
             $(".ghost_checkpoint").remove();
             rowsInGrid
@@ -99,7 +99,7 @@
 
         function getSkillsInCheckpoint(checkpointRow) {
             let prevCheckpointRow = [...$(".checkpoint").not(".ghost_checkpoint")]
-                .map(cp => parseInt(cp.style.gridRowStart))
+                .map(cp => getRow(cp))
                 .filter(cp => cp < checkpointRow)
                 .sort()
                 .reverse()[0];
@@ -108,9 +108,7 @@
 
             return [...$(".block")]
                 .filter(
-                    skill =>
-                        parseInt(skill.style.gridRowStart) > prevCheckpointRow &&
-                        parseInt(skill.style.gridRowStart) <= checkpointRow
+                    skill => getRow(skill) > prevCheckpointRow && getRow(skill) <= checkpointRow
                 )
                 .map(skill => skill.id.split("-")[1]);
         }
@@ -146,7 +144,7 @@
             select.val("new").change();
 
             const skillsFormElement = $("#create-checkpoint-skills");
-            const skills = getSkillsInCheckpoint(parseInt(ghostCheckpoint.css("gridRowStart")));
+            const skills = getSkillsInCheckpoint(getRow(ghostCheckpoint));
             skillsFormElement.val(skills);
             skillsFormElement.data("skills", skills);
             $(this).addClass("hidden");
@@ -158,7 +156,7 @@
             const rowsInGrid = parseInt($("#circuit").css("--rows"));
             for (let i = row + 1; i <= rowsInGrid + 1; i++) {
                 const next = [...$(".checkpoint ").not(".ghost_checkpoint")].find(
-                    cp => parseInt($(cp).css("gridRowStart")) === i
+                    cp => getRow(cp) === i
                 );
                 if (next) {
                     return $(next);

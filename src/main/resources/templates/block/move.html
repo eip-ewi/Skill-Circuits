@@ -119,9 +119,9 @@
                     let newColumns = 0;
                     let newRows = 0;
                     for (let skill of document.getElementsByClassName("block")) {
-                        let col = parseInt(skill.style.gridColumn.split(" / ")[0]);
+                        let col = getCol(skill);
                         if (col > newColumns) newColumns = col;
-                        let row = parseInt(skill.style.gridRow.split(" / ")[0]);
+                        let row = getRow(skill);
                         if (row > newRows) newRows = row;
                     }
                     circuit.style.setProperty("--columns", newColumns.toString());
@@ -132,12 +132,12 @@
                     let spaceMaxRow = 0;
                     let toRemove = [];
                     for (let space of document.getElementsByClassName("ghost_block")) {
-                        let col = parseInt(space.style.gridColumn.split(" / ")[0]);
+                        let col = getCol(space);
                         if (col > newColumns + 1) {
                             toRemove.push(space);
                             continue;
                         }
-                        let row = parseInt(space.style.gridRow.split(" / ")[0]);
+                        let row = getRow(space);
                         if (row > newRows + 1) {
                             toRemove.push(space);
                             continue;

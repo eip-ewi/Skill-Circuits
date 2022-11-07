@@ -47,7 +47,7 @@
 
             // Traverse all blocks topologically and mark their state
             [...$(".block")]
-                .sort((a, b) => $(a).css("gridRowStart") - $(b).css("gridRowStart"))
+                .sort((a, b) => getRow(a) - getRow(b))
                 .forEach(block => updateBlockState(block.id.split("-")[1]));
 
             //send update to server if user is authenticated and there are updates
