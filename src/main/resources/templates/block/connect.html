@@ -49,13 +49,15 @@
                 if (element[0] === root) return true;
                 if (childArray.includes(element[0])) return false;
 
-                const parents = element.data("parents").map(parent => $(`#block-${parent}`))
+                const parents = element
+                    .data("parents")
+                    .map(parent => $(`#block-${parent}`))
                     .filter(parent => {
-                    return !visited.includes(parent[0])
-                });
+                        return parent.length !== 0 && !visited.includes(parent[0]);
+                    });
                 if (parents.length === 0) return true;
 
-                visited.push(element[0])
+                visited.push(element[0]);
 
                 return parents.every(parent =>
                     isNotTransitivelyConnected(parent, childArray, root, visited)
@@ -87,7 +89,8 @@
                             return isNotTransitivelyConnected(
                                 element,
                                 array.filter(i => i !== element).map(e => e[0]),
-                                block, []
+                                block,
+                                []
                             );
                         });
 

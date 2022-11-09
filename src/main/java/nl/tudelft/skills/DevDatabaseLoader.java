@@ -22,17 +22,14 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.EditionControllerApi;
-import nl.tudelft.labracore.api.PersonControllerApi;
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.*;
-import nl.tudelft.librador.SpringContext;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.*;
@@ -146,8 +143,6 @@ public class DevDatabaseLoader {
 		courseADSDetails = courseControllerApi.getCourseById(2L).block();
 		editionADSDetails = editionApi.getAllEditionsByCourse(courseADSDetails.getId()).blockFirst();
 
-		System.out.println(roleControllerApi.getPersonRolesInActiveEditions(3L).toStream().toList());
-		System.out.println(roleControllerApi.getPersonRolesInActiveEditions(4L).toStream().toList());
 		initCourse();
 		initEdition();
 		initPaths();
@@ -168,8 +163,8 @@ public class DevDatabaseLoader {
 		person = personRepository.save(person);
 		// Add cseTeacher1 also as teacher for ADS
 
-		editionApi.getAllEditionsByCourse(scCourseADS.getId()).toStream().forEach(e ->
-				roleControllerApi.addRole(new RoleCreateDTO()
+		editionApi.getAllEditionsByCourse(scCourseADS.getId()).toStream()
+				.forEach(e -> roleControllerApi.addRole(new RoleCreateDTO()
 						.edition(new EditionIdDTO().id(e.getId()))
 						.type(RoleCreateDTO.TypeEnum.TEACHER).person(new PersonIdDTO().id(3L))).block());
 
