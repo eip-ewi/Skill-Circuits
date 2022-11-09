@@ -118,7 +118,7 @@
                     const checkpoints = $(".checkpoint:not(.ghost_checkpoint)").map((i, cp) =>
                         $(cp).attr("id").substring(11)
                     );
-                    const lastCp = getLastCheckpoint().attr("id").substring(11);
+                    const lastCp = getLastCheckpoint()?.attr("id").substring(11);
                     checkpointDiv.show();
                     checkpointSelect.change();
                     checkpointSelect.find("option").each((i, opt) => {
