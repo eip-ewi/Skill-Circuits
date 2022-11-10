@@ -42,17 +42,25 @@
              * @param {jQuery} element The element that needs to be checked.
              * @param {jQuery[]} childArray All the elements that are children of the parent.
              * @param {jQuery} root The element that is parent of all the children.
+             * @param visited {jQuery[]} The nodes that have already been visited. Needed for cyclic graphs.
              * @returns {boolean} False when a block is transitively connected to it's parent, otherwise True.
              */
-            function isNotTransitivelyConnected(element, childArray, root) {
+            function isNotTransitivelyConnected(element, childArray, root, visited) {
                 if (element[0] === root) return true;
                 if (childArray.includes(element[0])) return false;
 
-                const parents = element.data("parents").map(parent => $(`#block-${parent}`));
+                const parents = element
+                    .data("parents")
+                    .map(parent => $(`#block-${parent}`))
+                    .filter(parent => {
+                        return parent.length !== 0 && !visited.includes(parent[0]);
+                    });
                 if (parents.length === 0) return true;
 
+                visited.push(element[0]);
+
                 return parents.every(parent =>
-                    isNotTransitivelyConnected(parent, childArray, root)
+                    isNotTransitivelyConnected(parent, childArray, root, visited)
                 );
             }
 
@@ -81,7 +89,8 @@
                             return isNotTransitivelyConnected(
                                 element,
                                 array.filter(i => i !== element).map(e => e[0]),
-                                block
+                                block,
+                                []
                             );
                         });
 
