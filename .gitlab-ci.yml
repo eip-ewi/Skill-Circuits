@@ -291,6 +291,8 @@ license_scanning:
     LM_JAVA_VERSION: 17
 
 dev-deploy:
+  only:
+    - branches@skill-circuits/skill-circuits
   image: getsentry/sentry-cli
   stage: deploy
   dependencies:
