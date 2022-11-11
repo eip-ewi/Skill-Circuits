@@ -68,7 +68,7 @@
                 $(cp).css("grid-row", checkpointRows.get(cp.id.split("-")[1]));
                 $(cp).prop("draggable", true);
             });
-            getLastCheckpoint().prop("draggable", false);
+            getLastCheckpoint()?.prop("draggable", false);
         }
         function formatDeadline(isoTime) {
             const deadline = luxon.DateTime.fromISO(isoTime);

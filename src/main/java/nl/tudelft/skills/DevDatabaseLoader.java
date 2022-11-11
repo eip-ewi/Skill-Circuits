@@ -28,6 +28,7 @@ import javax.annotation.PostConstruct;
 
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.EditionControllerApi;
+import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
@@ -69,18 +70,24 @@ public class DevDatabaseLoader {
 	private PersonRepository personRepository;
 	@Autowired
 	private PathRepository pathRepository;
+	@Autowired
+	private RoleControllerApi roleControllerApi;
 
 	private SCPerson person = SCPerson.builder().id(1L).build();
 
-	private EditionDetailsDTO edition;
+	private EditionDetailsDTO editionOOPDetails;
+	private EditionDetailsDTO editionADSDetails;
 
-	private CourseSummaryDTO course;
-	private SCEdition scEdition;
+	private CourseDetailsDTO courseOOPDetails;
+	private CourseDetailsDTO courseADSDetails;
+	private SCEdition scEditionOOP;
+	private SCEdition scEditionADS;
 
 	private Path pathFinderPath;
 	private Path explorerPath;
 
-	private SCCourse scCourse;
+	private SCCourse scCourseOOP;
+	private SCCourse scCourseADS;
 
 	private SCModule moduleProofTechniques;
 	private SCModule modulePropositionalLogic;
@@ -130,8 +137,11 @@ public class DevDatabaseLoader {
 
 	@PostConstruct
 	private void init() {
-		course = courseControllerApi.getAllCourses().blockFirst();
-		edition = editionApi.getAllEditions().blockFirst();
+		courseOOPDetails = courseControllerApi.getCourseById(1L).block();
+		editionOOPDetails = editionApi.getAllEditionsByCourse(courseOOPDetails.getId()).blockFirst();
+
+		courseADSDetails = courseControllerApi.getCourseById(2L).block();
+		editionADSDetails = editionApi.getAllEditionsByCourse(courseADSDetails.getId()).blockFirst();
 
 		initCourse();
 		initEdition();
@@ -151,27 +161,41 @@ public class DevDatabaseLoader {
 		inventory.setPerson(person);
 
 		person = personRepository.save(person);
+		// Add cseTeacher1 also as teacher for ADS
+
+		editionApi.getAllEditionsByCourse(scCourseADS.getId()).toStream()
+				.forEach(e -> roleControllerApi.addRole(new RoleCreateDTO()
+						.edition(new EditionIdDTO().id(e.getId()))
+						.type(RoleCreateDTO.TypeEnum.TEACHER).person(new PersonIdDTO().id(3L))).block());
+
 	}
 
 	private void initCourse() {
-		scCourse = courseRepository.save(SCCourse.builder()
-				.id(edition.getCourse().getId())
+		scCourseOOP = courseRepository.save(SCCourse.builder()
+				.id(editionOOPDetails.getCourse().getId())
+				.build());
+
+		scCourseADS = courseRepository.save(SCCourse.builder()
+				.id(editionADSDetails.getCourse().getId())
 				.build());
 	}
 
 	private void initEdition() {
-		scEdition = editionRepository.save(SCEdition.builder()
-				.id(edition.getId())
+		scEditionOOP = editionRepository.save(SCEdition.builder()
+				.id(editionOOPDetails.getId())
+				.build());
+		scEditionADS = editionRepository.save(SCEdition.builder()
+				.id(editionADSDetails.getId())
 				.build());
 	}
 
 	private void initPaths() {
 		pathFinderPath = pathRepository.save(Path.builder()
-				.edition(scEdition)
+				.edition(scEditionOOP)
 				.name("Pathfinder")
 				.build());
 		explorerPath = pathRepository.save(Path.builder()
-				.edition(scEdition)
+				.edition(scEditionOOP)
 				.name("Explorer")
 				.build());
 	}
@@ -179,15 +203,15 @@ public class DevDatabaseLoader {
 	private void initModules() {
 		moduleProofTechniques = moduleRepository.save(SCModule.builder()
 				.name("Proof Techniques")
-				.edition(scEdition)
+				.edition(scEditionOOP)
 				.build());
 		modulePropositionalLogic = moduleRepository.save(SCModule.builder()
 				.name("Propositional Logic")
-				.edition(scEdition)
+				.edition(scEditionOOP)
 				.build());
 		moduleSimple = moduleRepository.save(SCModule.builder()
 				.name("Simple Module")
-				.edition(scEdition)
+				.edition(scEditionOOP)
 				.build());
 	}
 
@@ -457,19 +481,19 @@ public class DevDatabaseLoader {
 	private void initCheckpoints() {
 		checkpointLectureOne = checkpointRepository.save(Checkpoint.builder()
 				.name("Lecture 1")
-				.edition(scEdition)
+				.edition(scEditionOOP)
 				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 42), LocalTime.MIDNIGHT))
 				.build());
 
 		checkpointLectureTwo = checkpointRepository.save(Checkpoint.builder()
 				.name("Lecture 2")
-				.edition(scEdition)
+				.edition(scEditionOOP)
 				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 49), LocalTime.MIDNIGHT))
 				.build());
 
 		checkpointSimple = checkpointRepository.save(Checkpoint.builder()
 				.name("Simple")
-				.edition(scEdition)
+				.edition(scEditionOOP)
 				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 53), LocalTime.MIDNIGHT))
 				.build());
 	}
