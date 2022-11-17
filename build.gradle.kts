@@ -8,7 +8,7 @@ version = "2.2.1"
 
 val javaVersion = JavaVersion.VERSION_17
 
-val labradoorVersion = "1.3.1"
+val labradoorVersion = "1.3.2-SNAPSHOT"
 val libradorVersion = "1.0.3-SNAPSHOT7"
 
 val genSourceDir = file("$buildDir/skills/src/main/java")
