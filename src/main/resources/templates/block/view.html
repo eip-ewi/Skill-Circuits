@@ -69,14 +69,22 @@
             <h3 style="font-size: 0.8rem" th:if="${block.items.size() == 0 and level == 'module'}">
                 This skill has no tasks in this path
             </h3>
-            <th:block th:each="item, iter : ${block.items}">
-                <th:block th:if="${level == 'module'}">
-                    <li layout:replace="~{task/view :: item}"></li>
+
+            <ul>
+                <th:block th:each="item, iter : ${block.items}">
+    <!--                Task view for teacher-->
+                    <th:block th:if="${level == 'module' and canEdit}">
+                        <li layout:replace="~{task/view :: item}"></li>
+                    </th:block>
+    <!--                Task preview for student-->
+                    <th:block th:if="${level == 'module' and not canEdit}">
+                        <li style="display:inline" layout:replace="~{task/preview :: item}"></li>
+                    </th:block>
+                    <th:block th:unless="${level == 'module'}">
+                        <li layout:replace="~{item/view :: item}"></li>
+                    </th:block>
                 </th:block>
-                <th:block th:unless="${level == 'module'}">
-                    <li layout:replace="~{item/view :: item}"></li>
-                </th:block>
-            </th:block>
+            </ul>
         </ul>
 
         <div th:unless="${create}" data-edit="always" class="block__buttons">

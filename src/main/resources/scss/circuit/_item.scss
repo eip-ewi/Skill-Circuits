@@ -25,6 +25,12 @@
         color: var(--grey-500);
     }
 
+    &__icon {
+        &.completed{
+            color: var(--primary-green);
+        }
+    }
+
     &__button {
         align-self: stretch;
         min-width: 2.5rem;

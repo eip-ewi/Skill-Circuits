@@ -86,6 +86,10 @@
             const task = $(`#item-${taskId}`);
             task.toggleClass("completed");
 
+            // toggles task icon in skill preview
+            const taskIcon = $(`#item-${taskId}-icon`);
+            taskIcon.toggleClass("completed");
+
             const completed = task.hasClass("completed");
             const block = $(task.parents(".block")[0]);
             updateBlockState(block.prop("id").split("-")[1]);
