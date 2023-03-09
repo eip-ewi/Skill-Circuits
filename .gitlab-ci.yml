@@ -94,7 +94,9 @@ gradle_test:
        - codecov/
      reports:
        junit: build/test-results/test/TEST-*.xml
-       cobertura: build/reports/jacoco/test/jacocoTestReport.xml
+       coverage_report:
+          coverage_format: cobertura
+          path: build/reports/jacoco/test/jacocoTestReport.xml
   script:
     - gradle --build-cache test
   after_script:
