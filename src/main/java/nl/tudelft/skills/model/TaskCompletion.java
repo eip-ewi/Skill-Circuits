@@ -15,50 +15,39 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.model.labracore;
+package nl.tudelft.skills.model;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.time.Instant;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
-import lombok.*;
-import nl.tudelft.skills.model.Inventory;
-import nl.tudelft.skills.model.PathPreference;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.model.TaskCompletion;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import nl.tudelft.skills.model.labracore.SCPerson;
 
 @Data
 @Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SCPerson {
-
+public class TaskCompletion {
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
 
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@OneToMany(mappedBy = "person")
-	private Set<TaskCompletion> taskCompletions = new HashSet<>();
-
-	// TODO modify to only use TaskCompletion?
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany
-	private Set<Task> tasksCompleted = new HashSet<>();
+	@NotNull
+	@ManyToOne
+	private SCPerson person;
 
 	@NotNull
-	@OneToOne(cascade = CascadeType.ALL)
-	private Inventory inventory;
+	@ManyToOne
+	private Task task;
 
+	// TODO should this use a "time provider" class instead? For testability independent of time
+	// The timestamp can be null for the already stored completions without time indication
 	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@OneToMany(mappedBy = "person")
-	private Set<PathPreference> pathPreferences = new HashSet<>();
+	private Instant timestamp = Instant.now();
 }

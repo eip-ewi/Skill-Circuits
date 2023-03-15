@@ -115,6 +115,7 @@ public class ModuleController {
 	@Transactional
 	@PreAuthorize("@authorisationService.canDeleteModule(#id)")
 	public String deleteModule(@RequestParam Long id) {
+		// TODO modify to (also?) use TaskCompletion
 		SCModule module = moduleRepository.findByIdOrThrow(id);
 		module.getSubmodules().stream()
 				.flatMap(s -> s.getSkills().stream())
@@ -135,6 +136,7 @@ public class ModuleController {
 	@Transactional
 	@PreAuthorize("@authorisationService.canDeleteModule(#id)")
 	public ResponseEntity<Void> deleteModuleSetup(@RequestParam Long id) {
+		// TODO modify to (also?) use TaskCompletion
 		SCModule module = moduleRepository.findByIdOrThrow(id);
 		module.getSubmodules().stream()
 				.flatMap(s -> s.getSkills().stream())

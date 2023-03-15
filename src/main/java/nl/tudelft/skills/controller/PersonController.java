@@ -30,6 +30,7 @@ import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.service.TaskCompletionService;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -39,10 +40,13 @@ public class PersonController {
 
 	private final TaskRepository taskRepository;
 	private final PersonRepository scPersonRepository;
+	private final TaskCompletionService taskCompletionService;
 
-	public PersonController(TaskRepository taskRepository, PersonRepository scPersonRepository) {
+	public PersonController(TaskRepository taskRepository, PersonRepository scPersonRepository,
+			TaskCompletionService taskCompletionService) {
 		this.taskRepository = taskRepository;
 		this.scPersonRepository = scPersonRepository;
+		this.taskCompletionService = taskCompletionService;
 	}
 
 	/**
@@ -60,13 +64,18 @@ public class PersonController {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
 		Task task = taskRepository.findByIdOrThrow(taskId);
 		if (completed) {
+			taskCompletionService.addTaskCompletion(person, task);
+
+			// TODO modify to only use taskCompletion repository?
 			person.getTasksCompleted().add(task);
 			// TODO skill remains visible (see issue #90)
 			return new TaskCompletedDTO(task.getRequiredFor().stream()
 					.filter(s -> person.getTasksCompleted().containsAll(s.getRequiredTasks()))
 					.map(Skill::getId).toList());
 		} else {
+			// TODO modify to only use taskCompletion repository?
 			person.getTasksCompleted().remove(task);
+			taskCompletionService.deleteTaskCompletion(person, task);
 		}
 		return new TaskCompletedDTO(Collections.emptyList());
 	}
@@ -82,6 +91,11 @@ public class PersonController {
 	public void setTasksCompletedForPerson(@AuthenticatedPerson Person authPerson,
 			@RequestBody List<Long> completedTasks) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
-		person.getTasksCompleted().addAll(taskRepository.findAllById(completedTasks));
+
+		// TODO modify to only use taskCompletion repository?
+		List<Task> tasks = taskRepository.findAllById(completedTasks);
+		person.getTasksCompleted().addAll(tasks);
+
+		tasks.forEach(task -> taskCompletionService.addTaskCompletion(person, task));
 	}
 }

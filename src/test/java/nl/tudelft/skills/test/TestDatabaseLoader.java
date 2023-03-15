@@ -421,6 +421,7 @@ public class TestDatabaseLoader {
 	}
 
 	private void initPerson() {
+		// TODO modify to (also?) use TaskCompletion
 		person.setTasksCompleted(Set.of(taskDo11ad, taskRead12, taskDo12ae, taskRead11));
 		inventory.setPerson(person);
 		person.setInventory(inventory);

@@ -25,6 +25,7 @@ import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.service.TaskCompletionService;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,16 +41,20 @@ public class PersonControllerTest extends ControllerTest {
 	private final PersonController personController;
 	private final PersonRepository personRepository;
 	private final TaskRepository taskRepository;
+	private final TaskCompletionService taskCompletionService;
 
 	@Autowired
-	public PersonControllerTest(PersonRepository personRepository, TaskRepository taskRepository) {
+	public PersonControllerTest(PersonRepository personRepository, TaskRepository taskRepository,
+			TaskCompletionService taskCompletionService) {
 		this.personRepository = personRepository;
-		this.personController = new PersonController(taskRepository, personRepository);
+		this.personController = new PersonController(taskRepository, personRepository, taskCompletionService);
 		this.taskRepository = taskRepository;
+		this.taskCompletionService = taskCompletionService;
 	}
 
 	@Test
 	void setTasksCompletedForPerson() {
+		// TODO modify to (also?) use TaskCompletion
 		assertThat(db.getPerson().getTasksCompleted()).doesNotContain(
 				db.getTaskDo10a(),
 				db.getTaskRead10());
@@ -66,6 +71,7 @@ public class PersonControllerTest extends ControllerTest {
 
 	@Test
 	void updateTaskCompletedForPersonTrue() {
+		// TODO modify to (also?) use TaskCompletion
 		assertThat(db.getPerson().getTasksCompleted())
 				.doesNotContain(db.getTaskDo10a());
 
@@ -80,6 +86,7 @@ public class PersonControllerTest extends ControllerTest {
 
 	@Test
 	void updateTaskCompletedForPersonFalse() {
+		// TODO modify to (also?) use TaskCompletion
 		assertThat(db.getPerson().getTasksCompleted())
 				.contains(db.getTaskDo11ad());
 

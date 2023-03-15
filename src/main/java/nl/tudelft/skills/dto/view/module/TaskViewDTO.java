@@ -58,6 +58,7 @@ public class TaskViewDTO extends View<Task> implements ItemView {
 	@Override
 	public void postApply() {
 		super.postApply();
+		// TODO modify to (also?) use TaskCompletion
 		completedCount = data.getPersons().size();
 	}
 }

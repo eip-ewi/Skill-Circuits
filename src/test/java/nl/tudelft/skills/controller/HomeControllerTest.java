@@ -107,6 +107,7 @@ public class HomeControllerTest extends ControllerTest {
 		Set<Task> tasks = new HashSet<>();
 		tasks.add(db.getTaskRead12());
 		SCPerson person = new SCPerson();
+		// TODO modify to (also?) use TaskCompletion
 		person.setTasksCompleted(tasks);
 
 		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
@@ -128,6 +129,7 @@ public class HomeControllerTest extends ControllerTest {
 		tasks.add(db.getTaskRead12());
 		tasks.add(db.getTaskDo12ae());
 		SCPerson person = new SCPerson();
+		// TODO modify to (also?) use TaskCompletion
 		person.setTasksCompleted(tasks);
 
 		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))

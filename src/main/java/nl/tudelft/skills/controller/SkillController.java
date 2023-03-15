@@ -194,6 +194,7 @@ public class SkillController {
 		Skill skill = skillRepository.findByIdOrThrow(patch.getId());
 		List<Task> oldTasks = skill.getTasks();
 		skillRepository.save(patch.apply(skill));
+		// TODO modify to (also?) use TaskCompletion
 		taskRepository.findAllByIdIn(patch.getRemovedItems())
 				.forEach(t -> t.getPersons().forEach(p -> p.getTasksCompleted().remove(t)));
 		taskRepository.deleteAllByIdIn(patch.getRemovedItems());

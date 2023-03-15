@@ -130,6 +130,7 @@ public class HomeController {
 
 			if (editionId != null) {
 				SCEdition edition = editionService.getOrCreateSCEdition(editionId);
+				// TODO modify to (also?) use TaskCompletion
 				skillsDone = (int) edition.getModules().stream()
 						.flatMap(m -> m.getSubmodules().stream())
 						.flatMap(s -> s.getSkills().stream())
