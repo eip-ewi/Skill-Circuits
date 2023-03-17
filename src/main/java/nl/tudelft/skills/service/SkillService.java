@@ -20,6 +20,7 @@ package nl.tudelft.skills.service;
 import nl.tudelft.skills.model.AbstractSkill;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.AbstractSkillRepository;
+import nl.tudelft.skills.repository.TaskCompletionRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,10 +30,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class SkillService {
 
 	private final AbstractSkillRepository abstractSkillRepository;
+	private final TaskCompletionRepository taskCompletionRepository;
 
 	@Autowired
-	public SkillService(AbstractSkillRepository abstractSkillRepository) {
+	public SkillService(AbstractSkillRepository abstractSkillRepository,
+			TaskCompletionRepository taskCompletionRepository) {
 		this.abstractSkillRepository = abstractSkillRepository;
+		this.taskCompletionRepository = taskCompletionRepository;
 	}
 
 	/**
@@ -46,8 +50,10 @@ public class SkillService {
 		AbstractSkill skill = abstractSkillRepository.findByIdOrThrow(id);
 		skill.getChildren().forEach(c -> c.getParents().remove(skill));
 		if (skill instanceof Skill s) {
-			// TODO modify to (also?) use TaskCompletion
+			// TODO modify to only use TaskCompletion
 			s.getTasks().forEach(t -> t.getPersons().forEach(p -> p.getTasksCompleted().remove(t)));
+
+			s.getTasks().forEach(t -> taskCompletionRepository.deleteAll(t.getCompletedBy()));
 		}
 		abstractSkillRepository.delete(skill);
 		return skill;

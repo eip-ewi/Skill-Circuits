@@ -86,6 +86,8 @@ public class TaskCompletionService {
 	 * @return      A string indicating the location of the given task
 	 */
 	public String getLocationString(Task task) {
+		// TODO this might need to be moved to a more fitting place
+
 		Skill skill = task.getSkill();
 		Submodule submodule = skill.getSubmodule();
 		EditionDetailsDTO edition = editionApi.getEditionById(submodule.getModule().getEdition().getId())

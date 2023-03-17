@@ -20,6 +20,12 @@ package nl.tudelft.skills.repository;
 import nl.tudelft.skills.model.TaskCompletion;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
 public interface TaskCompletionRepository extends JpaRepository<TaskCompletion, Long> {
+
+	default TaskCompletion findByIdOrThrow(Long id) {
+		return findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("TaskCompletion was not found: " + id));
+	}
 }

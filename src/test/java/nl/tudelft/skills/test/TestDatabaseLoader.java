@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.test;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -37,6 +38,7 @@ import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.PathRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.SubmoduleRepository;
+import nl.tudelft.skills.repository.TaskCompletionRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 
@@ -79,6 +81,8 @@ public class TestDatabaseLoader {
 	private PathRepository pathRepository;
 	@Autowired
 	private CheckpointRepository checkpointRepository;
+	@Autowired
+	private TaskCompletionRepository taskCompletionRepository;
 
 	/**
 	 * Test models.
@@ -151,6 +155,11 @@ public class TestDatabaseLoader {
 	private Inventory inventory = Inventory.builder().build();
 
 	private SCPerson person = SCPerson.builder().id(TestUserDetailsService.id).build();
+
+	private TaskCompletion completeDo10a = TaskCompletion.builder().task(taskDo10a).person(person)
+			.timestamp(Instant.ofEpochSecond(100L)).build();
+	private TaskCompletion completeRead10 = TaskCompletion.builder().task(taskRead10).person(person)
+			.timestamp(Instant.ofEpochSecond(200L)).build();
 
 	public SCCourse getCourseRL() {
 		return courseRepository.findByIdOrThrow(courseRL.getId());
@@ -292,6 +301,14 @@ public class TestDatabaseLoader {
 		return personRepository.findByIdOrThrow(person.getId());
 	}
 
+	public TaskCompletion getCompleteDo10a() {
+		return taskCompletionRepository.findByIdOrThrow(completeDo10a.getId());
+	}
+
+	public TaskCompletion getCompleteRead10() {
+		return taskCompletionRepository.findByIdOrThrow(completeRead10.getId());
+	}
+
 	@PostConstruct
 	private void init() {
 		initCourse();
@@ -304,6 +321,7 @@ public class TestDatabaseLoader {
 		initTask();
 		initPerson();
 		initBadges();
+		initTaskCompletions();
 	}
 
 	private void initCourse() {
@@ -421,13 +439,23 @@ public class TestDatabaseLoader {
 	}
 
 	private void initPerson() {
-		// TODO modify to (also?) use TaskCompletion
+		// TODO modify to only use TaskCompletion
 		person.setTasksCompleted(Set.of(taskDo11ad, taskRead12, taskDo12ae, taskRead11));
 		inventory.setPerson(person);
 		person.setInventory(inventory);
 
 		person = personRepository.save(person);
 		inventory = person.getInventory();
+	}
+
+	private void initTaskCompletions() {
+		completeDo10a = taskCompletionRepository.save(completeDo10a);
+		completeRead10 = taskCompletionRepository.save(completeRead10);
+
+		person.getTaskCompletions().add(completeDo10a);
+		person.getTaskCompletions().add(completeRead10);
+		taskDo10a.getCompletedBy().add(completeDo10a);
+		taskRead10.getCompletedBy().add(completeRead10);
 	}
 
 	private void initBadges() {
