@@ -27,6 +27,7 @@ import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.dto.view.TaskCompletedDTO;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.TaskCompletion;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
@@ -65,16 +66,14 @@ public class PersonController {
 		Task task = taskRepository.findByIdOrThrow(taskId);
 		if (completed) {
 			taskCompletionService.addTaskCompletion(person, task);
+			List<Task> completedTasks = person.getTaskCompletions().stream()
+					.map(TaskCompletion::getTask).toList();
 
-			// TODO modify to only use taskCompletion repository?
-			person.getTasksCompleted().add(task);
 			// TODO skill remains visible (see issue #90)
 			return new TaskCompletedDTO(task.getRequiredFor().stream()
-					.filter(s -> person.getTasksCompleted().containsAll(s.getRequiredTasks()))
+					.filter(s -> completedTasks.containsAll(s.getRequiredTasks()))
 					.map(Skill::getId).toList());
 		} else {
-			// TODO modify to only use taskCompletion repository?
-			person.getTasksCompleted().remove(task);
 			taskCompletionService.deleteTaskCompletion(person, task);
 		}
 		return new TaskCompletedDTO(Collections.emptyList());
@@ -92,10 +91,7 @@ public class PersonController {
 			@RequestBody List<Long> completedTasks) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
 
-		// TODO modify to only use taskCompletion repository?
 		List<Task> tasks = taskRepository.findAllById(completedTasks);
-		person.getTasksCompleted().addAll(tasks);
-
 		tasks.forEach(task -> taskCompletionService.addTaskCompletion(person, task));
 	}
 }

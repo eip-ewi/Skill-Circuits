@@ -18,7 +18,9 @@
 package nl.tudelft.skills.service;
 
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
@@ -38,9 +40,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class TaskCompletionService {
 
-	private EditionControllerApi editionApi;
-	private PersonRepository personRepository;
-	private TaskCompletionRepository taskCompletionRepository;
+	private final EditionControllerApi editionApi;
+	private final PersonRepository personRepository;
+	private final TaskCompletionRepository taskCompletionRepository;
 
 	@Autowired
 	public TaskCompletionService(TaskCompletionRepository taskCompletionRepository,
@@ -142,5 +144,22 @@ public class TaskCompletionService {
 		});
 
 		return completion.orElse(null);
+	}
+
+	/**
+	 * Deletes the TaskCompletions of a given Task, and removes them from the Tasks completion set, as well as
+	 * completion sets of the Persons who completed the Task.
+	 *
+	 * @param task The Task for which the completions should be deleted
+	 */
+	@Transactional
+	public void deleteTaskCompletionsOfTask(Task task) {
+		Set<TaskCompletion> taskCompletions = task.getCompletedBy();
+		// Remove from taskCompletionRepository
+		taskCompletionRepository.deleteAll(taskCompletions);
+		// Remove from Person sets
+		taskCompletions.forEach(tc -> tc.getPerson().getTaskCompletions().remove(tc));
+		// In case the Task will be used later on, also clear its TaskCompletion set
+		task.setCompletedBy(new HashSet<>());
 	}
 }

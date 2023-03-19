@@ -31,8 +31,8 @@ import nl.tudelft.skills.dto.view.SkillSummaryDTO;
 import nl.tudelft.skills.dto.view.edition.EditionLevelModuleViewDTO;
 import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.repository.ModuleRepository;
-import nl.tudelft.skills.repository.TaskCompletionRepository;
 import nl.tudelft.skills.service.ModuleService;
+import nl.tudelft.skills.service.TaskCompletionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -49,15 +49,15 @@ public class ModuleController {
 	private ModuleRepository moduleRepository;
 	private ModuleService moduleService;
 	private HttpSession session;
-	private final TaskCompletionRepository taskCompletionRepository;
+	private final TaskCompletionService taskCompletionService;
 
 	@Autowired
 	public ModuleController(ModuleRepository moduleRepository, ModuleService moduleService,
-			HttpSession session, TaskCompletionRepository taskCompletionRepository) {
+			HttpSession session, TaskCompletionService taskCompletionService) {
 		this.moduleRepository = moduleRepository;
 		this.moduleService = moduleService;
 		this.session = session;
-		this.taskCompletionRepository = taskCompletionRepository;
+		this.taskCompletionService = taskCompletionService;
 	}
 
 	/**
@@ -118,16 +118,11 @@ public class ModuleController {
 	@Transactional
 	@PreAuthorize("@authorisationService.canDeleteModule(#id)")
 	public String deleteModule(@RequestParam Long id) {
-		// TODO modify to only use TaskCompletion
 		SCModule module = moduleRepository.findByIdOrThrow(id);
 		module.getSubmodules().stream()
 				.flatMap(s -> s.getSkills().stream())
 				.flatMap(s -> s.getTasks().stream())
-				.forEach(t -> {
-					t.getPersons()
-							.forEach(p -> p.getTasksCompleted().remove(t));
-					taskCompletionRepository.deleteAll(t.getCompletedBy());
-				});
+				.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
 		moduleRepository.delete(module);
 		return "redirect:/edition/" + module.getEdition().getId();
 	}
@@ -142,16 +137,11 @@ public class ModuleController {
 	@Transactional
 	@PreAuthorize("@authorisationService.canDeleteModule(#id)")
 	public ResponseEntity<Void> deleteModuleSetup(@RequestParam Long id) {
-		// TODO modify to only use TaskCompletion
 		SCModule module = moduleRepository.findByIdOrThrow(id);
 		module.getSubmodules().stream()
 				.flatMap(s -> s.getSkills().stream())
 				.flatMap(s -> s.getTasks().stream())
-				.forEach(t -> {
-					t.getPersons()
-							.forEach(p -> p.getTasksCompleted().remove(t));
-					taskCompletionRepository.deleteAll(t.getCompletedBy());
-				});
+				.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
 		moduleRepository.delete(module);
 		return ResponseEntity.ok().build();
 	}

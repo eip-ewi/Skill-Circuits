@@ -23,6 +23,9 @@ import java.util.List;
 
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.dto.view.TaskCompletedDTO;
+import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.TaskCompletion;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.TaskCompletionService;
@@ -54,49 +57,52 @@ public class PersonControllerTest extends ControllerTest {
 
 	@Test
 	void setTasksCompletedForPerson() {
-		// TODO modify to (also?) use TaskCompletion
-		assertThat(db.getPerson().getTasksCompleted()).doesNotContain(
-				db.getTaskDo10a(),
-				db.getTaskRead10());
+		List<Task> tasksCompleted = db.getPerson().getTaskCompletions().stream()
+				.map(TaskCompletion::getTask).toList();
+		assertThat(tasksCompleted).doesNotContain(db.getTaskDo10a(), db.getTaskRead10());
 
 		Person person = new Person();
 		person.setId(db.getPerson().getId());
 		personController.setTasksCompletedForPerson(person,
 				List.of(db.getTaskDo10a().getId(), db.getTaskRead10().getId()));
 
-		assertThat(db.getPerson().getTasksCompleted()).contains(
-				db.getTaskDo10a(),
-				db.getTaskRead10());
+		List<Task> tasksCompletedAfter = db.getPerson().getTaskCompletions().stream()
+				.map(TaskCompletion::getTask).toList();
+		assertThat(tasksCompletedAfter).contains(db.getTaskDo10a(), db.getTaskRead10());
 	}
 
 	@Test
 	void updateTaskCompletedForPersonTrue() {
-		// TODO modify to (also?) use TaskCompletion
-		assertThat(db.getPerson().getTasksCompleted())
-				.doesNotContain(db.getTaskDo10a());
+		List<Task> tasksCompleted = db.getPerson().getTaskCompletions().stream()
+				.map(TaskCompletion::getTask).toList();
+		assertThat(tasksCompleted).doesNotContain(db.getTaskDo10a());
 
 		Person person = new Person();
 		person.setId(db.getPerson().getId());
-		personController.updateTaskCompletedForPerson(person,
+		TaskCompletedDTO taskCompletedDTO = personController.updateTaskCompletedForPerson(person,
 				db.getTaskDo10a().getId(), true);
 
-		assertThat(db.getPerson().getTasksCompleted())
-				.contains(db.getTaskDo10a());
+		List<Task> tasksCompletedAfter = db.getPerson().getTaskCompletions().stream()
+				.map(TaskCompletion::getTask).toList();
+		assertThat(tasksCompletedAfter).contains(db.getTaskDo10a());
+		assertThat(taskCompletedDTO.getShowSkills()).hasSize(0);
 	}
 
 	@Test
 	void updateTaskCompletedForPersonFalse() {
-		// TODO modify to (also?) use TaskCompletion
-		assertThat(db.getPerson().getTasksCompleted())
-				.contains(db.getTaskDo11ad());
+		List<Task> tasksCompleted = db.getPerson().getTaskCompletions().stream()
+				.map(TaskCompletion::getTask).toList();
+		assertThat(tasksCompleted).contains(db.getTaskDo11ad());
 
 		Person person = new Person();
 		person.setId(db.getPerson().getId());
-		personController.updateTaskCompletedForPerson(person,
+		TaskCompletedDTO taskCompletedDTO = personController.updateTaskCompletedForPerson(person,
 				db.getTaskDo11ad().getId(), false);
 
-		assertThat(db.getPerson().getTasksCompleted())
-				.doesNotContain(db.getTaskDo11ad());
+		List<Task> tasksCompletedAfter = db.getPerson().getTaskCompletions().stream()
+				.map(TaskCompletion::getTask).toList();
+		assertThat(tasksCompletedAfter).doesNotContain(db.getTaskDo11ad());
+		assertThat(taskCompletedDTO.getShowSkills()).hasSize(0);
 	}
 
 }

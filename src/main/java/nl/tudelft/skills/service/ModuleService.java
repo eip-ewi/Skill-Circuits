@@ -147,9 +147,8 @@ public class ModuleService {
 	 */
 	@Transactional
 	public void setCompletedTasksForPerson(ModuleLevelModuleViewDTO moduleViewDTO, Long personId) {
-		// TODO modify to (also?) use TaskCompletion
-		Set<Long> completedTasks = personRepository.getById(personId).getTasksCompleted().stream()
-				.map(Task::getId).collect(Collectors.toSet());
+		Set<Long> completedTasks = personRepository.getById(personId).getTaskCompletions().stream()
+				.map(tc -> tc.getTask().getId()).collect(Collectors.toSet());
 
 		moduleViewDTO.getSubmodules().stream()
 				.flatMap(sub -> sub.getSkills().stream())

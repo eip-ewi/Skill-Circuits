@@ -56,20 +56,20 @@ public class SkillServiceTest {
 		skillService.deleteSkill(id);
 		assertThat(skillRepository.existsById(id)).isFalse();
 
-		// Both of the previously saved TaskCompletions were in the deleted Skill, so
-		// the size should be 0 now
-		assertThat(taskCompletionRepository.findAll()).hasSize(0);
+		// All TaskCompletions are in other Skills, so they should
+		// not have been deleted
+		assertThat(taskCompletionRepository.findAll()).hasSize(4);
 	}
 
 	@Test
-	public void deleteSkillTaskCompletionsNotImpacted() {
-		Long id = db.getSkillAssumption().getId();
+	public void deleteSkillTaskCompletionsImpacted() {
+		Long id = db.getSkillNegation().getId();
 
 		skillService.deleteSkill(id);
 		assertThat(skillRepository.existsById(id)).isFalse();
 
-		// There are two TaskCompletions saved which are in another Skill, so they should
-		// not have been deleted
+		// Two of the previously saved TaskCompletions were in the deleted Skill, so
+		// the size should be 2 now
 		assertThat(taskCompletionRepository.findAll()).hasSize(2);
 	}
 

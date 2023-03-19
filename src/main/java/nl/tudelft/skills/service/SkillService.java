@@ -50,9 +50,6 @@ public class SkillService {
 		AbstractSkill skill = abstractSkillRepository.findByIdOrThrow(id);
 		skill.getChildren().forEach(c -> c.getParents().remove(skill));
 		if (skill instanceof Skill s) {
-			// TODO modify to only use TaskCompletion
-			s.getTasks().forEach(t -> t.getPersons().forEach(p -> p.getTasksCompleted().remove(t)));
-
 			s.getTasks().forEach(t -> taskCompletionRepository.deleteAll(t.getCompletedBy()));
 		}
 		abstractSkillRepository.delete(skill);

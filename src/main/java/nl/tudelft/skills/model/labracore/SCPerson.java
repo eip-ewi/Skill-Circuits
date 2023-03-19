@@ -26,7 +26,6 @@ import javax.validation.constraints.NotNull;
 import lombok.*;
 import nl.tudelft.skills.model.Inventory;
 import nl.tudelft.skills.model.PathPreference;
-import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskCompletion;
 
 @Data
@@ -44,13 +43,6 @@ public class SCPerson {
 	@EqualsAndHashCode.Exclude
 	@OneToMany(mappedBy = "person")
 	private Set<TaskCompletion> taskCompletions = new HashSet<>();
-
-	// TODO modify to only use TaskCompletion?
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany
-	private Set<Task> tasksCompleted = new HashSet<>();
 
 	@NotNull
 	@OneToOne(cascade = CascadeType.ALL)

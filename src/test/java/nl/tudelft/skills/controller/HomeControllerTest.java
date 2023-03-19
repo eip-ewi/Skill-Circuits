@@ -34,7 +34,7 @@ import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.model.SCEdition;
-import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.TaskCompletion;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.ModuleRepository;
@@ -104,11 +104,10 @@ public class HomeControllerTest extends ControllerTest {
 	void getCompletedSkillsFalse() {
 		List<CourseSummaryDTO> courses = new ArrayList<>(
 				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
-		Set<Task> tasks = new HashSet<>();
-		tasks.add(db.getTaskRead12());
 		SCPerson person = new SCPerson();
-		// TODO modify to (also?) use TaskCompletion
-		person.setTasksCompleted(tasks);
+		TaskCompletion completion = TaskCompletion.builder().id(1L)
+				.person(person).task(db.getTaskRead12()).build();
+		person.setTaskCompletions(Set.of(completion));
 
 		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
 				.thenReturn(db.getEditionRL().getId());
@@ -118,19 +117,19 @@ public class HomeControllerTest extends ControllerTest {
 				person);
 
 		assertFalse(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
-		assertThat(courseCompletedSkills.get(db.getCourseRL().getId()) == 0);
+		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(0);
 	}
 
 	@Test
 	void getCompletedSkillsTrue() {
 		List<CourseSummaryDTO> courses = new ArrayList<>(
 				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
-		Set<Task> tasks = new HashSet<>();
-		tasks.add(db.getTaskRead12());
-		tasks.add(db.getTaskDo12ae());
 		SCPerson person = new SCPerson();
-		// TODO modify to (also?) use TaskCompletion
-		person.setTasksCompleted(tasks);
+		TaskCompletion completion1 = TaskCompletion.builder().id(1L)
+				.person(person).task(db.getTaskRead12()).build();
+		TaskCompletion completion2 = TaskCompletion.builder().id(2L)
+				.person(person).task(db.getTaskDo12ae()).build();
+		person.setTaskCompletions(Set.of(completion1, completion2));
 
 		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
 				.thenReturn(db.getEditionRL().getId());
@@ -139,7 +138,7 @@ public class HomeControllerTest extends ControllerTest {
 		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
 				person);
 		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
-		assertThat(courseCompletedSkills.get(db.getCourseRL().getId()) == 1);
+		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(1);
 	}
 
 }

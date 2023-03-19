@@ -156,10 +156,14 @@ public class TestDatabaseLoader {
 
 	private SCPerson person = SCPerson.builder().id(TestUserDetailsService.id).build();
 
-	private TaskCompletion completeDo10a = TaskCompletion.builder().task(taskDo10a).person(person)
+	private TaskCompletion completeDo11ad = TaskCompletion.builder().task(taskDo11ad).person(person)
 			.timestamp(Instant.ofEpochSecond(100L)).build();
-	private TaskCompletion completeRead10 = TaskCompletion.builder().task(taskRead10).person(person)
+	private TaskCompletion completeRead12 = TaskCompletion.builder().task(taskRead12).person(person)
 			.timestamp(Instant.ofEpochSecond(200L)).build();
+	private TaskCompletion completeDo12ae = TaskCompletion.builder().task(taskDo12ae).person(person)
+			.timestamp(Instant.ofEpochSecond(300L)).build();
+	private TaskCompletion completeRead11 = TaskCompletion.builder().task(taskRead11).person(person)
+			.timestamp(Instant.ofEpochSecond(400L)).build();
 
 	public SCCourse getCourseRL() {
 		return courseRepository.findByIdOrThrow(courseRL.getId());
@@ -301,12 +305,20 @@ public class TestDatabaseLoader {
 		return personRepository.findByIdOrThrow(person.getId());
 	}
 
-	public TaskCompletion getCompleteDo10a() {
-		return taskCompletionRepository.findByIdOrThrow(completeDo10a.getId());
+	public TaskCompletion getCompleteDo11ad() {
+		return taskCompletionRepository.findByIdOrThrow(completeDo11ad.getId());
 	}
 
-	public TaskCompletion getCompleteRead10() {
-		return taskCompletionRepository.findByIdOrThrow(completeRead10.getId());
+	public TaskCompletion getCompleteRead12() {
+		return taskCompletionRepository.findByIdOrThrow(completeRead12.getId());
+	}
+
+	public TaskCompletion getCompleteDo12ae() {
+		return taskCompletionRepository.findByIdOrThrow(completeDo12ae.getId());
+	}
+
+	public TaskCompletion getCompleteRead11() {
+		return taskCompletionRepository.findByIdOrThrow(completeRead11.getId());
 	}
 
 	@PostConstruct
@@ -439,8 +451,6 @@ public class TestDatabaseLoader {
 	}
 
 	private void initPerson() {
-		// TODO modify to only use TaskCompletion
-		person.setTasksCompleted(Set.of(taskDo11ad, taskRead12, taskDo12ae, taskRead11));
 		inventory.setPerson(person);
 		person.setInventory(inventory);
 
@@ -449,13 +459,16 @@ public class TestDatabaseLoader {
 	}
 
 	private void initTaskCompletions() {
-		completeDo10a = taskCompletionRepository.save(completeDo10a);
-		completeRead10 = taskCompletionRepository.save(completeRead10);
+		completeDo11ad = taskCompletionRepository.save(completeDo11ad);
+		completeRead12 = taskCompletionRepository.save(completeRead12);
+		completeDo12ae = taskCompletionRepository.save(completeDo12ae);
+		completeRead11 = taskCompletionRepository.save(completeRead11);
 
-		person.getTaskCompletions().add(completeDo10a);
-		person.getTaskCompletions().add(completeRead10);
-		taskDo10a.getCompletedBy().add(completeDo10a);
-		taskRead10.getCompletedBy().add(completeRead10);
+		person.setTaskCompletions(Set.of(completeDo11ad, completeRead12, completeDo12ae, completeRead11));
+		taskDo11ad.getCompletedBy().add(completeDo11ad);
+		taskRead12.getCompletedBy().add(completeRead12);
+		taskDo12ae.getCompletedBy().add(completeDo12ae);
+		taskRead11.getCompletedBy().add(completeRead11);
 	}
 
 	private void initBadges() {

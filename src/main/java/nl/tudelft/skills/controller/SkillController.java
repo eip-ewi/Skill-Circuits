@@ -43,6 +43,7 @@ import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.service.ModuleService;
 import nl.tudelft.skills.service.SkillService;
+import nl.tudelft.skills.service.TaskCompletionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -65,6 +66,7 @@ public class SkillController {
 	private final PathRepository pathRepository;
 	private final SkillService skillService;
 	private final ModuleService moduleService;
+	private final TaskCompletionService taskCompletionService;
 	private final HttpSession session;
 
 	@Autowired
@@ -73,7 +75,7 @@ public class SkillController {
 			SubmoduleRepository submoduleRepository, CheckpointRepository checkpointRepository,
 			PathRepository pathRepository,
 			SkillService skillService, ModuleService moduleService,
-			HttpSession session) {
+			TaskCompletionService taskCompletionService, HttpSession session) {
 		this.skillRepository = skillRepository;
 		this.externalSkillRepository = externalSkillRepository;
 		this.abstractSkillRepository = abstractSkillRepository;
@@ -83,6 +85,7 @@ public class SkillController {
 		this.pathRepository = pathRepository;
 		this.skillService = skillService;
 		this.moduleService = moduleService;
+		this.taskCompletionService = taskCompletionService;
 		this.session = session;
 	}
 
@@ -194,9 +197,8 @@ public class SkillController {
 		Skill skill = skillRepository.findByIdOrThrow(patch.getId());
 		List<Task> oldTasks = skill.getTasks();
 		skillRepository.save(patch.apply(skill));
-		// TODO modify to (also?) use TaskCompletion
 		taskRepository.findAllByIdIn(patch.getRemovedItems())
-				.forEach(t -> t.getPersons().forEach(p -> p.getTasksCompleted().remove(t)));
+				.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
 		taskRepository.deleteAllByIdIn(patch.getRemovedItems());
 		taskRepository.saveAll(skill.getRequiredTasks());
 

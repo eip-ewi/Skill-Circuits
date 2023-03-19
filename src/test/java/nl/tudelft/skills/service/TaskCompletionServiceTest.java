@@ -79,8 +79,8 @@ public class TaskCompletionServiceTest {
 	@Test
 	public void testLatestTaskCompletionReturnsCompletion() {
 		// In the test database, the most recently completed task by the
-		// saved person is taskRead10
-		Task expectedLastTask = db.getCompleteRead10().getTask();
+		// saved person is taskRead11
+		Task expectedLastTask = db.getTaskRead11();
 
 		// Assert that the latest task completion is the most recent one
 		Person person = Person.builder().id(db.getPerson().getId()).build();
@@ -104,38 +104,38 @@ public class TaskCompletionServiceTest {
 	@Test
 	public void testAddTaskCompletion() {
 		TaskCompletion completion = taskCompletionService.addTaskCompletion(db.getPerson(),
-				db.getTaskDo12ae());
+				db.getTaskDo10a());
 		assertThat(taskCompletionRepository.getById(completion.getId())).isEqualTo(completion);
 		assertThat(db.getPerson().getTaskCompletions()).contains(completion);
-		assertThat(db.getTaskDo12ae().getCompletedBy()).contains(completion);
+		assertThat(db.getTaskDo10a().getCompletedBy()).contains(completion);
 	}
 
 	@Test
 	public void testDeleteTaskCompletionExists() {
 		TaskCompletion completion = taskCompletionRepository.save(
-				TaskCompletion.builder().person(db.getPerson()).task(db.getTaskDo11ad()).build());
+				TaskCompletion.builder().person(db.getPerson()).task(db.getTaskRead10()).build());
 		Long completionId = completion.getId();
 		assertThat(taskCompletionRepository.getById(completionId)).isEqualTo(completion);
 		db.getPerson().getTaskCompletions().add(completion);
-		db.getTaskDo11ad().getCompletedBy().add(completion);
+		db.getTaskRead10().getCompletedBy().add(completion);
 
 		TaskCompletion deleted = taskCompletionService.deleteTaskCompletion(db.getPerson(),
-				db.getTaskDo11ad());
+				db.getTaskRead10());
 		assertThat(deleted).isEqualTo(completion);
 
 		// The TaskCompletion should be removed from the sets
 		assertThat(db.getPerson().getTaskCompletions()).doesNotContain(completion);
-		assertThat(db.getTaskDo11ad().getCompletedBy()).doesNotContain(completion);
+		assertThat(db.getTaskRead10().getCompletedBy()).doesNotContain(completion);
 
 		// The TaskCompletion should be removed from the repository
 		Optional<TaskCompletion> retrieved = taskCompletionRepository.findById(completionId);
-		assertThat(retrieved.isEmpty()).isTrue();
+		assertThat(retrieved).isEmpty();
 	}
 
 	@Test
 	public void testDeleteTaskCompletionDoesNotExist() {
 		TaskCompletion completion = taskCompletionService.deleteTaskCompletion(db.getPerson(),
-				db.getTaskRead12());
+				db.getTaskRead10());
 		// Should return null since this completion was not saved
 		assertThat(completion).isNull();
 	}

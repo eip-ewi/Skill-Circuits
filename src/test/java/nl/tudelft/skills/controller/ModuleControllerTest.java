@@ -40,6 +40,7 @@ import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
 import nl.tudelft.skills.service.ModuleService;
+import nl.tudelft.skills.service.TaskCompletionService;
 
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
@@ -62,19 +63,22 @@ public class ModuleControllerTest extends ControllerTest {
 
 	@MockBean
 	private ModuleService moduleService;
+	private final TaskCompletionService taskCompletionService;
+	private final TaskCompletionRepository taskCompletionRepository;
 	private final ModuleController moduleController;
 	private final RoleControllerApi roleControllerApi;
 	private final ModuleRepository moduleRepository;
 	private final HttpSession session;
-	private final TaskCompletionRepository taskCompletionRepository;
 
 	@Autowired
 	public ModuleControllerTest(ModuleController moduleController, RoleControllerApi roleControllerApi,
-			ModuleRepository moduleRepository, TaskCompletionRepository taskCompletionRepository) {
+			ModuleRepository moduleRepository, TaskCompletionService taskCompletionService,
+			TaskCompletionRepository taskCompletionRepository) {
 		this.moduleController = moduleController;
 		this.roleControllerApi = roleControllerApi;
 		this.moduleRepository = moduleRepository;
 		this.taskCompletionRepository = taskCompletionRepository;
+		this.taskCompletionService = taskCompletionService;
 		this.session = mock(HttpSession.class);
 	}
 
@@ -100,7 +104,7 @@ public class ModuleControllerTest extends ControllerTest {
 	@Test
 	void createModuleSetup() throws Exception {
 		new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionRepository).createModuleInEditionSetup(
+				session, taskCompletionService).createModuleInEditionSetup(
 						SCModuleCreateDTO.builder()
 								.name("Module").edition(new SCEditionIdDTO(db.getEditionRL().getId()))
 								.build(),
@@ -123,7 +127,7 @@ public class ModuleControllerTest extends ControllerTest {
 		assertThat(moduleRepository.existsById(moduleId)).isTrue();
 
 		new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionRepository).deleteModule(moduleId);
+				session, taskCompletionService).deleteModule(moduleId);
 
 		assertThat(moduleRepository.existsById(moduleId)).isFalse();
 		assertThat(taskCompletionRepository.findAll()).hasSize(0);
@@ -136,7 +140,7 @@ public class ModuleControllerTest extends ControllerTest {
 		assertThat(moduleRepository.existsById(moduleId)).isTrue();
 
 		new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionRepository).deleteModuleSetup(moduleId);
+				session, taskCompletionService).deleteModuleSetup(moduleId);
 
 		assertThat(moduleRepository.existsById(moduleId)).isFalse();
 		assertThat(taskCompletionRepository.findAll()).hasSize(0);
@@ -145,7 +149,7 @@ public class ModuleControllerTest extends ControllerTest {
 	@Test
 	void patchModule() {
 		new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionRepository).patchModule(
+				session, taskCompletionService).patchModule(
 						SCModulePatchDTO.builder()
 								.id(db.getModuleProofTechniques().getId())
 								.name("Module 2.0")
@@ -161,7 +165,7 @@ public class ModuleControllerTest extends ControllerTest {
 	@Test
 	void toggleStudentMode() {
 		ModuleController moduleController = new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionRepository);
+				session, taskCompletionService);
 		when(session.getAttribute("student-mode-" + db.getEditionRL().getId()))
 				.thenReturn(null)
 				.thenReturn(true)
@@ -177,7 +181,7 @@ public class ModuleControllerTest extends ControllerTest {
 	@Test
 	void getSkillsOfModule() {
 		ModuleController moduleController = new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionRepository);
+				session, taskCompletionService);
 		assertThat(moduleController.getSkillsOfModule(db.getModuleProofTechniques().getId()))
 				.isEqualTo(Stream
 						.of(
