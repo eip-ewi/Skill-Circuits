@@ -20,8 +20,6 @@ package nl.tudelft.skills.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
-
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
@@ -112,24 +110,21 @@ public class TaskCompletionServiceTest {
 
 	@Test
 	public void testDeleteTaskCompletionExists() {
-		TaskCompletion completion = taskCompletionRepository.save(
-				TaskCompletion.builder().person(db.getPerson()).task(db.getTaskRead10()).build());
-		Long completionId = completion.getId();
-		assertThat(taskCompletionRepository.getById(completionId)).isEqualTo(completion);
-		db.getPerson().getTaskCompletions().add(completion);
-		db.getTaskRead10().getCompletedBy().add(completion);
+		TaskCompletion taskCompletion = db.getCompleteRead12();
+		assertThat(db.getTaskRead12().getCompletedBy()).containsExactly(taskCompletion);
+		assertThat(db.getPerson().getTaskCompletions()).contains(taskCompletion);
+		assertThat(taskCompletionRepository.findById(taskCompletion.getId())).isPresent();
 
 		TaskCompletion deleted = taskCompletionService.deleteTaskCompletion(db.getPerson(),
-				db.getTaskRead10());
-		assertThat(deleted).isEqualTo(completion);
+				db.getTaskRead12());
+		assertThat(deleted).isEqualTo(taskCompletion);
 
 		// The TaskCompletion should be removed from the sets
-		assertThat(db.getPerson().getTaskCompletions()).doesNotContain(completion);
-		assertThat(db.getTaskRead10().getCompletedBy()).doesNotContain(completion);
+		assertThat(db.getPerson().getTaskCompletions()).doesNotContain(taskCompletion);
+		assertThat(db.getTaskRead10().getCompletedBy()).doesNotContain(taskCompletion);
 
 		// The TaskCompletion should be removed from the repository
-		Optional<TaskCompletion> retrieved = taskCompletionRepository.findById(completionId);
-		assertThat(retrieved).isEmpty();
+		assertThat(taskCompletionRepository.findById(taskCompletion.getId())).isEmpty();
 	}
 
 	@Test
@@ -140,4 +135,17 @@ public class TaskCompletionServiceTest {
 		assertThat(completion).isNull();
 	}
 
+	@Test
+	public void testDeleteTaskCompletionsOfTask() {
+		TaskCompletion taskCompletion = db.getCompleteRead12();
+		assertThat(db.getTaskRead12().getCompletedBy()).containsExactly(taskCompletion);
+		assertThat(db.getPerson().getTaskCompletions()).contains(taskCompletion);
+		assertThat(taskCompletionRepository.findById(taskCompletion.getId())).isPresent();
+
+		taskCompletionService.deleteTaskCompletionsOfTask(db.getTaskRead12());
+
+		assertThat(db.getTaskRead12().getCompletedBy()).isEmpty();
+		assertThat(db.getPerson().getTaskCompletions()).doesNotContain(taskCompletion);
+		assertThat(taskCompletionRepository.findById(taskCompletion.getId())).isEmpty();
+	}
 }
