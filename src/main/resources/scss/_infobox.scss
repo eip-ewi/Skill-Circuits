@@ -6,7 +6,6 @@
     justify-content: space-between;
     align-content: center;
     flex-direction: row;
-    flex-wrap: nowrap;
     position: fixed;
     width: auto;
     height: auto;
@@ -16,13 +15,30 @@
     min-height: 4rem;
     min-width: 10rem;
 
-    p {
+    div {
         padding-left: 1rem;
         padding-right: 1rem;
+        display: flex;
+        flex-direction: column;
+
+        .larger-info {
+            padding-top: 0.8rem;
+            padding-bottom: 0.3rem;
+            font-size: 1.2rem;
+            color: var(--primary-light);
+            text-decoration: none;
+        }
+
+        .smaller-info {
+            padding-bottom: 0.8rem;
+            color: var(--primary-light);
+            text-decoration: none;
+        }
     }
 
     i {
+        padding-left: 0.8rem;
         padding-right: 1rem;
-        font-size: 1.25rem;
+        font-size: 1.5rem;
     }
 }

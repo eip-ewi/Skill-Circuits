@@ -31,18 +31,17 @@
         th:if="${@taskCompletionService.latestTaskCompletion(@authorisationService.getAuthPerson())} != null and
                 ${@authorisationService.isAuthenticated()} and
                 (${studentMode} or not ${@authorisationService.isStaff()})">
-        <div class="info-box">
-            <p>
-                <b>Last worked on:</b>
-                <span
-                    th:text="${@taskCompletionService.latestTaskCompletion(
-                                    @authorisationService.getAuthPerson()).getName()}"></span>
-                <br />
-                In
-                <span
-                    th:text="${@taskCompletionService.getLocationString(
-                                    @taskCompletionService.latestTaskCompletion(@authorisationService.getAuthPerson()))}"></span>
-            </p>
+        <div class="info-box" th:with="task=${@taskCompletionService.latestTaskCompletion(
+            @authorisationService.getAuthPerson())},
+            moduleId=${task.getSkill().getSubmodule().getModule().getId()}">
+            <div>
+                <a class="larger-info"
+                   th:href="@{|/module/${moduleId}|}"
+                      th:text="'Last worked on: ' + ${task.getName()}"></a>
+                <a class="smaller-info"
+                   th:href="@{|/module/${moduleId}|}"
+                      th:text="'In ' + ${@taskCompletionService.getLocationString(task)}"></a>
+            </div>
             <i class="fa-solid fa-map-location-dot"></i>
         </div>
     </div>
