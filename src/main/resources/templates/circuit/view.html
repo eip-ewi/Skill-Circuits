@@ -40,6 +40,8 @@
         <th:block th:each="group : ${circuit.groups}">
             <th:block th:each="block : ${group.blocks}">
                 <div layout:replace="~{block/view :: block}"></div>
+                <div layout:replace="~{block/bloated :: bloated}"></div>
+
             </th:block>
         </th:block>
         <th:block th:if="${level == 'module'}">
@@ -102,9 +104,14 @@
             class="hidden"
             id="create-block-wrapper">
             <div layout:replace="~{block/view :: block}"></div>
+
         </div>
+
+        <div layout:replace="~{block/bloated :: overlay}"></div>
+
         <div layout:replace="~{block/edit :: form}"></div>
         <div layout:replace="~{block/delete :: overlay}"></div>
+
 
         <div layout:replace="~{item/delete :: overlay}"></div>
     </div>
@@ -113,6 +120,7 @@
         <div layout:replace="~{block/create :: script}"></div>
         <div layout:replace="~{block/edit :: script}"></div>
         <div layout:replace="~{block/delete :: script}"></div>
+        <div layout:replace="~{block/bloated :: script}"></div>
         <div layout:replace="~{block/view :: script}"></div>
         <div layout:replace="~{block/move :: script}"></div>
         <div layout:replace="~{block/connect :: script}"></div>

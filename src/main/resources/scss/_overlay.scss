@@ -1,3 +1,16 @@
+.bloated {
+    position: absolute;
+    top: 20%;
+    left: 30%;
+    z-index: 1000;
+    padding: 1rem;
+
+    background-color: var(--primary-light);
+
+    border: 1px solid var(--border-colour);
+    --border-colour: var(--primary-dark);
+}
+
 .overlay {
     border: none;
     left: 50%;
