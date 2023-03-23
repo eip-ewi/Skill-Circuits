@@ -27,6 +27,7 @@
         class="block visible"
         th:style="|grid-row: ${block.row + 1}; grid-column: ${block.column + 1}|"
         th:draggable="${canEdit}"
+        th:data-id="${block.id}"
         th:data-group="${group.id}"
         th:data-create="${create}"
         th:with="
@@ -85,6 +86,7 @@
                     </th:block>
                 </th:block>
             </ul>
+
         </ul>
 
         <div th:unless="${create}" data-edit="always" class="block__buttons">

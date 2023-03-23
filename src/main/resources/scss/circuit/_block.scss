@@ -206,6 +206,38 @@
     }
     @include show-only-when("*", ":hover");
 }
+
+.paths{
+    align-items: stretch;
+    display: grid;
+    color: var(--grey-500);
+    gap: 0.5rem;
+    grid-template-columns: 1fr 1fr;
+    min-height: 2rem;
+    min-width: 2rem;
+    &:hover,
+    &:focus-within {
+       color: var(--primary-dark);
+        cursor: pointer;
+
+    }
+}
+
+.skill-paths{
+    align-items: stretch;
+    display: grid;
+    color: var(--primary-dark);
+    gap: 0.5rem;
+    grid-template-columns: 1fr 1fr;
+    min-height: 2rem;
+    min-width: 2rem;
+    //&:hover,
+    //&:focus-within {
+    //    color: var(--primary-dark);
+    //    cursor: pointer;
+    //
+    //}
+}
 .circuit[data-moving="block"] > .ghost_block {
     background-color: var(--grey-700);
 }
