@@ -1,9 +1,9 @@
-.info-box {
+#info-box {
     z-index: 421;
-    background-color: var(--primary-green);
+    background-color: transparentize($primary-green, 0.2);
     color: var(--primary-light);
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-content: center;
     flex-direction: row;
     position: fixed;
@@ -12,12 +12,12 @@
     left: 1.5rem;
     bottom: 1.5rem;
     align-items: center;
-    min-height: 4rem;
-    min-width: 10rem;
+    min-height: 3.8rem;
+    min-width: 3.8rem;
 
-    div {
+    #info-text {
         padding-left: 1rem;
-        padding-right: 1rem;
+        padding-right: 1.1rem;
         display: flex;
         flex-direction: column;
 
@@ -36,9 +36,21 @@
         }
     }
 
-    i {
-        padding-left: 0.8rem;
-        padding-right: 1rem;
-        font-size: 1.5rem;
+    #icons {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+        flex-direction: row;
+        align-items: center;
+
+        #map-icon {
+            font-size: 1.7rem;
+        }
+
+        #arrow-icon {
+            color: var(--grey-700);
+            padding-left: 0.7rem;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
     }
 }

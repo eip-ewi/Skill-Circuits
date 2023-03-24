@@ -31,18 +31,49 @@
         th:if="${@taskCompletionService.latestTaskCompletion(@authorisationService.getAuthPerson())} != null and
                 ${@authorisationService.isAuthenticated()} and
                 (${studentMode} or not ${@authorisationService.isStaff()})">
-        <div class="info-box" th:with="task=${@taskCompletionService.latestTaskCompletion(
+        <div
+            id="info-box"
+            th:with="task=${@taskCompletionService.latestTaskCompletion(
             @authorisationService.getAuthPerson())},
             moduleId=${task.getSkill().getSubmodule().getModule().getId()}">
-            <div>
-                <a class="larger-info"
-                   th:href="@{|/module/${moduleId}|}"
-                      th:text="'Last worked on: ' + ${task.getName()}"></a>
-                <a class="smaller-info"
-                   th:href="@{|/module/${moduleId}|}"
-                      th:text="'In ' + ${@taskCompletionService.getLocationString(task)}"></a>
+            <div id="info-text" style="display: flex">
+                <a
+                    class="larger-info"
+                    th:href="@{|/module/${moduleId}|}"
+                    th:text="'Last worked on: ' + ${task.getName()}"></a>
+                <a
+                    class="smaller-info"
+                    th:href="@{|/module/${moduleId}|}"
+                    th:text="'In ' + ${@taskCompletionService.getLocationString(task)}"></a>
             </div>
-            <i class="fa-solid fa-map-location-dot"></i>
+            <div id="icons">
+                <i id="map-icon" class="fa-solid fa-map-location-dot"></i>
+                <i id="arrow-icon" class="fa-solid fa-angle-left"></i>
+            </div>
         </div>
+
+        <script>
+            const rightArrowClass = "fa-angle-right";
+            const leftArrowClass = "fa-angle-left";
+
+            document.addEventListener("DOMContentLoaded", function () {
+                const infoText = $("#info-text");
+                const arrow = $("#arrow-icon");
+
+                let collapseOrExpand = () => {
+                    if (infoText.css("display") === "flex") {
+                        infoText.css("display", "none");
+                        arrow.removeClass(leftArrowClass);
+                        arrow.addClass(rightArrowClass);
+                    } else {
+                        infoText.css("display", "flex");
+                        arrow.removeClass(rightArrowClass);
+                        arrow.addClass(leftArrowClass);
+                    }
+                };
+
+                arrow.click(collapseOrExpand);
+            });
+        </script>
     </div>
 </html>
