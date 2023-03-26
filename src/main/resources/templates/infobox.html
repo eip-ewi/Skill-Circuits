@@ -27,11 +27,11 @@
             <div id="info-text" style="display: flex">
                 <a
                     class="larger-info"
-                    th:href="@{|/module/${moduleId}#${skillId}|}"
+                    th:href="@{|/module/${moduleId}#block-${skillId}-name|}"
                     th:text="'Last worked on: ' + ${latestTask.getName()}"></a>
                 <a
                     class="smaller-info"
-                    th:href="@{|/module/${moduleId}#${skillId}|}"
+                    th:href="@{|/module/${moduleId}#block-${skillId}-name|}"
                     th:text="'In ' + ${locationString}"></a>
             </div>
             <div id="icons">
@@ -44,7 +44,7 @@
             const rightArrowClass = "fa-angle-right";
             const leftArrowClass = "fa-angle-left";
 
-            document.addEventListener("DOMContentLoaded", function () {
+            $(document).ready(function () {
                 const infoText = $("#info-text");
                 const arrow = $("#arrow-icon");
 
