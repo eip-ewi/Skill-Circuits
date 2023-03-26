@@ -29,9 +29,17 @@
             <main class="main-section">
                 <th:block layout:fragment="content" class="content">Content goes here.</th:block>
             </main>
-            <div layout:replace="~{infobox :: infobox}"></div>
+            <div id="infobox-placeholder"></div>
             <div layout:replace="~{footer :: footer}"></div>
             <div layout:replace="~{components/select_or_new :: script}"></div>
+
+            <script layout:fragment="script_infobox">
+                document.addEventListener("DOMContentLoaded", function () {
+                    $.get("/infobox", function (data) {
+                        $("#infobox-placeholder").replaceWith(data);
+                    });
+                });
+            </script>
         </div>
     </body>
 </html>

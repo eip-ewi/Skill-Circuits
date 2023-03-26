@@ -137,5 +137,23 @@
                 <div layout:replace="~{checkpoint/delete :: script}"></div>
             </th:block>
         </div>
+
+        <script layout:fragment="script_infobox">
+            document.addEventListener("DOMContentLoaded", function () {
+                $.get("/infobox", function (data) {
+                    $("#infobox-placeholder").replaceWith(data);
+
+                    // Check if the infobox was rendered
+                    if (!$("#info-box")) {
+                        return;
+                    }
+
+                    // Auto-collapse
+                    $("#info-text").css("display", "none");
+                    $("#arrow-icon").removeClass("fa-angle-left");
+                    $("#arrow-icon").addClass("fa-angle-right");
+                });
+            });
+        </script>
     </body>
 </html>

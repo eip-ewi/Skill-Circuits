@@ -22,29 +22,17 @@
     lang="en"
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-    <!-- TODO Might need to find a better way to retrieve the needed information
-            Also, currently, authorisationService.isStaff() does not check whether the person is
-            authenticated, so the below condition is only safe if the operators and/or are using
-            short-circuit evaluation -->
-    <div
-        layout:fragment="infobox"
-        th:if="${@taskCompletionService.latestTaskCompletion(@authorisationService.getAuthPerson())} != null and
-                ${@authorisationService.isAuthenticated()} and
-                (${studentMode} or not ${@authorisationService.isStaff()})">
-        <div
-            id="info-box"
-            th:with="task=${@taskCompletionService.latestTaskCompletion(
-            @authorisationService.getAuthPerson())},
-            moduleId=${task.getSkill().getSubmodule().getModule().getId()}">
+    <div th:fragment="infobox" th:if="${studentAndAuthenticated} and ${completedSomeTask}">
+        <div id="info-box">
             <div id="info-text" style="display: flex">
                 <a
                     class="larger-info"
-                    th:href="@{|/module/${moduleId}|}"
-                    th:text="'Last worked on: ' + ${task.getName()}"></a>
+                    th:href="@{|/module/${moduleId}#${skillId}|}"
+                    th:text="'Last worked on: ' + ${latestTask.getName()}"></a>
                 <a
                     class="smaller-info"
-                    th:href="@{|/module/${moduleId}|}"
-                    th:text="'In ' + ${@taskCompletionService.getLocationString(task)}"></a>
+                    th:href="@{|/module/${moduleId}#${skillId}|}"
+                    th:text="'In ' + ${locationString}"></a>
             </div>
             <div id="icons">
                 <i id="map-icon" class="fa-solid fa-map-location-dot"></i>
