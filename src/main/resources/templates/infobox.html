@@ -55,10 +55,12 @@
 
                 let collapseOrExpand = () => {
                     if (infoText.css("display") === "flex") {
+                        localStorage.setItem("infoboxCollapsed", "true");
                         infoText.css("display", "none");
                         arrow.removeClass(leftArrowClass);
                         arrow.addClass(rightArrowClass);
                     } else {
+                        localStorage.setItem("infoboxCollapsed", "false");
                         infoText.css("display", "flex");
                         arrow.removeClass(rightArrowClass);
                         arrow.addClass(leftArrowClass);

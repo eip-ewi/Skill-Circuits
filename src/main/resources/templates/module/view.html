@@ -137,13 +137,5 @@
                 <div layout:replace="~{checkpoint/delete :: script}"></div>
             </th:block>
         </div>
-
-        <script layout:fragment="script_infobox">
-            document.addEventListener("DOMContentLoaded", function () {
-                $.get("/infobox/true", function (data) {
-                    $("#infobox-placeholder").html(data);
-                });
-            });
-        </script>
     </body>
 </html>

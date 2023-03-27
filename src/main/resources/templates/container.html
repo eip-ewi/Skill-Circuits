@@ -33,9 +33,13 @@
             <div layout:replace="~{footer :: footer}"></div>
             <div layout:replace="~{components/select_or_new :: script}"></div>
 
-            <script layout:fragment="script_infobox">
+            <script>
                 document.addEventListener("DOMContentLoaded", function () {
-                    $.get("/infobox", function (data) {
+                    if (localStorage.getItem("infoboxCollapsed") === null) {
+                        localStorage.setItem("infoboxCollapsed", "true");
+                    }
+
+                    $.get("/infobox/" + localStorage.getItem("infoboxCollapsed"), function (data) {
                         $("#infobox-placeholder").html(data);
                     });
                 });
