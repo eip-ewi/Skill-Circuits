@@ -36,7 +36,7 @@
             <script layout:fragment="script_infobox">
                 document.addEventListener("DOMContentLoaded", function () {
                     $.get("/infobox", function (data) {
-                        $("#infobox-placeholder").replaceWith(data);
+                        $("#infobox-placeholder").html(data);
                     });
                 });
             </script>

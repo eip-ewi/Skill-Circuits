@@ -17,6 +17,8 @@
  */
 package nl.tudelft.skills.controller;
 
+import java.util.Objects;
+
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.security.AuthorisationService;
@@ -25,8 +27,9 @@ import nl.tudelft.skills.service.TaskCompletionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 @Controller
 @RequestMapping("infobox")
@@ -48,8 +51,8 @@ public class InfoboxController {
 	 * @param  model The model to add data to
 	 * @return       The fragment for the infobox
 	 */
-	@GetMapping
-	public String getInfoBox(Model model) {
+	@RequestMapping(value = { "", "/{collapsed}" }, method = RequestMethod.GET)
+	public String getInfoBox(Model model, @PathVariable(required = false) Boolean collapsed) {
 		Person authPerson = authorisationService.getAuthPerson();
 
 		// TODO should it be enabled in student mode?
@@ -59,6 +62,10 @@ public class InfoboxController {
 
 		Task latestTask = taskCompletionService.latestTaskCompletion(authPerson);
 		model.addAttribute("completedSomeTask", latestTask != null);
+
+		// If no task was completed, or it is collapsed by default, collapse it
+		boolean autoCollapse = Objects.requireNonNullElse(collapsed, latestTask == null);
+		model.addAttribute("collapsed", autoCollapse);
 
 		if (latestTask != null) {
 			model.addAttribute("latestTask", latestTask);

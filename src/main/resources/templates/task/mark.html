@@ -98,6 +98,7 @@
                                 recalculateConnections();
                             })
                         );
+                        reloadInfobox();
                     },
                 });
             } else {
@@ -124,6 +125,13 @@
                     );
                 }
             }
+        }
+        function reloadInfobox() {
+            // Check if the infobox was collapsed before
+            let collapsed = $("#info-text").css("display") === "none";
+            $.get("/infobox/" + collapsed, function (data) {
+                $("#infobox-placeholder").html(data);
+            });
         }
         function updateBlockState(blockId) {
             const block = $(`#block-${blockId}`);
