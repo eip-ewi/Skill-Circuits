@@ -22,9 +22,9 @@
     lang="en"
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-    <div th:fragment="infobox" th:if="${studentAndAuthenticated}">
+    <div th:fragment="infobox" th:if="${studentAndAuthenticated} and ${state} != 'hidden'">
         <div id="info-box">
-            <div id="info-text" th:style="${collapsed} ? 'display: none' : 'display: flex'">
+            <div id="info-text" th:style="${state} == 'collapsed' ? 'display: none' : 'display: flex'">
                 <a
                     class="larger-info"
                     th:if="${completedSomeTask}"
@@ -43,7 +43,7 @@
                 <i id="map-icon" class="fa-solid fa-map-location-dot"></i>
                 <i
                     id="arrow-icon"
-                    th:class="${collapsed} ? 'fa-solid fa-angle-right' : 'fa-solid fa-angle-left'"></i>
+                    th:class="${state} == 'collapsed' ? 'fa-solid fa-angle-right' : 'fa-solid fa-angle-left'"></i>
             </div>
         </div>
         <script>
@@ -55,12 +55,12 @@
 
                 let collapseOrExpand = () => {
                     if (infoText.css("display") === "flex") {
-                        localStorage.setItem("infoboxCollapsed", "true");
+                        localStorage.setItem("infoboxState", "COLLAPSED");
                         infoText.css("display", "none");
                         arrow.removeClass(leftArrowClass);
                         arrow.addClass(rightArrowClass);
                     } else {
-                        localStorage.setItem("infoboxCollapsed", "false");
+                        localStorage.setItem("infoboxState", "EXPANDED");
                         infoText.css("display", "flex");
                         arrow.removeClass(rightArrowClass);
                         arrow.addClass(leftArrowClass);

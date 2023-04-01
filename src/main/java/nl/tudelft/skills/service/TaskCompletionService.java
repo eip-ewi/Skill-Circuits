@@ -65,13 +65,11 @@ public class TaskCompletionService {
 		}
 		SCPerson scperson = personRepository.findByIdOrThrow(person.getId());
 		if (!scperson.getTaskCompletions().isEmpty()) {
-			// TODO Need to always sort when the page is loaded to retrieve the most recently
-			//  completed task. Should the most recent task be stored in database for efficiency?
-
+			// Also need to filter out null values due to the migrated data
 			Optional<TaskCompletion> lastCompleted = scperson.getTaskCompletions()
-					.stream().max(Comparator.comparing(TaskCompletion::getTimestamp));
+					.stream().filter(tc -> tc.getTimestamp() != null)
+					.max(Comparator.comparing(TaskCompletion::getTimestamp));
 
-			// Because of the length check above, lastCompleted should be present
 			if (lastCompleted.isPresent()) {
 				return lastCompleted.get().getTask();
 			}

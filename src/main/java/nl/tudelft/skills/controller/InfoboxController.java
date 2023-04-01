@@ -37,6 +37,11 @@ public class InfoboxController {
 
 	private final AuthorisationService authorisationService;
 	private final TaskCompletionService taskCompletionService;
+	private enum State {
+		HIDDEN,
+		COLLAPSED,
+		EXPANDED
+	}
 
 	@Autowired
 	public InfoboxController(AuthorisationService authorisationService,
@@ -49,10 +54,11 @@ public class InfoboxController {
 	 * Gets the fragment for the infobox rendered with the needed parameters.
 	 *
 	 * @param  model The model to add data to
+	 * @param  state The state of the infobox, namely HIDDEN, EXPANDED or COLLAPSED
 	 * @return       The fragment for the infobox
 	 */
-	@RequestMapping(value = { "", "/{collapsed}" }, method = RequestMethod.GET)
-	public String getInfoBox(Model model, @PathVariable(required = false) Boolean collapsed) {
+	@RequestMapping(value = { "", "/{state}" }, method = RequestMethod.GET)
+	public String getInfoBox(Model model, @PathVariable(required = false) State state) {
 		Person authPerson = authorisationService.getAuthPerson();
 
 		// TODO should it be enabled in student mode?
@@ -63,9 +69,11 @@ public class InfoboxController {
 		Task latestTask = taskCompletionService.latestTaskCompletion(authPerson);
 		model.addAttribute("completedSomeTask", latestTask != null);
 
-		// If no task was completed, or it is collapsed by default, collapse it
-		boolean autoCollapse = Objects.requireNonNullElse(collapsed, latestTask == null);
-		model.addAttribute("collapsed", autoCollapse);
+		switch(state) {
+			case HIDDEN -> model.addAttribute("state", "hidden");
+			case EXPANDED -> model.addAttribute("state", "expanded");
+			case COLLAPSED -> model.addAttribute("state", "collapsed");
+		}
 
 		if (latestTask != null) {
 			model.addAttribute("latestTask", latestTask);

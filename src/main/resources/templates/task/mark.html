@@ -98,7 +98,7 @@
                                 recalculateConnections();
                             })
                         );
-                        reloadInfobox();
+                        reloadInfobox(completed);
                     },
                 });
             } else {
@@ -126,10 +126,10 @@
                 }
             }
         }
-        function reloadInfobox() {
-            // Check if the infobox was collapsed before
-            let collapsed = $("#info-text").css("display") === "none";
-            $.get("/infobox/" + collapsed, function (data) {
+        function reloadInfobox(completed) {
+            let state = localStorage.getItem("infoboxState") === null ?
+                (completed ? "COLLAPSED" : "HIDDEN") : localStorage.getItem("infoboxState");
+            $.get("/infobox/" + state, function (data) {
                 $("#infobox-placeholder").html(data);
             });
         }

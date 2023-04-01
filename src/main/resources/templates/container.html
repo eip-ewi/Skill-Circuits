@@ -35,11 +35,10 @@
 
             <script>
                 document.addEventListener("DOMContentLoaded", function () {
-                    if (localStorage.getItem("infoboxCollapsed") === null) {
-                        localStorage.setItem("infoboxCollapsed", "true");
-                    }
+                    let state = localStorage.getItem("infoboxState") === null ?
+                        "HIDDEN" : localStorage.getItem("infoboxState");
 
-                    $.get("/infobox/" + localStorage.getItem("infoboxCollapsed"), function (data) {
+                    $.get("/infobox/" + state, function (data) {
                         $("#infobox-placeholder").html(data);
                     });
                 });
