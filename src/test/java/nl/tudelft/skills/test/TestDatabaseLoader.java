@@ -17,7 +17,6 @@
  */
 package nl.tudelft.skills.test;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -157,13 +156,16 @@ public class TestDatabaseLoader {
 	private SCPerson person = SCPerson.builder().id(TestUserDetailsService.id).build();
 
 	private TaskCompletion completeDo11ad = TaskCompletion.builder().task(taskDo11ad).person(person)
-			.timestamp(Instant.ofEpochSecond(100L)).build();
+			.timestamp(LocalDateTime.of(LocalDate.ofYearDay(2022, 42), LocalTime.MIDNIGHT)).build();
 	private TaskCompletion completeRead12 = TaskCompletion.builder().task(taskRead12).person(person)
-			.timestamp(Instant.ofEpochSecond(200L)).build();
+			.timestamp(LocalDateTime.of(LocalDate.ofYearDay(2022, 42), LocalTime.MIDNIGHT).plusSeconds(1))
+			.build();
 	private TaskCompletion completeDo12ae = TaskCompletion.builder().task(taskDo12ae).person(person)
-			.timestamp(Instant.ofEpochSecond(300L)).build();
+			.timestamp(LocalDateTime.of(LocalDate.ofYearDay(2022, 42), LocalTime.MIDNIGHT).plusSeconds(2))
+			.build();
 	private TaskCompletion completeRead11 = TaskCompletion.builder().task(taskRead11).person(person)
-			.timestamp(Instant.ofEpochSecond(400L)).build();
+			.timestamp(LocalDateTime.of(LocalDate.ofYearDay(2022, 42), LocalTime.MIDNIGHT).plusSeconds(3))
+			.build();
 
 	public SCCourse getCourseRL() {
 		return courseRepository.findByIdOrThrow(courseRL.getId());

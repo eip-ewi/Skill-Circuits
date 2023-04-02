@@ -1,4 +1,4 @@
-#info-box {
+.info-box {
     z-index: 421;
     background-color: transparentize($primary-green, 0.2);
     color: var(--primary-light);
@@ -7,15 +7,17 @@
     align-content: center;
     flex-direction: row;
     position: fixed;
-    width: auto;
-    height: auto;
     left: 1.5rem;
     bottom: 1.5rem;
     align-items: center;
     min-height: 3.8rem;
     min-width: 3.8rem;
 
-    #info-text {
+    &[aria-expanded="false"] .info-text {
+        display: none;
+    }
+
+    .info-text {
         padding-left: 1rem;
         padding-right: 1.1rem;
         display: flex;
@@ -40,21 +42,24 @@
         }
     }
 
-    #icons {
-        padding-left: 0.5rem;
-        padding-right: 0.5rem;
-        flex-direction: row;
-        align-items: center;
+    .icons {
+        padding-inline: 0.5rem;
 
-        #map-icon {
+        .map-icon {
             font-size: 1.7rem;
         }
 
-        #arrow-icon {
+        .arrow-icon {
             color: var(--grey-700);
             padding-left: 0.7rem;
             font-size: 1.2rem;
             cursor: pointer;
         }
+    }
+
+    &[aria-expanded="false"] .arrow-icon {
+        transform: rotate(180deg);
+        padding-left: 0;
+        padding-right: 0.7rem;
     }
 }

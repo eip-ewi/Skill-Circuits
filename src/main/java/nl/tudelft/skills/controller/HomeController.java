@@ -131,16 +131,11 @@ public class HomeController {
 			Long editionId = courseService.getLastStudentEditionForCourseOrLast(courseId);
 
 			if (editionId != null) {
-				SCEdition edition = editionService.getOrCreateSCEdition(editionId);
 				List<Task> tasksDone = scperson.getTaskCompletions().stream().map(TaskCompletion::getTask)
 						.toList();
 
-				skillsDone = (int) edition.getModules().stream()
-						.flatMap(m -> m.getSubmodules().stream())
-						.flatMap(s -> s.getSkills().stream())
-						.filter(s -> s.getTasks().size() > 0
-								&& tasksDone.containsAll(s.getTasks()))
-						.count();
+				skillsDone = (int) tasksDone.stream().map(Task::getSkill).distinct()
+						.filter(s -> tasksDone.containsAll(s.getTasks())).count();
 			}
 
 			completedSkillsPerCourse.put(courseId, skillsDone);

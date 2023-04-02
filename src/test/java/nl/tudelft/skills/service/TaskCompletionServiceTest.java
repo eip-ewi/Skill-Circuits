@@ -20,6 +20,8 @@ package nl.tudelft.skills.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import java.util.HashSet;
+
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
@@ -46,7 +48,6 @@ import reactor.core.publisher.Mono;
 public class TaskCompletionServiceTest {
 
 	private final EditionControllerApi editionApi;
-	private final PersonRepository personRepository;
 	private final TaskCompletionRepository taskCompletionRepository;
 	private final TaskCompletionService taskCompletionService;
 
@@ -56,22 +57,52 @@ public class TaskCompletionServiceTest {
 	public TaskCompletionServiceTest(EditionControllerApi editionApi, PersonRepository personRepository,
 			TaskCompletionRepository taskCompletionRepository, TestDatabaseLoader db) {
 		this.editionApi = editionApi;
-		this.personRepository = personRepository;
 		this.taskCompletionRepository = taskCompletionRepository;
 		this.db = db;
 		this.taskCompletionService = new TaskCompletionService(taskCompletionRepository, personRepository,
 				editionApi);
 	}
 
+	private void resetTaskCompletions() {
+		db.getPerson().setTaskCompletions(new HashSet<>());
+		db.getTaskDo11ad().setCompletedBy(new HashSet<>());
+		db.getTaskRead12().setCompletedBy(new HashSet<>());
+		db.getTaskDo12ae().setCompletedBy(new HashSet<>());
+		db.getTaskRead11().setCompletedBy(new HashSet<>());
+		taskCompletionRepository.deleteAll();
+	}
+
 	@Test
 	public void testLatestTaskCompletionDoesNotExist() {
-		personRepository.save(SCPerson.builder().id(1L).build());
-		assertThat(personRepository.findById(1L)).isPresent();
+		// Reset the person to not have done any tasks yet
+		resetTaskCompletions();
+		SCPerson scPerson = db.getPerson();
+
 		// The person did not complete any tasks yet
-		Person person = Person.builder().id(1L).build();
+		Person person = Person.builder().id(scPerson.getId()).build();
 		assertThat(taskCompletionService.latestTaskCompletion(person)).isNull();
 		// If the person is null, should also return null
 		assertThat(taskCompletionService.latestTaskCompletion(null)).isNull();
+	}
+
+	@Test
+	public void testLatestTaskCompletionNullTimestamp() {
+		// Reset the person to not have done any tasks yet
+		resetTaskCompletions();
+		SCPerson scPerson = db.getPerson();
+
+		// Add a task completion which has null as the timestamp
+		TaskCompletion timestampNull = TaskCompletion.builder().task(db.getTaskDo10a()).person(scPerson)
+				.timestamp(null).build();
+		taskCompletionRepository.save(timestampNull);
+		scPerson.getTaskCompletions().add(timestampNull);
+		db.getTaskDo10a().getCompletedBy().add(timestampNull);
+
+		// The person has only completed a task with null as the timestamp,
+		// this should not be considered the latest task completion
+		// Therefore, null is expected
+		Person person = Person.builder().id(scPerson.getId()).build();
+		assertThat(taskCompletionService.latestTaskCompletion(person)).isNull();
 	}
 
 	@Test

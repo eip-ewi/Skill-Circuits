@@ -35,8 +35,10 @@
 
             <script>
                 document.addEventListener("DOMContentLoaded", function () {
-                    let state = localStorage.getItem("infoboxState") === null ?
-                        "HIDDEN" : localStorage.getItem("infoboxState");
+                    let state =
+                        localStorage.getItem("infoboxState") === null
+                            ? "HIDDEN"
+                            : localStorage.getItem("infoboxState");
 
                     $.get("/infobox/" + state, function (data) {
                         $("#infobox-placeholder").html(data);

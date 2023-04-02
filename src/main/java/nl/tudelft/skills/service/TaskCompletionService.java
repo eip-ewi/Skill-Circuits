@@ -17,7 +17,6 @@
  */
 package nl.tudelft.skills.service;
 
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -64,17 +63,12 @@ public class TaskCompletionService {
 			return null;
 		}
 		SCPerson scperson = personRepository.findByIdOrThrow(person.getId());
-		if (!scperson.getTaskCompletions().isEmpty()) {
-			// Also need to filter out null values due to the migrated data
-			Optional<TaskCompletion> lastCompleted = scperson.getTaskCompletions()
-					.stream().filter(tc -> tc.getTimestamp() != null)
-					.max(Comparator.comparing(TaskCompletion::getTimestamp));
 
-			if (lastCompleted.isPresent()) {
-				return lastCompleted.get().getTask();
-			}
-		}
-		return null;
+		// Also need to filter out null values due to migrated data
+		Optional<TaskCompletion> lastCompleted = taskCompletionRepository
+				.getFirstByPersonIdAndTimestampNotNullOrderByTimestampDesc(scperson.getId());
+
+		return lastCompleted.map(TaskCompletion::getTask).orElse(null);
 	}
 
 	/**
@@ -86,8 +80,6 @@ public class TaskCompletionService {
 	 * @return      A string indicating the location of the given task
 	 */
 	public String getLocationString(Task task) {
-		// TODO this might need to be moved to a more fitting place
-
 		Skill skill = task.getSkill();
 		Submodule submodule = skill.getSubmodule();
 		EditionDetailsDTO edition = editionApi.getEditionById(submodule.getModule().getEdition().getId())

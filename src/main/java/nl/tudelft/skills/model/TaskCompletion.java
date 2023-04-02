@@ -17,7 +17,7 @@
  */
 package nl.tudelft.skills.model;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -46,8 +46,7 @@ public class TaskCompletion {
 	@ManyToOne
 	private Task task;
 
-	// TODO should this use a "time provider" class instead? For testability independent of time
 	// The timestamp can be null for the already stored completions without time indication
 	@Builder.Default
-	private Instant timestamp = Instant.now();
+	private LocalDateTime timestamp = LocalDateTime.now();
 }

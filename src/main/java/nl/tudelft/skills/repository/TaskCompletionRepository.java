@@ -17,6 +17,8 @@
  */
 package nl.tudelft.skills.repository;
 
+import java.util.Optional;
+
 import nl.tudelft.skills.model.TaskCompletion;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -28,4 +30,6 @@ public interface TaskCompletionRepository extends JpaRepository<TaskCompletion, 
 		return findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("TaskCompletion was not found: " + id));
 	}
+
+	Optional<TaskCompletion> getFirstByPersonIdAndTimestampNotNullOrderByTimestampDesc(Long id);
 }

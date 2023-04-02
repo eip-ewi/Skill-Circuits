@@ -23,8 +23,11 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <div th:fragment="infobox" th:if="${studentAndAuthenticated} and ${state} != 'hidden'">
-        <div id="info-box">
-            <div id="info-text" th:style="${state} == 'collapsed' ? 'display: none' : 'display: flex'">
+        <div
+            id="info-box"
+            class="info-box"
+            th:aria-expanded="${state} == 'collapsed' ? 'false' : 'true'">
+            <div class="info-text">
                 <a
                     class="larger-info"
                     th:if="${completedSomeTask}"
@@ -39,35 +42,26 @@
                     After you complete a task, it will appear here!
                 </span>
             </div>
-            <div id="icons">
-                <i id="map-icon" class="fa-solid fa-map-location-dot"></i>
-                <i
-                    id="arrow-icon"
-                    th:class="${state} == 'collapsed' ? 'fa-solid fa-angle-right' : 'fa-solid fa-angle-left'"></i>
+            <div class="icons">
+                <i class="map-icon fa-solid fa-map-location-dot"></i>
+                <i id="arrow-icon" class="arrow-icon fa-solid fa-angle-left"></i>
             </div>
         </div>
         <script>
             $(document).ready(function () {
-                const rightArrowClass = "fa-angle-right";
-                const leftArrowClass = "fa-angle-left";
-                const infoText = $("#info-text");
-                const arrow = $("#arrow-icon");
+                const infoBox = $("#info-box");
 
                 let collapseOrExpand = () => {
-                    if (infoText.css("display") === "flex") {
+                    if (infoBox.attr("aria-expanded") === "true") {
                         localStorage.setItem("infoboxState", "COLLAPSED");
-                        infoText.css("display", "none");
-                        arrow.removeClass(leftArrowClass);
-                        arrow.addClass(rightArrowClass);
+                        infoBox.attr("aria-expanded", "false");
                     } else {
                         localStorage.setItem("infoboxState", "EXPANDED");
-                        infoText.css("display", "flex");
-                        arrow.removeClass(rightArrowClass);
-                        arrow.addClass(leftArrowClass);
+                        infoBox.attr("aria-expanded", "true");
                     }
                 };
 
-                arrow.click(collapseOrExpand);
+                $("#arrow-icon").click(collapseOrExpand);
             });
         </script>
     </div>

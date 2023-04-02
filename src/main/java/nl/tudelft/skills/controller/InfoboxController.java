@@ -17,8 +17,6 @@
  */
 package nl.tudelft.skills.controller;
 
-import java.util.Objects;
-
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.security.AuthorisationService;
@@ -37,6 +35,7 @@ public class InfoboxController {
 
 	private final AuthorisationService authorisationService;
 	private final TaskCompletionService taskCompletionService;
+
 	private enum State {
 		HIDDEN,
 		COLLAPSED,
@@ -69,7 +68,7 @@ public class InfoboxController {
 		Task latestTask = taskCompletionService.latestTaskCompletion(authPerson);
 		model.addAttribute("completedSomeTask", latestTask != null);
 
-		switch(state) {
+		switch (state) {
 			case HIDDEN -> model.addAttribute("state", "hidden");
 			case EXPANDED -> model.addAttribute("state", "expanded");
 			case COLLAPSED -> model.addAttribute("state", "collapsed");

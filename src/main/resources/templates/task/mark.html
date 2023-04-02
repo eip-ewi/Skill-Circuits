@@ -127,8 +127,12 @@
             }
         }
         function reloadInfobox(completed) {
-            let state = localStorage.getItem("infoboxState") === null ?
-                (completed ? "COLLAPSED" : "HIDDEN") : localStorage.getItem("infoboxState");
+            let state =
+                localStorage.getItem("infoboxState") === null
+                    ? completed
+                        ? "COLLAPSED"
+                        : "HIDDEN"
+                    : localStorage.getItem("infoboxState");
             $.get("/infobox/" + state, function (data) {
                 $("#infobox-placeholder").html(data);
             });
