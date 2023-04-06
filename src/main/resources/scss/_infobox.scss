@@ -44,22 +44,30 @@
 
     .icons {
         padding-inline: 0.5rem;
+        width: 4.4rem;
+        height: 3rem;
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
 
         .map-icon {
             font-size: 1.7rem;
+            color: var(--primary-light);
+            text-decoration: none;
         }
 
         .arrow-icon {
             color: var(--grey-700);
-            padding-left: 0.7rem;
             font-size: 1.2rem;
             cursor: pointer;
+
+            &:hover {
+                font-size: 1.4rem;
+            }
         }
     }
 
     &[aria-expanded="false"] .arrow-icon {
         transform: rotate(180deg);
-        padding-left: 0;
-        padding-right: 0.7rem;
     }
 }

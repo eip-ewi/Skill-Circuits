@@ -27,7 +27,7 @@
             id="info-box"
             class="info-box"
             th:aria-expanded="${state} == 'collapsed' ? 'false' : 'true'">
-            <div class="info-text">
+            <div id="info-text" class="info-text">
                 <a
                     class="larger-info"
                     th:if="${completedSomeTask}"
@@ -43,15 +43,36 @@
                 </span>
             </div>
             <div class="icons">
-                <i class="map-icon fa-solid fa-map-location-dot"></i>
+                <a
+                    th:if="${completedSomeTask}"
+                    class="map-icon fa-solid fa-map-location-dot"
+                    th:href="@{|/module/${moduleId}#block-${skillId}-name|}"></a>
+                <i
+                    th:unless="${completedSomeTask}"
+                    class="map-icon fa-solid fa-map-location-dot"></i>
                 <i id="arrow-icon" class="arrow-icon fa-solid fa-angle-left"></i>
             </div>
         </div>
         <script>
             $(document).ready(function () {
                 const infoBox = $("#info-box");
+                const infoText = $("#info-text");
+                const mapIcon = $(".map-icon");
 
-                let collapseOrExpand = () => {
+                // Handling of hover effects for map icon
+                const largerMap = function () {
+                    if (infoText.has("a").length !== 0) {
+                        mapIcon.css("transform", "scale(1.15, 1.15)");
+                    }
+                };
+                const smallerMap = function () {
+                    mapIcon.css("transform", "scale(1, 1)");
+                };
+                infoText.children().hover(largerMap, smallerMap);
+                mapIcon.hover(largerMap, smallerMap);
+
+                // Handling of collapsing/expanding box
+                const collapseOrExpand = () => {
                     if (infoBox.attr("aria-expanded") === "true") {
                         localStorage.setItem("infoboxState", "COLLAPSED");
                         infoBox.attr("aria-expanded", "false");
@@ -60,7 +81,6 @@
                         infoBox.attr("aria-expanded", "true");
                     }
                 };
-
                 $("#arrow-icon").click(collapseOrExpand);
             });
         </script>
