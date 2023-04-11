@@ -34,6 +34,7 @@ import org.hibernate.annotations.CascadeType;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class Skill extends AbstractSkill {
 
 	@NotBlank

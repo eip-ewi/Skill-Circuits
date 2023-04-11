@@ -165,7 +165,7 @@ public class ModuleControllerTest extends ControllerTest {
 	void getSkillsOfModule() {
 		ModuleController moduleController = new ModuleController(moduleRepository, moduleService, session);
 		assertThat(moduleController.getSkillsOfModule(db.getModuleProofTechniques().getId()))
-				.isEqualTo(Stream
+				.containsExactlyInAnyOrder(Stream
 						.of(
 								db.getSkillVariables(),
 								db.getSkillNegation(),
@@ -177,6 +177,7 @@ public class ModuleControllerTest extends ControllerTest {
 								db.getSkillAssumption(),
 								db.getSkillGeneralisationPractice(), db.getSkillProofOutline(),
 								db.getSkillTransitiveProperty(), db.getSkillInductionPractice())
-						.map(s -> mapper.map(s, SkillSummaryDTO.class)).toList());
+						.map(s -> mapper.map(s, SkillSummaryDTO.class)).toList()
+						.toArray(new SkillSummaryDTO[0]));
 	}
 }
