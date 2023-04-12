@@ -34,6 +34,11 @@
         top: -1rem;
     }
 
+    &[data-external] {
+        text-decoration: none;
+        color: var(--primary-dark);
+    }
+
     &[draggable="true"] {
         cursor: grab;
     }
@@ -159,6 +164,10 @@
             color: var(--primary-green);
             border-color: var(--primary-green);
         }
+    }
+
+    &[data-external] &__group__name {
+        color: var(--secondary-green);
     }
 }
 

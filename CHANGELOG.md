@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
  - Fixed isNotTransitivelyConnected for cyclic graphs and for external skills
+ - Fixed external skill block link
 
 ## [2.2.1]
 
