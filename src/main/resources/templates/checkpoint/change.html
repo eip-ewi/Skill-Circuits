@@ -1,0 +1,116 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div th:if="${canEdit}" layout:fragment="form" class="hidden" id="change-checkpoint-wrapper">
+        <div id="change-checkpoint">
+            <form id="change-checkpoint-form" class="checkpoint__form">
+                <input id="change-checkpoint-id" name="id" type="hidden" />
+
+                <select
+                    class="selectbox font_size_regular"
+                    th:id="change-checkpoint-select"
+                    name="checkpoint.id">
+                    <option
+                        th:each="checkpoint: ${circuit.checkpointsInEdition}"
+                        th:id="|create-skill-checkpoint-option-${checkpoint.id}|"
+                        th:value="${checkpoint.id}"
+                        th:text="${checkpoint.name}"></option>
+                </select>
+
+                <button
+                    type="button"
+                    id="change-checkpoint-cancel"
+                    class="fa-solid fa-xmark"></button>
+                <button type="submit" class="fa-solid fa-check"></button>
+            </form>
+        </div>
+    </div>
+
+    <script th:if="${canEdit}" layout:fragment="script" th:inline="javascript">
+        function changeCheckpoint() {
+            const checkpointId = $(this).data("checkpoint");
+            const checkpointDisplay = $(`#checkpoint-${checkpointId}-display`);
+
+            $("#change-checkpoint-id").val(checkpointId);
+            $(`#checkpoint-${checkpointId}-body`).append($("#change-checkpoint"));
+
+            $(`#checkpoint-${checkpointId}`).attr("draggable", false);
+            $(".checkpoint__name").removeClass("hidden");
+            checkpointDisplay.addClass("hidden");
+            $(`#checkpoint-${checkpointId}-buttons`).addClass("hidden");
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            $(".checkpoint__body").mouseenter(() => {
+                const checkpointSelect = $("#change-checkpoint-select");
+
+                const checkpoints = $(".checkpoint:not(.ghost_checkpoint)").map((i, cp) =>
+                    $(cp).attr("id").substring(11)
+                );
+
+                // need to retrieve available checkpoints
+                let enabled_opts = [];
+                checkpointSelect.find("option").each((i, opt) => {
+                    opt = $(opt);
+                    if ([...checkpoints].includes(opt.val())) {
+                        opt.remove();
+                    } else {
+                        enabled_opts.push(opt.val());
+                    }
+                });
+                if (enabled_opts.length > 0) {
+                    checkpointSelect.val(enabled_opts[0]).change();
+                    $(".checkpoint__change").removeClass("hidden");
+                } else {
+                    $(".checkpoint__change").addClass("hidden");
+                }
+            });
+
+            $("#change-checkpoint-form").submit(function (event) {
+                const moduleId = $("#circuit").data("id");
+                event.preventDefault();
+                $.ajax({
+                    type: "PUT",
+                    url: `/checkpoint/${moduleId}/change-checkpoint/${$(
+                        "#change-checkpoint-id"
+                    ).val()}-${$("#change-checkpoint-select").val()}`,
+                    success: () => {
+                        location.reload();
+                    },
+                    error: () => {},
+                });
+            });
+
+            $(".checkpoint__change").click(changeCheckpoint);
+
+            $("#change-checkpoint-cancel").click(function () {
+                const checkpointId = $("#change-checkpoint-id").val();
+                $("#change-checkpoint-wrapper").append($("#change-checkpoint"));
+                $(`#checkpoint-${checkpointId}`).attr("draggable", true);
+                $(`#checkpoint-${checkpointId}-display`).removeClass("hidden");
+                $(`#checkpoint-${checkpointId}-buttons`).removeClass("hidden");
+            });
+        });
+    </script>
+</html>

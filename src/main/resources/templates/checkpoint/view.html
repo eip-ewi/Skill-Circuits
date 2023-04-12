@@ -44,6 +44,9 @@
                 class="checkpoint__buttons"
                 th:id="|checkpoint-${checkpoint.id}-buttons|">
                 <span
+                    class="fa-solid fa-right-left checkpoint__change hidden"
+                    th:data-checkpoint="${checkpoint.id}"></span>
+                <span
                     class="fa-solid fa-pen checkpoint__edit"
                     th:data-checkpoint="${checkpoint.id}"></span>
                 <span

@@ -91,6 +91,36 @@ public class CheckpointController {
 		return ResponseEntity.ok().build();
 	}
 
+	/**
+	 * Changes the skills belonging to a certain checkpoint in a given module to have another checkpoint.
+	 *
+	 * @param  moduleId The module in which the skills are
+	 * @param  prevId   The id of the former checkpoint
+	 * @param  newId    The id of the new checkpoint
+	 * @return          A response entity of the deadline of the new checkpoint, which is used to update the
+	 *                  frontend.
+	 */
+	@Transactional
+	@PutMapping("{moduleId}/change-checkpoint/{prevId}-{newId}")
+	@PreAuthorize("@authorisationService.canEditModule(#moduleId)")
+	public ResponseEntity<Void> changeToCheckpoint(@PathVariable Long moduleId,
+			@PathVariable Long prevId, @PathVariable Long newId) {
+		// If the new checkpoint is already used in the module, return 400 Bad Request.
+		// In practice this should already be prevented from the frontend side.
+		if (!skillRepository.findAllBySubmoduleModuleIdAndCheckpointId(moduleId, newId).isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+
+		Checkpoint checkpointPrev = checkpointRepository.findByIdOrThrow(prevId);
+		Checkpoint checkpointNew = checkpointRepository.findByIdOrThrow(newId);
+		Set<Skill> skills = skillRepository.findAllBySubmoduleModuleIdAndCheckpointId(moduleId, prevId);
+		checkpointNew.getSkills().addAll(skills);
+		checkpointPrev.getSkills().removeAll(skills);
+		skills.forEach(skill -> skill.setCheckpoint(checkpointNew));
+
+		return ResponseEntity.ok().build();
+	}
+
 	@Transactional
 	@DeleteMapping("{id}/skills")
 	@PreAuthorize("@authorisationService.canEditCheckpoint(#id)")
