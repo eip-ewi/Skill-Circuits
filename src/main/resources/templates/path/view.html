@@ -19,46 +19,59 @@
 -->
 <!DOCTYPE html>
 <html
-        lang="en"
-        xmlns:th="http://www.thymeleaf.org"
-        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <th:block layout:fragment="path">
-        <div class="paths" th:data-id="${path.id}"> <!--TODO sensible name please-->
-            <p th:text="${path.name}" th:id="path-name"></p>
+        <div class="paths" th:data-id="${path.id}">
+            <!--TODO sensible name please-->
+            <p th:text="${path.name}" th:id="path-name" th:class="skill-left-path"></p>
             <span class="fa-solid fa-caret-down"></span>
 
-<!--            <button type="button" class="collapsible" th:text="${path.name}"></button>-->
-            <div class="content" style="display: none">
-                <ul>
-                    <li>Placeholder task</li>
+            <div class="content" style="padding: 0rem; display: none">
+                <ul class="left-paths">
+                    <th:block th:each="item, iter : ${block.items}">
+                        <!--                        TODO: change from item not visible to item not in own path for custom path-->
+                        <th:block
+                            th:if="${@pathService.isTaskInPath(item.id, path.id) and not item.visible}">
+                            <li layout:replace="~{task/leftview :: item}"></li>
+                        </th:block>
+                    </th:block>
+                    <h3 style="font-size: 0.8rem" class="empty-path-text">
+                        This skill has no extra tasks in this path
+                    </h3>
                 </ul>
-<!--                <th:block th:each="task: ${@pathService.getTasksinSkillInPath(path.id)}">-->
-<!--                    <li>task</li>>-->
-<!--&lt;!&ndash;                    <li layout:replace="~{task/view :: item}"></li>&ndash;&gt;-->
-<!--                </th:block>-->
             </div>
         </div>
     </th:block>
 
     <script layout:fragment="script">
-
         function expandAlternativePath() {
             let pathId = $(this).data("id");
             // TODO: get skill id
             let content = this.nextElementSibling.nextElementSibling;
-            console.log(this.nextElementSibling);
 
+            let before = content.style.display;
 
-            if (content.style.display === "block") {
+            // Close all other paths in the left view of the skill
+            //TODO: do this only in opened skill
+            $(".skill-left-path").each(closeLeftPath);
+
+            // Toggle current left path in skill
+            if (before === "block") {
                 content.style.display = "none";
             } else {
                 content.style.display = "block";
             }
+        }
 
+        function closeLeftPath() {
+            let content = this.nextElementSibling.nextElementSibling;
+            content.style.display = "none";
         }
 
         document.addEventListener("DOMContentLoaded", function () {
-            $("#path-name").click(expandAlternativePath);
+            $(".skill-left-path").click(expandAlternativePath);
         });
     </script>
 </html>

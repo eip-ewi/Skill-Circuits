@@ -19,15 +19,15 @@
 -->
 <!DOCTYPE html>
 <html
-        lang="en"
-        xmlns:th="http://www.thymeleaf.org"
-        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <th:block layout:fragment="item">
-                  <span
-                          th:id="|item-${item.id}-icon|"
-                          th:class="|fa-solid fa-${item.type.icon} item__icon|" th:bgcolor="green"
-                          th:data-completed="${level == 'module'} ? ${item.completed ? 'true' : ''} : ${''}"
-                          th:classappend="${level == 'module'} ? ${item.completed ? 'completed' : ''} : ${''}">
-                    </span>
+        <span
+            th:id="|item-${item.id}-icon|"
+            th:class="|fa-solid fa-${item.type.icon} item__icon|"
+            th:bgcolor="green"
+            th:data-completed="${level == 'module'} ? ${item.completed ? 'true' : ''} : ${''}"
+            th:classappend="${level == 'module'} ? ${item.completed ? 'completed' : ''} : ${''}"></span>
     </th:block>
 </html>

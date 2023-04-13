@@ -70,7 +70,7 @@
                 /*]]>*/
 
                 const circuitGap = remToPx($("#circuit").css("--circuit-gap"));
-                const blocks = [...$(".block")];
+                const blocks = [...$(".block:not(.bloated)")];
 
                 let skillsOnLevel = {};
                 blocks.forEach(skill => {

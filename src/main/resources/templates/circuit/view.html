@@ -41,7 +41,6 @@
             <th:block th:each="block : ${group.blocks}">
                 <div layout:replace="~{block/view :: block}"></div>
                 <div layout:replace="~{block/bloated :: bloated}"></div>
-
             </th:block>
         </th:block>
         <th:block th:if="${level == 'module'}">
@@ -104,14 +103,12 @@
             class="hidden"
             id="create-block-wrapper">
             <div layout:replace="~{block/view :: block}"></div>
-
         </div>
 
         <div layout:replace="~{block/bloated :: overlay}"></div>
 
         <div layout:replace="~{block/edit :: form}"></div>
         <div layout:replace="~{block/delete :: overlay}"></div>
-
 
         <div layout:replace="~{item/delete :: overlay}"></div>
     </div>

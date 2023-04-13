@@ -22,6 +22,7 @@ function toggleOverlay(id) {
         overlay.close();
     } else {
         overlay.showModal();
+        $(":focus").blur();
     }
 }
 

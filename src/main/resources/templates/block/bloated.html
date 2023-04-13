@@ -19,102 +19,105 @@
 -->
 <!DOCTYPE html>
 <html
-        lang="en"
-        xmlns:th="http://www.thymeleaf.org"
-        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <!--        th:data-id="${block.id}"-->
+    <!--th:if="${level != 'module'} or ${block.completedRequiredTasks or canEdit or not block.hidden}"-->
 
-<!--th:style="|grid-row: ${block.row + 1}; grid-column: ${block.column + 1}|"-->
-<div
-        th:id="|block-${block.id}-overlay|"
-        class="bloated hidden"
-
+    <dialog
+        layout:fragment="bloated"
+        class="bloated block"
+        th:id="|block-${block.id}-bloated-overlay|"
+        th:if="${level == 'module'and not canEdit}"
+        style="padding: 0rem; position: fixed"
         th:data-group="${group.id}"
         th:data-create="${create}"
-
+        th:with="
+     parentIds = ${block instanceof T(nl.tudelft.skills.dto.view.BlockView)} ? ${block.parentIds} : ${{}},
+     childIds = ${block instanceof T(nl.tudelft.skills.dto.view.BlockView)} ? ${block.childIds} : ${{}}"
+        th:data-parents="${parentIds}"
         th:data-essential="${level == 'module'} ? ${block.essential} : ${null}"
         th:data-hidden="${level == 'module'} ? ${canEdit and block.hidden} : ${null}"
-        th:data-checkpoint="${level == 'module'} ? ${block.checkpoint.id} : ${null}"
-        layout:fragment="bloated"
-        th:if="${level == 'module'and not canEdit}">
-<!--        th:if="${level != 'module'} or ${block.completedRequiredTasks or canEdit or not block.hidden}"-->
+        th:data-checkpoint="${level == 'module'} ? ${block.checkpoint.id} : ${null}">
+        <div style="padding: 1rem">
+            <div th:id="|block-${block.id}-header|" class="block__header">
+                <p
+                    th:id="|block-${block.id}-group|"
+                    class="block__group__name"
+                    th:text="${group.name}"></p>
+                <h2 class="block__name">
+                    <span th:id="|block-${block.id}-name|" th:text="${block.name}"></span>
+                </h2>
+            </div>
 
-
-
-    <div th:id="|block-${block.id}-header|" class="block__header">
-        <p
-                th:id="|block-${block.id}-group|"
-                class="block__group__name"
-                th:text="${group.name}"></p>
-        <h2 class="block__name">
-            <span th:id="|block-${block.id}-name|" th:text="${block.name}"></span>
-        </h2>
-    </div>
-
-    <div class="skill-paths">
-        <div>
-            <p style="color:gray">Your path</p><!--TODO: do proper color styling, display path name before editing -->
-            <ul data-edit="always" class="items">
-                <h3 style="font-size: 0.8rem" th:if="${block.items.size() == 0}">
-                    This skill has no tasks in this path
-                </h3>
-
-                <th:block th:each="item, iter : ${block.items}">
-                    <th:block> <!--       TODO: remove this ?         -->
-                        <li layout:replace="~{task/view :: item}"></li>
+            <div class="skill-paths">
+                <div>
+                    <p style="color: gray">Your path</p>
+                    <!--TODO: do proper color styling, display path name before editing -->
+                    <ul data-edit="always" class="items">
+                        <!--                    TODO: change this later to my path -->
+                        <th:block th:each="item, iter : ${block.items}">
+                            <th:block th:if="${item.visible}">
+                                <li layout:replace="~{task/view :: item}"></li>
+                            </th:block>
+                        </th:block>
+                        <h3 style="font-size: 0.8rem" class="empty-path-text">
+                            This skill has no tasks in this path
+                        </h3>
+                    </ul>
+                </div>
+                <div>
+                    <p style="color: gray">Other Paths</p>
+                    <th:block th:each="path : ${@editionService.getPaths(circuit.edition.id)}">
+                        <li layout:replace="~{path/view :: path}"></li>
                     </th:block>
-                </th:block>
-            </ul>
-        </div>
-        <div>
-            <p style="color:gray">Other Paths</p>
-            <th:block th:each="path : ${@editionService.getPaths(circuit.edition.id)}">
-                    <li layout:replace="~{path/view :: path}"></li>
-            </th:block>
-        </div>
-    </div>
+                </div>
+            </div>
 
-    <span class="block__info" th:if="${not block.essential}">
-            Optional
-    </span>
-
-</div>
+            <span class="block__info" th:if="${not block.essential}">Optional</span>
+        </div>
+    </dialog>
 
     <th:block layout:fragment="script">
         <div layout:replace="~{path/view :: script}"></div>
 
         <script>
-        // function mouseEnterGroup() {
-        //     let submoduleId = $(this).parent().parent().data("group");
-        //     $(`.block[data-group='${submoduleId}']`).addClass("highlighted");
-        // }
-        // function mouseLeaveGroup() {
-        //     $(".block").removeClass("highlighted");
-        // }
+            // function mouseEnterGroup() {
+            //     let submoduleId = $(this).parent().parent().data("group");
+            //     $(`.block[data-group='${submoduleId}']`).addClass("highlighted");
+            // }
+            // function mouseLeaveGroup() {
+            //     $(".block").removeClass("highlighted");
+            // }
 
-        // document.addEventListener("DOMContentLoaded", function () {
-        //     let groupName = $(".block__group__name");
-        //     groupName.mouseenter(mouseEnterGroup);
-        //     groupName.mouseleave(mouseLeaveGroup);
-        // });
+            // document.addEventListener("DOMContentLoaded", function () {
+            //     let groupName = $(".block__group__name");
+            //     groupName.mouseenter(mouseEnterGroup);
+            //     groupName.mouseleave(mouseLeaveGroup);
+            // });
 
-       // functions for overlay
-        function openBloatedSkill() {
-            // toggleOverlay("block-overlay");
+            // functions for overlay
+            function openBloatedSkill() {
+                let blockId = $(this).data("id");
+                toggleOverlay(`block-${blockId}-bloated-overlay`);
+            }
 
-            let blockId = $(this).data("id");
-            // $("block-"+blockId+"-overlay").removeClass("hidden");
-            $(`#block-${blockId}-overlay`).removeClass("hidden");
-            console.log(blockId);
-            console.log($(`#block-${blockId}-overlay`));
+            function closeSkillOverlay(id) {
+                let overlay = document.getElementById(id);
+                overlay.close();
+            }
 
-            $("#block-id").val(blockId);
-            $("#block-name").text($(`#block-${blockId}-name`).text());
-        }
+            document.addEventListener("DOMContentLoaded", function () {
+                $(".block:not(.bloated)").click(openBloatedSkill); // TODO add skill id
 
-        document.addEventListener("DOMContentLoaded", function() {
-            $(".block").click(openBloatedSkill); // TODO add skill id
-        });
-
+                const myDialog = document.querySelectorAll(".block.bloated");
+                myDialog.forEach(d =>
+                    d.addEventListener("click", function (event) {
+                        if (event.target === d) d.close();
+                    })
+                );
+            });
         </script>
     </th:block>
 </html>
