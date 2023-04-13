@@ -26,7 +26,7 @@
     }
 
     &__icon {
-        &.completed{
+        &.completed {
             color: var(--primary-green);
         }
     }
@@ -50,6 +50,10 @@
                 var(--primary-green)
             );
         }
+//         &[disabled="true"]{
+//                     background-color: var(--grey);
+//                     border: 1px solid var(--primary-light);
+//         }
 
         &__edit {
             background-color: var(--primary-dark);

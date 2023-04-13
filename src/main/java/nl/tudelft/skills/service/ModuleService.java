@@ -103,22 +103,14 @@ public class ModuleService {
 				: path.getTasks().stream().map(Task::getId).collect(Collectors.toSet());
 
 		if (path != null) {
-			// if path is selected (doesn't apply for no-path), show only skills & tasks on followed path
-			if (!(authorisationService.canViewThroughPath(module.getEdition().getId())
-					&& (studentMode == null || !studentMode))) {
-				// tasks not in path get removed
-				module.getSubmodules().stream().flatMap(s -> s.getSkills().stream()).forEach(
-						s -> s.setTasks(
-								s.getTasks().stream().filter(t -> taskIds.contains(t.getId())).toList()));
-			} else {
-				// tasks not in path get visibility property false
-				module.getSubmodules().stream().flatMap(s -> s.getSkills().stream()).forEach(
-						s -> s.setTasks(s.getTasks().stream().map(t -> {
-							t.setVisible(taskIds.contains(t.getId()));
-							return t;
-						}).toList()));
+			// if path is selected (doesn't apply for no-path), show only tasks on followed path
+			// tasks not in path get visibility property false
+			module.getSubmodules().stream().flatMap(s -> s.getSkills().stream()).forEach(
+					s -> s.setTasks(s.getTasks().stream().map(t -> {
+						t.setVisible(taskIds.contains(t.getId()));
+						return t;
+					}).toList()));
 
-			}
 		}
 
 		model.addAttribute("level", "module");

@@ -22,10 +22,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.patch.PathPatchDTO;
-import nl.tudelft.skills.dto.view.edition.PathViewDTO;
-import nl.tudelft.skills.dto.view.module.TaskViewDTO;
 import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.PathRepository;
@@ -82,22 +79,15 @@ public class PathService {
 		pathRepository.save(path);
 	}
 
-//	public TaskViewDTO getTasksinSkillInPath (Long skillId, Long pathId){
-//		return taskRepository.findAllBySkillIdAndPathId(skillId, pathId);
-//
-//		public Set<PathViewDTO> getPaths(Long editionId) {
-//			return editionRepository.findById(editionId).get()
-//				.getPaths().stream().map(p -> View.convert(p, PathViewDTO.class))
-//				.collect(Collectors.toSet());
-//	}
-
-//		public List<TaskViewDTO> getTasksinSkillInPath (Long pathId){
-//			return taskRepository.findAllByPathId(pathId)
-//				.stream().map(t -> View.convert(t, TaskViewDTO.class)).collect(Collectors.toList());
-
-//			public List<TaskViewDTO> getPaths(Long editionId) {
-//				return editionRepository.findById(editionId).get()
-//					.getPaths().stream().map(p -> View.convert(p, PathViewDTO.class))
-//					.collect(Collectors.toSet());
-//?			}
+	/**
+	 * Checks if a task is in a certain path.
+	 *
+	 * @param  taskId Id of the task.
+	 * @param  pathId Id of the path.
+	 * @return        True if task belongs to this path, false otherwise.
+	 */
+	public boolean isTaskInPath(Long taskId, Long pathId) {
+		return pathRepository.findById(pathId).get()
+				.getTasks().stream().map(t -> t.getId()).filter(id -> id.equals(taskId)).count() >= 1;
+	}
 }

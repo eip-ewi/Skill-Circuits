@@ -37,7 +37,4 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
 	void deleteAllByIdIn(Collection<Long> id);
 
-//	List<Task> findAllBySkillIdAndPathId(Long skillId, Long pathId);
-//	List<Task> findAllByPathId(Long pathId);
-
 }

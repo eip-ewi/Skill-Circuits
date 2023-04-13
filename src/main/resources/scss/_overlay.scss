@@ -1,14 +1,17 @@
 .bloated {
-    position: absolute;
+    //position: fixed;
     top: 20%;
-    left: 30%;
+    left: 20%;
     z-index: 1000;
-    padding: 1rem;
 
     background-color: var(--primary-light);
 
     border: 1px solid var(--border-colour);
     --border-colour: var(--primary-dark);
+
+    &::backdrop {
+        background-color: rgba(0, 0, 0, 0.5);
+    }
 }
 
 .overlay {

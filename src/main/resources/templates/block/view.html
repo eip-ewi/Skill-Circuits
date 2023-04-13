@@ -67,26 +67,27 @@
                     class="item__create fa-solid fa-plus"
                     th:data-block="${block.id}"></button>
             </li>
-            <h3 style="font-size: 0.8rem" th:if="${block.items.size() == 0 and level == 'module'}">
+            <h3
+                style="font-size: 0.8rem"
+                th:if="${block.items.size() == 0 and level == 'module' and canEdit}">
                 This skill has no tasks in this path
             </h3>
 
-            <ul>
+            <ul data-edit="always">
                 <th:block th:each="item, iter : ${block.items}">
-    <!--                Task view for teacher-->
+                    <!--                Task view for teacher-->
                     <th:block th:if="${level == 'module' and canEdit}">
                         <li layout:replace="~{task/view :: item}"></li>
                     </th:block>
-    <!--                Task preview for student-->
-                    <th:block th:if="${level == 'module' and not canEdit}">
-                        <li style="display:inline" layout:replace="~{task/preview :: item}"></li>
+                    <!--                Task preview for student-->
+                    <th:block th:if="${level == 'module' and not canEdit and item.visible}">
+                        <li style="display: inline" layout:replace="~{task/preview :: item}"></li>
                     </th:block>
                     <th:block th:unless="${level == 'module'}">
                         <li layout:replace="~{item/view :: item}"></li>
                     </th:block>
                 </th:block>
             </ul>
-
         </ul>
 
         <div th:unless="${create}" data-edit="always" class="block__buttons">

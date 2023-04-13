@@ -39,14 +39,14 @@
                 toUpdate.forEach(taskId => {
                     const task = document.getElementById(`item-${taskId}`);
                     // If this task is not in this view, ignore.
-                    if (task !== null) {
-                        task.classList.add("completed");
-                    }
+                    // if (task !== null) {
+                    //     task.classList.add("completed");
+                    // }
                 });
             }
 
             // Traverse all blocks topologically and mark their state
-            [...$(".block")]
+            [...$(".block:not(.bloated)")]
                 .sort((a, b) => getRow(a) - getRow(b))
                 .forEach(block => updateBlockState(block.id.split("-")[1]));
 
@@ -91,8 +91,12 @@
             taskIcon.toggleClass("completed");
 
             const completed = task.hasClass("completed");
-            const block = $(task.parents(".block")[0]);
-            updateBlockState(block.prop("id").split("-")[1]);
+
+            const blockbloated = $(task.parents(".block")[0]);
+            const blockId = blockbloated.prop("id").split("-")[1];
+            const block = $(`#block-${blockId}`);
+
+            updateBlockState(blockId);
             [...block.data("children")].forEach(id => updateBlockState(id));
 
             //send update to server if user is authenticated
@@ -171,11 +175,17 @@
         }
         function updateBlockState(blockId) {
             const block = $(`#block-${blockId}`);
+
             if (block.attr("data-external")) return;
 
             block.removeClass("completed active disabled");
 
-            if (block.find(".item").not(".completed").length === 0) {
+            if (
+                (block.find(".item").length > 0 &&
+                    block.find(".item").not(".completed").length === 0) ||
+                (block.find(".item__icon").length > 0 &&
+                    block.find(".item__icon").not(".completed").length === 0)
+            ) {
                 block.addClass("completed");
             } else {
                 const allParentsCompleted = [...block.data("parents")].every(

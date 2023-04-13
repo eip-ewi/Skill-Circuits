@@ -207,7 +207,7 @@
     @include show-only-when("*", ":hover");
 }
 
-.paths{
+.paths {
     align-items: stretch;
     display: grid;
     color: var(--grey-500);
@@ -217,13 +217,16 @@
     min-width: 2rem;
     &:hover,
     &:focus-within {
-       color: var(--primary-dark);
+        color: var(--primary-dark);
         cursor: pointer;
-
     }
 }
 
-.skill-paths{
+li ~ .empty-path-text {
+    display: none;
+}
+
+.skill-paths {
     align-items: stretch;
     display: grid;
     color: var(--primary-dark);
