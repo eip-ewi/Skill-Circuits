@@ -127,14 +127,28 @@
             }
         }
         function reloadInfobox(completed) {
-            let state =
-                localStorage.getItem("infoboxState") === null
-                    ? completed
-                        ? "COLLAPSED"
-                        : "HIDDEN"
-                    : localStorage.getItem("infoboxState");
-            $.get("/infobox/" + state, function (data) {
-                $("#infobox-placeholder").html(data);
+            // Retrieve necessary data
+            $.get("/infobox", function (data) {
+                if (localStorage.getItem("infoboxExpanded") === null && completed) {
+                    // If a new task was just completed, set the local storage item
+                    // Default is the current appearance
+                    localStorage.setItem("infoboxExpanded", $("#info-box").attr("aria-expanded"));
+                }
+
+                // Set the expanded attribute
+                $("#info-box").attr("aria-expanded", localStorage.getItem("infoboxExpanded"));
+
+                // If the user is not a student, not authenticated, or has not completed any task yet, return
+                // If the user is not a student, !data["completedSomeTask"] will not be evaluated (the data is not set)
+                if (!data["studentAndAuthenticated"] || !data["completedSomeTask"]) {
+                    const infoboxContainer = $("#infobox-container");
+                    // If no task has been completed by the user (and the infobox was visible before), hide infobox
+                    if (!data["completedSomeTask"] && infoboxContainer.attr("hidden") !== "true") {
+                        infoboxContainer.attr("hidden", "true");
+                    }
+                    return;
+                }
+                renderInfobox(data);
             });
         }
         function updateBlockState(blockId) {

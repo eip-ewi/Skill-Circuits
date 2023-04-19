@@ -22,39 +22,20 @@
     lang="en"
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-    <div th:fragment="infobox" th:if="${studentAndAuthenticated} and ${state} != 'hidden'">
-        <div
-            id="info-box"
-            class="info-box"
-            th:aria-expanded="${state} == 'collapsed' ? 'false' : 'true'">
+    <div layout:fragment="infobox" id="infobox-container" hidden="true">
+        <div id="info-box" class="info-box" aria-expanded="false">
             <div id="info-text" class="info-text">
-                <a
-                    class="larger-info"
-                    th:if="${completedSomeTask}"
-                    th:href="@{|/module/${moduleId}#block-${skillId}-name|}"
-                    th:text="'Last worked on: ' + ${latestTask.getName()}"></a>
-                <a
-                    class="smaller-info"
-                    th:if="${completedSomeTask}"
-                    th:href="@{|/module/${moduleId}#block-${skillId}-name|}"
-                    th:text="'In ' + ${locationString}"></a>
-                <span class="default-info" th:unless="${completedSomeTask}">
-                    After you complete a task, it will appear here!
-                </span>
+                <a class="larger-info"></a>
+                <a class="smaller-info"></a>
             </div>
             <div class="icons">
-                <a
-                    th:if="${completedSomeTask}"
-                    class="map-icon fa-solid fa-map-location-dot"
-                    th:href="@{|/module/${moduleId}#block-${skillId}-name|}"></a>
-                <i
-                    th:unless="${completedSomeTask}"
-                    class="map-icon fa-solid fa-map-location-dot"></i>
+                <a id="map-icon" class="map-icon fa-solid fa-map-location-dot"></a>
                 <i id="arrow-icon" class="arrow-icon fa-solid fa-angle-left"></i>
             </div>
         </div>
+
         <script>
-            $(document).ready(function () {
+            document.addEventListener("DOMContentLoaded", function () {
                 const infoBox = $("#info-box");
                 const infoText = $("#info-text");
                 const mapIcon = $(".map-icon");
@@ -74,10 +55,10 @@
                 // Handling of collapsing/expanding box
                 const collapseOrExpand = () => {
                     if (infoBox.attr("aria-expanded") === "true") {
-                        localStorage.setItem("infoboxState", "COLLAPSED");
+                        localStorage.setItem("infoboxExpanded", "false");
                         infoBox.attr("aria-expanded", "false");
                     } else {
-                        localStorage.setItem("infoboxState", "EXPANDED");
+                        localStorage.setItem("infoboxExpanded", "true");
                         infoBox.attr("aria-expanded", "true");
                     }
                 };

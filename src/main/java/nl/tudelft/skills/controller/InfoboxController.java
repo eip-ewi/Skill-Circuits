@@ -17,17 +17,17 @@
  */
 package nl.tudelft.skills.controller;
 
+import net.minidev.json.JSONObject;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.TaskCompletionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 @Controller
 @RequestMapping("infobox")
@@ -35,12 +35,6 @@ public class InfoboxController {
 
 	private final AuthorisationService authorisationService;
 	private final TaskCompletionService taskCompletionService;
-
-	private enum State {
-		HIDDEN,
-		COLLAPSED,
-		EXPANDED
-	}
 
 	@Autowired
 	public InfoboxController(AuthorisationService authorisationService,
@@ -50,43 +44,40 @@ public class InfoboxController {
 	}
 
 	/**
-	 * Gets the fragment for the infobox rendered with the needed parameters.
+	 * Returns needed information for the infobox in form of a JSONObject, namely: - studentAndAuthenticated
+	 * whether the user is a student and authenticated - completedSomeTask whether the user has completed a
+	 * task with timestamp - taskInfo the string for the larger text, containing the task name -
+	 * locationString the string for the smaller text, containing the location of the task - link the link to
+	 * the skill of the most recent task
 	 *
-	 * @param  model The model to add data to
-	 * @param  state The state of the infobox, namely HIDDEN, EXPANDED or COLLAPSED
-	 * @return       The fragment for the infobox
+	 * @return A ResponseEntity of a JSONObject containing the needed information to render the infobox.
 	 */
-	@RequestMapping(value = { "", "/{state}" }, method = RequestMethod.GET)
-	public String getInfoBox(Model model, @PathVariable(required = false) State state) {
+	@GetMapping
+	public ResponseEntity<JSONObject> getInformation() {
+		JSONObject information = new JSONObject();
 		Person authPerson = authorisationService.getAuthPerson();
 
-		// TODO should it be enabled in student mode?
+		// Not enabled in student mode
 		boolean studentAndAuthenticated = authorisationService.isAuthenticated()
 				&& !authorisationService.isStaff();
-		model.addAttribute("studentAndAuthenticated", studentAndAuthenticated);
+		information.put("studentAndAuthenticated", studentAndAuthenticated);
 
-		Task latestTask = taskCompletionService.latestTaskCompletion(authPerson);
-		model.addAttribute("completedSomeTask", latestTask != null);
+		if (studentAndAuthenticated) {
+			Task latestTask = taskCompletionService.latestTaskCompletion(authPerson);
+			information.put("completedSomeTask", latestTask != null);
 
-		switch (state) {
-			case HIDDEN -> model.addAttribute("state", "hidden");
-			case EXPANDED -> model.addAttribute("state", "expanded");
-			case COLLAPSED -> model.addAttribute("state", "collapsed");
+			if (latestTask != null) {
+				information.put("taskInfo", "Last worked on: " + latestTask.getName());
+
+				long moduleId = latestTask.getSkill().getSubmodule().getModule().getId();
+				long skillId = latestTask.getSkill().getId();
+				information.put("link", "/module/" + moduleId + "#block-" + skillId + "-name");
+
+				String locationString = taskCompletionService.getLocationString(latestTask);
+				information.put("locationString", "In " + locationString);
+			}
 		}
 
-		if (latestTask != null) {
-			model.addAttribute("latestTask", latestTask);
-
-			long moduleId = latestTask.getSkill().getSubmodule().getModule().getId();
-			model.addAttribute("moduleId", moduleId);
-
-			long skillId = latestTask.getSkill().getId();
-			model.addAttribute("skillId", skillId);
-
-			String locationString = taskCompletionService.getLocationString(latestTask);
-			model.addAttribute("locationString", locationString);
-		}
-
-		return "infobox :: infobox";
+		return ResponseEntity.ok(information);
 	}
 }
