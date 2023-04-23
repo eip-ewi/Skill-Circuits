@@ -24,10 +24,10 @@
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <div layout:fragment="infobox" id="infobox-container" hidden="true">
         <div id="info-box" class="info-box" aria-expanded="false">
-            <div id="info-text" class="info-text">
-                <a class="larger-info"></a>
-                <a class="smaller-info"></a>
-            </div>
+            <a id="info-text" class="info-text">
+                <p class="larger-info"></p>
+                <p class="smaller-info"></p>
+            </a>
             <div class="icons">
                 <a id="map-icon" class="map-icon fa-solid fa-map-location-dot"></a>
                 <i id="arrow-icon" class="arrow-icon fa-solid fa-angle-left"></i>
@@ -37,20 +37,6 @@
         <script>
             document.addEventListener("DOMContentLoaded", function () {
                 const infoBox = $("#info-box");
-                const infoText = $("#info-text");
-                const mapIcon = $(".map-icon");
-
-                // Handling of hover effects for map icon
-                const largerMap = function () {
-                    if (infoText.has("a").length !== 0) {
-                        mapIcon.css("transform", "scale(1.15, 1.15)");
-                    }
-                };
-                const smallerMap = function () {
-                    mapIcon.css("transform", "scale(1, 1)");
-                };
-                infoText.children().hover(largerMap, smallerMap);
-                mapIcon.hover(largerMap, smallerMap);
 
                 // Handling of collapsing/expanding box
                 const collapseOrExpand = () => {

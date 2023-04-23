@@ -17,17 +17,17 @@
  */
 package nl.tudelft.skills.controller;
 
-import net.minidev.json.JSONObject;
 import nl.tudelft.labracore.lib.security.user.Person;
+import nl.tudelft.skills.dto.view.InfoboxDTO;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.TaskCompletionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("infobox")
@@ -44,40 +44,43 @@ public class InfoboxController {
 	}
 
 	/**
-	 * Returns needed information for the infobox in form of a JSONObject, namely: - studentAndAuthenticated
-	 * whether the user is a student and authenticated - completedSomeTask whether the user has completed a
-	 * task with timestamp - taskInfo the string for the larger text, containing the task name -
-	 * locationString the string for the smaller text, containing the location of the task - link the link to
+	 * Returns needed information for the infobox in form of a JSONObject, namely: - studentAndAuthenticated:
+	 * whether the user is a student and authenticated - completedSomeTask: whether the user has completed a
+	 * task with timestamp - taskInfo: the string for the larger text, containing the task name -
+	 * locationString the string for the smaller text, containing the location of the task - link: the link to
 	 * the skill of the most recent task
 	 *
-	 * @return A ResponseEntity of a JSONObject containing the needed information to render the infobox.
+	 * @return A InfoboxDTO containing the needed/available information to render the infobox. May contain
+	 *         null fields, if the user is not a student, not authenticated or has not completed a task yet.
 	 */
 	@GetMapping
-	public ResponseEntity<JSONObject> getInformation() {
-		JSONObject information = new JSONObject();
+	@ResponseBody
+	public InfoboxDTO getInformation() {
 		Person authPerson = authorisationService.getAuthPerson();
 
 		// Not enabled in student mode
 		boolean studentAndAuthenticated = authorisationService.isAuthenticated()
 				&& !authorisationService.isStaff();
-		information.put("studentAndAuthenticated", studentAndAuthenticated);
 
 		if (studentAndAuthenticated) {
 			Task latestTask = taskCompletionService.latestTaskCompletion(authPerson);
-			information.put("completedSomeTask", latestTask != null);
 
 			if (latestTask != null) {
-				information.put("taskInfo", "Last worked on: " + latestTask.getName());
+				String taskInfo = "Last worked on: " + latestTask.getName();
 
 				long moduleId = latestTask.getSkill().getSubmodule().getModule().getId();
 				long skillId = latestTask.getSkill().getId();
-				information.put("link", "/module/" + moduleId + "#block-" + skillId + "-name");
+				String link = "/module/" + moduleId + "#block-" + skillId + "-name";
 
-				String locationString = taskCompletionService.getLocationString(latestTask);
-				information.put("locationString", "In " + locationString);
+				String locationString = "In " + taskCompletionService.getLocationString(latestTask);
+
+				return new InfoboxDTO(true, true, taskInfo, link, locationString);
+			} else {
+				return InfoboxDTO.builder().studentAndAuthenticated(true).completedSomeTask(false).build();
 			}
+		} else {
+			return InfoboxDTO.builder().studentAndAuthenticated(false).build();
 		}
-
-		return ResponseEntity.ok(information);
 	}
+
 }

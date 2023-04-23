@@ -22,23 +22,17 @@
         padding-right: 1.1rem;
         display: flex;
         flex-direction: column;
+        color: var(--primary-light);
+        text-decoration: none;
 
         .larger-info {
             padding-top: 0.8rem;
             padding-bottom: 0.3rem;
             font-size: 1.2rem;
-            color: var(--primary-light);
-            text-decoration: none;
-        }
-
-        .default-info {
-            font-size: 1.1rem;
         }
 
         .smaller-info {
             padding-bottom: 0.8rem;
-            color: var(--primary-light);
-            text-decoration: none;
         }
     }
 
@@ -69,5 +63,10 @@
 
     &[aria-expanded="false"] .arrow-icon {
         transform: rotate(180deg);
+    }
+
+    .info-text:where(:hover, :focus-visible) ~ .icons .map-icon,
+    .map-icon:where(:hover, :focus-visible) {
+        transform: scale(1.15);
     }
 }

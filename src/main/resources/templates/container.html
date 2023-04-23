@@ -35,7 +35,11 @@
 
             <script>
                 function renderInfobox(data) {
-                    if (!"locationString" in data || !"link" in data || !"taskInfo" in data) {
+                    if (
+                        data["locationString"] === null ||
+                        data["link"] === null ||
+                        data["taskInfo"] === null
+                    ) {
                         // Something went wrong, not all needed information received
                         return;
                     }
@@ -44,8 +48,7 @@
                     const smallerInfo = $(".smaller-info");
                     largerInfo.text(data["taskInfo"]);
                     smallerInfo.text(data["locationString"]);
-                    largerInfo.attr("href", data["link"]);
-                    smallerInfo.attr("href", data["link"]);
+                    $("#info-text").attr("href", data["link"]);
                     $("#map-icon").attr("href", data["link"]);
                     $("#infobox-container").removeAttr("hidden");
                 }
@@ -53,10 +56,6 @@
                 document.addEventListener("DOMContentLoaded", function () {
                     // Retrieve necessary data
                     $.get("/infobox", function (data) {
-                        if (!data["completedSomeTask"]) {
-                            // The infobox should remain hidden if no task was completed
-                            return;
-                        }
                         const infoBox = $("#info-box");
                         // Set the expanded attribute if not yet available (default is "false" since the aria-expanded
                         // attribute is false on load)
@@ -66,11 +65,12 @@
                         // Set the state of the infobox (expanded or collapsed)
                         infoBox.attr("aria-expanded", localStorage.getItem("infoboxExpanded"));
 
-                        // If the user is not a student, not authenticated, or has not completed any task yet, return
-                        // In this case, the infobox should remain hidden
                         if (!data["studentAndAuthenticated"] || !data["completedSomeTask"]) {
+                            // If the user is not a student, not authenticated, or has not completed any task yet, return
+                            // In this case, the infobox should remain hidden
                             return;
                         }
+
                         renderInfobox(data);
                     });
                 });

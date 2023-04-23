@@ -98,7 +98,7 @@
                                 recalculateConnections();
                             })
                         );
-                        reloadInfobox(completed);
+                        reloadInfobox();
                     },
                 });
             } else {
@@ -126,12 +126,12 @@
                 }
             }
         }
-        function reloadInfobox(completed) {
+        function reloadInfobox() {
             // Retrieve necessary data
             $.get("/infobox", function (data) {
-                if (localStorage.getItem("infoboxExpanded") === null && completed) {
-                    // If a new task was just completed, set the local storage item
-                    // Default is the current appearance
+                // This is added as safety measure, in case localStorage items are removed at some point after page load
+                if (localStorage.getItem("infoboxExpanded") === null) {
+                    // Set the local storage item, default is the current appearance
                     localStorage.setItem("infoboxExpanded", $("#info-box").attr("aria-expanded"));
                 }
 

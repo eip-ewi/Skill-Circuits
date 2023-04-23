@@ -69,7 +69,8 @@ public class InfoboxControllerTest extends ControllerTest {
 	public void testUnauthenticatedUser() throws Exception {
 		mvc.perform(get("/infobox"))
 				.andExpect(status().isOk())
-				.andExpect(content().json("{'studentAndAuthenticated':false}"));
+				.andExpect(content().json("{'studentAndAuthenticated':false, 'completedSomeTask':null," +
+						" 'taskInfo':null, 'link':null, 'locationString':null}"));
 	}
 
 	@Test
@@ -81,7 +82,8 @@ public class InfoboxControllerTest extends ControllerTest {
 
 		mvc.perform(get("/infobox"))
 				.andExpect(status().isOk())
-				.andExpect(content().json("{'studentAndAuthenticated':false}"));
+				.andExpect(content().json("{'studentAndAuthenticated':false, 'completedSomeTask':null," +
+						" 'taskInfo':null, 'link':null, 'locationString':null}"));
 	}
 
 	@Test
@@ -114,7 +116,8 @@ public class InfoboxControllerTest extends ControllerTest {
 
 		mvc.perform(get("/infobox"))
 				.andExpect(status().isOk())
-				.andExpect(content().json("{'studentAndAuthenticated':true, 'completedSomeTask':false}"));
+				.andExpect(content().json("{'studentAndAuthenticated':true, 'completedSomeTask':false," +
+						" 'taskInfo':null, 'link':null, 'locationString':null}"));
 	}
 
 }
