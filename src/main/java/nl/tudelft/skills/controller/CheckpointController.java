@@ -24,6 +24,7 @@ import java.util.Set;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.CheckpointCreateDTO;
 import nl.tudelft.skills.dto.patch.CheckpointPatchDTO;
+import nl.tudelft.skills.dto.view.checkpoint.ChangeCheckpointDTO;
 import nl.tudelft.skills.dto.view.checkpoint.CheckpointViewDTO;
 import nl.tudelft.skills.model.Checkpoint;
 import nl.tudelft.skills.model.Skill;
@@ -94,26 +95,25 @@ public class CheckpointController {
 	/**
 	 * Changes the skills belonging to a certain checkpoint in a given module to have another checkpoint.
 	 *
-	 * @param  moduleId The module in which the skills are
-	 * @param  prevId   The id of the former checkpoint
-	 * @param  newId    The id of the new checkpoint
-	 * @return          A response entity of the deadline of the new checkpoint, which is used to update the
-	 *                  frontend.
+	 * @return Response entity OK, if it is a valid change, and BAD REQUEST if it is not. In practice, the
+	 *         frontend implementation should prevent requests for invalid changes.
 	 */
 	@Transactional
-	@PutMapping("{moduleId}/change-checkpoint/{prevId}-{newId}")
-	@PreAuthorize("@authorisationService.canEditModule(#moduleId)")
-	public ResponseEntity<Void> changeToCheckpoint(@PathVariable Long moduleId,
-			@PathVariable Long prevId, @PathVariable Long newId) {
+	@PutMapping("/change-checkpoint")
+	@PreAuthorize("@authorisationService.canEditModule(#changeCheckpointDTO.getModuleId())")
+	public ResponseEntity<Void> changeToCheckpoint(@RequestBody ChangeCheckpointDTO changeCheckpointDTO) {
 		// If the new checkpoint is already used in the module, return 400 Bad Request.
 		// In practice this should already be prevented from the frontend side.
-		if (!skillRepository.findAllBySubmoduleModuleIdAndCheckpointId(moduleId, newId).isEmpty()) {
+		if (!skillRepository.findAllBySubmoduleModuleIdAndCheckpointId(changeCheckpointDTO.getModuleId(),
+				changeCheckpointDTO.getNewId()).isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 
-		Checkpoint checkpointPrev = checkpointRepository.findByIdOrThrow(prevId);
-		Checkpoint checkpointNew = checkpointRepository.findByIdOrThrow(newId);
-		Set<Skill> skills = skillRepository.findAllBySubmoduleModuleIdAndCheckpointId(moduleId, prevId);
+		Checkpoint checkpointPrev = checkpointRepository.findByIdOrThrow(changeCheckpointDTO.getPrevId());
+		Checkpoint checkpointNew = checkpointRepository.findByIdOrThrow(changeCheckpointDTO.getNewId());
+		Set<Skill> skills = skillRepository.findAllBySubmoduleModuleIdAndCheckpointId(
+				changeCheckpointDTO.getModuleId(),
+				changeCheckpointDTO.getPrevId());
 		checkpointNew.getSkills().addAll(skills);
 		checkpointPrev.getSkills().removeAll(skills);
 		skills.forEach(skill -> skill.setCheckpoint(checkpointNew));
