@@ -631,3 +631,108 @@ databaseChangeLog:
       changes:
         - dropTable:
             tableName: path_tasks
+  # Move task completion to separate table
+  - changeSet:
+      id: 1682666888978-1
+      author: fanni (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_C9
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: timestamp
+                  type: TIMESTAMP
+              - column:
+                  constraints:
+                    nullable: false
+                  name: person_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: task_id
+                  type: BIGINT
+            tableName: task_completion
+  - changeSet:
+      id: 1682666888978-2
+      author: fanni (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: task_id
+            indexName: FK2mq03rtqcy5jvlco1co1fco6a_INDEX_C
+            tableName: task_completion
+  - changeSet:
+      id: 1682666888978-3
+      author: fanni (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: person_id
+            indexName: FK6l4isevvkwkbay4mgbqg7y91s_INDEX_C
+            tableName: task_completion
+  - changeSet:
+      id: 1682666888978-4
+      author: fanni (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: task_id
+            baseTableName: task_completion
+            constraintName: FK2mq03rtqcy5jvlco1co1fco6a
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: task
+            validate: true
+  - changeSet:
+      id: 1682666888978-5
+      author: fanni (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: person_id
+            baseTableName: task_completion
+            constraintName: FK6l4isevvkwkbay4mgbqg7y91s
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: scperson
+            validate: true
+  - changeSet:
+      id: 1682666888978-migrate-tasks-completed
+      author: Fanni Fiedrich
+      changes:
+        - sql:
+            comment: Migrate tasks completed
+            sql: INSERT INTO task_completion (id, timestamp, person_id, task_id) SELECT (ROW_NUMBER() OVER (ORDER BY (persons_id, tasks_completed_id))), NULL, persons_id, tasks_completed_id FROM scperson_tasks_completed;
+  - changeSet:
+      id: 1682666888978-6
+      author: fanni (generated)
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: scperson_tasks_completed
+            constraintName: FKrwsuhj88n1n0sigqwibq4dap1
+  - changeSet:
+      id: 1682666888978-7
+      author: fanni (generated)
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: scperson_tasks_completed
+            constraintName: FKtgiw4qnal6d91p8va4dvur1o4
+  - changeSet:
+      id: 1682666888978-8
+      author: fanni (generated)
+      changes:
+        - dropTable:
+            tableName: scperson_tasks_completed

@@ -105,8 +105,6 @@ public class TaskCompletionService {
 	public TaskCompletion addTaskCompletion(SCPerson person, Task task) {
 		TaskCompletion completion = taskCompletionRepository.save(TaskCompletion.builder()
 				.task(task).person(person).build());
-		// TODO Is there a way to ensure that this is done automatically, directly after the TaskCompletion is saved
-		//   to the database?
 		person.getTaskCompletions().add(completion);
 		task.getCompletedBy().add(completion);
 		return completion;
@@ -127,8 +125,6 @@ public class TaskCompletionService {
 
 		completion.ifPresent((TaskCompletion taskCompletion) -> {
 			taskCompletionRepository.delete(taskCompletion);
-			// TODO Is there a way to ensure that this is done automatically, directly after the TaskCompletion is
-			//  deleted from the database?
 			person.getTaskCompletions().remove(taskCompletion);
 			task.getCompletedBy().remove(taskCompletion);
 		});
