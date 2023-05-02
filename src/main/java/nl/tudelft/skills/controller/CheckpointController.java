@@ -95,22 +95,29 @@ public class CheckpointController {
 	/**
 	 * Changes the skills belonging to a certain checkpoint in a given module to have another checkpoint.
 	 *
-	 * @return Response entity OK, if it is a valid change, and BAD REQUEST if it is not. In practice, the
-	 *         frontend implementation should prevent requests for invalid changes.
+	 * @param  changeCheckpointDTO The DTO for changing the checkpoint, contains old/new checkpoint id as well
+	 *                             as module id.
+	 *
+	 * @return                     Response entity OK, if it is a valid change, and BAD REQUEST if it is not.
+	 *                             In practice, the frontend implementation should prevent requests for
+	 *                             invalid changes.
 	 */
 	@Transactional
 	@PutMapping("/change-checkpoint")
 	@PreAuthorize("@authorisationService.canEditModule(#changeCheckpointDTO.getModuleId())")
 	public ResponseEntity<Void> changeToCheckpoint(@RequestBody ChangeCheckpointDTO changeCheckpointDTO) {
-		// If the new checkpoint is already used in the module, return 400 Bad Request.
+		Checkpoint checkpointPrev = checkpointRepository.findByIdOrThrow(changeCheckpointDTO.getPrevId());
+		Checkpoint checkpointNew = checkpointRepository.findByIdOrThrow(changeCheckpointDTO.getNewId());
+
+		// If the new checkpoint is already used in the module, or if the checkpoints are
+		// not in the same edition, return 400 Bad Request.
 		// In practice this should already be prevented from the frontend side.
 		if (!skillRepository.findAllBySubmoduleModuleIdAndCheckpointId(changeCheckpointDTO.getModuleId(),
-				changeCheckpointDTO.getNewId()).isEmpty()) {
+				changeCheckpointDTO.getNewId()).isEmpty()
+				|| checkpointPrev.getEdition() != checkpointNew.getEdition()) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 
-		Checkpoint checkpointPrev = checkpointRepository.findByIdOrThrow(changeCheckpointDTO.getPrevId());
-		Checkpoint checkpointNew = checkpointRepository.findByIdOrThrow(changeCheckpointDTO.getNewId());
 		Set<Skill> skills = skillRepository.findAllBySubmoduleModuleIdAndCheckpointId(
 				changeCheckpointDTO.getModuleId(),
 				changeCheckpointDTO.getPrevId());
