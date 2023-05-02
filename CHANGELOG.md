@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [UNRELEASED]
 
 ### Added
+ - Added option to change/switch checkpoint to another one which is not used in the current module. (@ffiedrich)
 
 ### Changed
 
