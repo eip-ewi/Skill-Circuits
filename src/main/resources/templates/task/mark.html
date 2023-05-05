@@ -134,8 +134,10 @@
             if (block.find(".item").not(".completed").length === 0) {
                 block.addClass("completed");
             } else {
-                const allParentsCompleted = [...block.data("parents")].every(id =>
-                    $(`#block-${id}`).hasClass("completed")
+                const allParentsCompleted = [...block.data("parents")].every(
+                    id =>
+                        $(`#block-${id}`).hasClass("completed") ||
+                        !$(`#block-${id}`).data("essential")
                 );
                 if (allParentsCompleted) {
                     block.addClass("active");
