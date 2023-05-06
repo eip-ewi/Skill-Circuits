@@ -631,3 +631,39 @@ databaseChangeLog:
       changes:
         - dropTable:
             tableName: path_tasks
+# Skills can remember the skill in previous edition
+  - changeSet:
+      id: 1683394188548-1
+      author: fanni (generated)
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: previous_edition_skill_id
+                  type: BIGINT
+            tableName: skill
+  - changeSet:
+      id: 1683394188548-2
+      author: fanni (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: previous_edition_skill_id
+            indexName: FKmo4sw73pk13vxtwcjejc0do8j_INDEX_6
+            tableName: skill
+  - changeSet:
+      id: 1683394188548-3
+      author: fanni (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: previous_edition_skill_id
+            baseTableName: skill
+            constraintName: FKmo4sw73pk13vxtwcjejc0do8j
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: skill
+            validate: true
