@@ -15,42 +15,21 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.model.labracore;
+package nl.tudelft.skills.repository;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Optional;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-
-import lombok.*;
-import nl.tudelft.skills.model.Inventory;
-import nl.tudelft.skills.model.PathPreference;
 import nl.tudelft.skills.model.TaskCompletion;
 
-@Data
-@Entity
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class SCPerson {
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
-	@Id
-	private Long id;
+public interface TaskCompletionRepository extends JpaRepository<TaskCompletion, Long> {
 
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@OneToMany(mappedBy = "person")
-	private Set<TaskCompletion> taskCompletions = new HashSet<>();
+	default TaskCompletion findByIdOrThrow(Long id) {
+		return findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("TaskCompletion was not found: " + id));
+	}
 
-	@NotNull
-	@OneToOne(cascade = CascadeType.ALL)
-	private Inventory inventory;
-
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@OneToMany(mappedBy = "person")
-	private Set<PathPreference> pathPreferences = new HashSet<>();
+	Optional<TaskCompletion> getFirstByPersonIdAndTimestampNotNullOrderByTimestampDesc(Long id);
 }

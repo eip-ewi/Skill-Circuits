@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [UNRELEASED]
 
 ### Added
+- Floating box which displays information about the most recently completed task (@ffiedrich)
 
 ### Changed
 

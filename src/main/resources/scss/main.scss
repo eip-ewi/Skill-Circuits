@@ -1,6 +1,7 @@
 @import "vars";
 @import "header";
 @import "footer";
+@import "infobox";
 @import "overlay";
 @import "components";
 
@@ -15,7 +16,7 @@
 }
 
 .content {
-    padding: 2rem;
+    padding: 2rem 2rem 6rem;
     position: relative;
 }
 

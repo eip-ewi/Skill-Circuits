@@ -27,9 +27,11 @@ import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.dto.view.TaskCompletedDTO;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.TaskCompletion;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.service.TaskCompletionService;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -39,10 +41,13 @@ public class PersonController {
 
 	private final TaskRepository taskRepository;
 	private final PersonRepository scPersonRepository;
+	private final TaskCompletionService taskCompletionService;
 
-	public PersonController(TaskRepository taskRepository, PersonRepository scPersonRepository) {
+	public PersonController(TaskRepository taskRepository, PersonRepository scPersonRepository,
+			TaskCompletionService taskCompletionService) {
 		this.taskRepository = taskRepository;
 		this.scPersonRepository = scPersonRepository;
+		this.taskCompletionService = taskCompletionService;
 	}
 
 	/**
@@ -60,13 +65,16 @@ public class PersonController {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
 		Task task = taskRepository.findByIdOrThrow(taskId);
 		if (completed) {
-			person.getTasksCompleted().add(task);
+			taskCompletionService.addTaskCompletion(person, task);
+			List<Task> completedTasks = person.getTaskCompletions().stream()
+					.map(TaskCompletion::getTask).toList();
+
 			// TODO skill remains visible (see issue #90)
 			return new TaskCompletedDTO(task.getRequiredFor().stream()
-					.filter(s -> person.getTasksCompleted().containsAll(s.getRequiredTasks()))
+					.filter(s -> completedTasks.containsAll(s.getRequiredTasks()))
 					.map(Skill::getId).toList());
 		} else {
-			person.getTasksCompleted().remove(task);
+			taskCompletionService.deleteTaskCompletion(person, task);
 		}
 		return new TaskCompletedDTO(Collections.emptyList());
 	}
@@ -82,6 +90,8 @@ public class PersonController {
 	public void setTasksCompletedForPerson(@AuthenticatedPerson Person authPerson,
 			@RequestBody List<Long> completedTasks) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
-		person.getTasksCompleted().addAll(taskRepository.findAllById(completedTasks));
+
+		List<Task> tasks = taskRepository.findAllById(completedTasks);
+		tasks.forEach(task -> taskCompletionService.addTaskCompletion(person, task));
 	}
 }
