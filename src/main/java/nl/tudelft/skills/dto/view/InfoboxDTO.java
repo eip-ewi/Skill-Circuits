@@ -15,49 +15,32 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view.module;
+package nl.tudelft.skills.dto.view;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import lombok.*;
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.ItemView;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.model.TaskType;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class TaskViewDTO extends View<Task> implements ItemView {
+public class InfoboxDTO {
+	@NotNull
+	private Boolean studentAndAuthenticated;
 
-	@NotNull
-	private Long id;
-	@NotBlank
-	private String name;
-	@NotNull
-	private TaskType type;
-	@Min(0)
-	private Integer time;
-	private String link;
 	@Builder.Default
-	private boolean completed = false;
+	private Boolean completedSomeTask = null;
 
-	private Integer completedCount;
-
-	/**
-	 * Visibility of a task is set to true if it is part of the path currently displayed.
-	 */
 	@Builder.Default
-	@NotNull
-	private Boolean visible = true;
+	private String taskInfo = null;
 
-	@Override
-	public void postApply() {
-		super.postApply();
-		completedCount = data.getCompletedBy().size();
-	}
+	@Builder.Default
+	private String link = null;
+
+	@Builder.Default
+	private String locationString = null;
 }

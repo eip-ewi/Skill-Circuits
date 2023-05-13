@@ -98,6 +98,7 @@
                                 recalculateConnections();
                             })
                         );
+                        reloadInfobox();
                     },
                 });
             } else {
@@ -124,6 +125,31 @@
                     );
                 }
             }
+        }
+        function reloadInfobox() {
+            // Retrieve necessary data
+            $.get("/infobox", function (data) {
+                // This is added as safety measure, in case localStorage items are removed at some point after page load
+                if (localStorage.getItem("infoboxExpanded") === null) {
+                    // Set the local storage item, default is the current appearance
+                    localStorage.setItem("infoboxExpanded", $("#info-box").attr("aria-expanded"));
+                }
+
+                // Set the expanded attribute
+                $("#info-box").attr("aria-expanded", localStorage.getItem("infoboxExpanded"));
+
+                // If the user is not a student, not authenticated, or has not completed any task yet, return
+                // If the user is not a student, !data["completedSomeTask"] will not be evaluated (the data is not set)
+                if (!data["studentAndAuthenticated"] || !data["completedSomeTask"]) {
+                    const infoboxContainer = $("#infobox-container");
+                    // If no task has been completed by the user (and the infobox was visible before), hide infobox
+                    if (!data["completedSomeTask"] && infoboxContainer.attr("hidden") !== "true") {
+                        infoboxContainer.attr("hidden", "true");
+                    }
+                    return;
+                }
+                renderInfobox(data);
+            });
         }
         function updateBlockState(blockId) {
             const block = $(`#block-${blockId}`);
