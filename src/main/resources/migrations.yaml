@@ -727,7 +727,7 @@ databaseChangeLog:
       changes:
         - sql:
             comment: Migrate tasks completed
-            sql: INSERT INTO task_completion (id, timestamp, person_id, task_id) SELECT COMPLETION_SEQ.nextval, NULL, persons_id, tasks_completed_id FROM scperson_tasks_completed;
+            sql: INSERT INTO task_completion (id, timestamp, person_id, task_id) SELECT completion_seq.nextval, NULL, persons_id, tasks_completed_id FROM scperson_tasks_completed;
   - changeSet:
       id: 1682666888978-6
       author: fanni (generated)
