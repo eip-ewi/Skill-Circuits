@@ -29,6 +29,8 @@ import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.model.SCEdition;
+import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.TaskCompletion;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.ModuleRepository;
@@ -129,13 +131,11 @@ public class HomeController {
 			Long editionId = courseService.getLastStudentEditionForCourseOrLast(courseId);
 
 			if (editionId != null) {
-				SCEdition edition = editionService.getOrCreateSCEdition(editionId);
-				skillsDone = (int) edition.getModules().stream()
-						.flatMap(m -> m.getSubmodules().stream())
-						.flatMap(s -> s.getSkills().stream())
-						.filter(s -> s.getTasks().size() > 0
-								&& scperson.getTasksCompleted().containsAll(s.getTasks()))
-						.count();
+				List<Task> tasksDone = scperson.getTaskCompletions().stream().map(TaskCompletion::getTask)
+						.toList();
+
+				skillsDone = (int) tasksDone.stream().map(Task::getSkill).distinct()
+						.filter(s -> tasksDone.containsAll(s.getTasks())).count();
 			}
 
 			completedSkillsPerCourse.put(courseId, skillsDone);

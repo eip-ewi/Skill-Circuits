@@ -18,6 +18,9 @@
     font-family: var(--font);
 }
 
+// used to modify color with scss functions
+$primary-green: #2e8a00;
+
 $font-sizes: (
     "regular": 1rem,
     "big": 1.25rem,

@@ -63,6 +63,8 @@ public class CourseServiceTest {
 
 	private final AuthorisationService authorisationService;
 
+	private final LocalDateTime localDateTime;
+
 	@Autowired
 	public CourseServiceTest(CourseRepository courseRepository, EditionRepository editionRepository,
 			CourseControllerApi courseApi, EditionControllerApi editionApi, TestDatabaseLoader db) {
@@ -74,6 +76,8 @@ public class CourseServiceTest {
 		authorisationService = mock(AuthorisationService.class);
 		courseService = new CourseService(courseApi, editionApi, courseRepository, editionRepository,
 				authorisationService);
+
+		localDateTime = LocalDateTime.of(2023, 1, 10, 10, 10, 0);
 	}
 
 	@Test
@@ -110,8 +114,8 @@ public class CourseServiceTest {
 	@Test
 	public void getLastEditionForCourse() {
 		CourseDetailsDTO courseDetailsDTO = new CourseDetailsDTO().editions(
-				List.of(new EditionSummaryDTO().id(1L).startDate(LocalDateTime.now()),
-						new EditionSummaryDTO().id(2L).startDate(LocalDateTime.now())));
+				List.of(new EditionSummaryDTO().id(1L).startDate(localDateTime),
+						new EditionSummaryDTO().id(2L).startDate(localDateTime.plusMinutes(1))));
 
 		editionRepository.save(new SCEdition(1L, true, null, null, null, null));
 		editionRepository.save(new SCEdition(2L, true, null, null, null, null));
@@ -129,8 +133,8 @@ public class CourseServiceTest {
 	@Test
 	public void getLastStudentEditionForCourseOrLastReturnsMostRecent() {
 		CourseDetailsDTO courseDetailsDTO = new CourseDetailsDTO().editions(
-				List.of(new EditionSummaryDTO().id(1L).startDate(LocalDateTime.now()),
-						new EditionSummaryDTO().id(2L).startDate(LocalDateTime.now())));
+				List.of(new EditionSummaryDTO().id(1L).startDate(localDateTime),
+						new EditionSummaryDTO().id(2L).startDate(localDateTime.plusMinutes(1))));
 		when(courseApi.getCourseById(anyLong())).thenReturn(Mono.just(courseDetailsDTO));
 		when(authorisationService.isStudentInEdition(anyLong())).thenReturn(false);
 
@@ -144,9 +148,9 @@ public class CourseServiceTest {
 	@Test
 	public void getLastStudentEditionForCourseOrLastReturnsLast() {
 		CourseDetailsDTO courseDetailsDTO = new CourseDetailsDTO().editions(
-				List.of(new EditionSummaryDTO().id(1L).startDate(LocalDateTime.now()),
-						new EditionSummaryDTO().id(2L).startDate(LocalDateTime.now()),
-						new EditionSummaryDTO().id(3L).startDate(LocalDateTime.now())));
+				List.of(new EditionSummaryDTO().id(1L).startDate(localDateTime),
+						new EditionSummaryDTO().id(2L).startDate(localDateTime.plusMinutes(1)),
+						new EditionSummaryDTO().id(3L).startDate(localDateTime.plusMinutes(2))));
 		when(courseApi.getCourseById(anyLong())).thenReturn(Mono.just(courseDetailsDTO));
 
 		when(authorisationService.isStudentInEdition(1L)).thenReturn(true);
