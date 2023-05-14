@@ -19,8 +19,11 @@ package nl.tudelft.skills.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import nl.tudelft.labracore.api.CourseControllerApi;
+import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.repository.AbstractSkillRepository;
+import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.test.TestDatabaseLoader;
@@ -34,19 +37,22 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
 public class SkillServiceTest {
 
-	private final AbstractSkillRepository skillRepository;
+	private final AbstractSkillRepository abstractSkillRepository;
 	private final SkillService skillService;
 	private final TaskCompletionRepository taskCompletionRepository;
 
 	private TestDatabaseLoader db;
 
 	@Autowired
-	public SkillServiceTest(AbstractSkillRepository skillRepository, TaskRepository taskRepository,
-			TestDatabaseLoader db, TaskCompletionRepository taskCompletionRepository) {
-		this.skillRepository = skillRepository;
+	public SkillServiceTest(AbstractSkillRepository abstractSkillRepository, TaskRepository taskRepository,
+			TestDatabaseLoader db, TaskCompletionRepository taskCompletionRepository,
+			EditionControllerApi editionApi, CourseControllerApi courseApi,
+			SkillRepository skillRepository) {
+		this.abstractSkillRepository = abstractSkillRepository;
 		this.db = db;
 		this.taskCompletionRepository = taskCompletionRepository;
-		this.skillService = new SkillService(skillRepository, taskCompletionRepository);
+		this.skillService = new SkillService(abstractSkillRepository, taskCompletionRepository, editionApi,
+				courseApi, skillRepository);
 	}
 
 	@Test
@@ -54,7 +60,7 @@ public class SkillServiceTest {
 		Long id = db.getSkillVariables().getId();
 
 		skillService.deleteSkill(id);
-		assertThat(skillRepository.existsById(id)).isFalse();
+		assertThat(abstractSkillRepository.existsById(id)).isFalse();
 
 		// All TaskCompletions are in other Skills, so they should
 		// not have been deleted
@@ -66,7 +72,7 @@ public class SkillServiceTest {
 		Long id = db.getSkillNegation().getId();
 
 		skillService.deleteSkill(id);
-		assertThat(skillRepository.existsById(id)).isFalse();
+		assertThat(abstractSkillRepository.existsById(id)).isFalse();
 
 		// Two of the previously saved TaskCompletions were in the deleted Skill, so
 		// the size should be 2 now

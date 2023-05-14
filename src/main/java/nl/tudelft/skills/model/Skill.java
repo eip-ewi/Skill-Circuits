@@ -84,7 +84,7 @@ public class Skill extends AbstractSkill {
 
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@OneToOne
+	@ManyToOne
 	private Skill previousEditionSkill;
 
 	public void setTasks(List<Task> tasks) {
