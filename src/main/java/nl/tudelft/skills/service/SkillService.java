@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
-import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
+import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
 import nl.tudelft.skills.model.AbstractSkill;
 import nl.tudelft.skills.model.ExternalSkill;
 import nl.tudelft.skills.model.Skill;
@@ -95,10 +95,9 @@ public class SkillService {
 		CourseDetailsDTO course = courseApi.getCourseByEdition(editionId).block();
 
 		// Get the edition ids for the course, sorted by the start date (decreasing, newest to oldest)
-		List<Long> sortedEditionIdsOfCourse = editionApi.getAllEditionsByCourse(course.getId())
-				.collectList().block().stream()
-				.sorted(Comparator.comparing(EditionDetailsDTO::getStartDate))
-				.map(EditionDetailsDTO::getId)
+		List<Long> sortedEditionIdsOfCourse = course.getEditions().stream()
+				.sorted(Comparator.comparing(EditionSummaryDTO::getStartDate))
+				.map(EditionSummaryDTO::getId)
 				.collect(Collectors.toList());
 		Collections.reverse(sortedEditionIdsOfCourse);
 
@@ -132,14 +131,21 @@ public class SkillService {
 			Long currentEditionId = current.getSubmodule().getModule().getEdition().getId();
 
 			// Check if this skills edition is more recent
-			if (mostRecentEditionSkill == null
-					|| editionToOrderIdx.get(currentEditionId) < mostRecentEditionSkill.getId()) {
+			// Was not assigned yet || current order index < most recent order index
+			if (mostRecentEditionSkill == null ||
+					editionToOrderIdx.get(currentEditionId) < editionToOrderIdx
+							.get(mostRecentEditionSkill.getSubmodule()
+									.getModule().getEdition().getId())) {
 				mostRecentEditionSkill = current;
 			}
 
 			// Check if the person has completed a skill in this edition, and if it is more recent
-			if (completedTasksInEditions.contains(currentEditionId) && (recentActiveEditionSkill == null ||
-					editionToOrderIdx.get(currentEditionId) < recentActiveEditionSkill.getId())) {
+			// Was not assigned yet || current order index < recent active order index
+			if (completedTasksInEditions.contains(currentEditionId) &&
+					(recentActiveEditionSkill == null ||
+							editionToOrderIdx.get(currentEditionId) < editionToOrderIdx
+									.get(recentActiveEditionSkill.getSubmodule()
+											.getModule().getEdition().getId()))) {
 				recentActiveEditionSkill = current;
 			}
 

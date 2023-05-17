@@ -20,8 +20,6 @@ package nl.tudelft.skills.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-import java.util.HashSet;
-
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
@@ -63,19 +61,10 @@ public class TaskCompletionServiceTest {
 				editionApi);
 	}
 
-	private void resetTaskCompletions() {
-		db.getPerson().setTaskCompletions(new HashSet<>());
-		db.getTaskDo11ad().setCompletedBy(new HashSet<>());
-		db.getTaskRead12().setCompletedBy(new HashSet<>());
-		db.getTaskDo12ae().setCompletedBy(new HashSet<>());
-		db.getTaskRead11().setCompletedBy(new HashSet<>());
-		taskCompletionRepository.deleteAll();
-	}
-
 	@Test
 	public void testLatestTaskCompletionDoesNotExist() {
 		// Reset the person to not have done any tasks yet
-		resetTaskCompletions();
+		db.resetTaskCompletions();
 		SCPerson scPerson = db.getPerson();
 
 		// The person did not complete any tasks yet
@@ -88,7 +77,7 @@ public class TaskCompletionServiceTest {
 	@Test
 	public void testLatestTaskCompletionNullTimestamp() {
 		// Reset the person to not have done any tasks yet
-		resetTaskCompletions();
+		db.resetTaskCompletions();
 		SCPerson scPerson = db.getPerson();
 
 		// Add a task completion which has null as the timestamp
