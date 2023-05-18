@@ -483,10 +483,11 @@ public class TestDatabaseLoader {
 	 * also created/saved.
 	 *
 	 * @param  editionId The id of the new edition.
+	 * @param  visible   Whether the edition is visible.
 	 * @return           The skill created within the new edition.
 	 */
-	public Skill createSkillInEditionHelper(Long editionId) {
-		SCEdition edition = SCEdition.builder().id(editionId).build();
+	public Skill createSkillInEditionHelper(Long editionId, boolean visible) {
+		SCEdition edition = SCEdition.builder().id(editionId).isVisible(visible).build();
 		edition = editionRepository.save(edition);
 		SCModule module = SCModule.builder()
 				.name("Module in " + editionId).edition(edition).build();

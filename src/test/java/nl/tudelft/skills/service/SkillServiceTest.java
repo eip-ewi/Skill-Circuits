@@ -26,19 +26,11 @@ import java.util.List;
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
+import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.model.ExternalSkill;
-import nl.tudelft.skills.model.SCModule;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.model.TaskCompletion;
-import nl.tudelft.skills.repository.AbstractSkillRepository;
-import nl.tudelft.skills.repository.ExternalSkillRepository;
-import nl.tudelft.skills.repository.ModuleRepository;
-import nl.tudelft.skills.repository.SkillRepository;
-import nl.tudelft.skills.repository.TaskCompletionRepository;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.model.*;
+import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.test.TestDatabaseLoader;
 
 import org.junit.jupiter.api.Test;
@@ -47,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Transactional
@@ -56,10 +49,13 @@ public class SkillServiceTest {
 	private final AbstractSkillRepository abstractSkillRepository;
 	private final ExternalSkillRepository externalSkillRepository;
 	private final TaskCompletionRepository taskCompletionRepository;
+	private final EditionRepository editionRepository;
 	private final TaskRepository taskRepository;
 	private final ModuleRepository moduleRepository;
 	private final SkillService skillService;
+
 	private final CourseControllerApi courseApi;
+	private final EditionControllerApi editionApi;
 
 	private TestDatabaseLoader db;
 	private final LocalDateTime localDateTime;
@@ -69,17 +65,22 @@ public class SkillServiceTest {
 			TestDatabaseLoader db, TaskCompletionRepository taskCompletionRepository,
 			EditionControllerApi editionApi, CourseControllerApi courseApi,
 			SkillRepository skillRepository, ModuleRepository moduleRepository,
-			ExternalSkillRepository externalSkillRepository) {
+			ExternalSkillRepository externalSkillRepository, EditionRepository editionRepository) {
 		this.abstractSkillRepository = abstractSkillRepository;
-		this.db = db;
 		this.taskCompletionRepository = taskCompletionRepository;
-		this.moduleRepository = moduleRepository;
 		this.externalSkillRepository = externalSkillRepository;
-		this.courseApi = courseApi;
+		this.editionRepository = editionRepository;
+		this.moduleRepository = moduleRepository;
 		this.taskRepository = taskRepository;
+
+		this.db = db;
 		this.localDateTime = LocalDateTime.of(2023, 1, 10, 10, 10, 0);
+
+		this.courseApi = courseApi;
+		this.editionApi = editionApi;
+
 		this.skillService = new SkillService(abstractSkillRepository, taskCompletionRepository, editionApi,
-				courseApi, skillRepository);
+				courseApi, skillRepository, editionRepository);
 	}
 
 	@Test
@@ -122,7 +123,15 @@ public class SkillServiceTest {
 		// Mock the response of the courseApi to return the course details
 		CourseDetailsDTO course = new CourseDetailsDTO().id(db.getCourseRL().getId())
 				.editions(List.of(new EditionSummaryDTO().id(db.getEditionRL().getId())));
-		Mockito.when(courseApi.getCourseByEdition(anyLong())).thenReturn(Mono.just(course));
+		Mockito.when(courseApi.getCourseByEdition(db.getEditionRL().getId())).thenReturn(Mono.just(course));
+
+		// Mock response so that the edition is also active
+		Mockito.when(editionApi.getAllEditionsActiveOrTaughtBy(db.getPerson().getId()))
+				.thenReturn(Flux.just(new EditionDetailsDTO().id(db.getEditionRL().getId())));
+
+		// Set edition to be visible
+		db.getEditionRL().setVisible(true);
+		editionRepository.save(db.getEditionRL());
 
 		// Assert that the recent active edition method returns the correct skill
 		// Since there is only one edition, this is the skill in this edition
@@ -134,9 +143,9 @@ public class SkillServiceTest {
 	public void testMultipleEditionsNoTaskCompleted() {
 		/*
 		 * Test scenario in which there are multiple editions, but no task was completed. Edition structure
-		 * is: editionA / \ editionB editionC With editionC being the latest edition. The skill which the
-		 * external skill refers to should be "copied" from edition A to editions B and C. The method should
-		 * return the latest editions skill (edition C).
+		 * is: editionA --> (editionB and editionC). With editionC being the latest edition. The skill which
+		 * the external skill refers to should be "copied" from edition A to editions B and C. The method
+		 * should return the latest editions skill (edition C).
 		 */
 
 		// Create a new module for the external skill, in the same edition
@@ -153,8 +162,8 @@ public class SkillServiceTest {
 		// Create two new skills, submodules, modules and editions
 		// Edition A is the current edition (editionRL)
 		Long idInUse = db.getEditionRL().getId();
-		Skill skillEditionB = db.createSkillInEditionHelper(idInUse + 1);
-		Skill skillEditionC = db.createSkillInEditionHelper(idInUse + 2);
+		Skill skillEditionB = db.createSkillInEditionHelper(idInUse + 1, true);
+		Skill skillEditionC = db.createSkillInEditionHelper(idInUse + 2, true);
 
 		// Skills in edition B/C should be copies of skill in edition A
 		skillEditionB.setPreviousEditionSkill(db.getSkillAssumption());
@@ -167,7 +176,18 @@ public class SkillServiceTest {
 						new EditionSummaryDTO().id(idInUse).startDate(localDateTime),
 						new EditionSummaryDTO().id(idInUse + 1).startDate(localDateTime.plusDays(2)),
 						new EditionSummaryDTO().id(idInUse + 2).startDate(localDateTime.plusDays(4))));
-		Mockito.when(courseApi.getCourseByEdition(anyLong())).thenReturn(Mono.just(course));
+		Mockito.when(courseApi.getCourseByEdition(db.getEditionRL().getId())).thenReturn(Mono.just(course));
+
+		// Mock response so that the editions are all also active
+		Mockito.when(editionApi.getAllEditionsActiveOrTaughtBy(db.getPerson().getId()))
+				.thenReturn(Flux.fromIterable(List.of(
+						new EditionDetailsDTO().id(idInUse),
+						new EditionDetailsDTO().id(idInUse + 1),
+						new EditionDetailsDTO().id(idInUse + 2))));
+
+		// Set edition to be visible
+		db.getEditionRL().setVisible(true);
+		editionRepository.save(db.getEditionRL());
 
 		// Assert that the recent active edition method returns the correct skill
 		// The person has not completed any tasks in any edition yet, so it should return the most recent
@@ -180,8 +200,8 @@ public class SkillServiceTest {
 	public void testMultipleEditionsWithTaskCompleted() {
 		/*
 		 * Test scenario in which there are multiple editions, and a task was completed in one of the less
-		 * recent editions. Edition structure is: editionA / \ editionB editionC With editionC being the
-		 * latest edition. A task was completed in editionB. The skill which the external skill refers to
+		 * recent editions. Edition structure is: editionA --> (editionB and editionC). With editionC being
+		 * the latest edition. A task was completed in editionB. The skill which the external skill refers to
 		 * should be "copied" from edition A to editions B and C. The method should return the editions skill
 		 * in which a task was completed.
 		 */
@@ -200,8 +220,8 @@ public class SkillServiceTest {
 		// Create two new skills, submodules, modules and editions
 		// Edition A is the current edition (editionRL)
 		Long idInUse = db.getEditionRL().getId();
-		Skill skillEditionB = db.createSkillInEditionHelper(idInUse + 1);
-		Skill skillEditionC = db.createSkillInEditionHelper(idInUse + 2);
+		Skill skillEditionB = db.createSkillInEditionHelper(idInUse + 1, true);
+		Skill skillEditionC = db.createSkillInEditionHelper(idInUse + 2, true);
 
 		// Skills in edition B/C should be copies of skill in edition A
 		skillEditionB.setPreviousEditionSkill(db.getSkillAssumption());
@@ -224,6 +244,17 @@ public class SkillServiceTest {
 						new EditionSummaryDTO().id(idInUse + 2).startDate(localDateTime.plusDays(4))));
 		Mockito.when(courseApi.getCourseByEdition(anyLong())).thenReturn(Mono.just(course));
 
+		// Mock response so that the editions are all also active
+		Mockito.when(editionApi.getAllEditionsActiveOrTaughtBy(db.getPerson().getId()))
+				.thenReturn(Flux.fromIterable(List.of(
+						new EditionDetailsDTO().id(idInUse),
+						new EditionDetailsDTO().id(idInUse + 1),
+						new EditionDetailsDTO().id(idInUse + 2))));
+
+		// Set edition to be visible
+		db.getEditionRL().setVisible(true);
+		editionRepository.save(db.getEditionRL());
+
 		// Assert that the recent active edition method returns the correct skill
 		// The person has completed a task in editionB, so it should return that editions skill
 		assertThat(skillService.recentActiveEditionForSkillOrLatest(db.getPerson().getId(), externalSkill))
@@ -234,7 +265,7 @@ public class SkillServiceTest {
 	public void testMultipleEditionsChainWithTaskCompleted() {
 		/*
 		 * Test scenario in which there are multiple editions, and a task was completed in one of the less
-		 * recent editions. Edition structure is: editionA | editionB | editionC With editionC being the
+		 * recent editions. Edition structure is: editionA --> editionB --> editionC. With editionC being the
 		 * latest edition. A task was completed in editionB. The skill which the external skill refers to
 		 * should be "copied" from edition A to editions B and C. The method should return the editions skill
 		 * in which a task was completed.
@@ -254,8 +285,8 @@ public class SkillServiceTest {
 		// Create two new skills, submodules, modules and editions
 		// Edition A is the current edition (editionRL)
 		Long idInUse = db.getEditionRL().getId();
-		Skill skillEditionB = db.createSkillInEditionHelper(idInUse + 1);
-		Skill skillEditionC = db.createSkillInEditionHelper(idInUse + 2);
+		Skill skillEditionB = db.createSkillInEditionHelper(idInUse + 1, true);
+		Skill skillEditionC = db.createSkillInEditionHelper(idInUse + 2, true);
 
 		// Skill in edition B should be a copy of skill in edition A
 		skillEditionB.setPreviousEditionSkill(db.getSkillAssumption());
@@ -279,6 +310,17 @@ public class SkillServiceTest {
 						new EditionSummaryDTO().id(idInUse + 2).startDate(localDateTime.plusDays(4))));
 		Mockito.when(courseApi.getCourseByEdition(anyLong())).thenReturn(Mono.just(course));
 
+		// Mock response so that the editions are all also active
+		Mockito.when(editionApi.getAllEditionsActiveOrTaughtBy(db.getPerson().getId()))
+				.thenReturn(Flux.fromIterable(List.of(
+						new EditionDetailsDTO().id(idInUse),
+						new EditionDetailsDTO().id(idInUse + 1),
+						new EditionDetailsDTO().id(idInUse + 2))));
+
+		// Set edition to be visible
+		db.getEditionRL().setVisible(true);
+		editionRepository.save(db.getEditionRL());
+
 		// Assert that the recent active edition method returns the correct skill
 		// The person has completed a task in editionB, so it should return that editions skill
 		assertThat(skillService.recentActiveEditionForSkillOrLatest(db.getPerson().getId(), externalSkill))
@@ -289,9 +331,10 @@ public class SkillServiceTest {
 	public void testMultipleEditionsMostRecentDoesNotHaveSkill() {
 		/*
 		 * Test scenario in which there are multiple editions, and the most recent edition does not contain
-		 * the parent skill. Edition structure is: editionA | editionB editionC With editionC being the latest
-		 * edition, and editionB the one before that. The skill which the external skill refers to should be
-		 * "copied" from edition A to editions B, but not C. The method should return the skill in edition B.
+		 * the parent skill. Edition structure is: editionA --> editionB, editionC (independent). With
+		 * editionC being the latest edition, and editionB the one before that. The skill which the external
+		 * skill refers to should be "copied" from edition A to editions B, but not C. The method should
+		 * return the skill in edition B.
 		 */
 
 		// Create a new module for the external skill, in the same edition
@@ -308,10 +351,13 @@ public class SkillServiceTest {
 		// Create two new skills, submodules, modules and editions
 		// Edition A is the current edition (editionRL)
 		Long idInUse = db.getEditionRL().getId();
-		Skill skillEditionB = db.createSkillInEditionHelper(idInUse + 1);
+		Skill skillEditionB = db.createSkillInEditionHelper(idInUse + 1, true);
 
 		// Skill in edition B should be a copy of skill in edition A
 		skillEditionB.setPreviousEditionSkill(db.getSkillAssumption());
+
+		// Create empty edition C
+		editionRepository.save(SCEdition.builder().id(idInUse + 2).build());
 
 		// Mock the response of the courseApi to return the course details
 		// Edition C should be the most recent edition
@@ -321,6 +367,17 @@ public class SkillServiceTest {
 						new EditionSummaryDTO().id(idInUse + 1).startDate(localDateTime.plusDays(2)),
 						new EditionSummaryDTO().id(idInUse + 2).startDate(localDateTime.plusDays(4))));
 		Mockito.when(courseApi.getCourseByEdition(anyLong())).thenReturn(Mono.just(course));
+
+		// Mock response so that the editions are all also active
+		Mockito.when(editionApi.getAllEditionsActiveOrTaughtBy(db.getPerson().getId()))
+				.thenReturn(Flux.fromIterable(List.of(
+						new EditionDetailsDTO().id(idInUse),
+						new EditionDetailsDTO().id(idInUse + 1),
+						new EditionDetailsDTO().id(idInUse + 2))));
+
+		// Set edition to be visible
+		db.getEditionRL().setVisible(true);
+		editionRepository.save(db.getEditionRL());
 
 		// Assert that the recent active edition method returns the correct skill
 		// The most recent edition which contains the copied skill is editionB

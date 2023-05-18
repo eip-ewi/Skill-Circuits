@@ -27,11 +27,13 @@ import java.util.stream.Collectors;
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
+import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
 import nl.tudelft.skills.model.AbstractSkill;
 import nl.tudelft.skills.model.ExternalSkill;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.AbstractSkillRepository;
+import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
 
@@ -44,6 +46,7 @@ public class SkillService {
 
 	private final AbstractSkillRepository abstractSkillRepository;
 	private final TaskCompletionRepository taskCompletionRepository;
+	private final EditionRepository editionRepository;
 	private final EditionControllerApi editionApi;
 	private final CourseControllerApi courseApi;
 	private final SkillRepository skillRepository;
@@ -51,12 +54,14 @@ public class SkillService {
 	@Autowired
 	public SkillService(AbstractSkillRepository abstractSkillRepository,
 			TaskCompletionRepository taskCompletionRepository, EditionControllerApi editionApi,
-			CourseControllerApi courseApi, SkillRepository skillRepository) {
+			CourseControllerApi courseApi, SkillRepository skillRepository,
+			EditionRepository editionRepository) {
 		this.abstractSkillRepository = abstractSkillRepository;
 		this.taskCompletionRepository = taskCompletionRepository;
 		this.editionApi = editionApi;
 		this.courseApi = courseApi;
 		this.skillRepository = skillRepository;
+		this.editionRepository = editionRepository;
 	}
 
 	/**
@@ -88,16 +93,24 @@ public class SkillService {
 	 *                       exists, the most recent edition is chosen.
 	 */
 	public Skill recentActiveEditionForSkillOrLatest(Long personId, ExternalSkill externalSkill) {
-		// TODO check access rights, if, for example, an edition is not available anymore
-
 		Skill skill = externalSkill.getSkill();
 		Long editionId = skill.getSubmodule().getModule().getEdition().getId();
 		CourseDetailsDTO course = courseApi.getCourseByEdition(editionId).block();
 
+		List<Long> activeEditionsForPerson = editionApi.getAllEditionsActiveOrTaughtBy(personId)
+				.collectList().block().stream().map(EditionDetailsDTO::getId).toList();
+
 		// Get the edition ids for the course, sorted by the start date (decreasing, newest to oldest)
+		// Filter by: active editions for the person, and if the edition is visible
 		List<Long> sortedEditionIdsOfCourse = course.getEditions().stream()
 				.sorted(Comparator.comparing(EditionSummaryDTO::getStartDate))
 				.map(EditionSummaryDTO::getId)
+				.filter(id -> {
+					boolean visible = editionRepository.getById(id).isVisible();
+					boolean active = activeEditionsForPerson.contains(id);
+
+					return visible && active;
+				})
 				.collect(Collectors.toList());
 		Collections.reverse(sortedEditionIdsOfCourse);
 
@@ -130,25 +143,29 @@ public class SkillService {
 			current = traversal.pop();
 			Long currentEditionId = current.getSubmodule().getModule().getEdition().getId();
 
-			// Check if this skills edition is more recent
-			// Was not assigned yet || current order index < most recent order index
-			if (mostRecentEditionSkill == null ||
-					editionToOrderIdx.get(currentEditionId) < editionToOrderIdx
-							.get(mostRecentEditionSkill.getSubmodule()
-									.getModule().getEdition().getId())) {
-				mostRecentEditionSkill = current;
+			// Check if it is a valid edition id, or if it was filtered out
+			if (editionToOrderIdx.get(currentEditionId) != null) {
+				// Check if this skills edition is more recent
+				// Was not assigned yet || current order index < most recent order index
+				if (mostRecentEditionSkill == null ||
+						editionToOrderIdx.get(currentEditionId) < editionToOrderIdx
+								.get(mostRecentEditionSkill.getSubmodule()
+										.getModule().getEdition().getId())) {
+					mostRecentEditionSkill = current;
+				}
+
+				// Check if the person has completed a skill in this edition, and if it is more recent
+				// Was not assigned yet || current order index < recent active order index
+				if (completedTasksInEditions.contains(currentEditionId) &&
+						(recentActiveEditionSkill == null ||
+								editionToOrderIdx.get(currentEditionId) < editionToOrderIdx
+										.get(recentActiveEditionSkill.getSubmodule()
+												.getModule().getEdition().getId()))) {
+					recentActiveEditionSkill = current;
+				}
 			}
 
-			// Check if the person has completed a skill in this edition, and if it is more recent
-			// Was not assigned yet || current order index < recent active order index
-			if (completedTasksInEditions.contains(currentEditionId) &&
-					(recentActiveEditionSkill == null ||
-							editionToOrderIdx.get(currentEditionId) < editionToOrderIdx
-									.get(recentActiveEditionSkill.getSubmodule()
-											.getModule().getEdition().getId()))) {
-				recentActiveEditionSkill = current;
-			}
-
+			// Continue traversal
 			List<Skill> nextSkills = skillRepository.findByPreviousEditionSkill(current);
 			for (Skill nextSkill : nextSkills) {
 				traversal.push(nextSkill);
