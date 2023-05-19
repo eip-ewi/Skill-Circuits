@@ -33,6 +33,7 @@ import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSubmoduleViewDTO;
+import nl.tudelft.skills.dto.view.module.TaskViewDTO;
 import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.PathPreference;
 import nl.tudelft.skills.model.Task;
@@ -123,6 +124,11 @@ public class ModuleService {
 
 		model.addAttribute("selectedPathId", path != null ? path.getId() : null);
 		model.addAttribute("tasksInPathIds", taskIds);
+
+		model.addAttribute("tasksAdded", personRepository.getById(person.getId()).getTasksAdded().stream()
+				.map(at -> View.convert(at, TaskViewDTO.class)).toList());
+		model.addAttribute("skillsModified", personRepository.getById(person.getId()).getSkillsModified()
+				.stream().map(at -> View.convert(at, ModuleLevelSkillViewDTO.class)).toList());
 
 		EditionDetailsDTO edition = editionApi.getEditionById(module.getEdition().getId()).block();
 		CourseDetailsDTO course = courseApi.getCourseById(edition.getCourse().getId()).block();

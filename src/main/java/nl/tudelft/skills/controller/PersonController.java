@@ -17,18 +17,25 @@
  */
 package nl.tudelft.skills.controller;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
+import nl.tudelft.librador.SpringContext;
 import nl.tudelft.skills.dto.view.TaskCompletedDTO;
+import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskCompletion;
 import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.repository.PathRepository;
+import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.TaskCompletionService;
@@ -94,4 +101,98 @@ public class PersonController {
 		List<Task> tasks = taskRepository.findAllById(completedTasks);
 		tasks.forEach(task -> taskCompletionService.addTaskCompletion(person, task));
 	}
+
+	/**
+	 * Adds a task to the user custom path.
+	 *
+	 * @param authPerson the currently authenticated person.
+	 * @param taskId     id of task to be added to custom path.
+	 */
+	@PutMapping("add/{taskId}")
+	@Transactional
+	public void addTaskToOwnPath(@AuthenticatedPerson Person authPerson, @PathVariable Long taskId) {
+		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
+		Task task = taskRepository.findByIdOrThrow(taskId);
+
+		// if first time modifying skill, put all tasks from current path in own path
+
+		if (!person.getSkillsModified().contains(task.getSkill())) {
+			addAllTaskFromCurrentPath(person, task);
+			person.getSkillsModified().add(task.getSkill());
+		}
+
+		person.getTasksAdded().add(task);
+
+	}
+
+	/**
+	 * Remove a task from the user custom path.
+	 *
+	 * @param authPerson the currently authenticated person.
+	 * @param taskId     id of task to be added to custom path.
+	 */
+	@PutMapping("remove/{taskId}")
+	@Transactional
+	public void removeTaskFromOwnPath(@AuthenticatedPerson Person authPerson, @PathVariable Long taskId) {
+		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
+		Task task = taskRepository.findByIdOrThrow(taskId);
+
+		// if first time modifying skill, put all tasks from current path in own path
+		if (!person.getSkillsModified().contains(task.getSkill())) {
+			addAllTaskFromCurrentPath(person, task);
+			person.getSkillsModified().add(task.getSkill());
+		}
+
+		person.getTasksAdded().remove(task);
+	}
+
+	/**
+	 * Resets a custom skill for a student. All tasks in the skill will be according to the selected path.
+	 *
+	 * @param authPerson the currently authenticated person.
+	 * @param skillId    id of the skill to be reset.
+	 */
+	@PostMapping("reset/{skillId}")
+	@Transactional
+	public void resetSkill(@AuthenticatedPerson Person authPerson, @PathVariable Long skillId,
+			HttpServletResponse response) throws IOException {
+		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
+		Skill skill = (SpringContext.getBean(SkillRepository.class)).findByIdOrThrow(skillId);
+
+		// Remove the skill from the set of custom skills
+		person.setSkillsModified(
+				person.getSkillsModified().stream().filter(s -> !s.getId().equals(skillId))
+						.collect(Collectors.toSet()));
+		//Remove the tasks from the custom skill
+		person.setTasksAdded(
+				person.getTasksAdded().stream().filter(t -> !t.getSkill().getId().equals(skillId))
+						.collect(Collectors.toSet()));
+
+		response.sendRedirect("/module/" + skill.getSubmodule().getModule().getId() + "#block-" + skillId);
+	}
+
+	/**
+	 * Takes all tasks from a skill on current path and adds them to the set of modified tasks.
+	 *
+	 * @param person
+	 * @param task
+	 */
+	private static void addAllTaskFromCurrentPath(SCPerson person, Task task) {
+		Long currentPathId = person.getPathPreferences().stream()
+				.filter(p -> p.getEdition().equals(task.getSkill().getSubmodule().getModule().getEdition()))
+				.map(pp -> pp.getPath().getId()).findFirst().orElse(null);
+
+		if (currentPathId == null) {
+			// add all tasks
+			task.getSkill().getTasks().forEach(t -> person.getTasksAdded().add(t));
+		} else {
+			PathRepository pathRepository = SpringContext.getBean(PathRepository.class);
+			Path path = pathRepository.getById(currentPathId);
+			task.getSkill().getTasks().forEach(t -> {
+				if (t.getPaths().contains(path))
+					person.getTasksAdded().add(t);
+			});
+		}
+	}
+
 }

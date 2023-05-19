@@ -1,8 +1,14 @@
 .bloated {
     //position: fixed;
-    top: 20%;
+    top: 30%;
     left: 20%;
     z-index: 1000;
+
+    overflow: visible; // for optional
+    width: 60%;
+    height: 40%;
+
+    font-size: 1.2rem;
 
     background-color: var(--primary-light);
 

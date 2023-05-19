@@ -89,4 +89,10 @@ public class Task {
 	@ManyToMany
 	private Set<Skill> requiredFor = new HashSet<>();
 
+	@NotNull
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@ManyToMany(mappedBy = "tasksAdded")
+	private Set<SCPerson> personsThatAddedTask = new HashSet<>();
 }

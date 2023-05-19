@@ -21,6 +21,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -40,7 +41,9 @@ import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSubmoduleViewDTO;
 import nl.tudelft.skills.model.*;
+import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.*;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.ModuleService;
 import nl.tudelft.skills.service.SkillService;
 import nl.tudelft.skills.service.TaskCompletionService;
@@ -64,6 +67,7 @@ public class SkillController {
 	private final SubmoduleRepository submoduleRepository;
 	private final CheckpointRepository checkpointRepository;
 	private final PathRepository pathRepository;
+	private final PersonRepository personRepository;
 	private final SkillService skillService;
 	private final ModuleService moduleService;
 	private final TaskCompletionService taskCompletionService;
@@ -73,7 +77,7 @@ public class SkillController {
 	public SkillController(SkillRepository skillRepository, ExternalSkillRepository externalSkillRepository,
 			AbstractSkillRepository abstractSkillRepository, TaskRepository taskRepository,
 			SubmoduleRepository submoduleRepository, CheckpointRepository checkpointRepository,
-			PathRepository pathRepository,
+			PathRepository pathRepository, PersonRepository personRepository,
 			SkillService skillService, ModuleService moduleService,
 			TaskCompletionService taskCompletionService, HttpSession session) {
 		this.skillRepository = skillRepository;
@@ -83,6 +87,7 @@ public class SkillController {
 		this.submoduleRepository = submoduleRepository;
 		this.checkpointRepository = checkpointRepository;
 		this.pathRepository = pathRepository;
+		this.personRepository = personRepository;
 		this.skillService = skillService;
 		this.moduleService = moduleService;
 		this.taskCompletionService = taskCompletionService;
@@ -198,6 +203,13 @@ public class SkillController {
 		Skill skill = skillRepository.findByIdOrThrow(patch.getId());
 		List<Task> oldTasks = skill.getTasks();
 		skillRepository.save(patch.apply(skill));
+
+		// Remove selected tasks from custom skill in person
+		skill.getPersonModifiedSkill().forEach(p -> {
+			p.setTasksAdded(p.getTasksAdded().stream().filter(t -> !patch.getRemovedItems().contains(t.getId())).collect(Collectors.toSet()));
+			personRepository.save(p);
+		});
+
 		taskRepository.findAllByIdIn(patch.getRemovedItems())
 				.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
 		taskRepository.deleteAllByIdIn(patch.getRemovedItems());

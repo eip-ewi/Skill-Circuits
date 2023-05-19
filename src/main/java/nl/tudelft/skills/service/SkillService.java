@@ -29,6 +29,7 @@ import java.util.Stack;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
@@ -36,40 +37,29 @@ import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
 import nl.tudelft.skills.model.AbstractSkill;
 import nl.tudelft.skills.model.ExternalSkill;
 import nl.tudelft.skills.model.Skill;
+import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.AbstractSkillRepository;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
 import nl.tudelft.skills.security.AuthorisationService;
 
+import nl.tudelft.skills.repository.labracore.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.stream.Collectors;
+
 @Service
+@AllArgsConstructor
 public class SkillService {
 
 	private final AbstractSkillRepository abstractSkillRepository;
 	private final TaskCompletionRepository taskCompletionRepository;
-	private final EditionRepository editionRepository;
-	private final EditionControllerApi editionApi;
 	private final CourseControllerApi courseApi;
-	private final SkillRepository skillRepository;
 	private final AuthorisationService authorisationService;
-
-	@Autowired
-	public SkillService(AbstractSkillRepository abstractSkillRepository,
-			TaskCompletionRepository taskCompletionRepository, EditionControllerApi editionApi,
-			CourseControllerApi courseApi, SkillRepository skillRepository,
-			EditionRepository editionRepository, AuthorisationService authorisationService) {
-		this.abstractSkillRepository = abstractSkillRepository;
-		this.taskCompletionRepository = taskCompletionRepository;
-		this.editionApi = editionApi;
-		this.courseApi = courseApi;
-		this.skillRepository = skillRepository;
-		this.editionRepository = editionRepository;
-		this.authorisationService = authorisationService;
-	}
+	private final PersonRepository personRepository;
 
 	/**
 	 * Deletes a skill.
@@ -83,11 +73,24 @@ public class SkillService {
 		skill.getChildren().forEach(c -> c.getParents().remove(skill));
 		if (skill instanceof Skill s) {
 			s.getTasks().forEach(t -> taskCompletionRepository.deleteAll(t.getCompletedBy()));
-			s.getFutureEditionSkills().forEach(innerSkill -> innerSkill.setPreviousEditionSkill(null));
 
+			s.getFutureEditionSkills().forEach(innerSkill -> innerSkill.setPreviousEditionSkill(null));
 			if (s.getPreviousEditionSkill() != null) {
 				s.getPreviousEditionSkill().getFutureEditionSkills().remove(s);
 			}
+
+			// Remove references from user if they were customized skils
+			s.getPersonModifiedSkill().forEach(p -> {
+				// Remove skill from list of custom modified skills
+				SCPerson person = personRepository.findByIdOrThrow(p.getId());
+				person.getSkillsModified().remove(s);
+
+				// Remove the tasks from the custom skill
+				person.setTasksAdded(
+						person.getTasksAdded().stream().filter(t -> !t.getSkill().getId().equals(s.getId()))
+								.collect(Collectors.toSet()));
+				personRepository.save(person);
+			});
 		}
 		abstractSkillRepository.delete(skill);
 		return skill;

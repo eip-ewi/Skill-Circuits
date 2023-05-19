@@ -32,6 +32,10 @@ import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.security.AuthorisationService;
+import nl.tudelft.skills.repository.AbstractSkillRepository;
+import nl.tudelft.skills.repository.TaskCompletionRepository;
+import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.test.TestDatabaseLoader;
 import nl.tudelft.skills.test.TestUserDetailsService;
 
@@ -63,6 +67,8 @@ public class SkillServiceTest {
 	private final CourseControllerApi courseApi;
 	private final EditionControllerApi editionApi;
 
+	private final PersonRepository personRepository;
+
 	private TestDatabaseLoader db;
 	private final LocalDateTime localDateTime;
 
@@ -72,7 +78,7 @@ public class SkillServiceTest {
 			EditionControllerApi editionApi, CourseControllerApi courseApi,
 			SkillRepository skillRepository, ModuleRepository moduleRepository,
 			ExternalSkillRepository externalSkillRepository, EditionRepository editionRepository,
-			AuthorisationService authorisationService, RoleControllerApi roleApi) {
+			AuthorisationService authorisationService, RoleControllerApi roleApi, PersonRepository personRepository) {
 		this.abstractSkillRepository = abstractSkillRepository;
 		this.taskCompletionRepository = taskCompletionRepository;
 		this.externalSkillRepository = externalSkillRepository;
@@ -80,6 +86,7 @@ public class SkillServiceTest {
 		this.moduleRepository = moduleRepository;
 		this.taskRepository = taskRepository;
 		this.skillRepository = skillRepository;
+		this.personRepository = personRepository;
 
 		// The service is not mocked to test the specifics of whether an edition is shown because it
 		// is visible, or because the person is at least a teacher in the edition
@@ -92,8 +99,7 @@ public class SkillServiceTest {
 		this.courseApi = courseApi;
 		this.editionApi = editionApi;
 
-		this.skillService = new SkillService(abstractSkillRepository, taskCompletionRepository, editionApi,
-				courseApi, skillRepository, editionRepository, authorisationService);
+		this.skillService = new SkillService(abstractSkillRepository, taskCompletionRepository, courseApi, authorisationService, personRepository);
 	}
 
 	@Test

@@ -40,7 +40,7 @@
             border: 1px solid var(--primary-light);
             color: var(--primary-light);
         }
-        &[data-staff="false"] {
+        &:not([data-staff="true"]) {
             @include button(
                 var(--primary-dark),
                 var(--primary-light),
@@ -50,10 +50,12 @@
                 var(--primary-green)
             );
         }
-//         &[disabled="true"]{
-//                     background-color: var(--grey);
-//                     border: 1px solid var(--primary-light);
-//         }
+        &:disabled, &:disabled:hover {
+//             background-color: var(--grey-700);
+//             border: 1px solid var(--primary-light);
+//             color: var(--primary-dark);
+//             cursor: default;
+        }
 
         &__edit {
             background-color: var(--primary-dark);

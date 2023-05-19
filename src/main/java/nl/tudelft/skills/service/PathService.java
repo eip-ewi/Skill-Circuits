@@ -22,7 +22,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.patch.PathPatchDTO;
+import nl.tudelft.skills.dto.view.edition.PathViewDTO;
 import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.PathRepository;
@@ -90,4 +92,11 @@ public class PathService {
 		return pathRepository.findById(pathId).get()
 				.getTasks().stream().map(t -> t.getId()).filter(id -> id.equals(taskId)).count() >= 1;
 	}
+
+	public PathViewDTO getPath(Long pathId) {
+		if (pathId == null)
+			return null;
+		return View.convert(pathRepository.getById(pathId), PathViewDTO.class);
+	}
+
 }

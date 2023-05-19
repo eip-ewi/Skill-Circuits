@@ -50,10 +50,20 @@
         }
     }
 
+    &__button__symbol {
+        border: none;
+        background-color: var(--primary-light);
+        &:hover,
+        &:focus-visible {
+            color: var(--primary-green);
+            cursor: pointer;
+        }
+    }
+
     &__dropdown {
         flex-direction: column;
         right: 1rem;
-        background-color: var(--background-colour);
+        background-color: var(--primary-light);
         border: 1px solid var(--primary-dark);
         list-style: none;
         padding: 0.5rem 0;

@@ -53,12 +53,23 @@
 
             <div class="skill-paths">
                 <div>
-                    <p style="color: gray">Your path</p>
-                    <!--TODO: do proper color styling, display path name before editing -->
-                    <ul data-edit="always" class="items">
-                        <!--                    TODO: change this later to my path -->
+                    <span th:if="${#sets.contains(skillsModified, block)}" style="opacity: 80%">
+                        Your path
+                    </span>
+                    <span
+                        class="custom-path-name"
+                        th:unless="${#sets.contains(skillsModified, block)}"
+                        th:text="${@pathService.getPath(selectedPathId) == null ? 'No path' : @pathService.getPath(selectedPathId).name}"
+                        style="color: grey"></span>
+
+                    <ul
+                        data-edit="always"
+                        class="items left-paths"
+                        th:id="|left-tasks-${block.id}|">
                         <th:block th:each="item, iter : ${block.items}">
-                            <th:block th:if="${item.visible}">
+                            <th:block
+                                th:if="${(item.visible and not #sets.contains(skillsModified, block))
+                                                or (#sets.contains(skillsModified, block) and #sets.contains(tasksAdded, item))} ">
                                 <li layout:replace="~{task/view :: item}"></li>
                             </th:block>
                         </th:block>
@@ -68,10 +79,20 @@
                     </ul>
                 </div>
                 <div>
-                    <p style="color: gray">Other Paths</p>
+                    <span style="opacity: 80%">Other paths</span>
                     <th:block th:each="path : ${@editionService.getPaths(circuit.edition.id)}">
                         <li layout:replace="~{path/view :: path}"></li>
                     </th:block>
+                </div>
+                <div>
+                    <form th:action="@{|/person/reset/${block.id}|}" method="post">
+                        <button
+                            class="button reset-skill-button"
+                            th:classappend="${#sets.contains(skillsModified, block)} ? '' : 'hidden'"
+                            type="submit">
+                            Reset
+                        </button>
+                    </form>
                 </div>
             </div>
 
@@ -81,6 +102,7 @@
 
     <th:block layout:fragment="script">
         <div layout:replace="~{path/view :: script}"></div>
+        <div layout:replace="~{task/leftview :: script}"></div>
 
         <script>
             // function mouseEnterGroup() {
@@ -109,7 +131,7 @@
             }
 
             document.addEventListener("DOMContentLoaded", function () {
-                $(".block:not(.bloated)").click(openBloatedSkill); // TODO add skill id
+                $(".block:not(.bloated)").click(openBloatedSkill);
 
                 const myDialog = document.querySelectorAll(".block.bloated");
                 myDialog.forEach(d =>
@@ -117,6 +139,13 @@
                         if (event.target === d) d.close();
                     })
                 );
+
+                // Open skill overlay if url has location information
+                let openBlock = window.location.hash;
+                if (openBlock != "") {
+                    let blockOverlay = openBlock.substring(1) + "-bloated-overlay";
+                    toggleOverlay(`${blockOverlay}`);
+                }
             });
         </script>
     </th:block>
