@@ -26,15 +26,22 @@
         data-edit="always"
         class="item"
         th:id="|item-${item.id}|"
-        th:data-index="${iter.size - iter.count}"
-        th:data-index-initial="${iter.size - iter.count}"
+        th:data-item="${item.id}"
+        th:data-path-ids="${item.pathIds}"
+        th:data-index="${iter == null} ? 0 : ${iter.size - iter.count}"
+        th:data-index-initial="${iter == null} ? 0 : ${iter.size - iter.count}"
         th:classappend="${level == 'module'} ? ${item.completed ? 'completed' : ''} : ${''}"
         layout:fragment="item">
+        <!-- TODO fix iter, if this is in the MR, mara did not do her job -->
         <input th:if="${canEdit}" name="id" type="hidden" th:value="${item.id}" />
         <th:block layout:fragment="item-decoration"></th:block>
         <th:block layout:fragment="item-content-element">
             <th:block layout:fragment="item-content">
-                <div data-edit="always" th:id="|item-${item.id}-content|" class="item__content">
+                <div
+                    style="flex-grow: 1"
+                    data-edit="always"
+                    th:id="|item-${item.id}-content|"
+                    class="item__content">
                     <th:block layout:fragment="item-before-content"></th:block>
                     <th:block layout:fragment="item-name">
                         <span
@@ -59,10 +66,12 @@
                             placeholder="Name"
                             th:value="${item.name}" />
                     </th:block>
-                    <th:block layout:fragment="item-after-content"></th:block>
+                    <th:block layout:fragment="item-end-content"></th:block>
                 </div>
             </th:block>
         </th:block>
+        <th:block layout:fragment="item-after-content"></th:block>
+
         <div class="item__buttons" th:id="|item-${item.id}-buttons|" data-edit="only">
             <th:block layout:fragment="item-buttons">
                 <th:block th:if="${canEdit}">

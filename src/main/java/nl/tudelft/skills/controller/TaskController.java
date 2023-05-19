@@ -26,6 +26,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.dto.view.module.TaskViewDTO;
+import nl.tudelft.skills.model.Path;
+import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.repository.TaskRepository;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -54,4 +62,21 @@ public class TaskController {
 
 		return ResponseEntity.ok().build();
 	}
+
+	@GetMapping("{taskId}")
+	public String getTask(@PathVariable Long taskId, Model model) {
+		Task task = taskRepository.findByIdOrThrow(taskId);
+		model.addAttribute("item", View.convert(task, TaskViewDTO.class));
+		model.addAttribute("canEdit", false);
+		return "task/view";
+	}
+
+	@GetMapping("{taskId}/right")
+	public String getTaskForCustomPath(@PathVariable Long taskId, Model model) {
+		Task task = taskRepository.findByIdOrThrow(taskId);
+		model.addAttribute("item", View.convert(task, TaskViewDTO.class));
+		model.addAttribute("canEdit", false);
+		return "task/leftview";
+	}
+
 }

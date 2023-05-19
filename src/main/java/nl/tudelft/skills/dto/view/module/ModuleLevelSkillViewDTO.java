@@ -63,6 +63,7 @@ public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
 	private List<Long> requiredTaskIds;
 	@NotNull
 	@Builder.Default
+	@EqualsAndHashCode.Exclude
 	private Boolean completedRequiredTasks = false;
 
 	@Override

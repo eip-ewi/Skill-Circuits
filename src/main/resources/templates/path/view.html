@@ -23,17 +23,20 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <th:block layout:fragment="path">
-        <div class="paths" th:data-id="${path.id}">
-            <!--TODO sensible name please-->
-            <p th:text="${path.name}" th:id="path-name" th:class="skill-left-path"></p>
-            <span class="fa-solid fa-caret-down"></span>
+        <div class="right-path" th:data-id="${path.id}">
+
+            <div th:class="skill-right-path">
+                <p th:text="${path.name}"></p>
+                <span class="fa-solid fa-caret-down"></span>
+            </div>
 
             <div class="content" style="padding: 0rem; display: none">
-                <ul class="left-paths">
+                <ul class="right-path-ul">
                     <th:block th:each="item, iter : ${block.items}">
-                        <!--                        TODO: change from item not visible to item not in own path for custom path-->
                         <th:block
-                            th:if="${@pathService.isTaskInPath(item.id, path.id) and not item.visible}">
+                            th:if="${@pathService.isTaskInPath(item.id, path.id)
+                            and not ((item.visible and not #sets.contains(skillsModified, block))
+                                                or (#sets.contains(skillsModified, block) and #sets.contains(tasksAdded, item)))}">
                             <li layout:replace="~{task/leftview :: item}"></li>
                         </th:block>
                     </th:block>
@@ -49,13 +52,13 @@
         function expandAlternativePath() {
             let pathId = $(this).data("id");
             // TODO: get skill id
-            let content = this.nextElementSibling.nextElementSibling;
+            let content = this.nextElementSibling;
 
             let before = content.style.display;
 
             // Close all other paths in the left view of the skill
             //TODO: do this only in opened skill
-            $(".skill-left-path").each(closeLeftPath);
+            $(".skill-right-path").each(closeLeftPath);
 
             // Toggle current left path in skill
             if (before === "block") {
@@ -66,12 +69,12 @@
         }
 
         function closeLeftPath() {
-            let content = this.nextElementSibling.nextElementSibling;
+            let content = this.nextElementSibling;
             content.style.display = "none";
         }
 
         document.addEventListener("DOMContentLoaded", function () {
-            $(".skill-left-path").click(expandAlternativePath);
+            $(".skill-right-path").click(expandAlternativePath);
         });
     </script>
 </html>

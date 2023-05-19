@@ -67,12 +67,14 @@
                     th:class="|fa-solid fa-${item.type.icon}|"></span>
                 <th:block layout:replace="~{task/edit :: icon}"></th:block>
             </th:block>
-            <th:block layout:fragment="item-after-content">
-                <span th:if="${canEdit}" th:text="|(${item.completedCount})|"></span>
+            <th:block layout:fragment="item-end-content">
                 <span
                     th:if="${item.link}"
                     th:id="|item-${item.id}-link-icon|"
                     class="fa-solid fa-link always_visible"></span>
+            </th:block>
+            <th:block layout:fragment="item-after-content">
+                <span th:if="${canEdit}" th:text="|(${item.completedCount})|"></span>
                 <div class="hover_input" data-edit="only">
                     <input
                         th:data-initial="${item.link}"
@@ -84,6 +86,11 @@
                         th:value="${item.link}" />
                     <span data-edit="only" class="fa-solid fa-link always_visible"></span>
                 </div>
+                <button
+                    th:if="${not canEdit}"
+                    class="circuit__button__symbol fa-solid fa-trash"
+                    style="margin-left: auto"
+                    th:onclick="|removeTaskFromEditedSkill(${item.id})|"></button>
             </th:block>
         </th:block>
     </th:block>

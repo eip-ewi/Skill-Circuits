@@ -42,6 +42,9 @@
     &[draggable="true"] {
         cursor: grab;
     }
+    &[draggable="false"] {
+        cursor: pointer; // in student view, block preview is clickable
+    }
 
     &[data-editing="true"] {
         z-index: 200;
@@ -207,10 +210,18 @@
     @include show-only-when("*", ":hover");
 }
 
-.paths {
+.skill-right-path {
+    display: flex;
+    gap: 0.5rem;
+    &:hover,
+    &:focus-within {
+        color: var(--primary-green);
+        cursor: pointer;
+    }
+}
+.right-path {
     align-items: stretch;
-    display: grid;
-    color: var(--grey-500);
+    //     display: grid;
     gap: 0.5rem;
     grid-template-columns: 1fr 1fr;
     min-height: 2rem;
@@ -222,15 +233,16 @@
     }
 }
 
-li ~ .empty-path-text {
+.empty-path-text:not(:first-child:last-child) {
     display: none;
 }
 
 .skill-paths {
     align-items: stretch;
+
     display: grid;
     color: var(--primary-dark);
-    gap: 0.5rem;
+    gap: 6rem;
     grid-template-columns: 1fr 1fr;
     min-height: 2rem;
     min-width: 2rem;

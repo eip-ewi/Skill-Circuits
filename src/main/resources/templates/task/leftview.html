@@ -19,47 +19,48 @@
 -->
 <!DOCTYPE html>
 <html
-        lang="en"
-        xmlns:th="http://www.thymeleaf.org"
-        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-<th:block layout:fragment="item">
-    <th:block layout:replace="~{item/view :: item}">
-        <th:block layout:fragment="item-content-element">
-            <a
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <th:block layout:fragment="item">
+        <th:block layout:replace="~{item/view :: item}">
+            <th:block layout:fragment="item-content-element">
+                <a
                     th:if="${item.link}"
                     th:href="${item.link}"
                     target="_blank"
                     th:id="|item-${item.id}-link|">
-                <th:block layout:replace="~{item/view :: item-content}"></th:block>
-            </a>
-            <th:block th:unless="${item.link}">
-                <th:block layout:replace="~{item/view :: item-content}"></th:block>
+                    <th:block layout:replace="~{item/view :: item-content}"></th:block>
+                </a>
+                <th:block th:unless="${item.link}">
+                    <th:block layout:replace="~{item/view :: item-content}"></th:block>
+                </th:block>
             </th:block>
-        </th:block>
-        <th:block layout:fragment="item-decoration">
-            <button class="fa-solid fa-arrow-left"
-                    th:onclick="|addTaskToEditedSkill(${item.id})|">
-            </button>
+            <th:block layout:fragment="item-decoration">
+                <button
+                    class="circuit__button__symbol fa-solid fa-plus"
+                    th:onclick="|addTaskToEditedSkill(${item.id})|"></button>
 
-            <button
+                <button
                     class="item__button"
-                    th:data-disabled="true"
+                    data-staff="true"
+                    disabled
                     th:text="${item.time}"></button>
-        </th:block>
-        <th:block layout:fragment="item-before-content">
+            </th:block>
+            <th:block layout:fragment="item-before-content">
                 <span
-                        th:id="|item-${item.id}-icon|"
-                        th:class="|fa-solid fa-${item.type.icon}|"></span>
-            <th:block layout:replace="~{task/edit :: icon}"></th:block>
-        </th:block>
-        <th:block layout:fragment="item-after-content">
-            <span th:if="${canEdit}" th:text="|(${item.completedCount})|"></span>
-            <span
+                    th:id="|item-${item.id}-icon|"
+                    th:class="|fa-solid fa-${item.type.icon}|"></span>
+                <th:block layout:replace="~{task/edit :: icon}"></th:block>
+            </th:block>
+            <th:block layout:fragment="item-after-content">
+                <span th:if="${canEdit}" th:text="|(${item.completedCount})|"></span>
+                <span
                     th:if="${item.link}"
                     th:id="|item-${item.id}-link-icon|"
                     class="fa-solid fa-link always_visible"></span>
-            <div class="hover_input" data-edit="only">
-                <input
+                <div class="hover_input" data-edit="only">
+                    <input
                         th:data-initial="${item.link}"
                         placeholder="Task link"
                         data-edit="only"
@@ -67,16 +68,114 @@
                         type="url"
                         name="link"
                         th:value="${item.link}" />
-                <span data-edit="only" class="fa-solid fa-link always_visible"></span>
-            </div>
+                    <span data-edit="only" class="fa-solid fa-link always_visible"></span>
+                </div>
+            </th:block>
         </th:block>
     </th:block>
-</th:block>
 
-    <script layout:fragment="script">
-        function addTaskToEditedSkill(taskId){
+    <script layout:fragment="script" th:inline="javascript">
+        function addTaskToEditedSkill(taskId) {
+            // Send custom path update if user is authenticate
+            // TODO: probably this is undesirable for teacher, even in student view
 
+            /*<![CDATA[*/
+            const personId = /*[[${@authorisationService.authPerson?.id}]]*/ null;
+            /*]]>*/
+            if (personId !== null) {
+                // If there is an authenticated person, also update on the server.
+                $.ajax({
+                    type: "PUT",
+                    url: "/person/add/" + taskId,
+                    processData: false,
+                    contentType: "application/json",
+                    success: () => {},
+                });
+            }
+
+            // Remove task from right side
+            let elems = document.querySelectorAll(`.item[data-item="${taskId}"`);
+
+            let block = elems[0].closest(".block");
+            elems.forEach(e => e.remove());
+            // Add task on left side (to custom path)
+            let leftUl = block.querySelector(".left-paths");
+
+            // req task element (to be added to custom path)
+            $.ajax({
+                type: "GET",
+                url: "/task/" + taskId,
+                processData: false,
+                contentType: "text/html",
+                success: html => {
+                    const task = $($("<div/>").append(html).children()[0]);
+                    $(leftUl).append(task);
+                },
+            });
+            // Change <PathName> to "Your Path"
+            let customPathName = block.querySelector(".custom-path-name");
+            if (customPathName != null) customPathName.textContent = "Your path";
+
+            // Display Reset skill button
+            block.querySelector(".reset-skill-button").classList.remove("hidden");
+        }
+        function removeTaskFromEditedSkill(taskId) {
+            // Send custom path update if user is authenticated
+            // TODO: probably this is undesirable for teacher, even in student view
+
+            /*<![CDATA[*/
+            const personId = /*[[${@authorisationService.authPerson?.id}]]*/ null;
+            /*]]>*/
+            if (personId !== null) {
+                // If there is an authenticated person, also update on the server.
+                $.ajax({
+                    type: "PUT",
+                    url: "/person/remove/" + taskId,
+                    processData: false,
+                    contentType: "application/json",
+                    success: () => {},
+                });
+            }
+
+            // Remove task from left side (from custom path)
+            let elem = document.getElementById("item-" + taskId);
+
+            let block = elem.closest(".block");
+            let paths = elem.dataset.pathIds;//value("pathIds");
+
+            elem.remove();
+            // Add task on right side ("other paths")
+            //TODO: loop through all paths, add element to lists on right side
+            let rightPaths = block.getElementsByClassName("right-path");
+            console.log(block);
+            console.log(rightPaths);
+
+            for (let rightPath of rightPaths){
+                if (paths.includes(rightPath.dataset.id)){
+
+                    let rightUl = rightPath.querySelector(".right-path-ul");
+
+                    // req task element todo: change endpoint to match right side item
+                    $.ajax({
+                            type: "GET",
+                            url: "/task/" + taskId + "/right",
+                            processData: false,
+                            contentType: "text/html",
+                            success: html => {
+
+                                const task = $($("<div/>").append(html).children()[0]);
+                                $(rightUl).append(task);
+                        },
+                    });
+                }
+            }
+
+            // Change <PathName> to "Your Path"
+            let customPathName = block.querySelector(".custom-path-name");
+            if (customPathName != null) customPathName.textContent = "Your path";
+
+            // Display Reset skill button
+            block.querySelector(".reset-skill-button").classList.remove("hidden");
         }
     </script>
-
 </html>

@@ -80,7 +80,9 @@
                         <li layout:replace="~{task/view :: item}"></li>
                     </th:block>
                     <!--                Task preview for student-->
-                    <th:block th:if="${level == 'module' and not canEdit and item.visible}">
+                    <th:block
+                        th:if="${level == 'module' and not canEdit and ((item.visible and not #sets.contains(skillsModified, block))
+                                                or (#sets.contains(skillsModified, block) and #sets.contains(tasksAdded, item)))}">
                         <li style="display: inline" layout:replace="~{task/preview :: item}"></li>
                     </th:block>
                     <th:block th:unless="${level == 'module'}">
