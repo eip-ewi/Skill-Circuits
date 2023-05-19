@@ -177,7 +177,7 @@ public class PersonController {
 	 * @param person
 	 * @param task
 	 */
-	private static void addAllTaskFromCurrentPath(SCPerson person, Task task) {
+	void addAllTaskFromCurrentPath(SCPerson person, Task task) {
 		Long currentPathId = person.getPathPreferences().stream()
 				.filter(p -> p.getEdition().equals(task.getSkill().getSubmodule().getModule().getEdition()))
 				.map(pp -> pp.getPath().getId()).findFirst().orElse(null);

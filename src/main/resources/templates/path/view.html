@@ -24,7 +24,6 @@
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <th:block layout:fragment="path">
         <div class="right-path" th:data-id="${path.id}">
-
             <div th:class="skill-right-path">
                 <p th:text="${path.name}"></p>
                 <span class="fa-solid fa-caret-down"></span>
@@ -37,7 +36,7 @@
                             th:if="${@pathService.isTaskInPath(item.id, path.id)
                             and not ((item.visible and not #sets.contains(skillsModified, block))
                                                 or (#sets.contains(skillsModified, block) and #sets.contains(tasksAdded, item)))}">
-                            <li layout:replace="~{task/leftview :: item}"></li>
+                            <li layout:replace="~{task/inactiveview :: item}"></li>
                         </th:block>
                     </th:block>
                     <h3 style="font-size: 0.8rem" class="empty-path-text">
@@ -51,16 +50,14 @@
     <script layout:fragment="script">
         function expandAlternativePath() {
             let pathId = $(this).data("id");
-            // TODO: get skill id
             let content = this.nextElementSibling;
 
             let before = content.style.display;
 
-            // Close all other paths in the left view of the skill
-            //TODO: do this only in opened skill
-            $(".skill-right-path").each(closeLeftPath);
+            // Close all other paths in the right view of the skill
+            $(".skill-right-path").each(closeRightPath);
 
-            // Toggle current left path in skill
+            // Toggle current right path in skill
             if (before === "block") {
                 content.style.display = "none";
             } else {
@@ -68,7 +65,7 @@
             }
         }
 
-        function closeLeftPath() {
+        function closeRightPath() {
             let content = this.nextElementSibling;
             content.style.display = "none";
         }

@@ -62,10 +62,7 @@
                         th:text="${@pathService.getPath(selectedPathId) == null ? 'No path' : @pathService.getPath(selectedPathId).name}"
                         style="color: grey"></span>
 
-                    <ul
-                        data-edit="always"
-                        class="items left-paths"
-                        th:id="|left-tasks-${block.id}|">
+                    <ul data-edit="always" class="items custom-path-tasks">
                         <th:block th:each="item, iter : ${block.items}">
                             <th:block
                                 th:if="${(item.visible and not #sets.contains(skillsModified, block))
@@ -102,7 +99,7 @@
 
     <th:block layout:fragment="script">
         <div layout:replace="~{path/view :: script}"></div>
-        <div layout:replace="~{task/leftview :: script}"></div>
+        <div layout:replace="~{task/inactiveview :: script}"></div>
 
         <script>
             // function mouseEnterGroup() {

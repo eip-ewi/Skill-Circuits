@@ -19,14 +19,21 @@ package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
+import java.io.IOException;
 import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
 
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.TaskCompletedDTO;
+import nl.tudelft.skills.model.PathPreference;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskCompletion;
+import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.repository.PathPreferenceRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.TaskCompletionService;
@@ -46,14 +53,17 @@ public class PersonControllerTest extends ControllerTest {
 	private final PersonRepository personRepository;
 	private final TaskRepository taskRepository;
 	private final TaskCompletionService taskCompletionService;
+	private final PathPreferenceRepository pathPreferenceRepository;
 
 	@Autowired
 	public PersonControllerTest(PersonRepository personRepository, TaskRepository taskRepository,
-			TaskCompletionService taskCompletionService) {
+			TaskCompletionService taskCompletionService,
+			PathPreferenceRepository pathPreferenceRepository) {
 		this.personRepository = personRepository;
 		this.personController = new PersonController(taskRepository, personRepository, taskCompletionService);
 		this.taskRepository = taskRepository;
 		this.taskCompletionService = taskCompletionService;
+		this.pathPreferenceRepository = pathPreferenceRepository;
 	}
 
 	@Test
@@ -106,4 +116,71 @@ public class PersonControllerTest extends ControllerTest {
 		assertThat(taskCompletedDTO.getShowSkills()).hasSize(0);
 	}
 
+	@Test
+	void addAllTaskFromCurrentPath() {
+		SCPerson person = db.getPerson();
+
+		PathPreference pathPreference = PathPreference.builder().path(db.getPathFinderPath())
+				.edition(db.getEditionRL()).person(db.getPerson()).build();
+		pathPreferenceRepository.save(pathPreference);
+
+		Task task = db.getTaskDo12ae();
+		personController.addAllTaskFromCurrentPath(person, task);
+
+		assertThat(db.getPerson().getTasksAdded()).contains(db.getTaskRead12());
+	}
+
+	@Test
+	void resetSkill() throws IOException {
+		SCPerson person = db.getPerson();
+		person.getSkillsModified().add(db.getSkillImplication());
+		person.getTasksAdded().add(db.getTaskDo12ae());
+		personRepository.save(person);
+
+		Person authPerson = Person.builder().id(person.getId()).build();
+
+		PathPreference pathPreference = PathPreference.builder().path(db.getPathFinderPath())
+				.edition(db.getEditionRL()).person(db.getPerson()).build();
+		pathPreferenceRepository.save(pathPreference);
+
+		personController.resetSkill(authPerson, db.getSkillImplication().getId(),
+				mock(HttpServletResponse.class));
+
+		//		assertThat(db.getPerson().getTasksAdded()).contains(db.getTaskRead12());
+		assertThat(db.getPerson().getTasksAdded()).doesNotContain(db.getTaskDo12ae());
+		assertThat(db.getPerson().getSkillsModified()).doesNotContain(db.getSkillImplication());
+	}
+
+	@Test
+	void addTaskToOwnPath() throws IOException {
+		SCPerson person = db.getPerson();
+
+		Person authPerson = Person.builder().id(person.getId()).build();
+
+		PathPreference pathPreference = PathPreference.builder().path(db.getPathFinderPath())
+				.edition(db.getEditionRL()).person(db.getPerson()).build();
+		pathPreferenceRepository.save(pathPreference);
+
+		personController.addTaskToOwnPath(authPerson, db.getTaskDo12ae().getId());
+
+		assertThat(db.getPerson().getTasksAdded()).contains(db.getTaskRead12());
+		assertThat(db.getPerson().getTasksAdded()).contains(db.getTaskDo12ae());
+		assertThat(db.getPerson().getSkillsModified()).contains(db.getSkillImplication());
+	}
+
+	@Test
+	void removeTaskFromOwnPath() throws IOException {
+		SCPerson person = db.getPerson();
+
+		Person authPerson = Person.builder().id(person.getId()).build();
+
+		PathPreference pathPreference = PathPreference.builder().path(db.getPathFinderPath())
+				.edition(db.getEditionRL()).person(db.getPerson()).build();
+		pathPreferenceRepository.save(pathPreference);
+
+		personController.removeTaskFromOwnPath(authPerson, db.getTaskRead12().getId());
+
+		assertThat(db.getPerson().getTasksAdded()).doesNotContain(db.getTaskRead12());
+		assertThat(db.getPerson().getSkillsModified()).contains(db.getSkillImplication());
+	}
 }

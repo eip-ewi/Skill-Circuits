@@ -77,7 +77,6 @@
     <script layout:fragment="script" th:inline="javascript">
         function addTaskToEditedSkill(taskId) {
             // Send custom path update if user is authenticate
-            // TODO: probably this is undesirable for teacher, even in student view
 
             /*<![CDATA[*/
             const personId = /*[[${@authorisationService.authPerson?.id}]]*/ null;
@@ -98,8 +97,8 @@
 
             let block = elems[0].closest(".block");
             elems.forEach(e => e.remove());
-            // Add task on left side (to custom path)
-            let leftUl = block.querySelector(".left-paths");
+            // Add task to custom path)
+            let leftUl = block.querySelector(".custom-path-tasks");
 
             // req task element (to be added to custom path)
             $.ajax({
@@ -118,10 +117,15 @@
 
             // Display Reset skill button
             block.querySelector(".reset-skill-button").classList.remove("hidden");
+
+            // Hide icon from skill preview
+            let icon = document.querySelector("#item-" + taskId + "-icon");
+            console.log(icon);
+            icon.classList.remove("hidden");
         }
+
         function removeTaskFromEditedSkill(taskId) {
             // Send custom path update if user is authenticated
-            // TODO: probably this is undesirable for teacher, even in student view
 
             /*<![CDATA[*/
             const personId = /*[[${@authorisationService.authPerson?.id}]]*/ null;
@@ -141,30 +145,25 @@
             let elem = document.getElementById("item-" + taskId);
 
             let block = elem.closest(".block");
-            let paths = elem.dataset.pathIds;//value("pathIds");
+            let paths = elem.dataset.pathIds; //value("pathIds");
 
             elem.remove();
             // Add task on right side ("other paths")
-            //TODO: loop through all paths, add element to lists on right side
             let rightPaths = block.getElementsByClassName("right-path");
-            console.log(block);
-            console.log(rightPaths);
 
-            for (let rightPath of rightPaths){
-                if (paths.includes(rightPath.dataset.id)){
-
+            for (let rightPath of rightPaths) {
+                if (paths.includes(rightPath.dataset.id)) {
                     let rightUl = rightPath.querySelector(".right-path-ul");
 
-                    // req task element todo: change endpoint to match right side item
+                    // req task element
                     $.ajax({
-                            type: "GET",
-                            url: "/task/" + taskId + "/right",
-                            processData: false,
-                            contentType: "text/html",
-                            success: html => {
-
-                                const task = $($("<div/>").append(html).children()[0]);
-                                $(rightUl).append(task);
+                        type: "GET",
+                        url: "/task/" + taskId + "/right",
+                        processData: false,
+                        contentType: "text/html",
+                        success: html => {
+                            const task = $($("<div/>").append(html).children()[0]);
+                            $(rightUl).append(task);
                         },
                     });
                 }
@@ -176,6 +175,11 @@
 
             // Display Reset skill button
             block.querySelector(".reset-skill-button").classList.remove("hidden");
+
+            // Hide icon from skill preview
+            let icon = document.querySelector("#item-" + taskId + "-icon");
+            console.log(icon);
+            icon.classList.add("hidden");
         }
     </script>
 </html>

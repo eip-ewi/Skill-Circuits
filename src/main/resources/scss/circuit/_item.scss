@@ -50,11 +50,8 @@
                 var(--primary-green)
             );
         }
-        &:disabled, &:disabled:hover {
-//             background-color: var(--grey-700);
-//             border: 1px solid var(--primary-light);
-//             color: var(--primary-dark);
-//             cursor: default;
+        &:disabled,
+        &:disabled:hover {
         }
 
         &__edit {

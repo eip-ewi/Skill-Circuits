@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 
 import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.api.CourseControllerApi;
-import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
 import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
 import nl.tudelft.skills.model.AbstractSkill;
@@ -40,17 +39,12 @@ import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.AbstractSkillRepository;
-import nl.tudelft.skills.repository.EditionRepository;
-import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.security.AuthorisationService;
 
-import nl.tudelft.skills.repository.labracore.PersonRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor

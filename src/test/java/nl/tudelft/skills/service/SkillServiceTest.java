@@ -31,11 +31,11 @@ import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.*;
-import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.repository.AbstractSkillRepository;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.test.TestDatabaseLoader;
 import nl.tudelft.skills.test.TestUserDetailsService;
 

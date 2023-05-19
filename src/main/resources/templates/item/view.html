@@ -32,7 +32,6 @@
         th:data-index-initial="${iter == null} ? 0 : ${iter.size - iter.count}"
         th:classappend="${level == 'module'} ? ${item.completed ? 'completed' : ''} : ${''}"
         layout:fragment="item">
-        <!-- TODO fix iter, if this is in the MR, mara did not do her job -->
         <input th:if="${canEdit}" name="id" type="hidden" th:value="${item.id}" />
         <th:block layout:fragment="item-decoration"></th:block>
         <th:block layout:fragment="item-content-element">
