@@ -41,7 +41,6 @@ import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSubmoduleViewDTO;
 import nl.tudelft.skills.model.*;
-import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.ModuleService;
@@ -206,7 +205,8 @@ public class SkillController {
 
 		// Remove selected tasks from custom skill in person
 		skill.getPersonModifiedSkill().forEach(p -> {
-			p.setTasksAdded(p.getTasksAdded().stream().filter(t -> !patch.getRemovedItems().contains(t.getId())).collect(Collectors.toSet()));
+			p.setTasksAdded(p.getTasksAdded().stream()
+					.filter(t -> !patch.getRemovedItems().contains(t.getId())).collect(Collectors.toSet()));
 			personRepository.save(p);
 		});
 

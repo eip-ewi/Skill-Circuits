@@ -17,6 +17,9 @@
  */
 package nl.tudelft.skills.dto.view.module;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -27,9 +30,6 @@ import nl.tudelft.skills.dto.view.ItemView;
 import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskType;
-
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Data
 @Builder

@@ -1,0 +1,162 @@
+#
+# Skill Circuits
+# Copyright (C) 2022 - Delft University of Technology
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+
+databaseChangeLog:
+- changeSet:
+    id: 1684509725437-1
+    author: mars (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: CONSTRAINT_21
+            name: person_modified_skill_id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: CONSTRAINT_21
+            name: skills_modified_id
+            type: BIGINT
+        tableName: scperson_skills_modified
+- changeSet:
+    id: 1684509725437-2
+    author: mars (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: CONSTRAINT_F8
+            name: persons_that_added_task_id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: CONSTRAINT_F8
+            name: tasks_added_id
+            type: BIGINT
+        tableName: scperson_tasks_added
+- changeSet:
+    id: 1684509725437-3
+    author: mars (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: skills_modified_id
+        indexName: FKeoxxf3njxk8axo1mjbfu3m7hp_INDEX_2
+        tableName: scperson_skills_modified
+- changeSet:
+    id: 1684509725437-4
+    author: mars (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: persons_that_added_task_id
+        indexName: FKn444l2wfkopnym2dgvimw9ojo_INDEX_F
+        tableName: scperson_tasks_added
+- changeSet:
+    id: 1684509725437-5
+    author: mars (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: tasks_added_id
+        indexName: FKrtd50gfy2hcf3h69oobl6klh3_INDEX_F
+        tableName: scperson_tasks_added
+- changeSet:
+    id: 1684509725437-6
+    author: mars (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: person_modified_skill_id
+        indexName: FKsullxuw6a27c690fnuopkhape_INDEX_2
+        tableName: scperson_skills_modified
+- changeSet:
+    id: 1684509725437-7
+    author: mars (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: skills_modified_id
+        baseTableName: scperson_skills_modified
+        constraintName: FKeoxxf3njxk8axo1mjbfu3m7hp
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: id
+        referencedTableName: skill
+        validate: true
+- changeSet:
+    id: 1684509725437-8
+    author: mars (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: persons_that_added_task_id
+        baseTableName: scperson_tasks_added
+        constraintName: FKn444l2wfkopnym2dgvimw9ojo
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: id
+        referencedTableName: scperson
+        validate: true
+- changeSet:
+    id: 1684509725437-9
+    author: mars (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: tasks_added_id
+        baseTableName: scperson_tasks_added
+        constraintName: FKrtd50gfy2hcf3h69oobl6klh3
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: id
+        referencedTableName: task
+        validate: true
+- changeSet:
+    id: 1684509725437-10
+    author: mars (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: person_modified_skill_id
+        baseTableName: scperson_skills_modified
+        constraintName: FKsullxuw6a27c690fnuopkhape
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: id
+        referencedTableName: scperson
+        validate: true
+

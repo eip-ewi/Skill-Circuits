@@ -31,11 +31,11 @@ import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.*;
-import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.repository.AbstractSkillRepository;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.test.TestDatabaseLoader;
 import nl.tudelft.skills.test.TestUserDetailsService;
 
@@ -78,7 +78,8 @@ public class SkillServiceTest {
 			EditionControllerApi editionApi, CourseControllerApi courseApi,
 			SkillRepository skillRepository, ModuleRepository moduleRepository,
 			ExternalSkillRepository externalSkillRepository, EditionRepository editionRepository,
-			AuthorisationService authorisationService, RoleControllerApi roleApi, PersonRepository personRepository) {
+			AuthorisationService authorisationService, RoleControllerApi roleApi,
+			PersonRepository personRepository) {
 		this.abstractSkillRepository = abstractSkillRepository;
 		this.taskCompletionRepository = taskCompletionRepository;
 		this.externalSkillRepository = externalSkillRepository;
@@ -99,7 +100,8 @@ public class SkillServiceTest {
 		this.courseApi = courseApi;
 		this.editionApi = editionApi;
 
-		this.skillService = new SkillService(abstractSkillRepository, taskCompletionRepository, courseApi, authorisationService, personRepository);
+		this.skillService = new SkillService(abstractSkillRepository, taskCompletionRepository, courseApi,
+				authorisationService, personRepository);
 	}
 
 	@Test

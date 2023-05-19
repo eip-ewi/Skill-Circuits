@@ -48,6 +48,7 @@ import nl.tudelft.skills.model.ExternalSkill;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.*;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.ModuleService;
 import nl.tudelft.skills.service.SkillService;
 import nl.tudelft.skills.service.TaskCompletionService;
@@ -79,6 +80,7 @@ public class SkillControllerTest extends ControllerTest {
 	private final SkillService skillService;
 	private final TaskCompletionService taskCompletionService;
 	private final TaskCompletionRepository taskCompletionRepository;
+	private final PersonRepository personRepository;
 	private final HttpSession session;
 	private final EditionRepository editionRepository;
 	private final RoleControllerApi roleApi;
@@ -90,7 +92,7 @@ public class SkillControllerTest extends ControllerTest {
 			AbstractSkillRepository abstractSkillRepository, CheckpointRepository checkpointRepository,
 			PathRepository pathRepository, TaskCompletionService taskCompletionService,
 			TaskCompletionRepository taskCompletionRepository, EditionRepository editionRepository,
-			RoleControllerApi roleApi) {
+			RoleControllerApi roleApi, PersonRepository personRepository) {
 		this.submoduleRepository = submoduleRepository;
 		this.session = mock(HttpSession.class);
 		this.moduleService = mock(ModuleService.class);
@@ -100,15 +102,18 @@ public class SkillControllerTest extends ControllerTest {
 		this.pathRepository = pathRepository;
 		this.skillService = skillService;
 		this.taskCompletionService = taskCompletionService;
-		this.skillController = new SkillController(skillRepository, externalSkillRepository,
-				abstractSkillRepository, taskRepository,
-				submoduleRepository, checkpointRepository, pathRepository, skillService, moduleService,
-				taskCompletionService, session);
+		this.personRepository = personRepository;
 		this.skillRepository = skillRepository;
 		this.abstractSkillRepository = abstractSkillRepository;
 		this.taskCompletionRepository = taskCompletionRepository;
 		this.editionRepository = editionRepository;
 		this.roleApi = roleApi;
+
+		this.skillController = new SkillController(skillRepository, externalSkillRepository,
+				abstractSkillRepository, taskRepository,
+				submoduleRepository, checkpointRepository, pathRepository, personRepository, skillService,
+				moduleService,
+				taskCompletionService, session);
 	}
 
 	@Test
@@ -143,7 +148,7 @@ public class SkillControllerTest extends ControllerTest {
 				externalSkillRepository,
 				abstractSkillRepository, taskRepository,
 				submoduleRepository, SpringContext.getBean(CheckpointRepository.class), pathRepository,
-				skillService,
+				personRepository, skillService,
 				moduleService, taskCompletionService, session);
 
 		skc.createSkill(null, dto, mock(Model.class));
@@ -262,7 +267,8 @@ public class SkillControllerTest extends ControllerTest {
 		SkillService mockSkillService = mock(SkillService.class);
 		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
 				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
-				pathRepository, mockSkillService, moduleService, taskCompletionService, session);
+				pathRepository, personRepository, mockSkillService, moduleService, taskCompletionService,
+				session);
 
 		// Save an external skill and mock the response
 		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
@@ -296,7 +302,8 @@ public class SkillControllerTest extends ControllerTest {
 		SkillService mockSkillService = mock(SkillService.class);
 		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
 				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
-				pathRepository, mockSkillService, moduleService, taskCompletionService, session);
+				pathRepository, personRepository, mockSkillService, moduleService, taskCompletionService,
+				session);
 
 		// Save an external skill and mock the response
 		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
@@ -360,7 +367,8 @@ public class SkillControllerTest extends ControllerTest {
 		SkillService mockSkillService = mock(SkillService.class);
 		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
 				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
-				pathRepository, mockSkillService, moduleService, taskCompletionService, session);
+				pathRepository, personRepository, mockSkillService, moduleService, taskCompletionService,
+				session);
 
 		// Save an external skill and mock the response
 		Skill linkedSkill = db.createSkillInEditionHelper(db.getEditionRL().getId() + 1, false);

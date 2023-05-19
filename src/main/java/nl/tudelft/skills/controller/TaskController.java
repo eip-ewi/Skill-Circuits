@@ -19,7 +19,6 @@ package nl.tudelft.skills.controller;
 
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.module.TaskViewDTO;
-import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.TaskRepository;
 
@@ -37,6 +36,13 @@ public class TaskController {
 		this.taskRepository = taskRepository;
 	}
 
+	/**
+	 * Returns a task view for a custom path.
+	 *
+	 * @param  taskId The id of the task.
+	 * @param  model  The model to configure.
+	 * @return        Html page with the task.
+	 */
 	@GetMapping("{taskId}")
 	public String getTask(@PathVariable Long taskId, Model model) {
 		Task task = taskRepository.findByIdOrThrow(taskId);
@@ -45,12 +51,19 @@ public class TaskController {
 		return "task/view";
 	}
 
+	/**
+	 * Returns task view paths overview in a exploded skill.
+	 *
+	 * @param  taskId The id of the task.
+	 * @param  model  The model to configure.
+	 * @return        Html page with the task.
+	 */
 	@GetMapping("{taskId}/right")
 	public String getTaskForCustomPath(@PathVariable Long taskId, Model model) {
 		Task task = taskRepository.findByIdOrThrow(taskId);
 		model.addAttribute("item", View.convert(task, TaskViewDTO.class));
 		model.addAttribute("canEdit", false);
-		return "task/leftview";
+		return "task/inactiveview";
 	}
 
 }
