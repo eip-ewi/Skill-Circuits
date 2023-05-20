@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.EditionControllerApi;
@@ -177,10 +178,13 @@ public class SkillServiceTest {
 	}
 
 	/**
-	 * Mocks the responses of the courseApi and editionApi for three active courses. Sets visibility of
-	 * editionRL to visible.
+	 * Mocks the responses of the courseApi and editionApi for three courses. Sets visibility of editionRL to
+	 * the given value, and mocks editions of given ids to be active.
+	 *
+	 * @param activeEditionIds The ids of active editions.
+	 * @param visible          Whether the current edition should be visible.
 	 */
-	private void mockActiveEditionsAndSetVisible() {
+	private void mockEditionsAndSetVisible(List<Long> activeEditionIds, boolean visible) {
 		Long idInUse = db.getEditionRL().getId();
 
 		// Mock the response of the courseApi to return the course details
@@ -193,14 +197,14 @@ public class SkillServiceTest {
 		Mockito.when(courseApi.getCourseByEdition(db.getEditionRL().getId())).thenReturn(Mono.just(course));
 
 		// Mock response so that the editions are all also active
+		List<EditionDetailsDTO> activeEditions = activeEditionIds.stream()
+				.map(id -> new EditionDetailsDTO().id(id))
+				.collect(Collectors.toList());
 		Mockito.when(editionApi.getAllEditionsActiveOrTaughtBy(db.getPerson().getId()))
-				.thenReturn(Flux.fromIterable(List.of(
-						new EditionDetailsDTO().id(idInUse),
-						new EditionDetailsDTO().id(idInUse + 1),
-						new EditionDetailsDTO().id(idInUse + 2))));
+				.thenReturn(Flux.fromIterable(activeEditions));
 
 		// Set edition to be visible
-		db.getEditionRL().setVisible(true);
+		db.getEditionRL().setVisible(visible);
 		editionRepository.save(db.getEditionRL());
 	}
 
@@ -254,7 +258,7 @@ public class SkillServiceTest {
 		skillEditionB.setPreviousEditionSkill(db.getSkillAssumption());
 		skillEditionC.setPreviousEditionSkill(db.getSkillAssumption());
 
-		mockActiveEditionsAndSetVisible();
+		mockEditionsAndSetVisible(List.of(idInUse, idInUse + 1, idInUse + 2), true);
 
 		// Assert that the recent active edition method returns the correct skill
 		// The person has not completed any tasks in any edition yet, so it should return the most recent
@@ -296,7 +300,7 @@ public class SkillServiceTest {
 		task.getCompletedBy().add(taskCompletion);
 		db.getPerson().getTaskCompletions().add(taskCompletion);
 
-		mockActiveEditionsAndSetVisible();
+		mockEditionsAndSetVisible(List.of(idInUse, idInUse + 1, idInUse + 2), true);
 
 		// Assert that the recent active edition method returns the correct skill
 		// The person has completed a task in editionB, so it should return that editions skill
@@ -338,7 +342,7 @@ public class SkillServiceTest {
 		task.getCompletedBy().add(taskCompletion);
 		db.getPerson().getTaskCompletions().add(taskCompletion);
 
-		mockActiveEditionsAndSetVisible();
+		mockEditionsAndSetVisible(List.of(idInUse, idInUse + 1, idInUse + 2), true);
 
 		// Assert that the recent active edition method returns the correct skill
 		// The person has completed a task in editionB, so it should return that editions skill
@@ -372,10 +376,156 @@ public class SkillServiceTest {
 		// Create empty edition C
 		editionRepository.save(SCEdition.builder().id(idInUse + 2).build());
 
-		mockActiveEditionsAndSetVisible();
+		mockEditionsAndSetVisible(List.of(idInUse, idInUse + 1, idInUse + 2), true);
 
 		// Assert that the recent active edition method returns the correct skill
 		// The most recent edition which contains the copied skill is editionB
+		assertThat(skillService.recentActiveEditionForSkillOrLatest(db.getPerson().getId(), externalSkill))
+				.isEqualTo(skillEditionB);
+	}
+
+	@Test
+	public void testMultipleEditionsTaskCompletedInvisibleEdition() {
+		/*
+		 * Test scenario in which there are multiple editions, and a task was completed in the oldest edition,
+		 * however it now being not visible. Edition structure is: editionA --> (editionB and editionC). With
+		 * editionC being the latest edition. A task was completed in editionA. The skill which the external
+		 * skill refers to should be "copied" from edition A to editions B and C. The method should return the
+		 * most skill of recent edition, which is also visible (editionC).
+		 */
+
+		ExternalSkill externalSkill = createExternalSkill();
+
+		// Reset the task completions, so that the person has not completed any tasks yet
+		db.resetTaskCompletions();
+
+		// Create two new skills, submodules, modules and editions
+		// Edition A is the current edition (editionRL)
+		Long idInUse = db.getEditionRL().getId();
+		Skill skillEditionB = db.createSkillInEditionHelper(idInUse + 1, true);
+		Skill skillEditionC = db.createSkillInEditionHelper(idInUse + 2, true);
+
+		// Skills in edition B/C should be copies of skill in edition A
+		skillEditionB.setPreviousEditionSkill(db.getSkillAssumption());
+		skillEditionC.setPreviousEditionSkill(db.getSkillAssumption());
+
+		// Set a task in skillEditionA to be completed by the person
+		Task task = Task.builder().skill(db.getSkillAssumption()).name("Task").build();
+		task = taskRepository.save(task);
+		TaskCompletion taskCompletion = TaskCompletion.builder().task(task).person(db.getPerson()).build();
+		taskCompletion = taskCompletionRepository.save(taskCompletion);
+		task.getCompletedBy().add(taskCompletion);
+		db.getPerson().getTaskCompletions().add(taskCompletion);
+
+		mockEditionsAndSetVisible(List.of(idInUse, idInUse + 1, idInUse + 2), false);
+
+		// Assert that the recent active edition method returns the correct skill
+		// The latest visible edition is edition C, so it should return the skill in that edition
+		assertThat(skillService.recentActiveEditionForSkillOrLatest(db.getPerson().getId(), externalSkill))
+				.isEqualTo(skillEditionC);
+	}
+
+	@Test
+	public void testMultipleEditionsTaskCompletedInactiveEdition() {
+		/*
+		 * Test scenario in which there are multiple editions, and a task was completed in the oldest edition,
+		 * however it now being not active. Edition structure is: editionA --> (editionB and editionC). With
+		 * editionC being the latest edition. A task was completed in editionA. The skill which the external
+		 * skill refers to should be "copied" from edition A to editions B and C. The method should return the
+		 * most skill of recent edition, which is also active (editionC).
+		 */
+
+		ExternalSkill externalSkill = createExternalSkill();
+
+		// Reset the task completions, so that the person has not completed any tasks yet
+		db.resetTaskCompletions();
+
+		// Create two new skills, submodules, modules and editions
+		// Edition A is the current edition (editionRL)
+		Long idInUse = db.getEditionRL().getId();
+		Skill skillEditionB = db.createSkillInEditionHelper(idInUse + 1, true);
+		Skill skillEditionC = db.createSkillInEditionHelper(idInUse + 2, true);
+
+		// Skills in edition B/C should be copies of skill in edition A
+		skillEditionB.setPreviousEditionSkill(db.getSkillAssumption());
+		skillEditionC.setPreviousEditionSkill(db.getSkillAssumption());
+
+		// Set a task in skillEditionC to be completed by the person
+		Task task = Task.builder().skill(db.getSkillAssumption()).name("Task").build();
+		task = taskRepository.save(task);
+		TaskCompletion taskCompletion = TaskCompletion.builder().task(task).person(db.getPerson()).build();
+		taskCompletion = taskCompletionRepository.save(taskCompletion);
+		task.getCompletedBy().add(taskCompletion);
+		db.getPerson().getTaskCompletions().add(taskCompletion);
+
+		mockEditionsAndSetVisible(List.of(idInUse + 1, idInUse + 2), true);
+
+		// Assert that the recent active edition method returns the correct skill
+		// The latest active edition is edition C, so it should return the skill in that edition
+		assertThat(skillService.recentActiveEditionForSkillOrLatest(db.getPerson().getId(), externalSkill))
+				.isEqualTo(skillEditionC);
+	}
+
+	@Test
+	public void testMultipleEditionsWithoutTaskCompletedInactiveEdition() {
+		/*
+		 * Test scenario in which there are multiple editions, and the most recent edition is not active.
+		 * Edition structure is: editionA --> (editionB and editionC). With editionC being the latest edition.
+		 * The skill which the external skill refers to should be "copied" from edition A to editions B and C.
+		 * The method should return the most skill of recent edition, which is also active (editionB).
+		 */
+
+		ExternalSkill externalSkill = createExternalSkill();
+
+		// Reset the task completions, so that the person has not completed any tasks yet
+		db.resetTaskCompletions();
+
+		// Create two new skills, submodules, modules and editions
+		// Edition A is the current edition (editionRL)
+		Long idInUse = db.getEditionRL().getId();
+		Skill skillEditionB = db.createSkillInEditionHelper(idInUse + 1, true);
+		Skill skillEditionC = db.createSkillInEditionHelper(idInUse + 2, true);
+
+		// Skills in edition B/C should be copies of skill in edition A
+		skillEditionB.setPreviousEditionSkill(db.getSkillAssumption());
+		skillEditionC.setPreviousEditionSkill(db.getSkillAssumption());
+
+		mockEditionsAndSetVisible(List.of(idInUse, idInUse + 1), true);
+
+		// Assert that the recent active edition method returns the correct skill
+		// The latest active edition is edition B, so it should return the skill in that edition
+		assertThat(skillService.recentActiveEditionForSkillOrLatest(db.getPerson().getId(), externalSkill))
+				.isEqualTo(skillEditionB);
+	}
+
+	@Test
+	public void testMultipleEditionsWithoutTaskCompletedInvisibleEdition() {
+		/*
+		 * Test scenario in which there are multiple editions, and the most recent edition is not visible.
+		 * Edition structure is: editionA --> (editionB and editionC). With editionC being the latest edition.
+		 * The skill which the external skill refers to should be "copied" from edition A to editions B and C.
+		 * The method should return the most skill of recent edition, which is also visible (editionB).
+		 */
+
+		ExternalSkill externalSkill = createExternalSkill();
+
+		// Reset the task completions, so that the person has not completed any tasks yet
+		db.resetTaskCompletions();
+
+		// Create two new skills, submodules, modules and editions
+		// Edition A is the current edition (editionRL)
+		Long idInUse = db.getEditionRL().getId();
+		Skill skillEditionB = db.createSkillInEditionHelper(idInUse + 1, true);
+		Skill skillEditionC = db.createSkillInEditionHelper(idInUse + 2, false);
+
+		// Skills in edition B/C should be copies of skill in edition A
+		skillEditionB.setPreviousEditionSkill(db.getSkillAssumption());
+		skillEditionC.setPreviousEditionSkill(db.getSkillAssumption());
+
+		mockEditionsAndSetVisible(List.of(idInUse, idInUse + 1, idInUse + 2), true);
+
+		// Assert that the recent active edition method returns the correct skill
+		// The latest visible edition is edition B, so it should return the skill in that edition
 		assertThat(skillService.recentActiveEditionForSkillOrLatest(db.getPerson().getId(), externalSkill))
 				.isEqualTo(skillEditionB);
 	}
