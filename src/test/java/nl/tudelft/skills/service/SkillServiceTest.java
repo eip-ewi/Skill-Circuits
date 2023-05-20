@@ -52,6 +52,7 @@ public class SkillServiceTest {
 	private final TaskRepository taskRepository;
 	private final ModuleRepository moduleRepository;
 	private final SkillService skillService;
+	private final SkillRepository skillRepository;
 
 	private final CourseControllerApi courseApi;
 	private final EditionControllerApi editionApi;
@@ -71,6 +72,7 @@ public class SkillServiceTest {
 		this.editionRepository = editionRepository;
 		this.moduleRepository = moduleRepository;
 		this.taskRepository = taskRepository;
+		this.skillRepository = skillRepository;
 
 		this.db = db;
 		this.localDateTime = LocalDateTime.of(2023, 1, 10, 10, 10, 0);
@@ -89,8 +91,7 @@ public class SkillServiceTest {
 		skillService.deleteSkill(id);
 		assertThat(abstractSkillRepository.existsById(id)).isFalse();
 
-		// All TaskCompletions are in other Skills, so they should
-		// not have been deleted
+		// All TaskCompletions are in other Skills, so they should not have been deleted
 		assertThat(taskCompletionRepository.findAll()).hasSize(4);
 	}
 
@@ -104,6 +105,58 @@ public class SkillServiceTest {
 		// Two of the previously saved TaskCompletions were in the deleted Skill, so
 		// the size should be 2 now
 		assertThat(taskCompletionRepository.findAll()).hasSize(2);
+	}
+
+	@Test
+	public void deleteSkillPreviousEditionSkillImpacted() {
+		// For testing purposes, set another skill to be the previous editions
+		// skill of skill variables. This scenario would not occur in the real setup, since
+		// they are in the same edition, this test only checks if the deletion
+		// is propagated.
+
+		Skill previousEditionSkill = db.getSkillAssumption();
+		Skill newerEditionSkill = db.getSkillVariables();
+		newerEditionSkill.setPreviousEditionSkill(previousEditionSkill);
+		newerEditionSkill = abstractSkillRepository.save(newerEditionSkill);
+
+		// Delete the previous editions skill, which is referenced by the newer editions skill
+		Long id = previousEditionSkill.getId();
+		skillService.deleteSkill(id);
+		assertThat(abstractSkillRepository.existsById(id)).isFalse();
+
+		// Assert that the previous edition skill is null after it was deleted.
+		assertThat(newerEditionSkill.getPreviousEditionSkill()).isNull();
+
+		// All TaskCompletions are in other Skills, so they should
+		// not have been deleted
+		assertThat(taskCompletionRepository.findAll()).hasSize(4);
+	}
+
+	@Test
+	public void deleteSkillFutureEditionSkillImpacted() {
+		// For testing purposes, set another skill to be the previous editions
+		// skill of skill variables. This scenario would not occur in the real setup, since
+		// they are in the same edition, this test only checks if the deletion
+		// is propagated.
+
+		Skill previousEditionSkill = db.getSkillAssumption();
+		Skill newerEditionSkill = db.getSkillVariables();
+		newerEditionSkill.setPreviousEditionSkill(previousEditionSkill);
+		newerEditionSkill = abstractSkillRepository.save(newerEditionSkill);
+
+		assertThat(skillRepository.findByPreviousEditionSkill(previousEditionSkill))
+				.containsExactly(newerEditionSkill);
+
+		// Delete the newer editions skill, which references the previous editions skill
+		Long id = newerEditionSkill.getId();
+		skillService.deleteSkill(id);
+		assertThat(abstractSkillRepository.existsById(id)).isFalse();
+
+		// Assert that the "future" edition skill is null after it was deleted.
+		assertThat(skillRepository.findByPreviousEditionSkill(previousEditionSkill)).isEmpty();
+
+		// All TaskCompletions are in other Skills, so they should not have been deleted
+		assertThat(taskCompletionRepository.findAll()).hasSize(4);
 	}
 
 	/**

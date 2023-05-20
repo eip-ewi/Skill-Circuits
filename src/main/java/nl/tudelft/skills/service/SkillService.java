@@ -76,6 +76,8 @@ public class SkillService {
 		skill.getChildren().forEach(c -> c.getParents().remove(skill));
 		if (skill instanceof Skill s) {
 			s.getTasks().forEach(t -> taskCompletionRepository.deleteAll(t.getCompletedBy()));
+			skillRepository.findByPreviousEditionSkill(s)
+					.forEach(innerSkill -> innerSkill.setPreviousEditionSkill(null));
 		}
 		abstractSkillRepository.delete(skill);
 		return skill;
