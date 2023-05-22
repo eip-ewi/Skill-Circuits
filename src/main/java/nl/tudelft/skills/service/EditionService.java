@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.service;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -92,9 +93,18 @@ public class EditionService {
 		EditionLevelEditionViewDTO view = View.convert(getOrCreateSCEdition(id),
 				EditionLevelEditionViewDTO.class);
 
+		// TODO asserting on the new attribute in additional tests
+		List<EditionLevelEditionSummaryDTO> olderEditions = editionApi
+				.getAllEditionsByCourse(edition.getCourse().getId())
+				.collectList().block().stream()
+				.filter(dto -> dto.getStartDate().isBefore(edition.getStartDate()))
+				.map(dto -> new EditionLevelEditionSummaryDTO(dto.getId(), dto.getName()))
+				.collect(Collectors.toList());
+
 		view.setName(edition.getName());
 		view.setCourse(
-				new EditionLevelCourseViewDTO(edition.getCourse().getId(), edition.getCourse().getName()));
+				new EditionLevelCourseViewDTO(edition.getCourse().getId(), edition.getCourse().getName(),
+						olderEditions));
 		return view;
 	}
 

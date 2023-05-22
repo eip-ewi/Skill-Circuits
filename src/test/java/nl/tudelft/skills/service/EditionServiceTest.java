@@ -23,6 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
@@ -36,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Transactional
@@ -58,15 +62,17 @@ public class EditionServiceTest {
 
 	@Test
 	public void getCourseView() {
-
 		EditionDetailsDTO editionDetailsDTO = new EditionDetailsDTO().id(1L).name("edition")
-				.course(new CourseSummaryDTO().id(2L).name("course"));
+				.course(new CourseSummaryDTO().id(2L).name("course"))
+				.startDate(LocalDateTime.of(2023, 1, 10, 10, 10, 0));
 
 		when(editionApi.getEditionById(anyLong())).thenReturn(Mono.just(editionDetailsDTO));
+		when(editionApi.getAllEditionsByCourse(anyLong()))
+				.thenReturn(Flux.fromIterable(List.of(editionDetailsDTO)));
 
 		assertThat(editionService.getEditionView(1L).getName()).isEqualTo("edition");
 		assertThat(editionService.getEditionView(1L).getCourse())
-				.isEqualTo(new EditionLevelCourseViewDTO(2L, "course"));
+				.isEqualTo(new EditionLevelCourseViewDTO(2L, "course", List.of()));
 	}
 
 	@Test

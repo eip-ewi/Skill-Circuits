@@ -1,0 +1,76 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div
+        layout:fragment="copy-edition"
+        th:if="${@skillRepository.countBySubmoduleModuleEditionId(edition.id) == 0 and not studentMode
+        and @authorisationService.canEditEdition(edition.id)}">
+        <button id="copy-edition" class="circuit__button copy-edition__button">
+            <i class="fas fa-paste"></i>
+            <span>Copy previous edition</span>
+        </button>
+
+        <form id="copy-edition-form" class="copy-edition__form hidden">
+            <select
+                class="circuit__dropdown copy-edition__select"
+                id="copy-edition-select"
+                name="edition.id">
+                <option
+                    th:each="selectEdition: ${edition.course.olderEditions}"
+                    th:value="${selectEdition.id}"
+                    th:text="${selectEdition.name}"></option>
+            </select>
+
+            <button type="button" id="copy-edition-cancel" class="fa-solid fa-xmark"></button>
+            <button type="submit" class="fas fa-check"></button>
+        </form>
+    </div>
+
+    <script
+        th:if="${@skillRepository.countBySubmoduleModuleEditionId(edition.id) == 0 and not studentMode
+        and @authorisationService.canEditEdition(edition.id)}"
+        layout:fragment="script">
+        function copyEdition() {
+            $("#copy-edition-form").removeClass("hidden");
+            $("#copy-edition").addClass("hidden");
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            $("#copy-edition-form").submit(function (event) {
+                event.preventDefault();
+                $("#copy-edition").removeClass("hidden");
+                $("#copy-edition-form").addClass("hidden");
+
+                // TODO send request to copy edition
+            });
+
+            $("#copy-edition").click(copyEdition);
+
+            $("#copy-edition-cancel").click(function () {
+                $("#copy-edition").removeClass("hidden");
+                $("#copy-edition-form").addClass("hidden");
+            });
+        });
+    </script>
+</html>

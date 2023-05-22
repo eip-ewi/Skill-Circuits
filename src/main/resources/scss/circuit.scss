@@ -20,6 +20,7 @@
         &__group {
             display: flex;
             gap: 1rem;
+            align-items: center;
         }
         & a {
             text-decoration: none;
@@ -55,5 +56,37 @@
         list-style: none;
         padding: 0.5rem 0;
         font-size: 1.25rem;
+    }
+}
+
+.copy-edition {
+    &__button {
+        display: flex;
+        gap: 0.6rem;
+        align-items: center;
+        margin-left: 0.5rem;
+        height: 2rem;
+        padding: 0.5rem 0.4rem;
+        font-size: 1.1rem;
+    }
+
+    &__form {
+        & > button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            margin-left: 0.2rem;
+
+            &:hover {
+                color: var(--primary-green);
+            }
+        }
+    }
+
+    &__select {
+        margin-right: 0.2rem;
+        padding: 0.2rem 0;
+        font-size: 1.2rem;
     }
 }
