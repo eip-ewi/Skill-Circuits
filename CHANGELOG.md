@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
  - Fixed isNotTransitivelyConnected for cyclic graphs and for external skills
+ - Fixed to not count optional skills in highlighting of skills that can be worked on. (@ffiedrich)
 
 ## [2.2.1]
 
