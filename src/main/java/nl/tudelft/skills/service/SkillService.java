@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
@@ -76,8 +77,11 @@ public class SkillService {
 		skill.getChildren().forEach(c -> c.getParents().remove(skill));
 		if (skill instanceof Skill s) {
 			s.getTasks().forEach(t -> taskCompletionRepository.deleteAll(t.getCompletedBy()));
-			skillRepository.findByPreviousEditionSkill(s)
-					.forEach(innerSkill -> innerSkill.setPreviousEditionSkill(null));
+			s.getFutureEditionSkills().forEach(innerSkill -> innerSkill.setPreviousEditionSkill(null));
+
+			if (s.getPreviousEditionSkill() != null) {
+				s.getPreviousEditionSkill().getFutureEditionSkills().remove(s);
+			}
 		}
 		abstractSkillRepository.delete(skill);
 		return skill;
@@ -168,7 +172,7 @@ public class SkillService {
 			}
 
 			// Continue traversal
-			List<Skill> nextSkills = skillRepository.findByPreviousEditionSkill(current);
+			Set<Skill> nextSkills = current.getFutureEditionSkills();
 			for (Skill nextSkill : nextSkills) {
 				traversal.push(nextSkill);
 			}

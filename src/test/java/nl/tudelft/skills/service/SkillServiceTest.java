@@ -119,6 +119,7 @@ public class SkillServiceTest {
 		Skill newerEditionSkill = db.getSkillVariables();
 		newerEditionSkill.setPreviousEditionSkill(previousEditionSkill);
 		newerEditionSkill = abstractSkillRepository.save(newerEditionSkill);
+		abstractSkillRepository.flush();
 
 		// Delete the previous editions skill, which is referenced by the newer editions skill
 		Long id = previousEditionSkill.getId();
@@ -142,11 +143,9 @@ public class SkillServiceTest {
 
 		Skill previousEditionSkill = db.getSkillAssumption();
 		Skill newerEditionSkill = db.getSkillVariables();
+		previousEditionSkill.getFutureEditionSkills().add(newerEditionSkill);
 		newerEditionSkill.setPreviousEditionSkill(previousEditionSkill);
 		newerEditionSkill = abstractSkillRepository.save(newerEditionSkill);
-
-		assertThat(skillRepository.findByPreviousEditionSkill(previousEditionSkill))
-				.containsExactly(newerEditionSkill);
 
 		// Delete the newer editions skill, which references the previous editions skill
 		Long id = newerEditionSkill.getId();
@@ -154,7 +153,8 @@ public class SkillServiceTest {
 		assertThat(abstractSkillRepository.existsById(id)).isFalse();
 
 		// Assert that the "future" edition skill is null after it was deleted.
-		assertThat(skillRepository.findByPreviousEditionSkill(previousEditionSkill)).isEmpty();
+		assertThat(skillRepository.findByIdOrThrow(previousEditionSkill.getId()).getFutureEditionSkills())
+				.isEmpty();
 
 		// All TaskCompletions are in other Skills, so they should not have been deleted
 		assertThat(taskCompletionRepository.findAll()).hasSize(4);
@@ -257,6 +257,8 @@ public class SkillServiceTest {
 		// Skills in edition B/C should be copies of skill in edition A
 		skillEditionB.setPreviousEditionSkill(db.getSkillAssumption());
 		skillEditionC.setPreviousEditionSkill(db.getSkillAssumption());
+		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionB);
+		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionC);
 
 		mockEditionsAndSetVisible(List.of(idInUse, idInUse + 1, idInUse + 2), true);
 
@@ -291,6 +293,8 @@ public class SkillServiceTest {
 		// Skills in edition B/C should be copies of skill in edition A
 		skillEditionB.setPreviousEditionSkill(db.getSkillAssumption());
 		skillEditionC.setPreviousEditionSkill(db.getSkillAssumption());
+		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionB);
+		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionC);
 
 		// Set a task in skillEditionB to be completed by the person
 		Task task = Task.builder().skill(skillEditionB).name("Task").build();
@@ -333,6 +337,8 @@ public class SkillServiceTest {
 		skillEditionB.setPreviousEditionSkill(db.getSkillAssumption());
 		// Skill in edition C should be a copy of skill in edition C
 		skillEditionC.setPreviousEditionSkill(skillEditionB);
+		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionB);
+		skillEditionB.getFutureEditionSkills().add(skillEditionC);
 
 		// Set a task in skillEditionB to be completed by the person
 		Task task = Task.builder().skill(skillEditionB).name("Task").build();
@@ -372,6 +378,7 @@ public class SkillServiceTest {
 
 		// Skill in edition B should be a copy of skill in edition A
 		skillEditionB.setPreviousEditionSkill(db.getSkillAssumption());
+		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionB);
 
 		// Create empty edition C
 		editionRepository.save(SCEdition.builder().id(idInUse + 2).build());
@@ -408,6 +415,8 @@ public class SkillServiceTest {
 		// Skills in edition B/C should be copies of skill in edition A
 		skillEditionB.setPreviousEditionSkill(db.getSkillAssumption());
 		skillEditionC.setPreviousEditionSkill(db.getSkillAssumption());
+		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionB);
+		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionC);
 
 		// Set a task in skillEditionA to be completed by the person
 		Task task = Task.builder().skill(db.getSkillAssumption()).name("Task").build();
@@ -449,6 +458,8 @@ public class SkillServiceTest {
 		// Skills in edition B/C should be copies of skill in edition A
 		skillEditionB.setPreviousEditionSkill(db.getSkillAssumption());
 		skillEditionC.setPreviousEditionSkill(db.getSkillAssumption());
+		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionB);
+		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionC);
 
 		// Set a task in skillEditionC to be completed by the person
 		Task task = Task.builder().skill(db.getSkillAssumption()).name("Task").build();
@@ -489,6 +500,8 @@ public class SkillServiceTest {
 		// Skills in edition B/C should be copies of skill in edition A
 		skillEditionB.setPreviousEditionSkill(db.getSkillAssumption());
 		skillEditionC.setPreviousEditionSkill(db.getSkillAssumption());
+		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionB);
+		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionC);
 
 		mockEditionsAndSetVisible(List.of(idInUse, idInUse + 1), true);
 
@@ -521,6 +534,8 @@ public class SkillServiceTest {
 		// Skills in edition B/C should be copies of skill in edition A
 		skillEditionB.setPreviousEditionSkill(db.getSkillAssumption());
 		skillEditionC.setPreviousEditionSkill(db.getSkillAssumption());
+		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionB);
+		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionC);
 
 		mockEditionsAndSetVisible(List.of(idInUse, idInUse + 1, idInUse + 2), true);
 
