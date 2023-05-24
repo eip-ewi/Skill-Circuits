@@ -37,6 +37,7 @@ import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.PathRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.SubmoduleRepository;
+import nl.tudelft.skills.repository.TaskCompletionRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 
@@ -79,6 +80,8 @@ public class TestDatabaseLoader {
 	private PathRepository pathRepository;
 	@Autowired
 	private CheckpointRepository checkpointRepository;
+	@Autowired
+	private TaskCompletionRepository taskCompletionRepository;
 
 	/**
 	 * Test models.
@@ -151,6 +154,18 @@ public class TestDatabaseLoader {
 	private Inventory inventory = Inventory.builder().build();
 
 	private SCPerson person = SCPerson.builder().id(TestUserDetailsService.id).build();
+
+	private TaskCompletion completeDo11ad = TaskCompletion.builder().task(taskDo11ad).person(person)
+			.timestamp(LocalDateTime.of(LocalDate.ofYearDay(2022, 42), LocalTime.MIDNIGHT)).build();
+	private TaskCompletion completeRead12 = TaskCompletion.builder().task(taskRead12).person(person)
+			.timestamp(LocalDateTime.of(LocalDate.ofYearDay(2022, 42), LocalTime.MIDNIGHT).plusSeconds(1))
+			.build();
+	private TaskCompletion completeDo12ae = TaskCompletion.builder().task(taskDo12ae).person(person)
+			.timestamp(LocalDateTime.of(LocalDate.ofYearDay(2022, 42), LocalTime.MIDNIGHT).plusSeconds(2))
+			.build();
+	private TaskCompletion completeRead11 = TaskCompletion.builder().task(taskRead11).person(person)
+			.timestamp(LocalDateTime.of(LocalDate.ofYearDay(2022, 42), LocalTime.MIDNIGHT).plusSeconds(3))
+			.build();
 
 	public SCCourse getCourseRL() {
 		return courseRepository.findByIdOrThrow(courseRL.getId());
@@ -292,6 +307,22 @@ public class TestDatabaseLoader {
 		return personRepository.findByIdOrThrow(person.getId());
 	}
 
+	public TaskCompletion getCompleteDo11ad() {
+		return taskCompletionRepository.findByIdOrThrow(completeDo11ad.getId());
+	}
+
+	public TaskCompletion getCompleteRead12() {
+		return taskCompletionRepository.findByIdOrThrow(completeRead12.getId());
+	}
+
+	public TaskCompletion getCompleteDo12ae() {
+		return taskCompletionRepository.findByIdOrThrow(completeDo12ae.getId());
+	}
+
+	public TaskCompletion getCompleteRead11() {
+		return taskCompletionRepository.findByIdOrThrow(completeRead11.getId());
+	}
+
 	@PostConstruct
 	private void init() {
 		initCourse();
@@ -304,6 +335,7 @@ public class TestDatabaseLoader {
 		initTask();
 		initPerson();
 		initBadges();
+		initTaskCompletions();
 	}
 
 	private void initCourse() {
@@ -421,12 +453,24 @@ public class TestDatabaseLoader {
 	}
 
 	private void initPerson() {
-		person.setTasksCompleted(Set.of(taskDo11ad, taskRead12, taskDo12ae, taskRead11));
 		inventory.setPerson(person);
 		person.setInventory(inventory);
 
 		person = personRepository.save(person);
 		inventory = person.getInventory();
+	}
+
+	private void initTaskCompletions() {
+		completeDo11ad = taskCompletionRepository.save(completeDo11ad);
+		completeRead12 = taskCompletionRepository.save(completeRead12);
+		completeDo12ae = taskCompletionRepository.save(completeDo12ae);
+		completeRead11 = taskCompletionRepository.save(completeRead11);
+
+		person.setTaskCompletions(Set.of(completeDo11ad, completeRead12, completeDo12ae, completeRead11));
+		taskDo11ad.getCompletedBy().add(completeDo11ad);
+		taskRead12.getCompletedBy().add(completeRead12);
+		taskDo12ae.getCompletedBy().add(completeDo12ae);
+		taskRead11.getCompletedBy().add(completeRead11);
 	}
 
 	private void initBadges() {

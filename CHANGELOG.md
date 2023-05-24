@@ -12,12 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [UNRELEASED]
 
 ### Added
+- Floating box which displays information about the most recently completed task (@ffiedrich)
 
 ### Changed
 
 ### Fixed
  - Fixed isNotTransitivelyConnected for cyclic graphs and for external skills
- - Fixed external skill block link
+ - Fixed to not count optional skills in highlighting of skills that can be worked on. (@ffiedrich)
+ - Fixed external skill block link (@ffiedrich)
 
 ## [2.2.1]
 

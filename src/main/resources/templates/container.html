@@ -29,8 +29,52 @@
             <main class="main-section">
                 <th:block layout:fragment="content" class="content">Content goes here.</th:block>
             </main>
+            <div layout:replace="~{infobox :: infobox}"></div>
             <div layout:replace="~{footer :: footer}"></div>
             <div layout:replace="~{components/select_or_new :: script}"></div>
+
+            <script>
+                function renderInfobox(data) {
+                    if (
+                        data["locationString"] === null ||
+                        data["link"] === null ||
+                        data["taskInfo"] === null
+                    ) {
+                        // Something went wrong, not all needed information received
+                        return;
+                    }
+                    // Set texts, links and visibility
+                    const largerInfo = $(".larger-info");
+                    const smallerInfo = $(".smaller-info");
+                    largerInfo.text(data["taskInfo"]);
+                    smallerInfo.text(data["locationString"]);
+                    $("#info-text").attr("href", data["link"]);
+                    $("#map-icon").attr("href", data["link"]);
+                    $("#infobox-container").removeAttr("hidden");
+                }
+
+                document.addEventListener("DOMContentLoaded", function () {
+                    // Retrieve necessary data
+                    $.get("/infobox", function (data) {
+                        const infoBox = $("#info-box");
+                        // Set the expanded attribute if not yet available (default is "false" since the aria-expanded
+                        // attribute is false on load)
+                        if (localStorage.getItem("infoboxExpanded") === null) {
+                            localStorage.setItem("infoboxExpanded", "false");
+                        }
+                        // Set the state of the infobox (expanded or collapsed)
+                        infoBox.attr("aria-expanded", localStorage.getItem("infoboxExpanded"));
+
+                        if (!data["studentAndAuthenticated"] || !data["completedSomeTask"]) {
+                            // If the user is not a student, not authenticated, or has not completed any task yet, return
+                            // In this case, the infobox should remain hidden
+                            return;
+                        }
+
+                        renderInfobox(data);
+                    });
+                });
+            </script>
         </div>
     </body>
 </html>

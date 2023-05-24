@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.repository.AbstractSkillRepository;
+import nl.tudelft.skills.repository.TaskCompletionRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.test.TestDatabaseLoader;
 
@@ -35,22 +36,41 @@ public class SkillServiceTest {
 
 	private final AbstractSkillRepository skillRepository;
 	private final SkillService skillService;
+	private final TaskCompletionRepository taskCompletionRepository;
 
 	private TestDatabaseLoader db;
 
 	@Autowired
 	public SkillServiceTest(AbstractSkillRepository skillRepository, TaskRepository taskRepository,
-			TestDatabaseLoader db) {
+			TestDatabaseLoader db, TaskCompletionRepository taskCompletionRepository) {
 		this.skillRepository = skillRepository;
 		this.db = db;
-		this.skillService = new SkillService(skillRepository);
+		this.taskCompletionRepository = taskCompletionRepository;
+		this.skillService = new SkillService(skillRepository, taskCompletionRepository);
 	}
 
 	@Test
 	public void deleteSkill() {
 		Long id = db.getSkillVariables().getId();
+
 		skillService.deleteSkill(id);
 		assertThat(skillRepository.existsById(id)).isFalse();
+
+		// All TaskCompletions are in other Skills, so they should
+		// not have been deleted
+		assertThat(taskCompletionRepository.findAll()).hasSize(4);
+	}
+
+	@Test
+	public void deleteSkillTaskCompletionsImpacted() {
+		Long id = db.getSkillNegation().getId();
+
+		skillService.deleteSkill(id);
+		assertThat(skillRepository.existsById(id)).isFalse();
+
+		// Two of the previously saved TaskCompletions were in the deleted Skill, so
+		// the size should be 2 now
+		assertThat(taskCompletionRepository.findAll()).hasSize(2);
 	}
 
 }
