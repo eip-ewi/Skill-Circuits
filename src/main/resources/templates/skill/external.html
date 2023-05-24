@@ -70,12 +70,12 @@
         <script th:inline="javascript">
             document.addEventListener("DOMContentLoaded", function () {
                 /*<![CDATA[*/
-                const block_id = /*[[${block.id}]]*/ null;
-                const can_edit = /*[[${canEdit}]]*/ false;
+                const blockId = /*[[${block.id}]]*/ null;
+                const canEdit = /*[[${canEdit}]]*/ false;
                 /*]]>*/
-                const block = $("#block-" + block_id);
+                const block = $("#block-" + blockId);
 
-                if (can_edit) {
+                if (canEdit) {
                     block.removeAttr("href");
                 } else {
                     block
