@@ -232,6 +232,10 @@ public class SkillServiceTest {
 		// Since there is only one edition, this is the skill in this edition
 		assertThat(skillService.recentActiveEditionForSkillOrLatest(db.getPerson().getId(), externalSkill))
 				.isEqualTo(db.getSkillAssumption());
+
+		// Assert on the traversal list
+		assertThat(skillService.traverseSkillTree(db.getSkillAssumption()))
+				.containsExactly(db.getSkillAssumption());
 	}
 
 	@Test
@@ -267,6 +271,15 @@ public class SkillServiceTest {
 		// editions skill (skillEditionC)
 		assertThat(skillService.recentActiveEditionForSkillOrLatest(db.getPerson().getId(), externalSkill))
 				.isEqualTo(skillEditionC);
+
+		// Assert on the traversal lists
+		// The order cannot be asserted on, since the futureEditionSkills is a set
+		assertThat(skillService.traverseSkillTree(db.getSkillAssumption()))
+				.containsExactlyInAnyOrder(db.getSkillAssumption(), skillEditionB, skillEditionC);
+		assertThat(skillService.traverseSkillTree(skillEditionB))
+				.containsExactlyInAnyOrder(db.getSkillAssumption(), skillEditionB, skillEditionC);
+		assertThat(skillService.traverseSkillTree(skillEditionC))
+				.containsExactlyInAnyOrder(db.getSkillAssumption(), skillEditionB, skillEditionC);
 	}
 
 	@Test
@@ -310,6 +323,15 @@ public class SkillServiceTest {
 		// The person has completed a task in editionB, so it should return that editions skill
 		assertThat(skillService.recentActiveEditionForSkillOrLatest(db.getPerson().getId(), externalSkill))
 				.isEqualTo(skillEditionB);
+
+		// Assert on the traversal lists
+		// The order cannot be asserted on, since the futureEditionSkills is a set
+		assertThat(skillService.traverseSkillTree(db.getSkillAssumption()))
+				.containsExactlyInAnyOrder(db.getSkillAssumption(), skillEditionB, skillEditionC);
+		assertThat(skillService.traverseSkillTree(skillEditionB))
+				.containsExactlyInAnyOrder(db.getSkillAssumption(), skillEditionB, skillEditionC);
+		assertThat(skillService.traverseSkillTree(skillEditionC))
+				.containsExactlyInAnyOrder(db.getSkillAssumption(), skillEditionB, skillEditionC);
 	}
 
 	@Test
@@ -354,6 +376,14 @@ public class SkillServiceTest {
 		// The person has completed a task in editionB, so it should return that editions skill
 		assertThat(skillService.recentActiveEditionForSkillOrLatest(db.getPerson().getId(), externalSkill))
 				.isEqualTo(skillEditionB);
+
+		// Assert on the traversal lists
+		assertThat(skillService.traverseSkillTree(db.getSkillAssumption()))
+				.containsExactly(db.getSkillAssumption(), skillEditionB, skillEditionC);
+		assertThat(skillService.traverseSkillTree(skillEditionB))
+				.containsExactly(db.getSkillAssumption(), skillEditionB, skillEditionC);
+		assertThat(skillService.traverseSkillTree(skillEditionC))
+				.containsExactly(db.getSkillAssumption(), skillEditionB, skillEditionC);
 	}
 
 	@Test
@@ -389,6 +419,12 @@ public class SkillServiceTest {
 		// The most recent edition which contains the copied skill is editionB
 		assertThat(skillService.recentActiveEditionForSkillOrLatest(db.getPerson().getId(), externalSkill))
 				.isEqualTo(skillEditionB);
+
+		// Assert on the traversal lists
+		assertThat(skillService.traverseSkillTree(db.getSkillAssumption()))
+				.containsExactly(db.getSkillAssumption(), skillEditionB);
+		assertThat(skillService.traverseSkillTree(skillEditionB))
+				.containsExactly(db.getSkillAssumption(), skillEditionB);
 	}
 
 	@Test
@@ -432,83 +468,15 @@ public class SkillServiceTest {
 		// The latest visible edition is edition C, so it should return the skill in that edition
 		assertThat(skillService.recentActiveEditionForSkillOrLatest(db.getPerson().getId(), externalSkill))
 				.isEqualTo(skillEditionC);
-	}
 
-	@Test
-	public void testMultipleEditionsTaskCompletedInactiveEdition() {
-		/*
-		 * Test scenario in which there are multiple editions, and a task was completed in the oldest edition,
-		 * however it now being not active. Edition structure is: editionA --> (editionB and editionC). With
-		 * editionC being the latest edition. A task was completed in editionA. The skill which the external
-		 * skill refers to should be "copied" from edition A to editions B and C. The method should return the
-		 * most skill of recent edition, which is also active (editionC).
-		 */
-
-		ExternalSkill externalSkill = createExternalSkill();
-
-		// Reset the task completions, so that the person has not completed any tasks yet
-		db.resetTaskCompletions();
-
-		// Create two new skills, submodules, modules and editions
-		// Edition A is the current edition (editionRL)
-		Long idInUse = db.getEditionRL().getId();
-		Skill skillEditionB = db.createSkillInEditionHelper(idInUse + 1, true);
-		Skill skillEditionC = db.createSkillInEditionHelper(idInUse + 2, true);
-
-		// Skills in edition B/C should be copies of skill in edition A
-		skillEditionB.setPreviousEditionSkill(db.getSkillAssumption());
-		skillEditionC.setPreviousEditionSkill(db.getSkillAssumption());
-		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionB);
-		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionC);
-
-		// Set a task in skillEditionC to be completed by the person
-		Task task = Task.builder().skill(db.getSkillAssumption()).name("Task").build();
-		task = taskRepository.save(task);
-		TaskCompletion taskCompletion = TaskCompletion.builder().task(task).person(db.getPerson()).build();
-		taskCompletion = taskCompletionRepository.save(taskCompletion);
-		task.getCompletedBy().add(taskCompletion);
-		db.getPerson().getTaskCompletions().add(taskCompletion);
-
-		mockEditionsAndSetVisible(List.of(idInUse + 1, idInUse + 2), true);
-
-		// Assert that the recent active edition method returns the correct skill
-		// The latest active edition is edition C, so it should return the skill in that edition
-		assertThat(skillService.recentActiveEditionForSkillOrLatest(db.getPerson().getId(), externalSkill))
-				.isEqualTo(skillEditionC);
-	}
-
-	@Test
-	public void testMultipleEditionsWithoutTaskCompletedInactiveEdition() {
-		/*
-		 * Test scenario in which there are multiple editions, and the most recent edition is not active.
-		 * Edition structure is: editionA --> (editionB and editionC). With editionC being the latest edition.
-		 * The skill which the external skill refers to should be "copied" from edition A to editions B and C.
-		 * The method should return the most skill of recent edition, which is also active (editionB).
-		 */
-
-		ExternalSkill externalSkill = createExternalSkill();
-
-		// Reset the task completions, so that the person has not completed any tasks yet
-		db.resetTaskCompletions();
-
-		// Create two new skills, submodules, modules and editions
-		// Edition A is the current edition (editionRL)
-		Long idInUse = db.getEditionRL().getId();
-		Skill skillEditionB = db.createSkillInEditionHelper(idInUse + 1, true);
-		Skill skillEditionC = db.createSkillInEditionHelper(idInUse + 2, true);
-
-		// Skills in edition B/C should be copies of skill in edition A
-		skillEditionB.setPreviousEditionSkill(db.getSkillAssumption());
-		skillEditionC.setPreviousEditionSkill(db.getSkillAssumption());
-		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionB);
-		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionC);
-
-		mockEditionsAndSetVisible(List.of(idInUse, idInUse + 1), true);
-
-		// Assert that the recent active edition method returns the correct skill
-		// The latest active edition is edition B, so it should return the skill in that edition
-		assertThat(skillService.recentActiveEditionForSkillOrLatest(db.getPerson().getId(), externalSkill))
-				.isEqualTo(skillEditionB);
+		// Assert on the traversal lists
+		// The order cannot be asserted on, since the futureEditionSkills is a set
+		assertThat(skillService.traverseSkillTree(db.getSkillAssumption()))
+				.containsExactlyInAnyOrder(db.getSkillAssumption(), skillEditionB, skillEditionC);
+		assertThat(skillService.traverseSkillTree(skillEditionB))
+				.containsExactlyInAnyOrder(db.getSkillAssumption(), skillEditionB, skillEditionC);
+		assertThat(skillService.traverseSkillTree(skillEditionC))
+				.containsExactlyInAnyOrder(db.getSkillAssumption(), skillEditionB, skillEditionC);
 	}
 
 	@Test
@@ -543,6 +511,15 @@ public class SkillServiceTest {
 		// The latest visible edition is edition B, so it should return the skill in that edition
 		assertThat(skillService.recentActiveEditionForSkillOrLatest(db.getPerson().getId(), externalSkill))
 				.isEqualTo(skillEditionB);
+
+		// Assert on the traversal lists
+		// The order cannot be asserted on, since the futureEditionSkills is a set
+		assertThat(skillService.traverseSkillTree(db.getSkillAssumption()))
+				.containsExactlyInAnyOrder(db.getSkillAssumption(), skillEditionB, skillEditionC);
+		assertThat(skillService.traverseSkillTree(skillEditionB))
+				.containsExactlyInAnyOrder(db.getSkillAssumption(), skillEditionB, skillEditionC);
+		assertThat(skillService.traverseSkillTree(skillEditionC))
+				.containsExactlyInAnyOrder(db.getSkillAssumption(), skillEditionB, skillEditionC);
 	}
 
 }

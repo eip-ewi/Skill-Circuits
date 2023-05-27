@@ -17,18 +17,21 @@
  */
 package nl.tudelft.skills.service;
 
-import java.util.Collections;
+import static java.util.stream.Collectors.toMap;
+
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
-import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
 import nl.tudelft.skills.model.AbstractSkill;
 import nl.tudelft.skills.model.ExternalSkill;
@@ -103,73 +106,62 @@ public class SkillService {
 		Long editionId = skill.getSubmodule().getModule().getEdition().getId();
 		CourseDetailsDTO course = courseApi.getCourseByEdition(editionId).block();
 
-		List<Long> activeEditionsForPerson = editionApi.getAllEditionsActiveOrTaughtBy(personId)
-				.collectList().block().stream().map(EditionDetailsDTO::getId).toList();
-
-		// Get the edition ids for the course, sorted by the start date (decreasing, newest to oldest)
-		// Filter by: active editions for the person, and if the edition is visible
-		List<Long> sortedEditionIdsOfCourse = course.getEditions().stream()
-				.sorted(Comparator.comparing(EditionSummaryDTO::getStartDate))
-				.map(EditionSummaryDTO::getId)
-				.filter(id -> {
-					boolean visible = editionRepository.getById(id).isVisible();
-					boolean active = activeEditionsForPerson.contains(id);
-
-					return visible && active;
-				})
-				.collect(Collectors.toList());
-		Collections.reverse(sortedEditionIdsOfCourse);
+		Map<Long, EditionSummaryDTO> editionsById = course.getEditions().stream()
+				.collect(toMap(EditionSummaryDTO::getId, Function.identity()));
 
 		// Get ids of the editions the person as completed at least one task in
-		List<Long> completedTasksInEditions = taskCompletionRepository.getByPersonId(personId).stream()
+		Set<Long> completedTasksInEditions = taskCompletionRepository.getByPersonId(personId).stream()
 				.map(taskCompletion -> taskCompletion.getTask().getSkill().getSubmodule()
 						.getModule().getEdition().getId())
+				.collect(Collectors.toSet());
+
+		// Do DFS
+		List<Skill> traversal = traverseSkillTree(skill);
+
+		// Filter by skills in visible editions
+		traversal = traversal.stream()
+				.filter(innerSkill -> {
+					Long innerEditionId = innerSkill.getSubmodule().getModule().getEdition().getId();
+					return editionRepository.getById(innerEditionId).isVisible();
+				})
+				.sorted(Comparator.comparing((Skill innerSkill) -> editionsById.get(innerSkill.getSubmodule()
+						.getModule().getEdition().getId()).getStartDate()).reversed())
 				.collect(Collectors.toList());
 
-		// For efficiency purposes, create a map with the editionId as key, and the index in the sorted list as value
-		Map<Long, Integer> editionToOrderIdx = sortedEditionIdsOfCourse.stream().collect(
-				Collectors.toMap(edition -> edition, sortedEditionIdsOfCourse::indexOf));
+		// If it exists, return the skill from the last edition the person has completed a task in
+		Optional<Skill> completedTasksInEdition = traversal.stream()
+				.filter(innerSkill -> completedTasksInEditions.contains(innerSkill.getSubmodule()
+						.getModule().getEdition().getId()))
+				.findFirst();
 
+		// If it does not exist, return the skill in the latest edition
+		// Traversal should never be empty, as it at least contains the initial skill
+		return completedTasksInEdition.orElse(traversal.get(0));
+	}
+
+	/**
+	 * Return the DFS traversal of the "skill tree" for the given tree. The tree contains all skill versions
+	 * in different editions, linked by the previous/future skill(s) attributes
+	 *
+	 * @param  skill The skill for which to traverse the tree of skill versions.
+	 * @return       The DFS traversal of the skill tree for the given skill.
+	 */
+	public List<Skill> traverseSkillTree(Skill skill) {
 		// Find root of the "skill tree"
 		Skill current = skill;
 		while (current.getPreviousEditionSkill() != null) {
 			current = current.getPreviousEditionSkill();
 		}
 
-		// Do DFS, keep track of:
-		// 1. "active edition" skill which:
-		//		- is in an edition the person has completed something in
-		//		- is the most recent edition
-		// 2. "most recent" skill which only fulfills the last condition (most recent)
-		Skill recentActiveEditionSkill = null;
-		Skill mostRecentEditionSkill = null;
+		// Do DFS
 		Stack<Skill> traversal = new Stack<>();
 		traversal.push(current);
+
+		List<Skill> skills = new ArrayList<>();
+
 		while (!traversal.isEmpty()) {
 			current = traversal.pop();
-			Long currentEditionId = current.getSubmodule().getModule().getEdition().getId();
-
-			// Check if it is a valid edition id, or if it was filtered out
-			if (editionToOrderIdx.get(currentEditionId) != null) {
-				// Check if this skills edition is more recent
-				// Was not assigned yet || current order index < most recent order index
-				if (mostRecentEditionSkill == null ||
-						editionToOrderIdx.get(currentEditionId) < editionToOrderIdx
-								.get(mostRecentEditionSkill.getSubmodule()
-										.getModule().getEdition().getId())) {
-					mostRecentEditionSkill = current;
-				}
-
-				// Check if the person has completed a skill in this edition, and if it is more recent
-				// Was not assigned yet || current order index < recent active order index
-				if (completedTasksInEditions.contains(currentEditionId) &&
-						(recentActiveEditionSkill == null ||
-								editionToOrderIdx.get(currentEditionId) < editionToOrderIdx
-										.get(recentActiveEditionSkill.getSubmodule()
-												.getModule().getEdition().getId()))) {
-					recentActiveEditionSkill = current;
-				}
-			}
+			skills.add(current);
 
 			// Continue traversal
 			Set<Skill> nextSkills = current.getFutureEditionSkills();
@@ -178,15 +170,7 @@ public class SkillService {
 			}
 		}
 
-		// If the "active edition" skill is null at the end, this means that there is no edition the person
-		// has completed something in, which contains the skill
-		// Then return the "most recent" skill
-		if (recentActiveEditionSkill == null) {
-			return mostRecentEditionSkill;
-		}
-
-		// Return "active edition" skill
-		return recentActiveEditionSkill;
+		return skills;
 	}
 
 }
