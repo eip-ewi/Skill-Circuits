@@ -32,7 +32,7 @@ import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.edition.EditionLevelCourseViewDTO;
 import nl.tudelft.skills.model.SCEdition;
-import nl.tudelft.skills.repository.EditionRepository;
+import nl.tudelft.skills.repository.*;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,10 +54,18 @@ public class EditionServiceTest {
 
 	@Autowired
 	public EditionServiceTest(EditionControllerApi editionApi, EditionRepository editionRepository,
-			CircuitService circuitService) {
+			CircuitService circuitService, CheckpointRepository checkpointRepository,
+			PathRepository pathRepository, ModuleRepository moduleRepository,
+			SubmoduleRepository submoduleRepository, AbstractSkillRepository abstractSkillRepository,
+			AchievementRepository achievementRepository, SkillRepository skillRepository,
+			TaskRepository taskRepository) {
 		this.editionApi = editionApi;
 		this.editionRepository = editionRepository;
-		editionService = new EditionService(editionApi, editionRepository, circuitService);
+		editionService = new EditionService(editionApi, editionRepository, circuitService,
+				checkpointRepository,
+				pathRepository, moduleRepository, submoduleRepository, abstractSkillRepository,
+				achievementRepository,
+				skillRepository, taskRepository);
 	}
 
 	@Test
