@@ -1,0 +1,83 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div
+        layout:fragment="copy-edition"
+        th:if="${@editionService.isEditionEmpty(edition.id) and not studentMode
+        and @authorisationService.canEditEdition(edition.id) and #lists.size(edition.course.olderEditions) > 0}">
+        <button id="copy-edition" class="circuit__button copy-edition__button">
+            <i class="fas fa-paste"></i>
+            <span>Copy previous edition</span>
+        </button>
+
+        <form id="copy-edition-form" class="copy-edition__form hidden">
+            <input id="copy-checkpoint-id" name="id" type="hidden" th:value="${edition.id}" />
+
+            <select
+                class="circuit__dropdown copy-edition__select"
+                id="copy-edition-select"
+                name="edition.id">
+                <option
+                    th:each="selectEdition: ${edition.course.olderEditions}"
+                    th:value="${selectEdition.id}"
+                    th:text="${selectEdition.name}"></option>
+            </select>
+
+            <button
+                type="button"
+                id="copy-edition-cancel"
+                class="fa-solid fa-xmark"
+                onclick="toggleFormVisibility()"></button>
+            <button
+                type="button"
+                class="fas fa-check"
+                onclick="toggleOverlay('copy-confirmation-overlay')"></button>
+        </form>
+    </div>
+
+    <script
+        th:if="${@editionService.isEditionEmpty(edition.id) and not studentMode
+        and @authorisationService.canEditEdition(edition.id) and #lists.size(edition.course.olderEditions) > 0}"
+        layout:fragment="script">
+        function toggleFormVisibility() {
+            const copyEditionForm = $("#copy-edition-form");
+            const copyEdition = $("#copy-edition");
+
+            if (copyEditionForm.hasClass("hidden")) {
+                copyEditionForm.removeClass("hidden");
+                copyEdition.addClass("hidden");
+            } else {
+                copyEdition.removeClass("hidden");
+                copyEditionForm.addClass("hidden");
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            $("#copy-edition").click(() => {
+                toggleFormVisibility();
+                $("#copy-edition-from").text($("#copy-edition-select").find(":selected").text());
+            });
+        });
+    </script>
+</html>
