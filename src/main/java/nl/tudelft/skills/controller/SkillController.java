@@ -315,7 +315,8 @@ public class SkillController {
 		Skill redirectedSkill = skillService.recentActiveEditionForSkillOrLatest(authPerson.getId(),
 				externalSkill);
 
-		return "redirect:/module/" + redirectedSkill.getSubmodule().getModule().getId();
+		return "redirect:/module/" + redirectedSkill.getSubmodule().getModule().getId() + "#block-"
+				+ redirectedSkill.getId() + "-name";
 	}
 
 }
