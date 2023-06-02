@@ -55,15 +55,6 @@ public class InfoboxControllerTest extends ControllerTest {
 		this.taskCompletionRepository = taskCompletionRepository;
 	}
 
-	private void resetTaskCompletions() {
-		db.getPerson().setTaskCompletions(new HashSet<>());
-		db.getTaskDo11ad().setCompletedBy(new HashSet<>());
-		db.getTaskRead12().setCompletedBy(new HashSet<>());
-		db.getTaskDo12ae().setCompletedBy(new HashSet<>());
-		db.getTaskRead11().setCompletedBy(new HashSet<>());
-		taskCompletionRepository.deleteAll();
-	}
-
 	@Test
 	@WithAnonymousUser
 	public void testUnauthenticatedUser() throws Exception {
@@ -78,7 +69,7 @@ public class InfoboxControllerTest extends ControllerTest {
 	public void testTeacherUserNoCompletions() throws Exception {
 		// Remove all task completions from the repository
 		// In the setup the teacher has task completions
-		resetTaskCompletions();
+		db.resetTaskCompletions();
 
 		mvc.perform(get("/infobox"))
 				.andExpect(status().isOk())
@@ -112,7 +103,7 @@ public class InfoboxControllerTest extends ControllerTest {
 	public void testStudentNoCompletions() throws Exception {
 		// Remove all task completions from the repository
 		// In the setup the student has task completions
-		resetTaskCompletions();
+		db.resetTaskCompletions();
 
 		mvc.perform(get("/infobox"))
 				.andExpect(status().isOk())

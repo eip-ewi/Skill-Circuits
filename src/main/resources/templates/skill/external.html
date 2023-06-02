@@ -25,7 +25,7 @@
     <a
         th:id="|block-${block.id}|"
         class="block"
-        th:href="@{|/module/${block.module.id}#block-${block.skill.id}-name|}"
+        th:href="@{|/skill/external/${block.id}|}"
         th:style="|grid-row: ${block.row + 1}; grid-column: ${block.column + 1}|"
         th:draggable="${canEdit}"
         th:data-create="${create}"

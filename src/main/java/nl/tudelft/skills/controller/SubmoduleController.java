@@ -17,6 +17,8 @@
  */
 package nl.tudelft.skills.controller;
 
+import java.util.HashSet;
+
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
@@ -88,6 +90,7 @@ public class SubmoduleController {
 	public String deleteSubmodule(@RequestParam Long id, @RequestParam String page) {
 		Submodule submodule = submoduleRepository.findByIdOrThrow(id);
 		submodule.getSkills().stream().map(AbstractSkill::getId).forEach(skillService::deleteSkill);
+		submodule.setSkills(new HashSet<>());
 		submoduleRepository.delete(submodule);
 		return "redirect:/edition/" + submodule.getModule().getEdition().getId(); // TODO redirect to track page
 	}
