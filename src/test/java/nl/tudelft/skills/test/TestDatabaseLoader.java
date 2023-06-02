@@ -477,4 +477,42 @@ public class TestDatabaseLoader {
 		badge1 = badgeRepository.save(badge1);
 		badge2 = badgeRepository.save(badge2);
 	}
+
+	/**
+	 * Creates a skill in a new edition, with a given edition id. The submodule, module and checkpoint are
+	 * also created/saved.
+	 *
+	 * @param  editionId The id of the new edition.
+	 * @param  visible   Whether the edition is visible.
+	 * @return           The skill created within the new edition.
+	 */
+	public Skill createSkillInEditionHelper(Long editionId, boolean visible) {
+		SCEdition edition = SCEdition.builder().id(editionId).isVisible(visible).build();
+		edition = editionRepository.save(edition);
+		SCModule module = SCModule.builder()
+				.name("Module in " + editionId).edition(edition).build();
+		module = moduleRepository.save(module);
+		Submodule submodule = Submodule.builder().module(module)
+				.name("Submodule in " + editionId).column(0).row(0).build();
+		submodule = submoduleRepository.save(submodule);
+		LocalDateTime localDateTime = LocalDateTime.of(2023, 1, 10, 10, 10, 0);
+		Checkpoint checkpoint = Checkpoint.builder().edition(edition)
+				.name("Checkpoint in " + editionId).deadline(localDateTime).build();
+		checkpoint = checkpointRepository.save(checkpoint);
+		Skill skill = Skill.builder().submodule(submodule).checkpoint(checkpoint)
+				.name("Skill in " + editionId).column(0).row(0).build();
+		return skillRepository.save(skill);
+	}
+
+	/**
+	 * Reset the task completions that were initialized on load.
+	 */
+	public void resetTaskCompletions() {
+		person.setTaskCompletions(new HashSet<>());
+		taskDo11ad.setCompletedBy(new HashSet<>());
+		taskRead12.setCompletedBy(new HashSet<>());
+		taskDo12ae.setCompletedBy(new HashSet<>());
+		taskRead11.setCompletedBy(new HashSet<>());
+		taskCompletionRepository.deleteAll();
+	}
 }

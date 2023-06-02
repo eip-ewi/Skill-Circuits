@@ -18,6 +18,7 @@
 package nl.tudelft.skills.repository;
 
 import java.util.Optional;
+import java.util.Set;
 
 import nl.tudelft.skills.model.TaskCompletion;
 
@@ -32,4 +33,6 @@ public interface TaskCompletionRepository extends JpaRepository<TaskCompletion, 
 	}
 
 	Optional<TaskCompletion> getFirstByPersonIdAndTimestampNotNullOrderByTimestampDesc(Long id);
+
+	Set<TaskCompletion> getByPersonId(Long id);
 }
