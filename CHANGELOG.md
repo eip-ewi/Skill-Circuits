@@ -12,13 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [UNRELEASED]
 
 ### Added
- - Floating box which displays information about the most recently completed task (@ffiedrich)
+- Floating box which displays information about the most recently completed task (@ffiedrich)
+- Skill can remember the skill from the edition it was copied from (@ffiedrich)
  - Added option to change/switch checkpoint to another one which is not used in the current module. (@ffiedrich)
 
 ### Changed
 
 ### Fixed
  - Fixed isNotTransitivelyConnected for cyclic graphs and for external skills
+ - Fixed to not count optional skills in highlighting of skills that can be worked on. (@ffiedrich)
 
 ## [2.2.1]
 
