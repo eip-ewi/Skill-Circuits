@@ -302,20 +302,25 @@ public class SkillController {
 	/**
 	 * Redirects to the correct skill when an external skill is clicked. The link should redirect to the skill
 	 * in the most recent edition which the person has last worked on. If none such edition exists, the most
-	 * recent edition is chosen.
+	 * recent edition is chosen. If there is no skill that the person can view, the current skills view is
+	 * rendered.
 	 *
 	 * @param  skillId    The id of the external skill.
 	 * @param  authPerson The currently logged in person.
 	 * @return            The redirection link to the module in which the correct skill is.
 	 */
 	@GetMapping("external/{skillId}")
+	@PreAuthorize("@authorisationService.canViewSkill(#skillId)")
 	public String redirectToExternalSkill(@PathVariable Long skillId,
 			@AuthenticatedPerson Person authPerson) {
 		ExternalSkill externalSkill = externalSkillRepository.findByIdOrThrow(skillId);
 		Skill redirectedSkill = skillService.recentActiveEditionForSkillOrLatest(authPerson.getId(),
 				externalSkill);
 
-		return "redirect:/module/" + redirectedSkill.getSubmodule().getModule().getId();
+		// If there is no valid skill to link to, return to the initial page
+		return "redirect:/module/"
+				+ (redirectedSkill != null ? redirectedSkill.getSubmodule().getModule().getId()
+						: externalSkill.getModule().getId());
 	}
 
 }

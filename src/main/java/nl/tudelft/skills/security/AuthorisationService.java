@@ -143,6 +143,21 @@ public class AuthorisationService {
 	}
 
 	/**
+	 * Gets whether the authenticated user can view a skill.
+	 *
+	 * @param  skillId The id of the skill.
+	 * @return         True iff the user can view the skill.
+	 */
+	public boolean canViewSkill(Long skillId) {
+		AbstractSkill skill = abstractSkillRepository.findByIdOrThrow(skillId);
+
+		if (skill instanceof ExternalSkill) {
+			return canViewEdition(((ExternalSkill) skill).getModule().getEdition().getId());
+		}
+		return canViewEdition(skill.getSubmodule().getModule().getEdition().getId());
+	}
+
+	/**
 	 * Gets whether the authenticated user can edit the edition
 	 *
 	 * @param  editionId The id of the edition.

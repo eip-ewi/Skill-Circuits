@@ -96,7 +96,8 @@ public class SkillService {
 	/**
 	 * Gets the correct skill for an external skill. This is the skill in the most recent edition which the
 	 * person has last worked on. If none such edition exists, the most recent edition is chosen. "Most
-	 * recent" refers to the start date of the edition, and not the date of activity by the person.
+	 * recent" refers to the start date of the edition, and not the date of activity by the person. If there
+	 * is no skill in an edition visible to the user, this returns null.
 	 *
 	 * @param  personId      The id of the person.
 	 * @param  externalSkill The external skill.
@@ -138,8 +139,8 @@ public class SkillService {
 				.findFirst();
 
 		// If it does not exist, return the skill in the latest edition
-		// Traversal should never be empty, as it at least contains the initial skill
-		return completedTasksInEdition.orElse(traversal.get(0));
+		// If there is no skill visible to the user, returns null
+		return completedTasksInEdition.orElse(traversal.size() > 0 ? traversal.get(0) : null);
 	}
 
 	/**

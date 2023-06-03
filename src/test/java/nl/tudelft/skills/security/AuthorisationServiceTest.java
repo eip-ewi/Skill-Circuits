@@ -32,6 +32,8 @@ import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.cache.RoleCacheManager;
 import nl.tudelft.skills.model.ExternalSkill;
 import nl.tudelft.skills.model.SCEdition;
+import nl.tudelft.skills.model.SCModule;
+import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.test.TestDatabaseLoader;
 import nl.tudelft.skills.test.TestUserDetailsService;
@@ -185,6 +187,67 @@ public class AuthorisationServiceTest {
 		editionRepository.save(edition);
 
 		assertThat(authorisationService.canViewEdition(edition.getId())).isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canViewSkill(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canViewSkill(db.getSkillAssumption().getId())).isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,true", "STUDENT,true", ",true" })
+	void canViewSkillWithVisibility(String role, boolean expected) {
+		mockRole(role);
+		SCEdition edition = db.getEditionRL();
+		edition.setVisible(true);
+		editionRepository.save(edition);
+		assertThat(authorisationService.canViewSkill(db.getSkillAssumption().getId())).isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canViewSkillExternalSameEdition(String role, boolean expected) {
+		mockRole(role);
+		// Create a new module for the external skill, in the same edition
+		SCModule module = moduleRepository.save(SCModule.builder().edition(db.getEditionRL())
+				.name("New module").build());
+		// Create an external skill referencing SkillAssumption
+		ExternalSkill externalSkill = ExternalSkill.builder().skill(db.getSkillAssumption()).module(module)
+				.row(0).column(0).build();
+		externalSkill = externalSkillRepository.save(externalSkill);
+		assertThat(authorisationService.canViewSkill(externalSkill.getId())).isEqualTo(expected);
+	}
+
+	@WithUserDetails("username")
+	void canViewSkillExternalOtherEdition() {
+		// Since this is a bigger test, it is only checked with one role (the student role).
+		// This checks that the correct submodule is retrieved if it is an external skill (not using the overridden
+		// method in the ExternalSkill class).
+
+		mockRole("STUDENT");
+
+		// Set visibility of this edition
+		SCEdition edition = db.getEditionRL();
+		edition.setVisible(true);
+		editionRepository.save(edition);
+
+		// Create an edition which is invisible, and a skill it contains to which the external skill
+		// should link to
+		Skill skill = db.createSkillInEditionHelper(db.getEditionRL().getId() + 1, false);
+
+		// Create a new module for the external skill, in the same edition
+		SCModule module = moduleRepository.save(SCModule.builder().edition(db.getEditionRL())
+				.name("New module").build());
+		ExternalSkill externalSkill = ExternalSkill.builder().skill(skill).module(module)
+				.row(0).column(0).build();
+		externalSkill = externalSkillRepository.save(externalSkill);
+
+		assertThat(authorisationService.canViewSkill(externalSkill.getId())).isEqualTo(true);
 	}
 
 	@ParameterizedTest
