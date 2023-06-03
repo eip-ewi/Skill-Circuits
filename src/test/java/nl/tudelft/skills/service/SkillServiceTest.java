@@ -18,25 +18,27 @@
 package nl.tudelft.skills.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.EditionControllerApi;
-import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
-import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
-import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
+import nl.tudelft.labracore.api.RoleControllerApi;
+import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.*;
+import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.test.TestDatabaseLoader;
+import nl.tudelft.skills.test.TestUserDetailsService;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
 import reactor.core.publisher.Flux;
@@ -54,7 +56,9 @@ public class SkillServiceTest {
 	private final ModuleRepository moduleRepository;
 	private final SkillService skillService;
 	private final SkillRepository skillRepository;
+	private AuthorisationService authorisationService;
 
+	private final RoleControllerApi roleApi;
 	private final CourseControllerApi courseApi;
 	private final EditionControllerApi editionApi;
 
@@ -66,7 +70,8 @@ public class SkillServiceTest {
 			TestDatabaseLoader db, TaskCompletionRepository taskCompletionRepository,
 			EditionControllerApi editionApi, CourseControllerApi courseApi,
 			SkillRepository skillRepository, ModuleRepository moduleRepository,
-			ExternalSkillRepository externalSkillRepository, EditionRepository editionRepository) {
+			ExternalSkillRepository externalSkillRepository, EditionRepository editionRepository,
+			AuthorisationService authorisationService, RoleControllerApi roleApi) {
 		this.abstractSkillRepository = abstractSkillRepository;
 		this.taskCompletionRepository = taskCompletionRepository;
 		this.externalSkillRepository = externalSkillRepository;
@@ -75,14 +80,19 @@ public class SkillServiceTest {
 		this.taskRepository = taskRepository;
 		this.skillRepository = skillRepository;
 
+		// The service is not mocked to test the specifics of whether an edition is shown because it
+		// is visible, or because the person is at least a teacher in the edition
+		this.authorisationService = authorisationService;
+
 		this.db = db;
 		this.localDateTime = LocalDateTime.of(2023, 1, 10, 10, 10, 0);
 
+		this.roleApi = roleApi;
 		this.courseApi = courseApi;
 		this.editionApi = editionApi;
 
 		this.skillService = new SkillService(abstractSkillRepository, taskCompletionRepository, editionApi,
-				courseApi, skillRepository, editionRepository);
+				courseApi, skillRepository, editionRepository, authorisationService);
 	}
 
 	@Test
@@ -179,12 +189,12 @@ public class SkillServiceTest {
 
 	/**
 	 * Mocks the responses of the courseApi and editionApi for three courses. Sets visibility of editionRL to
-	 * the given value, and mocks editions of given ids to be active.
+	 * the given value. Also mocks the role of the person.
 	 *
-	 * @param activeEditionIds The ids of active editions.
-	 * @param visible          Whether the current edition should be visible.
+	 * @param visible Whether the current edition should be visible.
+	 * @param role    Role of the person.
 	 */
-	private void mockEditionsAndSetVisible(List<Long> activeEditionIds, boolean visible) {
+	private void mockEditionsAndSetVisible(boolean visible, String role) {
 		Long idInUse = db.getEditionRL().getId();
 
 		// Mock the response of the courseApi to return the course details
@@ -196,19 +206,21 @@ public class SkillServiceTest {
 						new EditionSummaryDTO().id(idInUse + 2).startDate(localDateTime.plusDays(4))));
 		Mockito.when(courseApi.getCourseByEdition(db.getEditionRL().getId())).thenReturn(Mono.just(course));
 
-		// Mock response so that the editions are all also active
-		List<EditionDetailsDTO> activeEditions = activeEditionIds.stream()
-				.map(id -> new EditionDetailsDTO().id(id))
-				.collect(Collectors.toList());
-		Mockito.when(editionApi.getAllEditionsActiveOrTaughtBy(db.getPerson().getId()))
-				.thenReturn(Flux.fromIterable(activeEditions));
-
 		// Set edition to be visible
 		db.getEditionRL().setVisible(visible);
 		editionRepository.save(db.getEditionRL());
+
+		// Mock the role of the person
+		when(roleApi.getRolesById(anyList(), anyList()))
+				.thenReturn(Flux.just(new RoleDetailsDTO()
+						.id(new Id().editionId(db.getEditionRL().getId())
+								.personId(TestUserDetailsService.id))
+						.person(new PersonSummaryDTO().id(TestUserDetailsService.id).username("username"))
+						.type(RoleDetailsDTO.TypeEnum.valueOf(role))));
 	}
 
 	@Test
+	@WithUserDetails("username")
 	public void testRecentActiveEditionOneEdition() {
 		// Test scenario in which there is only one edition
 		// The method should return that editions skill
@@ -227,6 +239,13 @@ public class SkillServiceTest {
 		// Set edition to be visible
 		db.getEditionRL().setVisible(true);
 		editionRepository.save(db.getEditionRL());
+		// Mock the role of the person
+		when(roleApi.getRolesById(anyList(), anyList()))
+				.thenReturn(Flux.just(new RoleDetailsDTO()
+						.id(new Id().editionId(db.getEditionRL().getId())
+								.personId(TestUserDetailsService.id))
+						.person(new PersonSummaryDTO().id(TestUserDetailsService.id).username("username"))
+						.type(RoleDetailsDTO.TypeEnum.valueOf("STUDENT"))));
 
 		// Assert that the recent active edition method returns the correct skill
 		// Since there is only one edition, this is the skill in this edition
@@ -239,6 +258,7 @@ public class SkillServiceTest {
 	}
 
 	@Test
+	@WithUserDetails("username")
 	public void testMultipleEditionsNoTaskCompleted() {
 		/*
 		 * Test scenario in which there are multiple editions, but no task was completed. Edition structure
@@ -264,7 +284,7 @@ public class SkillServiceTest {
 		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionB);
 		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionC);
 
-		mockEditionsAndSetVisible(List.of(idInUse, idInUse + 1, idInUse + 2), true);
+		mockEditionsAndSetVisible(true, "STUDENT");
 
 		// Assert that the recent active edition method returns the correct skill
 		// The person has not completed any tasks in any edition yet, so it should return the most recent
@@ -283,6 +303,7 @@ public class SkillServiceTest {
 	}
 
 	@Test
+	@WithUserDetails("username")
 	public void testMultipleEditionsWithTaskCompleted() {
 		/*
 		 * Test scenario in which there are multiple editions, and a task was completed in one of the less
@@ -317,7 +338,7 @@ public class SkillServiceTest {
 		task.getCompletedBy().add(taskCompletion);
 		db.getPerson().getTaskCompletions().add(taskCompletion);
 
-		mockEditionsAndSetVisible(List.of(idInUse, idInUse + 1, idInUse + 2), true);
+		mockEditionsAndSetVisible(true, "STUDENT");
 
 		// Assert that the recent active edition method returns the correct skill
 		// The person has completed a task in editionB, so it should return that editions skill
@@ -335,6 +356,7 @@ public class SkillServiceTest {
 	}
 
 	@Test
+	@WithUserDetails("username")
 	public void testMultipleEditionsChainWithTaskCompleted() {
 		/*
 		 * Test scenario in which there are multiple editions, and a task was completed in one of the less
@@ -370,7 +392,7 @@ public class SkillServiceTest {
 		task.getCompletedBy().add(taskCompletion);
 		db.getPerson().getTaskCompletions().add(taskCompletion);
 
-		mockEditionsAndSetVisible(List.of(idInUse, idInUse + 1, idInUse + 2), true);
+		mockEditionsAndSetVisible(true, "STUDENT");
 
 		// Assert that the recent active edition method returns the correct skill
 		// The person has completed a task in editionB, so it should return that editions skill
@@ -387,6 +409,7 @@ public class SkillServiceTest {
 	}
 
 	@Test
+	@WithUserDetails("username")
 	public void testMultipleEditionsMostRecentDoesNotHaveSkill() {
 		/*
 		 * Test scenario in which there are multiple editions, and the most recent edition does not contain
@@ -413,7 +436,7 @@ public class SkillServiceTest {
 		// Create empty edition C
 		editionRepository.save(SCEdition.builder().id(idInUse + 2).build());
 
-		mockEditionsAndSetVisible(List.of(idInUse, idInUse + 1, idInUse + 2), true);
+		mockEditionsAndSetVisible(true, "STUDENT");
 
 		// Assert that the recent active edition method returns the correct skill
 		// The most recent edition which contains the copied skill is editionB
@@ -428,6 +451,7 @@ public class SkillServiceTest {
 	}
 
 	@Test
+	@WithUserDetails("username")
 	public void testMultipleEditionsTaskCompletedInvisibleEdition() {
 		/*
 		 * Test scenario in which there are multiple editions, and a task was completed in the oldest edition,
@@ -462,7 +486,7 @@ public class SkillServiceTest {
 		task.getCompletedBy().add(taskCompletion);
 		db.getPerson().getTaskCompletions().add(taskCompletion);
 
-		mockEditionsAndSetVisible(List.of(idInUse, idInUse + 1, idInUse + 2), false);
+		mockEditionsAndSetVisible(false, "STUDENT");
 
 		// Assert that the recent active edition method returns the correct skill
 		// The latest visible edition is edition C, so it should return the skill in that edition
@@ -480,6 +504,7 @@ public class SkillServiceTest {
 	}
 
 	@Test
+	@WithUserDetails("username")
 	public void testMultipleEditionsWithoutTaskCompletedInvisibleEdition() {
 		/*
 		 * Test scenario in which there are multiple editions, and the most recent edition is not visible.
@@ -505,7 +530,7 @@ public class SkillServiceTest {
 		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionB);
 		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionC);
 
-		mockEditionsAndSetVisible(List.of(idInUse, idInUse + 1, idInUse + 2), true);
+		mockEditionsAndSetVisible(true, "STUDENT");
 
 		// Assert that the recent active edition method returns the correct skill
 		// The latest visible edition is edition B, so it should return the skill in that edition

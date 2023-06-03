@@ -40,6 +40,7 @@ import nl.tudelft.skills.repository.AbstractSkillRepository;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
+import nl.tudelft.skills.security.AuthorisationService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -54,18 +55,20 @@ public class SkillService {
 	private final EditionControllerApi editionApi;
 	private final CourseControllerApi courseApi;
 	private final SkillRepository skillRepository;
+	private final AuthorisationService authorisationService;
 
 	@Autowired
 	public SkillService(AbstractSkillRepository abstractSkillRepository,
 			TaskCompletionRepository taskCompletionRepository, EditionControllerApi editionApi,
 			CourseControllerApi courseApi, SkillRepository skillRepository,
-			EditionRepository editionRepository) {
+			EditionRepository editionRepository, AuthorisationService authorisationService) {
 		this.abstractSkillRepository = abstractSkillRepository;
 		this.taskCompletionRepository = taskCompletionRepository;
 		this.editionApi = editionApi;
 		this.courseApi = courseApi;
 		this.skillRepository = skillRepository;
 		this.editionRepository = editionRepository;
+		this.authorisationService = authorisationService;
 	}
 
 	/**
@@ -118,11 +121,11 @@ public class SkillService {
 		// Do DFS
 		List<Skill> traversal = traverseSkillTree(skill);
 
-		// Filter by skills in visible editions
+		// Filter by skills in editions visible to the user
 		traversal = traversal.stream()
 				.filter(innerSkill -> {
 					Long innerEditionId = innerSkill.getSubmodule().getModule().getEdition().getId();
-					return editionRepository.getById(innerEditionId).isVisible();
+					return authorisationService.canViewEdition(innerEditionId);
 				})
 				.sorted(Comparator.comparing((Skill innerSkill) -> editionsById.get(innerSkill.getSubmodule()
 						.getModule().getEdition().getId()).getStartDate()).reversed())
