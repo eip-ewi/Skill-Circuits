@@ -22,6 +22,7 @@ import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.EditionControllerApi;
@@ -189,7 +190,7 @@ public class SkillServiceTest {
 
 	/**
 	 * Mocks the responses of the courseApi and editionApi for three courses. Sets visibility of editionRL to
-	 * the given value. Also mocks the role of the person.
+	 * the given value. Also mocks the role of the person in all editions.
 	 *
 	 * @param visible Whether the current edition should be visible.
 	 * @param role    Role of the person.
@@ -210,13 +211,16 @@ public class SkillServiceTest {
 		db.getEditionRL().setVisible(visible);
 		editionRepository.save(db.getEditionRL());
 
-		// Mock the role of the person
-		when(roleApi.getRolesById(anyList(), anyList()))
-				.thenReturn(Flux.just(new RoleDetailsDTO()
-						.id(new Id().editionId(db.getEditionRL().getId())
+		// Mock the role of the person for all of the editions
+		List<RoleDetailsDTO> roleDetails = List.of(idInUse, idInUse + 1, idInUse + 2).stream()
+				.map(id -> new RoleDetailsDTO()
+						.id(new Id().editionId(id)
 								.personId(TestUserDetailsService.id))
 						.person(new PersonSummaryDTO().id(TestUserDetailsService.id).username("username"))
-						.type(RoleDetailsDTO.TypeEnum.valueOf(role))));
+						.type(RoleDetailsDTO.TypeEnum.valueOf(role)))
+				.collect(Collectors.toList());
+		when(roleApi.getRolesById(anyList(), anyList()))
+				.thenReturn(Flux.fromIterable(roleDetails));
 	}
 
 	@Test
@@ -536,6 +540,53 @@ public class SkillServiceTest {
 		// The latest visible edition is edition B, so it should return the skill in that edition
 		assertThat(skillService.recentActiveEditionForSkillOrLatest(db.getPerson().getId(), externalSkill))
 				.isEqualTo(skillEditionB);
+
+		// Assert on the traversal lists
+		// The order cannot be asserted on, since the futureEditionSkills is a set
+		assertThat(skillService.traverseSkillTree(db.getSkillAssumption()))
+				.containsExactlyInAnyOrder(db.getSkillAssumption(), skillEditionB, skillEditionC);
+		assertThat(skillService.traverseSkillTree(skillEditionB))
+				.containsExactlyInAnyOrder(db.getSkillAssumption(), skillEditionB, skillEditionC);
+		assertThat(skillService.traverseSkillTree(skillEditionC))
+				.containsExactlyInAnyOrder(db.getSkillAssumption(), skillEditionB, skillEditionC);
+	}
+
+	@Test
+	@WithUserDetails("teacher")
+	public void testMultipleEditionsWithoutTaskCompletedTeacherEdition() {
+		/*
+		 * Test scenario in which there are multiple editions, and the most recent edition is not visible, the
+		 * logged-in user is however a teacher in these editions, so it should be visible to them regardless.
+		 * Edition structure is: editionA --> (editionB and editionC). With editionC being the latest edition.
+		 * The skill which the external skill refers to should be "copied" from edition A to editions B and C.
+		 * The method should return the most skill of recent edition, which is also visible to the user
+		 * (editionC).
+		 */
+
+		ExternalSkill externalSkill = createExternalSkill();
+
+		// Reset the task completions, so that the person has not completed any tasks yet
+		db.resetTaskCompletions();
+
+		// Create two new skills, submodules, modules and editions
+		// Edition A is the current edition (editionRL)
+		Long idInUse = db.getEditionRL().getId();
+		Skill skillEditionB = db.createSkillInEditionHelper(idInUse + 1, true);
+		Skill skillEditionC = db.createSkillInEditionHelper(idInUse + 2, false);
+
+		// Skills in edition B/C should be copies of skill in edition A
+		skillEditionB.setPreviousEditionSkill(db.getSkillAssumption());
+		skillEditionC.setPreviousEditionSkill(db.getSkillAssumption());
+		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionB);
+		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionC);
+
+		// Sets the role to "teacher" for all editions
+		mockEditionsAndSetVisible(true, "TEACHER");
+
+		// Assert that the recent active edition method returns the correct skill
+		// The latest visible edition is edition B, so it should return the skill in that edition
+		assertThat(skillService.recentActiveEditionForSkillOrLatest(db.getPerson().getId(), externalSkill))
+				.isEqualTo(skillEditionC);
 
 		// Assert on the traversal lists
 		// The order cannot be asserted on, since the futureEditionSkills is a set
