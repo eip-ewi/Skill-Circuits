@@ -319,8 +319,7 @@ public class SkillController {
 
 		// If there is no valid skill to link to, return to the initial page
 		return "redirect:/module/"
-				+ (redirectedSkill != null ? redirectedSkill.getSubmodule().getModule().getId()
-						: externalSkill.getModule().getId());
+				+ (redirectedSkill != null ? (redirectedSkill.getSubmodule().getModule().getId() +
+						"#block-" + redirectedSkill.getId() + "-name") : externalSkill.getModule().getId());
 	}
-
 }
