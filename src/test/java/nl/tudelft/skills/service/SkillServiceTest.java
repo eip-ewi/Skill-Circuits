@@ -172,23 +172,6 @@ public class SkillServiceTest {
 	}
 
 	/**
-	 * Creates an external skill for testing purposes.
-	 *
-	 * @return The created external skill.
-	 */
-	private ExternalSkill createExternalSkill() {
-		// Create a new module for the external skill, in the same edition
-		SCModule module = moduleRepository.save(SCModule.builder().edition(db.getEditionRL())
-				.name("New module").build());
-		// Create an external skill referencing SkillAssumption
-		ExternalSkill externalSkill = ExternalSkill.builder().skill(db.getSkillAssumption()).module(module)
-				.row(0).column(0).build();
-		externalSkill = externalSkillRepository.save(externalSkill);
-
-		return externalSkill;
-	}
-
-	/**
 	 * Mocks the responses of the courseApi and editionApi for three courses. Sets visibility of editionRL to
 	 * the given value. Also mocks the role of the person in all editions.
 	 *
@@ -229,7 +212,7 @@ public class SkillServiceTest {
 		// Test scenario in which there is only one edition
 		// The method should return that editions skill
 
-		ExternalSkill externalSkill = createExternalSkill();
+		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
 
 		// Mock the response of the courseApi to return the course details
 		CourseDetailsDTO course = new CourseDetailsDTO().id(db.getCourseRL().getId())
@@ -263,6 +246,38 @@ public class SkillServiceTest {
 
 	@Test
 	@WithUserDetails("username")
+	public void testRecentActiveEditionReturnNull() {
+		// Test scenario in which there is only a skill in an invisible edition
+		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
+
+		// Mock the response of the courseApi to return the course details
+		CourseDetailsDTO course = new CourseDetailsDTO().id(db.getCourseRL().getId())
+				.editions(List.of(new EditionSummaryDTO().id(db.getEditionRL().getId())));
+		Mockito.when(courseApi.getCourseByEdition(db.getEditionRL().getId())).thenReturn(Mono.just(course));
+
+		// Mock response so that the edition is also active
+		Mockito.when(editionApi.getAllEditionsActiveOrTaughtBy(db.getPerson().getId()))
+				.thenReturn(Flux.just(new EditionDetailsDTO().id(db.getEditionRL().getId())));
+
+		// Mock the role of the person
+		when(roleApi.getRolesById(anyList(), anyList()))
+				.thenReturn(Flux.just(new RoleDetailsDTO()
+						.id(new Id().editionId(db.getEditionRL().getId())
+								.personId(TestUserDetailsService.id))
+						.person(new PersonSummaryDTO().id(TestUserDetailsService.id).username("username"))
+						.type(RoleDetailsDTO.TypeEnum.valueOf("STUDENT"))));
+
+		// Assert that the recent active edition method returns null (edition is invisible)
+		assertThat(skillService.recentActiveEditionForSkillOrLatest(db.getPerson().getId(), externalSkill))
+				.isEqualTo(null);
+
+		// Assert on the traversal list
+		assertThat(skillService.traverseSkillTree(db.getSkillAssumption()))
+				.containsExactly(db.getSkillAssumption());
+	}
+
+	@Test
+	@WithUserDetails("username")
 	public void testMultipleEditionsNoTaskCompleted() {
 		/*
 		 * Test scenario in which there are multiple editions, but no task was completed. Edition structure
@@ -271,7 +286,7 @@ public class SkillServiceTest {
 		 * should return the latest editions skill (edition C).
 		 */
 
-		ExternalSkill externalSkill = createExternalSkill();
+		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
 
 		// Reset the task completions, so that the person has not completed any tasks yet
 		db.resetTaskCompletions();
@@ -317,7 +332,7 @@ public class SkillServiceTest {
 		 * in which a task was completed.
 		 */
 
-		ExternalSkill externalSkill = createExternalSkill();
+		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
 
 		// Reset the task completions, so that the person has not completed any tasks yet
 		db.resetTaskCompletions();
@@ -370,7 +385,7 @@ public class SkillServiceTest {
 		 * in which a task was completed.
 		 */
 
-		ExternalSkill externalSkill = createExternalSkill();
+		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
 
 		// Reset the task completions, so that the person has not completed any tasks yet
 		db.resetTaskCompletions();
@@ -423,7 +438,7 @@ public class SkillServiceTest {
 		 * return the skill in edition B.
 		 */
 
-		ExternalSkill externalSkill = createExternalSkill();
+		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
 
 		// Reset the task completions, so that the person has not completed any tasks yet
 		db.resetTaskCompletions();
@@ -465,7 +480,7 @@ public class SkillServiceTest {
 		 * most skill of recent edition, which is also visible (editionC).
 		 */
 
-		ExternalSkill externalSkill = createExternalSkill();
+		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
 
 		// Reset the task completions, so that the person has not completed any tasks yet
 		db.resetTaskCompletions();
@@ -517,7 +532,7 @@ public class SkillServiceTest {
 		 * The method should return the most skill of recent edition, which is also visible (editionB).
 		 */
 
-		ExternalSkill externalSkill = createExternalSkill();
+		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
 
 		// Reset the task completions, so that the person has not completed any tasks yet
 		db.resetTaskCompletions();
@@ -563,7 +578,7 @@ public class SkillServiceTest {
 		 * (editionC).
 		 */
 
-		ExternalSkill externalSkill = createExternalSkill();
+		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
 
 		// Reset the task completions, so that the person has not completed any tasks yet
 		db.resetTaskCompletions();

@@ -32,7 +32,6 @@ import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.cache.RoleCacheManager;
 import nl.tudelft.skills.model.ExternalSkill;
 import nl.tudelft.skills.model.SCEdition;
-import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.test.TestDatabaseLoader;
@@ -213,13 +212,7 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canViewSkillExternalSameEdition(String role, boolean expected) {
 		mockRole(role);
-		// Create a new module for the external skill, in the same edition
-		SCModule module = moduleRepository.save(SCModule.builder().edition(db.getEditionRL())
-				.name("New module").build());
-		// Create an external skill referencing SkillAssumption
-		ExternalSkill externalSkill = ExternalSkill.builder().skill(db.getSkillAssumption()).module(module)
-				.row(0).column(0).build();
-		externalSkill = externalSkillRepository.save(externalSkill);
+		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
 		assertThat(authorisationService.canViewSkill(externalSkill.getId())).isEqualTo(expected);
 	}
 
@@ -239,13 +232,7 @@ public class AuthorisationServiceTest {
 		// Create an edition which is invisible, and a skill it contains to which the external skill
 		// should link to
 		Skill skill = db.createSkillInEditionHelper(db.getEditionRL().getId() + 1, false);
-
-		// Create a new module for the external skill, in the same edition
-		SCModule module = moduleRepository.save(SCModule.builder().edition(db.getEditionRL())
-				.name("New module").build());
-		ExternalSkill externalSkill = ExternalSkill.builder().skill(skill).module(module)
-				.row(0).column(0).build();
-		externalSkill = externalSkillRepository.save(externalSkill);
+		ExternalSkill externalSkill = db.createExternalSkill(skill);
 
 		assertThat(authorisationService.canViewSkill(externalSkill.getId())).isEqualTo(true);
 	}
