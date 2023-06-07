@@ -325,7 +325,7 @@ public class SkillControllerTest extends ControllerTest {
 	@WithUserDetails("username")
 	void redirectToExternalSkillNotAuthorized() throws Exception {
 		// Save an external skill
-		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());;
+		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
 
 		// Mock role of user
 		mockRole("STUDENT");
