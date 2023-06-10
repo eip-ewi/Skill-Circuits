@@ -166,6 +166,24 @@ public class EditionService {
 	}
 
 	/**
+	 * Checks if an edition is empty (i.e., no modules, no checkpoints and no paths).
+	 *
+	 * @param  id The id of the edition to check.
+	 * @return    If the given edition is empty.
+	 */
+	public boolean isEditionEmpty(Long id) {
+		SCEdition edition = editionRepository.findByIdOrThrow(id);
+
+		boolean noModules = edition.getModules().isEmpty();
+		boolean noCheckpoints = edition.getCheckpoints().isEmpty();
+		boolean noPaths = edition.getPaths().isEmpty();
+
+		// These checks are sufficient, since submodules, skills etc. can
+		// only exist if there is at least one module.
+		return noModules && noCheckpoints && noPaths;
+	}
+
+	/**
 	 * Copies one edition (i.e., modules, submodules etc.) to another.
 	 *
 	 * @param copyTo   The id of the edition to copy to.
@@ -182,7 +200,53 @@ public class EditionService {
 		SCEdition editionTo = editionRepository.findByIdOrThrow(copyTo);
 		SCEdition editionFrom = editionRepository.findByIdOrThrow(copyFrom);
 
-		// ---- Copy checkpoints ----
+		// Copy checkpoints
+		Map<Checkpoint, Checkpoint> checkpointMap = copyEditionCheckpoints(editionFrom, editionTo);
+
+		// Copy paths
+		Map<Path, Path> pathMap = copyEditionPaths(editionFrom, editionTo);
+		editionTo.setDefaultPath(pathMap.get(editionFrom.getDefaultPath()));
+
+		// Copy modules and submodules
+		Map<SCModule, SCModule> moduleMap = copyEditionModules(editionFrom, editionTo);
+		Map<Submodule, Submodule> submoduleMap = copyEditionSubmodules(moduleMap);
+
+		// Copy (external) skills
+		Map<ExternalSkill, ExternalSkill> externalSkillMap = copyEditionExternalSkills(moduleMap);
+		Map<Skill, Skill> skillMap = copyAndLinkEditionSkills(submoduleMap, checkpointMap, externalSkillMap);
+		Map<AbstractSkill, AbstractSkill> abstractSkillMap = new HashMap<>(externalSkillMap);
+		abstractSkillMap.putAll(skillMap);
+		linkParentsChildrenSkills(abstractSkillMap);
+
+		// Copy tasks
+		Map<Task, Task> taskMap = copyAndLinkEditionTasks(skillMap, pathMap);
+
+		// Copy achievements
+		copyAndLinkEditionAchievements(taskMap);
+
+		// Since there may be a lot of updates to the database, flush all databases for safety
+		editionRepository.flush();
+		pathRepository.flush();
+		moduleRepository.flush();
+		submoduleRepository.flush();
+		abstractSkillRepository.flush();
+		achievementRepository.flush();
+		skillRepository.flush();
+		taskRepository.flush();
+	}
+
+	/**
+	 * Adds copies of checkpoints from the given edition (editionFrom) to the database, and adds them to the
+	 * checkpoints of the edition to copy to (editionTo). Returns the map of checkpoints, from previous
+	 * checkpoints in editionFrom to the new checkpoints in editionTo.
+	 *
+	 * @param  editionFrom The edition to copy from.
+	 * @param  editionTo   The edition to copy to.
+	 * @return             A map of checkpoints, from previous checkpoints in editionFrom to the new
+	 *                     checkpoints in editionTo.
+	 */
+	@Transactional
+	public Map<Checkpoint, Checkpoint> copyEditionCheckpoints(SCEdition editionFrom, SCEdition editionTo) {
 		Map<Checkpoint, Checkpoint> checkpointsMap = new HashMap<>();
 
 		editionFrom.getCheckpoints().forEach(c -> {
@@ -197,7 +261,22 @@ public class EditionService {
 			checkpointsMap.put(c, checkpoint);
 		});
 
-		// ---- Copy paths ----
+		checkpointRepository.flush();
+
+		return checkpointsMap;
+	}
+
+	/**
+	 * Adds copies of paths from the given edition (editionFrom) to the database, and adds them to the paths
+	 * of the edition to copy to (editionTo). Returns the map of paths, from previous paths in editionFrom to
+	 * the new paths in editionTo.
+	 *
+	 * @param  editionFrom The edition to copy from.
+	 * @param  editionTo   The edition to copy to.
+	 * @return             A map of paths, from previous paths in editionFrom to the new paths in editionTo.
+	 */
+	@Transactional
+	public Map<Path, Path> copyEditionPaths(SCEdition editionFrom, SCEdition editionTo) {
 		Map<Path, Path> pathMap = new HashMap<>();
 
 		editionFrom.getPaths().forEach(p -> {
@@ -211,11 +290,22 @@ public class EditionService {
 			pathMap.put(p, path);
 		});
 
-		editionTo.setDefaultPath(pathMap.get(editionFrom.getDefaultPath()));
+		return pathMap;
+	}
 
-		// ---- Copy modules/submodules ----
+	/**
+	 * Adds copies of modules from the given edition (editionFrom) to the database, and adds them to the
+	 * modules of the edition to copy to (editionTo). Returns the map of modules, from previous modules in
+	 * editionFrom to the new modules in editionTo.
+	 *
+	 * @param  editionFrom The edition to copy from.
+	 * @param  editionTo   The edition to copy to.
+	 * @return             A map of modules, from previous modules in editionFrom to the new modules in
+	 *                     editionTo.
+	 */
+	@Transactional
+	public Map<SCModule, SCModule> copyEditionModules(SCEdition editionFrom, SCEdition editionTo) {
 		Map<SCModule, SCModule> moduleMap = new HashMap<>();
-		Map<Submodule, Submodule> submoduleMap = new HashMap<>();
 
 		editionFrom.getModules().forEach(m -> {
 			SCModule module = moduleRepository.save(
@@ -226,24 +316,52 @@ public class EditionService {
 
 			editionTo.getModules().add(module);
 			moduleMap.put(m, module);
+		});
 
-			m.getSubmodules().forEach(sm -> {
+		return moduleMap;
+	}
+
+	/**
+	 * Creates copies of submodules of the keys of the given module map. This map contains modules mapped to
+	 * their copy. The submodules are added as submodules to the copy of the corresponding module. Returns the
+	 * map of submodules, from previous submodules to the new submodules.
+	 *
+	 * @param  moduleMap The map of modules, from previous modules to the new modules.
+	 * @return           The map of submodules, from previous submodules to the new submodules.
+	 */
+	@Transactional
+	public Map<Submodule, Submodule> copyEditionSubmodules(Map<SCModule, SCModule> moduleMap) {
+		Map<Submodule, Submodule> submoduleMap = new HashMap<>();
+
+		moduleMap.forEach((prev, copy) -> {
+			prev.getSubmodules().forEach(sm -> {
 				Submodule submodule = submoduleRepository.save(
 						Submodule.builder()
 								.name(sm.getName())
-								.module(module)
+								.module(copy)
 								.row(sm.getRow())
 								.column(sm.getColumn())
 								.build());
 
-				module.getSubmodules().add(submodule);
+				copy.getSubmodules().add(submodule);
 				submoduleMap.put(sm, submodule);
 			});
 		});
 
-		// ---- Copy external skills from modules ----
+		return submoduleMap;
+	}
+
+	/**
+	 * Creates copies of external skills of the keys of the given module map. This map contains modules mapped
+	 * to their copy. The external skills are added as external skills to the copy of the corresponding
+	 * module. Returns the map of external skills, from previous external skills to the new external skills.
+	 *
+	 * @param  moduleMap The map of modules, from previous modules to the new modules.
+	 * @return           The map of external skills, from previous external skills to the new external skills.
+	 */
+	@Transactional
+	public Map<ExternalSkill, ExternalSkill> copyEditionExternalSkills(Map<SCModule, SCModule> moduleMap) {
 		Map<ExternalSkill, ExternalSkill> externalSkillMap = new HashMap<>();
-		Map<AbstractSkill, AbstractSkill> abstractSkillMap = new HashMap<>();
 
 		moduleMap.forEach((prev, copy) -> prev.getExternalSkills().forEach(s -> {
 			ExternalSkill externalSkill = abstractSkillRepository.save(
@@ -253,18 +371,35 @@ public class EditionService {
 
 			copy.getExternalSkills().add(externalSkill);
 			externalSkillMap.put(s, externalSkill);
-			abstractSkillMap.put(s, externalSkill);
 		}));
 
-		// ---- Copy skills from submodules ----
-		// ---- Copy/link external skills from/to skills ----
-		// ---- Link checkpoints and skills ----
+		return externalSkillMap;
+	}
+
+	/**
+	 * Creates copies of skills of the keys of the given submodule map. This map contains submodules mapped to
+	 * their copy. The skills are added as skills to the copy of the corresponding submodule. Additionally,
+	 * links copied external skills/checkpoints to their copied skills. Returns the map of skills, from
+	 * previous skills to the new skills.
+	 *
+	 * @param  submoduleMap     The map of submodules, from previous submodules to the new submodules.
+	 * @param  checkpointMap    The map of checkpoints, from previous checkpoints to the new checkpoints.
+	 * @param  externalSkillMap The map of external skills, from previous external skills to the new external
+	 *                          skills.
+	 * @return                  The map of skills, from previous skills to the new skills.
+	 */
+	@Transactional
+	public Map<Skill, Skill> copyAndLinkEditionSkills(Map<Submodule, Submodule> submoduleMap,
+			Map<Checkpoint, Checkpoint> checkpointMap,
+			Map<ExternalSkill, ExternalSkill> externalSkillMap) {
 		Map<Skill, Skill> skillMap = new HashMap<>();
 
 		submoduleMap.forEach((prev, copy) -> prev.getSkills().forEach(s -> {
-			Checkpoint linkedCheckpoint = checkpointsMap.get(s.getCheckpoint());
+			Checkpoint linkedCheckpoint = checkpointMap.get(s.getCheckpoint());
+
 			if (linkedCheckpoint != null) {
 				// This should hold for any correctly formed edition
+				// A skill requires a checkpoint to be linked to
 				Skill skill = abstractSkillRepository.save(
 						Skill.builder()
 								.name(s.getName())
@@ -281,16 +416,16 @@ public class EditionService {
 				s.getFutureEditionSkills().add(skill);
 				copy.getSkills().add(skill);
 				skillMap.put(s, skill);
-				abstractSkillMap.put(s, skill);
 
 				s.getExternalSkills().forEach(extSkill -> {
 					ExternalSkill linkedSkill = externalSkillMap.get(extSkill);
 					if (linkedSkill != null) {
-						// It is linked to a module of this edition
+						// It is linked to an external skill of this edition
 
 						skill.getExternalSkills().add(linkedSkill);
 					} else {
-						// It is not linked to a module of this edition
+						// It is not linked to an external skill of this edition, so can be linked
+						// to a non-copied version (i.e., the same external skill as the previous skill)
 
 						ExternalSkill externalSkill = abstractSkillRepository.save(
 								ExternalSkill.builder()
@@ -304,7 +439,20 @@ public class EditionService {
 			}
 		}));
 
-		// ---- Link parents/children of skills ----
+		return skillMap;
+	}
+
+	/**
+	 * Links skills to their parents and children, given the map of copied (abstract) skills.
+	 *
+	 * @param  abstractSkillMap The map of abstract skills, from previous abstract skills to the new abstract
+	 *                          skills.
+	 * @return                  The updated map of abstract skills, from previous abstract skills to the new
+	 *                          abstract skills. The copied skills are now linked to their parents/children.
+	 */
+	@Transactional
+	public Map<AbstractSkill, AbstractSkill> linkParentsChildrenSkills(
+			Map<AbstractSkill, AbstractSkill> abstractSkillMap) {
 		abstractSkillMap.forEach((prev, copy) -> prev.getParents().forEach((AbstractSkill p) -> {
 			AbstractSkill linkedSkill = abstractSkillMap.get(p);
 			if (linkedSkill != null) {
@@ -315,7 +463,20 @@ public class EditionService {
 			}
 		}));
 
-		// ---- Copy tasks from skills and link to path and required skills ----
+		return abstractSkillMap;
+	}
+
+	/**
+	 * Creates copies of tasks of the keys of the given skill map. This map contains skills mapped to their
+	 * copy. The tasks are added as tasks to the copy of the corresponding skill. Additionally, they are also
+	 * linked to the copied path, as well as the skills they are required for.
+	 *
+	 * @param  skillMap The map of skills, from previous skills to the new skills.
+	 * @param  pathMap  The map of paths, from previous paths to the new paths.
+	 * @return          The map of tasks, from previous tasks to the new tasks.
+	 */
+	@Transactional
+	public Map<Task, Task> copyAndLinkEditionTasks(Map<Skill, Skill> skillMap, Map<Path, Path> pathMap) {
 		Map<Task, Task> taskMap = new HashMap<>();
 
 		skillMap.forEach((prev, copy) -> prev.getTasks().forEach(t -> {
@@ -353,12 +514,27 @@ public class EditionService {
 			});
 		}));
 
-		// ---- Copy achievements ----
+		return taskMap;
+	}
+
+	/**
+	 * Creates copies of achievements of the keys of the given task map. This map contains tasks mapped to
+	 * their copy. The achievements are linked to the tasks they belong to.
+	 *
+	 * @param  taskMap The map of tasks, from previous tasks to the new tasks.
+	 * @return         The map of achievements, from previous achievements to the new achievements.
+	 */
+	@Transactional
+	public Map<Achievement, Achievement> copyAndLinkEditionAchievements(Map<Task, Task> taskMap) {
 		Map<Achievement, Achievement> achievementMap = new HashMap<>();
 
 		taskMap.forEach((prev, copy) -> prev.getAchievements().forEach(a -> {
 			Achievement copiedAchievement = achievementMap.get(a);
+
+			// Check if the achievement was already copied
 			if (copiedAchievement == null) {
+				// If it was not yet copied, create a copy
+
 				Achievement achievement = achievementRepository.save(
 						Achievement.builder()
 								.name(a.getName())
@@ -376,37 +552,13 @@ public class EditionService {
 				copy.getAchievements().add(achievement);
 				achievementMap.put(a, achievement);
 			} else {
+				// If it was copied, link to the copy
+
 				copy.getAchievements().add(copiedAchievement);
 			}
 		}));
 
-		editionRepository.flush();
-		checkpointRepository.flush();
-		pathRepository.flush();
-		moduleRepository.flush();
-		submoduleRepository.flush();
-		abstractSkillRepository.flush();
-		achievementRepository.flush();
-		skillRepository.flush();
-		taskRepository.flush();
-	}
-
-	/**
-	 * Checks if an edition is empty (i.e., no modules, no checkpoints and no paths).
-	 *
-	 * @param  id The id of the edition to check.
-	 * @return    If the given edition is empty.
-	 */
-	public boolean isEditionEmpty(Long id) {
-		SCEdition edition = editionRepository.findByIdOrThrow(id);
-
-		boolean noModules = edition.getModules().isEmpty();
-		boolean noCheckpoints = edition.getCheckpoints().isEmpty();
-		boolean noPaths = edition.getPaths().isEmpty();
-
-		// These checks are sufficient, since submodules, skills etc. can
-		// only exist if there is at least one module.
-		return noModules && noCheckpoints && noPaths;
+		return achievementMap;
 	}
 
 }
