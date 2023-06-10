@@ -31,6 +31,8 @@ import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.edition.EditionLevelCourseViewDTO;
+import nl.tudelft.skills.dto.view.edition.EditionLevelEditionSummaryDTO;
+import nl.tudelft.skills.dto.view.edition.EditionLevelEditionViewDTO;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.*;
 
@@ -46,11 +48,11 @@ import reactor.core.publisher.Mono;
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
 public class EditionServiceTest {
 
-	private EditionControllerApi editionApi;
+	private final EditionControllerApi editionApi;
 
-	private EditionService editionService;
+	private final EditionService editionService;
 
-	private EditionRepository editionRepository;
+	private final EditionRepository editionRepository;
 
 	@Autowired
 	public EditionServiceTest(EditionControllerApi editionApi, EditionRepository editionRepository,
@@ -62,10 +64,8 @@ public class EditionServiceTest {
 		this.editionApi = editionApi;
 		this.editionRepository = editionRepository;
 		editionService = new EditionService(editionApi, editionRepository, circuitService,
-				checkpointRepository,
-				pathRepository, moduleRepository, submoduleRepository, abstractSkillRepository,
-				achievementRepository,
-				skillRepository, taskRepository);
+				checkpointRepository, pathRepository, moduleRepository, submoduleRepository,
+				abstractSkillRepository, achievementRepository, skillRepository, taskRepository);
 	}
 
 	@Test
@@ -78,9 +78,40 @@ public class EditionServiceTest {
 		when(editionApi.getAllEditionsByCourse(anyLong()))
 				.thenReturn(Flux.fromIterable(List.of(editionDetailsDTO)));
 
-		assertThat(editionService.getEditionView(1L).getName()).isEqualTo("edition");
-		assertThat(editionService.getEditionView(1L).getCourse())
+		EditionLevelEditionViewDTO editionView = editionService.getEditionView(1L);
+		assertThat(editionView.getName()).isEqualTo("edition");
+
+		// Should contain no edition in the previous editions of the course view
+		assertThat(editionView.getCourse())
 				.isEqualTo(new EditionLevelCourseViewDTO(2L, "course", List.of()));
+	}
+
+	@Test
+	public void getCourseViewPreviousEditionExists() {
+		// Return and mock three editions, one older and one newer one than the one for which
+		// the method is called
+		EditionDetailsDTO checkEditionDetails = new EditionDetailsDTO().id(1L).name("edition")
+				.course(new CourseSummaryDTO().id(2L).name("course"))
+				.startDate(LocalDateTime.of(2023, 1, 10, 10, 10, 0));
+		EditionDetailsDTO olderEdition = new EditionDetailsDTO().id(2L).name("older edition")
+				.course(new CourseSummaryDTO().id(2L).name("course"))
+				.startDate(LocalDateTime.of(2022, 1, 10, 10, 10, 0));
+		EditionDetailsDTO newerEdition = new EditionDetailsDTO().id(3L).name("newer edition")
+				.course(new CourseSummaryDTO().id(2L).name("course"))
+				.startDate(LocalDateTime.of(2023, 2, 10, 10, 10, 0));
+
+		when(editionApi.getEditionById(anyLong())).thenReturn(Mono.just(checkEditionDetails));
+		when(editionApi.getAllEditionsByCourse(anyLong()))
+				.thenReturn(Flux.fromIterable(List.of(checkEditionDetails, olderEdition, newerEdition)));
+
+		EditionLevelEditionViewDTO editionView = editionService.getEditionView(1L);
+		assertThat(editionView.getName()).isEqualTo("edition");
+
+		// Should only contain the older edition in the previous editions of the course view
+		EditionLevelEditionSummaryDTO olderEditionSummary = new EditionLevelEditionSummaryDTO(2L,
+				"older edition");
+		assertThat(editionView.getCourse())
+				.isEqualTo(new EditionLevelCourseViewDTO(2L, "course", List.of(olderEditionSummary)));
 	}
 
 	@Test
