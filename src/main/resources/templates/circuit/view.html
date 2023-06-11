@@ -80,6 +80,70 @@
                     data-type="external"
                     class="fa-solid fa-link"></button>
             </div>
+            <div
+                th:each="row : ${#numbers.sequence(0, rows - 1)}"
+                class="ghost_row"
+                th:style="|grid-row: ${row + 1}; grid-column: ${columns + 2}|">
+                <button
+                    class="add_row fa-solid fa-plus"></button>
+            </div>
+            <script>
+                newRow = document.getElementsByClassName("add_row")
+                for(let i = 0; i < newRow.length; i++){
+                    newRow[i].addEventListener("click",
+                        function (event){
+                            console.log("Row clicked: " + i)
+                            let maxRow = 0;
+                            for(let block of document.getElementsByClassName("block")){
+                               let row = parseInt(block.style.gridRow.split((" / ")[0]));
+
+                               if(row > i){
+                                   let id = block.id.split("-")[1];
+                                   let col = parseInt(block.style.gridColumn.split((" / ")[0]));
+                                   $.ajax({
+                                       type: "PATCH",
+                                       url: `/${blockType}/${id}/position`,
+                                       data: JSON.stringify({ column: col - 1, row: row }),
+                                       processData: false,
+                                       contentType: "application/json",
+                                       success: () => {},
+                                   });
+
+                                   block.style.gridRow = row + 1;
+                                   block.style.gridColumn = col;
+
+                                   if(row + 1 > maxRow) maxRow = row + 1;
+                               }
+                            }
+                            recalculateConnections();
+                            if (blockType === "skill") {
+                                recalculateCheckpointSkills();
+                            }
+
+                            for(let ghostBlock of document.getElementsByClassName("ghost_block")){
+                                let row = parseInt(ghostBlock.style.gridRow.split((" / ")[0]));
+
+                                if(row > i){
+                                    let col = parseInt(ghostBlock.style.gridColumn.split((" / ")[0]));
+
+                                    ghostBlock.style.gridRow = row + 1;
+                                    ghostBlock.style.gridColumn = col;
+                                }
+                            }
+                            const circuit = $("#circuit");
+                            for(let colNum = 0; colNum < parseInt(circuit.css("--columns"))+1; colNum++) {
+                                const gb = $("<div>")
+                                    .addClass("ghost_block")
+                                    .css({"grid-column": colNum, "grid-row": i + 1})
+                                    .append(
+                                        $("<button>").addClass("fa-solid fa-plus").attr("data-type", "regular")
+                                    );
+                                circuit.append(gb);
+                            }
+
+                        })
+                }
+            </script>
         </th:block>
     </div>
 
