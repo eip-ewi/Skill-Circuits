@@ -441,14 +441,11 @@ public class EditionService {
 	/**
 	 * Links skills to their parents and children, given the map of copied (abstract) skills.
 	 *
-	 * @param  abstractSkillMap The map of abstract skills, from previous abstract skills to the new abstract
-	 *                          skills.
-	 * @return                  The updated map of abstract skills, from previous abstract skills to the new
-	 *                          abstract skills. The copied skills are now linked to their parents/children.
+	 * @param abstractSkillMap The map of abstract skills, from previous abstract skills to the new abstract
+	 *                         skills.
 	 */
 	@Transactional
-	public Map<AbstractSkill, AbstractSkill> linkParentsChildrenSkills(
-			Map<AbstractSkill, AbstractSkill> abstractSkillMap) {
+	public void linkParentsChildrenSkills(Map<AbstractSkill, AbstractSkill> abstractSkillMap) {
 		abstractSkillMap.forEach((prev, copy) -> prev.getParents().forEach((AbstractSkill p) -> {
 			AbstractSkill linkedSkill = abstractSkillMap.get(p);
 			if (linkedSkill != null) {
@@ -458,8 +455,6 @@ public class EditionService {
 				linkedSkill.getChildren().add(copy);
 			}
 		}));
-
-		return abstractSkillMap;
 	}
 
 	/**
@@ -517,11 +512,10 @@ public class EditionService {
 	 * Creates copies of achievements of the keys of the given task map. This map contains tasks mapped to
 	 * their copy. The achievements are linked to the tasks they belong to.
 	 *
-	 * @param  taskMap The map of tasks, from previous tasks to the new tasks.
-	 * @return         The map of achievements, from previous achievements to the new achievements.
+	 * @param taskMap The map of tasks, from previous tasks to the new tasks.
 	 */
 	@Transactional
-	public Map<Achievement, Achievement> copyAndLinkEditionAchievements(Map<Task, Task> taskMap) {
+	public void copyAndLinkEditionAchievements(Map<Task, Task> taskMap) {
 		Map<Achievement, Achievement> achievementMap = new HashMap<>();
 
 		taskMap.forEach((prev, copy) -> prev.getAchievements().forEach(a -> {
@@ -553,8 +547,6 @@ public class EditionService {
 				copy.getAchievements().add(copiedAchievement);
 			}
 		}));
-
-		return achievementMap;
 	}
 
 }
