@@ -353,49 +353,6 @@ public class EditionService {
 	}
 
 	/**
-	 * Creates copies of external skills of the keys of the given module map. The module map contains modules
-	 * mapped to their copy, and the skill maps skills to their copy. The external skills are added as
-	 * external skills to the copy of the corresponding module, and linked to their skill. Returns the map of
-	 * external skills, from previous external skills to the new external skills.
-	 *
-	 * @param  moduleMap The map of modules, from previous modules to the new modules.
-	 * @param  skillMap  The map of skills, from previous skills to the new skills.
-	 * @return           The map of external skills, from previous external skills to the new external skills.
-	 */
-	@Transactional
-	public Map<ExternalSkill, ExternalSkill> copyAndLinkEditionExternalSkills(
-			Map<SCModule, SCModule> moduleMap,
-			Map<Skill, Skill> skillMap) {
-		Map<ExternalSkill, ExternalSkill> externalSkillMap = new HashMap<>();
-
-		// A module has N external skills which link to other skills, these should be copied.
-		// A skill has N external skills which link to it, these do not need to be copied.
-		// Copy external skills for all modules in this edition, and link them to their corresponding skills.
-		moduleMap.forEach((prev, copy) -> prev.getExternalSkills().forEach(s -> {
-			Skill linkedSkill = skillMap.get(s.getSkill());
-
-			// If there is no corresponding copy, this means it is part of another edition
-			// Therefore the skill can be linked to that other skill without copying
-			if (linkedSkill == null) {
-				linkedSkill = s.getSkill();
-			}
-
-			ExternalSkill externalSkill = abstractSkillRepository.save(
-					ExternalSkill.builder()
-							.module(copy)
-							.skill(linkedSkill)
-							.row(s.getRow())
-							.column(s.getColumn())
-							.build());
-
-			copy.getExternalSkills().add(externalSkill);
-			externalSkillMap.put(s, externalSkill);
-		}));
-
-		return externalSkillMap;
-	}
-
-	/**
 	 * Creates copies of skills of the keys of the given submodule map. This map contains submodules mapped to
 	 * their copy. The skills are added as skills to the copy of the corresponding submodule. Additionally,
 	 * links copied checkpoints to their copied skills. Returns the map of skills, from previous skills to the
@@ -436,6 +393,49 @@ public class EditionService {
 		}));
 
 		return skillMap;
+	}
+
+	/**
+	 * Creates copies of external skills of the keys of the given module map. The module map contains modules
+	 * mapped to their copy, and the skill maps skills to their copy. The external skills are added as
+	 * external skills to the copy of the corresponding module, and linked to their skill. Returns the map of
+	 * external skills, from previous external skills to the new external skills.
+	 *
+	 * @param  moduleMap The map of modules, from previous modules to the new modules.
+	 * @param  skillMap  The map of skills, from previous skills to the new skills.
+	 * @return           The map of external skills, from previous external skills to the new external skills.
+	 */
+	@Transactional
+	public Map<ExternalSkill, ExternalSkill> copyAndLinkEditionExternalSkills(
+			Map<SCModule, SCModule> moduleMap, Map<Skill, Skill> skillMap) {
+		Map<ExternalSkill, ExternalSkill> externalSkillMap = new HashMap<>();
+
+		// A module has N external skills which link to other skills, these should be copied.
+		// A skill has N external skills which link to it, these do not need to be copied.
+		// Copy external skills for all modules in this edition, and link them to their corresponding skills.
+		moduleMap.forEach((prev, copy) -> prev.getExternalSkills().forEach(s -> {
+			Skill linkedSkill = skillMap.get(s.getSkill());
+
+			// If there is no corresponding copy, this means it is part of another edition
+			// Therefore the skill can be linked to that other skill without copying
+			if (linkedSkill == null) {
+				linkedSkill = s.getSkill();
+			}
+
+			ExternalSkill externalSkill = abstractSkillRepository.save(
+					ExternalSkill.builder()
+							.module(copy)
+							.skill(linkedSkill)
+							.row(s.getRow())
+							.column(s.getColumn())
+							.build());
+
+			linkedSkill.getExternalSkills().add(externalSkill);
+			copy.getExternalSkills().add(externalSkill);
+			externalSkillMap.put(s, externalSkill);
+		}));
+
+		return externalSkillMap;
 	}
 
 	/**
