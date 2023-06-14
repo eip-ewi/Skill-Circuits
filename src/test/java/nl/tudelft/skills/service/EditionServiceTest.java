@@ -25,7 +25,6 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
@@ -36,6 +35,7 @@ import nl.tudelft.skills.dto.view.edition.EditionLevelEditionSummaryDTO;
 import nl.tudelft.skills.dto.view.edition.EditionLevelEditionViewDTO;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.*;
+import nl.tudelft.skills.test.CopyEditionTestDatabaseLoader;
 import nl.tudelft.skills.test.TestDatabaseLoader;
 
 import org.junit.jupiter.api.Test;
@@ -59,11 +59,11 @@ public class EditionServiceTest {
 	private final ModuleRepository moduleRepository;
 	private final SubmoduleRepository submoduleRepository;
 	private final AbstractSkillRepository abstractSkillRepository;
-	private final AchievementRepository achievementRepository;
 	private final SkillRepository skillRepository;
 	private final TaskRepository taskRepository;
 
 	private final TestDatabaseLoader db;
+	private final CopyEditionTestDatabaseLoader editionDb;
 	private final LocalDateTime localDateTime;
 
 	@Autowired
@@ -71,8 +71,8 @@ public class EditionServiceTest {
 			CircuitService circuitService, CheckpointRepository checkpointRepository,
 			PathRepository pathRepository, ModuleRepository moduleRepository,
 			SubmoduleRepository submoduleRepository, AbstractSkillRepository abstractSkillRepository,
-			AchievementRepository achievementRepository, SkillRepository skillRepository,
-			TaskRepository taskRepository, TestDatabaseLoader db) {
+			SkillRepository skillRepository, TaskRepository taskRepository, TestDatabaseLoader db,
+			CopyEditionTestDatabaseLoader editionDb) {
 		this.editionApi = editionApi;
 		this.editionRepository = editionRepository;
 		this.checkpointRepository = checkpointRepository;
@@ -80,15 +80,15 @@ public class EditionServiceTest {
 		this.moduleRepository = moduleRepository;
 		this.submoduleRepository = submoduleRepository;
 		this.abstractSkillRepository = abstractSkillRepository;
-		this.achievementRepository = achievementRepository;
 		this.skillRepository = skillRepository;
 		this.taskRepository = taskRepository;
 
 		this.db = db;
+		this.editionDb = editionDb;
 		this.localDateTime = LocalDateTime.of(2023, 1, 10, 10, 10, 0);
 		editionService = new EditionService(editionApi, editionRepository, circuitService,
 				checkpointRepository, pathRepository, moduleRepository, submoduleRepository,
-				abstractSkillRepository, achievementRepository, skillRepository, taskRepository);
+				abstractSkillRepository, skillRepository, taskRepository);
 	}
 
 	@Test
@@ -215,47 +215,28 @@ public class EditionServiceTest {
 
 	@Test
 	public void testCopyEditionCheckpoints() {
-		Long idInUse = db.getEditionRL().getId();
-		SCEdition from = editionRepository.save(SCEdition.builder().id(idInUse + 1).build());
-		SCEdition to = editionRepository.save(SCEdition.builder().id(idInUse + 2).build());
-
-		// Add three checkpoints to the previous edition, with different properties
-		Checkpoint checkpointA = checkpointRepository.save(Checkpoint.builder()
-				.edition(from).name("Checkpoint A").deadline(localDateTime).build());
-		Checkpoint checkpointB = checkpointRepository.save(Checkpoint.builder()
-				.edition(from).name("Checkpoint B").deadline(localDateTime.plusDays(5)).build());
-		Checkpoint checkpointC = checkpointRepository.save(Checkpoint.builder()
-				.edition(from).name("Checkpoint C").deadline(localDateTime.minusDays(5)).build());
-
-		// Add a skill to checkpoint B, to assure that this does not affect functionality of the method
-		SCModule module = SCModule.builder().name("Module").edition(from).build();
-		module = moduleRepository.save(module);
-		Submodule submodule = Submodule.builder().module(module).name("Submodule").column(0).row(0).build();
-		submodule = submoduleRepository.save(submodule);
-		module.getSubmodules().add(submodule);
-		Skill skill = Skill.builder().submodule(submodule).checkpoint(checkpointB).name("Skill").column(0)
-				.row(0)
-				.build();
-		skill = skillRepository.save(skill);
-		submodule.getSkills().add(skill);
-		checkpointB.getSkills().add(skill);
-
-		from.getCheckpoints().addAll(Set.of(checkpointA, checkpointB, checkpointC));
+		editionDb.initEditionFrom(db.getSkillAssumption());
 
 		int amountBefore = checkpointRepository.findAll().size();
-		Map<Checkpoint, Checkpoint> copies = editionService.copyEditionCheckpoints(from, to);
-		assertThat(copies.keySet()).containsExactlyInAnyOrder(checkpointA, checkpointB, checkpointC);
-		assertThat(checkpointRepository.findAll()).hasSize(amountBefore + 3);
+		Map<Checkpoint, Checkpoint> copies = editionService.copyEditionCheckpoints(editionDb.getFrom(),
+				editionDb.getTo());
+		assertThat(copies.keySet()).containsExactlyInAnyOrder(editionDb.getCheckpointFromA(),
+				editionDb.getCheckpointFromB());
+		assertThat(checkpointRepository.findAll()).hasSize(amountBefore + 2);
 
 		// Safety check that the previous edition was not changed
-		SCEdition old = editionRepository.findByIdOrThrow(from.getId());
-		assertThat(old).isEqualTo(from);
-		assertThat(to.getCheckpoints()).containsAll(copies.values());
-		assertThat(old.getCheckpoints()).containsExactlyInAnyOrder(checkpointA, checkpointB, checkpointC);
+		SCEdition old = editionRepository.findByIdOrThrow(editionDb.getFrom().getId());
+		assertThat(old).isEqualTo(editionDb.getFrom());
+		assertThat(editionDb.getTo().getCheckpoints()).containsAll(copies.values());
+		assertThat(old.getCheckpoints()).containsExactlyInAnyOrder(editionDb.getCheckpointFromA(),
+				editionDb.getCheckpointFromB());
 
-		testCheckpointEqualityHelper(checkpointA, copies.get(checkpointA), to);
-		testCheckpointEqualityHelper(checkpointB, copies.get(checkpointB), to);
-		testCheckpointEqualityHelper(checkpointC, copies.get(checkpointC), to);
+		testCheckpointEqualityHelper(editionDb.getCheckpointFromA(),
+				copies.get(editionDb.getCheckpointFromA()),
+				editionDb.getTo());
+		testCheckpointEqualityHelper(editionDb.getCheckpointFromA(),
+				copies.get(editionDb.getCheckpointFromA()),
+				editionDb.getTo());
 	}
 
 	private void testCheckpointEqualityHelper(Checkpoint initial, Checkpoint copy, SCEdition to) {
@@ -276,52 +257,25 @@ public class EditionServiceTest {
 
 	@Test
 	public void testCopyEditionPaths() {
-		Long idInUse = db.getEditionRL().getId();
-		SCEdition from = editionRepository.save(SCEdition.builder().id(idInUse + 1).build());
-		SCEdition to = editionRepository.save(SCEdition.builder().id(idInUse + 2).build());
-
-		// Add two paths to the previous edition, with different properties
-		Path pathA = pathRepository.save(Path.builder().name("Path A").edition(from).build());
-		from.getPaths().add(pathA);
-		Path pathB = pathRepository.save(Path.builder().name("Path B").edition(from).build());
-		from.getPaths().add(pathA);
-
-		// Add a task to path B, to assure that this does not affect functionality of the method
-		SCModule module = SCModule.builder().name("Module").edition(from).build();
-		module = moduleRepository.save(module);
-		Submodule submodule = Submodule.builder().module(module).name("Submodule").column(0).row(0).build();
-		module.getSubmodules().add(submodule);
-		submodule = submoduleRepository.save(submodule);
-		Checkpoint checkpoint = Checkpoint.builder().edition(from).name("Checkpoint").deadline(localDateTime)
-				.build();
-		checkpoint = checkpointRepository.save(checkpoint);
-		from.getCheckpoints().add(checkpoint);
-		Skill skill = Skill.builder().submodule(submodule).checkpoint(checkpoint).name("Skill").column(0)
-				.row(0)
-				.build();
-		skill = skillRepository.save(skill);
-		submodule.getSkills().add(skill);
-		checkpoint.getSkills().add(skill);
-		Task task = Task.builder().name("Task").skill(skill).build();
-		task = taskRepository.save(task);
-		skill.getTasks().add(task);
-		pathB.getTasks().add(task);
-
-		from.getPaths().addAll(Set.of(pathA, pathB));
+		editionDb.initEditionFrom(db.getSkillAssumption());
 
 		int amountBefore = pathRepository.findAll().size();
-		Map<Path, Path> copies = editionService.copyEditionPaths(from, to);
-		assertThat(copies.keySet()).containsExactlyInAnyOrder(pathA, pathB);
-		assertThat(to.getPaths()).containsAll(copies.values());
+		Map<Path, Path> copies = editionService.copyEditionPaths(editionDb.getFrom(), editionDb.getTo());
+		assertThat(copies.keySet()).containsExactlyInAnyOrder(editionDb.getPathFromA(),
+				editionDb.getPathFromB());
+		assertThat(editionDb.getTo().getPaths()).containsAll(copies.values());
 		assertThat(pathRepository.findAll()).hasSize(amountBefore + 2);
 
 		// Safety check that the previous edition was not changed
-		SCEdition old = editionRepository.findByIdOrThrow(from.getId());
-		assertThat(old).isEqualTo(from);
-		assertThat(old.getPaths()).containsExactlyInAnyOrder(pathA, pathB);
+		SCEdition old = editionRepository.findByIdOrThrow(editionDb.getFrom().getId());
+		assertThat(old).isEqualTo(editionDb.getFrom());
+		assertThat(old.getPaths()).containsExactlyInAnyOrder(editionDb.getPathFromA(),
+				editionDb.getPathFromB());
 
-		testPathEqualityHelper(pathA, copies.get(pathA), to);
-		testPathEqualityHelper(pathB, copies.get(pathB), to);
+		testPathEqualityHelper(editionDb.getPathFromA(), copies.get(editionDb.getPathFromA()),
+				editionDb.getTo());
+		testPathEqualityHelper(editionDb.getPathFromB(), copies.get(editionDb.getPathFromB()),
+				editionDb.getTo());
 	}
 
 	private void testPathEqualityHelper(Path initial, Path copy, SCEdition to) {
@@ -341,41 +295,26 @@ public class EditionServiceTest {
 
 	@Test
 	public void testCopyEditionModules() {
-		Long idInUse = db.getEditionRL().getId();
-		SCEdition from = editionRepository.save(SCEdition.builder().id(idInUse + 1).build());
-		SCEdition to = editionRepository.save(SCEdition.builder().id(idInUse + 2).build());
-
-		// Add two modules to the previous edition, with different properties
-		SCModule moduleA = moduleRepository.save(SCModule.builder().name("Module A").edition(from).build());
-		from.getModules().add(moduleA);
-		SCModule moduleB = moduleRepository.save(SCModule.builder().name("Module B").edition(from).build());
-		from.getModules().add(moduleB);
-
-		// Add a submodule to module A, and an external skill to module B, to ensure this does not break
-		// functionality of this method
-		Submodule submoduleA = Submodule.builder().module(moduleA).name("Submodule").column(0).row(0).build();
-		submoduleA = submoduleRepository.save(submoduleA);
-		moduleA.getSubmodules().add(submoduleA);
-
-		ExternalSkill externalSkill = ExternalSkill.builder().skill(db.getSkillAssumption()).module(moduleB)
-				.row(0).column(0).build();
-		externalSkill = abstractSkillRepository.save(externalSkill);
-		moduleB.getExternalSkills().add(externalSkill);
-		db.getSkillAssumption().getExternalSkills().add(externalSkill);
+		editionDb.initEditionFrom(db.getSkillAssumption());
 
 		int amountBefore = moduleRepository.findAll().size();
-		Map<SCModule, SCModule> copies = editionService.copyEditionModules(from, to);
-		assertThat(copies.keySet()).containsExactlyInAnyOrder(moduleA, moduleB);
-		assertThat(to.getModules()).containsAll(copies.values());
+		Map<SCModule, SCModule> copies = editionService.copyEditionModules(editionDb.getFrom(),
+				editionDb.getTo());
+		assertThat(copies.keySet()).containsExactlyInAnyOrder(editionDb.getModuleFromA(),
+				editionDb.getModuleFromB());
+		assertThat(editionDb.getTo().getModules()).containsAll(copies.values());
 		assertThat(moduleRepository.findAll()).hasSize(amountBefore + 2);
 
 		// Safety check that the previous edition was not changed
-		SCEdition old = editionRepository.findByIdOrThrow(from.getId());
-		assertThat(old).isEqualTo(from);
-		assertThat(old.getModules()).containsExactlyInAnyOrder(moduleA, moduleB);
+		SCEdition old = editionRepository.findByIdOrThrow(editionDb.getFrom().getId());
+		assertThat(old).isEqualTo(editionDb.getFrom());
+		assertThat(old.getModules()).containsExactlyInAnyOrder(editionDb.getModuleFromA(),
+				editionDb.getModuleFromB());
 
-		testModuleEqualityHelper(moduleA, copies.get(moduleA), to);
-		testModuleEqualityHelper(moduleB, copies.get(moduleB), to);
+		testModuleEqualityHelper(editionDb.getModuleFromA(), copies.get(editionDb.getModuleFromA()),
+				editionDb.getTo());
+		testModuleEqualityHelper(editionDb.getModuleFromB(), copies.get(editionDb.getModuleFromB()),
+				editionDb.getTo());
 	}
 
 	private void testModuleEqualityHelper(SCModule initial, SCModule copy, SCEdition to) {
@@ -396,52 +335,32 @@ public class EditionServiceTest {
 
 	@Test
 	public void testCopyEditionSubmodules() {
-		Long idInUse = db.getEditionRL().getId();
-		SCEdition from = editionRepository.save(SCEdition.builder().id(idInUse + 1).build());
-		SCEdition to = editionRepository.save(SCEdition.builder().id(idInUse + 2).build());
-
-		// Add a module to each edition
-		SCModule moduleFrom = moduleRepository
-				.save(SCModule.builder().name("Module from").edition(from).build());
-		from.getModules().add(moduleFrom);
-		SCModule moduleTo = moduleRepository.save(SCModule.builder().name("Module to").edition(from).build());
-		to.getModules().add(moduleTo);
-
-		// Add two submodule to moduleFrom, with different properties
-		Submodule submoduleA = Submodule.builder().module(moduleFrom).name("Submodule A").column(0).row(0)
-				.build();
-		submoduleA = submoduleRepository.save(submoduleA);
-		moduleFrom.getSubmodules().add(submoduleA);
-		// Add a skill to second submodule, to ensure this does not break functionality of this method
-		Submodule submoduleB = Submodule.builder().module(moduleFrom).name("Submodule B").column(0).row(0)
-				.build();
-		submoduleB = submoduleRepository.save(submoduleB);
-		moduleFrom.getSubmodules().add(submoduleB);
-		Checkpoint checkpoint = Checkpoint.builder().edition(from).name("Checkpoint").deadline(localDateTime)
-				.build();
-		checkpoint = checkpointRepository.save(checkpoint);
-		from.getCheckpoints().add(checkpoint);
-		Skill skill = Skill.builder().submodule(submoduleB).checkpoint(checkpoint).name("Skill").column(0)
-				.row(0)
-				.build();
-		skill = skillRepository.save(skill);
-		submoduleB.getSkills().add(skill);
-		checkpoint.getSkills().add(skill);
+		editionDb.initEditionFrom(db.getSkillAssumption());
+		editionDb.initModules(false);
 
 		int amountBefore = submoduleRepository.findAll().size();
-		Map<SCModule, SCModule> moduleCopies = Map.of(moduleFrom, moduleTo);
+		Map<SCModule, SCModule> moduleCopies = Map.of(editionDb.getModuleFromA(), editionDb.getModuleToA(),
+				editionDb.getModuleFromB(), editionDb.getModuleToB());
 		Map<Submodule, Submodule> copies = editionService.copyEditionSubmodules(moduleCopies);
-		assertThat(copies.keySet()).containsExactlyInAnyOrder(submoduleA, submoduleB);
-		assertThat(moduleTo.getSubmodules()).containsAll(copies.values());
+		assertThat(copies.keySet()).containsExactlyInAnyOrder(editionDb.getSubmoduleFromA(),
+				editionDb.getSubmoduleFromB());
+		assertThat(editionDb.getModuleToA().getSubmodules()).containsAll(copies.values());
+		assertThat(editionDb.getModuleToB().getSubmodules()).isEmpty();
 		assertThat(submoduleRepository.findAll()).hasSize(amountBefore + 2);
 
-		// Safety check that the previous module was not changed
-		SCModule old = moduleRepository.findByIdOrThrow(moduleFrom.getId());
-		assertThat(old).isEqualTo(moduleFrom);
-		assertThat(old.getSubmodules()).containsExactlyInAnyOrder(submoduleA, submoduleB);
+		// Safety check that the previous modules were not changed
+		SCModule oldA = moduleRepository.findByIdOrThrow(editionDb.getModuleFromA().getId());
+		assertThat(oldA).isEqualTo(editionDb.getModuleFromA());
+		assertThat(oldA.getSubmodules()).containsExactlyInAnyOrder(editionDb.getSubmoduleFromA(),
+				editionDb.getSubmoduleFromB());
+		SCModule oldB = moduleRepository.findByIdOrThrow(editionDb.getModuleFromB().getId());
+		assertThat(oldB).isEqualTo(editionDb.getModuleFromB());
+		assertThat(oldB.getSubmodules()).isEmpty();
 
-		testSubmoduleEqualityHelper(submoduleA, copies.get(submoduleA), moduleTo);
-		testSubmoduleEqualityHelper(submoduleB, copies.get(submoduleB), moduleTo);
+		testSubmoduleEqualityHelper(editionDb.getSubmoduleFromA(), copies.get(editionDb.getSubmoduleFromA()),
+				editionDb.getModuleToA());
+		testSubmoduleEqualityHelper(editionDb.getSubmoduleFromB(), copies.get(editionDb.getSubmoduleFromB()),
+				editionDb.getModuleToA());
 	}
 
 	private void testSubmoduleEqualityHelper(Submodule initial, Submodule copy, SCModule moduleTo) {
@@ -461,92 +380,57 @@ public class EditionServiceTest {
 
 	@Test
 	public void testCopyEditionSkills() {
-		Long idInUse = db.getEditionRL().getId();
-		SCEdition from = editionRepository.save(SCEdition.builder().id(idInUse + 1).build());
-		SCEdition to = editionRepository.save(SCEdition.builder().id(idInUse + 2).build());
+		editionDb.initEditionFrom(db.getSkillAssumption());
+		editionDb.initModules(false);
+		editionDb.initSubmodules(false);
+		editionDb.initCheckpoints(false);
 
-		// Add a module to each edition
-		SCModule moduleFrom = moduleRepository
-				.save(SCModule.builder().name("Module from").edition(from).build());
-		from.getModules().add(moduleFrom);
-		SCModule moduleTo = moduleRepository.save(SCModule.builder().name("Module to").edition(from).build());
-		to.getModules().add(moduleTo);
-
-		// Add submodule to each module
-		Submodule submoduleFrom = Submodule.builder().module(moduleFrom).name("Submodule from").column(0)
-				.row(0)
-				.build();
-		submoduleFrom = submoduleRepository.save(submoduleFrom);
-		moduleFrom.getSubmodules().add(submoduleFrom);
-		Submodule submoduleTo = Submodule.builder().module(moduleFrom).name("Submodule to").column(0).row(0)
-				.build();
-		submoduleTo = submoduleRepository.save(submoduleTo);
-		moduleTo.getSubmodules().add(submoduleTo);
-
-		// Add two checkpoints to each edition
-		Checkpoint checkpointFromA = Checkpoint.builder().edition(from).name("Checkpoint from A")
-				.deadline(localDateTime).build();
-		checkpointFromA = checkpointRepository.save(checkpointFromA);
-		from.getCheckpoints().add(checkpointFromA);
-		Checkpoint checkpointFromB = Checkpoint.builder().edition(from).name("Checkpoint from B")
-				.deadline(localDateTime).build();
-		checkpointFromB = checkpointRepository.save(checkpointFromB);
-		from.getCheckpoints().add(checkpointFromB);
-		Checkpoint checkpointToA = Checkpoint.builder().edition(to).name("Checkpoint to A")
-				.deadline(localDateTime)
-				.build();
-		checkpointToA = checkpointRepository.save(checkpointToA);
-		to.getCheckpoints().add(checkpointToA);
-		Checkpoint checkpointToB = Checkpoint.builder().edition(to).name("Checkpoint to B")
-				.deadline(localDateTime)
-				.build();
-		checkpointToB = checkpointRepository.save(checkpointToB);
-		to.getCheckpoints().add(checkpointToB);
-
-		// Add skills to the submodule, with different properties, and some linked tasks and an external skill to
-		// assure that it does not break functionality
-		Skill skillA = Skill.builder().submodule(submoduleFrom).checkpoint(checkpointFromA).name("Skill A")
-				.column(0)
-				.row(0).build();
-		skillA = skillRepository.save(skillA);
-		submoduleFrom.getSkills().add(skillA);
-		checkpointFromA.getSkills().add(skillA);
-		Skill skillB = Skill.builder().submodule(submoduleFrom).checkpoint(checkpointFromB).name("Skill B")
-				.column(0)
-				.row(0).build();
-		skillB = skillRepository.save(skillB);
-		submoduleFrom.getSkills().add(skillB);
-		checkpointFromB.getSkills().add(skillB);
-		// Add task to skill B
-		Task task = Task.builder().skill(skillB).name("Task").build();
-		task = taskRepository.save(task);
-		// Make task required for skill A
-		skillB.getTasks().add(task);
-		skillA.getRequiredTasks().add(task);
 		// Add an external skill linking to skill A
-		ExternalSkill externalSkill = ExternalSkill.builder().skill(skillA)
-				.module(db.getModuleProofTechniques())
-				.column(0).row(0).build();
+		ExternalSkill externalSkill = ExternalSkill.builder().skill(editionDb.getSkillFromA())
+				.module(db.getModuleProofTechniques()).column(0).row(0).build();
 		externalSkill = abstractSkillRepository.save(externalSkill);
-		skillA.getExternalSkills().add(externalSkill);
+		editionDb.getSkillFromA().getExternalSkills().add(externalSkill);
 		db.getModuleProofTechniques().getExternalSkills().add(externalSkill);
 
 		int amountBefore = skillRepository.findAll().size();
-		Map<Submodule, Submodule> submoduleCopies = Map.of(submoduleFrom, submoduleTo);
-		Map<Checkpoint, Checkpoint> checkpointCopies = Map.of(checkpointFromA, checkpointToA, checkpointFromB,
-				checkpointToB);
+		Map<Submodule, Submodule> submoduleCopies = Map.of(editionDb.getSubmoduleFromA(),
+				editionDb.getSubmoduleToA(),
+				editionDb.getSubmoduleFromB(), editionDb.getSubmoduleToB());
+		Map<Checkpoint, Checkpoint> checkpointCopies = Map.of(editionDb.getCheckpointFromA(),
+				editionDb.getCheckpointToA(), editionDb.getCheckpointFromB(), editionDb.getCheckpointToB());
 		Map<Skill, Skill> copies = editionService.copyAndLinkEditionSkills(submoduleCopies, checkpointCopies);
-		assertThat(copies.keySet()).containsExactlyInAnyOrder(skillA, skillB);
-		assertThat(submoduleTo.getSkills()).containsAll(copies.values());
+		assertThat(copies.keySet()).containsExactlyInAnyOrder(editionDb.getSkillFromA(),
+				editionDb.getSkillFromB());
+		assertThat(editionDb.getSubmoduleToA().getSkills()).containsAll(copies.values());
+		assertThat(editionDb.getSubmoduleToB().getSkills()).isEmpty();
+		assertThat(editionDb.getCheckpointToA().getSkills()).containsAll(copies.values());
+		assertThat(editionDb.getCheckpointToB().getSkills()).isEmpty();
 		assertThat(skillRepository.findAll()).hasSize(amountBefore + 2);
 
-		// Safety check that the previous submodule was not changed
-		Submodule old = submoduleRepository.findByIdOrThrow(submoduleFrom.getId());
-		assertThat(old).isEqualTo(submoduleFrom);
-		assertThat(old.getSkills()).containsExactlyInAnyOrder(skillA, skillB);
+		// Safety check that the previous submodules were not changed
+		Submodule oldA = submoduleRepository.findByIdOrThrow(editionDb.getSubmoduleFromA().getId());
+		assertThat(oldA).isEqualTo(editionDb.getSubmoduleFromA());
+		assertThat(oldA.getSkills()).containsExactlyInAnyOrder(editionDb.getSkillFromA(),
+				editionDb.getSkillFromB());
+		Submodule oldB = submoduleRepository.findByIdOrThrow(editionDb.getSubmoduleFromB().getId());
+		assertThat(oldB).isEqualTo(editionDb.getSubmoduleFromB());
+		assertThat(oldB.getSkills()).isEmpty();
 
-		testSkillEqualityHelper(skillA, copies.get(skillA), submoduleTo, checkpointToA);
-		testSkillEqualityHelper(skillB, copies.get(skillB), submoduleTo, checkpointToB);
+		// Safety check that the previous checkpoints were not changed
+		Checkpoint oldCheckpointA = checkpointRepository
+				.findByIdOrThrow(editionDb.getCheckpointFromA().getId());
+		assertThat(oldCheckpointA).isEqualTo(editionDb.getCheckpointFromA());
+		assertThat(oldCheckpointA.getSkills()).containsExactlyInAnyOrder(editionDb.getSkillFromA(),
+				editionDb.getSkillFromB());
+		Checkpoint oldCheckpointB = checkpointRepository
+				.findByIdOrThrow(editionDb.getCheckpointFromB().getId());
+		assertThat(oldCheckpointB).isEqualTo(editionDb.getCheckpointFromB());
+		assertThat(oldCheckpointB.getSkills()).isEmpty();
+
+		testSkillEqualityHelper(editionDb.getSkillFromA(), copies.get(editionDb.getSkillFromA()),
+				editionDb.getSubmoduleToA(), editionDb.getCheckpointToA());
+		testSkillEqualityHelper(editionDb.getSkillFromB(), copies.get(editionDb.getSkillFromB()),
+				editionDb.getSubmoduleToA(), editionDb.getCheckpointToA());
 	}
 
 	private void testSkillEqualityHelper(Skill initial, Skill copy, Submodule submoduleTo,
@@ -578,86 +462,48 @@ public class EditionServiceTest {
 
 	@Test
 	public void testCopyEditionExternalSkills() {
-		Long idInUse = db.getEditionRL().getId();
-		SCEdition from = editionRepository.save(SCEdition.builder().id(idInUse + 1).build());
-		SCEdition to = editionRepository.save(SCEdition.builder().id(idInUse + 2).build());
-
-		// Add a module to each edition
-		SCModule moduleFrom = moduleRepository
-				.save(SCModule.builder().name("Module from").edition(from).build());
-		from.getModules().add(moduleFrom);
-		SCModule moduleTo = moduleRepository.save(SCModule.builder().name("Module to").edition(from).build());
-		to.getModules().add(moduleTo);
-
-		// Add submodule to each module
-		Submodule submoduleFrom = Submodule.builder().module(moduleFrom).name("Submodule from").column(0)
-				.row(0)
-				.build();
-		submoduleFrom = submoduleRepository.save(submoduleFrom);
-		moduleFrom.getSubmodules().add(submoduleFrom);
-		Submodule submoduleTo = Submodule.builder().module(moduleFrom).name("Submodule to").column(0).row(0)
-				.build();
-		submoduleTo = submoduleRepository.save(submoduleTo);
-		moduleTo.getSubmodules().add(submoduleTo);
-
-		// Add a checkpoint to each edition
-		Checkpoint checkpointFrom = Checkpoint.builder().edition(from).name("Checkpoint from")
-				.deadline(localDateTime).build();
-		checkpointFrom = checkpointRepository.save(checkpointFrom);
-		from.getCheckpoints().add(checkpointFrom);
-		Checkpoint checkpointTo = Checkpoint.builder().edition(to).name("Checkpoint to")
-				.deadline(localDateTime)
-				.build();
-		checkpointTo = checkpointRepository.save(checkpointTo);
-		to.getCheckpoints().add(checkpointTo);
-
-		// Add a skill to each submodule
-		Skill skillFrom = Skill.builder().submodule(submoduleFrom).checkpoint(checkpointFrom)
-				.name("Skill from").column(0)
-				.row(0).build();
-		skillFrom = skillRepository.save(skillFrom);
-		submoduleFrom.getSkills().add(skillFrom);
-		checkpointFrom.getSkills().add(skillFrom);
-		Skill skillTo = Skill.builder().submodule(submoduleFrom).checkpoint(checkpointTo).name("Skill to")
-				.column(0)
-				.row(0).build();
-		skillTo = skillRepository.save(skillTo);
-		submoduleTo.getSkills().add(skillTo);
-		checkpointTo.getSkills().add(skillTo);
-
-		// Add two external skills: One linking to a skill in the same edition (here in the same module, the ext. skill
-		// is in, which would not be a situation in reality), and one linking to a module in another edition
-		ExternalSkill externalSkillA = ExternalSkill.builder().skill(skillFrom).module(moduleFrom).column(0)
-				.row(0)
-				.build();
-		externalSkillA = abstractSkillRepository.save(externalSkillA);
-		skillFrom.getExternalSkills().add(externalSkillA);
-		moduleFrom.getExternalSkills().add(externalSkillA);
-		ExternalSkill externalSkillB = ExternalSkill.builder().skill(db.getSkillAssumption())
-				.module(moduleFrom)
-				.column(0).row(0).build();
-		externalSkillB = abstractSkillRepository.save(externalSkillB);
-		db.getSkillAssumption().getExternalSkills().add(externalSkillB);
-		moduleFrom.getExternalSkills().add(externalSkillB);
+		editionDb.initEditionFrom(db.getSkillAssumption());
+		editionDb.initModules(false);
+		editionDb.initSubmodules(false);
+		editionDb.initCheckpoints(false);
+		editionDb.initSkills(false);
 
 		int amountBefore = abstractSkillRepository.findAll().size();
-		Map<SCModule, SCModule> moduleCopies = Map.of(moduleFrom, moduleTo);
-		Map<Skill, Skill> skillCopies = Map.of(skillFrom, skillTo);
+		Map<SCModule, SCModule> moduleCopies = Map.of(editionDb.getModuleFromA(), editionDb.getModuleToA(),
+				editionDb.getModuleFromB(), editionDb.getModuleToB());
+		Map<Skill, Skill> skillCopies = Map.of(editionDb.getSkillFromA(), editionDb.getSkillToA(),
+				editionDb.getSkillFromB(), editionDb.getSkillToB());
 		Map<ExternalSkill, ExternalSkill> copies = editionService.copyAndLinkEditionExternalSkills(
-				moduleCopies,
-				skillCopies);
-		assertThat(copies.keySet()).containsExactlyInAnyOrder(externalSkillA, externalSkillB);
-		assertThat(moduleTo.getExternalSkills()).containsAll(copies.values());
+				moduleCopies, skillCopies);
+		assertThat(copies.keySet()).containsExactlyInAnyOrder(editionDb.getExtSkillFromA(),
+				editionDb.getExtSkillFromB());
 		assertThat(abstractSkillRepository.findAll()).hasSize(amountBefore + 2);
 
-		// Safety check that the previous module was not changed
-		SCModule old = moduleRepository.findByIdOrThrow(moduleFrom.getId());
-		assertThat(old).isEqualTo(moduleFrom);
-		assertThat(old.getExternalSkills()).containsExactlyInAnyOrder(externalSkillA, externalSkillB);
+		// Safety check that the previous modules were not changed
+		SCModule oldA = moduleRepository.findByIdOrThrow(editionDb.getModuleFromA().getId());
+		assertThat(oldA).isEqualTo(editionDb.getModuleFromA());
+		assertThat(oldA.getExternalSkills()).containsExactly(editionDb.getExtSkillFromB());
+		SCModule oldB = moduleRepository.findByIdOrThrow(editionDb.getModuleFromB().getId());
+		assertThat(oldB).isEqualTo(editionDb.getModuleFromB());
+		assertThat(oldB.getExternalSkills()).containsExactly(editionDb.getExtSkillFromA());
 
-		testExternalSkillEqualityHelper(externalSkillA, copies.get(externalSkillA), moduleTo, skillTo);
-		testExternalSkillEqualityHelper(externalSkillB, copies.get(externalSkillB), moduleTo,
-				db.getSkillAssumption());
+		// Safety check that the previous skills were not changed
+		Skill oldSkillA = skillRepository.findByIdOrThrow(editionDb.getSkillFromA().getId());
+		assertThat(oldSkillA).isEqualTo(editionDb.getSkillFromA());
+		assertThat(oldSkillA.getExternalSkills()).containsExactly(editionDb.getExtSkillFromA());
+		Skill oldSkillB = skillRepository.findByIdOrThrow(editionDb.getSkillFromB().getId());
+		assertThat(oldSkillB).isEqualTo(editionDb.getSkillFromB());
+		assertThat(oldSkillB.getExternalSkills()).isEmpty();
+
+		testExternalSkillEqualityHelper(editionDb.getExtSkillFromA(),
+				copies.get(editionDb.getExtSkillFromA()),
+				editionDb.getModuleToB(), editionDb.getSkillToA());
+		testExternalSkillEqualityHelper(editionDb.getExtSkillFromB(),
+				copies.get(editionDb.getExtSkillFromB()),
+				editionDb.getModuleToA(), db.getSkillAssumption());
+
+		assertThat(db.getSkillAssumption().getExternalSkills()).containsExactlyInAnyOrder(
+				copies.get(editionDb.getExtSkillFromB()), editionDb.getExtSkillFromB());
 	}
 
 	private void testExternalSkillEqualityHelper(ExternalSkill initial, ExternalSkill copy, SCModule moduleTo,
@@ -669,6 +515,7 @@ public class EditionServiceTest {
 		assertThat(copy.getModule()).isEqualTo(moduleTo);
 		assertThat(copy.getSkill()).isEqualTo(shouldLinkTo);
 		assertThat(shouldLinkTo.getExternalSkills()).contains(copy);
+		assertThat(moduleTo.getExternalSkills()).containsExactly(copy);
 
 		// No parents/children should have been linked for now
 		assertThat(copy.getParents()).isEmpty();
@@ -680,191 +527,106 @@ public class EditionServiceTest {
 
 	@Test
 	public void testLinkParentsChildrenEditionSkills() {
-		Long idInUse = db.getEditionRL().getId();
-		SCEdition from = editionRepository.save(SCEdition.builder().id(idInUse + 1).build());
-		SCEdition to = editionRepository.save(SCEdition.builder().id(idInUse + 2).build());
-
-		// Add a module to each edition
-		SCModule moduleFrom = moduleRepository
-				.save(SCModule.builder().name("Module from").edition(from).build());
-		from.getModules().add(moduleFrom);
-		SCModule moduleTo = moduleRepository.save(SCModule.builder().name("Module to").edition(from).build());
-		to.getModules().add(moduleTo);
-
-		// Add submodule to each module
-		Submodule submoduleFrom = Submodule.builder().module(moduleFrom).name("Submodule from").column(0)
-				.row(0).build();
-		submoduleFrom = submoduleRepository.save(submoduleFrom);
-		moduleFrom.getSubmodules().add(submoduleFrom);
-		Submodule submoduleTo = Submodule.builder().module(moduleFrom).name("Submodule to").column(0).row(0)
-				.build();
-		submoduleTo = submoduleRepository.save(submoduleTo);
-		moduleTo.getSubmodules().add(submoduleTo);
-
-		// Add a checkpoint to each edition
-		Checkpoint checkpointFrom = Checkpoint.builder().edition(from).name("Checkpoint from")
-				.deadline(localDateTime).build();
-		checkpointFrom = checkpointRepository.save(checkpointFrom);
-		from.getCheckpoints().add(checkpointFrom);
-		Checkpoint checkpointTo = Checkpoint.builder().edition(to).name("Checkpoint to")
-				.deadline(localDateTime)
-				.build();
-		checkpointTo = checkpointRepository.save(checkpointTo);
-		to.getCheckpoints().add(checkpointTo);
-
-		// Add an external skill to the modules and a skill to the submodules, one being the parent of the other
-		Skill skillFrom = Skill.builder().submodule(submoduleFrom).checkpoint(checkpointFrom)
-				.name("Skill from").column(0).row(0).build();
-		skillFrom = skillRepository.save(skillFrom);
-		submoduleFrom.getSkills().add(skillFrom);
-		checkpointFrom.getSkills().add(skillFrom);
-		Skill skillTo = Skill.builder().submodule(submoduleTo).checkpoint(checkpointTo).name("Skill to")
-				.column(0).row(0).build();
-		skillTo = skillRepository.save(skillTo);
-		submoduleTo.getSkills().add(skillTo);
-		checkpointTo.getSkills().add(skillTo);
-		// Add external skill
-		ExternalSkill externalSkillFrom = ExternalSkill.builder().skill(db.getSkillAssumption())
-				.module(moduleFrom).column(0).row(0).build();
-		externalSkillFrom = abstractSkillRepository.save(externalSkillFrom);
-		db.getSkillAssumption().getExternalSkills().add(externalSkillFrom);
-		moduleFrom.getExternalSkills().add(externalSkillFrom);
-		ExternalSkill externalSkillTo = ExternalSkill.builder().skill(db.getSkillAssumption())
-				.module(moduleFrom).column(0).row(0).build();
-		externalSkillTo = abstractSkillRepository.save(externalSkillTo);
-		db.getSkillAssumption().getExternalSkills().add(externalSkillTo);
-		moduleTo.getExternalSkills().add(externalSkillTo);
-		// Link parent/child relationship
-		externalSkillFrom.getParents().add(skillFrom);
-		skillFrom.getChildren().add(externalSkillFrom);
+		editionDb.initEditionFrom(db.getSkillAssumption());
+		editionDb.initModules(false);
+		editionDb.initSubmodules(false);
+		editionDb.initCheckpoints(false);
+		editionDb.initSkills(false);
+		editionDb.initExternalSkillOtherEdition(false, db.getSkillAssumption());
+		editionDb.initExternalSkillSameEdition(false);
 
 		int amountBefore = skillRepository.findAll().size();
-		Map<AbstractSkill, AbstractSkill> skillCopies = Map.of(skillFrom, skillTo, externalSkillFrom,
-				externalSkillTo);
+		Map<AbstractSkill, AbstractSkill> skillCopies = Map.of(editionDb.getSkillFromA(),
+				editionDb.getSkillToA(),
+				editionDb.getSkillFromB(), editionDb.getSkillToB(), editionDb.getExtSkillFromA(),
+				editionDb.getExtSkillToA(), editionDb.getExtSkillFromB(), editionDb.getExtSkillToB());
 		editionService.linkParentsChildrenSkills(skillCopies);
-		assertThat(skillCopies.keySet()).containsExactlyInAnyOrder(skillFrom, externalSkillFrom);
-		assertThat(skillCopies.get(skillFrom)).isEqualTo(skillTo);
-		assertThat(skillCopies.get(externalSkillFrom)).isEqualTo(externalSkillTo);
+
+		// Assert that the map still contains the correct skills
+		assertThat(skillCopies.keySet()).containsExactlyInAnyOrder(editionDb.getSkillFromA(),
+				editionDb.getSkillFromB(), editionDb.getExtSkillFromA(), editionDb.getExtSkillFromB());
+		assertThat(skillCopies.get(editionDb.getSkillFromA())).isEqualTo(editionDb.getSkillToA());
+		assertThat(skillCopies.get(editionDb.getSkillFromB())).isEqualTo(editionDb.getSkillToB());
+		assertThat(skillCopies.get(editionDb.getExtSkillFromA())).isEqualTo(editionDb.getExtSkillToA());
+		assertThat(skillCopies.get(editionDb.getExtSkillFromB())).isEqualTo(editionDb.getExtSkillToB());
 		assertThat(skillRepository.findAll()).hasSize(amountBefore);
-		assertThat(externalSkillTo.getParents()).containsExactly(skillTo);
-		assertThat(skillTo.getChildren()).containsExactly(externalSkillTo);
-		assertThat(externalSkillTo.getChildren()).isEmpty();
-		assertThat(skillTo.getParents()).isEmpty();
+
+		// Assert on the parent/child relationships
+		assertThat(editionDb.getExtSkillToA().getParents()).isEmpty();
+		assertThat(editionDb.getExtSkillToA().getChildren()).isEmpty();
+		assertThat(editionDb.getExtSkillToB().getParents()).containsExactly(editionDb.getSkillToB());
+		assertThat(editionDb.getExtSkillToB().getChildren()).isEmpty();
+		assertThat(editionDb.getSkillToA().getParents()).isEmpty();
+		assertThat(editionDb.getSkillToA().getChildren()).isEmpty();
+		assertThat(editionDb.getSkillToB().getParents()).isEmpty();
+		assertThat(editionDb.getSkillToB().getChildren()).containsExactly(editionDb.getExtSkillToB());
 
 		// Safety check that the previous skills were not changed
-		AbstractSkill oldSkill = abstractSkillRepository.findByIdOrThrow(skillFrom.getId());
-		assertThat(oldSkill).isEqualTo(skillFrom);
-		assertThat(oldSkill.getChildren()).containsExactly(externalSkillFrom);
-		assertThat(oldSkill.getParents()).isEmpty();
-		AbstractSkill oldExtSkill = abstractSkillRepository.findByIdOrThrow(externalSkillFrom.getId());
-		assertThat(oldExtSkill).isEqualTo(externalSkillFrom);
-		assertThat(oldExtSkill.getParents()).containsExactly(skillFrom);
-		assertThat(oldExtSkill.getChildren()).isEmpty();
+		AbstractSkill oldSkillA = abstractSkillRepository.findByIdOrThrow(editionDb.getSkillFromA().getId());
+		assertThat(oldSkillA).isEqualTo(editionDb.getSkillFromA());
+		assertThat(oldSkillA.getChildren()).isEmpty();
+		assertThat(oldSkillA.getParents()).isEmpty();
+		AbstractSkill oldSkillB = abstractSkillRepository.findByIdOrThrow(editionDb.getSkillFromB().getId());
+		assertThat(oldSkillB).isEqualTo(editionDb.getSkillFromB());
+		assertThat(oldSkillB.getChildren()).containsExactly(editionDb.getExtSkillFromB());
+		assertThat(oldSkillB.getParents()).isEmpty();
+		AbstractSkill oldExtSkillA = abstractSkillRepository
+				.findByIdOrThrow(editionDb.getExtSkillFromA().getId());
+		assertThat(oldExtSkillA.getParents()).isEmpty();
+		assertThat(oldExtSkillA.getChildren()).isEmpty();
+		AbstractSkill oldExtSkillB = abstractSkillRepository
+				.findByIdOrThrow(editionDb.getExtSkillFromB().getId());
+		assertThat(oldExtSkillB).isEqualTo(editionDb.getExtSkillFromB());
+		assertThat(oldExtSkillB.getParents()).containsExactly(editionDb.getSkillFromB());
+		assertThat(oldExtSkillB.getChildren()).isEmpty();
 	}
 
 	@Test
 	public void testCopyEditionTasks() {
-		Long idInUse = db.getEditionRL().getId();
-		SCEdition from = editionRepository.save(SCEdition.builder().id(idInUse + 1).build());
-		SCEdition to = editionRepository.save(SCEdition.builder().id(idInUse + 2).build());
-
-		// Add a module to each edition
-		SCModule moduleFrom = moduleRepository
-				.save(SCModule.builder().name("Module from").edition(from).build());
-		from.getModules().add(moduleFrom);
-		SCModule moduleTo = moduleRepository.save(SCModule.builder().name("Module to").edition(from).build());
-		to.getModules().add(moduleTo);
-
-		// Add submodule to each module
-		Submodule submoduleFrom = Submodule.builder().module(moduleFrom).name("Submodule from").column(0)
-				.row(0)
-				.build();
-		submoduleFrom = submoduleRepository.save(submoduleFrom);
-		moduleFrom.getSubmodules().add(submoduleFrom);
-		Submodule submoduleTo = Submodule.builder().module(moduleFrom).name("Submodule to").column(0).row(0)
-				.build();
-		submoduleTo = submoduleRepository.save(submoduleTo);
-		moduleTo.getSubmodules().add(submoduleTo);
-
-		// Add a checkpoint to each edition
-		Checkpoint checkpointFrom = Checkpoint.builder().edition(from).name("Checkpoint from")
-				.deadline(localDateTime).build();
-		checkpointFrom = checkpointRepository.save(checkpointFrom);
-		from.getCheckpoints().add(checkpointFrom);
-		Checkpoint checkpointTo = Checkpoint.builder().edition(to).name("Checkpoint to")
-				.deadline(localDateTime)
-				.build();
-		checkpointTo = checkpointRepository.save(checkpointTo);
-		to.getCheckpoints().add(checkpointTo);
-
-		// Add two skills to each submodule
-		Skill skillFromA = Skill.builder().submodule(submoduleFrom).checkpoint(checkpointFrom)
-				.name("Skill from A").column(0).row(0).build();
-		skillFromA = skillRepository.save(skillFromA);
-		submoduleFrom.getSkills().add(skillFromA);
-		checkpointFrom.getSkills().add(skillFromA);
-		Skill skillFromB = Skill.builder().submodule(submoduleFrom).checkpoint(checkpointFrom)
-				.name("Skill from B").column(0).row(0).build();
-		skillFromB = skillRepository.save(skillFromB);
-		submoduleFrom.getSkills().add(skillFromB);
-		checkpointFrom.getSkills().add(skillFromB);
-
-		Skill skillToA = Skill.builder().submodule(submoduleFrom).checkpoint(checkpointTo).name("Skill to A")
-				.column(0).row(0).build();
-		skillToA = skillRepository.save(skillToA);
-		submoduleTo.getSkills().add(skillToA);
-		checkpointTo.getSkills().add(skillToA);
-		Skill skillToB = Skill.builder().submodule(submoduleFrom).checkpoint(checkpointTo).name("Skill to B")
-				.column(0).row(0).build();
-		skillToB = skillRepository.save(skillToB);
-		submoduleTo.getSkills().add(skillToB);
-		checkpointTo.getSkills().add(skillToB);
-
-		// Add a path to each edition
-		Path pathFrom = pathRepository.save(Path.builder().name("Path from").edition(from).build());
-		from.getPaths().add(pathFrom);
-		Path pathTo = pathRepository.save(Path.builder().name("Path to").edition(to).build());
-		to.getPaths().add(pathTo);
-
-		// Add one task in the path, and one task without path in the different skills, one task being required for the
-		// other skill
-		Task taskA = Task.builder().skill(skillFromA).name("Task A").paths(Set.of(pathFrom)).build();
-		taskA = taskRepository.save(taskA);
-		pathFrom.getTasks().add(taskA);
-		// Make task required for skill B
-		skillFromA.getTasks().add(taskA);
-		skillFromB.getRequiredTasks().add(taskA);
-		taskA.getRequiredFor().add(skillFromB);
-		Task taskB = Task.builder().skill(skillFromB).name("Task B").build();
-		taskB = taskRepository.save(taskB);
-		skillFromB.getTasks().add(taskB);
+		editionDb.initEditionFrom(db.getSkillAssumption());
+		editionDb.initModules(false);
+		editionDb.initSubmodules(false);
+		editionDb.initCheckpoints(false);
+		editionDb.initPaths(false);
+		editionDb.initSkills(false);
+		editionDb.initExternalSkillOtherEdition(false, db.getSkillAssumption());
+		editionDb.initExternalSkillSameEdition(false);
+		editionDb.initParentChild(false);
 
 		int amountBefore = taskRepository.findAll().size();
-		Map<Skill, Skill> skillCopies = Map.of(skillFromA, skillToA, skillFromB, skillToB);
-		Map<Path, Path> pathCopies = Map.of(pathFrom, pathTo);
+		Map<Skill, Skill> skillCopies = Map.of(editionDb.getSkillFromA(), editionDb.getSkillToA(),
+				editionDb.getSkillFromB(), editionDb.getSkillToB());
+		Map<Path, Path> pathCopies = Map.of(editionDb.getPathFromA(), editionDb.getPathToA(),
+				editionDb.getPathFromB(), editionDb.getPathToB());
 		Map<Task, Task> copies = editionService.copyAndLinkEditionTasks(skillCopies, pathCopies);
-		assertThat(copies.keySet()).containsExactlyInAnyOrder(taskA, taskB);
+		assertThat(copies.keySet()).containsExactlyInAnyOrder(editionDb.getTaskFromA(),
+				editionDb.getTaskFromB());
 		assertThat(taskRepository.findAll()).hasSize(amountBefore + 2);
 
 		// Safety check that the previous skills were not changed
-		Skill oldA = skillRepository.findByIdOrThrow(skillFromA.getId());
-		assertThat(oldA).isEqualTo(skillFromA);
-		assertThat(oldA.getTasks()).containsExactly(taskA);
-		Skill oldB = skillRepository.findByIdOrThrow(skillFromB.getId());
-		assertThat(oldB).isEqualTo(skillFromB);
-		assertThat(oldB.getRequiredTasks()).containsExactly(taskA);
-		assertThat(oldB.getTasks()).containsExactly(taskB);
+		Skill oldA = skillRepository.findByIdOrThrow(editionDb.getSkillFromA().getId());
+		assertThat(oldA).isEqualTo(editionDb.getSkillFromA());
+		assertThat(oldA.getTasks()).containsExactly(editionDb.getTaskFromA());
+		Skill oldB = skillRepository.findByIdOrThrow(editionDb.getSkillFromB().getId());
+		assertThat(oldB).isEqualTo(editionDb.getSkillFromB());
+		assertThat(oldB.getRequiredTasks()).containsExactly(editionDb.getTaskFromA());
+		assertThat(oldB.getTasks()).containsExactly(editionDb.getTaskFromB());
 
-		testTaskEqualityHelper(taskA, copies.get(taskA), skillToA);
-		testTaskEqualityHelper(taskB, copies.get(taskB), skillToB);
+		testTaskEqualityHelper(editionDb.getTaskFromA(), copies.get(editionDb.getTaskFromA()),
+				editionDb.getSkillToA());
+		testTaskEqualityHelper(editionDb.getTaskFromB(), copies.get(editionDb.getTaskFromB()),
+				editionDb.getSkillToB());
 
-		assertThat(skillToB.getRequiredTasks()).containsExactly(copies.get(taskA));
-		assertThat(skillToA.getRequiredTasks()).isEmpty();
-		assertThat(copies.get(taskA).getRequiredFor()).containsExactly(skillToB);
-		assertThat(copies.get(taskB).getRequiredFor()).isEmpty();
-		assertThat(copies.get(taskA).getPaths()).containsExactly(pathTo);
-		assertThat(copies.get(taskB).getPaths()).isEmpty();
-		assertThat(pathTo.getTasks()).containsExactly(copies.get(taskA));
+		assertThat(editionDb.getSkillToB().getRequiredTasks())
+				.containsExactly(copies.get(editionDb.getTaskFromA()));
+		assertThat(editionDb.getSkillToA().getRequiredTasks()).isEmpty();
+		assertThat(copies.get(editionDb.getTaskFromA()).getRequiredFor())
+				.containsExactly(editionDb.getSkillToB());
+		assertThat(copies.get(editionDb.getTaskFromB()).getRequiredFor()).isEmpty();
+		assertThat(copies.get(editionDb.getTaskFromA()).getPaths()).containsExactly(editionDb.getPathToA());
+		assertThat(copies.get(editionDb.getTaskFromB()).getPaths()).isEmpty();
+		assertThat(editionDb.getPathToA().getTasks()).containsExactly(copies.get(editionDb.getTaskFromA()));
+		assertThat(editionDb.getPathToB().getTasks()).isEmpty();
 	}
 
 	private void testTaskEqualityHelper(Task initial, Task copy, Skill skillTo) {

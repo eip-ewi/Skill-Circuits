@@ -50,7 +50,6 @@ public class EditionService {
 	private final ModuleRepository moduleRepository;
 	private final SubmoduleRepository submoduleRepository;
 	private final AbstractSkillRepository abstractSkillRepository;
-	private final AchievementRepository achievementRepository;
 	private final SkillRepository skillRepository;
 	private final TaskRepository taskRepository;
 
@@ -59,8 +58,7 @@ public class EditionService {
 			CircuitService circuitService, CheckpointRepository checkpointRepository,
 			PathRepository pathRepository, ModuleRepository moduleRepository,
 			SubmoduleRepository submoduleRepository, AbstractSkillRepository abstractSkillRepository,
-			AchievementRepository achievementRepository, SkillRepository skillRepository,
-			TaskRepository taskRepository) {
+			SkillRepository skillRepository, TaskRepository taskRepository) {
 		this.editionApi = editionApi;
 		this.editionRepository = editionRepository;
 		this.circuitService = circuitService;
@@ -70,7 +68,6 @@ public class EditionService {
 		this.moduleRepository = moduleRepository;
 		this.submoduleRepository = submoduleRepository;
 		this.abstractSkillRepository = abstractSkillRepository;
-		this.achievementRepository = achievementRepository;
 		this.skillRepository = skillRepository;
 		this.taskRepository = taskRepository;
 	}
@@ -220,18 +217,15 @@ public class EditionService {
 		linkParentsChildrenSkills(abstractSkillMap);
 
 		// Copy tasks
-		Map<Task, Task> taskMap = copyAndLinkEditionTasks(skillMap, pathMap);
+		copyAndLinkEditionTasks(skillMap, pathMap);
 
-		// Copy achievements
-		copyAndLinkEditionAchievements(taskMap);
-
+		// TODO achievements are currently not copied.
 		// Since there may be a lot of updates to the database, flush all databases for safety
 		editionRepository.flush();
 		pathRepository.flush();
 		moduleRepository.flush();
 		submoduleRepository.flush();
 		abstractSkillRepository.flush();
-		achievementRepository.flush();
 		skillRepository.flush();
 		taskRepository.flush();
 
@@ -506,47 +500,6 @@ public class EditionService {
 		}));
 
 		return taskMap;
-	}
-
-	/**
-	 * Creates copies of achievements of the keys of the given task map. This map contains tasks mapped to
-	 * their copy. The achievements are linked to the tasks they belong to.
-	 *
-	 * @param taskMap The map of tasks, from previous tasks to the new tasks.
-	 */
-	@Transactional
-	public void copyAndLinkEditionAchievements(Map<Task, Task> taskMap) {
-		Map<Achievement, Achievement> achievementMap = new HashMap<>();
-
-		taskMap.forEach((prev, copy) -> prev.getAchievements().forEach(a -> {
-			Achievement copiedAchievement = achievementMap.get(a);
-
-			// Check if the achievement was already copied
-			if (copiedAchievement == null) {
-				// If it was not yet copied, create a copy
-
-				Achievement achievement = achievementRepository.save(
-						Achievement.builder()
-								.name(a.getName())
-								.build());
-
-				a.getTasks().forEach(innerTask -> {
-					Task copiedTask = taskMap.get(innerTask);
-					if (copiedTask != null) {
-						achievement.getTasks().add(copiedTask);
-					} else {
-						achievement.getTasks().add(innerTask);
-					}
-				});
-
-				copy.getAchievements().add(achievement);
-				achievementMap.put(a, achievement);
-			} else {
-				// If it was copied, link to the copy
-
-				copy.getAchievements().add(copiedAchievement);
-			}
-		}));
 	}
 
 }
