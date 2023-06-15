@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Floating box which displays information about the most recently completed task (@ffiedrich)
 - Skill can remember the skill from the edition it was copied from (@ffiedrich)
+- Add the ability to copy the contents of one edition to another (empty) edition. (@ffiedrich)
 
 ### Changed
 

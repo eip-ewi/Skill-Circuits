@@ -113,7 +113,6 @@ public class EditionService {
 		EditionLevelEditionViewDTO view = View.convert(getOrCreateSCEdition(id),
 				EditionLevelEditionViewDTO.class);
 
-		// TODO asserting on the new attribute in additional tests
 		List<EditionLevelEditionSummaryDTO> olderEditions = editionApi
 				.getAllEditionsByCourse(edition.getCourse().getId())
 				.collectList().block().stream()
