@@ -119,7 +119,7 @@ public class EditionController {
 	 */
 	@PostMapping("{copyTo}/copy/{copyFrom}")
 	@Transactional
-	@PreAuthorize("@authorisationService.canEditEdition(#copyTo)")
+	@PreAuthorize("@authorisationService.canEditEdition(#copyTo) and @authorisationService.canViewEdition(#copyFrom)")
 	public String copyEdition(@PathVariable Long copyTo, @PathVariable Long copyFrom) {
 		editionService.copyEdition(copyTo, copyFrom);
 
