@@ -134,7 +134,7 @@
                 let maxRow = 0;
 
                 //move down blocks
-                for (let block of document.getElementsByClassName("block final")) {
+                for (let block of document.getElementsByClassName("block visible")) {
                     let row = getRow(block);
 
                     if (row > rowNum) {
@@ -155,11 +155,7 @@
                         if (row + 1 > maxRow) maxRow = row + 1;
                     }
                 }
-
                 recalculateConnections();
-                if (blockType === "skill") {
-                    recalculateCheckpointSkills();
-                }
 
                 //move down ghost blocks
                 for (let ghostBlock of document.getElementsByClassName("ghost_block")) {
@@ -194,6 +190,19 @@
 
                 //update rows in css
                 circuitElem.style.setProperty("--rows", parseInt(circuit.css("--rows")) + 1);
+
+                //update checkpoints
+                for (let checkpoint of document.getElementsByClassName("checkpoint")) {
+                    let row = getRow(checkpoint);
+
+                    if (row > rowNum) {
+                        checkpoint.style.gridRow = row + 1;
+                    }
+                }
+
+                if (blockType === "skill") {
+                    recalculateCheckpointSkills();
+                }
 
                 //create an extra insert row button
                 const ghostRowButtonInsert = $("<div>")

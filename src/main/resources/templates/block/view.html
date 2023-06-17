@@ -24,7 +24,7 @@
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <div
         th:id="|block-${block.id}|"
-        class="block final"
+        class="block visible"
         th:style="|grid-row: ${block.row + 1}; grid-column: ${block.column + 1}|"
         th:draggable="${canEdit}"
         th:data-group="${group.id}"
