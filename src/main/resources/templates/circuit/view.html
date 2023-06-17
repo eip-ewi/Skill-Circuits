@@ -84,98 +84,8 @@
                 th:each="row : ${#numbers.sequence(0, rows - 1)}"
                 class="ghost_row"
                 th:style="|grid-row: ${row + 1}; grid-column: ${columns + 2}|">
-                <button
-                    class="add_row fa-solid fa-plus"></button>
+                <button class="add_row fa-solid fa-plus"></button>
             </div>
-            <script>
-                let circuitElem;
-
-                document.addEventListener("DOMContentLoaded", function () {
-                    $(".add_row").click(insertNewRow)
-                    circuitElem = document.getElementById("circuit");
-                })
-
-                function insertNewRow(){
-                    let rowNum = getRow($(this).parent()) - 1;
-                    let maxRow = 0;
-
-                    //move down blocks
-                    for(let block of document.getElementsByClassName("block final")){
-                        let row = parseInt(block.style.gridRow.split((" / ")[0]));
-
-                        if(row > rowNum){
-                            let id = block.id.split("-")[1];
-                            let col = parseInt(block.style.gridColumn.split((" / ")[0]));
-                            $.ajax({
-                                type: "PATCH",
-                                url: `/${blockType}/${id}/position`,
-                                data: JSON.stringify({ column: col - 1, row: row }),
-                                processData: false,
-                                contentType: "application/json",
-                                success: () => {},
-                            });
-
-                            block.style.gridRow = row + 1;
-                            block.style.gridColumn = col;
-
-                            if(row + 1 > maxRow) maxRow = row + 1;
-                        }
-                    }
-
-                    recalculateConnections();
-                    if (blockType === "skill") {
-                        recalculateCheckpointSkills();
-                    }
-
-                    //move down ghost blocks
-                    for(let ghostBlock of document.getElementsByClassName("ghost_block")){
-                        let row = parseInt(ghostBlock.style.gridRow.split((" / ")[0]));
-
-                        if(row > rowNum){
-                            let col = parseInt(ghostBlock.style.gridColumn.split((" / ")[0]));
-
-                            ghostBlock.style.gridRow = row + 1;
-                            ghostBlock.style.gridColumn = col;
-                        }
-                    }
-
-                    //insert ghost blocks
-                    const circuit = $("#circuit");
-                    for(let colNum = 1; colNum < parseInt(circuit.css("--columns"))+2; colNum++) {
-                        const gb = $("<div>")
-                            .addClass("ghost_block")
-                            .css({"grid-column": colNum, "grid-row": rowNum + 1})
-                            .append(
-                                $("<button>").addClass("fa-solid fa-plus").attr("data-type", "regular")
-                            );
-                        circuit.append(gb);
-                    }
-
-                    $(".ghost_block button[data-type='regular']").click(clickGhostRegular);
-
-                    //update rows in css
-                    circuitElem.style.setProperty("--rows", parseInt(circuit.css("--rows"))+1);
-
-                    //create an extra insert row button
-                    const ghostRowButtonInsert = $("<div>")
-                        .addClass("ghost_row")
-                        .css({"grid-column": parseInt(circuit.css("--columns"))+2,
-                            "grid-row": parseInt(circuit.css("--rows"))})
-                        .append(
-                            $("<button>").addClass("add_row fa-solid fa-plus")
-                        );
-                    circuit.append(ghostRowButtonInsert);
-
-                    $("*").unbind();
-                    window.document.dispatchEvent(
-                        new Event("DOMContentLoaded", {
-                            bubbles: true,
-                            cancelable: true,
-                        })
-                    );
-                }
-                
-            </script>
         </th:block>
     </div>
 
@@ -210,6 +120,93 @@
             }
             function getCol(obj) {
                 return parseInt($(obj).css("grid-column-start"));
+            }
+
+            let circuitElem;
+
+            document.addEventListener("DOMContentLoaded", function () {
+                $(".add_row").click(insertNewRow);
+                circuitElem = document.getElementById("circuit");
+            });
+
+            function insertNewRow() {
+                let rowNum = getRow($(this).parent()) - 1;
+                let maxRow = 0;
+
+                //move down blocks
+                for (let block of document.getElementsByClassName("block final")) {
+                    let row = getRow(block);
+
+                    if (row > rowNum) {
+                        let id = block.id.split("-")[1];
+                        let col = getCol(block);
+                        $.ajax({
+                            type: "PATCH",
+                            url: `/${blockType}/${id}/position`,
+                            data: JSON.stringify({ column: col - 1, row: row }),
+                            processData: false,
+                            contentType: "application/json",
+                            success: () => {},
+                        });
+
+                        block.style.gridRow = row + 1;
+                        block.style.gridColumn = col;
+
+                        if (row + 1 > maxRow) maxRow = row + 1;
+                    }
+                }
+
+                recalculateConnections();
+                if (blockType === "skill") {
+                    recalculateCheckpointSkills();
+                }
+
+                //move down ghost blocks
+                for (let ghostBlock of document.getElementsByClassName("ghost_block")) {
+                    let row = getRow(ghostBlock);
+
+                    if (row > rowNum) {
+                        let col = getCol(ghostBlock);
+
+                        ghostBlock.style.gridRow = row + 1;
+                        ghostBlock.style.gridColumn = col;
+                    }
+                }
+
+                //insert ghost blocks
+                const circuit = $("#circuit");
+                for (let colNum = 1; colNum < parseInt(circuit.css("--columns")) + 2; colNum++) {
+                    const gb = $("<div>")
+                        .addClass("ghost_block")
+                        .css({ "grid-column": colNum, "grid-row": rowNum + 1 })
+                        .append(
+                            $("<button>").addClass("fa-solid fa-plus").attr("data-type", "regular")
+                        );
+                    circuit.append(gb);
+                }
+
+                $(".ghost_block button[data-type='regular']").click(clickGhostRegular);
+
+                //update rows in css
+                circuitElem.style.setProperty("--rows", parseInt(circuit.css("--rows")) + 1);
+
+                //create an extra insert row button
+                const ghostRowButtonInsert = $("<div>")
+                    .addClass("ghost_row")
+                    .css({
+                        "grid-column": parseInt(circuit.css("--columns")) + 2,
+                        "grid-row": parseInt(circuit.css("--rows")),
+                    })
+                    .append($("<button>").addClass("add_row fa-solid fa-plus"));
+                circuit.append(ghostRowButtonInsert);
+
+                $("*").unbind();
+                window.document.dispatchEvent(
+                    new Event("DOMContentLoaded", {
+                        bubbles: true,
+                        cancelable: true,
+                    })
+                );
             }
         </script>
     </th:block>
