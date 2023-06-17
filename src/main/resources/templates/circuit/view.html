@@ -93,7 +93,7 @@
                     newRow[i].addEventListener("click",
                         function (){
                             let maxRow = 0;
-                            for(let block of document.getElementsByClassName("block")){
+                            for(let block of document.getElementsByClassName("block final")){
                                let row = parseInt(block.style.gridRow.split((" / ")[0]));
 
                                if(row > i){
