@@ -216,6 +216,7 @@ public class AuthorisationServiceTest {
 		assertThat(authorisationService.canViewSkill(externalSkill.getId())).isEqualTo(expected);
 	}
 
+	@Test
 	@WithUserDetails("username")
 	void canViewSkillExternalOtherEdition() {
 		// Since this is a bigger test, it is only checked with one role (the student role).
