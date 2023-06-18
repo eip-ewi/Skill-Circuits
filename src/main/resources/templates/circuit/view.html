@@ -83,7 +83,7 @@
             <div
                 th:each="row : ${#numbers.sequence(0, rows - 1)}"
                 class="ghost_row"
-                th:style="|grid-row: ${row + 1}; grid-column: ${columns + 2}|">
+                th:style="|grid-row: ${row + 1}; grid-column: 1|">
                 <button class="add_row fa-solid fa-plus"></button>
             </div>
         </th:block>
@@ -208,7 +208,7 @@
                 const ghostRowButtonInsert = $("<div>")
                     .addClass("ghost_row")
                     .css({
-                        "grid-column": parseInt(circuit.css("--columns")) + 2,
+                        "grid-column": 1,
                         "grid-row": parseInt(circuit.css("--rows")),
                     })
                     .append($("<button>").addClass("add_row fa-solid fa-plus"));
