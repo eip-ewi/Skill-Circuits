@@ -84,13 +84,13 @@
                 th:each="row : ${#numbers.sequence(0, rows - 1)}"
                 class="ghost_row"
                 th:style="|grid-row: ${row + 1}; grid-column: 1|">
-                <button class="add_row fa-solid fa-plus"></button>
+                <button class="add_row fa-solid fa-arrow-right"></button>
             </div>
             <div
                 th:each="col : ${#numbers.sequence(0, columns - 1)}"
                 class="ghost_column"
                 th:style="|grid-row: 1; grid-column: ${col + 1}|">
-                <button class="add_column fa-solid fa-plus"></button>
+                <button class="add_column fa-solid fa-arrow-down"></button>
             </div>
         </th:block>
     </div>
@@ -216,7 +216,7 @@
                         "grid-column": 1,
                         "grid-row": parseInt(circuit.css("--rows")),
                     })
-                    .append($("<button>").addClass("add_row fa-solid fa-plus"));
+                    .append($("<button>").addClass("add_row fa-solid fa-arrow-right"));
                 circuit.append(ghostRowButtonInsert);
 
                 $("*").unbind();
@@ -295,7 +295,7 @@
                         "grid-column": parseInt(circuit.css("--columns")),
                         "grid-row": 1,
                     })
-                    .append($("<button>").addClass("add_column fa-solid fa-plus"));
+                    .append($("<button>").addClass("add_column fa-solid fa-arrow-down"));
                 circuit.append(ghostRowButtonInsert);
 
                 $("*").unbind();
