@@ -96,6 +96,7 @@ public class SkillController {
 	 * @return    The skill html element
 	 */
 	@GetMapping("{id}")
+	@PreAuthorize("@authorisationService.canViewSkill(#id)")
 	public String getSkill(@PathVariable Long id, Model model) {
 		Skill skill = skillRepository.findByIdOrThrow(id);
 		ModuleLevelSkillViewDTO view = View.convert(skill, ModuleLevelSkillViewDTO.class);

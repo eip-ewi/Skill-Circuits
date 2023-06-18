@@ -128,7 +128,7 @@ public class AuthorisationService {
 	 * @return          True iff the user can view all the editions of a course by id.
 	 */
 	public boolean canViewCourse(Long courseId) {
-		return isAtLeastTeacherInCourse(courseId);
+		return isAuthenticated() && isAtLeastTeacherInCourse(courseId);
 	}
 
 	/**
@@ -138,8 +138,18 @@ public class AuthorisationService {
 	 * @return           True iff the user can view the edition.
 	 */
 	public boolean canViewEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId)
-				|| editionRepository.findByIdOrThrow(editionId).isVisible();
+		return isAuthenticated() && (isAtLeastTeacherInEdition(editionId)
+				|| editionRepository.findByIdOrThrow(editionId).isVisible());
+	}
+
+	/**
+	 * Gets whether the authenticated user can view a module.
+	 *
+	 * @param  moduleId The id of the module.
+	 * @return          True iff the user can view the module.
+	 */
+	public boolean canViewModule(Long moduleId) {
+		return isAuthenticated() && canViewEdition(moduleRepository.getById(moduleId).getEdition().getId());
 	}
 
 	/**
@@ -152,9 +162,10 @@ public class AuthorisationService {
 		AbstractSkill skill = abstractSkillRepository.findByIdOrThrow(skillId);
 
 		if (skill instanceof ExternalSkill) {
-			return canViewEdition(((ExternalSkill) skill).getModule().getEdition().getId());
+			return isAuthenticated()
+					&& canViewEdition(((ExternalSkill) skill).getModule().getEdition().getId());
 		}
-		return canViewEdition(skill.getSubmodule().getModule().getEdition().getId());
+		return isAuthenticated() && canViewEdition(skill.getSubmodule().getModule().getEdition().getId());
 	}
 
 	/**

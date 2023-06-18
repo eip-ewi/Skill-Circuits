@@ -17,8 +17,15 @@
  */
 package nl.tudelft.skills.controller;
 
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.when;
+
 import java.util.Random;
 
+import nl.tudelft.labracore.api.RoleControllerApi;
+import nl.tudelft.labracore.api.dto.Id;
+import nl.tudelft.labracore.api.dto.PersonSummaryDTO;
+import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
 import nl.tudelft.skills.test.TestDatabaseLoader;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +35,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
+
+import reactor.core.publisher.Flux;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -60,6 +69,21 @@ public abstract class ControllerTest {
 
 	protected <T> T map(Object source, Class<T> dest) {
 		return mapper.map(source, dest);
+	}
+
+	/**
+	 * Mocks the response of the role api for a given role.
+	 *
+	 * @param roleApi The roleApi.
+	 * @param role    The role to return for the user.
+	 */
+	protected void mockRole(RoleControllerApi roleApi, String role) {
+		when(roleApi.getRolesById(anyList(), anyList()))
+				.thenReturn(Flux.just(new RoleDetailsDTO()
+						.id(new Id().editionId(db.getEditionRL().getId())
+								.personId(db.getPerson().getId()))
+						.person(new PersonSummaryDTO().id(db.getPerson().getId()).username("username"))
+						.type(RoleDetailsDTO.TypeEnum.valueOf(role))));
 	}
 
 }
