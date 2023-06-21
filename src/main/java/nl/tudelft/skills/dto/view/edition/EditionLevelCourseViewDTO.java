@@ -38,6 +38,7 @@ public class EditionLevelCourseViewDTO extends View<SCCourse> {
 	@NotNull
 	private String name;
 	@NotNull
+	@Builder.Default
 	private List<EditionLevelEditionSummaryDTO> olderEditions = new ArrayList<>();
 
 }

@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
 
+import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.librador.dto.view.View;
@@ -32,13 +33,13 @@ import nl.tudelft.skills.dto.view.edition.*;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.*;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 
 @Service
+@AllArgsConstructor
 public class EditionService {
 
 	private final EditionControllerApi editionApi;
@@ -52,25 +53,6 @@ public class EditionService {
 	private final AbstractSkillRepository abstractSkillRepository;
 	private final SkillRepository skillRepository;
 	private final TaskRepository taskRepository;
-
-	@Autowired
-	public EditionService(EditionControllerApi editionApi, EditionRepository editionRepository,
-			CircuitService circuitService, CheckpointRepository checkpointRepository,
-			PathRepository pathRepository, ModuleRepository moduleRepository,
-			SubmoduleRepository submoduleRepository, AbstractSkillRepository abstractSkillRepository,
-			SkillRepository skillRepository, TaskRepository taskRepository) {
-		this.editionApi = editionApi;
-		this.editionRepository = editionRepository;
-		this.circuitService = circuitService;
-
-		this.checkpointRepository = checkpointRepository;
-		this.pathRepository = pathRepository;
-		this.moduleRepository = moduleRepository;
-		this.submoduleRepository = submoduleRepository;
-		this.abstractSkillRepository = abstractSkillRepository;
-		this.skillRepository = skillRepository;
-		this.taskRepository = taskRepository;
-	}
 
 	/**
 	 * Configures the model for the module circuit view.

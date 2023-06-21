@@ -25,7 +25,6 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
 public class EditionLevelEditionSummaryDTO {
 
 	@NotNull

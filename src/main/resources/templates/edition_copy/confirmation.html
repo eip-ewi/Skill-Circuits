@@ -24,19 +24,15 @@
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <dialog
         th:if="${@editionService.isEditionEmpty(edition.id) and not studentMode
-        and @authorisationService.canEditEdition(edition.id) and #lists.size(edition.course.olderEditions) > 0}"
+        and @authorisationService.canEditEdition(edition.id) and not edition.course.olderEditions.isEmpty()}"
         layout:fragment="overlay"
         class="overlay"
         id="copy-confirmation-overlay">
         <form id="copy-confirmation-form" class="confirmation">
             <p>
-                Are you sure you want to
-                <b>copy all content</b>
-                of edition &quot;
-                <span id="copy-edition-from"></span>
-                &quot; to edition &quot;
-                <span th:text="${edition.name}"></span>
-                &quot;?
+                <!-- spotless:off -->Are you sure you want to <b>copy all content</b> of edition
+                &quot;<span id="copy-edition-from"></span>&quot; to edition
+                &quot;<span th:text="${edition.name}"></span>&quot;?<!-- spotless:on -->
             </p>
 
             <div class="confirmation__buttons">
