@@ -145,6 +145,21 @@
                         spaceMaxCol = Math.max(spaceMaxCol, col);
                         spaceMaxRow = Math.max(spaceMaxRow, row);
                     }
+
+                    for (let insert_row of document.getElementsByClassName("ghost_row")) {
+                        let row = getRow(insert_row);
+                        if (row > newRows) {
+                            toRemove.push(insert_row);
+                        }
+                    }
+
+                    for (let insert_column of document.getElementsByClassName("ghost_column")) {
+                        let col = getCol(insert_column);
+                        if (col > newColumns) {
+                            toRemove.push(insert_column);
+                        }
+                    }
+
                     for (let space of toRemove) {
                         space.remove();
                     }
