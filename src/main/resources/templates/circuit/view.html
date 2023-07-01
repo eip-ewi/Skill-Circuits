@@ -199,19 +199,6 @@
                 //update rows in css
                 circuitElem.css("--rows", parseInt(circuitElem.css("--rows")) + 1);
 
-                //update checkpoints
-                for (let checkpoint of document.getElementsByClassName("checkpoint")) {
-                    const row = getRow(checkpoint);
-
-                    if (row > rowNum) {
-                        checkpoint.style.gridRow = row + 1;
-                    }
-                }
-
-                if (blockType === "skill") {
-                    recalculateCheckpointSkills();
-                }
-
                 //create an extra insert row button
                 const insertRow = $("<div>")
                     .addClass("add_row")
