@@ -82,15 +82,15 @@
             </div>
             <div
                 th:each="row : ${#numbers.sequence(0, rows - 1)}"
-                class="ghost_row"
+                class="add_row"
                 th:style="|grid-row: ${row + 1}; grid-column: 1|">
-                <button title="Insert row" class="add_row fa-solid fa-arrow-right"></button>
+                <button title="Insert row" class="row_button fa-solid fa-arrow-right"></button>
             </div>
             <div
                 th:each="col : ${#numbers.sequence(0, columns - 1)}"
-                class="ghost_column"
+                class="add_column"
                 th:style="|grid-row: 1; grid-column: ${col + 1}|">
-                <button title="Insert column" class="add_column fa-solid fa-arrow-down"></button>
+                <button title="Insert column" class="column_button fa-solid fa-arrow-down"></button>
             </div>
         </th:block>
     </div>
@@ -131,8 +131,8 @@
             let circuitElem;
 
             document.addEventListener("DOMContentLoaded", function () {
-                $(".add_row").click(insertNewRow);
-                $(".add_column").click(insertNewColumn);
+                $(".row_button").click(insertNewRow);
+                $(".column_button").click(insertNewColumn);
                 circuitElem = document.getElementById("circuit");
             });
 
@@ -210,14 +210,15 @@
                 }
 
                 //create an extra insert row button
-                const ghostRowButtonInsert = $("<div>")
-                    .addClass("ghost_row")
+                const insertRow = $("<div>")
+                    .addClass("add_row")
                     .css({
                         "grid-column": 1,
                         "grid-row": parseInt(circuit.css("--rows")),
                     })
-                    .append($("<button>").addClass("add_row fa-solid fa-arrow-right"));
-                circuit.append(ghostRowButtonInsert);
+                    .append($("<button>").addClass("row_button fa-solid fa-arrow-right")
+                        .prop('title', 'Insert row'));
+                circuit.append(insertRow);
 
                 $("*").unbind();
                 window.document.dispatchEvent(
@@ -289,14 +290,15 @@
                 circuitElem.style.setProperty("--columns", parseInt(circuit.css("--columns")) + 1);
 
                 //create an extra insert column button
-                const ghostRowButtonInsert = $("<div>")
-                    .addClass("ghost_column")
+                const insertColumn = $("<div>")
+                    .addClass("add_column")
                     .css({
                         "grid-column": parseInt(circuit.css("--columns")),
                         "grid-row": 1,
                     })
-                    .append($("<button>").addClass("add_column fa-solid fa-arrow-down"));
-                circuit.append(ghostRowButtonInsert);
+                    .append($("<button>").addClass("column_button fa-solid fa-arrow-down")
+                        .prop('title', 'Insert column'));
+                circuit.append(insertColumn);
 
                 $("*").unbind();
                 window.document.dispatchEvent(

@@ -171,8 +171,28 @@
                             space.classList.add("ghost_block");
                             space.style.gridRow = (row + 1).toString();
                             space.style.gridColumn = (newColumns + 1).toString();
+                            const spaceButton = document.createElement("button");
+                            spaceButton.className = "fa-solid fa-plus"
+                            spaceButton.setAttribute("data-type", "regular")
+                            space.appendChild(spaceButton)
+                            if (blockType === "skill") {
+                                const spaceButtonExternal = document.createElement("button");
+                                spaceButtonExternal.className = "fa-solid fa-link"
+                                spaceButtonExternal.setAttribute("data-type", "external")
+                                space.appendChild(spaceButtonExternal)
+                            }
+
                             circuit.appendChild(space);
                         }
+                        const insertColumn = document.createElement("div");
+                        insertColumn.classList.add("add_column");
+                        insertColumn.style.gridRow = "1";
+                        insertColumn.style.gridColumn = (newColumns).toString();
+                        const insertColumnButton = document.createElement("button");
+                        insertColumnButton.className = "column_button fa-solid fa-arrow-down";
+                        insertColumnButton.title = "Insert column"
+                        insertColumn.appendChild(insertColumnButton)
+                        circuit.appendChild(insertColumn);
                     }
                     if (spaceMaxRow <= newRows) {
                         for (
@@ -184,8 +204,27 @@
                             space.classList.add("ghost_block");
                             space.style.gridRow = (newRows + 1).toString();
                             space.style.gridColumn = (col + 1).toString();
+                            const spaceButton = document.createElement("button");
+                            spaceButton.className = "fa-solid fa-plus"
+                            spaceButton.setAttribute("data-type", "regular")
+                            space.appendChild(spaceButton)
+                            if (blockType === "skill") {
+                                const spaceButtonExternal = document.createElement("button");
+                                spaceButtonExternal.className = "fa-solid fa-link"
+                                spaceButtonExternal.setAttribute("data-type", "external")
+                                space.appendChild(spaceButtonExternal)
+                            }
                             circuit.appendChild(space);
                         }
+                        const insertRow = document.createElement("div");
+                        insertRow.classList.add("add_row");
+                        insertRow.style.gridRow = (newRows).toString();
+                        insertRow.style.gridColumn = "1";
+                        const insertRowButton = document.createElement("button");
+                        insertRowButton.className = "row_button fa-solid fa-arrow-right";
+                        insertRowButton.title = "Insert row"
+                        insertRow.appendChild(insertRowButton)
+                        circuit.appendChild(insertRow);
                         window.scrollTo(0, document.body.scrollHeight);
                     }
 
@@ -193,6 +232,14 @@
                     if (blockType === "skill") {
                         recalculateCheckpointSkills();
                     }
+
+                    $("*").unbind();
+                    window.document.dispatchEvent(
+                        new Event("DOMContentLoaded", {
+                            bubbles: true,
+                            cancelable: true,
+                        })
+                    );
                 }
             },
             false
