@@ -133,19 +133,19 @@
             document.addEventListener("DOMContentLoaded", function () {
                 $(".row_button").click(insertNewRow);
                 $(".column_button").click(insertNewColumn);
-                circuitElem = document.getElementById("circuit");
+                circuitElem = $("#circuit");
             });
 
             function insertNewRow() {
-                let rowNum = getRow($(this).parent()) - 1;
+                const rowNum = getRow($(this).parent()) - 1;
 
                 //move down blocks
                 for (let block of document.getElementsByClassName("block visible")) {
-                    let row = getRow(block);
+                    const row = getRow(block);
 
                     if (row > rowNum) {
-                        let id = block.id.split("-")[1];
-                        let col = getCol(block);
+                        const id = block.id.split("-")[1];
+                        const col = getCol(block);
                         $.ajax({
                             type: "PATCH",
                             url: `/${blockType}/${id}/position`,
@@ -163,10 +163,10 @@
 
                 //move down ghost blocks
                 for (let ghostBlock of document.getElementsByClassName("ghost_block")) {
-                    let row = getRow(ghostBlock);
+                    const row = getRow(ghostBlock);
 
                     if (row > rowNum) {
-                        let col = getCol(ghostBlock);
+                        const col = getCol(ghostBlock);
 
                         ghostBlock.style.gridRow = row + 1;
                         ghostBlock.style.gridColumn = col;
@@ -174,8 +174,11 @@
                 }
 
                 //insert ghost blocks
-                const circuit = $("#circuit");
-                for (let colNum = 1; colNum < parseInt(circuit.css("--columns")) + 2; colNum++) {
+                for (
+                    let colNum = 1;
+                    colNum < parseInt(circuitElem.css("--columns")) + 2;
+                    colNum++
+                ) {
                     const gb = $("<div>")
                         .addClass("ghost_block")
                         .css({ "grid-column": colNum, "grid-row": rowNum + 1 })
@@ -187,18 +190,18 @@
                             $("<button>").addClass("fa-solid fa-link").attr("data-type", "external")
                         );
                     }
-                    circuit.append(gb);
+                    circuitElem.append(gb);
                 }
 
                 $(".ghost_block button[data-type='regular']").click(clickGhostRegular);
                 $(".ghost_block button[data-type='external']").click(clickGhostExternal);
 
                 //update rows in css
-                circuitElem.style.setProperty("--rows", parseInt(circuit.css("--rows")) + 1);
+                circuitElem.css("--rows", parseInt(circuitElem.css("--rows")) + 1);
 
                 //update checkpoints
                 for (let checkpoint of document.getElementsByClassName("checkpoint")) {
-                    let row = getRow(checkpoint);
+                    const row = getRow(checkpoint);
 
                     if (row > rowNum) {
                         checkpoint.style.gridRow = row + 1;
@@ -214,11 +217,14 @@
                     .addClass("add_row")
                     .css({
                         "grid-column": 1,
-                        "grid-row": parseInt(circuit.css("--rows")),
+                        "grid-row": parseInt(circuitElem.css("--rows")),
                     })
-                    .append($("<button>").addClass("row_button fa-solid fa-arrow-right")
-                        .prop('title', 'Insert row'));
-                circuit.append(insertRow);
+                    .append(
+                        $("<button>")
+                            .addClass("row_button fa-solid fa-arrow-right")
+                            .prop("title", "Insert row")
+                    );
+                circuitElem.append(insertRow);
 
                 $("*").unbind();
                 window.document.dispatchEvent(
@@ -230,15 +236,15 @@
             }
 
             function insertNewColumn() {
-                let colNum = getCol($(this).parent()) - 1;
+                const colNum = getCol($(this).parent()) - 1;
 
                 //move blocks to the right
                 for (let block of document.getElementsByClassName("block visible")) {
-                    let col = getCol(block);
+                    const col = getCol(block);
 
                     if (col > colNum) {
-                        let id = block.id.split("-")[1];
-                        let row = getRow(block);
+                        const id = block.id.split("-")[1];
+                        const row = getRow(block);
                         $.ajax({
                             type: "PATCH",
                             url: `/${blockType}/${id}/position`,
@@ -256,10 +262,10 @@
 
                 //move ghost blocks to the right
                 for (let ghostBlock of document.getElementsByClassName("ghost_block")) {
-                    let col = getCol(ghostBlock);
+                    const col = getCol(ghostBlock);
 
                     if (col > colNum) {
-                        let row = getRow(ghostBlock);
+                        const row = getRow(ghostBlock);
 
                         ghostBlock.style.gridRow = row;
                         ghostBlock.style.gridColumn = col + 1;
@@ -267,8 +273,7 @@
                 }
 
                 //insert ghost blocks
-                const circuit = $("#circuit");
-                for (let rowNum = 1; rowNum < parseInt(circuit.css("--rows")) + 2; rowNum++) {
+                for (let rowNum = 1; rowNum < parseInt(circuitElem.css("--rows")) + 2; rowNum++) {
                     const gb = $("<div>")
                         .addClass("ghost_block")
                         .css({ "grid-column": colNum + 1, "grid-row": rowNum })
@@ -280,25 +285,28 @@
                             $("<button>").addClass("fa-solid fa-link").attr("data-type", "external")
                         );
                     }
-                    circuit.append(gb);
+                    circuitElem.append(gb);
                 }
 
                 $(".ghost_block button[data-type='regular']").click(clickGhostRegular);
                 $(".ghost_block button[data-type='external']").click(clickGhostExternal);
 
                 //update columns in css
-                circuitElem.style.setProperty("--columns", parseInt(circuit.css("--columns")) + 1);
+                circuitElem.css("--columns", parseInt(circuitElem.css("--columns")) + 1);
 
                 //create an extra insert column button
                 const insertColumn = $("<div>")
                     .addClass("add_column")
                     .css({
-                        "grid-column": parseInt(circuit.css("--columns")),
+                        "grid-column": parseInt(circuitElem.css("--columns")),
                         "grid-row": 1,
                     })
-                    .append($("<button>").addClass("column_button fa-solid fa-arrow-down")
-                        .prop('title', 'Insert column'));
-                circuit.append(insertColumn);
+                    .append(
+                        $("<button>")
+                            .addClass("column_button fa-solid fa-arrow-down")
+                            .prop("title", "Insert column")
+                    );
+                circuitElem.append(insertColumn);
 
                 $("*").unbind();
                 window.document.dispatchEvent(
