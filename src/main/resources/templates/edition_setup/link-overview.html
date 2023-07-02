@@ -23,43 +23,35 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <!-- TODO only display if authorised -->
-    <dialog
-        layout:fragment="link-overlay"
-        class="overlay"
-        style="height: 70vh; width: 70vw; padding: 1.4rem"
-        id="link-overview-overlay">
+    <dialog layout:fragment="link-overlay" class="overlay link__overlay" id="link-overview-overlay">
         <h2>Edition link overview</h2>
 
         <div th:each="module : ${edition.modules}">
-            <!-- TODO move styling to CSS file -->
-            <div
-                th:if="${!#sets.isEmpty(module.tasksWithLinks)}"
-                style="
-                    background-color: #e3e3e3;
-                    padding: 0.5rem;
-                    margin-top: 1rem;
-                    width: min-content;
-                ">
-                <h3 th:text="${module.name}" style="margin-bottom: 0.5rem"></h3>
-                <table style="border-spacing: 0 0.3rem">
+            <div th:if="${!#sets.isEmpty(module.tasksWithLinks)}" class="link__group">
+                <h3 th:text="${module.name}" />
+                <table class="link__table">
+                    <!-- TODO implement better resizability -->
                     <tr>
-                        <th style="text-align: left; min-width: 28rem"><b>Link</b></th>
-                        <th style="text-align: left; min-width: 10rem"><b>Task</b></th>
-                        <th style="text-align: left; min-width: 10rem"><b>Skill</b></th>
-                        <th style="text-align: left; min-width: 10rem"><b>Submodule</b></th>
+                        <th style="min-width: 26rem"><b>Link</b></th>
+                        <th style="min-width: 10rem"><b>Task</b></th>
+                        <th style="min-width: 10rem"><b>Skill</b></th>
+                        <th style="min-width: 10rem"><b>Submodule</b></th>
                     </tr>
                     <tr th:each="task : ${module.tasksWithLinks}">
                         <td>
-                            <input
-                                th:id="'prev-link' + ${task.id}"
-                                type="hidden"
-                                th:value="${task.link}" />
-                            <label th:for="'link' + ${task.id}">Link</label>
-                            <input
-                                th:id="'link' + ${task.id}"
-                                th:value="${task.link}"
-                                style="width: 25rem; border: none; padding: 0.2rem"
-                                th:attr="onblur=|editLink('${task.id}')|" />
+                            <form th:id="'link-form' + ${task.id}" class="link_form">
+                                <input
+                                    th:id="'prev-link' + ${task.id}"
+                                    type="hidden"
+                                    th:value="${task.link}" />
+                                <!-- TODO ability to delete the link fully (trashcan icon) -->
+                                <input
+                                    th:id="'link' + ${task.id}"
+                                    th:value="${task.link}"
+                                    type="url"
+                                    aria-label="Task URL"
+                                    th:attr="onblur=|submitForm('${task.id}')|" />
+                            </form>
                         </td>
                         <td th:text="${task.name}"></td>
                         <td th:text="${task.skillName}"></td>
@@ -72,11 +64,30 @@
 
     <!-- TODO only display if authorised -->
     <script layout:fragment="script">
-        function editLink(taskId) {
-            const newLink = $(`#link` + taskId);
-            const prevLink = $(`#prev-link` + taskId);
+        document.addEventListener("DOMContentLoaded", function () {
+            $(".link_form").on("submit", function (event) {
+                event.preventDefault();
+                const taskId = event.target.id.substring(9);
 
-            // TODO validate link format, close overlay on click
+                if (!event.target.checkValidity()) {
+                    const inputLink = $(`#link${taskId}`)[0];
+                    inputLink.reportValidity();
+                } else {
+                    editLink(taskId);
+                }
+            });
+        });
+
+        function submitForm(taskId) {
+            $(`#link-form${taskId}`).submit();
+        }
+
+        function editLink(taskId) {
+            const newLink = $(`#link${taskId}`);
+            const prevLink = $(`#prev-link${taskId}`);
+
+            // TODO close overlay on click
+            // TODO search by substring functionality
             if (prevLink.val() !== newLink.val()) {
                 $.ajax({
                     url: "/task/change-link",
@@ -87,9 +98,11 @@
                         newLink: newLink.val(),
                     }),
                     success: () => {
+                        // Update previous value if successful
                         prevLink.val(newLink.val());
                     },
                     error: () => {
+                        // Reset link field to previous value if unsuccessful
                         newLink.val(prevLink.val());
                     },
                 });

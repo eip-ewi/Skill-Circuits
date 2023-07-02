@@ -1,0 +1,29 @@
+.link {
+    &__overlay {
+        height: 70vh;
+        width: 70vw;
+        padding: 1.4rem;
+    }
+
+    &__group {
+        background-color: var(--grey-700);
+        padding: 0.5rem;
+        margin-top: 1rem;
+        width: min-content;
+    }
+
+    &__table {
+        border-spacing: 0 0.3rem;
+        margin-top: 0.5rem;
+
+        & th {
+            text-align: left;
+        }
+
+        & input {
+            width: 25rem;
+            border: none;
+            padding: 0.2rem;
+        }
+    }
+}
