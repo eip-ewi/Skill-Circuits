@@ -146,17 +146,17 @@
                         spaceMaxRow = Math.max(spaceMaxRow, row);
                     }
 
-                    for (let insert_row of document.getElementsByClassName("add_row")) {
-                        let row = getRow(insert_row);
+                    for (let insertRow of document.getElementsByClassName("add_row")) {
+                        let row = getRow(insertRow);
                         if (row > newRows) {
-                            toRemove.push(insert_row);
+                            toRemove.push(insertRow);
                         }
                     }
 
-                    for (let insert_column of document.getElementsByClassName("add_column")) {
-                        let col = getCol(insert_column);
+                    for (let insertColumn of document.getElementsByClassName("add_column")) {
+                        let col = getCol(insertColumn);
                         if (col > newColumns) {
-                            toRemove.push(insert_column);
+                            toRemove.push(insertColumn);
                         }
                     }
 

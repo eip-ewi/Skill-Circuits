@@ -19,7 +19,8 @@
     font-size: 1rem;
     padding: 0.1rem;
 
-    &:hover {
+    &:hover,
+    &:focus-visible {
         background-color: var(--primary-green);
         color: var(--primary-light);
     }
