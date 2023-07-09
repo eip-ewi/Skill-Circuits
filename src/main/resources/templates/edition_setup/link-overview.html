@@ -22,9 +22,38 @@
     lang="en"
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-    <!-- TODO only display if authorised -->
-    <dialog layout:fragment="link-overlay" class="overlay link__overlay" id="link-overview-overlay">
+    <dialog
+        layout:fragment="link-overlay"
+        th:if="${@authorisationService.canEditEdition(edition.id)}"
+        class="overlay link__overlay"
+        id="link-overview-overlay">
         <h2>Edition link overview</h2>
+        <button
+            class="link__close fa-solid fa-xmark"
+            title="Close overlay"
+            aria-label="Close overlay"
+            onclick="toggleOverlay('link-overview-overlay')"></button>
+
+        <div class="link__filter">
+            <form>
+                <label for="type-filter">Filter by task type</label>
+                <select id="type-filter" class="link__form">
+                    <option value="All types" selected>All types</option>
+                    <option
+                        th:each="type : ${T(nl.tudelft.skills.model.TaskType).values()}"
+                        th:value="${type}"
+                        th:text="${#strings.capitalize(#strings.toLowerCase(type.name()))}"></option>
+                </select>
+            </form>
+
+            <form id="searchbar-form">
+                <label for="link-searchbar">Filter by link</label>
+                <input id="link-searchbar" placeholder="Filter links" class="link__form" />
+                <button type="submit">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
 
         <div th:each="module : ${edition.modules}">
             <div th:if="${!#sets.isEmpty(module.tasksWithLinks)}" class="link__group">
@@ -49,11 +78,15 @@
                                     th:id="'link' + ${task.id}"
                                     th:value="${task.link}"
                                     type="url"
-                                    aria-label="Task URL"
+                                    aria-label="Change task URL"
+                                    title="Change task URL"
                                     th:attr="onblur=|submitForm('${task.id}')|" />
                             </form>
                         </td>
-                        <td th:text="${task.name}"></td>
+                        <td>
+                            <i th:class="|fa-solid fa-${task.type.icon}|"></i>
+                            <span th:text="${task.name}"></span>
+                        </td>
                         <td th:text="${task.skillName}"></td>
                         <td th:text="${task.submoduleName}"></td>
                     </tr>
@@ -62,8 +95,9 @@
         </div>
     </dialog>
 
-    <!-- TODO only display if authorised -->
-    <script layout:fragment="script">
+    <script
+        layout:fragment="script"
+        th:if="${@authorisationService.canEditEdition(edition.id)}">
         document.addEventListener("DOMContentLoaded", function () {
             $(".link_form").on("submit", function (event) {
                 event.preventDefault();
@@ -76,6 +110,14 @@
                     editLink(taskId);
                 }
             });
+
+            $("#searchbar-form").on("submit", function (event) {
+                event.preventDefault();
+
+                // TODO implement search by substring functionality
+            });
+
+            // TODO filter by type functionality
         });
 
         function submitForm(taskId) {
@@ -86,8 +128,6 @@
             const newLink = $(`#link${taskId}`);
             const prevLink = $(`#prev-link${taskId}`);
 
-            // TODO close overlay on click
-            // TODO search by substring functionality
             if (prevLink.val() !== newLink.val()) {
                 $.ajax({
                     url: "/task/change-link",
