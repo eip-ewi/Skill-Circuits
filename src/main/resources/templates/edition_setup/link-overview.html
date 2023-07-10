@@ -41,17 +41,14 @@
                     <option value="All types" selected>All types</option>
                     <option
                         th:each="type : ${T(nl.tudelft.skills.model.TaskType).values()}"
-                        th:value="${type}"
+                        th:value="'fa-' + ${type.icon}"
                         th:text="${#strings.capitalize(#strings.toLowerCase(type.name()))}"></option>
                 </select>
             </form>
 
-            <form id="searchbar-form">
+            <form>
                 <label for="link-searchbar">Filter by link</label>
                 <input id="link-searchbar" placeholder="Filter links" class="link__form" />
-                <button type="submit">
-                    <i class="fas fa-search"></i>
-                </button>
             </form>
         </div>
 
@@ -66,7 +63,10 @@
                         <th style="min-width: 10rem"><b>Skill</b></th>
                         <th style="min-width: 10rem"><b>Submodule</b></th>
                     </tr>
-                    <tr th:each="task : ${module.tasksWithLinks}">
+                    <tr
+                        th:each="task : ${module.tasksWithLinks}"
+                        th:id="'link-row' + ${task.id}"
+                        class="link_row">
                         <td>
                             <form th:id="'link-form' + ${task.id}" class="link_form">
                                 <input
@@ -84,7 +84,9 @@
                             </form>
                         </td>
                         <td>
-                            <i th:class="|fa-solid fa-${task.type.icon}|"></i>
+                            <i
+                                th:class="|fa-solid fa-${task.type.icon}|"
+                                th:id="'task-icon' + ${task.id}"></i>
                             <span th:text="${task.name}"></span>
                         </td>
                         <td th:text="${task.skillName}"></td>
@@ -95,9 +97,26 @@
         </div>
     </dialog>
 
-    <script
-        layout:fragment="script"
-        th:if="${@authorisationService.canEditEdition(edition.id)}">
+    <script layout:fragment="script" th:if="${@authorisationService.canEditEdition(edition.id)}">
+        function setVisibilityModuleInfos() {
+            $(".link__table").each(function () {
+                const visibleRows = $(this)
+                    .children()
+                    .children()
+                    .filter(function () {
+                        const hidden = $(this).attr("hidden");
+
+                        return typeof hidden === "undefined" || !hidden;
+                    }).length;
+
+                if (visibleRows === 1) {
+                    $(this).parent().parent().attr("hidden", "true");
+                } else {
+                    $(this).parent().parent().removeAttr("hidden");
+                }
+            });
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
             $(".link_form").on("submit", function (event) {
                 event.preventDefault();
@@ -111,13 +130,41 @@
                 }
             });
 
-            $("#searchbar-form").on("submit", function (event) {
-                event.preventDefault();
+            const searchBar = $("#link-searchbar");
+            searchBar.on("input", function () {
+                const search = searchBar.val().toLowerCase();
 
-                // TODO implement search by substring functionality
+                $(".link_row").each(function () {
+                    const taskId = $(this).attr("id").substring(8);
+                    const inputLink = $(`#link${taskId}`).val().toLowerCase();
+
+                    if (!inputLink.includes(search)) {
+                        $(this).attr("hidden", "true");
+                    } else {
+                        $(this).removeAttr("hidden");
+                    }
+                });
+
+                setVisibilityModuleInfos();
             });
 
-            // TODO filter by type functionality
+            const typeSelect = $("#type-filter");
+            typeSelect.on("change", function () {
+                const selectedType = typeSelect.val();
+
+                $(".link_row").each(function () {
+                    const taskId = $(this).attr("id").substring(8);
+                    const taskIcon = $(`#task-icon${taskId}`).attr("class");
+
+                    if (!taskIcon.includes(selectedType) && selectedType !== "All types") {
+                        $(this).attr("hidden", "true");
+                    } else {
+                        $(this).removeAttr("hidden");
+                    }
+                });
+
+                setVisibilityModuleInfos();
+            });
         });
 
         function submitForm(taskId) {
@@ -140,10 +187,14 @@
                     success: () => {
                         // Update previous value if successful
                         prevLink.val(newLink.val());
+
+                        // TODO visual indicator that link was updated
                     },
                     error: () => {
                         // Reset link field to previous value if unsuccessful
                         newLink.val(prevLink.val());
+
+                        // TODO visual indicator that link was not updated
                     },
                 });
             }

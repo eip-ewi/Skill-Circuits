@@ -45,22 +45,6 @@
             & input {
                 width: 12rem;
             }
-
-            & button {
-                background-color: var(--grey-700);
-                border: var(--grey-700) solid 1px;
-                color: var(--primary-dark);
-                cursor: pointer;
-                font-size: 0.8rem;
-                height: 1.5rem;
-                padding: 0 0.4rem;
-                text-decoration: none;
-
-                &:focus-visible {
-                    border: var(--primary-dark) solid 1px;
-                    outline: none;
-                }
-            }
         }
     }
 
