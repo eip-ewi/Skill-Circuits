@@ -24,7 +24,7 @@
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <a
         th:id="|block-${block.id}|"
-        class="block"
+        class="block visible"
         th:href="@{|/skill/external/${block.id}|}"
         th:style="|grid-row: ${block.row + 1}; grid-column: ${block.column + 1}|"
         th:draggable="${canEdit}"
