@@ -7,7 +7,7 @@
         padding: 1.4rem;
     }
 
-    &__form {
+    &__filter_element {
         font-size: 0.8rem;
         padding: 0.1rem 0.1rem 0.1rem 0.3rem;
         border: var(--grey-700) solid 1px;
@@ -25,6 +25,21 @@
         right: 0.8rem;
         top: 0.8rem;
         font-size: 1.6rem;
+    }
+
+    &__alert {
+        background: var(--primary-light);
+        border: var(--primary-dark) solid 1px;
+        font-size: 0.75rem;
+        padding: 0.2rem;
+        position: absolute;
+        top: -1.5rem;
+        right: 1rem;
+        width: fit-content;
+
+        & i {
+            margin-right: 0.15rem;
+        }
     }
 
     &__filter {
@@ -62,6 +77,10 @@
         & th {
             text-align: left;
         }
+    }
+
+    &__input {
+        position: relative;
 
         & input {
             width: 25rem;

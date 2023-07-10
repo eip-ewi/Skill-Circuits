@@ -32,12 +32,12 @@
             class="link__close fa-solid fa-xmark"
             title="Close overlay"
             aria-label="Close overlay"
-            onclick="toggleOverlay('link-overview-overlay')"></button>
+            onclick="openLinkOverlay()"></button>
 
         <div class="link__filter">
             <form>
                 <label for="type-filter">Filter by task type</label>
-                <select id="type-filter" class="link__form">
+                <select id="type-filter" class="link__filter_element">
                     <option value="All types" selected>All types</option>
                     <option
                         th:each="type : ${T(nl.tudelft.skills.model.TaskType).values()}"
@@ -48,7 +48,10 @@
 
             <form>
                 <label for="link-searchbar">Filter by link</label>
-                <input id="link-searchbar" placeholder="Filter links" class="link__form" />
+                <input
+                    id="link-searchbar"
+                    placeholder="Filter links"
+                    class="link__filter_element" />
             </form>
         </div>
 
@@ -68,7 +71,7 @@
                         th:id="'link-row' + ${task.id}"
                         class="link_row">
                         <td>
-                            <form th:id="'link-form' + ${task.id}" class="link_form">
+                            <form th:id="'link-form' + ${task.id}" class="link__input">
                                 <input
                                     th:id="'prev-link' + ${task.id}"
                                     type="hidden"
@@ -117,8 +120,17 @@
             });
         }
 
+        function openLinkOverlay() {
+            // Reset filters
+            $("#type-filter").val("All types").change();
+            $("#link-searchbar").val("");
+
+            // Show overlay
+            toggleOverlay("link-overview-overlay");
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
-            $(".link_form").on("submit", function (event) {
+            $(".link__input").on("submit", function (event) {
                 event.preventDefault();
                 const taskId = event.target.id.substring(9);
 
@@ -171,6 +183,19 @@
             $(`#link-form${taskId}`).submit();
         }
 
+        function createMsg(formElement, message, icon) {
+            const parentDiv = $("<div/>", { class: "link__alert" });
+            const iconElement = $("<i/>", { class: icon });
+
+            iconElement.appendTo(parentDiv);
+            parentDiv.append(message);
+            parentDiv.appendTo(formElement);
+
+            setTimeout(function () {
+                parentDiv.remove();
+            }, 1500);
+        }
+
         function editLink(taskId) {
             const newLink = $(`#link${taskId}`);
             const prevLink = $(`#prev-link${taskId}`);
@@ -188,13 +213,13 @@
                         // Update previous value if successful
                         prevLink.val(newLink.val());
 
-                        // TODO visual indicator that link was updated
+                        createMsg(newLink.parent(), "Success", "fa-regular fa-circle-check");
                     },
                     error: () => {
                         // Reset link field to previous value if unsuccessful
                         newLink.val(prevLink.val());
 
-                        // TODO visual indicator that link was not updated
+                        createMsg(newLink.parent(), "Error", "fa-sharp fa-regular fa-circle-xmark");
                     },
                 });
             }
