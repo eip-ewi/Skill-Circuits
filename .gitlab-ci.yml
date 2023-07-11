@@ -20,6 +20,7 @@ stages:
   - gitlab reports
   - publish
   - deploy
+  - test2
 
 
 # Default build cache settings to extend from
@@ -57,7 +58,7 @@ gradle_build:
     paths:
       - build/
   script:
-    - npm install
+    - npm ci
     - gradle --build-cache build testClasses -x test -x licenseMain -x licenseTest -x spotlessJava -x spotlessCheck
 
 # Run tests
@@ -78,7 +79,7 @@ gradle_test:
           coverage_format: cobertura
           path: build/reports/jacoco/test/jacocoTestReport.xml
   before_script:
-    - npm install
+    - npm ci
   script:
     - gradle --build-cache test
   after_script:
@@ -93,7 +94,7 @@ gradle_test:
 # Run integration tests
 gradle_integration_test:
   extends: .build_cached
-  stage: test
+  stage: test2
   needs:
     - gradle_build
   script:
@@ -109,7 +110,7 @@ gradle_js_test:
   needs:
     - gradle_build
   before_script:
-    - npm install
+    - npm ci
   script:
     - npm test
 
