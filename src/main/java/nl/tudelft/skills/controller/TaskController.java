@@ -23,6 +23,7 @@ import nl.tudelft.skills.repository.TaskRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -45,14 +46,11 @@ public class TaskController {
 	 */
 	@Transactional
 	@PatchMapping("change-link")
-	// TODO add PreAuthorize
+	@PreAuthorize("@authorisationService.canEditTask(#editLinkDTO.taskId)")
 	public ResponseEntity<Void> updateTaskLink(@RequestBody EditLinkDTO editLinkDTO) {
-		// Update task link if it has changed
-		Task task = taskRepository.getById(editLinkDTO.getTaskId());
-		if (!task.getLink().equals(editLinkDTO.getNewLink())) {
-			task.setLink(editLinkDTO.getNewLink());
-			taskRepository.save(task);
-		}
+		Task task = taskRepository.findByIdOrThrow(editLinkDTO.getTaskId());
+		task.setLink(editLinkDTO.getNewLink());
+		taskRepository.save(task);
 
 		return ResponseEntity.ok().build();
 	}

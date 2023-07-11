@@ -60,7 +60,7 @@ public class EditionLevelModuleViewDTO extends View<SCModule> implements GroupVi
 		this.tasksWithLinks = this.getSubmodules().stream()
 				.flatMap(submodule -> submodule.getSkills().stream())
 				.flatMap(skill -> skill.getTasks().stream())
-				.filter(task -> task.getLink() != null && !task.getLink().equals(""))
+				.filter(task -> task.getLink() != null)
 				.collect(Collectors.toSet());
 		this.tasksWithLinks.forEach(TaskViewDTO::postApply);
 	}
