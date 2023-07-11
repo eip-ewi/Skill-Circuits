@@ -15,11 +15,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 function toggleOverlay(id) {
-    let overlay = document.getElementById(id);
+    let overlay = document.getElementById(id) as HTMLDialogElement;
     if (overlay.open) {
         overlay.close();
     } else {
         overlay.showModal();
     }
 }
+module.exports.toggleOverlay = toggleOverlay;

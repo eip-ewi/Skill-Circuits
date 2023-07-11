@@ -154,6 +154,7 @@
 
         function cancelCreateBlock(block) {
             block.find(".item").remove();
+            block.removeClass("visible");
             block.find("select > option").prop("selected", false);
             block.find("input:not(:where([type='hidden'], [type='checkbox']))").val("");
             block.find("input[type='checkbox'][name='essential']").prop("checked", true);
@@ -220,6 +221,7 @@
                 data: JSON.stringify(data),
                 success: html => {
                     block.find(".item").remove();
+                    block.removeClass("visible");
                     block.find("select > option").prop("selected", false);
                     block.find("input:not(:where([type='hidden'], [type='checkbox']))").val("");
                     block.find("input[type='checkbox']").prop("checked", true);
