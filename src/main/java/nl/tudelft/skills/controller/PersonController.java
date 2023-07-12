@@ -25,10 +25,12 @@ import javax.transaction.Transactional;
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.dto.view.TaskCompletedDTO;
+import nl.tudelft.skills.model.ClickedLink;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskCompletion;
 import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.repository.ClickedLinkRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.TaskCompletionService;
@@ -42,12 +44,14 @@ public class PersonController {
 	private final TaskRepository taskRepository;
 	private final PersonRepository scPersonRepository;
 	private final TaskCompletionService taskCompletionService;
+	private final ClickedLinkRepository clickedLinkRepository;
 
 	public PersonController(TaskRepository taskRepository, PersonRepository scPersonRepository,
-			TaskCompletionService taskCompletionService) {
+			TaskCompletionService taskCompletionService, ClickedLinkRepository clickedLinkRepository) {
 		this.taskRepository = taskRepository;
 		this.scPersonRepository = scPersonRepository;
 		this.taskCompletionService = taskCompletionService;
+		this.clickedLinkRepository = clickedLinkRepository;
 	}
 
 	/**
@@ -93,5 +97,24 @@ public class PersonController {
 
 		List<Task> tasks = taskRepository.findAllById(completedTasks);
 		tasks.forEach(task -> taskCompletionService.addTaskCompletion(person, task));
+	}
+
+	/**
+	 * Saves the clicked link by a person
+	 *
+	 * @param authPerson the person clicking the link
+	 * @param taskId     the id of the task the link is part of
+	 * @param link       the link the person clicked
+	 */
+	@PutMapping("clicked/{taskId}")
+	@Transactional
+	public void logClickedLinkByPerson(@AuthenticatedPerson Person authPerson,
+			@PathVariable Long taskId, @RequestBody String link) {
+		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
+		Task task = taskRepository.findByIdOrThrow(taskId);
+
+		clickedLinkRepository.save(ClickedLink.builder()
+				.task(task).person(person).link(link).build());
+
 	}
 }

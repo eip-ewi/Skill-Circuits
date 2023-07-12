@@ -26,6 +26,7 @@ import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.TaskCompletedDTO;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskCompletion;
+import nl.tudelft.skills.repository.ClickedLinkRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.TaskCompletionService;
@@ -45,14 +46,17 @@ public class PersonControllerTest extends ControllerTest {
 	private final PersonRepository personRepository;
 	private final TaskRepository taskRepository;
 	private final TaskCompletionService taskCompletionService;
+	private final ClickedLinkRepository clickedLinkRepository;
 
 	@Autowired
 	public PersonControllerTest(PersonRepository personRepository, TaskRepository taskRepository,
-			TaskCompletionService taskCompletionService) {
+			TaskCompletionService taskCompletionService, ClickedLinkRepository clickedLinkRepository) {
 		this.personRepository = personRepository;
-		this.personController = new PersonController(taskRepository, personRepository, taskCompletionService);
+		this.personController = new PersonController(taskRepository, personRepository, taskCompletionService,
+				clickedLinkRepository);
 		this.taskRepository = taskRepository;
 		this.taskCompletionService = taskCompletionService;
+		this.clickedLinkRepository = clickedLinkRepository;
 	}
 
 	@Test

@@ -26,6 +26,7 @@
         <th:block layout:replace="~{item/view :: item}">
             <th:block layout:fragment="item-content-element">
                 <a
+                    class="link"
                     th:if="${item.link}"
                     th:href="${item.link}"
                     target="_blank"
