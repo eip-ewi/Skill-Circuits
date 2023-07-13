@@ -27,6 +27,12 @@
         font-size: 1.6rem;
     }
 
+    &__delete {
+        @include icon-button;
+        font-size: 0.8rem;
+        margin-left: 0.35rem;
+    }
+
     &__alert {
         background: var(--primary-light);
         border: var(--primary-dark) solid 1px;
@@ -81,6 +87,8 @@
 
     &__input {
         position: relative;
+        display: flex;
+        flex-direction: row;
 
         & input {
             width: 25rem;

@@ -61,7 +61,7 @@
                 <table class="link__table">
                     <!-- TODO implement better resizability -->
                     <tr>
-                        <th style="min-width: 26rem"><b>Link</b></th>
+                        <th style="min-width: 27.5rem"><b>Link</b></th>
                         <th style="min-width: 10rem"><b>Task</b></th>
                         <th style="min-width: 10rem"><b>Skill</b></th>
                         <th style="min-width: 10rem"><b>Submodule</b></th>
@@ -69,6 +69,7 @@
                     <tr
                         th:each="task : ${module.tasksWithLinks}"
                         th:id="'link-row' + ${task.id}"
+                        th:data-task-id="${task.id}"
                         class="link_row">
                         <td>
                             <form th:id="'link-form' + ${task.id}" class="link__input">
@@ -76,14 +77,17 @@
                                     th:id="'prev-link' + ${task.id}"
                                     type="hidden"
                                     th:value="${task.link}" />
-                                <!-- TODO ability to delete the link fully (trashcan icon) -->
                                 <input
                                     th:id="'link' + ${task.id}"
                                     th:value="${task.link}"
+                                    th:data-task-id="${task.id}"
                                     type="url"
                                     aria-label="Change task URL"
                                     title="Change task URL"
                                     th:attr="onblur=|submitForm('${task.id}')|" />
+                                <button
+                                    th:data-task-id="${task.id}"
+                                    class="fa-solid fa-trash link__delete"></button>
                             </form>
                         </td>
                         <td>
@@ -132,14 +136,25 @@
         document.addEventListener("DOMContentLoaded", function () {
             $(".link__input").on("submit", function (event) {
                 event.preventDefault();
-                const taskId = event.target.id.substring(9);
+                const taskId = event.target.dataset.taskId;
 
                 if (!event.target.checkValidity()) {
                     const inputLink = $(`#link${taskId}`)[0];
                     inputLink.reportValidity();
                 } else {
-                    editLink(taskId);
+                    const newLink = $(`#link${taskId}`).val();
+                    const prevLink = $(`#prev-link${taskId}`).val();
+                    editLink(taskId, prevLink, newLink);
                 }
+            });
+
+            $(".link__delete").on("click", function (event) {
+                event.preventDefault();
+                const taskId = event.target.dataset.taskId;
+
+                const newLink = null;
+                const prevLink = $(`#prev-link${taskId}`);
+                editLink(taskId, prevLink, newLink);
             });
 
             const searchBar = $("#link-searchbar");
@@ -147,7 +162,7 @@
                 const search = searchBar.val().toLowerCase();
 
                 $(".link_row").each(function () {
-                    const taskId = $(this).attr("id").substring(8);
+                    const taskId = $(this).data("taskId");
                     const inputLink = $(`#link${taskId}`).val().toLowerCase();
 
                     if (!inputLink.includes(search)) {
@@ -165,7 +180,7 @@
                 const selectedType = typeSelect.val();
 
                 $(".link_row").each(function () {
-                    const taskId = $(this).attr("id").substring(8);
+                    const taskId = $(this).data("taskId");
                     const taskIcon = $(`#task-icon${taskId}`).attr("class");
 
                     if (!taskIcon.includes(selectedType) && selectedType !== "All types") {
@@ -196,30 +211,39 @@
             }, 1500);
         }
 
-        function editLink(taskId) {
-            const newLink = $(`#link${taskId}`);
-            const prevLink = $(`#prev-link${taskId}`);
+        function editLink(taskId, prevLink, newLink) {
+            const linkInput = $(`#link${taskId}`);
 
-            if (prevLink.val() !== newLink.val()) {
+            if (prevLink !== newLink) {
                 $.ajax({
                     url: "/task/change-link",
                     method: "PATCH",
                     contentType: "application/json",
                     data: JSON.stringify({
                         taskId: taskId,
-                        newLink: newLink.val(),
+                        newLink: newLink,
                     }),
                     success: () => {
-                        // Update previous value if successful
-                        prevLink.val(newLink.val());
+                        // If it was deleted, remove the row, otherwise show success message
+                        if (newLink === null) {
+                            $(`#link-row${taskId}`).remove();
+                            setVisibilityModuleInfos();
+                        } else {
+                            // Update previous value if successful
+                            $(`#prev-link${taskId}`).val(newLink);
 
-                        createMsg(newLink.parent(), "Success", "fa-regular fa-circle-check");
+                            createMsg(linkInput.parent(), "Success", "fa-regular fa-circle-check");
+                        }
                     },
                     error: () => {
                         // Reset link field to previous value if unsuccessful
-                        newLink.val(prevLink.val());
+                        linkInput.val(prevLink);
 
-                        createMsg(newLink.parent(), "Error", "fa-sharp fa-regular fa-circle-xmark");
+                        createMsg(
+                            linkInput.parent(),
+                            "Error",
+                            "fa-sharp fa-regular fa-circle-xmark"
+                        );
                     },
                 });
             }
