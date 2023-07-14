@@ -72,7 +72,10 @@
                         th:data-task-id="${task.id}"
                         class="link_row">
                         <td>
-                            <form th:id="'link-form' + ${task.id}" class="link__input">
+                            <form
+                                th:id="'link-form' + ${task.id}"
+                                class="link__input"
+                                th:data-task-id="${task.id}">
                                 <input
                                     th:id="'prev-link' + ${task.id}"
                                     type="hidden"
@@ -102,151 +105,16 @@
                 </table>
             </div>
         </div>
+
+        <script th:src="@{/js/linkOverview.js}"></script>
     </dialog>
 
     <script layout:fragment="script" th:if="${@authorisationService.canEditEdition(edition.id)}">
-        function setVisibilityModuleInfos() {
-            $(".link__table").each(function () {
-                const visibleRows = $(this)
-                    .children()
-                    .children()
-                    .filter(function () {
-                        const hidden = $(this).attr("hidden");
-
-                        return typeof hidden === "undefined" || !hidden;
-                    }).length;
-
-                if (visibleRows === 1) {
-                    $(this).parent().parent().attr("hidden", "true");
-                } else {
-                    $(this).parent().parent().removeAttr("hidden");
-                }
-            });
-        }
-
-        function openLinkOverlay() {
-            // Reset filters
-            $("#type-filter").val("All types").change();
-            $("#link-searchbar").val("");
-
-            // Show overlay
-            toggleOverlay("link-overview-overlay");
-        }
-
         document.addEventListener("DOMContentLoaded", function () {
-            $(".link__input").on("submit", function (event) {
-                event.preventDefault();
-                const taskId = event.target.dataset.taskId;
-
-                if (!event.target.checkValidity()) {
-                    const inputLink = $(`#link${taskId}`)[0];
-                    inputLink.reportValidity();
-                } else {
-                    const newLink = $(`#link${taskId}`).val();
-                    const prevLink = $(`#prev-link${taskId}`).val();
-                    editLink(taskId, prevLink, newLink);
-                }
-            });
-
-            $(".link__delete").on("click", function (event) {
-                event.preventDefault();
-                const taskId = event.target.dataset.taskId;
-
-                const newLink = null;
-                const prevLink = $(`#prev-link${taskId}`);
-                editLink(taskId, prevLink, newLink);
-            });
-
-            const searchBar = $("#link-searchbar");
-            searchBar.on("input", function () {
-                const search = searchBar.val().toLowerCase();
-
-                $(".link_row").each(function () {
-                    const taskId = $(this).data("taskId");
-                    const inputLink = $(`#link${taskId}`).val().toLowerCase();
-
-                    if (!inputLink.includes(search)) {
-                        $(this).attr("hidden", "true");
-                    } else {
-                        $(this).removeAttr("hidden");
-                    }
-                });
-
-                setVisibilityModuleInfos();
-            });
-
-            const typeSelect = $("#type-filter");
-            typeSelect.on("change", function () {
-                const selectedType = typeSelect.val();
-
-                $(".link_row").each(function () {
-                    const taskId = $(this).data("taskId");
-                    const taskIcon = $(`#task-icon${taskId}`).attr("class");
-
-                    if (!taskIcon.includes(selectedType) && selectedType !== "All types") {
-                        $(this).attr("hidden", "true");
-                    } else {
-                        $(this).removeAttr("hidden");
-                    }
-                });
-
-                setVisibilityModuleInfos();
-            });
+            $(".link__input").on("submit", handleLinkSubmission);
+            $(".link__delete").on("click", handleLinkDeletion);
+            $("#link-searchbar").on("input", handleSearchBarInput);
+            $("#type-filter").on("change", handleTypeSelectChange);
         });
-
-        function submitForm(taskId) {
-            $(`#link-form${taskId}`).submit();
-        }
-
-        function createMsg(formElement, message, icon) {
-            const parentDiv = $("<div/>", { class: "link__alert" });
-            const iconElement = $("<i/>", { class: icon });
-
-            iconElement.appendTo(parentDiv);
-            parentDiv.append(message);
-            parentDiv.appendTo(formElement);
-
-            setTimeout(function () {
-                parentDiv.remove();
-            }, 1500);
-        }
-
-        function editLink(taskId, prevLink, newLink) {
-            const linkInput = $(`#link${taskId}`);
-
-            if (prevLink !== newLink) {
-                $.ajax({
-                    url: "/task/change-link",
-                    method: "PATCH",
-                    contentType: "application/json",
-                    data: JSON.stringify({
-                        taskId: taskId,
-                        newLink: newLink,
-                    }),
-                    success: () => {
-                        // If it was deleted, remove the row, otherwise show success message
-                        if (newLink === null) {
-                            $(`#link-row${taskId}`).remove();
-                            setVisibilityModuleInfos();
-                        } else {
-                            // Update previous value if successful
-                            $(`#prev-link${taskId}`).val(newLink);
-
-                            createMsg(linkInput.parent(), "Success", "fa-regular fa-circle-check");
-                        }
-                    },
-                    error: () => {
-                        // Reset link field to previous value if unsuccessful
-                        linkInput.val(prevLink);
-
-                        createMsg(
-                            linkInput.parent(),
-                            "Error",
-                            "fa-sharp fa-regular fa-circle-xmark"
-                        );
-                    },
-                });
-            }
-        }
     </script>
 </html>
