@@ -24,9 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
 
 import javax.servlet.http.HttpSession;
 
@@ -35,11 +33,15 @@ import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.create.CheckpointCreateDTO;
 import nl.tudelft.skills.dto.create.ExternalSkillCreateDTO;
 import nl.tudelft.skills.dto.create.SkillCreateDTO;
+import nl.tudelft.skills.dto.create.TaskCreateDTO;
 import nl.tudelft.skills.dto.id.*;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
+import nl.tudelft.skills.dto.patch.TaskPatchDTO;
 import nl.tudelft.skills.model.ExternalSkill;
 import nl.tudelft.skills.model.Skill;
+import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.TaskType;
 import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.service.ModuleService;
 import nl.tudelft.skills.service.SkillService;
@@ -111,6 +113,33 @@ public class SkillControllerTest extends ControllerTest {
 	}
 
 	@Test
+	void createSkillWithTasks() {
+		TaskCreateDTO taskDto = TaskCreateDTO.builder().name("New Task").type(TaskType.EXERCISE)
+				.skill(new SkillIdDTO())
+				.index(1).time(1).build();
+		var dto = SkillCreateDTO.builder()
+				.name("New Skill")
+				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
+				.checkpoint(new CheckpointIdDTO(db.getCheckpointLectureOne().getId()))
+				.requiredTaskIds(Collections.emptyList())
+				.column(10).row(11).newItems(new ArrayList<>()).build();
+		dto.setNewItems(List.of(taskDto));
+		skillController.createSkill(null, dto, mock(Model.class));
+
+		Optional<Skill> skill = skillRepository.findAll().stream()
+				.filter(s -> s.getName().equals("New Skill"))
+				.findFirst();
+		assertTrue(skill.isPresent());
+
+		Optional<Task> task = taskRepository.findAll().stream().filter(t -> t.getName().equals("New Task"))
+				.findFirst();
+		assertTrue(task.isPresent());
+
+		assertThat(task.get().getSkill()).isEqualTo(skill.get());
+		assertThat(skill.get().getTasks()).containsExactly(task.get());
+	}
+
+	@Test
 	void createSkillWithNewCheckpoint() {
 		var dto = SkillCreateDTO.builder()
 				.name("New skill with new checkpoint")
@@ -155,16 +184,34 @@ public class SkillControllerTest extends ControllerTest {
 
 	@Test
 	void patchSkill() {
+		Long skillId = db.getSkillVariables().getId();
+		Task old = db.getTaskRead10();
+		TaskCreateDTO taskAdded = TaskCreateDTO.builder().name("New Task").type(TaskType.EXERCISE)
+				.skill(new SkillIdDTO(skillId)).index(1).time(1).build();
+		TaskPatchDTO oldTask = TaskPatchDTO.builder().name(old.getName()).type(old.getType())
+				.id(old.getId()).index(old.getIdx()).time(old.getTime()).build();
+
+		// Add a task and remove a task
 		skillController.patchSkill(SkillPatchDTO.builder()
-				.id(db.getSkillVariables().getId())
+				.id(skillId)
 				.name("Updated")
 				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
+				.items(List.of(oldTask))
+				.newItems(List.of(taskAdded))
+				.removedItems(Set.of(db.getTaskDo10a().getId()))
 				.build(), model);
 
 		Skill skill = db.getSkillVariables();
 		assertThat(skill.getName()).isEqualTo("Updated");
 		assertThat(submoduleRepository.findByIdOrThrow(skill.getSubmodule().getId())).isEqualTo(
 				submoduleRepository.findByIdOrThrow(db.getSubmoduleCases().getId()));
+
+		// Check task related properties
+		Optional<Task> task = taskRepository.findAll().stream().filter(t -> t.getName().equals("New Task"))
+				.findFirst();
+		assertTrue(task.isPresent());
+		assertThat(skill.getTasks()).containsExactlyInAnyOrder(db.getTaskRead10(), task.get());
+		assertThat(task.get().getSkill()).isEqualTo(skill);
 
 		// Check that all TaskCompletion related information remains the same
 		assertThat(taskCompletionRepository.findAll()).hasSize(4);
