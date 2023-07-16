@@ -30,7 +30,6 @@ stages:
     paths:
       - .gradle/
       - node_modules/
-      - package-lock.json
     policy: pull
   rules:
     - if: $CI_COMMIT_BRANCH == "master" ||

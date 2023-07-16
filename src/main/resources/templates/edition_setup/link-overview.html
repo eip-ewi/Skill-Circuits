@@ -32,7 +32,7 @@
             class="link__close fa-solid fa-xmark"
             title="Close overlay"
             aria-label="Close overlay"
-            onclick="openLinkOverlay()"></button>
+            onclick="openLinkOverlay(toggleOverlay)"></button>
 
         <div class="link__filter">
             <form>
@@ -105,16 +105,10 @@
                 </table>
             </div>
         </div>
-
-        <script th:src="@{/js/linkOverview.js}"></script>
     </dialog>
 
-    <script layout:fragment="script" th:if="${@authorisationService.canEditEdition(edition.id)}">
-        document.addEventListener("DOMContentLoaded", function () {
-            $(".link__input").on("submit", handleLinkSubmission);
-            $(".link__delete").on("click", handleLinkDeletion);
-            $("#link-searchbar").on("input", handleSearchBarInput);
-            $("#type-filter").on("change", handleTypeSelectChange);
-        });
-    </script>
+    <script
+        layout:fragment="script"
+        th:if="${@authorisationService.canEditEdition(edition.id)}"
+        th:src="@{/js/linkOverview.js}"></script>
 </html>

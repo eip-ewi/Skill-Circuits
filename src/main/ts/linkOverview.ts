@@ -19,7 +19,7 @@
 /**
  * Opens the link overlay and resets the filters.
  */
-function openLinkOverlay() {
+function openLinkOverlay(toggleOverlay: (id: string) => void) {
     // Reset filters
     $("#type-filter").val("All types").trigger("change");
     $("#link-searchbar").val("");
@@ -171,6 +171,7 @@ function handleSearchBarInput() {
         const taskId: string = $(this).data("taskId");
         const inputLink: string = ($(`#link${taskId}`).val() as string).toLowerCase();
 
+        // TODO check also type condition
         if (!inputLink.includes(search)) {
             $(this).attr("hidden", "true");
         } else {
@@ -185,12 +186,24 @@ function handleSearchBarInput() {
  * Handle a type filter change event. Filters the links in the tables.
  */
 function handleTypeSelectChange() {
-    const selectedType: string = $("#type-filter").val() as string;
+    const typeFilter: JQuery = $("#type-filter");
+    const selectedType: string = typeFilter.val() as string;
 
+    // Update selection
+    typeFilter.children().each(function () {
+        if (($(this).val() as string) === selectedType) {
+            $(this).attr("selected", "selected");
+        } else {
+            $(this).removeAttr("selected");
+        }
+    });
+
+    // Filter tasks by type
     $(".link_row").each(function () {
         const taskId: string = $(this).data("taskId");
         const taskIcon: string = $(`#task-icon${taskId}`).attr("class");
 
+        // TODO check also search condition
         if (!taskIcon.includes(selectedType) && selectedType !== "All types") {
             $(this).attr("hidden", "true");
         } else {
@@ -198,18 +211,34 @@ function handleTypeSelectChange() {
         }
     });
 
+    // Update visibility
     setVisibilityModuleInfos();
 }
 
-if (typeof module === "object") {
+/**
+ * Adds the event listeners to elements on the link overview page.
+ */
+function linkOverviewEventListeners() {
+    $(".link__input").on("submit", handleLinkSubmission);
+    $(".link__delete").on("click", handleLinkDeletion);
+    $("#link-searchbar").on("input", handleSearchBarInput);
+    $("#type-filter").on("change", handleTypeSelectChange);
+}
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
     module.exports.openLinkOverlay = openLinkOverlay;
     module.exports.setVisibilityModuleInfos = setVisibilityModuleInfos;
     module.exports.createMsg = createMsg;
     module.exports.editLink = editLink;
-
     module.exports.handleLinkDeletion = handleLinkDeletion;
     module.exports.handleLinkSubmission = handleLinkSubmission;
     module.exports.handleSearchBarInput = handleSearchBarInput;
     module.exports.handleTypeSelectChange = handleTypeSelectChange;
     module.exports.submitForm = submitForm;
+    module.exports.linkOverviewEventListeners = linkOverviewEventListeners;
+} else {
+    // For the browser view, add the event listeners
+    document.addEventListener("DOMContentLoaded", function () {
+        linkOverviewEventListeners();
+    });
 }
