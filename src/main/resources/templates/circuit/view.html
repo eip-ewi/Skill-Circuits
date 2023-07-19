@@ -80,6 +80,18 @@
                     data-type="external"
                     class="fa-solid fa-link"></button>
             </div>
+            <div
+                th:each="row : ${#numbers.sequence(0, rows - 1)}"
+                class="add_row"
+                th:style="|grid-row: ${row + 1}; grid-column: 1|">
+                <button title="Insert row" class="row_button fa-solid fa-arrow-right"></button>
+            </div>
+            <div
+                th:each="col : ${#numbers.sequence(0, columns - 1)}"
+                class="add_column"
+                th:style="|grid-row: 1; grid-column: ${col + 1}|">
+                <button title="Insert column" class="column_button fa-solid fa-arrow-down"></button>
+            </div>
         </th:block>
     </div>
 
@@ -114,6 +126,182 @@
             }
             function getCol(obj) {
                 return parseInt($(obj).css("grid-column-start"));
+            }
+
+            let circuitElem;
+
+            document.addEventListener("DOMContentLoaded", function () {
+                $(".row_button").click(insertNewRow);
+                $(".column_button").click(insertNewColumn);
+                circuitElem = $("#circuit");
+            });
+
+            function insertNewRow() {
+                const rowNum = getRow($(this).parent()) - 1;
+
+                //move down blocks
+                for (let block of document.getElementsByClassName("block visible")) {
+                    const row = getRow(block);
+
+                    if (row > rowNum) {
+                        const id = block.id.split("-")[1];
+                        const col = getCol(block);
+                        $.ajax({
+                            type: "PATCH",
+                            url: `/${blockType}/${id}/position`,
+                            data: JSON.stringify({ column: col - 1, row: row }),
+                            processData: false,
+                            contentType: "application/json",
+                            success: () => {},
+                        });
+
+                        block.style.gridRow = row + 1;
+                        block.style.gridColumn = col;
+                    }
+                }
+                recalculateConnections();
+
+                //move down ghost blocks
+                for (let ghostBlock of document.getElementsByClassName("ghost_block")) {
+                    const row = getRow(ghostBlock);
+
+                    if (row > rowNum) {
+                        const col = getCol(ghostBlock);
+
+                        ghostBlock.style.gridRow = row + 1;
+                        ghostBlock.style.gridColumn = col;
+                    }
+                }
+
+                //insert ghost blocks
+                for (
+                    let colNum = 1;
+                    colNum < parseInt(circuitElem.css("--columns")) + 2;
+                    colNum++
+                ) {
+                    const gb = $("<div>")
+                        .addClass("ghost_block")
+                        .css({ "grid-column": colNum, "grid-row": rowNum + 1 })
+                        .append(
+                            $("<button>").addClass("fa-solid fa-plus").attr("data-type", "regular")
+                        );
+                    if (blockType === "skill") {
+                        gb.append(
+                            $("<button>").addClass("fa-solid fa-link").attr("data-type", "external")
+                        );
+                    }
+                    circuitElem.append(gb);
+                }
+
+                $(".ghost_block button[data-type='regular']").click(clickGhostRegular);
+                $(".ghost_block button[data-type='external']").click(clickGhostExternal);
+
+                //update rows in css
+                circuitElem.css("--rows", parseInt(circuitElem.css("--rows")) + 1);
+
+                //create an extra insert row button
+                const insertRow = $("<div>")
+                    .addClass("add_row")
+                    .css({
+                        "grid-column": 1,
+                        "grid-row": parseInt(circuitElem.css("--rows")),
+                    })
+                    .append(
+                        $("<button>")
+                            .addClass("row_button fa-solid fa-arrow-right")
+                            .prop("title", "Insert row")
+                    );
+                circuitElem.append(insertRow);
+
+                $("*").unbind();
+                window.document.dispatchEvent(
+                    new Event("DOMContentLoaded", {
+                        bubbles: true,
+                        cancelable: true,
+                    })
+                );
+            }
+
+            function insertNewColumn() {
+                const colNum = getCol($(this).parent()) - 1;
+
+                //move blocks to the right
+                for (let block of document.getElementsByClassName("block visible")) {
+                    const col = getCol(block);
+
+                    if (col > colNum) {
+                        const id = block.id.split("-")[1];
+                        const row = getRow(block);
+                        $.ajax({
+                            type: "PATCH",
+                            url: `/${blockType}/${id}/position`,
+                            data: JSON.stringify({ column: col, row: row - 1 }),
+                            processData: false,
+                            contentType: "application/json",
+                            success: () => {},
+                        });
+
+                        block.style.gridRow = row;
+                        block.style.gridColumn = col + 1;
+                    }
+                }
+                recalculateConnections();
+
+                //move ghost blocks to the right
+                for (let ghostBlock of document.getElementsByClassName("ghost_block")) {
+                    const col = getCol(ghostBlock);
+
+                    if (col > colNum) {
+                        const row = getRow(ghostBlock);
+
+                        ghostBlock.style.gridRow = row;
+                        ghostBlock.style.gridColumn = col + 1;
+                    }
+                }
+
+                //insert ghost blocks
+                for (let rowNum = 1; rowNum < parseInt(circuitElem.css("--rows")) + 2; rowNum++) {
+                    const gb = $("<div>")
+                        .addClass("ghost_block")
+                        .css({ "grid-column": colNum + 1, "grid-row": rowNum })
+                        .append(
+                            $("<button>").addClass("fa-solid fa-plus").attr("data-type", "regular")
+                        );
+                    if (blockType === "skill") {
+                        gb.append(
+                            $("<button>").addClass("fa-solid fa-link").attr("data-type", "external")
+                        );
+                    }
+                    circuitElem.append(gb);
+                }
+
+                $(".ghost_block button[data-type='regular']").click(clickGhostRegular);
+                $(".ghost_block button[data-type='external']").click(clickGhostExternal);
+
+                //update columns in css
+                circuitElem.css("--columns", parseInt(circuitElem.css("--columns")) + 1);
+
+                //create an extra insert column button
+                const insertColumn = $("<div>")
+                    .addClass("add_column")
+                    .css({
+                        "grid-column": parseInt(circuitElem.css("--columns")),
+                        "grid-row": 1,
+                    })
+                    .append(
+                        $("<button>")
+                            .addClass("column_button fa-solid fa-arrow-down")
+                            .prop("title", "Insert column")
+                    );
+                circuitElem.append(insertColumn);
+
+                $("*").unbind();
+                window.document.dispatchEvent(
+                    new Event("DOMContentLoaded", {
+                        bubbles: true,
+                        cancelable: true,
+                    })
+                );
             }
         </script>
     </th:block>

@@ -22,9 +22,10 @@
     lang="en"
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-    <div
+    <a
         th:id="|block-${block.id}|"
-        class="block"
+        class="block visible"
+        th:href="@{|/skill/external/${block.id}|}"
         th:style="|grid-row: ${block.row + 1}; grid-column: ${block.column + 1}|"
         th:draggable="${canEdit}"
         th:data-create="${create}"
@@ -36,11 +37,10 @@
         data-external
         layout:fragment="block">
         <div th:id="|block-${block.id}-header|" class="block__header">
-            <a
+            <span
                 th:id="|block-${block.id}-group|"
                 class="block__group__name"
-                th:href="@{|/skill/external/${block.id}|}"
-                th:text="${block.module.name}"></a>
+                th:text="${block.module.name}"></span>
             <h2 class="block__name">
                 <span th:id="|block-${block.id}-name|" th:text="${block.skill.name}"></span>
             </h2>
@@ -66,5 +66,27 @@
                 <button><span class="fa-solid fa-link"></span></button>
             </div>
         </th:block>
-    </div>
+
+        <script th:inline="javascript">
+            document.addEventListener("DOMContentLoaded", function () {
+                /*<![CDATA[*/
+                const blockId = /*[[${block.id}]]*/ null;
+                const canEdit = /*[[${canEdit}]]*/ false;
+                /*]]>*/
+                const block = $("#block-" + blockId);
+
+                if (canEdit) {
+                    block.removeAttr("href");
+                } else {
+                    block
+                        .mouseover(() => {
+                            block.addClass("highlighted");
+                        })
+                        .mouseout(() => {
+                            block.removeClass("highlighted");
+                        });
+                }
+            });
+        </script>
+    </a>
 </html>
