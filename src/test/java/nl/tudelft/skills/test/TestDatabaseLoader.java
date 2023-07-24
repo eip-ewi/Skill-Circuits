@@ -28,17 +28,7 @@ import javax.annotation.PostConstruct;
 
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
-import nl.tudelft.skills.repository.BadgeRepository;
-import nl.tudelft.skills.repository.CheckpointRepository;
-import nl.tudelft.skills.repository.CourseRepository;
-import nl.tudelft.skills.repository.EditionRepository;
-import nl.tudelft.skills.repository.InventoryRepository;
-import nl.tudelft.skills.repository.ModuleRepository;
-import nl.tudelft.skills.repository.PathRepository;
-import nl.tudelft.skills.repository.SkillRepository;
-import nl.tudelft.skills.repository.SubmoduleRepository;
-import nl.tudelft.skills.repository.TaskCompletionRepository;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +72,8 @@ public class TestDatabaseLoader {
 	private CheckpointRepository checkpointRepository;
 	@Autowired
 	private TaskCompletionRepository taskCompletionRepository;
+	@Autowired
+	private ExternalSkillRepository externalSkillRepository;
 
 	/**
 	 * Test models.
@@ -476,6 +468,24 @@ public class TestDatabaseLoader {
 	private void initBadges() {
 		badge1 = badgeRepository.save(badge1);
 		badge2 = badgeRepository.save(badge2);
+	}
+
+	/**
+	 * Creates an external skill for testing purposes.
+	 *
+	 * @param  linksTo The skill the external skill should link to.
+	 * @return         The created external skill.
+	 */
+	public ExternalSkill createExternalSkill(Skill linksTo) {
+		// Create a new module for the external skill, in the same edition
+		SCModule module = moduleRepository.save(SCModule.builder().edition(editionRL2021)
+				.name("New module").build());
+		// Create an external skill referencing SkillAssumption
+		ExternalSkill externalSkill = ExternalSkill.builder().skill(linksTo).module(module)
+				.row(0).column(0).build();
+		externalSkill = externalSkillRepository.save(externalSkill);
+
+		return externalSkill;
 	}
 
 	/**
