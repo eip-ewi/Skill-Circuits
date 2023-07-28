@@ -784,3 +784,88 @@ databaseChangeLog:
             referencedColumnNames: id
             referencedTableName: skill
             validate: true
+# Create table for logging clicked links
+  - changeSet:
+      id: 1690547517723-1
+      author: bakos (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_4C
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: link
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: timestamp
+                  type: TIMESTAMP
+              - column:
+                  constraints:
+                    nullable: false
+                  name: person_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: task_id
+                  type: BIGINT
+            tableName: clicked_link
+  - changeSet:
+      id: 1690547517723-2
+      author: bakos (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: task_id
+            indexName: FKjy82i90jv9tm04dy5lmdedv4t_INDEX_4
+            tableName: clicked_link
+  - changeSet:
+      id: 1690547517723-3
+      author: bakos (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: person_id
+            indexName: FKpkdufyxedswqtr9wxbvxs4g09_INDEX_4
+            tableName: clicked_link
+  - changeSet:
+      id: 1690547517723-4
+      author: bakos (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: task_id
+            baseTableName: clicked_link
+            constraintName: FKjy82i90jv9tm04dy5lmdedv4t
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: task
+            validate: true
+  - changeSet:
+      id: 1690547517723-5
+      author: bakos (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: person_id
+            baseTableName: clicked_link
+            constraintName: FKpkdufyxedswqtr9wxbvxs4g09
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: scperson
+            validate: true
