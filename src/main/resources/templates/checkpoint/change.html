@@ -95,37 +95,71 @@
             });
         }
 
-        document.addEventListener("DOMContentLoaded", function () {
-            $(".checkpoint__body").mouseenter(() => {
-                const checkpointSelect = $("#change-checkpoint-select");
+        function hoverCheckpoint() {
+            const checkpointSelect = $("#change-checkpoint-select");
 
-                const checkpoints = $(".checkpoint:not(.ghost_checkpoint)").map((i, cp) =>
-                    $(cp).attr("id").substring(11)
-                );
+            const checkpoints = $(".checkpoint:not(.ghost_checkpoint)").map((i, cp) =>
+                $(cp).attr("id").substring(11)
+            );
 
-                // need to retrieve available checkpoints
-                let enabled_opts = [];
-                checkpointSelect.find("option").each((i, opt) => {
-                    opt = $(opt);
-                    if ([...checkpoints].includes(opt.val())) {
-                        opt.remove();
-                    } else {
-                        enabled_opts.push(opt.val());
-                    }
-                });
-
-                const checkpointChange = $(".checkpoint__change");
-                // checkpointChange may contain multiple elements, they all either have the class "hidden",
-                // or they all do not
-                if (enabled_opts.length > 0 && checkpointChange.hasClass("hidden")) {
-                    checkpointSelect.val(enabled_opts[0]).change();
-                    checkpointChange.removeClass("hidden");
-                } else if (enabled_opts.length === 0) {
-                    checkpointChange.addClass("hidden");
+            // need to retrieve available checkpoints
+            let enabled_opts = [];
+            checkpointSelect.find("option").each((i, opt) => {
+                opt = $(opt);
+                if ([...checkpoints].includes(opt.val())) {
+                    opt.remove();
+                } else {
+                    enabled_opts.push(opt.val());
                 }
             });
 
-            $(".checkpoint__change").click(changeCheckpoint);
+            const checkpointChange = $(".checkpoint__change");
+            // checkpointChange may contain multiple elements, they all either have the class "hidden",
+            // or they all do not
+            if (enabled_opts.length > 0 && checkpointChange.hasClass("hidden")) {
+                checkpointSelect.val(enabled_opts[0]).change();
+                checkpointChange.removeClass("hidden");
+            } else if (enabled_opts.length === 0) {
+                checkpointChange.addClass("hidden");
+            }
+
+            $(this)
+                .children(".checkpoint__buttons")
+                .css({ visibility: "initial", display: "flex" });
+        }
+
+        /**
+         * Exits focus on a button of a checkpoint, and sets the buttons to be invisible if the body is not hovered
+         * and no button is in focus.
+         */
+        function exitFocusCheckpointButton() {
+            if (
+                $(this).parent(":focus-within").length === 0 &&
+                $(this).parent(":hover").length === 0
+            ) {
+                $(this).parent().css({ visibility: "", display: "" });
+            }
+        }
+
+        /**
+         * Exits focus/hovering over the body of a checkpoint. Only sets the buttons to be invisible, if none of
+         * them are in focus either.
+         */
+        function exitHoverCheckpoint() {
+            if (!$(this).is(":focus-within")) {
+                $(this).children(".checkpoint__buttons").css({ visibility: "", display: "" });
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const body = $(".checkpoint__body");
+            body.on("focus", hoverCheckpoint);
+            body.on("mouseenter", hoverCheckpoint);
+            $(".checkpoint__buttons").children().on("focusout", exitFocusCheckpointButton);
+            body.on("focusout", exitHoverCheckpoint);
+            body.on("mouseleave", exitHoverCheckpoint);
+
+            $(".checkpoint__change").on("click", changeCheckpoint);
         });
     </script>
 </html>
