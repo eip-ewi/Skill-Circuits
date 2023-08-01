@@ -18,6 +18,7 @@
 package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
@@ -107,6 +108,16 @@ public class PersonControllerTest extends ControllerTest {
 				.map(TaskCompletion::getTask).toList();
 		assertThat(tasksCompletedAfter).doesNotContain(db.getTaskDo11ad());
 		assertThat(taskCompletedDTO.getShowSkills()).hasSize(0);
+	}
+
+	@Test
+	void logClickedLinkByPerson() {
+		Person person = new Person();
+		person.setId(db.getPerson().getId());
+		Long taskId = db.getTaskRead11().getId();
+		String link = db.getTaskRead11().getLink();
+		personController.logClickedLinkByPerson(person, taskId, link);
+		assertTrue(clickedLinkRepository.findAll().stream().anyMatch(s -> s.getLink().equals(link)));
 	}
 
 }

@@ -28,17 +28,7 @@ import javax.annotation.PostConstruct;
 
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
-import nl.tudelft.skills.repository.BadgeRepository;
-import nl.tudelft.skills.repository.CheckpointRepository;
-import nl.tudelft.skills.repository.CourseRepository;
-import nl.tudelft.skills.repository.EditionRepository;
-import nl.tudelft.skills.repository.InventoryRepository;
-import nl.tudelft.skills.repository.ModuleRepository;
-import nl.tudelft.skills.repository.PathRepository;
-import nl.tudelft.skills.repository.SkillRepository;
-import nl.tudelft.skills.repository.SubmoduleRepository;
-import nl.tudelft.skills.repository.TaskCompletionRepository;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +60,8 @@ public class TestDatabaseLoader {
 	private SkillRepository skillRepository;
 	@Autowired
 	private TaskRepository taskRepository;
+	@Autowired
+	private ClickedLinkRepository clickedLinkRepository;
 	@Autowired
 	private PersonRepository personRepository;
 	@Autowired
@@ -143,7 +135,8 @@ public class TestDatabaseLoader {
 	private Task taskRead12 = Task.builder().name("Read chapter 1.2").time(1)
 			.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build();
 	private Task taskDo12ae = Task.builder().name("Do exercise 1.2a-e").time(3).build();
-	private Task taskRead11 = Task.builder().name("Read chapter 1.1").time(5).build();
+	private Task taskRead11 = Task.builder().name("Read chapter 1.1")
+			.link("https://docs.oracle.com/en/java/javase/17/docs/api/index.html").time(5).build();
 	private Task taskDo11ad = Task.builder().name("Do exercise 1.1a-d").time(7).build();
 	private Task taskRead10 = Task.builder().name("Read chapter 1.0").time(13).build();
 	private Task taskDo10a = Task.builder().name("Do exercise 1.0a").time(20).build();
