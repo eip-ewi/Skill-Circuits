@@ -44,7 +44,8 @@
                 class="checkpoint__buttons"
                 th:id="|checkpoint-${checkpoint.id}-buttons|">
                 <button
-                    class="fa-solid fa-right-left checkpoint__change hidden"
+                    th:if="${#lists.size(module.remainingCheckpointsInEdition) > 0}"
+                    class="fa-solid fa-right-left checkpoint__change"
                     th:data-checkpoint="${checkpoint.id}"
                     tabindex="1"></button>
                 <button

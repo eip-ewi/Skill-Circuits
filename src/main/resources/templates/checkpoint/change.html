@@ -30,7 +30,7 @@
                     id="change-checkpoint-select"
                     name="checkpoint.id">
                     <option
-                        th:each="checkpoint: ${circuit.checkpointsInEdition}"
+                        th:each="checkpoint: ${module.remainingCheckpointsInEdition}"
                         th:value="${checkpoint.id}"
                         th:text="${checkpoint.name}"></option>
                 </select>
@@ -96,33 +96,6 @@
         }
 
         function hoverCheckpoint() {
-            const checkpointSelect = $("#change-checkpoint-select");
-
-            const checkpoints = $(".checkpoint:not(.ghost_checkpoint)").map((i, cp) =>
-                $(cp).attr("id").substring(11)
-            );
-
-            // need to retrieve available checkpoints
-            let enabled_opts = [];
-            checkpointSelect.find("option").each((i, opt) => {
-                opt = $(opt);
-                if ([...checkpoints].includes(opt.val())) {
-                    opt.remove();
-                } else {
-                    enabled_opts.push(opt.val());
-                }
-            });
-
-            const checkpointChange = $(".checkpoint__change");
-            // checkpointChange may contain multiple elements, they all either have the class "hidden",
-            // or they all do not
-            if (enabled_opts.length > 0 && checkpointChange.hasClass("hidden")) {
-                checkpointSelect.val(enabled_opts[0]).change();
-                checkpointChange.removeClass("hidden");
-            } else if (enabled_opts.length === 0) {
-                checkpointChange.addClass("hidden");
-            }
-
             $(this)
                 .children(".checkpoint__buttons")
                 .css({ visibility: "initial", display: "flex" });
