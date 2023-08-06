@@ -13,14 +13,14 @@ variables:
 
 # The names of the stages we use
 stages:
-  - build 1
-  - build 2
+  - build
   - test
   - review
   - accessibility
   - gitlab reports
   - publish
   - deploy
+  - test2
 
 
 # Default build cache settings to extend from
@@ -29,6 +29,8 @@ stages:
     key: "gradle-build"
     paths:
       - .gradle/
+      - node_modules/
+      - package-lock.json
     policy: pull
   rules:
     - if: $CI_COMMIT_BRANCH == "master" ||
@@ -49,36 +51,15 @@ gradle_build:
   extends: .build_cached
   cache:
     policy: pull-push
-  stage: build 1
+  stage: build
   artifacts:
     name: build
     expire_in: 6 hours
     paths:
       - build/
   script:
+    - npm ci
     - gradle --build-cache build testClasses -x test -x licenseMain -x licenseTest -x spotlessJava -x spotlessCheck
-
-
-# Generate the pom for dependency scanning
-generate_pom:
-  extends: .build_cached
-  stage: build 2
-  needs:
-    - gradle_build
-  rules:
-    - if: $CI_COMMIT_BRANCH == "master" ||
-        $CI_COMMIT_BRANCH == "development" ||
-        $CI_MERGE_REQUEST_ID
-  artifacts:
-    name: pom
-    expire_in: 6 hours
-    paths:
-      - pom.xml
-  script:
-    - gradle generatePomFileForGeneratePomPublication
-  after_script:
-    - cp build/publications/generatePom/pom-default.xml pom.xml
-
 
 # Run tests
 gradle_test:
@@ -97,6 +78,8 @@ gradle_test:
        coverage_report:
           coverage_format: cobertura
           path: build/reports/jacoco/test/jacocoTestReport.xml
+  before_script:
+    - npm ci
   script:
     - gradle --build-cache test
   after_script:
@@ -108,6 +91,28 @@ gradle_test:
      - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered, "/", instructions, " instructions covered"; print "Code coverage:", 100*covered/       instructions }' build/reports/jacoco/test/jacocoTestReport.csv || true
      - cp -r build/reports codecov
 
+# Run integration tests
+gradle_integration_test:
+  extends: .build_cached
+  stage: test2
+  needs:
+    - gradle_build
+  script:
+    - gradle --build-cache integrationTest
+  rules:
+    - if: $CI_COMMIT_BRANCH == "development"
+      when: manual
+
+# Run js tests
+gradle_js_test:
+  extends: .build_cached
+  stage: test
+  needs:
+    - gradle_build
+  before_script:
+    - npm ci
+  script:
+    - npm test
 
 # Run spotless
 gradle_spotless:
@@ -278,16 +283,12 @@ license_scanning:
     - .gitlab_reporter
   stage: gitlab reports
   rules:
+    - if: $CI_PIPELINE_SOURCE == "trigger" ||
+        $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
+      when: never
     - if: $CI_COMMIT_BRANCH == "master" ||
         $CI_COMMIT_BRANCH == "development" ||
         $CI_MERGE_REQUEST_ID
-  needs:
-    - generate_pom
-  dependencies:
-    - generate_pom
-  before_script:
-    - rm build.gradle* gradlew gradlew.bat
-    - cat pom.xml
   variables:
     MAVEN_CLI_OPTS: -q -Dmaven.main.skip -Dmaven.test.skip -DskipTests --batch-mode
     LM_JAVA_VERSION: 17

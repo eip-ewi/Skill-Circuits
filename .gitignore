@@ -40,3 +40,9 @@ sentry.properties
 # sass cashe
 
 .sass_cache/
+
+# js
+/src/main/resources/static/js
+
+# npm
+node_modules

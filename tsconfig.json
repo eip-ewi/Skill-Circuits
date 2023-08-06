@@ -1,0 +1,7 @@
+{
+  "include": ["src/main/ts/**/*"],
+  "compilerOptions": {
+    "target": "es6",
+    "skipLibCheck": true
+  }
+}
