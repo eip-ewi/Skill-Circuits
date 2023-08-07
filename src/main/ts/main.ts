@@ -24,4 +24,7 @@ function toggleOverlay(id) {
         overlay.showModal();
     }
 }
-module.exports.toggleOverlay = toggleOverlay;
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports.toggleOverlay = toggleOverlay;
+}
