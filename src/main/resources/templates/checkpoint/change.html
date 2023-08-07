@@ -24,11 +24,17 @@
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <div th:if="${canEdit}" layout:fragment="form" class="hidden" id="change-checkpoint-wrapper">
         <div id="change-checkpoint">
-            <form class="checkpoint__form">
+            <form
+                class="checkpoint__form"
+                th:action="@{/checkpoint/change-checkpoint}"
+                th:method="patch">
+                <input name="moduleId" type="hidden" th:value="${circuit.id}" />
+                <input name="prevId" type="hidden" />
+
                 <select
                     class="selectbox font_size_regular"
                     id="change-checkpoint-select"
-                    name="checkpoint.id">
+                    name="newId">
                     <option
                         th:each="checkpoint: ${module.remainingCheckpointsInEdition}"
                         th:value="${checkpoint.id}"
@@ -53,41 +59,24 @@
             const checkpointChanger = $("#change-checkpoint").clone();
             checkpointChanger.attr("id", `change-checkpoint-${checkpointId}`);
             checkpointChanger.children().eq(0).attr("id", `change-checkpoint-form-${checkpointId}`);
+            checkpointChanger.children().eq(0).children().eq(2).val($("#circuit").data("id"));
+            checkpointChanger.children().eq(0).children().eq(3).val(checkpointId);
             checkpointChanger
                 .children()
                 .eq(0)
                 .children()
-                .eq(0)
+                .eq(4)
                 .attr("id", `change-checkpoint-select-${checkpointId}`);
             checkpointChanger
                 .children()
                 .eq(0)
                 .children()
-                .eq(1)
+                .eq(5)
                 .attr("id", `change-checkpoint-cancel-${checkpointId}`);
 
             $(`#checkpoint-${checkpointId}-body`).append(checkpointChanger);
 
-            $(`#change-checkpoint-form-${checkpointId}`).submit(function (event) {
-                const moduleId = $("#circuit").data("id");
-                event.preventDefault();
-                $.ajax({
-                    type: "PUT",
-                    url: "/checkpoint/change-checkpoint",
-                    contentType: "application/json",
-                    data: JSON.stringify({
-                        moduleId: moduleId,
-                        prevId: checkpointId,
-                        newId: $(`#change-checkpoint-select-${checkpointId}`).val(),
-                    }),
-                    success: () => {
-                        location.reload();
-                    },
-                    error: () => {},
-                });
-            });
-
-            $(`#change-checkpoint-cancel-${checkpointId}`).click(function () {
+            $(`#change-checkpoint-cancel-${checkpointId}`).on("click", function () {
                 checkpointChanger.remove();
                 $(`#checkpoint-${checkpointId}`).attr("draggable", true);
                 $(`#checkpoint-${checkpointId}-display`).removeClass("hidden");

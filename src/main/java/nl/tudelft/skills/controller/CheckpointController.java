@@ -98,34 +98,34 @@ public class CheckpointController {
 	 * @param  changeCheckpointDTO The DTO for changing the checkpoint, contains old/new checkpoint id as well
 	 *                             as module id.
 	 *
-	 * @return                     Response entity OK, if it is a valid change, and BAD REQUEST if it is not.
-	 *                             In practice, the frontend implementation should prevent requests for
-	 *                             invalid changes.
+	 * @return                     Redirects to the module page, regardless of whether it was a valid or
+	 *                             invalid request. In practice, the frontend implementation should prevent
+	 *                             requests for invalid changes.
 	 */
 	@Transactional
-	@PutMapping("/change-checkpoint")
-	@PreAuthorize("@authorisationService.canEditModule(#changeCheckpointDTO.getModuleId())")
-	public ResponseEntity<Void> changeToCheckpoint(@RequestBody ChangeCheckpointDTO changeCheckpointDTO) {
+	@PatchMapping("/change-checkpoint")
+	@PreAuthorize("@authorisationService.canEditModule(#changeCheckpointDTO.moduleId)")
+	public String changeToCheckpoint(ChangeCheckpointDTO changeCheckpointDTO) {
 		Checkpoint checkpointPrev = checkpointRepository.findByIdOrThrow(changeCheckpointDTO.getPrevId());
 		Checkpoint checkpointNew = checkpointRepository.findByIdOrThrow(changeCheckpointDTO.getNewId());
+		Long moduleId = changeCheckpointDTO.getModuleId();
 
 		// If the new checkpoint is already used in the module, or if the checkpoints are
-		// not in the same edition, return 400 Bad Request.
+		// not in the same edition, redirect to the module page without any changes.
 		// In practice this should already be prevented from the frontend side.
-		if (!skillRepository.findAllBySubmoduleModuleIdAndCheckpointId(changeCheckpointDTO.getModuleId(),
+		if (!skillRepository.findAllBySubmoduleModuleIdAndCheckpointId(moduleId,
 				changeCheckpointDTO.getNewId()).isEmpty()
 				|| checkpointPrev.getEdition() != checkpointNew.getEdition()) {
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			return "redirect:/module/" + moduleId;
 		}
 
 		Set<Skill> skills = skillRepository.findAllBySubmoduleModuleIdAndCheckpointId(
-				changeCheckpointDTO.getModuleId(),
-				changeCheckpointDTO.getPrevId());
+				moduleId, changeCheckpointDTO.getPrevId());
 		checkpointNew.getSkills().addAll(skills);
 		checkpointPrev.getSkills().removeAll(skills);
 		skills.forEach(skill -> skill.setCheckpoint(checkpointNew));
 
-		return ResponseEntity.ok().build();
+		return "redirect:/module/" + moduleId;
 	}
 
 	@Transactional

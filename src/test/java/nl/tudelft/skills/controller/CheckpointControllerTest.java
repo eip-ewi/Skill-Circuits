@@ -36,7 +36,6 @@ import nl.tudelft.labracore.api.dto.Id;
 import nl.tudelft.labracore.api.dto.PersonSummaryDTO;
 import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.dto.view.checkpoint.ChangeCheckpointDTO;
 import nl.tudelft.skills.model.Checkpoint;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.Skill;
@@ -126,6 +125,13 @@ public class CheckpointControllerTest extends ControllerTest {
 								.format(DateTimeFormatter.ISO_DATE_TIME)))));
 	}
 
+	private String getChangeCheckpointFormData(Long moduleId, Long prevId, Long newId) throws Exception {
+		return EntityUtils.toString(new UrlEncodedFormEntity(List.of(
+				new BasicNameValuePair("moduleId", Long.toString(moduleId)),
+				new BasicNameValuePair("prevId", Long.toString(prevId)),
+				new BasicNameValuePair("newId", Long.toString(newId)))));
+	}
+
 	@Test
 	public void createCheckpointForbidden() throws Exception {
 		mvc.perform(post("/checkpoint").with(csrf())
@@ -191,13 +197,10 @@ public class CheckpointControllerTest extends ControllerTest {
 						.type(RoleDetailsDTO.TypeEnum.valueOf("STUDENT"))));
 
 		// Prepare and send request
-		ChangeCheckpointDTO changeCheckpointDTO = ChangeCheckpointDTO.builder()
-				.moduleId(db.getModuleProofTechniques().getId())
-				.prevId(db.getCheckpointLectureOne().getId())
-				.newId(db.getCheckpointLectureTwo().getId()).build();
-		mvc.perform(put("/checkpoint/change-checkpoint").with(csrf())
-				.content(objectMapper.writeValueAsString(changeCheckpointDTO))
-				.contentType(MediaType.APPLICATION_JSON))
+		mvc.perform(patch("/checkpoint/change-checkpoint").with(csrf())
+				.content(getChangeCheckpointFormData(db.getModuleProofTechniques().getId(),
+						db.getCheckpointLectureOne().getId(), db.getCheckpointLectureTwo().getId()))
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isForbidden());
 
 		// Assert that the skills in checkpoints are still the same
@@ -215,17 +218,15 @@ public class CheckpointControllerTest extends ControllerTest {
 		Set<Skill> checkpointTwoSkills = db.getCheckpointLectureTwo().getSkills();
 
 		// Prepare and send request
-		ChangeCheckpointDTO changeCheckpointDTO = ChangeCheckpointDTO.builder()
-				.moduleId(db.getModuleProofTechniques().getId())
-				.prevId(db.getCheckpointLectureOne().getId())
-				.newId(db.getCheckpointLectureTwo().getId()).build();
-		// Expect bad request, since checkpoint for lecture 2 contains some skills in the module already
-		mvc.perform(put("/checkpoint/change-checkpoint").with(csrf())
-				.content(objectMapper.writeValueAsString(changeCheckpointDTO))
-				.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+		// Expect a redirection to the page, which will also be returned if the request is invalid
+		mvc.perform(patch("/checkpoint/change-checkpoint").with(csrf())
+				.content(getChangeCheckpointFormData(db.getModuleProofTechniques().getId(),
+						db.getCheckpointLectureOne().getId(), db.getCheckpointLectureTwo().getId()))
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+				.andExpect(redirectedUrl("/module/" + db.getModuleProofTechniques().getId()));
 
-		// Assert that the skills in checkpoints are still the same
+		// Assert that the skills in checkpoints are still the same (nothing should have changed since
+		// the checkpoint for lecture 2 contains some skills in the module already)
 		assertThat(checkpointRepository.findAll()).hasSize(2);
 		assertThat(checkpointRepository.findByIdOrThrow(db.getCheckpointLectureOne().getId()).getSkills())
 				.containsAll(checkpointOneSkills);
@@ -247,17 +248,15 @@ public class CheckpointControllerTest extends ControllerTest {
 		edition.setCheckpoints(Set.of(checkpoint));
 
 		// Prepare and send request
-		ChangeCheckpointDTO changeCheckpointDTO = ChangeCheckpointDTO.builder()
-				.moduleId(db.getModuleProofTechniques().getId())
-				.prevId(db.getCheckpointLectureOne().getId())
-				.newId(db.getCheckpointLectureTwo().getId()).build();
-		// Expect bad request, since checkpoint for lecture 2 contains some skills in the module already
-		mvc.perform(put("/checkpoint/change-checkpoint").with(csrf())
-				.content(objectMapper.writeValueAsString(changeCheckpointDTO))
-				.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+		// Expect a redirection to the page, which will also be returned if the request is invalid
+		mvc.perform(patch("/checkpoint/change-checkpoint").with(csrf())
+				.content(getChangeCheckpointFormData(db.getModuleProofTechniques().getId(),
+						db.getCheckpointLectureOne().getId(), checkpoint.getId()))
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+				.andExpect(redirectedUrl("/module/" + db.getModuleProofTechniques().getId()));
 
-		// Assert that the skills in checkpoints are still the same
+		// Assert that the skills in checkpoints are still the same (nothing should have changed since the
+		// checkpoint is in a different edition)
 		assertThat(checkpointRepository.findAll()).hasSize(3);
 		assertThat(checkpointRepository.findByIdOrThrow(checkpoint.getId()).getSkills())
 				.isEmpty();
@@ -278,16 +277,12 @@ public class CheckpointControllerTest extends ControllerTest {
 				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 100), LocalTime.MIDNIGHT))
 				.name("Checkpoint").edition(db.getEditionRL()).build());
 
-		// Prepare and send request
-		ChangeCheckpointDTO changeCheckpointDTO = ChangeCheckpointDTO.builder()
-				.moduleId(db.getModuleProofTechniques().getId())
-				.prevId(db.getCheckpointLectureOne().getId())
-				.newId(checkpoint.getId()).build();
-		// Expect status 200 OK since it is a valid request
-		mvc.perform(put("/checkpoint/change-checkpoint").with(csrf())
-				.content(objectMapper.writeValueAsString(changeCheckpointDTO))
-				.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
+		// Prepare and send request, expect a redirection to the page
+		mvc.perform(patch("/checkpoint/change-checkpoint").with(csrf())
+				.content(getChangeCheckpointFormData(db.getModuleProofTechniques().getId(),
+						db.getCheckpointLectureOne().getId(), checkpoint.getId()))
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+				.andExpect(redirectedUrl("/module/" + db.getModuleProofTechniques().getId()));
 
 		// Assert that the skills are now changed to be in the new checkpoint
 		assertThat(checkpointRepository.findAll()).hasSize(3);
