@@ -26,7 +26,7 @@
         th:id="|block-${block.id}|"
         class="block visible"
         th:style="|grid-row: ${block.row + 1}; grid-column: ${block.column + 1}|"
-        th:draggable="${canEdit}"
+        th:draggable="${canEdit and not studentMode}"
         th:data-group="${group.id}"
         th:data-create="${create}"
         th:with="
@@ -83,12 +83,12 @@
             <button
                 data-edit="always"
                 class="fa-solid fa-pen block__edit"
-                th:if="${canEdit}"
+                th:if="${canEdit and not studentMode}"
                 th:data-block="${block.id}"></button>
             <button
                 data-edit="always"
                 class="fa-solid fa-trash block__delete"
-                th:if="${canDelete}"
+                th:if="${canDelete and not studentMode}"
                 th:data-block="${block.id}"></button>
         </div>
 

@@ -22,7 +22,7 @@
     lang="en"
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-    <script th:if="${canEdit}" layout:fragment="script">
+    <script th:if="${canEdit and not studentMode}" layout:fragment="script">
         let draggingSkill = false;
         let circuit;
 

@@ -22,7 +22,7 @@
     lang="en"
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-    <div th:if="${canEdit}" layout:fragment="form" class="hidden" id="edit-checkpoint-wrapper">
+    <div th:if="${canEdit and not studentMode}" layout:fragment="form" class="hidden" id="edit-checkpoint-wrapper">
         <div id="edit-checkpoint">
             <form id="edit-checkpoint-form" class="checkpoint__form">
                 <input id="edit-checkpoint-id" name="id" type="hidden" />

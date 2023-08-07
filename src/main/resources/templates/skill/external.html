@@ -27,7 +27,7 @@
         class="block visible"
         th:href="@{|/skill/external/${block.id}|}"
         th:style="|grid-row: ${block.row + 1}; grid-column: ${block.column + 1}|"
-        th:draggable="${canEdit}"
+        th:draggable="${canEdit and not studentMode}"
         th:data-create="${create}"
         th:with="
      parentIds = ${block instanceof T(nl.tudelft.skills.dto.view.BlockView)} ? ${block.parentIds} : ${{}},
@@ -58,7 +58,7 @@
 
         <p style="opacity: 50%; font-size: 0.9rem">This is a link to a skill in another module.</p>
 
-        <th:block th:if="${canEdit}">
+        <th:block th:if="${canEdit and not studentMode}">
             <div class="block__connect from" th:data-skill="${block.id}">
                 <button><span class="fa-solid fa-link"></span></button>
             </div>

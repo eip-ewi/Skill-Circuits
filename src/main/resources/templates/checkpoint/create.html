@@ -71,7 +71,7 @@
     </div>
 
     <script
-        th:if="${@authorisationService.canEditCheckpointInEdition(circuit.edition.id)}"
+        th:if="${@authorisationService.canEditCheckpointInEdition(circuit.edition.id) and not studentMode}"
         layout:fragment="script">
         function updateGhostCheckpoints() {
             const circuit = $("#circuit");
