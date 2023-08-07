@@ -115,9 +115,9 @@ public class PersonControllerTest extends ControllerTest {
 		Person person = new Person();
 		person.setId(db.getPerson().getId());
 		Long taskId = db.getTaskRead11().getId();
-		String link = db.getTaskRead11().getLink();
-		personController.logClickedLinkByPerson(person, taskId, link);
-		assertTrue(clickedLinkRepository.findAll().stream().anyMatch(s -> s.getLink().equals(link)));
+		personController.logClickedLinkByPerson(person, taskId);
+		assertTrue(
+				clickedLinkRepository.findAll().stream().anyMatch(s -> s.getTask().getId().equals(taskId)));
 	}
 
 }

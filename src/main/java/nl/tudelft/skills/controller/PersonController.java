@@ -109,12 +109,12 @@ public class PersonController {
 	@PutMapping("clicked/{taskId}")
 	@Transactional
 	public void logClickedLinkByPerson(@AuthenticatedPerson Person authPerson,
-			@PathVariable Long taskId, @RequestBody String link) {
+			@PathVariable Long taskId) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
 		Task task = taskRepository.findByIdOrThrow(taskId);
 
 		clickedLinkRepository.save(ClickedLink.builder()
-				.task(task).person(person).link(link).build());
+				.task(task).person(person).build());
 
 	}
 }

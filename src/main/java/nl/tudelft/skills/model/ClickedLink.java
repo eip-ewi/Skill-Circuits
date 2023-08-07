@@ -44,9 +44,6 @@ public class ClickedLink {
 	private SCPerson person;
 
 	@NotNull
-	private String link;
-
-	@NotNull
 	@Builder.Default
 	private LocalDateTime timestamp = LocalDateTime.now();
 }
