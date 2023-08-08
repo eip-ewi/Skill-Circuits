@@ -202,7 +202,7 @@ public class SkillServiceTest {
 						.person(new PersonSummaryDTO().id(TestUserDetailsService.id).username("username"))
 						.type(RoleDetailsDTO.TypeEnum.valueOf(role)))
 				.collect(Collectors.toList());
-		when(roleApi.getRolesById(anyList(), anyList()))
+		when(roleApi.getRolesById(anySet(), anySet()))
 				.thenReturn(Flux.fromIterable(roleDetails));
 	}
 
@@ -227,7 +227,7 @@ public class SkillServiceTest {
 		db.getEditionRL().setVisible(true);
 		editionRepository.save(db.getEditionRL());
 		// Mock the role of the person
-		when(roleApi.getRolesById(anyList(), anyList()))
+		when(roleApi.getRolesById(anySet(), anySet()))
 				.thenReturn(Flux.just(new RoleDetailsDTO()
 						.id(new Id().editionId(db.getEditionRL().getId())
 								.personId(TestUserDetailsService.id))
@@ -260,7 +260,7 @@ public class SkillServiceTest {
 				.thenReturn(Flux.just(new EditionDetailsDTO().id(db.getEditionRL().getId())));
 
 		// Mock the role of the person
-		when(roleApi.getRolesById(anyList(), anyList()))
+		when(roleApi.getRolesById(anySet(), anySet()))
 				.thenReturn(Flux.just(new RoleDetailsDTO()
 						.id(new Id().editionId(db.getEditionRL().getId())
 								.personId(TestUserDetailsService.id))

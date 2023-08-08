@@ -18,8 +18,7 @@
 package nl.tudelft.skills.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -682,9 +681,9 @@ public class AuthorisationServiceTest {
 
 	private void mockRole(String role) {
 		if (role == null || role.isBlank()) {
-			when(roleApi.getRolesById(anyList(), anyList())).thenReturn(Flux.empty());
+			when(roleApi.getRolesById(anySet(), anySet())).thenReturn(Flux.empty());
 		} else {
-			when(roleApi.getRolesById(anyList(), anyList()))
+			when(roleApi.getRolesById(anySet(), anySet()))
 					.thenReturn(Flux.just(new RoleDetailsDTO()
 							.id(new Id().editionId(db.getEditionRL().getId())
 									.personId(TestUserDetailsService.id))

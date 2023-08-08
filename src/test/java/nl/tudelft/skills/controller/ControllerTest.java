@@ -17,7 +17,7 @@
  */
 package nl.tudelft.skills.controller;
 
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.when;
 
 import java.util.Random;
@@ -78,7 +78,7 @@ public abstract class ControllerTest {
 	 * @param role    The role to return for the user.
 	 */
 	protected void mockRole(RoleControllerApi roleApi, String role) {
-		when(roleApi.getRolesById(anyList(), anyList()))
+		when(roleApi.getRolesById(anySet(), anySet()))
 				.thenReturn(Flux.just(new RoleDetailsDTO()
 						.id(new Id().editionId(db.getEditionRL().getId())
 								.personId(db.getPerson().getId()))
