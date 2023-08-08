@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Floating box which displays information about the most recently completed task (@ffiedrich)
 - Skill can remember the skill from the edition it was copied from (@ffiedrich)
 - Ability to insert new rows and columns when editing editions or modules (@bbakos)
+ - Added option to change/switch checkpoint to another one which is not used in the current module. (@ffiedrich)
 
 ### Changed
 

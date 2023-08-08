@@ -22,17 +22,18 @@
             font-size: smaller;
             color: var(--grey-500);
         }
-        &:hover > .checkpoint__buttons {
-            visibility: initial;
-            display: flex;
-        }
     }
     &__buttons {
         cursor: pointer;
         visibility: hidden;
         gap: 0.5rem;
-        & > *:hover {
-            color: var(--primary-green);
+        & > button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            &:hover {
+                color: var(--primary-green);
+            }
         }
     }
 
