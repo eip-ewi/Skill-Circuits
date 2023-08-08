@@ -42,6 +42,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -138,6 +139,18 @@ public class AuthorisationServiceTest {
 		assertThat(authorisationService.isStaff()).isFalse();
 	}
 
+	@Test
+	@WithAnonymousUser
+	void cannotViewIfNotAuthenticated() {
+		assertThat(authorisationService.canViewCourse(db.getCourseRL().getId())).isFalse();
+		assertThat(authorisationService.canViewEdition(db.getEditionRL().getId())).isFalse();
+		assertThat(authorisationService.canViewModule(db.getModuleProofTechniques().getId())).isFalse();
+		assertThat(authorisationService.canViewSkill(db.getSkillAssumption().getId())).isFalse();
+
+		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
+		assertThat(authorisationService.canViewSkill(externalSkill.getId())).isFalse();
+	}
+
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
@@ -191,6 +204,30 @@ public class AuthorisationServiceTest {
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canViewModule(String role, boolean expected) {
+		mockRole(role);
+
+		assertThat(authorisationService.canViewModule(db.getModuleProofTechniques().getId()))
+				.isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,true", "STUDENT,true", ",true" })
+	void canViewModuleWithVisibility(String role, boolean expected) {
+		mockRole(role);
+
+		SCEdition edition = db.getEditionRL();
+		edition.setVisible(true);
+		editionRepository.save(edition);
+
+		assertThat(authorisationService.canViewModule(db.getModuleProofTechniques().getId()))
+				.isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
 	void canViewSkill(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canViewSkill(db.getSkillAssumption().getId())).isEqualTo(expected);
@@ -216,6 +253,7 @@ public class AuthorisationServiceTest {
 		assertThat(authorisationService.canViewSkill(externalSkill.getId())).isEqualTo(expected);
 	}
 
+	@Test
 	@WithUserDetails("username")
 	void canViewSkillExternalOtherEdition() {
 		// Since this is a bigger test, it is only checked with one role (the student role).

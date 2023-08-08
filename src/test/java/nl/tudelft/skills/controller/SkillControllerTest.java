@@ -19,11 +19,11 @@ package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDateTime;
@@ -34,9 +34,6 @@ import java.util.Set;
 import javax.servlet.http.HttpSession;
 
 import nl.tudelft.labracore.api.RoleControllerApi;
-import nl.tudelft.labracore.api.dto.Id;
-import nl.tudelft.labracore.api.dto.PersonSummaryDTO;
-import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
 import nl.tudelft.labracore.lib.security.LabradorUserDetails;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.SpringContext;
@@ -60,11 +57,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
-
-import reactor.core.publisher.Flux;
 
 @Transactional
 @AutoConfigureMockMvc
@@ -260,7 +256,7 @@ public class SkillControllerTest extends ControllerTest {
 
 	@Test
 	@WithUserDetails("username")
-	void redirectToExternalSkillVisibleToStudent() throws Exception {
+	void redirectToExternalSkillVisibleToStudent() {
 		// Use a mocked version of the skill service because of the complexity
 		// of the recentActiveEditionForSkillOrLatest method
 		SkillService mockSkillService = mock(SkillService.class);
@@ -279,7 +275,7 @@ public class SkillControllerTest extends ControllerTest {
 		editionRepository.save(edition);
 
 		// Mock role of user
-		mockRole("STUDENT");
+		mockRole(roleApi, "STUDENT");
 
 		// Get authenticated person
 		Person authPerson = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
@@ -308,7 +304,7 @@ public class SkillControllerTest extends ControllerTest {
 				externalSkill)).thenReturn(db.getSkillAssumption());
 
 		// Mock role of user
-		mockRole("TEACHER");
+		mockRole(roleApi, "TEACHER");
 
 		// Get authenticated person
 		Person authPerson = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
@@ -323,16 +319,37 @@ public class SkillControllerTest extends ControllerTest {
 
 	@Test
 	@WithUserDetails("username")
-	void redirectToExternalSkillNotAuthorized() throws Exception {
+	void redirectToExternalSkillNotAuthorizedStudent() throws Exception {
 		// Save an external skill
 		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
 
 		// Mock role of user
-		mockRole("STUDENT");
+		mockRole(roleApi, "STUDENT");
 
 		// Assert on result, should be unauthorized since the external skill is not visible
 		mvc.perform(get("/skill/external/" + externalSkill.getId()).with(csrf()))
 				.andExpect(status().isForbidden());
+	}
+
+	@Test
+	@WithAnonymousUser
+	void redirectToExternalSkillNotAuthenticated() throws Exception {
+		// Save an external skill
+		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
+
+		// Assert on result, it will throw an error since there is no authenticated person
+		// (Which is needed as a parameter to the method)
+		mvc.perform(get("/skill/external/" + externalSkill.getId()).with(csrf()))
+				.andExpect(status().is4xxClientError());
+	}
+
+	@Test
+	@WithAnonymousUser
+	void getSkillNotAuthenticated() throws Exception {
+		// An unauthenticated user should not be able to get a skill
+		mvc.perform(get("/skill/{id}", db.getSkillVariables().getId()))
+				.andExpect(status().is3xxRedirection())
+				.andExpect(redirectedUrlPattern("**/auth/login"));
 	}
 
 	@Test
@@ -357,7 +374,7 @@ public class SkillControllerTest extends ControllerTest {
 		editionRepository.save(edition);
 
 		// Mock role of user
-		mockRole("STUDENT");
+		mockRole(roleApi, "STUDENT");
 
 		// Get authenticated person
 		Person authPerson = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
@@ -381,20 +398,8 @@ public class SkillControllerTest extends ControllerTest {
 				.andExpect(status().isForbidden());
 		mvc.perform(post("/skill/disconnect/1/2"))
 				.andExpect(status().isForbidden());
+		mvc.perform(get("/skill/{id}", db.getSkillVariables().getId()))
+				.andExpect(status().is3xxRedirection())
+				.andExpect(redirectedUrlPattern("**/auth/login"));
 	}
-
-	/**
-	 * Mocks the response of the role api for a given role.
-	 *
-	 * @param role The role to return for the user.
-	 */
-	private void mockRole(String role) {
-		when(roleApi.getRolesById(anyList(), anyList()))
-				.thenReturn(Flux.just(new RoleDetailsDTO()
-						.id(new Id().editionId(db.getEditionRL().getId())
-								.personId(db.getPerson().getId()))
-						.person(new PersonSummaryDTO().id(db.getPerson().getId()).username("username"))
-						.type(RoleDetailsDTO.TypeEnum.valueOf(role))));
-	}
-
 }
