@@ -120,6 +120,7 @@ configure<SpotlessExtension> {
             "bracketSameLine" to true,
             "arrowParens" to "avoid",
             "htmlWhitespaceSensitivity" to "ignore"))
+        toggleOffOn()
     }
 }
 

@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Skill can remember the skill from the edition it was copied from (@ffiedrich)
 - Ability to insert new rows and columns when editing editions or modules (@bbakos)
  - Added option to change/switch checkpoint to another one which is not used in the current module. (@ffiedrich)
+- Add the ability to copy the contents of one edition to another (empty) edition. (@ffiedrich)
 
 ### Changed
 

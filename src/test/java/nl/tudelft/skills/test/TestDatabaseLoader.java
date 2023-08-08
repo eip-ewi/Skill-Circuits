@@ -502,16 +502,23 @@ public class TestDatabaseLoader {
 		SCModule module = SCModule.builder()
 				.name("Module in " + editionId).edition(edition).build();
 		module = moduleRepository.save(module);
+		edition.getModules().add(module);
 		Submodule submodule = Submodule.builder().module(module)
 				.name("Submodule in " + editionId).column(0).row(0).build();
 		submodule = submoduleRepository.save(submodule);
+		module.getSubmodules().add(submodule);
 		LocalDateTime localDateTime = LocalDateTime.of(2023, 1, 10, 10, 10, 0);
 		Checkpoint checkpoint = Checkpoint.builder().edition(edition)
 				.name("Checkpoint in " + editionId).deadline(localDateTime).build();
 		checkpoint = checkpointRepository.save(checkpoint);
+		edition.getCheckpoints().add(checkpoint);
 		Skill skill = Skill.builder().submodule(submodule).checkpoint(checkpoint)
 				.name("Skill in " + editionId).column(0).row(0).build();
-		return skillRepository.save(skill);
+		skill = skillRepository.save(skill);
+		checkpoint.getSkills().add(skill);
+		submodule.getSkills().add(skill);
+
+		return skill;
 	}
 
 	/**

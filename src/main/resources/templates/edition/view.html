@@ -36,6 +36,11 @@
                 th:with="visible = ${@editionRepository.findByIdOrThrow(edition.id).isVisible()}">
                 <div class="circuit__header__group">
                     <h1 th:text="${edition.name}"></h1>
+                    <div layout:replace="~{edition_copy/copy :: copy-edition}"></div>
+                    <div layout:replace="~{edition_copy/copy :: script}"></div>
+                    <div layout:replace="~{edition_copy/confirmation :: overlay}"></div>
+                    <div layout:replace="~{edition_copy/confirmation :: script}"></div>
+
                     <!--                    <a th:href="@{|/course/${edition.course.id}|}">-->
                     <!--                        <span class="level_up_button fa-solid fa-turn-up fa-xl"></span>-->
                     <!--                    </a>-->
