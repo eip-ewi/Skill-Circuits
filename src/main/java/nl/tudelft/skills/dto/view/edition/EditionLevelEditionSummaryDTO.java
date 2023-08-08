@@ -15,11 +15,21 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-function toggleOverlay(id) {
-    let overlay = document.getElementById(id);
-    if (overlay.open) {
-        overlay.close();
-    } else {
-        overlay.showModal();
-    }
+package nl.tudelft.skills.dto.view.edition;
+
+import javax.validation.constraints.NotNull;
+
+import lombok.*;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class EditionLevelEditionSummaryDTO {
+
+	@NotNull
+	private Long id;
+	@NotNull
+	private String name;
+
 }

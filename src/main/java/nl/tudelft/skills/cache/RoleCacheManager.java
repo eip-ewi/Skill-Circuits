@@ -41,8 +41,8 @@ public class RoleCacheManager extends CoreCacheManager<Id, RoleDetailsDTO> {
 	@Override
 	protected List<RoleDetailsDTO> fetch(List<Id> ids) {
 		return api.getRolesById(
-				ids.stream().map(Id::getEditionId).collect(Collectors.toList()),
-				ids.stream().map(Id::getPersonId).collect(Collectors.toList()))
+				ids.stream().map(Id::getEditionId).collect(Collectors.toSet()),
+				ids.stream().map(Id::getPersonId).collect(Collectors.toSet()))
 				.collectList().block();
 	}
 

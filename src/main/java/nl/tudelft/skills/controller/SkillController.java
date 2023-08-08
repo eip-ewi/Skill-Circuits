@@ -43,6 +43,7 @@ import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.service.ModuleService;
 import nl.tudelft.skills.service.SkillService;
+import nl.tudelft.skills.service.TaskCompletionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -65,6 +66,7 @@ public class SkillController {
 	private final PathRepository pathRepository;
 	private final SkillService skillService;
 	private final ModuleService moduleService;
+	private final TaskCompletionService taskCompletionService;
 	private final HttpSession session;
 
 	@Autowired
@@ -73,7 +75,7 @@ public class SkillController {
 			SubmoduleRepository submoduleRepository, CheckpointRepository checkpointRepository,
 			PathRepository pathRepository,
 			SkillService skillService, ModuleService moduleService,
-			HttpSession session) {
+			TaskCompletionService taskCompletionService, HttpSession session) {
 		this.skillRepository = skillRepository;
 		this.externalSkillRepository = externalSkillRepository;
 		this.abstractSkillRepository = abstractSkillRepository;
@@ -83,6 +85,7 @@ public class SkillController {
 		this.pathRepository = pathRepository;
 		this.skillService = skillService;
 		this.moduleService = moduleService;
+		this.taskCompletionService = taskCompletionService;
 		this.session = session;
 	}
 
@@ -93,6 +96,7 @@ public class SkillController {
 	 * @return    The skill html element
 	 */
 	@GetMapping("{id}")
+	@PreAuthorize("@authorisationService.canViewSkill(#id)")
 	public String getSkill(@PathVariable Long id, Model model) {
 		Skill skill = skillRepository.findByIdOrThrow(id);
 		ModuleLevelSkillViewDTO view = View.convert(skill, ModuleLevelSkillViewDTO.class);
@@ -195,7 +199,7 @@ public class SkillController {
 		List<Task> oldTasks = skill.getTasks();
 		skillRepository.save(patch.apply(skill));
 		taskRepository.findAllByIdIn(patch.getRemovedItems())
-				.forEach(t -> t.getPersons().forEach(p -> p.getTasksCompleted().remove(t)));
+				.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
 		taskRepository.deleteAllByIdIn(patch.getRemovedItems());
 		taskRepository.saveAll(skill.getRequiredTasks());
 
@@ -296,4 +300,27 @@ public class SkillController {
 		return ResponseEntity.ok().build();
 	}
 
+	/**
+	 * Redirects to the correct skill when an external skill is clicked. The link should redirect to the skill
+	 * in the most recent edition which the person has last worked on. If none such edition exists, the most
+	 * recent edition is chosen. If there is no skill that the person can view, the current skills view is
+	 * rendered.
+	 *
+	 * @param  skillId    The id of the external skill.
+	 * @param  authPerson The currently logged in person.
+	 * @return            The redirection link to the module in which the correct skill is.
+	 */
+	@GetMapping("external/{skillId}")
+	@PreAuthorize("@authorisationService.canViewSkill(#skillId)")
+	public String redirectToExternalSkill(@PathVariable Long skillId,
+			@AuthenticatedPerson Person authPerson) {
+		ExternalSkill externalSkill = externalSkillRepository.findByIdOrThrow(skillId);
+		Skill redirectedSkill = skillService.recentActiveEditionForSkillOrLatest(authPerson.getId(),
+				externalSkill);
+
+		// If there is no valid skill to link to, return to the initial page
+		return "redirect:/module/"
+				+ (redirectedSkill != null ? (redirectedSkill.getSubmodule().getModule().getId() +
+						"#block-" + redirectedSkill.getId() + "-name") : externalSkill.getModule().getId());
+	}
 }

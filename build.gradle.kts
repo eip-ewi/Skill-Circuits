@@ -2,13 +2,14 @@ import com.diffplug.gradle.spotless.SpotlessExtension
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 import nl.javadude.gradle.plugins.license.DownloadLicensesExtension
 import nl.javadude.gradle.plugins.license.LicenseExtension
+import org.gradle.internal.fingerprint.classpath.impl.ClasspathFingerprintingStrategy.runtimeClasspath
 
 group = "nl.tudelft.skills"
-version = "2.2.1"
+version = "2.2.2"
 
 val javaVersion = JavaVersion.VERSION_17
 
-val labradoorVersion = "1.3.2-SNAPSHOT"
+val labradoorVersion = "1.4.1-SNAPSHOT"
 val libradorVersion = "1.0.3-SNAPSHOT7"
 
 val genSourceDir = file("$buildDir/skills/src/main/java")
@@ -112,13 +113,14 @@ configure<SpotlessExtension> {
         endWithNewline()
     }
     format("html") {
-        target("src/main/resources/**/*.html", "src/main/resources/**/*.js", "src/main/resources/scss/**/*.scss")
+        target("src/main/resources/**/*.html", "src/main/ts/**/*.ts", "src/main/resources/scss/**/*.scss")
         prettier("2.6").config(mapOf(
             "tabWidth" to 4, "semi" to true,
             "printWidth" to 100,
             "bracketSameLine" to true,
             "arrowParens" to "avoid",
             "htmlWhitespaceSensitivity" to "ignore"))
+        toggleOffOn()
     }
 }
 
@@ -140,14 +142,22 @@ val jacocoTestReport by tasks.getting(JacocoReport::class) {
 
 task<Exec>("sassCompile") {
     if (System.getProperty("os.name").contains("windows",true)) {
-        commandLine("cmd", "/c", "sass", "src/main/resources/scss:src/main/resources/static/css")
+        commandLine("cmd", "/c", "npm", "run", "sassCompile")
     } else {
-        commandLine("sass", "src/main/resources/scss:src/main/resources/static/css")
+        commandLine("npm", "run", "sassCompile")
+    }
+}
+task<Exec>("tsCompile") {
+    if (System.getProperty("os.name").contains("windows",true)) {
+        commandLine("cmd", "/c", "npm", "run", "tsCompile")
+    } else {
+        commandLine("npm", "run", "tsCompile")
     }
 }
 
 val processResources by tasks.getting(ProcessResources::class) {
     dependsOn.add(tasks.getByName("sassCompile"))
+    dependsOn.add(tasks.getByName("tsCompile"))
 }
 
 val bootJar by tasks.getting(BootJar::class) {
@@ -180,6 +190,10 @@ publishing {
     }
 }
 
+task<Test>("integrationTest") {
+    useJUnitPlatform()
+    include("nl/tudelft/skills/integration/**")
+}
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
     minHeapSize = "256m"
@@ -191,6 +205,7 @@ tasks.withType<Test>().configureEach {
 
 tasks.getByName<Test>("test") {
     useJUnitPlatform()
+    exclude("nl/tudelft/skills/integration/**")
 }
 
 dependencies {
@@ -270,6 +285,9 @@ dependencies {
         exclude("junit", "junit")
         exclude("org.junit.vintage", "junit-vintage-engine")
     }
+
+    testImplementation("com.microsoft.playwright:playwright:1.32.0")
+    testImplementation("com.microsoft.playwright:driver-bundle:1.32.0")
 
     testImplementation("org.junit.jupiter:junit-jupiter")
     runtimeOnly("org.junit.jupiter:junit-jupiter-engine")

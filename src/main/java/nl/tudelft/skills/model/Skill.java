@@ -34,6 +34,7 @@ import org.hibernate.annotations.CascadeType;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class Skill extends AbstractSkill {
 
 	@NotBlank
@@ -80,6 +81,18 @@ public class Skill extends AbstractSkill {
 	@Cascade(CascadeType.DELETE)
 	@OneToMany(mappedBy = "skill")
 	private Set<ExternalSkill> externalSkills = new HashSet<>();
+
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@ManyToOne
+	private Skill previousEditionSkill;
+
+	@NotNull
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@OneToMany(mappedBy = "previousEditionSkill")
+	private Set<Skill> futureEditionSkills = new HashSet<>();
 
 	public void setTasks(List<Task> tasks) {
 		this.tasks = tasks;

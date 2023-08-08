@@ -26,7 +26,7 @@ import javax.validation.constraints.NotNull;
 import lombok.*;
 import nl.tudelft.skills.model.Inventory;
 import nl.tudelft.skills.model.PathPreference;
-import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.TaskCompletion;
 
 @Data
 @Entity
@@ -41,8 +41,8 @@ public class SCPerson {
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToMany
-	private Set<Task> tasksCompleted = new HashSet<>();
+	@OneToMany(mappedBy = "person")
+	private Set<TaskCompletion> taskCompletions = new HashSet<>();
 
 	@NotNull
 	@OneToOne(cascade = CascadeType.ALL)

@@ -28,16 +28,7 @@ import javax.annotation.PostConstruct;
 
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
-import nl.tudelft.skills.repository.BadgeRepository;
-import nl.tudelft.skills.repository.CheckpointRepository;
-import nl.tudelft.skills.repository.CourseRepository;
-import nl.tudelft.skills.repository.EditionRepository;
-import nl.tudelft.skills.repository.InventoryRepository;
-import nl.tudelft.skills.repository.ModuleRepository;
-import nl.tudelft.skills.repository.PathRepository;
-import nl.tudelft.skills.repository.SkillRepository;
-import nl.tudelft.skills.repository.SubmoduleRepository;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +70,10 @@ public class TestDatabaseLoader {
 	private PathRepository pathRepository;
 	@Autowired
 	private CheckpointRepository checkpointRepository;
+	@Autowired
+	private TaskCompletionRepository taskCompletionRepository;
+	@Autowired
+	private ExternalSkillRepository externalSkillRepository;
 
 	/**
 	 * Test models.
@@ -151,6 +146,18 @@ public class TestDatabaseLoader {
 	private Inventory inventory = Inventory.builder().build();
 
 	private SCPerson person = SCPerson.builder().id(TestUserDetailsService.id).build();
+
+	private TaskCompletion completeDo11ad = TaskCompletion.builder().task(taskDo11ad).person(person)
+			.timestamp(LocalDateTime.of(LocalDate.ofYearDay(2022, 42), LocalTime.MIDNIGHT)).build();
+	private TaskCompletion completeRead12 = TaskCompletion.builder().task(taskRead12).person(person)
+			.timestamp(LocalDateTime.of(LocalDate.ofYearDay(2022, 42), LocalTime.MIDNIGHT).plusSeconds(1))
+			.build();
+	private TaskCompletion completeDo12ae = TaskCompletion.builder().task(taskDo12ae).person(person)
+			.timestamp(LocalDateTime.of(LocalDate.ofYearDay(2022, 42), LocalTime.MIDNIGHT).plusSeconds(2))
+			.build();
+	private TaskCompletion completeRead11 = TaskCompletion.builder().task(taskRead11).person(person)
+			.timestamp(LocalDateTime.of(LocalDate.ofYearDay(2022, 42), LocalTime.MIDNIGHT).plusSeconds(3))
+			.build();
 
 	public SCCourse getCourseRL() {
 		return courseRepository.findByIdOrThrow(courseRL.getId());
@@ -292,6 +299,22 @@ public class TestDatabaseLoader {
 		return personRepository.findByIdOrThrow(person.getId());
 	}
 
+	public TaskCompletion getCompleteDo11ad() {
+		return taskCompletionRepository.findByIdOrThrow(completeDo11ad.getId());
+	}
+
+	public TaskCompletion getCompleteRead12() {
+		return taskCompletionRepository.findByIdOrThrow(completeRead12.getId());
+	}
+
+	public TaskCompletion getCompleteDo12ae() {
+		return taskCompletionRepository.findByIdOrThrow(completeDo12ae.getId());
+	}
+
+	public TaskCompletion getCompleteRead11() {
+		return taskCompletionRepository.findByIdOrThrow(completeRead11.getId());
+	}
+
 	@PostConstruct
 	private void init() {
 		initCourse();
@@ -304,6 +327,7 @@ public class TestDatabaseLoader {
 		initTask();
 		initPerson();
 		initBadges();
+		initTaskCompletions();
 	}
 
 	private void initCourse() {
@@ -421,7 +445,6 @@ public class TestDatabaseLoader {
 	}
 
 	private void initPerson() {
-		person.setTasksCompleted(Set.of(taskDo11ad, taskRead12, taskDo12ae, taskRead11));
 		inventory.setPerson(person);
 		person.setInventory(inventory);
 
@@ -429,8 +452,84 @@ public class TestDatabaseLoader {
 		inventory = person.getInventory();
 	}
 
+	private void initTaskCompletions() {
+		completeDo11ad = taskCompletionRepository.save(completeDo11ad);
+		completeRead12 = taskCompletionRepository.save(completeRead12);
+		completeDo12ae = taskCompletionRepository.save(completeDo12ae);
+		completeRead11 = taskCompletionRepository.save(completeRead11);
+
+		person.setTaskCompletions(Set.of(completeDo11ad, completeRead12, completeDo12ae, completeRead11));
+		taskDo11ad.getCompletedBy().add(completeDo11ad);
+		taskRead12.getCompletedBy().add(completeRead12);
+		taskDo12ae.getCompletedBy().add(completeDo12ae);
+		taskRead11.getCompletedBy().add(completeRead11);
+	}
+
 	private void initBadges() {
 		badge1 = badgeRepository.save(badge1);
 		badge2 = badgeRepository.save(badge2);
+	}
+
+	/**
+	 * Creates an external skill for testing purposes.
+	 *
+	 * @param  linksTo The skill the external skill should link to.
+	 * @return         The created external skill.
+	 */
+	public ExternalSkill createExternalSkill(Skill linksTo) {
+		// Create a new module for the external skill, in the same edition
+		SCModule module = moduleRepository.save(SCModule.builder().edition(editionRL2021)
+				.name("New module").build());
+		// Create an external skill referencing SkillAssumption
+		ExternalSkill externalSkill = ExternalSkill.builder().skill(linksTo).module(module)
+				.row(0).column(0).build();
+		externalSkill = externalSkillRepository.save(externalSkill);
+
+		return externalSkill;
+	}
+
+	/**
+	 * Creates a skill in a new edition, with a given edition id. The submodule, module and checkpoint are
+	 * also created/saved.
+	 *
+	 * @param  editionId The id of the new edition.
+	 * @param  visible   Whether the edition is visible.
+	 * @return           The skill created within the new edition.
+	 */
+	public Skill createSkillInEditionHelper(Long editionId, boolean visible) {
+		SCEdition edition = SCEdition.builder().id(editionId).isVisible(visible).build();
+		edition = editionRepository.save(edition);
+		SCModule module = SCModule.builder()
+				.name("Module in " + editionId).edition(edition).build();
+		module = moduleRepository.save(module);
+		edition.getModules().add(module);
+		Submodule submodule = Submodule.builder().module(module)
+				.name("Submodule in " + editionId).column(0).row(0).build();
+		submodule = submoduleRepository.save(submodule);
+		module.getSubmodules().add(submodule);
+		LocalDateTime localDateTime = LocalDateTime.of(2023, 1, 10, 10, 10, 0);
+		Checkpoint checkpoint = Checkpoint.builder().edition(edition)
+				.name("Checkpoint in " + editionId).deadline(localDateTime).build();
+		checkpoint = checkpointRepository.save(checkpoint);
+		edition.getCheckpoints().add(checkpoint);
+		Skill skill = Skill.builder().submodule(submodule).checkpoint(checkpoint)
+				.name("Skill in " + editionId).column(0).row(0).build();
+		skill = skillRepository.save(skill);
+		checkpoint.getSkills().add(skill);
+		submodule.getSkills().add(skill);
+
+		return skill;
+	}
+
+	/**
+	 * Reset the task completions that were initialized on load.
+	 */
+	public void resetTaskCompletions() {
+		person.setTaskCompletions(new HashSet<>());
+		taskDo11ad.setCompletedBy(new HashSet<>());
+		taskRead12.setCompletedBy(new HashSet<>());
+		taskDo12ae.setCompletedBy(new HashSet<>());
+		taskRead11.setCompletedBy(new HashSet<>());
+		taskCompletionRepository.deleteAll();
 	}
 }

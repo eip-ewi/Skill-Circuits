@@ -17,6 +17,9 @@
  */
 package nl.tudelft.skills.dto.view.edition;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
@@ -34,4 +37,8 @@ public class EditionLevelCourseViewDTO extends View<SCCourse> {
 	private Long id;
 	@NotNull
 	private String name;
+	@NotNull
+	@Builder.Default
+	private List<EditionLevelEditionSummaryDTO> olderEditions = new ArrayList<>();
+
 }

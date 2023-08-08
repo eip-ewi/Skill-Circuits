@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -138,7 +139,10 @@ public class DevDatabaseLoader {
 	@PostConstruct
 	private void init() {
 		courseOOPDetails = courseControllerApi.getCourseById(1L).block();
-		editionOOPDetails = editionApi.getAllEditionsByCourse(courseOOPDetails.getId()).blockFirst();
+		// Find the most recent edition to add the modules to (which should be the active one)
+		// This should not produce exceptions if there is at least one edition (and courseOOPDetails != null)
+		editionOOPDetails = editionApi.getAllEditionsByCourse(courseOOPDetails.getId()).collectList().block()
+				.stream().max(Comparator.comparing(EditionDetailsDTO::getEndDate)).get();
 
 		courseADSDetails = courseControllerApi.getCourseById(2L).block();
 		editionADSDetails = editionApi.getAllEditionsByCourse(courseADSDetails.getId()).blockFirst();

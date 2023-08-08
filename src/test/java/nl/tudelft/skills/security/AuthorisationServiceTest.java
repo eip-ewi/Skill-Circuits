@@ -18,8 +18,7 @@
 package nl.tudelft.skills.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -32,6 +31,7 @@ import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.cache.RoleCacheManager;
 import nl.tudelft.skills.model.ExternalSkill;
 import nl.tudelft.skills.model.SCEdition;
+import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.test.TestDatabaseLoader;
 import nl.tudelft.skills.test.TestUserDetailsService;
@@ -41,6 +41,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -137,6 +138,18 @@ public class AuthorisationServiceTest {
 		assertThat(authorisationService.isStaff()).isFalse();
 	}
 
+	@Test
+	@WithAnonymousUser
+	void cannotViewIfNotAuthenticated() {
+		assertThat(authorisationService.canViewCourse(db.getCourseRL().getId())).isFalse();
+		assertThat(authorisationService.canViewEdition(db.getEditionRL().getId())).isFalse();
+		assertThat(authorisationService.canViewModule(db.getModuleProofTechniques().getId())).isFalse();
+		assertThat(authorisationService.canViewSkill(db.getSkillAssumption().getId())).isFalse();
+
+		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
+		assertThat(authorisationService.canViewSkill(externalSkill.getId())).isFalse();
+	}
+
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
@@ -185,6 +198,80 @@ public class AuthorisationServiceTest {
 		editionRepository.save(edition);
 
 		assertThat(authorisationService.canViewEdition(edition.getId())).isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canViewModule(String role, boolean expected) {
+		mockRole(role);
+
+		assertThat(authorisationService.canViewModule(db.getModuleProofTechniques().getId()))
+				.isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,true", "STUDENT,true", ",true" })
+	void canViewModuleWithVisibility(String role, boolean expected) {
+		mockRole(role);
+
+		SCEdition edition = db.getEditionRL();
+		edition.setVisible(true);
+		editionRepository.save(edition);
+
+		assertThat(authorisationService.canViewModule(db.getModuleProofTechniques().getId()))
+				.isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canViewSkill(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.canViewSkill(db.getSkillAssumption().getId())).isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,true", "STUDENT,true", ",true" })
+	void canViewSkillWithVisibility(String role, boolean expected) {
+		mockRole(role);
+		SCEdition edition = db.getEditionRL();
+		edition.setVisible(true);
+		editionRepository.save(edition);
+		assertThat(authorisationService.canViewSkill(db.getSkillAssumption().getId())).isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void canViewSkillExternalSameEdition(String role, boolean expected) {
+		mockRole(role);
+		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
+		assertThat(authorisationService.canViewSkill(externalSkill.getId())).isEqualTo(expected);
+	}
+
+	@Test
+	@WithUserDetails("username")
+	void canViewSkillExternalOtherEdition() {
+		// Since this is a bigger test, it is only checked with one role (the student role).
+		// This checks that the correct submodule is retrieved if it is an external skill (not using the overridden
+		// method in the ExternalSkill class).
+
+		mockRole("STUDENT");
+
+		// Set visibility of this edition
+		SCEdition edition = db.getEditionRL();
+		edition.setVisible(true);
+		editionRepository.save(edition);
+
+		// Create an edition which is invisible, and a skill it contains to which the external skill
+		// should link to
+		Skill skill = db.createSkillInEditionHelper(db.getEditionRL().getId() + 1, false);
+		ExternalSkill externalSkill = db.createExternalSkill(skill);
+
+		assertThat(authorisationService.canViewSkill(externalSkill.getId())).isEqualTo(true);
 	}
 
 	@ParameterizedTest
@@ -594,9 +681,9 @@ public class AuthorisationServiceTest {
 
 	private void mockRole(String role) {
 		if (role == null || role.isBlank()) {
-			when(roleApi.getRolesById(anyList(), anyList())).thenReturn(Flux.empty());
+			when(roleApi.getRolesById(anySet(), anySet())).thenReturn(Flux.empty());
 		} else {
-			when(roleApi.getRolesById(anyList(), anyList()))
+			when(roleApi.getRolesById(anySet(), anySet()))
 					.thenReturn(Flux.just(new RoleDetailsDTO()
 							.id(new Id().editionId(db.getEditionRL().getId())
 									.personId(TestUserDetailsService.id))

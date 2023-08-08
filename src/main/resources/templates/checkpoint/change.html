@@ -1,0 +1,127 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div th:if="${canEdit}" layout:fragment="form" class="hidden" id="change-checkpoint-wrapper">
+        <div id="change-checkpoint">
+            <form
+                class="checkpoint__form"
+                th:action="@{/checkpoint/change-checkpoint}"
+                th:method="patch">
+                <input name="moduleId" type="hidden" th:value="${circuit.id}" />
+                <input name="prevId" type="hidden" />
+
+                <select
+                    class="selectbox font_size_regular"
+                    id="change-checkpoint-select"
+                    name="newId">
+                    <option
+                        th:each="checkpoint: ${module.remainingCheckpointsInEdition}"
+                        th:value="${checkpoint.id}"
+                        th:text="${checkpoint.name}"></option>
+                </select>
+
+                <button type="button" class="fa-solid fa-xmark"></button>
+                <button type="submit" class="fa-solid fa-check"></button>
+            </form>
+        </div>
+    </div>
+
+    <script th:if="${canEdit}" layout:fragment="script">
+        function changeCheckpoint() {
+            const checkpointId = $(this).data("checkpoint");
+            const checkpointDisplay = $(`#checkpoint-${checkpointId}-display`);
+
+            $(`#checkpoint-${checkpointId}`).attr("draggable", false);
+            checkpointDisplay.addClass("hidden");
+            $(`#checkpoint-${checkpointId}-buttons`).addClass("hidden");
+
+            const checkpointChanger = $("#change-checkpoint").clone();
+            checkpointChanger.attr("id", `change-checkpoint-${checkpointId}`);
+            checkpointChanger.children().eq(0).attr("id", `change-checkpoint-form-${checkpointId}`);
+            checkpointChanger.children().eq(0).children().eq(2).val($("#circuit").data("id"));
+            checkpointChanger.children().eq(0).children().eq(3).val(checkpointId);
+            checkpointChanger
+                .children()
+                .eq(0)
+                .children()
+                .eq(4)
+                .attr("id", `change-checkpoint-select-${checkpointId}`);
+            checkpointChanger
+                .children()
+                .eq(0)
+                .children()
+                .eq(5)
+                .attr("id", `change-checkpoint-cancel-${checkpointId}`);
+
+            $(`#checkpoint-${checkpointId}-body`).append(checkpointChanger);
+
+            $(`#change-checkpoint-cancel-${checkpointId}`).on("click", function () {
+                checkpointChanger.remove();
+                $(`#checkpoint-${checkpointId}`).attr("draggable", true);
+                $(`#checkpoint-${checkpointId}-display`).removeClass("hidden");
+                $(`#checkpoint-${checkpointId}-buttons`).removeClass("hidden");
+            });
+        }
+
+        function hoverCheckpoint() {
+            $(this)
+                .children(".checkpoint__buttons")
+                .css({ visibility: "initial", display: "flex" });
+        }
+
+        /**
+         * Exits focus on a button of a checkpoint, and sets the buttons to be invisible if the body is not hovered
+         * and no button is in focus.
+         */
+        function exitFocusCheckpointButton() {
+            if (
+                $(this).parent(":focus-within").length === 0 &&
+                $(this).parent(":hover").length === 0
+            ) {
+                $(this).parent().css({ visibility: "", display: "" });
+            }
+        }
+
+        /**
+         * Exits focus/hovering over the body of a checkpoint. Only sets the buttons to be invisible, if none of
+         * them are in focus either.
+         */
+        function exitHoverCheckpoint() {
+            if (!$(this).is(":focus-within")) {
+                $(this).children(".checkpoint__buttons").css({ visibility: "", display: "" });
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const body = $(".checkpoint__body");
+            body.on("focus", hoverCheckpoint);
+            body.on("mouseenter", hoverCheckpoint);
+            $(".checkpoint__buttons").children().on("focusout", exitFocusCheckpointButton);
+            body.on("focusout", exitHoverCheckpoint);
+            body.on("mouseleave", exitHoverCheckpoint);
+
+            $(".checkpoint__change").on("click", changeCheckpoint);
+        });
+    </script>
+</html>

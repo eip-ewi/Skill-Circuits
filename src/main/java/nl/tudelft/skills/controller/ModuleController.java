@@ -32,6 +32,7 @@ import nl.tudelft.skills.dto.view.edition.EditionLevelModuleViewDTO;
 import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.service.ModuleService;
+import nl.tudelft.skills.service.TaskCompletionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -48,13 +49,15 @@ public class ModuleController {
 	private ModuleRepository moduleRepository;
 	private ModuleService moduleService;
 	private HttpSession session;
+	private final TaskCompletionService taskCompletionService;
 
 	@Autowired
 	public ModuleController(ModuleRepository moduleRepository, ModuleService moduleService,
-			HttpSession session) {
+			HttpSession session, TaskCompletionService taskCompletionService) {
 		this.moduleRepository = moduleRepository;
 		this.moduleService = moduleService;
 		this.session = session;
+		this.taskCompletionService = taskCompletionService;
 	}
 
 	/**
@@ -67,7 +70,7 @@ public class ModuleController {
 	 * @return        The page to load
 	 */
 	@GetMapping("{id}")
-	@PreAuthorize("@authorisationService.isAuthenticated()")
+	@PreAuthorize("@authorisationService.canViewModule(#id)")
 	public String getModulePage(@AuthenticatedPerson(required = false) Person person, @PathVariable Long id,
 			Model model) {
 		moduleService.configureModuleModel(person, id, model, session);
@@ -119,8 +122,7 @@ public class ModuleController {
 		module.getSubmodules().stream()
 				.flatMap(s -> s.getSkills().stream())
 				.flatMap(s -> s.getTasks().stream())
-				.forEach(t -> t.getPersons()
-						.forEach(p -> p.getTasksCompleted().remove(t)));
+				.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
 		moduleRepository.delete(module);
 		return "redirect:/edition/" + module.getEdition().getId();
 	}
@@ -139,8 +141,7 @@ public class ModuleController {
 		module.getSubmodules().stream()
 				.flatMap(s -> s.getSkills().stream())
 				.flatMap(s -> s.getTasks().stream())
-				.forEach(t -> t.getPersons()
-						.forEach(p -> p.getTasksCompleted().remove(t)));
+				.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
 		moduleRepository.delete(module);
 		return ResponseEntity.ok().build();
 	}

@@ -24,6 +24,7 @@ import java.util.Set;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.CheckpointCreateDTO;
 import nl.tudelft.skills.dto.patch.CheckpointPatchDTO;
+import nl.tudelft.skills.dto.view.checkpoint.ChangeCheckpointDTO;
 import nl.tudelft.skills.dto.view.checkpoint.CheckpointViewDTO;
 import nl.tudelft.skills.model.Checkpoint;
 import nl.tudelft.skills.model.Skill;
@@ -89,6 +90,42 @@ public class CheckpointController {
 		skills.forEach(skill -> skill.setCheckpoint(checkpoint));
 
 		return ResponseEntity.ok().build();
+	}
+
+	/**
+	 * Changes the skills belonging to a certain checkpoint in a given module to have another checkpoint.
+	 *
+	 * @param  changeCheckpointDTO The DTO for changing the checkpoint, contains old/new checkpoint id as well
+	 *                             as module id.
+	 *
+	 * @return                     Redirects to the module page, regardless of whether it was a valid or
+	 *                             invalid request. In practice, the frontend implementation should prevent
+	 *                             requests for invalid changes.
+	 */
+	@Transactional
+	@PatchMapping("/change-checkpoint")
+	@PreAuthorize("@authorisationService.canEditModule(#changeCheckpointDTO.moduleId)")
+	public String changeToCheckpoint(ChangeCheckpointDTO changeCheckpointDTO) {
+		Checkpoint checkpointPrev = checkpointRepository.findByIdOrThrow(changeCheckpointDTO.getPrevId());
+		Checkpoint checkpointNew = checkpointRepository.findByIdOrThrow(changeCheckpointDTO.getNewId());
+		Long moduleId = changeCheckpointDTO.getModuleId();
+
+		// If the new checkpoint is already used in the module, or if the checkpoints are
+		// not in the same edition, redirect to the module page without any changes.
+		// In practice this should already be prevented from the frontend side.
+		if (!skillRepository.findAllBySubmoduleModuleIdAndCheckpointId(moduleId,
+				changeCheckpointDTO.getNewId()).isEmpty()
+				|| checkpointPrev.getEdition() != checkpointNew.getEdition()) {
+			return "redirect:/module/" + moduleId;
+		}
+
+		Set<Skill> skills = skillRepository.findAllBySubmoduleModuleIdAndCheckpointId(
+				moduleId, changeCheckpointDTO.getPrevId());
+		checkpointNew.getSkills().addAll(skills);
+		checkpointPrev.getSkills().removeAll(skills);
+		skills.forEach(skill -> skill.setCheckpoint(checkpointNew));
+
+		return "redirect:/module/" + moduleId;
 	}
 
 	@Transactional

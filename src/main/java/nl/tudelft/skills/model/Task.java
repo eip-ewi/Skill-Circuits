@@ -26,7 +26,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
-import nl.tudelft.skills.model.labracore.SCPerson;
 
 @Data
 @Entity
@@ -80,8 +79,8 @@ public class Task {
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToMany(mappedBy = "tasksCompleted")
-	private Set<SCPerson> persons = new HashSet<>();
+	@OneToMany(mappedBy = "task")
+	private Set<TaskCompletion> completedBy = new HashSet<>();
 
 	@NotNull
 	@Builder.Default
