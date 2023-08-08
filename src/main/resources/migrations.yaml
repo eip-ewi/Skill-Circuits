@@ -802,7 +802,7 @@ databaseChangeLog:
             validate: true
 # Create table for logging clicked links
   - changeSet:
-      id: 1690547517723-1
+      id: 1691506242366-1
       author: bakos (generated)
       changes:
         - createTable:
@@ -814,11 +814,6 @@ databaseChangeLog:
                     primaryKeyName: CONSTRAINT_4C
                   name: id
                   type: BIGINT
-              - column:
-                  constraints:
-                    nullable: false
-                  name: link
-                  type: VARCHAR(255)
               - column:
                   constraints:
                     nullable: false
@@ -836,7 +831,7 @@ databaseChangeLog:
                   type: BIGINT
             tableName: clicked_link
   - changeSet:
-      id: 1690547517723-2
+      id: 1691506242366-2
       author: bakos (generated)
       changes:
         - createIndex:
@@ -846,7 +841,7 @@ databaseChangeLog:
             indexName: FKjy82i90jv9tm04dy5lmdedv4t_INDEX_4
             tableName: clicked_link
   - changeSet:
-      id: 1690547517723-3
+      id: 1691506242366-3
       author: bakos (generated)
       changes:
         - createIndex:
@@ -856,7 +851,7 @@ databaseChangeLog:
             indexName: FKpkdufyxedswqtr9wxbvxs4g09_INDEX_4
             tableName: clicked_link
   - changeSet:
-      id: 1690547517723-4
+      id: 1691506242366-4
       author: bakos (generated)
       changes:
         - addForeignKeyConstraint:
@@ -871,7 +866,7 @@ databaseChangeLog:
             referencedTableName: task
             validate: true
   - changeSet:
-      id: 1690547517723-5
+      id: 1691506242366-5
       author: bakos (generated)
       changes:
         - addForeignKeyConstraint:

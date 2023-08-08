@@ -17,12 +17,12 @@
  */
 package nl.tudelft.skills.model;
 
+import java.io.IOException;
+import java.time.format.DateTimeFormatter;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-
-import java.io.IOException;
-import java.time.format.DateTimeFormatter;
 
 public class CustomClickedLinkSerializer extends StdSerializer<ClickedLink> {
 	public CustomClickedLinkSerializer() {
