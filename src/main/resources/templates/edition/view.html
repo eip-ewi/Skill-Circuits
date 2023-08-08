@@ -90,9 +90,9 @@
 
             <th:block
                 th:with="circuit = ${edition},
-                       canCreate = ${@authorisationService.canCreateSubmoduleInEdition(edition.id)},
-                       canEdit = ${@authorisationService.canEditSubmoduleInEdition(edition.id)},
-                       canDelete = ${@authorisationService.canDeleteSubmoduleInEdition(edition.id)},
+                       canCreate = ${@authorisationService.canCreateSubmoduleInEdition(edition.id) and not studentMode},
+                       canEdit = ${@authorisationService.canEditSubmoduleInEdition(edition.id) and not studentMode},
+                       canDelete = ${@authorisationService.canDeleteSubmoduleInEdition(edition.id) and not studentMode},
                        groupType = ${'module'},
                        blockType = ${'submodule'},
                        itemType = ${'skill'}">
@@ -102,9 +102,9 @@
 
             <th:block
                 th:with="circuit = ${edition},
-                       canCreate = ${@authorisationService.canCreateSubmoduleInEdition(edition.id)},
-                       canEdit = ${@authorisationService.canEditSubmoduleInEdition(edition.id)},
-                       canDelete = ${@authorisationService.canDeleteSubmoduleInEdition(edition.id)},
+                       canCreate = ${@authorisationService.canCreateSubmoduleInEdition(edition.id) and not studentMode},
+                       canEdit = ${@authorisationService.canEditSubmoduleInEdition(edition.id) and not studentMode},
+                       canDelete = ${@authorisationService.canDeleteSubmoduleInEdition(edition.id) and not studentMode},
                        groupType = ${'module'},
                        blockType = ${'submodule'},
                        itemType = ${'skill'}">

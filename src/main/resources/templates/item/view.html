@@ -30,11 +30,7 @@
         th:data-index-initial="${iter.size - iter.count}"
         th:classappend="${level == 'module'} ? ${item.completed ? 'completed' : ''} : ${''}"
         layout:fragment="item">
-        <input
-            th:if="${canEdit and not studentMode}"
-            name="id"
-            type="hidden"
-            th:value="${item.id}" />
+        <input th:if="${canEdit}" name="id" type="hidden" th:value="${item.id}" />
         <th:block layout:fragment="item-decoration"></th:block>
         <th:block layout:fragment="item-content-element">
             <th:block layout:fragment="item-content">

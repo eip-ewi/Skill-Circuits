@@ -23,7 +23,7 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <form
-        th:if="${canEdit and not studentMode}"
+        th:if="${canEdit}"
         layout:fragment="header"
         data-edit="only"
         class="block__header"
@@ -153,7 +153,7 @@
         </th:block>
     </form>
 
-    <script th:if="${canEdit and not studentMode}" layout:fragment="script">
+    <script th:if="${canEdit}" layout:fragment="script">
         function editBlock() {
             const block = $(this).parent().parent();
             const current = block.data("editing") === true;

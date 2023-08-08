@@ -48,7 +48,7 @@
             </th:block>
         </th:block>
 
-        <th:block th:if="${canEdit and not studentMode}">
+        <th:block th:if="${canEdit}">
             <div
                 th:each="pos : ${emptySpaces}"
                 class="ghost_block"
