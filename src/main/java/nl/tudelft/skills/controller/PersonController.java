@@ -25,17 +25,20 @@ import javax.transaction.Transactional;
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.dto.view.TaskCompletedDTO;
-import nl.tudelft.skills.model.ClickedLink;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.model.TaskCompletion;
+import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.ClickedLinkRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.TaskCompletionService;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @RestController
 @RequestMapping("/person")
@@ -104,7 +107,6 @@ public class PersonController {
 	 *
 	 * @param authPerson the person clicking the link
 	 * @param taskId     the id of the task the link is part of
-	 * @param link       the link the person clicked
 	 */
 	@PutMapping("clicked/{taskId}")
 	@Transactional
@@ -116,5 +118,21 @@ public class PersonController {
 		clickedLinkRepository.save(ClickedLink.builder()
 				.task(task).person(person).build());
 
+	}
+
+	@GetMapping("clickedlinks")
+	@Transactional
+	@PreAuthorize("@authorisationService.isAdmin()")
+	public String downloadClickedLinks() throws JsonProcessingException {
+		var logs = clickedLinkRepository.findAll();
+
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JavaTimeModule());
+
+		SimpleModule module = new SimpleModule();
+		module.addSerializer(ClickedLink.class, new CustomClickedLinkSerializer());
+		mapper.registerModule(module);
+
+		return mapper.writeValueAsString(logs);
 	}
 }

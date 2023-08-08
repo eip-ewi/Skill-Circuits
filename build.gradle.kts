@@ -244,6 +244,9 @@ dependencies {
     implementation("org.springframework:spring-web")
     implementation("org.springframework.security:spring-security-messaging")
 
+    //jackson
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.4")
+
     // Spring Boot security
     implementation("org.springframework.boot:spring-boot-starter-security")
 
