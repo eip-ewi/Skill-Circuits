@@ -223,8 +223,7 @@ public class EditionService {
 	 * @return             A map of checkpoints, from previous checkpoints in editionFrom to the new
 	 *                     checkpoints in editionTo.
 	 */
-	@Transactional
-	public Map<Checkpoint, Checkpoint> copyEditionCheckpoints(SCEdition editionFrom, SCEdition editionTo) {
+	Map<Checkpoint, Checkpoint> copyEditionCheckpoints(SCEdition editionFrom, SCEdition editionTo) {
 		Map<Checkpoint, Checkpoint> checkpointsMap = new HashMap<>();
 
 		editionFrom.getCheckpoints().forEach(c -> {
@@ -251,8 +250,7 @@ public class EditionService {
 	 * @param  editionTo   The edition to copy to.
 	 * @return             A map of paths, from previous paths in editionFrom to the new paths in editionTo.
 	 */
-	@Transactional
-	public Map<Path, Path> copyEditionPaths(SCEdition editionFrom, SCEdition editionTo) {
+	Map<Path, Path> copyEditionPaths(SCEdition editionFrom, SCEdition editionTo) {
 		Map<Path, Path> pathMap = new HashMap<>();
 
 		editionFrom.getPaths().forEach(p -> {
@@ -279,8 +277,7 @@ public class EditionService {
 	 * @return             A map of modules, from previous modules in editionFrom to the new modules in
 	 *                     editionTo.
 	 */
-	@Transactional
-	public Map<SCModule, SCModule> copyEditionModules(SCEdition editionFrom, SCEdition editionTo) {
+	Map<SCModule, SCModule> copyEditionModules(SCEdition editionFrom, SCEdition editionTo) {
 		Map<SCModule, SCModule> moduleMap = new HashMap<>();
 
 		editionFrom.getModules().forEach(m -> {
@@ -305,8 +302,7 @@ public class EditionService {
 	 * @param  moduleMap The map of modules, from previous modules to the new modules.
 	 * @return           The map of submodules, from previous submodules to the new submodules.
 	 */
-	@Transactional
-	public Map<Submodule, Submodule> copyEditionSubmodules(Map<SCModule, SCModule> moduleMap) {
+	Map<Submodule, Submodule> copyEditionSubmodules(Map<SCModule, SCModule> moduleMap) {
 		Map<Submodule, Submodule> submoduleMap = new HashMap<>();
 
 		moduleMap.forEach((prev, copy) -> {
@@ -337,8 +333,7 @@ public class EditionService {
 	 * @param  checkpointMap The map of checkpoints, from previous checkpoints to the new checkpoints.
 	 * @return               The map of skills, from previous skills to the new skills.
 	 */
-	@Transactional
-	public Map<Skill, Skill> copyAndLinkEditionSkills(Map<Submodule, Submodule> submoduleMap,
+	Map<Skill, Skill> copyAndLinkEditionSkills(Map<Submodule, Submodule> submoduleMap,
 			Map<Checkpoint, Checkpoint> checkpointMap) {
 		Map<Skill, Skill> skillMap = new HashMap<>();
 
@@ -380,8 +375,7 @@ public class EditionService {
 	 * @param  skillMap  The map of skills, from previous skills to the new skills.
 	 * @return           The map of external skills, from previous external skills to the new external skills.
 	 */
-	@Transactional
-	public Map<ExternalSkill, ExternalSkill> copyAndLinkEditionExternalSkills(
+	Map<ExternalSkill, ExternalSkill> copyAndLinkEditionExternalSkills(
 			Map<SCModule, SCModule> moduleMap, Map<Skill, Skill> skillMap) {
 		Map<ExternalSkill, ExternalSkill> externalSkillMap = new HashMap<>();
 
@@ -419,8 +413,7 @@ public class EditionService {
 	 * @param abstractSkillMap The map of abstract skills, from previous abstract skills to the new abstract
 	 *                         skills.
 	 */
-	@Transactional
-	public void linkParentsChildrenSkills(Map<AbstractSkill, AbstractSkill> abstractSkillMap) {
+	void linkParentsChildrenSkills(Map<AbstractSkill, AbstractSkill> abstractSkillMap) {
 		abstractSkillMap.forEach((prev, copy) -> prev.getParents().forEach((AbstractSkill p) -> {
 			AbstractSkill linkedSkill = abstractSkillMap.get(p);
 			if (linkedSkill != null) {
@@ -441,8 +434,7 @@ public class EditionService {
 	 * @param  pathMap  The map of paths, from previous paths to the new paths.
 	 * @return          The map of tasks, from previous tasks to the new tasks.
 	 */
-	@Transactional
-	public Map<Task, Task> copyAndLinkEditionTasks(Map<Skill, Skill> skillMap, Map<Path, Path> pathMap) {
+	Map<Task, Task> copyAndLinkEditionTasks(Map<Skill, Skill> skillMap, Map<Path, Path> pathMap) {
 		Map<Task, Task> taskMap = new HashMap<>();
 
 		skillMap.forEach((prev, copy) -> prev.getTasks().forEach(t -> {

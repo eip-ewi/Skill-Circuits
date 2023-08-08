@@ -164,6 +164,7 @@ public class EditionServiceTest {
 	}
 
 	@Test
+	@Transactional
 	public void testIsEditionEmpty() {
 		Long idInUse = db.getEditionRL().getId();
 
@@ -196,6 +197,7 @@ public class EditionServiceTest {
 	}
 
 	@Test
+	@Transactional
 	public void testCopyToEditionInvalid() {
 		Long idInUse = db.getEditionRL().getId();
 		SCEdition emptyEdition = editionRepository.save(SCEdition.builder().id(idInUse + 1).build());
@@ -214,6 +216,7 @@ public class EditionServiceTest {
 	}
 
 	@Test
+	@Transactional
 	public void testCopyEditionCheckpoints() {
 		editionDb.initEditionFrom(db.getSkillAssumption());
 
@@ -256,6 +259,7 @@ public class EditionServiceTest {
 	}
 
 	@Test
+	@Transactional
 	public void testCopyEditionPaths() {
 		editionDb.initEditionFrom(db.getSkillAssumption());
 
@@ -294,6 +298,7 @@ public class EditionServiceTest {
 	}
 
 	@Test
+	@Transactional
 	public void testCopyEditionModules() {
 		editionDb.initEditionFrom(db.getSkillAssumption());
 
@@ -334,6 +339,7 @@ public class EditionServiceTest {
 	}
 
 	@Test
+	@Transactional
 	public void testCopyEditionSubmodules() {
 		editionDb.initEditionFrom(db.getSkillAssumption());
 		editionDb.initModules(false);
@@ -379,6 +385,7 @@ public class EditionServiceTest {
 	}
 
 	@Test
+	@Transactional
 	public void testCopyEditionSkills() {
 		editionDb.initEditionFrom(db.getSkillAssumption());
 		editionDb.initModules(false);
@@ -461,6 +468,7 @@ public class EditionServiceTest {
 	}
 
 	@Test
+	@Transactional
 	public void testCopyEditionExternalSkills() {
 		editionDb.initEditionFrom(db.getSkillAssumption());
 		editionDb.initModules(false);
@@ -526,6 +534,7 @@ public class EditionServiceTest {
 	}
 
 	@Test
+	@Transactional
 	public void testLinkParentsChildrenEditionSkills() {
 		editionDb.initEditionFrom(db.getSkillAssumption());
 		editionDb.initModules(false);
@@ -582,6 +591,7 @@ public class EditionServiceTest {
 	}
 
 	@Test
+	@Transactional
 	public void testCopyEditionTasks() {
 		editionDb.initEditionFrom(db.getSkillAssumption());
 		editionDb.initModules(false);
