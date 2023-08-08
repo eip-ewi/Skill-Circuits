@@ -5,7 +5,7 @@ import nl.javadude.gradle.plugins.license.LicenseExtension
 import org.gradle.internal.fingerprint.classpath.impl.ClasspathFingerprintingStrategy.runtimeClasspath
 
 group = "nl.tudelft.skills"
-version = "2.2.1"
+version = "2.2.2"
 
 val javaVersion = JavaVersion.VERSION_17
 
