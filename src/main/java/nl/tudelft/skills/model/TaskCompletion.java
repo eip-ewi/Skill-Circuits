@@ -35,8 +35,7 @@ import nl.tudelft.skills.model.labracore.SCPerson;
 @AllArgsConstructor
 public class TaskCompletion {
 	@Id
-	@GeneratedValue(generator = "task_completion_seq")
-	@SequenceGenerator(name = "task_completion_seq", sequenceName = "completion_seq", allocationSize = 1)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@NotNull
