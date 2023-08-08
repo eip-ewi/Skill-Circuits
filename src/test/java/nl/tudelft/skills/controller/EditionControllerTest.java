@@ -128,7 +128,7 @@ public class EditionControllerTest extends ControllerTest {
 		edition1.getModules().add(module);
 		SCEdition edition2 = editionRepository.save(SCEdition.builder().id(2L).build());
 		// Mock the user to be a teacher in both editions
-		when(roleApi.getRolesById(anyList(), anyList())).thenReturn(Flux.fromIterable(
+		when(roleApi.getRolesById(anySet(), anySet())).thenReturn(Flux.fromIterable(
 				List.of(getRoleDetails("TEACHER", 1L), getRoleDetails("TEACHER", 2L))));
 		// This will use a non-mocked version of the editionService
 		mvc.perform(post("/edition/2/copy/1").with(csrf()))
@@ -154,7 +154,7 @@ public class EditionControllerTest extends ControllerTest {
 		edition1.setVisible(true);
 		SCEdition edition2 = editionRepository.save(SCEdition.builder().id(2L).build());
 		// Mock the user to be a teacher one edition, but a student in the other, the edition being visible
-		when(roleApi.getRolesById(anyList(), anyList())).thenReturn(Flux.fromIterable(
+		when(roleApi.getRolesById(anySet(), anySet())).thenReturn(Flux.fromIterable(
 				List.of(getRoleDetails("TEACHER", 2L), getRoleDetails("STUDENT", 1L))));
 		// This will use a non-mocked version of the editionService
 		mvc.perform(post("/edition/2/copy/1").with(csrf()))
@@ -172,7 +172,7 @@ public class EditionControllerTest extends ControllerTest {
 	public void testCopyEditionEditionDoesNotExist() throws Exception {
 		editionRepository.save(SCEdition.builder().id(1L).build());
 		// Mock the user to be a teacher in edition 1, edition with id 2 is not saved
-		when(roleApi.getRolesById(anyList(), anyList())).thenReturn(Flux.fromIterable(
+		when(roleApi.getRolesById(anySet(), anySet())).thenReturn(Flux.fromIterable(
 				List.of(getRoleDetails("TEACHER", 1L))));
 		mvc.perform(post("/edition/1/copy/2").with(csrf()))
 				.andExpect(status().is4xxClientError());
@@ -185,17 +185,17 @@ public class EditionControllerTest extends ControllerTest {
 		editionRepository.save(SCEdition.builder().id(2L).build());
 
 		// Mock the user to be a student in one edition, and student in the other (the edition being invisible)
-		when(roleApi.getRolesById(anyList(), anyList())).thenReturn(Flux.fromIterable(
+		when(roleApi.getRolesById(anySet(), anySet())).thenReturn(Flux.fromIterable(
 				List.of(getRoleDetails("TEACHER", 1L), getRoleDetails("STUDENT", 2L))));
 		mvc.perform(post("/edition/1/copy/2").with(csrf()))
 				.andExpect(status().isForbidden());
-		when(roleApi.getRolesById(anyList(), anyList())).thenReturn(Flux.fromIterable(
+		when(roleApi.getRolesById(anySet(), anySet())).thenReturn(Flux.fromIterable(
 				List.of(getRoleDetails("STUDENT", 1L), getRoleDetails("TEACHER", 2L))));
 		mvc.perform(post("/edition/1/copy/2").with(csrf()))
 				.andExpect(status().isForbidden());
 
 		// Mock the user to be a student both editions
-		when(roleApi.getRolesById(anyList(), anyList())).thenReturn(Flux.fromIterable(
+		when(roleApi.getRolesById(anySet(), anySet())).thenReturn(Flux.fromIterable(
 				List.of(getRoleDetails("STUDENT", 1L), getRoleDetails("STUDENT", 2L))));
 		mvc.perform(post("/edition/1/copy/2").with(csrf()))
 				.andExpect(status().isForbidden());

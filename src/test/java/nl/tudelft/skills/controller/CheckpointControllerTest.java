@@ -189,7 +189,7 @@ public class CheckpointControllerTest extends ControllerTest {
 		Set<Skill> checkpointTwoSkills = db.getCheckpointLectureTwo().getSkills();
 
 		// If fetch for the cache is called, the roleApi is called, which should return the student role
-		when(roleApi.getRolesById(List.of(db.getEditionRL().getId()), List.of(TestUserDetailsService.id)))
+		when(roleApi.getRolesById(Set.of(db.getEditionRL().getId()), Set.of(TestUserDetailsService.id)))
 				.thenReturn(Flux.just(new RoleDetailsDTO()
 						.id(new Id().editionId(db.getEditionRL().getId())
 								.personId(TestUserDetailsService.id))
