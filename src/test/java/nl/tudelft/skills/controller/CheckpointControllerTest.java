@@ -18,21 +18,31 @@
 package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import nl.tudelft.labracore.api.RoleControllerApi;
+import nl.tudelft.labracore.api.dto.Id;
+import nl.tudelft.labracore.api.dto.PersonSummaryDTO;
+import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.model.Checkpoint;
+import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.CheckpointRepository;
+import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.SkillRepository;
+import nl.tudelft.skills.test.TestUserDetailsService;
 
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
@@ -47,6 +57,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
+import reactor.core.publisher.Flux;
+
 @Transactional
 @AutoConfigureMockMvc
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
@@ -55,13 +67,18 @@ public class CheckpointControllerTest extends ControllerTest {
 	private final CheckpointRepository checkpointRepository;
 	private final CheckpointController checkpointController;
 	private final SkillRepository skillRepository;
+	private final EditionRepository editionRepository;
+	private final RoleControllerApi roleApi;
 
 	@Autowired
 	public CheckpointControllerTest(CheckpointRepository checkpointRepository,
-			CheckpointController checkpointController, SkillRepository skillRepository) {
+			CheckpointController checkpointController, SkillRepository skillRepository,
+			EditionRepository editionRepository, RoleControllerApi roleApi) {
 		this.checkpointRepository = checkpointRepository;
 		this.checkpointController = checkpointController;
 		this.skillRepository = skillRepository;
+		this.editionRepository = editionRepository;
+		this.roleApi = roleApi;
 	}
 
 	@Test
@@ -106,6 +123,13 @@ public class CheckpointControllerTest extends ControllerTest {
 				new BasicNameValuePair("deadline",
 						LocalDateTime.of(2022, 1, 1, 1, 1)
 								.format(DateTimeFormatter.ISO_DATE_TIME)))));
+	}
+
+	private String getChangeCheckpointFormData(Long moduleId, Long prevId, Long newId) throws Exception {
+		return EntityUtils.toString(new UrlEncodedFormEntity(List.of(
+				new BasicNameValuePair("moduleId", Long.toString(moduleId)),
+				new BasicNameValuePair("prevId", Long.toString(prevId)),
+				new BasicNameValuePair("newId", Long.toString(newId)))));
 	}
 
 	@Test
@@ -156,6 +180,118 @@ public class CheckpointControllerTest extends ControllerTest {
 
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(db.getCheckpointLectureOne().getId());
 		assertThat(checkpoint.getName()).isEqualTo("Lecture 1");
+	}
+
+	@Test
+	@WithUserDetails("username")
+	public void changeCheckpointForbidden() throws Exception {
+		Set<Skill> checkpointOneSkills = db.getCheckpointLectureOne().getSkills();
+		Set<Skill> checkpointTwoSkills = db.getCheckpointLectureTwo().getSkills();
+
+		// If fetch for the cache is called, the roleApi is called, which should return the student role
+		when(roleApi.getRolesById(Set.of(db.getEditionRL().getId()), Set.of(TestUserDetailsService.id)))
+				.thenReturn(Flux.just(new RoleDetailsDTO()
+						.id(new Id().editionId(db.getEditionRL().getId())
+								.personId(TestUserDetailsService.id))
+						.person(new PersonSummaryDTO().id(TestUserDetailsService.id).username("username"))
+						.type(RoleDetailsDTO.TypeEnum.valueOf("STUDENT"))));
+
+		// Prepare and send request
+		mvc.perform(patch("/checkpoint/change-checkpoint").with(csrf())
+				.content(getChangeCheckpointFormData(db.getModuleProofTechniques().getId(),
+						db.getCheckpointLectureOne().getId(), db.getCheckpointLectureTwo().getId()))
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+				.andExpect(status().isForbidden());
+
+		// Assert that the skills in checkpoints are still the same
+		assertThat(checkpointRepository.findAll()).hasSize(2);
+		assertThat(checkpointRepository.findByIdOrThrow(db.getCheckpointLectureOne().getId()).getSkills())
+				.containsAll(checkpointOneSkills);
+		assertThat(checkpointRepository.findByIdOrThrow(db.getCheckpointLectureTwo().getId()).getSkills())
+				.containsAll(checkpointTwoSkills);
+	}
+
+	@Test
+	@WithUserDetails("admin")
+	public void changeCheckpointInvalidSomeSkillsInModule() throws Exception {
+		Set<Skill> checkpointOneSkills = db.getCheckpointLectureOne().getSkills();
+		Set<Skill> checkpointTwoSkills = db.getCheckpointLectureTwo().getSkills();
+
+		// Prepare and send request
+		// Expect a redirection to the page, which will also be returned if the request is invalid
+		mvc.perform(patch("/checkpoint/change-checkpoint").with(csrf())
+				.content(getChangeCheckpointFormData(db.getModuleProofTechniques().getId(),
+						db.getCheckpointLectureOne().getId(), db.getCheckpointLectureTwo().getId()))
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+				.andExpect(redirectedUrl("/module/" + db.getModuleProofTechniques().getId()));
+
+		// Assert that the skills in checkpoints are still the same (nothing should have changed since
+		// the checkpoint for lecture 2 contains some skills in the module already)
+		assertThat(checkpointRepository.findAll()).hasSize(2);
+		assertThat(checkpointRepository.findByIdOrThrow(db.getCheckpointLectureOne().getId()).getSkills())
+				.containsAll(checkpointOneSkills);
+		assertThat(checkpointRepository.findByIdOrThrow(db.getCheckpointLectureTwo().getId()).getSkills())
+				.containsAll(checkpointTwoSkills);
+	}
+
+	@Test
+	@WithUserDetails("admin")
+	public void changeCheckpointInvalidDifferentEditions() throws Exception {
+		Set<Skill> checkpointOneSkills = db.getCheckpointLectureOne().getSkills();
+		Set<Skill> checkpointTwoSkills = db.getCheckpointLectureTwo().getSkills();
+
+		// Create a new checkpoint in different edition
+		SCEdition edition = editionRepository.save(SCEdition.builder().id(1L).build());
+		Checkpoint checkpoint = checkpointRepository.save(Checkpoint.builder()
+				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 100), LocalTime.MIDNIGHT))
+				.name("Checkpoint").edition(edition).build());
+		edition.setCheckpoints(Set.of(checkpoint));
+
+		// Prepare and send request
+		// Expect a redirection to the page, which will also be returned if the request is invalid
+		mvc.perform(patch("/checkpoint/change-checkpoint").with(csrf())
+				.content(getChangeCheckpointFormData(db.getModuleProofTechniques().getId(),
+						db.getCheckpointLectureOne().getId(), checkpoint.getId()))
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+				.andExpect(redirectedUrl("/module/" + db.getModuleProofTechniques().getId()));
+
+		// Assert that the skills in checkpoints are still the same (nothing should have changed since the
+		// checkpoint is in a different edition)
+		assertThat(checkpointRepository.findAll()).hasSize(3);
+		assertThat(checkpointRepository.findByIdOrThrow(checkpoint.getId()).getSkills())
+				.isEmpty();
+		assertThat(checkpointRepository.findByIdOrThrow(db.getCheckpointLectureOne().getId()).getSkills())
+				.containsAll(checkpointOneSkills);
+		assertThat(checkpointRepository.findByIdOrThrow(db.getCheckpointLectureTwo().getId()).getSkills())
+				.containsAll(checkpointTwoSkills);
+	}
+
+	@Test
+	@WithUserDetails("admin")
+	public void changeCheckpointValid() throws Exception {
+		Set<Skill> checkpointOneSkills = db.getCheckpointLectureOne().getSkills();
+		Set<Skill> checkpointTwoSkills = db.getCheckpointLectureTwo().getSkills();
+
+		// Create a new checkpoint (contains no skills in this module)
+		Checkpoint checkpoint = checkpointRepository.save(Checkpoint.builder()
+				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 100), LocalTime.MIDNIGHT))
+				.name("Checkpoint").edition(db.getEditionRL()).build());
+
+		// Prepare and send request, expect a redirection to the page
+		mvc.perform(patch("/checkpoint/change-checkpoint").with(csrf())
+				.content(getChangeCheckpointFormData(db.getModuleProofTechniques().getId(),
+						db.getCheckpointLectureOne().getId(), checkpoint.getId()))
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+				.andExpect(redirectedUrl("/module/" + db.getModuleProofTechniques().getId()));
+
+		// Assert that the skills are now changed to be in the new checkpoint
+		assertThat(checkpointRepository.findAll()).hasSize(3);
+		assertThat(checkpointRepository.findByIdOrThrow(db.getCheckpointLectureOne().getId()).getSkills())
+				.isEmpty();
+		assertThat(checkpointRepository.findByIdOrThrow(checkpoint.getId()).getSkills())
+				.containsAll(checkpointOneSkills);
+		assertThat(checkpointRepository.findByIdOrThrow(db.getCheckpointLectureTwo().getId()).getSkills())
+				.containsAll(checkpointTwoSkills);
 	}
 
 	@Test

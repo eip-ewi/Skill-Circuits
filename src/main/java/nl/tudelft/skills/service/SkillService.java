@@ -40,6 +40,7 @@ import nl.tudelft.skills.repository.AbstractSkillRepository;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
+import nl.tudelft.skills.security.AuthorisationService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -54,18 +55,20 @@ public class SkillService {
 	private final EditionControllerApi editionApi;
 	private final CourseControllerApi courseApi;
 	private final SkillRepository skillRepository;
+	private final AuthorisationService authorisationService;
 
 	@Autowired
 	public SkillService(AbstractSkillRepository abstractSkillRepository,
 			TaskCompletionRepository taskCompletionRepository, EditionControllerApi editionApi,
 			CourseControllerApi courseApi, SkillRepository skillRepository,
-			EditionRepository editionRepository) {
+			EditionRepository editionRepository, AuthorisationService authorisationService) {
 		this.abstractSkillRepository = abstractSkillRepository;
 		this.taskCompletionRepository = taskCompletionRepository;
 		this.editionApi = editionApi;
 		this.courseApi = courseApi;
 		this.skillRepository = skillRepository;
 		this.editionRepository = editionRepository;
+		this.authorisationService = authorisationService;
 	}
 
 	/**
@@ -93,7 +96,8 @@ public class SkillService {
 	/**
 	 * Gets the correct skill for an external skill. This is the skill in the most recent edition which the
 	 * person has last worked on. If none such edition exists, the most recent edition is chosen. "Most
-	 * recent" refers to the start date of the edition, and not the date of activity by the person.
+	 * recent" refers to the start date of the edition, and not the date of activity by the person. If there
+	 * is no skill in an edition visible to the user, this returns null.
 	 *
 	 * @param  personId      The id of the person.
 	 * @param  externalSkill The external skill.
@@ -118,11 +122,11 @@ public class SkillService {
 		// Do DFS
 		List<Skill> traversal = traverseSkillTree(skill);
 
-		// Filter by skills in visible editions
+		// Filter by skills in editions visible to the user
 		traversal = traversal.stream()
 				.filter(innerSkill -> {
 					Long innerEditionId = innerSkill.getSubmodule().getModule().getEdition().getId();
-					return editionRepository.getById(innerEditionId).isVisible();
+					return authorisationService.canViewEdition(innerEditionId);
 				})
 				.sorted(Comparator.comparing((Skill innerSkill) -> editionsById.get(innerSkill.getSubmodule()
 						.getModule().getEdition().getId()).getStartDate()).reversed())
@@ -135,8 +139,8 @@ public class SkillService {
 				.findFirst();
 
 		// If it does not exist, return the skill in the latest edition
-		// Traversal should never be empty, as it at least contains the initial skill
-		return completedTasksInEdition.orElse(traversal.get(0));
+		// If there is no skill visible to the user, returns null
+		return completedTasksInEdition.orElse(traversal.size() > 0 ? traversal.get(0) : null);
 	}
 
 	/**

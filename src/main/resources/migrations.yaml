@@ -709,25 +709,41 @@ databaseChangeLog:
             referencedColumnNames: id
             referencedTableName: scperson
             validate: true
+#  - changeSet:
+#      id: 1682666888978-create-task-completion-id-sequence
+#      author: Fanni Fiedrich
+#      changes:
+#        - createSequence:
+#            cycle: false
+#            incrementBy: 1
+#            minValue: 1
+#            maxValue: 9223372036854775807
+#            ordered: true
+#            sequenceName: completion_seq
+#            startValue: 1
   - changeSet:
-      id: 1682666888978-create-task-completion-id-sequence
-      author: Fanni Fiedrich
+      id: task-completion-auto-increment-mysql
+      author: Ruben Backx
+      dbms: mysql
       changes:
-        - createSequence:
-            cycle: false
-            incrementBy: 1
-            minValue: 1
-            maxValue: 9223372036854775807
-            ordered: true
-            sequenceName: completion_seq
-            startValue: 1
+        - sql:
+            comment: Add auto increment to ID of task_completion
+            sql: ALTER TABLE task_completion MODIFY COLUMN id BIGINT AUTO_INCREMENT;
+  - changeSet:
+      id: task-completion-auto-increment-h2
+      author: Ruben Backx
+      dbms: h2
+      changes:
+        - sql:
+            comment: Add auto increment to ID of task_completion
+            sql: ALTER TABLE task_completion ALTER COLUMN id BIGINT AUTO_INCREMENT;
   - changeSet:
       id: 1682666888978-migrate-tasks-completed
       author: Fanni Fiedrich
       changes:
         - sql:
             comment: Migrate tasks completed
-            sql: INSERT INTO task_completion (id, timestamp, person_id, task_id) SELECT completion_seq.nextval, NULL, persons_id, tasks_completed_id FROM scperson_tasks_completed;
+            sql: INSERT INTO task_completion (timestamp, person_id, task_id) SELECT NULL, persons_id, tasks_completed_id FROM scperson_tasks_completed;
   - changeSet:
       id: 1682666888978-6
       author: fanni (generated)

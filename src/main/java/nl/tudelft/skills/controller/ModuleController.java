@@ -70,7 +70,7 @@ public class ModuleController {
 	 * @return        The page to load
 	 */
 	@GetMapping("{id}")
-	@PreAuthorize("@authorisationService.isAuthenticated()")
+	@PreAuthorize("@authorisationService.canViewModule(#id)")
 	public String getModulePage(@AuthenticatedPerson(required = false) Person person, @PathVariable Long id,
 			Model model) {
 		moduleService.configureModuleModel(person, id, model, session);

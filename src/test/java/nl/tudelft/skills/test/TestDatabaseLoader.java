@@ -74,6 +74,8 @@ public class TestDatabaseLoader {
 	private CheckpointRepository checkpointRepository;
 	@Autowired
 	private TaskCompletionRepository taskCompletionRepository;
+	@Autowired
+	private ExternalSkillRepository externalSkillRepository;
 
 	/**
 	 * Test models.
@@ -471,6 +473,24 @@ public class TestDatabaseLoader {
 	}
 
 	/**
+	 * Creates an external skill for testing purposes.
+	 *
+	 * @param  linksTo The skill the external skill should link to.
+	 * @return         The created external skill.
+	 */
+	public ExternalSkill createExternalSkill(Skill linksTo) {
+		// Create a new module for the external skill, in the same edition
+		SCModule module = moduleRepository.save(SCModule.builder().edition(editionRL2021)
+				.name("New module").build());
+		// Create an external skill referencing SkillAssumption
+		ExternalSkill externalSkill = ExternalSkill.builder().skill(linksTo).module(module)
+				.row(0).column(0).build();
+		externalSkill = externalSkillRepository.save(externalSkill);
+
+		return externalSkill;
+	}
+
+	/**
 	 * Creates a skill in a new edition, with a given edition id. The submodule, module and checkpoint are
 	 * also created/saved.
 	 *
@@ -484,16 +504,23 @@ public class TestDatabaseLoader {
 		SCModule module = SCModule.builder()
 				.name("Module in " + editionId).edition(edition).build();
 		module = moduleRepository.save(module);
+		edition.getModules().add(module);
 		Submodule submodule = Submodule.builder().module(module)
 				.name("Submodule in " + editionId).column(0).row(0).build();
 		submodule = submoduleRepository.save(submodule);
+		module.getSubmodules().add(submodule);
 		LocalDateTime localDateTime = LocalDateTime.of(2023, 1, 10, 10, 10, 0);
 		Checkpoint checkpoint = Checkpoint.builder().edition(edition)
 				.name("Checkpoint in " + editionId).deadline(localDateTime).build();
 		checkpoint = checkpointRepository.save(checkpoint);
+		edition.getCheckpoints().add(checkpoint);
 		Skill skill = Skill.builder().submodule(submodule).checkpoint(checkpoint)
 				.name("Skill in " + editionId).column(0).row(0).build();
-		return skillRepository.save(skill);
+		skill = skillRepository.save(skill);
+		checkpoint.getSkills().add(skill);
+		submodule.getSkills().add(skill);
+
+		return skill;
 	}
 
 	/**
