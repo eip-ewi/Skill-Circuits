@@ -24,12 +24,12 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
-public class CustomClickedLinkSerializer extends StdSerializer<ClickedLink> {
-	public CustomClickedLinkSerializer() {
+public class ClickedLinkSerializer extends StdSerializer<ClickedLink> {
+	public ClickedLinkSerializer() {
 		this(null);
 	}
 
-	public CustomClickedLinkSerializer(Class<ClickedLink> t) {
+	public ClickedLinkSerializer(Class<ClickedLink> t) {
 		super(t);
 	}
 

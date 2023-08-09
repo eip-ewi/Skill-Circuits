@@ -120,6 +120,12 @@ public class PersonController {
 
 	}
 
+	/**
+	 * Displays the content of the Clicked link table in json format. Only accessible to admins.
+	 *
+	 * @return                         the entries in the Clicked link table in json format
+	 * @throws JsonProcessingException
+	 */
 	@GetMapping("clickedlinks")
 	@Transactional
 	@PreAuthorize("@authorisationService.isAdmin()")
@@ -130,7 +136,7 @@ public class PersonController {
 		mapper.registerModule(new JavaTimeModule());
 
 		SimpleModule module = new SimpleModule();
-		module.addSerializer(ClickedLink.class, new CustomClickedLinkSerializer());
+		module.addSerializer(ClickedLink.class, new ClickedLinkSerializer());
 		mapper.registerModule(module);
 
 		return mapper.writeValueAsString(logs);

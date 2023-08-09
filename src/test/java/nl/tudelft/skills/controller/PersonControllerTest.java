@@ -18,7 +18,7 @@
 package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
@@ -37,6 +37,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Transactional
 @AutoConfigureMockMvc
@@ -117,7 +121,23 @@ public class PersonControllerTest extends ControllerTest {
 		Long taskId = db.getTaskRead11().getId();
 		personController.logClickedLinkByPerson(person, taskId);
 		assertTrue(
-				clickedLinkRepository.findAll().stream().anyMatch(s -> s.getTask().getId().equals(taskId)));
+				clickedLinkRepository.findAll().stream().anyMatch(s -> s.getTask().getId().equals(taskId)
+						&& s.getPerson().getId().equals(person.getId())));
+	}
+
+	@Test
+	void downloadClickedLinks() throws JsonProcessingException {
+		String clicks = personController.downloadClickedLinks();
+
+		ObjectMapper mapper = new ObjectMapper()
+				.enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
+		assertDoesNotThrow(() -> {
+			mapper.readTree(clicks);
+		});
+
+		assertTrue(clicks.contains("\"taskName\":\"Read chapter 1.1\""));
+		assertTrue(clicks.contains("\"skillName\":\"Negation\""));
+		assertTrue(clicks.contains("\"editionId\":69"));
 	}
 
 }
