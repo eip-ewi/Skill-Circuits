@@ -24,7 +24,8 @@
     overflow: visible;
     top: 0;
     left: 0;
-    margin-left: -3rem;
+    /* Padding of the circuit and width of the connections svg */
+    margin-left: calc(-3rem - 300px);
 
     & > .connection {
         stroke-width: 2;

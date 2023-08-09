@@ -100,6 +100,8 @@
                         .filter(child => getCol(child) === getCol(block))
                         .sort((c1, c2) => getRow(c1) - getRow(c2))[0];
 
+                    // Width of the connection svg in pixels
+                    const offsetX = 300;
                     const circuitY = $("#circuit").offset().top;
 
                     const parentX = block.offset().left + block.outerWidth() / 2;
@@ -135,10 +137,10 @@
 
                         const horizontalConnectionY = toY - circuitGap / 2 + yOffset;
 
-                        const points = `${fromX},${parentY - circuitY},
-                                ${fromX},${horizontalConnectionY - circuitY}
-                                ${toX},${horizontalConnectionY - circuitY}
-                                ${toX},${toY - circuitY}`;
+                        const points = `${fromX + offsetX},${parentY - circuitY},
+                                ${fromX + offsetX},${horizontalConnectionY - circuitY}
+                                ${toX + offsetX},${horizontalConnectionY - circuitY}
+                                ${toX + offsetX},${toY - circuitY}`;
 
                         $("#connections").append(line.attr("points", points));
 
