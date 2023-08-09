@@ -18,7 +18,7 @@
 package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -115,9 +115,9 @@ public class TaskControllerTest extends ControllerTest {
 
 	private void mockRole(String role) {
 		if (role == null || role.isBlank()) {
-			when(roleApi.getRolesById(anyList(), anyList())).thenReturn(Flux.empty());
+			when(roleApi.getRolesById(anySet(), anySet())).thenReturn(Flux.empty());
 		} else {
-			when(roleApi.getRolesById(anyList(), anyList()))
+			when(roleApi.getRolesById(anySet(), anySet()))
 					.thenReturn(Flux.just(new RoleDetailsDTO()
 							.id(new Id().editionId(db.getEditionRL().getId())
 									.personId(TestUserDetailsService.id))
