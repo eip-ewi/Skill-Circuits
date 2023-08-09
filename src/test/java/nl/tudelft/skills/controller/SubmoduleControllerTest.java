@@ -20,9 +20,14 @@ package nl.tudelft.skills.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
@@ -49,6 +54,7 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Transactional
@@ -82,7 +88,13 @@ public class SubmoduleControllerTest extends ControllerTest {
 		Mockito.when(course.getId()).thenReturn(1L);
 		Mockito.when(edition.getName()).thenReturn("Mocked Edition");
 		Mockito.when(edition.getCourse()).thenReturn(course);
+		Mockito.when(edition.getStartDate()).thenReturn(
+				LocalDateTime.of(2023, 1, 10, 10, 10, 0));
 		Mockito.when(editionControllerApi.getEditionById(any())).thenReturn(Mono.just(edition));
+
+		when(editionControllerApi.getAllEditionsByCourse(anyLong()))
+				.thenReturn(Flux.fromIterable(List.of(edition)));
+
 		var dto = SubmoduleCreateDTO.builder()
 				.name("New Submodule")
 				.module(new SCModuleIdDTO(db.getModuleProofTechniques().getId()))

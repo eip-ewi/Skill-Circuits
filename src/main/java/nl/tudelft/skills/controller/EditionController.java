@@ -111,6 +111,21 @@ public class EditionController {
 	}
 
 	/**
+	 * Copies one edition (i.e., modules, submodules etc.) to another.
+	 *
+	 * @param  copyTo   The id of the edition to copy to.
+	 * @param  copyFrom The id of the edition to copy from.
+	 * @return          Redirect to the editions page that was copied to.
+	 */
+	@PostMapping("{copyTo}/copy/{copyFrom}")
+	@PreAuthorize("@authorisationService.canEditEdition(#copyTo) and @authorisationService.canViewEdition(#copyFrom)")
+	public String copyEdition(@PathVariable Long copyTo, @PathVariable Long copyFrom) {
+		editionService.copyEdition(copyTo, copyFrom);
+
+		return "redirect:/edition/" + copyTo.toString();
+	}
+
+	/**
 	 * Toggles student mode for a specific edition.
 	 *
 	 * @param  id The id of the edition

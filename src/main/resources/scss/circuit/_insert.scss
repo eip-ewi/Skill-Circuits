@@ -1,12 +1,12 @@
 .add_row {
     display: flex;
-    align-self: start;
+    place-self: start;
     transform: translate(-2.5rem, -1.5rem);
 }
 
 .add_column {
     display: flex;
-    align-self: start;
+    place-self: start;
     transform: translate(-1.25rem, -2.75rem);
 }
 

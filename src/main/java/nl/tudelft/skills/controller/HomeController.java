@@ -89,8 +89,9 @@ public class HomeController {
 				.filter(SCEdition::isVisible).map(SCEdition::getId).collect(Collectors.toSet());
 		Set<Long> teacherIds = person == null ? Set.of()
 				: roleApi
-						.getRolesById(editions.stream().map(EditionDetailsDTO::getId).toList(),
-								List.of(person.getId()))
+						.getRolesById(
+								editions.stream().map(EditionDetailsDTO::getId).collect(Collectors.toSet()),
+								Set.of(person.getId()))
 						.collectList().block().stream()
 						.filter(r -> r.getType() == RoleDetailsDTO.TypeEnum.TEACHER)
 						.map(r -> r.getEdition().getId()).collect(Collectors.toSet());

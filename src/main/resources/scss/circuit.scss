@@ -6,6 +6,7 @@
 @import "circuit/edition_setup";
 @import "circuit/insert";
 @import "circuit/link_overview";
+@import "circuit/copy_edition";
 
 .circuit {
     --circuit-gap: 3rem;
@@ -22,6 +23,7 @@
         &__group {
             display: flex;
             gap: 1rem;
+            align-items: center;
         }
         & a {
             text-decoration: none;

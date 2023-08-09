@@ -40,4 +40,6 @@ public interface SkillRepository extends JpaRepository<Skill, Long> {
 
 	Integer countBySubmoduleModuleId(Long moduleId);
 
+	Set<Skill> findAllBySubmoduleModuleIdAndCheckpointId(Long moduleId, Long checkpointId);
+
 }

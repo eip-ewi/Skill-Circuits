@@ -20,7 +20,10 @@ package nl.tudelft.skills.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDateTime;
@@ -28,6 +31,9 @@ import java.util.*;
 
 import javax.servlet.http.HttpSession;
 
+import nl.tudelft.labracore.api.RoleControllerApi;
+import nl.tudelft.labracore.lib.security.LabradorUserDetails;
+import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.SpringContext;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.create.CheckpointCreateDTO;
@@ -39,6 +45,7 @@ import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
 import nl.tudelft.skills.dto.patch.TaskPatchDTO;
 import nl.tudelft.skills.model.ExternalSkill;
+import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskType;
@@ -51,6 +58,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 
@@ -72,6 +82,8 @@ public class SkillControllerTest extends ControllerTest {
 	private final TaskCompletionService taskCompletionService;
 	private final TaskCompletionRepository taskCompletionRepository;
 	private final HttpSession session;
+	private final EditionRepository editionRepository;
+	private final RoleControllerApi roleApi;
 
 	@Autowired
 	public SkillControllerTest(SkillRepository skillRepository, TaskRepository taskRepository,
@@ -79,7 +91,8 @@ public class SkillControllerTest extends ControllerTest {
 			ExternalSkillRepository externalSkillRepository,
 			AbstractSkillRepository abstractSkillRepository, CheckpointRepository checkpointRepository,
 			PathRepository pathRepository, TaskCompletionService taskCompletionService,
-			TaskCompletionRepository taskCompletionRepository) {
+			TaskCompletionRepository taskCompletionRepository, EditionRepository editionRepository,
+			RoleControllerApi roleApi) {
 		this.submoduleRepository = submoduleRepository;
 		this.session = mock(HttpSession.class);
 		this.moduleService = mock(ModuleService.class);
@@ -96,6 +109,8 @@ public class SkillControllerTest extends ControllerTest {
 		this.skillRepository = skillRepository;
 		this.abstractSkillRepository = abstractSkillRepository;
 		this.taskCompletionRepository = taskCompletionRepository;
+		this.editionRepository = editionRepository;
+		this.roleApi = roleApi;
 	}
 
 	@Test
@@ -287,6 +302,138 @@ public class SkillControllerTest extends ControllerTest {
 	}
 
 	@Test
+	@WithUserDetails("username")
+	void redirectToExternalSkillVisibleToStudent() {
+		// Use a mocked version of the skill service because of the complexity
+		// of the recentActiveEditionForSkillOrLatest method
+		SkillService mockSkillService = mock(SkillService.class);
+		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
+				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
+				pathRepository, mockSkillService, moduleService, taskCompletionService, session);
+
+		// Save an external skill and mock the response
+		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
+		when(mockSkillService.recentActiveEditionForSkillOrLatest(db.getPerson().getId(),
+				externalSkill)).thenReturn(db.getSkillAssumption());
+
+		// Make edition visible
+		SCEdition edition = db.getEditionRL();
+		edition.setVisible(true);
+		editionRepository.save(edition);
+
+		// Mock role of user
+		mockRole(roleApi, "STUDENT");
+
+		// Get authenticated person
+		Person authPerson = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal()).getUser();
+
+		// Assert on result
+		Long moduleId = db.getModuleProofTechniques().getId();
+		Long skillId = db.getSkillAssumption().getId();
+		assertThat(innerSkillController.redirectToExternalSkill(externalSkill.getId(), authPerson))
+				.isEqualTo("redirect:/module/" + moduleId + "#block-" + skillId + "-name");
+	}
+
+	@Test
+	@WithUserDetails("teacher")
+	void redirectToExternalSkillVisibleToTeacher() {
+		// Use a mocked version of the skill service because of the complexity
+		// of the recentActiveEditionForSkillOrLatest method
+		SkillService mockSkillService = mock(SkillService.class);
+		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
+				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
+				pathRepository, mockSkillService, moduleService, taskCompletionService, session);
+
+		// Save an external skill and mock the response
+		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
+		when(mockSkillService.recentActiveEditionForSkillOrLatest(db.getPerson().getId(),
+				externalSkill)).thenReturn(db.getSkillAssumption());
+
+		// Mock role of user
+		mockRole(roleApi, "TEACHER");
+
+		// Get authenticated person
+		Person authPerson = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal()).getUser();
+
+		// Assert on result
+		Long moduleId = db.getModuleProofTechniques().getId();
+		Long skillId = db.getSkillAssumption().getId();
+		assertThat(innerSkillController.redirectToExternalSkill(externalSkill.getId(), authPerson))
+				.isEqualTo("redirect:/module/" + moduleId + "#block-" + skillId + "-name");
+	}
+
+	@Test
+	@WithUserDetails("username")
+	void redirectToExternalSkillNotAuthorizedStudent() throws Exception {
+		// Save an external skill
+		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
+
+		// Mock role of user
+		mockRole(roleApi, "STUDENT");
+
+		// Assert on result, should be unauthorized since the external skill is not visible
+		mvc.perform(get("/skill/external/" + externalSkill.getId()).with(csrf()))
+				.andExpect(status().isForbidden());
+	}
+
+	@Test
+	@WithAnonymousUser
+	void redirectToExternalSkillNotAuthenticated() throws Exception {
+		// Save an external skill
+		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
+
+		// Assert on result, it will throw an error since there is no authenticated person
+		// (Which is needed as a parameter to the method)
+		mvc.perform(get("/skill/external/" + externalSkill.getId()).with(csrf()))
+				.andExpect(status().is4xxClientError());
+	}
+
+	@Test
+	@WithAnonymousUser
+	void getSkillNotAuthenticated() throws Exception {
+		// An unauthenticated user should not be able to get a skill
+		mvc.perform(get("/skill/{id}", db.getSkillVariables().getId()))
+				.andExpect(status().is3xxRedirection())
+				.andExpect(redirectedUrlPattern("**/auth/login"));
+	}
+
+	@Test
+	@WithUserDetails("username")
+	void redirectToExternalSkillNoValidSkill() {
+		// Use a mocked version of the skill service because of the complexity
+		// of the recentActiveEditionForSkillOrLatest method
+		SkillService mockSkillService = mock(SkillService.class);
+		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
+				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
+				pathRepository, mockSkillService, moduleService, taskCompletionService, session);
+
+		// Save an external skill and mock the response
+		Skill linkedSkill = db.createSkillInEditionHelper(db.getEditionRL().getId() + 1, false);
+		ExternalSkill externalSkill = db.createExternalSkill(linkedSkill);
+		when(mockSkillService.recentActiveEditionForSkillOrLatest(db.getPerson().getId(),
+				externalSkill)).thenReturn(null);
+
+		// Make edition visible
+		SCEdition edition = db.getEditionRL();
+		edition.setVisible(true);
+		editionRepository.save(edition);
+
+		// Mock role of user
+		mockRole(roleApi, "STUDENT");
+
+		// Get authenticated person
+		Person authPerson = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal()).getUser();
+
+		// Assert on result, should redirect to the external skills page, and not the linked skills page
+		Long moduleId = externalSkill.getModule().getId();
+		assertThat(innerSkillController.redirectToExternalSkill(externalSkill.getId(), authPerson))
+				.isEqualTo("redirect:/module/" + moduleId);
+	}
+
+	@Test
 	void endpointsAreProtected() throws Exception {
 		mvc.perform(patch("/skill/{id}", db.getSkillVariables().getId()))
 				.andExpect(status().isForbidden());
@@ -298,6 +445,8 @@ public class SkillControllerTest extends ControllerTest {
 				.andExpect(status().isForbidden());
 		mvc.perform(post("/skill/disconnect/1/2"))
 				.andExpect(status().isForbidden());
+		mvc.perform(get("/skill/{id}", db.getSkillVariables().getId()))
+				.andExpect(status().is3xxRedirection())
+				.andExpect(redirectedUrlPattern("**/auth/login"));
 	}
-
 }

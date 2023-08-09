@@ -12,9 +12,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [UNRELEASED]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+## [2.2.2]
+
+### Added
 - Floating box which displays information about the most recently completed task (@ffiedrich)
 - Skill can remember the skill from the edition it was copied from (@ffiedrich)
 - Ability to insert new rows and columns when editing editions or modules (@bbakos)
+- Added option to change/switch checkpoint to another one which is not used in the current module. (@ffiedrich)
+- Add the ability to copy the contents of one edition to another (empty) edition. (@ffiedrich)
 
 ### Changed
 
@@ -22,6 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Fixed isNotTransitivelyConnected for cyclic graphs and for external skills
  - Fixed to not count optional skills in highlighting of skills that can be worked on. (@ffiedrich)
  - Fixed external skill block link (@ffiedrich)
+ - External skills are accessible if they are visible to the user. (@ffiedrich)
+ - Checking access rights for skills and modules, and enforcing login for view methods. (@ffiedrich)
 
 ## [2.2.1]
 

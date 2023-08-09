@@ -29,7 +29,7 @@
         th:draggable="${canEdit}"
         class="checkpoint"
         layout:fragment="checkpoint">
-        <div class="checkpoint__body" th:id="|checkpoint-${checkpoint.id}-body|">
+        <div class="checkpoint__body" th:id="|checkpoint-${checkpoint.id}-body|" tabindex="1">
             <div th:id="|checkpoint-${checkpoint.id}-display|">
                 <span
                     th:id="|checkpoint-${checkpoint.id}-name|"
@@ -43,12 +43,19 @@
                 th:if="${canEdit}"
                 class="checkpoint__buttons"
                 th:id="|checkpoint-${checkpoint.id}-buttons|">
-                <span
+                <button
+                    th:if="${#lists.size(module.remainingCheckpointsInEdition) > 0}"
+                    class="fa-solid fa-right-left checkpoint__change"
+                    th:data-checkpoint="${checkpoint.id}"
+                    tabindex="1"></button>
+                <button
                     class="fa-solid fa-pen checkpoint__edit"
-                    th:data-checkpoint="${checkpoint.id}"></span>
-                <span
+                    th:data-checkpoint="${checkpoint.id}"
+                    tabindex="1"></button>
+                <button
                     class="fa-solid fa-trash checkpoint__delete"
-                    th:data-checkpoint="${checkpoint.id}"></span>
+                    th:data-checkpoint="${checkpoint.id}"
+                    tabindex="1"></button>
             </div>
         </div>
     </div>

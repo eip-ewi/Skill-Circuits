@@ -15,38 +15,21 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.model;
+package nl.tudelft.skills.dto.view.edition;
 
-import java.time.LocalDateTime;
-
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import nl.tudelft.skills.model.labracore.SCPerson;
+import lombok.*;
 
 @Data
-@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TaskCompletion {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+public class EditionLevelEditionSummaryDTO {
+
+	@NotNull
 	private Long id;
-
 	@NotNull
-	@ManyToOne
-	private SCPerson person;
+	private String name;
 
-	@NotNull
-	@ManyToOne
-	private Task task;
-
-	// The timestamp can be null for the already stored completions without time indication
-	@Builder.Default
-	private LocalDateTime timestamp = LocalDateTime.now();
 }
