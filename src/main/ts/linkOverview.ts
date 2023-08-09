@@ -166,13 +166,14 @@ function handleLinkSubmission(event: Event) {
  */
 function handleSearchBarInput() {
     const search: string = ($("#link-searchbar").val() as string).toLowerCase();
+    const selectedType: string = $("#type-filter").val() as string;
 
     $(".link_row").each(function () {
         const taskId: string = $(this).data("taskId");
         const inputLink: string = ($(`#link${taskId}`).val() as string).toLowerCase();
+        const taskIcon: string = $(`#task-icon${taskId}`).attr("class");
 
-        // TODO check also type condition
-        if (!inputLink.includes(search)) {
+        if (!inputLink.includes(search) || (!taskIcon.includes(selectedType) && selectedType !== "All types")) {
             $(this).attr("hidden", "true");
         } else {
             $(this).removeAttr("hidden");
@@ -188,6 +189,7 @@ function handleSearchBarInput() {
 function handleTypeSelectChange() {
     const typeFilter: JQuery = $("#type-filter");
     const selectedType: string = typeFilter.val() as string;
+    const search: string = ($("#link-searchbar").val() as string).toLowerCase();
 
     // Update selection
     typeFilter.children().each(function () {
@@ -198,13 +200,13 @@ function handleTypeSelectChange() {
         }
     });
 
-    // Filter tasks by type
+    // Filter tasks by type and search string
     $(".link_row").each(function () {
         const taskId: string = $(this).data("taskId");
         const taskIcon: string = $(`#task-icon${taskId}`).attr("class");
+        const inputLink: string = ($(`#link${taskId}`).val() as string).toLowerCase();
 
-        // TODO check also search condition
-        if (!taskIcon.includes(selectedType) && selectedType !== "All types") {
+        if ((!taskIcon.includes(selectedType) && selectedType !== "All types") || !inputLink.includes(search)) {
             $(this).attr("hidden", "true");
         } else {
             $(this).removeAttr("hidden");
