@@ -174,7 +174,7 @@ test("Test create message", async () => {
     jest.useFakeTimers();
 
     const fromElement: JQuery = $("#link-form0");
-    createMsg(fromElement, "message", "icon-class", 1);
+    createMsg(fromElement, "message", "icon-class", 2);
     const alert: JQuery = fromElement.children(".link__alert");
     expect(alert.length).toBe(1);
     expect(alert.text()).toBe("message");
@@ -182,9 +182,63 @@ test("Test create message", async () => {
     expect(icon.length).toBe(1);
     expect(icon.hasClass("icon-class")).toBe(true);
 
-    // Wait for the message to be removed, and assert that it does not exist anymore
+    // Check that the message is still visible after 1ms
+    setTimeout(() => {
+        expect(alert.first().children("i").length).toBe(1);
+        expect(alert.first().children("i").hasClass("icon-class")).toBe(true);
+    }, 1);
+    // Wait for the message to be removed, and assert that it does not exist anymore after 2ms
     setTimeout(() => {
         expect($(".link__alert").length).toBe(0);
-    }, 1);
+    }, 2);
+    jest.runAllTimers();
+});
+
+test("Test successful link deletion", async () => {
+    // Set up ajax to call the success function
+    $.ajax = jest.fn().mockImplementation((params) => {
+        params.success();
+    });
+
+    expect($(".link_row").length).toBe(3);
+    expect($("#link-row0").length).toBe(1);
+
+    // Click button and assert that the row was removed
+    $("#delete-0").trigger("click");
+    expect($("#link-row0").length).toBe(0);
+    expect($(".link_row").length).toBe(2);
+});
+
+test("Test failed link deletion", async () => {
+    // Set up timers for the message pop up
+    jest.useFakeTimers();
+    // Set up ajax to call the error function
+    $.ajax = jest.fn().mockImplementation((params) => {
+        params.error();
+    });
+
+    expect($(".link_row").length).toBe(3);
+    expect($("#link-row0").length).toBe(1);
+
+    // Click button and assert that the row was *not* removed
+    $("#delete-0").trigger("click");
+    expect($(".link_row").length).toBe(3);
+    expect($("#link-row0").length).toBe(1);
+    expect($("#prev-link0").val()).toBe("https://test0.com");
+    expect($("#link0").val()).toBe("https://test0.com");
+
+    // Assert that the error pop up was created
+    const alert: JQuery = $("#link-form0").children(".link__alert");
+    expect(alert.length).toBe(1);
+    expect(alert.text()).toBe("Error");
+    const icon: JQuery = alert.first().children("i");
+    expect(icon.length).toBe(1);
+    expect(icon.hasClass("fa-sharp") && icon.hasClass("fa-regular")
+        && icon.hasClass("fa-circle-xmark")).toBe(true);
+
+    // Wait for the message to be removed, and assert that it does not exist anymore after 1500ms
+    setTimeout(() => {
+        expect($(".link__alert").length).toBe(0);
+    }, 1500);
     jest.runAllTimers();
 });
