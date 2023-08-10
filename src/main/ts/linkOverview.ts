@@ -69,8 +69,9 @@ function setVisibilityModuleInfos() {
  * @param formElement   The element to which the message will be appended.
  * @param message       The message to display.
  * @param icon          The icon (class) to show in the message block.
+ * @param duration      The duration for which the alert should be shown (in ms).
  */
-function createMsg(formElement, message, icon) {
+function createMsg(formElement, message, icon, duration) {
     const parentDiv: JQuery = $("<div/>", { class: "link__alert" });
     const iconElement: JQuery = $("<i/>", { class: icon });
 
@@ -78,10 +79,10 @@ function createMsg(formElement, message, icon) {
     parentDiv.append(message);
     parentDiv.appendTo(formElement);
 
-    // Display the message for 1.5 seconds
+    // Display the message for specified amount of time
     setTimeout(function () {
         parentDiv.remove();
-    }, 1500);
+    }, duration);
 }
 
 /**
@@ -113,14 +114,14 @@ function editLink(taskId: string, prevLink: string, newLink: string) {
                     // Update previous value if successful
                     $(`#prev-link${taskId}`).val(newLink);
 
-                    createMsg(linkInput.parent(), "Success", "fa-regular fa-circle-check");
+                    createMsg(linkInput.parent(), "Success", "fa-regular fa-circle-check", 1500);
                 }
             },
             error: () => {
                 // Reset link field to previous value if unsuccessful
                 linkInput.val(prevLink);
 
-                createMsg(linkInput.parent(), "Error", "fa-sharp fa-regular fa-circle-xmark");
+                createMsg(linkInput.parent(), "Error", "fa-sharp fa-regular fa-circle-xmark", 1500);
             },
         });
     }
@@ -173,7 +174,10 @@ function handleSearchBarInput() {
         const inputLink: string = ($(`#link${taskId}`).val() as string).toLowerCase();
         const taskIcon: string = $(`#task-icon${taskId}`).attr("class");
 
-        if (!inputLink.includes(search) || (!taskIcon.includes(selectedType) && selectedType !== "All types")) {
+        if (
+            !inputLink.includes(search) ||
+            (!taskIcon.includes(selectedType) && selectedType !== "All types")
+        ) {
             $(this).attr("hidden", "true");
         } else {
             $(this).removeAttr("hidden");
@@ -206,7 +210,10 @@ function handleTypeSelectChange() {
         const taskIcon: string = $(`#task-icon${taskId}`).attr("class");
         const inputLink: string = ($(`#link${taskId}`).val() as string).toLowerCase();
 
-        if ((!taskIcon.includes(selectedType) && selectedType !== "All types") || !inputLink.includes(search)) {
+        if (
+            (!taskIcon.includes(selectedType) && selectedType !== "All types") ||
+            !inputLink.includes(search)
+        ) {
             $(this).attr("hidden", "true");
         } else {
             $(this).removeAttr("hidden");
