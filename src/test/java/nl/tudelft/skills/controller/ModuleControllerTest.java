@@ -37,8 +37,10 @@ import nl.tudelft.skills.dto.id.SCEditionIdDTO;
 import nl.tudelft.skills.dto.patch.SCModulePatchDTO;
 import nl.tudelft.skills.dto.view.SkillSummaryDTO;
 import nl.tudelft.skills.model.SCModule;
+import nl.tudelft.skills.repository.ClickedLinkRepository;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
+import nl.tudelft.skills.service.ClickedLinkService;
 import nl.tudelft.skills.service.ModuleService;
 import nl.tudelft.skills.service.TaskCompletionService;
 
@@ -69,16 +71,18 @@ public class ModuleControllerTest extends ControllerTest {
 	private final RoleControllerApi roleControllerApi;
 	private final ModuleRepository moduleRepository;
 	private final HttpSession session;
+	private final ClickedLinkService clickedLinkService;
 
 	@Autowired
 	public ModuleControllerTest(ModuleController moduleController, RoleControllerApi roleControllerApi,
 			ModuleRepository moduleRepository, TaskCompletionService taskCompletionService,
-			TaskCompletionRepository taskCompletionRepository) {
+			TaskCompletionRepository taskCompletionRepository, ClickedLinkService clickedLinkService) {
 		this.moduleController = moduleController;
 		this.roleControllerApi = roleControllerApi;
 		this.moduleRepository = moduleRepository;
 		this.taskCompletionRepository = taskCompletionRepository;
 		this.taskCompletionService = taskCompletionService;
+		this.clickedLinkService = clickedLinkService;
 		this.session = mock(HttpSession.class);
 	}
 
@@ -104,7 +108,7 @@ public class ModuleControllerTest extends ControllerTest {
 	@Test
 	void createModuleSetup() throws Exception {
 		new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionService).createModuleInEditionSetup(
+				session, taskCompletionService, clickedLinkService).createModuleInEditionSetup(
 						SCModuleCreateDTO.builder()
 								.name("Module").edition(new SCEditionIdDTO(db.getEditionRL().getId()))
 								.build(),
@@ -127,7 +131,7 @@ public class ModuleControllerTest extends ControllerTest {
 		assertThat(moduleRepository.existsById(moduleId)).isTrue();
 
 		new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionService).deleteModule(moduleId);
+				session, taskCompletionService, clickedLinkService).deleteModule(moduleId);
 
 		assertThat(moduleRepository.existsById(moduleId)).isFalse();
 		assertThat(taskCompletionRepository.findAll()).hasSize(0);
@@ -140,7 +144,7 @@ public class ModuleControllerTest extends ControllerTest {
 		assertThat(moduleRepository.existsById(moduleId)).isTrue();
 
 		new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionService).deleteModuleSetup(moduleId);
+				session, taskCompletionService, clickedLinkService).deleteModuleSetup(moduleId);
 
 		assertThat(moduleRepository.existsById(moduleId)).isFalse();
 		assertThat(taskCompletionRepository.findAll()).hasSize(0);
@@ -149,7 +153,7 @@ public class ModuleControllerTest extends ControllerTest {
 	@Test
 	void patchModule() {
 		new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionService).patchModule(
+				session, taskCompletionService, clickedLinkService).patchModule(
 						SCModulePatchDTO.builder()
 								.id(db.getModuleProofTechniques().getId())
 								.name("Module 2.0")
@@ -165,7 +169,7 @@ public class ModuleControllerTest extends ControllerTest {
 	@Test
 	void toggleStudentMode() {
 		ModuleController moduleController = new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionService);
+				session, taskCompletionService, clickedLinkService);
 		when(session.getAttribute("student-mode-" + db.getEditionRL().getId()))
 				.thenReturn(null)
 				.thenReturn(true)
@@ -181,7 +185,7 @@ public class ModuleControllerTest extends ControllerTest {
 	@Test
 	void getSkillsOfModule() {
 		ModuleController moduleController = new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionService);
+				session, taskCompletionService, clickedLinkService);
 		assertThat(moduleController.getSkillsOfModule(db.getModuleProofTechniques().getId()))
 				.containsExactlyInAnyOrder(Stream
 						.of(

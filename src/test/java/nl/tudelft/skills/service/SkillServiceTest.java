@@ -66,13 +66,15 @@ public class SkillServiceTest {
 	private TestDatabaseLoader db;
 	private final LocalDateTime localDateTime;
 
+	private  final ClickedLinkService clickedLinkService;
+
 	@Autowired
 	public SkillServiceTest(AbstractSkillRepository abstractSkillRepository, TaskRepository taskRepository,
 			TestDatabaseLoader db, TaskCompletionRepository taskCompletionRepository,
 			EditionControllerApi editionApi, CourseControllerApi courseApi,
 			SkillRepository skillRepository, ModuleRepository moduleRepository,
 			ExternalSkillRepository externalSkillRepository, EditionRepository editionRepository,
-			AuthorisationService authorisationService, RoleControllerApi roleApi) {
+			AuthorisationService authorisationService, RoleControllerApi roleApi, ClickedLinkService clickedLinkService) {
 		this.abstractSkillRepository = abstractSkillRepository;
 		this.taskCompletionRepository = taskCompletionRepository;
 		this.externalSkillRepository = externalSkillRepository;
@@ -80,6 +82,7 @@ public class SkillServiceTest {
 		this.moduleRepository = moduleRepository;
 		this.taskRepository = taskRepository;
 		this.skillRepository = skillRepository;
+		this.clickedLinkService = clickedLinkService;
 
 		// The service is not mocked to test the specifics of whether an edition is shown because it
 		// is visible, or because the person is at least a teacher in the edition
@@ -93,7 +96,7 @@ public class SkillServiceTest {
 		this.editionApi = editionApi;
 
 		this.skillService = new SkillService(abstractSkillRepository, taskCompletionRepository, editionApi,
-				courseApi, skillRepository, editionRepository, authorisationService);
+				courseApi, skillRepository, editionRepository, authorisationService, clickedLinkService);
 	}
 
 	@Test
