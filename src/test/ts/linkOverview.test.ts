@@ -1,7 +1,7 @@
 // @ts-ignore
 import {toggleOverlay} from "../../main/ts/main.ts";
 
-import {openLinkOverlay, linkOverviewEventListeners, setVisibilityModuleInfos, createMsg}
+import {openLinkOverlay, linkOverviewEventListeners, setVisibilityModuleInfos, createMsg, submitForm}
 // @ts-ignore
     from "../../main/ts/linkOverview.ts";
 
@@ -46,6 +46,27 @@ const checkDefaultFilterValues = function(): void {
 
     expect($(".link_row").attr("hidden")).toBeUndefined();
     expect($(".wrapper").attr("hidden")).toBeUndefined();
+}
+
+/**
+ * Check that a message pop-up was created, and is removed.
+ *
+ * @param message       The message.
+ * @param classes       The icon class(es).
+ */
+const checkMessagePopUp = function(message: string, classes: string): void {
+    const alert: JQuery = $("#link-form0").children(".link__alert");
+    expect(alert.length).toBe(1);
+    expect(alert.text()).toBe(message);
+    const icon: JQuery = alert.first().children("i");
+    expect(icon.length).toBe(1);
+    expect(icon.attr("class")).toBe(classes);
+
+    // Wait for the message to be removed, and assert that it does not exist anymore after timeout ms
+    setTimeout(() => {
+        expect($(".link__alert").length).toBe(0);
+    }, 1500);
+    jest.runAllTimers();
 }
 
 beforeEach(() => {
@@ -170,7 +191,7 @@ test("Test visibility module boxes", () => {
     expect(wrapper1.attr("hidden")).toBeDefined();
 });
 
-test("Test create message", async () => {
+test("Test create message",  () => {
     jest.useFakeTimers();
 
     const fromElement: JQuery = $("#link-form0");
@@ -194,7 +215,7 @@ test("Test create message", async () => {
     jest.runAllTimers();
 });
 
-test("Test successful link deletion", async () => {
+test("Test successful link deletion",  () => {
     // Set up ajax to call the success function
     $.ajax = jest.fn().mockImplementation((params) => {
         params.success();
@@ -209,7 +230,7 @@ test("Test successful link deletion", async () => {
     expect($(".link_row").length).toBe(2);
 });
 
-test("Test failed link deletion", async () => {
+test("Test failed link deletion",  () => {
     // Set up timers for the message pop up
     jest.useFakeTimers();
     // Set up ajax to call the error function
@@ -228,17 +249,71 @@ test("Test failed link deletion", async () => {
     expect($("#link0").val()).toBe("https://test0.com");
 
     // Assert that the error pop up was created
-    const alert: JQuery = $("#link-form0").children(".link__alert");
-    expect(alert.length).toBe(1);
-    expect(alert.text()).toBe("Error");
-    const icon: JQuery = alert.first().children("i");
-    expect(icon.length).toBe(1);
-    expect(icon.hasClass("fa-sharp") && icon.hasClass("fa-regular")
-        && icon.hasClass("fa-circle-xmark")).toBe(true);
+    checkMessagePopUp("Error", "fa-sharp fa-regular fa-circle-xmark");
+});
 
-    // Wait for the message to be removed, and assert that it does not exist anymore after 1500ms
-    setTimeout(() => {
-        expect($(".link__alert").length).toBe(0);
-    }, 1500);
-    jest.runAllTimers();
+test("Test successful link change",  () => {
+    // Set up timers for the message pop up
+    jest.useFakeTimers();
+    // Set up ajax to call the success function
+    $.ajax = jest.fn().mockImplementation((params) => {
+        params.success();
+    });
+    // Add the onblur function to the input element
+    const linkInput: JQuery = $("#link0");
+    linkInput.on("blur", () => submitForm("0"));
+
+    // Change the value and trigger blur event
+    linkInput.val("https://www.new-link.com");
+    linkInput.trigger("blur");
+
+    // Assert that the value of the input stayed changed, and the previous value input changed
+    expect(linkInput.val()).toBe("https://www.new-link.com");
+    expect($("#prev-link0").val()).toBe("https://www.new-link.com");
+
+    // Assert that the success pop up was created
+    checkMessagePopUp("Success", "fa-regular fa-circle-check");
+});
+
+test("Test failed link change",  () => {
+    // Set up timers for the message pop up
+    jest.useFakeTimers();
+    // Set up ajax to call the error function
+    $.ajax = jest.fn().mockImplementation((params) => {
+        params.error();
+    });
+    // Add the onblur function to the input element
+    const linkInput: JQuery = $("#link0");
+    linkInput.on("blur", () => submitForm("0"));
+
+    // Change the value and trigger blur event
+    linkInput.val("https://www.new-link.com");
+    linkInput.trigger("blur");
+
+    // Assert that the value of the input, and the previous value input are the initial value again
+    expect(linkInput.val()).toBe("https://test0.com");
+    expect($("#prev-link0").val()).toBe("https://test0.com");
+
+    // Assert that the error pop up was created
+    checkMessagePopUp("Error", "fa-sharp fa-regular fa-circle-xmark");
+});
+
+test("Test malformed link change attempt",  () => {
+    // Set up ajax
+    $.ajax = jest.fn().mockImplementation(() => {});
+    // Add the onblur function to the input element
+    const linkInput: JQuery = $("#link0");
+    linkInput.on("blur", () => submitForm("0"));
+
+    // Change the value and trigger blur event
+    linkInput.val("not a link");
+    linkInput.trigger("blur");
+
+    // Assert that the value of the input stayed changed, and the previous value input is the initial value
+    expect(linkInput.val()).toBe("not a link");
+    expect($("#prev-link0").val()).toBe("https://test0.com");
+
+    // Assert that no pop up was created, and no request was sent via ajax
+    expect($(".link__alert").length).toBe(0);
+    expect($.ajax).not.toHaveBeenCalled();
 });
