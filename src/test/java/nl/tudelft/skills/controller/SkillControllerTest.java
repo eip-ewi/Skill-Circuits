@@ -81,6 +81,7 @@ public class SkillControllerTest extends ControllerTest {
 	private final TaskCompletionService taskCompletionService;
 	private final TaskCompletionRepository taskCompletionRepository;
 	private final ClickedLinkService clickedLinkService;
+	private final ClickedLinkRepository clickedLinkRepository;
 	private final HttpSession session;
 	private final EditionRepository editionRepository;
 	private final RoleControllerApi roleApi;
@@ -91,7 +92,8 @@ public class SkillControllerTest extends ControllerTest {
 			ExternalSkillRepository externalSkillRepository,
 			AbstractSkillRepository abstractSkillRepository, CheckpointRepository checkpointRepository,
 			PathRepository pathRepository, TaskCompletionService taskCompletionService,
-			TaskCompletionRepository taskCompletionRepository, ClickedLinkService clickedLinkService, EditionRepository editionRepository,
+			TaskCompletionRepository taskCompletionRepository, ClickedLinkService clickedLinkService,
+			ClickedLinkRepository clickedLinkRepository, EditionRepository editionRepository,
 			RoleControllerApi roleApi) {
 		this.submoduleRepository = submoduleRepository;
 		this.session = mock(HttpSession.class);
@@ -99,6 +101,7 @@ public class SkillControllerTest extends ControllerTest {
 		this.externalSkillRepository = externalSkillRepository;
 		this.taskRepository = taskRepository;
 		this.clickedLinkService = clickedLinkService;
+		this.clickedLinkRepository = clickedLinkRepository;
 		this.checkpointRepository = checkpointRepository;
 		this.pathRepository = pathRepository;
 		this.skillService = skillService;
@@ -218,6 +221,8 @@ public class SkillControllerTest extends ControllerTest {
 		assertThat(db.getTaskRead12().getCompletedBy()).hasSize(1);
 		assertThat(db.getTaskDo12ae().getCompletedBy()).hasSize(1);
 		assertThat(db.getTaskDo11ad().getCompletedBy()).hasSize(1);
+		//Check that ClickedLinks are deleted
+		assertThat(clickedLinkRepository.findAll()).hasSize(1);
 	}
 
 	@Test
@@ -265,7 +270,8 @@ public class SkillControllerTest extends ControllerTest {
 		SkillService mockSkillService = mock(SkillService.class);
 		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
 				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
-				pathRepository, mockSkillService, moduleService, taskCompletionService, clickedLinkService, session);
+				pathRepository, mockSkillService, moduleService, taskCompletionService, clickedLinkService,
+				session);
 
 		// Save an external skill and mock the response
 		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
@@ -299,7 +305,8 @@ public class SkillControllerTest extends ControllerTest {
 		SkillService mockSkillService = mock(SkillService.class);
 		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
 				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
-				pathRepository, mockSkillService, moduleService, taskCompletionService,clickedLinkService, session);
+				pathRepository, mockSkillService, moduleService, taskCompletionService, clickedLinkService,
+				session);
 
 		// Save an external skill and mock the response
 		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
@@ -362,8 +369,9 @@ public class SkillControllerTest extends ControllerTest {
 		// of the recentActiveEditionForSkillOrLatest method
 		SkillService mockSkillService = mock(SkillService.class);
 		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
-				abstractSkillRepository, taskRepository,  submoduleRepository, checkpointRepository,
-				pathRepository, mockSkillService, moduleService, taskCompletionService,clickedLinkService, session);
+				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
+				pathRepository, mockSkillService, moduleService, taskCompletionService, clickedLinkService,
+				session);
 
 		// Save an external skill and mock the response
 		Skill linkedSkill = db.createSkillInEditionHelper(db.getEditionRL().getId() + 1, false);

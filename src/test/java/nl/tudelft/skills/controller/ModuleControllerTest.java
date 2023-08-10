@@ -72,17 +72,20 @@ public class ModuleControllerTest extends ControllerTest {
 	private final ModuleRepository moduleRepository;
 	private final HttpSession session;
 	private final ClickedLinkService clickedLinkService;
+	private final ClickedLinkRepository clickedLinkRepository;
 
 	@Autowired
 	public ModuleControllerTest(ModuleController moduleController, RoleControllerApi roleControllerApi,
 			ModuleRepository moduleRepository, TaskCompletionService taskCompletionService,
-			TaskCompletionRepository taskCompletionRepository, ClickedLinkService clickedLinkService) {
+			TaskCompletionRepository taskCompletionRepository, ClickedLinkService clickedLinkService,
+			ClickedLinkRepository clickedLinkRepository) {
 		this.moduleController = moduleController;
 		this.roleControllerApi = roleControllerApi;
 		this.moduleRepository = moduleRepository;
 		this.taskCompletionRepository = taskCompletionRepository;
 		this.taskCompletionService = taskCompletionService;
 		this.clickedLinkService = clickedLinkService;
+		this.clickedLinkRepository = clickedLinkRepository;
 		this.session = mock(HttpSession.class);
 	}
 
@@ -135,6 +138,7 @@ public class ModuleControllerTest extends ControllerTest {
 
 		assertThat(moduleRepository.existsById(moduleId)).isFalse();
 		assertThat(taskCompletionRepository.findAll()).hasSize(0);
+		assertThat(clickedLinkRepository.findAll()).hasSize(0);
 	}
 
 	@Test
@@ -148,6 +152,7 @@ public class ModuleControllerTest extends ControllerTest {
 
 		assertThat(moduleRepository.existsById(moduleId)).isFalse();
 		assertThat(taskCompletionRepository.findAll()).hasSize(0);
+		assertThat(clickedLinkRepository.findAll()).hasSize(0);
 	}
 
 	@Test

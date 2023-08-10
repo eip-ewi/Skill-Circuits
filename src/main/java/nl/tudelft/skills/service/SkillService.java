@@ -59,7 +59,8 @@ public class SkillService {
 	public SkillService(AbstractSkillRepository abstractSkillRepository,
 			TaskCompletionRepository taskCompletionRepository, EditionControllerApi editionApi,
 			CourseControllerApi courseApi, SkillRepository skillRepository,
-			EditionRepository editionRepository, AuthorisationService authorisationService, ClickedLinkService clickedLinkService) {
+			EditionRepository editionRepository, AuthorisationService authorisationService,
+			ClickedLinkService clickedLinkService) {
 		this.abstractSkillRepository = abstractSkillRepository;
 		this.taskCompletionRepository = taskCompletionRepository;
 		this.editionApi = editionApi;

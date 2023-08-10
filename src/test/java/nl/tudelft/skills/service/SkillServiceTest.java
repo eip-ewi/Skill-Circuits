@@ -66,7 +66,8 @@ public class SkillServiceTest {
 	private TestDatabaseLoader db;
 	private final LocalDateTime localDateTime;
 
-	private  final ClickedLinkService clickedLinkService;
+	private final ClickedLinkService clickedLinkService;
+	private final ClickedLinkRepository clickedLinkRepository;
 
 	@Autowired
 	public SkillServiceTest(AbstractSkillRepository abstractSkillRepository, TaskRepository taskRepository,
@@ -74,7 +75,8 @@ public class SkillServiceTest {
 			EditionControllerApi editionApi, CourseControllerApi courseApi,
 			SkillRepository skillRepository, ModuleRepository moduleRepository,
 			ExternalSkillRepository externalSkillRepository, EditionRepository editionRepository,
-			AuthorisationService authorisationService, RoleControllerApi roleApi, ClickedLinkService clickedLinkService) {
+			AuthorisationService authorisationService, RoleControllerApi roleApi,
+			ClickedLinkService clickedLinkService, ClickedLinkRepository clickedLinkRepository) {
 		this.abstractSkillRepository = abstractSkillRepository;
 		this.taskCompletionRepository = taskCompletionRepository;
 		this.externalSkillRepository = externalSkillRepository;
@@ -83,6 +85,7 @@ public class SkillServiceTest {
 		this.taskRepository = taskRepository;
 		this.skillRepository = skillRepository;
 		this.clickedLinkService = clickedLinkService;
+		this.clickedLinkRepository = clickedLinkRepository;
 
 		// The service is not mocked to test the specifics of whether an edition is shown because it
 		// is visible, or because the person is at least a teacher in the edition
@@ -108,6 +111,15 @@ public class SkillServiceTest {
 
 		// All TaskCompletions are in other Skills, so they should not have been deleted
 		assertThat(taskCompletionRepository.findAll()).hasSize(4);
+	}
+
+	@Test
+	public void deleteSkillClickedLinksImpacted() {
+		Long id = db.getSkillNegation().getId();
+
+		assertThat(clickedLinkRepository.findAll()).hasSize(3);
+		skillService.deleteSkill(id);
+		assertThat(clickedLinkRepository.findAll()).hasSize(1);
 	}
 
 	@Test

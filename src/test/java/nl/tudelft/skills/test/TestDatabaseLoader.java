@@ -150,6 +150,9 @@ public class TestDatabaseLoader {
 	private SCPerson person = SCPerson.builder().id(TestUserDetailsService.id).build();
 
 	private ClickedLink clickedLink1 = ClickedLink.builder().task(taskRead11).person(person).build();
+	private ClickedLink clickedLink2 = ClickedLink.builder().task(taskRead11).person(person)
+			.timestamp(LocalDateTime.of(2023, 1, 1, 0, 0, 0)).build();
+	private ClickedLink clickedLink3 = ClickedLink.builder().task(taskRead12).person(person).build();
 	private TaskCompletion completeDo11ad = TaskCompletion.builder().task(taskDo11ad).person(person)
 			.timestamp(LocalDateTime.of(LocalDate.ofYearDay(2022, 42), LocalTime.MIDNIGHT)).build();
 	private TaskCompletion completeRead12 = TaskCompletion.builder().task(taskRead12).person(person)
@@ -458,6 +461,8 @@ public class TestDatabaseLoader {
 
 	private void initClickedLink() {
 		clickedLinkRepository.save(clickedLink1);
+		clickedLinkRepository.save(clickedLink2);
+		clickedLinkRepository.save(clickedLink3);
 	}
 
 	private void initTaskCompletions() {

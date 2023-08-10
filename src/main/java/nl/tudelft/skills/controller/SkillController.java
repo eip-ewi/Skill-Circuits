@@ -69,7 +69,7 @@ public class SkillController {
 	private final SkillService skillService;
 	private final ModuleService moduleService;
 	private final TaskCompletionService taskCompletionService;
-	private  final ClickedLinkService clickedLinkService;
+	private final ClickedLinkService clickedLinkService;
 	private final HttpSession session;
 
 	@Autowired
@@ -78,7 +78,8 @@ public class SkillController {
 			SubmoduleRepository submoduleRepository, CheckpointRepository checkpointRepository,
 			PathRepository pathRepository,
 			SkillService skillService, ModuleService moduleService,
-			TaskCompletionService taskCompletionService,ClickedLinkService clickedLinkService, HttpSession session) {
+			TaskCompletionService taskCompletionService, ClickedLinkService clickedLinkService,
+			HttpSession session) {
 		this.skillRepository = skillRepository;
 		this.externalSkillRepository = externalSkillRepository;
 		this.abstractSkillRepository = abstractSkillRepository;

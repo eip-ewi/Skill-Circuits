@@ -55,7 +55,8 @@ public class ModuleController {
 
 	@Autowired
 	public ModuleController(ModuleRepository moduleRepository, ModuleService moduleService,
-			HttpSession session, TaskCompletionService taskCompletionService, ClickedLinkService clickedLinkService) {
+			HttpSession session, TaskCompletionService taskCompletionService,
+			ClickedLinkService clickedLinkService) {
 		this.moduleRepository = moduleRepository;
 		this.moduleService = moduleService;
 		this.session = session;
