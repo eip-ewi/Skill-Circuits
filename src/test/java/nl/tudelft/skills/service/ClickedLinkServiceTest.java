@@ -54,7 +54,7 @@ class ClickedLinkServiceTest {
 	}
 
 	@Test
-	void deleteClickedLinksForTasksTwoTasks() {
+	void deleteClickedLinksForTasks() {
 		clickedLinkService.deleteClickedLinksForTasks(
 				Arrays.asList(db.getTaskRead11(), db.getTaskRead12(), db.getTaskDo12ae()));
 		assertThat(clickedLinkRepository.findAll()).hasSize(0);
