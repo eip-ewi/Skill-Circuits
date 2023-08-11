@@ -27,18 +27,11 @@ import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.dto.view.TaskCompletedDTO;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
-import nl.tudelft.skills.repository.ClickedLinkRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.TaskCompletionService;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @RestController
 @RequestMapping("/person")
@@ -47,14 +40,12 @@ public class PersonController {
 	private final TaskRepository taskRepository;
 	private final PersonRepository scPersonRepository;
 	private final TaskCompletionService taskCompletionService;
-	private final ClickedLinkRepository clickedLinkRepository;
 
 	public PersonController(TaskRepository taskRepository, PersonRepository scPersonRepository,
-			TaskCompletionService taskCompletionService, ClickedLinkRepository clickedLinkRepository) {
+			TaskCompletionService taskCompletionService) {
 		this.taskRepository = taskRepository;
 		this.scPersonRepository = scPersonRepository;
 		this.taskCompletionService = taskCompletionService;
-		this.clickedLinkRepository = clickedLinkRepository;
 	}
 
 	/**
@@ -100,45 +91,5 @@ public class PersonController {
 
 		List<Task> tasks = taskRepository.findAllById(completedTasks);
 		tasks.forEach(task -> taskCompletionService.addTaskCompletion(person, task));
-	}
-
-	/**
-	 * Saves the clicked link by a person
-	 *
-	 * @param authPerson the person clicking the link
-	 * @param taskId     the id of the task the link is part of
-	 */
-	@PutMapping("clicked/{taskId}")
-	@Transactional
-	public void logClickedLinkByPerson(@AuthenticatedPerson Person authPerson,
-			@PathVariable Long taskId) {
-		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
-		Task task = taskRepository.findByIdOrThrow(taskId);
-
-		clickedLinkRepository.save(ClickedLink.builder()
-				.task(task).person(person).build());
-
-	}
-
-	/**
-	 * Displays the content of the Clicked link table in json format. Only accessible to admins.
-	 *
-	 * @return                         the entries in the Clicked link table in json format
-	 * @throws JsonProcessingException
-	 */
-	@GetMapping("clickedlinks")
-	@Transactional
-	@PreAuthorize("@authorisationService.isAdmin()")
-	public String downloadClickedLinks() throws JsonProcessingException {
-		var logs = clickedLinkRepository.findAll();
-
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new JavaTimeModule());
-
-		SimpleModule module = new SimpleModule();
-		module.addSerializer(ClickedLink.class, new ClickedLinkSerializer());
-		mapper.registerModule(module);
-
-		return mapper.writeValueAsString(logs);
 	}
 }

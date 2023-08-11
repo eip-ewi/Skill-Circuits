@@ -27,7 +27,6 @@ import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.TaskCompletedDTO;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskCompletion;
-import nl.tudelft.skills.repository.ClickedLinkRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.TaskCompletionService;
@@ -38,10 +37,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 @Transactional
 @AutoConfigureMockMvc
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
@@ -51,17 +46,14 @@ public class PersonControllerTest extends ControllerTest {
 	private final PersonRepository personRepository;
 	private final TaskRepository taskRepository;
 	private final TaskCompletionService taskCompletionService;
-	private final ClickedLinkRepository clickedLinkRepository;
 
 	@Autowired
 	public PersonControllerTest(PersonRepository personRepository, TaskRepository taskRepository,
-			TaskCompletionService taskCompletionService, ClickedLinkRepository clickedLinkRepository) {
+			TaskCompletionService taskCompletionService) {
 		this.personRepository = personRepository;
-		this.personController = new PersonController(taskRepository, personRepository, taskCompletionService,
-				clickedLinkRepository);
+		this.personController = new PersonController(taskRepository, personRepository, taskCompletionService);
 		this.taskRepository = taskRepository;
 		this.taskCompletionService = taskCompletionService;
-		this.clickedLinkRepository = clickedLinkRepository;
 	}
 
 	@Test
@@ -112,32 +104,6 @@ public class PersonControllerTest extends ControllerTest {
 				.map(TaskCompletion::getTask).toList();
 		assertThat(tasksCompletedAfter).doesNotContain(db.getTaskDo11ad());
 		assertThat(taskCompletedDTO.getShowSkills()).hasSize(0);
-	}
-
-	@Test
-	void logClickedLinkByPerson() {
-		Person person = new Person();
-		person.setId(db.getPerson().getId());
-		Long taskId = db.getTaskRead11().getId();
-		personController.logClickedLinkByPerson(person, taskId);
-		assertTrue(
-				clickedLinkRepository.findAll().stream().anyMatch(s -> s.getTask().getId().equals(taskId)
-						&& s.getPerson().getId().equals(person.getId())));
-	}
-
-	@Test
-	void downloadClickedLinks() throws JsonProcessingException {
-		String clicks = personController.downloadClickedLinks();
-
-		ObjectMapper mapper = new ObjectMapper()
-				.enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
-		assertDoesNotThrow(() -> {
-			mapper.readTree(clicks);
-		});
-
-		assertTrue(clicks.contains("\"taskName\":\"Read chapter 1.1\""));
-		assertTrue(clicks.contains("\"skillName\":\"Negation\""));
-		assertTrue(clicks.contains("\"editionId\":69"));
 	}
 
 }
