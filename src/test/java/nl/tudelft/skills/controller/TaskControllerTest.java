@@ -18,21 +18,15 @@
 package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import nl.tudelft.labracore.api.RoleControllerApi;
-import nl.tudelft.labracore.api.dto.Id;
-import nl.tudelft.labracore.api.dto.PersonSummaryDTO;
-import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.EditLinkDTO;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.TaskRepository;
-import nl.tudelft.skills.test.TestUserDetailsService;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,8 +35,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
-
-import reactor.core.publisher.Flux;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -79,7 +71,7 @@ public class TaskControllerTest extends ControllerTest {
 	@Test
 	@WithUserDetails("teacher")
 	public void updateLinkSuccessful() throws Exception {
-		mockRole("TEACHER");
+		mockRole(roleApi, "TEACHER");
 
 		mvc.perform(patch("/task/change-link").with(csrf())
 				.content(createBody())
@@ -93,7 +85,7 @@ public class TaskControllerTest extends ControllerTest {
 	@Test
 	@WithUserDetails("teacher")
 	public void updateLinkTaskDoesNotExist() throws Exception {
-		mockRole("TEACHER");
+		mockRole(roleApi, "TEACHER");
 
 		ObjectMapper objectMapper = new ObjectMapper();
 		mvc.perform(patch("/task/change-link").with(csrf())
@@ -105,25 +97,12 @@ public class TaskControllerTest extends ControllerTest {
 	@Test
 	@WithUserDetails("student")
 	public void updateLinkUnauthorized() throws Exception {
-		mockRole("STUDENT");
+		mockRole(roleApi, "STUDENT");
 
 		mvc.perform(patch("/task/change-link").with(csrf())
 				.content(createBody())
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isForbidden());
-	}
-
-	private void mockRole(String role) {
-		if (role == null || role.isBlank()) {
-			when(roleApi.getRolesById(anySet(), anySet())).thenReturn(Flux.empty());
-		} else {
-			when(roleApi.getRolesById(anySet(), anySet()))
-					.thenReturn(Flux.just(new RoleDetailsDTO()
-							.id(new Id().editionId(db.getEditionRL().getId())
-									.personId(TestUserDetailsService.id))
-							.person(new PersonSummaryDTO().id(TestUserDetailsService.id).username("username"))
-							.type(RoleDetailsDTO.TypeEnum.valueOf(role))));
-		}
 	}
 
 }
