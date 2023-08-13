@@ -30,7 +30,7 @@
     &__delete {
         @include icon-button;
         font-size: 0.8rem;
-        margin-left: 0.35rem;
+        margin: 0 0.35rem;
     }
 
     &__alert {
@@ -83,6 +83,14 @@
         & th {
             text-align: left;
         }
+
+        & th:first-child {
+            min-width: min(27.5rem, 28vw);
+        }
+
+        & th:not(:first-child) {
+            min-width: min(10rem, 12vw);
+        }
     }
 
     &__input {
@@ -91,7 +99,7 @@
         flex-direction: row;
 
         & input {
-            width: 25rem;
+            width: min(25rem, 26vw);
             padding: 0.2rem;
             border: var(--primary-light) solid 1px;
 
