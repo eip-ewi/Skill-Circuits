@@ -210,49 +210,6 @@
     @include show-only-when("*", ":hover");
 }
 
-.skill-right-path {
-    display: flex;
-    gap: 0.5rem;
-    &:hover,
-    &:focus-within {
-        color: var(--primary-green);
-        cursor: pointer;
-    }
-}
-.right-path {
-    align-items: stretch;
-    //     display: grid;
-    gap: 0.5rem;
-    grid-template-columns: 1fr 1fr;
-    min-height: 2rem;
-    min-width: 2rem;
-    &:hover,
-    &:focus-within {
-        color: var(--primary-dark);
-        cursor: pointer;
-    }
-}
-
-.empty-path-text:not(:first-child:last-child) {
-    display: none;
-}
-
-.skill-paths {
-    align-items: stretch;
-
-    display: grid;
-    color: var(--primary-dark);
-    gap: 6rem;
-    grid-template-columns: 1fr 1fr;
-    min-height: 2rem;
-    min-width: 2rem;
-    //&:hover,
-    //&:focus-within {
-    //    color: var(--primary-dark);
-    //    cursor: pointer;
-    //
-    //}
-}
 .circuit[data-moving="block"] > .ghost_block {
     background-color: var(--grey-700);
 }
@@ -263,3 +220,5 @@
         display: none;
     }
 }
+
+@import "expanded";

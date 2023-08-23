@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add a table overview for editing links in an edition (@ffiedrich)
 - Add a table for storing information about clicked links (@bbakos) 
+- Paths can now be customised per user. (@mcoman)
+
+### Changed
+>>>>>>> 05cc578 (Finalise expanded skills)
 
 ### Fixed
 - Copy edition confirmation pop up shows the correct edition. (@ffiedrich)

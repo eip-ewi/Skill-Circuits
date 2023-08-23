@@ -22,7 +22,7 @@
     lang="en"
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-    <th:block layout:fragment="item">
+    <th:block layout:fragment="item" th:fragment="item">
         <th:block layout:replace="~{item/view :: item}">
             <th:block layout:fragment="item-content-element">
                 <a
@@ -39,7 +39,8 @@
             <th:block layout:fragment="item-decoration">
                 <button
                     class="circuit__button__symbol fa-solid fa-plus"
-                    th:onclick="|addTaskToEditedSkill(${item.id})|"></button>
+                    title="Add task to your path"
+                    onclick="addTaskToEditedSkill(this)"></button>
 
                 <button
                     class="item__button"
@@ -75,111 +76,123 @@
     </th:block>
 
     <script layout:fragment="script" th:inline="javascript">
-        function addTaskToEditedSkill(taskId) {
+        function addTaskToEditedSkill(button) {
             // Send custom path update if user is authenticate
 
             /*<![CDATA[*/
             const personId = /*[[${@authorisationService.authPerson?.id}]]*/ null;
             /*]]>*/
-            if (personId !== null) {
-                // If there is an authenticated person, also update on the server.
-                $.ajax({
-                    type: "PUT",
-                    url: "/person/add/" + taskId,
-                    processData: false,
-                    contentType: "application/json",
-                    success: () => {},
-                });
+            if (personId === null) {
+                window.location.reload();
             }
 
-            // Remove task from right side
-            let elems = document.querySelectorAll(`.item[data-item="${taskId}"`);
+            const taskId = button.closest(".item").dataset.item;
+            const expandedSkill = button.closest(".expanded-skill");
+            const leftSide = expandedSkill.querySelector(".expanded-skill__content > :first-child");
+            const rightSide = expandedSkill.querySelector(".expanded-skill__content > :last-child");
 
-            let block = elems[0].closest(".block");
-            elems.forEach(e => e.remove());
-            // Add task to custom path)
-            let leftUl = block.querySelector(".custom-path-tasks");
-
-            // req task element (to be added to custom path)
+            // If there is an authenticated person, also update on the server.
             $.ajax({
-                type: "GET",
-                url: "/task/" + taskId,
+                type: "PUT",
+                url: "/person/add/" + taskId,
                 processData: false,
-                contentType: "text/html",
-                success: html => {
-                    const task = $($("<div/>").append(html).children()[0]);
-                    $(leftUl).append(task);
+                contentType: "application/json",
+                success: async () => {
+                    // Add task to left side
+                    const task = await fetch(`/task/${taskId}`)
+                        .then(res => res.text())
+                        .then(html => {
+                            const div = document.createElement("div");
+                            div.innerHTML = html;
+                            return div.querySelector(".item");
+                        })
+                        .catch(() => {
+                            alert("Failed to add task");
+                        });
+                    leftSide.querySelector(".items").appendChild(task);
+
+                    // Remove tasks from right side
+                    rightSide
+                        .querySelectorAll(`.item[data-item="${taskId}"`)
+                        .forEach(item => item.remove());
+
+                    // Change path name to 'Your path'
+                    leftSide.querySelector(".path-name").innerText = "Your path";
+
+                    // Display reset button
+                    expandedSkill
+                        .querySelector("form button[type='submit']")
+                        .classList.remove("hidden");
+
+                    // Show icon in preview
+                    document.getElementById(`item-${taskId}-icon`).classList.remove("hidden");
+                },
+                error: () => {
+                    alert("Failed to add task");
                 },
             });
-            // Change <PathName> to "Your Path"
-            let customPathName = block.querySelector(".custom-path-name");
-            if (customPathName != null) customPathName.textContent = "Your path";
-
-            // Display Reset skill button
-            block.querySelector(".reset-skill-button").classList.remove("hidden");
-
-            // Hide icon from skill preview
-            let icon = document.querySelector("#item-" + taskId + "-icon");
-            console.log(icon);
-            icon.classList.remove("hidden");
         }
 
-        function removeTaskFromEditedSkill(taskId) {
+        function removeTaskFromEditedSkill(button) {
             // Send custom path update if user is authenticated
 
             /*<![CDATA[*/
             const personId = /*[[${@authorisationService.authPerson?.id}]]*/ null;
             /*]]>*/
-            if (personId !== null) {
-                // If there is an authenticated person, also update on the server.
-                $.ajax({
-                    type: "PUT",
-                    url: "/person/remove/" + taskId,
-                    processData: false,
-                    contentType: "application/json",
-                    success: () => {},
-                });
+            if (personId === null) {
+                window.location.reload();
             }
 
-            // Remove task from left side (from custom path)
-            let elem = document.getElementById("item-" + taskId);
+            const taskId = button.closest(".item").dataset.item;
+            const paths = button.closest(".item").dataset.pathIds;
+            const expandedSkill = button.closest(".expanded-skill");
+            const leftSide = expandedSkill.querySelector(".expanded-skill__content > :first-child");
+            const rightSide = expandedSkill.querySelector(".expanded-skill__content > :last-child");
 
-            let block = elem.closest(".block");
-            let paths = elem.dataset.pathIds; //value("pathIds");
+            // If there is an authenticated person, also update on the server.
+            $.ajax({
+                type: "PUT",
+                url: "/person/remove/" + taskId,
+                processData: false,
+                contentType: "application/json",
+                success: async () => {
+                    // Remove task from left side
+                    document.getElementById(`item-${taskId}`).remove();
 
-            elem.remove();
-            // Add task on right side ("other paths")
-            let rightPaths = block.getElementsByClassName("right-path");
+                    // Add task to right side
+                    const task = await fetch(`/task/${taskId}/preview`)
+                        .then(res => res.text())
+                        .then(html => {
+                            const div = document.createElement("div");
+                            div.innerHTML = html;
+                            return div.querySelector(".item");
+                        })
+                        .catch(() => {
+                            alert("Failed to add task");
+                        });
+                    [...rightSide.querySelectorAll(".path-toggle")]
+                        .filter(path => paths.includes(path.dataset.id))
+                        .forEach(path => {
+                            path.querySelector(".path-toggle__content").appendChild(
+                                task.cloneNode(true)
+                            );
+                        });
 
-            for (let rightPath of rightPaths) {
-                if (paths.includes(rightPath.dataset.id)) {
-                    let rightUl = rightPath.querySelector(".right-path-ul");
+                    // Change path name to 'Your path'
+                    leftSide.querySelector(".path-name").innerText = "Your path";
 
-                    // req task element
-                    $.ajax({
-                        type: "GET",
-                        url: "/task/" + taskId + "/right",
-                        processData: false,
-                        contentType: "text/html",
-                        success: html => {
-                            const task = $($("<div/>").append(html).children()[0]);
-                            $(rightUl).append(task);
-                        },
-                    });
-                }
-            }
+                    // Display reset button
+                    expandedSkill
+                        .querySelector("form button[type='submit']")
+                        .classList.remove("hidden");
 
-            // Change <PathName> to "Your Path"
-            let customPathName = block.querySelector(".custom-path-name");
-            if (customPathName != null) customPathName.textContent = "Your path";
-
-            // Display Reset skill button
-            block.querySelector(".reset-skill-button").classList.remove("hidden");
-
-            // Hide icon from skill preview
-            let icon = document.querySelector("#item-" + taskId + "-icon");
-            console.log(icon);
-            icon.classList.add("hidden");
+                    // Hide icon in preview
+                    document.getElementById(`item-${taskId}-icon`).classList.add("hidden");
+                },
+                error: () => {
+                    alert("Failed to remove task");
+                },
+            });
         }
     </script>
 </html>

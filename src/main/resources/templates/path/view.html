@@ -23,55 +23,37 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <th:block layout:fragment="path">
-        <div class="right-path" th:data-id="${path.id}">
-            <div th:class="skill-right-path">
-                <p th:text="${path.name}"></p>
-                <span class="fa-solid fa-caret-down"></span>
-            </div>
+        <div th:data-id="${path.id}" aria-expanded="false" class="path-toggle">
+            <button class="path-toggle__control">
+                <span th:text="${path.name}"></span>
+                <span class="fa-solid fa-chevron-down"></span>
+            </button>
 
-            <div class="content" style="padding: 0rem; display: none">
-                <ul class="right-path-ul">
-                    <th:block th:each="item, iter : ${block.items}">
-                        <th:block
-                            th:if="${@pathService.isTaskInPath(item.id, path.id)
-                            and not ((item.visible and not #sets.contains(skillsModified, block))
-                                                or (#sets.contains(skillsModified, block) and #sets.contains(tasksAdded, item)))}">
-                            <li layout:replace="~{task/inactiveview :: item}"></li>
-                        </th:block>
+            <ul class="path-toggle__content">
+                <th:block
+                    th:each="item, iter : ${block.items}"
+                    th:with="taskAdded = ${#sets.contains(tasksAdded.![id], item.id)}">
+                    <th:block
+                        th:if="${@pathService.isTaskInPath(item.id, path.id) and not ((item.visible and not modified) or (modified and taskAdded))}">
+                        <li layout:replace="~{task/inactiveview :: item}"></li>
                     </th:block>
-                    <h3 style="font-size: 0.8rem" class="empty-path-text">
-                        This skill has no extra tasks in this path
-                    </h3>
-                </ul>
-            </div>
+                </th:block>
+                <li class="hide-with-siblings">This skill has no extra tasks in this path</li>
+            </ul>
         </div>
     </th:block>
 
     <script layout:fragment="script">
-        function expandAlternativePath() {
-            let pathId = $(this).data("id");
-            let content = this.nextElementSibling;
-
-            let before = content.style.display;
-
-            // Close all other paths in the right view of the skill
-            $(".skill-right-path").each(closeRightPath);
-
-            // Toggle current right path in skill
-            if (before === "block") {
-                content.style.display = "none";
-            } else {
-                content.style.display = "block";
-            }
-        }
-
-        function closeRightPath() {
-            let content = this.nextElementSibling;
-            content.style.display = "none";
-        }
-
         document.addEventListener("DOMContentLoaded", function () {
-            $(".skill-right-path").click(expandAlternativePath);
+            document.querySelectorAll(".path-toggle__control").forEach(ctrl =>
+                ctrl.addEventListener("click", function () {
+                    const toggle = ctrl.closest(".path-toggle");
+                    toggle.setAttribute(
+                        "aria-expanded",
+                        toggle.getAttribute("aria-expanded") !== "true"
+                    );
+                })
+            );
         });
     </script>
 </html>

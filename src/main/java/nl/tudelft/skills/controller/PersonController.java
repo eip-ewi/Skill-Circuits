@@ -20,14 +20,15 @@ package nl.tudelft.skills.controller;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 
+import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.librador.SpringContext;
 import nl.tudelft.skills.dto.view.TaskCompletedDTO;
 import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.Skill;
@@ -44,18 +45,14 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/person")
+@AllArgsConstructor
 public class PersonController {
 
 	private final TaskRepository taskRepository;
 	private final PersonRepository scPersonRepository;
 	private final TaskCompletionService taskCompletionService;
-
-	public PersonController(TaskRepository taskRepository, PersonRepository scPersonRepository,
-			TaskCompletionService taskCompletionService) {
-		this.taskRepository = taskRepository;
-		this.scPersonRepository = scPersonRepository;
-		this.taskCompletionService = taskCompletionService;
-	}
+	private final SkillRepository skillRepository;
+	private final PathRepository pathRepository;
 
 	/**
 	 * Marks a certain task as completed or uncompleted for a certain person.
@@ -157,7 +154,7 @@ public class PersonController {
 	public void resetSkill(@AuthenticatedPerson Person authPerson, @PathVariable Long skillId,
 			HttpServletResponse response) throws IOException {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
-		Skill skill = (SpringContext.getBean(SkillRepository.class)).findByIdOrThrow(skillId);
+		Skill skill = skillRepository.findByIdOrThrow(skillId);
 
 		// Remove the skill from the set of custom skills
 		person.setSkillsModified(
@@ -178,21 +175,21 @@ public class PersonController {
 	 * @param task
 	 */
 	void addAllTaskFromCurrentPath(SCPerson person, Task task) {
-		Long currentPathId = person.getPathPreferences().stream()
+		Optional<Long> currentPathId = person.getPathPreferences().stream()
 				.filter(p -> p.getEdition().equals(task.getSkill().getSubmodule().getModule().getEdition()))
-				.map(pp -> pp.getPath().getId()).findFirst().orElse(null);
+				.filter(p -> p.getPath() != null)
+				.map(p -> p.getPath().getId()).findFirst();
 
-		if (currentPathId == null) {
-			// add all tasks
-			task.getSkill().getTasks().forEach(t -> person.getTasksAdded().add(t));
-		} else {
-			PathRepository pathRepository = SpringContext.getBean(PathRepository.class);
-			Path path = pathRepository.getById(currentPathId);
+		currentPathId.ifPresentOrElse(id -> {
+			Path path = pathRepository.getById(id);
 			task.getSkill().getTasks().forEach(t -> {
 				if (t.getPaths().contains(path))
 					person.getTasksAdded().add(t);
 			});
-		}
+		}, () -> {
+			// add all tasks
+			task.getSkill().getTasks().forEach(t -> person.getTasksAdded().add(t));
+		});
 	}
 
 }

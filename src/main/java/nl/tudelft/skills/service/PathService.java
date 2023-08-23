@@ -89,8 +89,9 @@ public class PathService {
 	 * @return        True if task belongs to this path, false otherwise.
 	 */
 	public boolean isTaskInPath(Long taskId, Long pathId) {
-		return pathRepository.findById(pathId).get()
-				.getTasks().stream().map(t -> t.getId()).filter(id -> id.equals(taskId)).count() >= 1;
+		return pathRepository.findByIdOrThrow(pathId).getTasks().stream()
+				.map(Task::getId)
+				.anyMatch(taskId::equals);
 	}
 
 	public PathViewDTO getPath(Long pathId) {
