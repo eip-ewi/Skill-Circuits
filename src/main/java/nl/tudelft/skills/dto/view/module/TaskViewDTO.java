@@ -48,6 +48,13 @@ public class TaskViewDTO extends View<Task> implements ItemView {
 
 	private Integer completedCount;
 
+	@NotNull
+	@PostApply
+	private String submoduleName;
+	@NotNull
+	@PostApply
+	private String skillName;
+
 	/**
 	 * Visibility of a task is set to true if it is part of the path currently displayed.
 	 */
@@ -59,5 +66,7 @@ public class TaskViewDTO extends View<Task> implements ItemView {
 	public void postApply() {
 		super.postApply();
 		completedCount = data.getCompletedBy().size();
+		skillName = data.getSkill().getName();
+		submoduleName = data.getSkill().getSubmodule().getName();
 	}
 }
