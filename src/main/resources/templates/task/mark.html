@@ -46,7 +46,7 @@
             }
 
             // Traverse all blocks topologically and mark their state
-            [...$(".block:not(.bloated)")]
+            [...$(".block")]
                 .sort((a, b) => getRow(a) - getRow(b))
                 .forEach(block => updateBlockState(block.id.split("-")[1]));
 
@@ -78,9 +78,8 @@
 
             const completed = task.hasClass("completed");
 
-            const blockbloated = $(task.parents(".block")[0]);
-            const blockId = blockbloated.prop("id").split("-")[1];
-            const block = $(`#block-${blockId}`);
+            const block = task.closest(".block");
+            const blockId = block.attr("id").split("-")[1];
 
             updateBlockState(blockId);
             [...block.data("children")].forEach(id => updateBlockState(id));

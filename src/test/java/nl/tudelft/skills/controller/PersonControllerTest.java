@@ -33,6 +33,8 @@ import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskCompletion;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.PathPreferenceRepository;
+import nl.tudelft.skills.repository.PathRepository;
+import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.TaskCompletionService;
@@ -57,9 +59,12 @@ public class PersonControllerTest extends ControllerTest {
 	@Autowired
 	public PersonControllerTest(PersonRepository personRepository, TaskRepository taskRepository,
 			TaskCompletionService taskCompletionService,
-			PathPreferenceRepository pathPreferenceRepository) {
+			PathPreferenceRepository pathPreferenceRepository,
+			SkillRepository skillRepository,
+			PathRepository pathRepository) {
 		this.personRepository = personRepository;
-		this.personController = new PersonController(taskRepository, personRepository, taskCompletionService);
+		this.personController = new PersonController(taskRepository, personRepository, taskCompletionService,
+				skillRepository, pathRepository);
 		this.taskRepository = taskRepository;
 		this.taskCompletionService = taskCompletionService;
 		this.pathPreferenceRepository = pathPreferenceRepository;

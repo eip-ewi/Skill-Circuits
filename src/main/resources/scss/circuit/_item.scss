@@ -50,9 +50,6 @@
                 var(--primary-green)
             );
         }
-        &:disabled,
-        &:disabled:hover {
-        }
 
         &__edit {
             background-color: var(--primary-dark);

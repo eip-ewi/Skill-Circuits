@@ -58,12 +58,12 @@ public class TaskController {
 	 * @param  model  The model to configure.
 	 * @return        Html page with the task.
 	 */
-	@GetMapping("{taskId}/right")
+	@GetMapping("{taskId}/preview")
 	public String getTaskForCustomPath(@PathVariable Long taskId, Model model) {
 		Task task = taskRepository.findByIdOrThrow(taskId);
 		model.addAttribute("item", View.convert(task, TaskViewDTO.class));
 		model.addAttribute("canEdit", false);
-		return "task/inactiveview";
+		return "task/inactiveview :: item";
 	}
 
 }

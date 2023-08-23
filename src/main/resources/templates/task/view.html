@@ -89,7 +89,8 @@
                     th:if="${not canEdit}"
                     class="circuit__button__symbol fa-solid fa-trash"
                     style="margin-left: auto"
-                    th:onclick="|removeTaskFromEditedSkill(${item.id})|"></button>
+                    title="Remove task from your path"
+                    onclick="removeTaskFromEditedSkill(this)"></button>
             </th:block>
         </th:block>
     </th:block>

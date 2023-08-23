@@ -73,17 +73,17 @@
                 This skill has no tasks in this path
             </h3>
 
-            <ul data-edit="always">
+            <ul>
                 <th:block th:each="item, iter : ${block.items}">
-                    <!--                Task view for teacher-->
+                    <!-- Task view for teacher-->
                     <th:block th:if="${level == 'module' and canEdit}">
                         <li layout:replace="~{task/view :: item}"></li>
                     </th:block>
-                    <!--                Task preview for student-->
-                    <th:block>
+                    <!--  Task preview for student-->
+                    <th:block
+                        th:with="skillModified = ${#sets.contains(skillsModified.![id], block.id)}">
                         <li
-                            th:classappend="${level == 'module' and not canEdit and ((item.visible and not #sets.contains(skillsModified, block))
-                                                or (#sets.contains(skillsModified, block) and #sets.contains(tasksAdded, item)))}? '' : 'hidden'"
+                            th:classappend="${level == 'module' and not canEdit and ((item.visible and not skillModified) or (skillModified and #sets.contains(tasksAdded.![id], item.id)))}? '' : 'hidden'"
                             style="display: inline"
                             layout:insert="~{task/preview :: item}"></li>
                     </th:block>
@@ -123,6 +123,10 @@
             <div class="hidden block__connect to" th:data-skill="${block.id}">
                 <button><span class="fa-solid fa-link"></span></button>
             </div>
+        </th:block>
+
+        <th:block th:if="${level == 'module'}">
+            <div layout:replace="~{skill/expanded :: dialog}"></div>
         </th:block>
     </div>
 

@@ -25,7 +25,8 @@
     <li
         data-edit="always"
         class="item"
-        th:id="|item-${item.id}|"
+        th:with="id = ${path == null} ? |item-${item.id}| : |item-${item.id}-${path.id}|"
+        th:id="${id}"
         th:data-item="${item.id}"
         th:data-path-ids="${item.pathIds}"
         th:data-index="${iter == null} ? 0 : ${iter.size - iter.count}"
@@ -39,19 +40,19 @@
                 <div
                     style="flex-grow: 1"
                     data-edit="always"
-                    th:id="|item-${item.id}-content|"
+                    th:id="|${id}-content|"
                     class="item__content">
                     <th:block layout:fragment="item-before-content"></th:block>
                     <th:block layout:fragment="item-name">
                         <span
                             th:if="not ${canEdit} and ((${level == 'module'}) or ${level != 'module'})"
-                            th:id="|item-${item.id}-name|"
+                            th:id="|${id}-name|"
                             class="item__name"
                             th:text="${item.name}"
                             th:data-black="true"></span>
                         <span
                             th:if="${canEdit}"
-                            th:id="|item-${item.id}-name|"
+                            th:id="|${id}-name|"
                             class="item__name"
                             th:text="${item.name}"
                             th:data-black="(${level == 'module'} and ${item.visible}) or ${level != 'module'}"></span>
@@ -71,7 +72,7 @@
         </th:block>
         <th:block layout:fragment="item-after-content"></th:block>
 
-        <div class="item__buttons" th:id="|item-${item.id}-buttons|" data-edit="only">
+        <div class="item__buttons" th:id="|${id}-buttons|" data-edit="only">
             <th:block layout:fragment="item-buttons">
                 <th:block th:if="${canEdit}">
                     <button
