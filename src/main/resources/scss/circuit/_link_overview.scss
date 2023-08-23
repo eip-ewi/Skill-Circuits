@@ -1,0 +1,112 @@
+@use "../mixins" as *;
+
+.link {
+    &__overlay {
+        height: 70vh;
+        width: 70vw;
+        padding: 1.4rem;
+    }
+
+    &__filter_element {
+        font-size: 0.8rem;
+        padding: 0.1rem 0.1rem 0.1rem 0.3rem;
+        border: var(--grey-700) solid 1px;
+        height: 1.5rem;
+
+        &:focus-visible {
+            border: var(--primary-dark) solid 1px;
+            outline: none;
+        }
+    }
+
+    &__close {
+        @include icon-button;
+        position: absolute;
+        right: 0.8rem;
+        top: 0.8rem;
+        font-size: 1.6rem;
+    }
+
+    &__delete {
+        @include icon-button;
+        font-size: 0.8rem;
+        margin: 0 0.35rem;
+    }
+
+    &__alert {
+        background: var(--primary-light);
+        border: var(--primary-dark) solid 1px;
+        font-size: 0.75rem;
+        padding: 0.2rem;
+        position: absolute;
+        top: -1.5rem;
+        right: 1rem;
+        width: fit-content;
+
+        & i {
+            margin-right: 0.15rem;
+        }
+    }
+
+    &__filter {
+        margin: 0.3rem 0;
+        display: flex;
+        flex-direction: row;
+
+        & > form {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            margin-right: 1.2rem;
+
+            & label {
+                margin-right: 0.3rem;
+            }
+
+            & input {
+                width: 12rem;
+            }
+        }
+    }
+
+    &__group {
+        background-color: var(--grey-700);
+        padding: 0.5rem;
+        margin-top: 1rem;
+        width: min-content;
+    }
+
+    &__table {
+        border-spacing: 0 0.4rem;
+        margin-top: 0.5rem;
+
+        & th {
+            text-align: left;
+        }
+
+        & th:first-child {
+            min-width: min(27.5rem, 28vw);
+        }
+
+        & th:not(:first-child) {
+            min-width: min(10rem, 12vw);
+        }
+    }
+
+    &__input {
+        position: relative;
+        display: flex;
+        flex-direction: row;
+
+        & input {
+            width: min(25rem, 26vw);
+            padding: 0.2rem;
+            border: var(--primary-light) solid 1px;
+
+            &:focus-visible {
+                border: var(--primary-dark) solid 1px;
+                outline: none;
+            }
+        }
+    }
+}

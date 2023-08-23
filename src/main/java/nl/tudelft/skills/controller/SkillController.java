@@ -134,6 +134,9 @@ public class SkillController {
 					dto.setSkill(SkillIdDTO.builder().id(skill.getId()).build());
 					return dto.apply();
 				}).toList();
+		for (Task task : tasks) {
+			task.setSkill(skill);
+		}
 		skill.setTasks(taskRepository.saveAll(tasks));
 
 		checkpointRepository.findBySkillsContains(skill).getSkills().add(skill);
@@ -210,6 +213,7 @@ public class SkillController {
 		skillRepository.findByIdOrThrow(skill.getId()).getTasks().stream().filter(t -> !oldTasks.contains(t))
 				.forEach(t -> {
 					t.setPaths(paths);
+					t.setSkill(skill);
 					taskRepository.save(t);
 				});
 
