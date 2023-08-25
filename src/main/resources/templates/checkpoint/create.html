@@ -22,11 +22,7 @@
     lang="en"
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-    <div
-        th:if="${@authorisationService.canEditCheckpointInEdition(circuit.edition.id)}"
-        layout:fragment="form"
-        class="hidden"
-        id="create-checkpoint-wrapper">
+    <div th:if="${canEdit}" layout:fragment="form" class="hidden" id="create-checkpoint-wrapper">
         <div id="create-checkpoint">
             <form
                 id="create-checkpoint-form"
@@ -70,10 +66,7 @@
         </div>
     </div>
 
-    <script
-        th:with="canEdit = ${@authorisationService.canEditSubmoduleInEdition(circuit.edition.id) and not studentMode}"
-        th:if="${canEdit}"
-        layout:fragment="script">
+    <script th:if="${canEdit}" layout:fragment="script">
         function updateGhostCheckpoints() {
             const circuit = $("#circuit");
             const rowsInGrid = [...Array(parseInt(circuit.css("--rows"))).keys()];
