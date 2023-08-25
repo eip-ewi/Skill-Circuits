@@ -75,7 +75,7 @@ public class ClickedLinkController {
 	 * @return                         the entries in the Clicked link table in json format
 	 * @throws JsonProcessingException
 	 */
-	@GetMapping("download")
+	@GetMapping("all")
 	@Transactional
 	@PreAuthorize("@authorisationService.isAdmin()")
 	public String downloadClickedLinks() throws JsonProcessingException {

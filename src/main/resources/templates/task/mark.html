@@ -72,11 +72,9 @@
 
         function clickedLink() {
             const taskId = $(this).parent().attr("id").split("-")[1];
-            const link = $(this).attr("href");
-            console.log(link);
 
             $.ajax({
-                type: "PUT",
+                type: "POST",
                 url: "/clicked_links/clicked/" + taskId,
                 processData: false,
                 contentType: "application/json",
