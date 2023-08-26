@@ -57,7 +57,7 @@ public class ClickedLinkController {
 	 * @param authPerson the person clicking the link
 	 * @param taskId     the id of the task the link is part of
 	 */
-	@PutMapping("clicked/{taskId}")
+	@PostMapping("clicked/{taskId}")
 	@Transactional
 	public void logClickedLinkByPerson(@AuthenticatedPerson Person authPerson,
 			@PathVariable Long taskId) {

@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.repository;
 
+import java.util.List;
 import java.util.Set;
 
 import nl.tudelft.skills.model.ClickedLink;
@@ -32,4 +33,6 @@ public interface ClickedLinkRepository extends JpaRepository<ClickedLink, Long> 
 	}
 
 	Set<ClickedLink> getByPersonId(Long id);
+
+	List<ClickedLink> deleteAllByTaskIdIn(List<Long> taskIds);
 }

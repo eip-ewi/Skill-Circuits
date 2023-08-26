@@ -44,8 +44,6 @@ public class ClickedLinkService {
 	@Transactional
 	public void deleteClickedLinksForTasks(List<Task> tasks) {
 		var taskIds = tasks.stream().map(Task::getId).toList();
-		var clicks = clickedLinkRepository.findAll();
-		var deletedClicks = clicks.stream().filter(c -> taskIds.contains(c.getTask().getId()));
-		deletedClicks.forEach(clickedLinkRepository::delete);
+		clickedLinkRepository.deleteAllByTaskIdIn(taskIds);
 	}
 }
