@@ -19,8 +19,11 @@ package nl.tudelft.skills.controller;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
+
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.dto.view.ClickedLinkDTO;
 import nl.tudelft.skills.repository.ClickedLinkRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
@@ -31,10 +34,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Transactional
 @AutoConfigureMockMvc
@@ -69,17 +68,11 @@ class ClickedLinkControllerTest extends ControllerTest {
 
 	@Test
 	@WithUserDetails("admin")
-	void downloadClickedLinks() throws JsonProcessingException {
-		String clicks = clickedLinkController.downloadClickedLinks();
+	void downloadClickedLinks() {
+		List<ClickedLinkDTO> clicks = clickedLinkController.showAllClickedLinks();
 
-		ObjectMapper mapper = new ObjectMapper()
-				.enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
-		assertDoesNotThrow(() -> {
-			mapper.readTree(clicks);
-		});
-
-		assertTrue(clicks.contains("\"taskName\":\"Read chapter 1.1\""));
-		assertTrue(clicks.contains("\"skillName\":\"Negation\""));
-		assertTrue(clicks.contains("\"editionId\":69"));
+		assertEquals("Read chapter 1.1", clicks.get(0).getTaskName());
+		assertEquals("Negation", clicks.get(0).getSkillName());
+		assertEquals(69, clicks.get(0).getEditionId());
 	}
 }
