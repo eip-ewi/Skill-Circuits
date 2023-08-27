@@ -51,18 +51,18 @@
         document.addEventListener("DOMContentLoaded", function () {
             $("#copy-confirmation-form").submit(function (event) {
                 event.preventDefault();
+
+                const editionTo = $("#copy-checkpoint-id").val();
+                const editionFrom = $("#copy-edition-select").val();
                 $.ajax({
                     type: "post",
-                    url: `/edition/${$("#copy-checkpoint-id").val()}/copy/${$(
-                        "#copy-edition-select"
-                    ).val()}`,
+                    url: `/edition/${editionTo}/copy/${editionFrom}`,
                     processData: false,
                     contentType: "application/json",
                     success: () => {
                         location.reload();
                     },
                     error: () => {
-                        toggleFormVisibility();
                         toggleOverlay("copy-confirmation-overlay");
                     },
                 });

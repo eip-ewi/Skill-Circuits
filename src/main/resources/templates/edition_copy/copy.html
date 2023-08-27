@@ -26,7 +26,10 @@
         layout:fragment="copy-edition"
         th:if="${@editionService.isEditionEmpty(edition.id) and not studentMode
         and @authorisationService.canEditEdition(edition.id) and #lists.size(edition.course.olderEditions) > 0}">
-        <button id="copy-edition" class="circuit__button copy-edition__button">
+        <button
+            id="copy-edition"
+            class="circuit__button copy-edition__button"
+            onclick="toggleFormVisibility()">
             <i class="fas fa-paste"></i>
             <span>Copy previous edition</span>
         </button>
@@ -37,7 +40,8 @@
             <select
                 class="circuit__dropdown copy-edition__select"
                 id="copy-edition-select"
-                name="edition.id">
+                name="edition.id"
+                aria-label="Edition to copy">
                 <option
                     th:each="selectEdition: ${edition.course.olderEditions}"
                     th:value="${selectEdition.id}"
@@ -49,10 +53,7 @@
                 id="copy-edition-cancel"
                 class="fa-solid fa-xmark"
                 onclick="toggleFormVisibility()"></button>
-            <button
-                type="button"
-                class="fas fa-check"
-                onclick="toggleOverlay('copy-confirmation-overlay')"></button>
+            <button type="submit" class="fas fa-check"></button>
         </form>
     </div>
 
@@ -74,9 +75,12 @@
         }
 
         document.addEventListener("DOMContentLoaded", function () {
-            $("#copy-edition").click(() => {
-                toggleFormVisibility();
-                $("#copy-edition-from").text($("#copy-edition-select").find(":selected").text());
+            $("#copy-edition-form").on("submit", event => {
+                event.preventDefault();
+                $("#copy-edition-from").text(
+                    $("#copy-edition-select").children(":selected").text()
+                );
+                toggleOverlay("copy-confirmation-overlay");
             });
         });
     </script>
