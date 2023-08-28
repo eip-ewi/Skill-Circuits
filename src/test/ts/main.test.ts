@@ -1,7 +1,3 @@
-/**
- * @jest-environment jsdom
- */
-
 // @ts-ignore
 import {toggleOverlay} from "../../main/ts/main.ts";
 

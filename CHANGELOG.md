@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [UNRELEASED]
 
 ### Added
+- Add a table overview for editing links in an edition (@ffiedrich)
 - Add a table for storing information about clicked links (@bbakos) 
 
 ### Changed

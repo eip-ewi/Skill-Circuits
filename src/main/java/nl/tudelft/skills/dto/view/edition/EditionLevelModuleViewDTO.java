@@ -19,6 +19,8 @@ package nl.tudelft.skills.dto.view.edition;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 
@@ -26,6 +28,7 @@ import lombok.*;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.BlockView;
 import nl.tudelft.skills.dto.view.GroupView;
+import nl.tudelft.skills.dto.view.module.TaskViewDTO;
 import nl.tudelft.skills.model.SCModule;
 
 @Data
@@ -42,10 +45,24 @@ public class EditionLevelModuleViewDTO extends View<SCModule> implements GroupVi
 	@NotNull
 	@PostApply
 	private List<EditionLevelSubmoduleViewDTO> submodules;
+	@NotNull
+	@PostApply
+	private Set<TaskViewDTO> tasksWithLinks;
 
 	@Override
 	public List<? extends BlockView> getBlocks() {
 		return submodules;
+	}
+
+	@Override
+	public void postApply() {
+		super.postApply();
+		this.tasksWithLinks = this.getSubmodules().stream()
+				.flatMap(submodule -> submodule.getSkills().stream())
+				.flatMap(skill -> skill.getTasks().stream())
+				.filter(task -> task.getLink() != null)
+				.collect(Collectors.toSet());
+		this.tasksWithLinks.forEach(TaskViewDTO::postApply);
 	}
 
 	public int getSkillsCount() {

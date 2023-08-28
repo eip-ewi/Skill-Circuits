@@ -15,33 +15,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view.edition;
-
-import java.util.List;
+package nl.tudelft.skills.dto.view;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import lombok.*;
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.ItemView;
-import nl.tudelft.skills.dto.view.module.TaskViewDTO;
-import nl.tudelft.skills.model.Skill;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class EditionLevelSkillViewDTO extends View<Skill> implements ItemView {
-
+public class EditLinkDTO {
 	@NotNull
-	private Long id;
+	private Long taskId;
+
 	@NotBlank
-	private String name;
-	@NotNull
-	private Boolean hidden;
-	@NotNull
-	private List<TaskViewDTO> tasks;
-
+	private String newLink;
 }
