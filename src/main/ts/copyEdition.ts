@@ -75,11 +75,7 @@ function editionCopyEventListeners(): void {
     $("#copy-confirmation-form").on("submit", handleCopyEditionConfirmation);
 }
 
-if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
-    module.exports.toggleEditionFormVisibility = toggleEditionFormVisibility;
-    module.exports.handleCopyEditionFormSubmission = handleCopyEditionFormSubmission;
-    module.exports.handleCopyEditionConfirmation = handleCopyEditionConfirmation;
-} else {
+if (typeof module === "undefined" || typeof module.exports === "undefined") {
     // For the browser view, add the event listeners
     document.addEventListener("DOMContentLoaded", function () {
         editionCopyEventListeners();
