@@ -192,7 +192,6 @@ include:
   - template: Jobs/Code-Quality.gitlab-ci.yml
   - template: Security/DAST.gitlab-ci.yml
 #  - template: Security/SAST.gitlab-ci.yml
-  - template: Security/License-Scanning.gitlab-ci.yml
   - template: Security/Secret-Detection.gitlab-ci.yml
   - template: Verify/Accessibility.gitlab-ci.yml
     #  - template: Verify/Browser-Performance.gitlab-ci.yml
@@ -274,24 +273,6 @@ dast:
 #    - cat pom.xml
 #  variables:
 #    MAVEN_CLI_OPTS: -q -Dmaven.main.skip -Dmaven.test.skip -DskipTests --batch-mode
-
-
-# License scanning reporter for checking the licenses of dependencies.
-license_scanning:
-  extends:
-    - .build_cached
-    - .gitlab_reporter
-  stage: gitlab reports
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "trigger" ||
-        $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
-      when: never
-    - if: $CI_COMMIT_BRANCH == "master" ||
-        $CI_COMMIT_BRANCH == "development" ||
-        $CI_MERGE_REQUEST_ID
-  variables:
-    MAVEN_CLI_OPTS: -q -Dmaven.main.skip -Dmaven.test.skip -DskipTests --batch-mode
-    LM_JAVA_VERSION: 17
 
 dev-deploy:
   image: getsentry/sentry-cli

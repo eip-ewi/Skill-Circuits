@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Copy edition confirmation pop up shows the correct edition. (@ffiedrich)
 - Fixed student view for teachers (@bbakos)
+- Fix connections between skills to be hoverable and removable (@ffiedrich)
 
 ## [2.2.2]
 
