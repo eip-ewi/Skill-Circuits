@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- Copy edition confirmation pop up shows the correct edition. (@ffiedrich)
 
 ## [2.2.2]
 

@@ -26,7 +26,10 @@
         layout:fragment="copy-edition"
         th:if="${@editionService.isEditionEmpty(edition.id) and not studentMode
         and @authorisationService.canEditEdition(edition.id) and #lists.size(edition.course.olderEditions) > 0}">
-        <button id="copy-edition" class="circuit__button copy-edition__button">
+        <button
+            id="copy-edition"
+            class="circuit__button copy-edition__button"
+            onclick="toggleEditionFormVisibility()">
             <i class="fas fa-paste"></i>
             <span>Copy previous edition</span>
         </button>
@@ -37,7 +40,8 @@
             <select
                 class="circuit__dropdown copy-edition__select"
                 id="copy-edition-select"
-                name="edition.id">
+                name="edition.id"
+                aria-label="Edition to copy">
                 <option
                     th:each="selectEdition: ${edition.course.olderEditions}"
                     th:value="${selectEdition.id}"
@@ -48,36 +52,36 @@
                 type="button"
                 id="copy-edition-cancel"
                 class="fa-solid fa-xmark"
-                onclick="toggleFormVisibility()"></button>
-            <button
-                type="button"
-                class="fas fa-check"
-                onclick="toggleOverlay('copy-confirmation-overlay')"></button>
+                onclick="toggleEditionFormVisibility()"></button>
+            <button type="submit" class="fas fa-check"></button>
         </form>
     </div>
 
-    <script
+    <dialog
         th:if="${@editionService.isEditionEmpty(edition.id) and not studentMode
-        and @authorisationService.canEditEdition(edition.id) and #lists.size(edition.course.olderEditions) > 0}"
-        layout:fragment="script">
-        function toggleFormVisibility() {
-            const copyEditionForm = $("#copy-edition-form");
-            const copyEdition = $("#copy-edition");
+        and @authorisationService.canEditEdition(edition.id) and not edition.course.olderEditions.isEmpty()}"
+        layout:fragment="overlay"
+        class="overlay"
+        id="copy-confirmation-overlay">
+        <form id="copy-confirmation-form" class="confirmation">
+            <p>
+                <!-- spotless:off -->Are you sure you want to <b>copy all content</b> of edition
+                &quot;<span id="copy-edition-from"></span>&quot; to edition
+                &quot;<span th:text="${edition.name}"></span>&quot;?<!-- spotless:on -->
+            </p>
 
-            if (copyEditionForm.hasClass("hidden")) {
-                copyEditionForm.removeClass("hidden");
-                copyEdition.addClass("hidden");
-            } else {
-                copyEdition.removeClass("hidden");
-                copyEditionForm.addClass("hidden");
-            }
-        }
+            <div class="confirmation__buttons">
+                <button type="button" onclick="toggleOverlay('copy-confirmation-overlay')">
+                    Cancel
+                </button>
+                <button type="submit">Copy</button>
+            </div>
+        </form>
+    </dialog>
 
-        document.addEventListener("DOMContentLoaded", function () {
-            $("#copy-edition").click(() => {
-                toggleFormVisibility();
-                $("#copy-edition-from").text($("#copy-edition-select").find(":selected").text());
-            });
-        });
-    </script>
+    <script
+        layout:fragment="script"
+        th:if="${@editionService.isEditionEmpty(edition.id) and not studentMode
+            and @authorisationService.canEditEdition(edition.id) and #lists.size(edition.course.olderEditions) > 0}"
+        th:src="@{/js/copyEdition.js}"></script>
 </html>
