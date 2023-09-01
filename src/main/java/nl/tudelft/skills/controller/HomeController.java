@@ -154,4 +154,14 @@ public class HomeController {
 		return "login";
 	}
 
+	/**
+	 * Gets the page for the privacy statement.
+	 *
+	 * @return The page to load
+	 */
+	@GetMapping("privacy")
+	public String getPrivacyPage() {
+		return "privacy";
+	}
+
 }
