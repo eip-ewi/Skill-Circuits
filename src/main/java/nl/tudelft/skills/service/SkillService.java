@@ -36,10 +36,7 @@ import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
 import nl.tudelft.skills.model.AbstractSkill;
 import nl.tudelft.skills.model.ExternalSkill;
 import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.repository.AbstractSkillRepository;
-import nl.tudelft.skills.repository.EditionRepository;
-import nl.tudelft.skills.repository.SkillRepository;
-import nl.tudelft.skills.repository.TaskCompletionRepository;
+import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.security.AuthorisationService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,12 +53,14 @@ public class SkillService {
 	private final CourseControllerApi courseApi;
 	private final SkillRepository skillRepository;
 	private final AuthorisationService authorisationService;
+	private final ClickedLinkService clickedLinkService;
 
 	@Autowired
 	public SkillService(AbstractSkillRepository abstractSkillRepository,
 			TaskCompletionRepository taskCompletionRepository, EditionControllerApi editionApi,
 			CourseControllerApi courseApi, SkillRepository skillRepository,
-			EditionRepository editionRepository, AuthorisationService authorisationService) {
+			EditionRepository editionRepository, AuthorisationService authorisationService,
+			ClickedLinkService clickedLinkService) {
 		this.abstractSkillRepository = abstractSkillRepository;
 		this.taskCompletionRepository = taskCompletionRepository;
 		this.editionApi = editionApi;
@@ -69,6 +68,7 @@ public class SkillService {
 		this.skillRepository = skillRepository;
 		this.editionRepository = editionRepository;
 		this.authorisationService = authorisationService;
+		this.clickedLinkService = clickedLinkService;
 	}
 
 	/**
@@ -84,6 +84,8 @@ public class SkillService {
 		if (skill instanceof Skill s) {
 			s.getTasks().forEach(t -> taskCompletionRepository.deleteAll(t.getCompletedBy()));
 			s.getFutureEditionSkills().forEach(innerSkill -> innerSkill.setPreviousEditionSkill(null));
+
+			clickedLinkService.deleteClickedLinksForTasks(s.getTasks());
 
 			if (s.getPreviousEditionSkill() != null) {
 				s.getPreviousEditionSkill().getFutureEditionSkills().remove(s);
