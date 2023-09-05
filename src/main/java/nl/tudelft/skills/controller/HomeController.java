@@ -29,6 +29,7 @@ import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.model.SCEdition;
+import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskCompletion;
 import nl.tudelft.skills.model.labracore.SCPerson;
@@ -135,8 +136,12 @@ public class HomeController {
 				List<Task> tasksDone = scperson.getTaskCompletions().stream().map(TaskCompletion::getTask)
 						.toList();
 
-				skillsDone = (int) tasksDone.stream().map(Task::getSkill).distinct()
-						.filter(s -> tasksDone.containsAll(s.getTasks())).count();
+				List<Skill> allSkillsDone = tasksDone.stream().map(Task::getSkill).distinct()
+						.filter(s -> tasksDone.containsAll(s.getTasks())).toList();
+
+				skillsDone = (int) allSkillsDone.stream().filter(
+						s -> Objects.equals(s.getSubmodule().getModule().getEdition().getId(), editionId))
+						.count();
 			}
 
 			completedSkillsPerCourse.put(courseId, skillsDone);
