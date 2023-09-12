@@ -38,6 +38,7 @@ import nl.tudelft.skills.model.TaskCompletion;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.ModuleRepository;
+import nl.tudelft.skills.repository.PathPreferenceRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.CourseService;
 import nl.tudelft.skills.service.EditionService;
@@ -61,19 +62,22 @@ public class HomeControllerTest extends ControllerTest {
 	private final PersonRepository personRepository;
 	private final EditionService editionService;
 	private final CourseService courseService;
+	private final PathPreferenceRepository pathPreferenceRepository;
 
 	@Autowired
 	public HomeControllerTest(EditionControllerApi editionApi, RoleControllerApi roleApi,
 			EditionRepository editionRepository, ModuleRepository moduleRepository,
-			PersonRepository personRepository, EditionService editionService) {
+			PersonRepository personRepository, EditionService editionService,
+			PathPreferenceRepository pathPreferenceRepository) {
 		this.editionApi = editionApi;
 		this.roleApi = roleApi;
 		this.editionRepository = editionRepository;
 		this.personRepository = personRepository;
 		this.editionService = editionService;
 		this.courseService = mock(CourseService.class);
+		this.pathPreferenceRepository = pathPreferenceRepository;
 		this.homeController = new HomeController(editionApi, roleApi, editionRepository, moduleRepository,
-				personRepository, editionService, courseService);
+				personRepository, editionService, courseService, pathPreferenceRepository);
 	}
 
 	@Test

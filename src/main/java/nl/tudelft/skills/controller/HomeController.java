@@ -28,13 +28,11 @@ import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.skills.model.SCEdition;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.model.TaskCompletion;
+import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.ModuleRepository;
+import nl.tudelft.skills.repository.PathPreferenceRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.CourseService;
 import nl.tudelft.skills.service.EditionService;
@@ -57,10 +55,13 @@ public class HomeController {
 	private final EditionService editionService;
 	private final CourseService courseService;
 
+	private final PathPreferenceRepository pathPreferenceRepository;
+
 	@Autowired
 	public HomeController(EditionControllerApi editionApi, RoleControllerApi roleApi,
 			EditionRepository editionRepository, ModuleRepository moduleRepository,
-			PersonRepository personRepository, EditionService editionService, CourseService courseService) {
+			PersonRepository personRepository, EditionService editionService, CourseService courseService,
+			PathPreferenceRepository pathPreferenceRepository) {
 		this.editionApi = editionApi;
 		this.roleApi = roleApi;
 		this.editionRepository = editionRepository;
@@ -68,6 +69,7 @@ public class HomeController {
 		this.personRepository = personRepository;
 		this.editionService = editionService;
 		this.courseService = courseService;
+		this.pathPreferenceRepository = pathPreferenceRepository;
 	}
 
 	/**
@@ -136,12 +138,27 @@ public class HomeController {
 				List<Task> tasksDone = scperson.getTaskCompletions().stream().map(TaskCompletion::getTask)
 						.toList();
 
-				List<Skill> allSkillsDone = tasksDone.stream().map(Task::getSkill).distinct()
-						.filter(s -> tasksDone.containsAll(s.getTasks())).toList();
+				var personPathPreference = pathPreferenceRepository
+						.findAllByPersonIdAndEditionId(scperson.getId(), editionId);
+				if (personPathPreference.isEmpty() || personPathPreference.get(0).getPath() == null) {
+					var touchedSkill = tasksDone.stream().map(Task::getSkill).distinct().filter(
+							s -> Objects.equals(s.getSubmodule().getModule().getEdition().getId(),
+									editionId));
+					skillsDone = (int) touchedSkill.filter(s -> tasksDone.containsAll(s.getTasks())).count();
+				} else {
+					Path personPath = personPathPreference.get(0).getPath();
+					var touchedSkill = tasksDone.stream().filter(t -> t.getPaths().contains(personPath))
+							.map(Task::getSkill).distinct().filter(
+									s -> Objects.equals(s.getSubmodule().getModule().getEdition().getId(),
+											editionId));
 
-				skillsDone = (int) allSkillsDone.stream().filter(
-						s -> Objects.equals(s.getSubmodule().getModule().getEdition().getId(), editionId))
-						.count();
+					var tasksOnPath = touchedSkill.map(Skill::getTasks)
+							.map(t -> t.stream().filter(x -> x.getPaths().contains(personPath)));
+
+					skillsDone = (int) tasksOnPath.filter(s -> tasksDone.containsAll(s.toList())).count();
+
+				}
+
 			}
 
 			completedSkillsPerCourse.put(courseId, skillsDone);
