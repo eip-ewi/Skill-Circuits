@@ -106,7 +106,7 @@ public class CourseService {
 
 		return course.getEditions().stream()
 				.filter(e -> editionRepository.findById(e.getId()).map(SCEdition::isVisible).orElse(false))
-				.filter(e -> authorisationService.isStudentInEdition(e.getId()))
+				.filter(e -> authorisationService.isAtLeastStudentInEdition(e.getId()))
 				.max(Comparator.comparing(EditionSummaryDTO::getStartDate))
 				.map(EditionSummaryDTO::getId)
 				.orElseGet(() -> getLastEditionForCourse(id));

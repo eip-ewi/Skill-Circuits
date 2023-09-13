@@ -153,9 +153,9 @@ public class CourseServiceTest {
 						new EditionSummaryDTO().id(3L).startDate(localDateTime.plusMinutes(2))));
 		when(courseApi.getCourseById(anyLong())).thenReturn(Mono.just(courseDetailsDTO));
 
-		when(authorisationService.isStudentInEdition(1L)).thenReturn(true);
-		when(authorisationService.isStudentInEdition(2L)).thenReturn(true);
-		when(authorisationService.isStudentInEdition(3L)).thenReturn(false);
+		when(authorisationService.isAtLeastStudentInEdition(1L)).thenReturn(true);
+		when(authorisationService.isAtLeastStudentInEdition(2L)).thenReturn(true);
+		when(authorisationService.isAtLeastStudentInEdition(3L)).thenReturn(false);
 
 		editionRepository.save(new SCEdition(1L, true, null, null, null, null));
 		editionRepository.save(new SCEdition(2L, true, null, null, null, null));

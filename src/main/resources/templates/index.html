@@ -30,71 +30,147 @@
     </head>
 
     <body>
-        <div layout:fragment="content">
+        <div
+            layout:fragment="content"
+            th:with="displayOwn = !${#lists.isEmpty(ownActive)} or !${#lists.isEmpty(ownFinished)} or !${#lists.isEmpty(managed)},
+                        displayAvailable = !${#lists.isEmpty(availableActive)} or !${#lists.isEmpty(availableFinished)}">
             <h1>Welcome to Skill Circuits</h1>
 
-            <h2 th:if="${@authorisationService.isAuthenticated()} and ${isAnySkillCompleted}">
-                Your Courses
-            </h2>
-
-            <div class="blocks">
-                <th:block th:each="course : ${courses}">
-                    <th:block
-                        th:if="${@authorisationService.isAuthenticated()} and not ${@authorisationService.canViewCourse(course.id)} and ${completedSkillsPerCourse.get(course.id)} > 0">
-                        <a
-                            class="block"
-                            th:href="@{|/edition/${@courseService.getLastStudentEditionForCourseOrLast(course.id)}|}">
-                            <h2 th:text="${course.code}"></h2>
-                            <h2 th:text="${course.name}"></h2>
-                            <h3
-                                style="font-size: 0.8rem"
-                                th:text="|${completedSkillsPerCourse.get(course.id)} / ${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastStudentEditionForCourseOrLast(course.id))} skills completed|"></h3>
-                        </a>
-                    </th:block>
-
-                    <th:block th:if="${@authorisationService.canViewCourse(course.id)}">
-                        <a class="block" th:href="@{|/course/${course.id}|}">
-                            <h2 th:text="${course.code}"></h2>
-                            <h2 th:text="${course.name}"></h2>
-                            <h3
-                                style="font-size: 0.8rem"
-                                th:text="|${@courseService.getNumberOfEditions(course.id)} editions|"></h3>
-                        </a>
-                    </th:block>
-                </th:block>
+            <!-- TODO check if this should be a form, only display if needed, show currently selected visually -->
+            <div class="tabs">
+                <button class="tab" onclick="setCourseView('own')" type="button" th:if="displayOwn">
+                    Your Courses
+                </button>
+                <button
+                    class="tab"
+                    onclick="setCourseView('available')"
+                    type="button"
+                    th:if="displayAvailable">
+                    Available Courses
+                </button>
             </div>
 
-            <h2>Available Courses</h2>
-            <div class="blocks">
-                <th:block th:each="course : ${courses}">
-                    <th:block th:if="not${@authorisationService.isAuthenticated()}">
-                        <a
-                            class="block"
-                            th:href="@{|/edition/${@courseService.getLastEditionForCourse(course.id)}|}">
-                            <h2 th:text="${course.code}"></h2>
-                            <h2 th:text="${course.name}"></h2>
-                            <h3
-                                style="font-size: 0.8rem"
-                                th:text="|${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastEditionForCourse(course.id))} skills|"></h3>
-                        </a>
-                    </th:block>
+            <!-- TODO display information text if no courses available at all, or no own courses etc. -->
+            <!-- TODO add some spacing between elements -->
 
-                    <th:block
-                        th:if="${@authorisationService.isAuthenticated()} and not ${@authorisationService.canViewCourse(course.id)} and ${completedSkillsPerCourse.get(course.id)}==0">
-                        <a
-                            class="block"
-                            th:href="@{|/edition/${@courseService.getLastStudentEditionForCourseOrLast(course.id)}|}">
-                            <h2 th:text="${course.code}"></h2>
-                            <h2 th:text="${course.name}"></h2>
-                            <h3
-                                style="font-size: 0.8rem"
-                                th:text="|${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastStudentEditionForCourseOrLast(course.id))} skills|"></h3>
-                        </a>
+            <!-- Own courses -->
+            <div id="own-courses" th:if="displayOwn">
+                <h2 th:if="!${#lists.isEmpty(ownActive)}">Active courses</h2>
+                <div class="blocks" th:if="!${#lists.isEmpty(ownActive)}">
+                    <th:block th:each="course : ${ownActive}">
+                        <th:block>
+                            <a
+                                class="block"
+                                th:href="@{|/edition/${@courseService.getLastStudentEditionForCourseOrLast(course.id)}|}">
+                                <h2 th:text="${course.code}"></h2>
+                                <h2 th:text="${course.name}"></h2>
+                                <h3
+                                    style="font-size: 0.8rem"
+                                    th:text="|${completedSkillsPerCourse.get(course.id)} / ${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastStudentEditionForCourseOrLast(course.id))} skills completed|"></h3>
+                            </a>
+                        </th:block>
                     </th:block>
-                </th:block>
+                </div>
+
+                <h2 th:if="!${#lists.isEmpty(ownFinished)}">Finished courses</h2>
+                <div class="blocks" th:if="!${#lists.isEmpty(ownFinished)}">
+                    <th:block th:each="course : ${ownFinished}">
+                        <th:block>
+                            <a
+                                class="block"
+                                th:href="@{|/edition/${@courseService.getLastStudentEditionForCourseOrLast(course.id)}|}">
+                                <h2 th:text="${course.code}"></h2>
+                                <h2 th:text="${course.name}"></h2>
+                                <h3
+                                    style="font-size: 0.8rem"
+                                    th:text="|${completedSkillsPerCourse.get(course.id)} / ${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastStudentEditionForCourseOrLast(course.id))} skills completed|"></h3>
+                            </a>
+                        </th:block>
+                    </th:block>
+                </div>
+
+                <h2 th:if="!${#lists.isEmpty(managed)}">Managed courses</h2>
+                <div class="blocks" th:if="!${#lists.isEmpty(managed)}">
+                    <th:block th:each="course : ${managed}">
+                        <th:block>
+                            <a class="block" th:href="@{|/course/${course.id}|}">
+                                <h2 th:text="${course.code}"></h2>
+                                <h2 th:text="${course.name}"></h2>
+                                <h3
+                                    style="font-size: 0.8rem"
+                                    th:text="|${@courseService.getNumberOfEditions(course.id)} editions|"></h3>
+                            </a>
+                        </th:block>
+                    </th:block>
+                </div>
             </div>
 
-            <br />
+            <!-- Available courses -->
+            <div
+                id="available-courses"
+                th:if="displayAvailable"
+                aria-hidden="true"
+                style="display: none">
+                <h2 th:if="!${#lists.isEmpty(availableActive)}">Active courses</h2>
+                <div class="blocks" th:if="!${#lists.isEmpty(availableActive)}">
+                    <th:block th:each="course : ${availableActive}">
+                        <th:block>
+                            <a
+                                class="block"
+                                th:href="@{|/edition/${@courseService.getLastEditionForCourse(course.id)}|}">
+                                <h2 th:text="${course.code}"></h2>
+                                <h2 th:text="${course.name}"></h2>
+                                <h3
+                                    style="font-size: 0.8rem"
+                                    th:text="|${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastEditionForCourse(course.id))} skills|"></h3>
+                            </a>
+                        </th:block>
+                    </th:block>
+                </div>
+
+                <h2 th:if="!${#lists.isEmpty(availableFinished)}">Finished courses</h2>
+                <div class="blocks" th:if="!${#lists.isEmpty(availableFinished)}">
+                    <th:block th:each="course : ${availableFinished}">
+                        <th:block>
+                            <a
+                                class="block"
+                                th:href="@{|/edition/${@courseService.getLastEditionForCourse(course.id)}|}">
+                                <h2 th:text="${course.code}"></h2>
+                                <h2 th:text="${course.name}"></h2>
+                                <h3
+                                    style="font-size: 0.8rem"
+                                    th:text="|${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastEditionForCourse(course.id))} skills|"></h3>
+                            </a>
+                        </th:block>
+                    </th:block>
+                </div>
+            </div>
+
+            <!-- TODO conditions, move to fragment -->
+            <script>
+                function setCourseView(view) {
+                    const ownCourses = $("#own-courses");
+                    const availableCourses = $("#available-courses");
+
+                    if (view === "own") {
+                        ownCourses.css("display", "");
+                        ownCourses.removeAttr("aria-hidden");
+                        ownCourses.data("active", true);
+
+                        availableCourses.css("display", "none");
+                        availableCourses.attr("aria-hidden", "true");
+                        availableCourses.data("active", false);
+                    } else if (view === "available") {
+                        availableCourses.css("display", "");
+                        availableCourses.removeAttr("aria-hidden");
+                        availableCourses.data("active", true);
+
+                        ownCourses.css("display", "none");
+                        ownCourses.attr("aria-hidden", "true");
+                        ownCourses.data("active", false);
+                    }
+                }
+            </script>
         </div>
     </body>
 </html>

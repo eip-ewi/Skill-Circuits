@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import javax.transaction.Transactional;
@@ -31,7 +32,6 @@ import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
-import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.TaskCompletion;
@@ -39,6 +39,7 @@ import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.CourseService;
 import nl.tudelft.skills.service.EditionService;
 
@@ -65,7 +66,8 @@ public class HomeControllerTest extends ControllerTest {
 	@Autowired
 	public HomeControllerTest(EditionControllerApi editionApi, RoleControllerApi roleApi,
 			EditionRepository editionRepository, ModuleRepository moduleRepository,
-			PersonRepository personRepository, EditionService editionService) {
+			PersonRepository personRepository, EditionService editionService,
+			AuthorisationService authorisationService) {
 		this.editionApi = editionApi;
 		this.roleApi = roleApi;
 		this.editionRepository = editionRepository;
@@ -73,7 +75,7 @@ public class HomeControllerTest extends ControllerTest {
 		this.editionService = editionService;
 		this.courseService = mock(CourseService.class);
 		this.homeController = new HomeController(editionApi, roleApi, editionRepository, moduleRepository,
-				personRepository, editionService, courseService);
+				personRepository, editionService, courseService, authorisationService);
 	}
 
 	@Test
@@ -84,20 +86,28 @@ public class HomeControllerTest extends ControllerTest {
 	@Test
 	@SuppressWarnings("unchecked")
 	void getHomePage() {
+		// Exactly one edition which is currently active and visible, the user being null
+
 		SCEdition edition = db.getEditionRL();
 		edition.setVisible(true);
 		editionRepository.saveAndFlush(edition);
 
 		CourseSummaryDTO course = new CourseSummaryDTO().id(randomId());
 
-		when(editionApi.getAllEditionsActiveAtDate(any()))
-				.thenReturn(Flux.just(new EditionSummaryDTO().id(edition.getId())));
-		when(editionApi.getEditionsById(anyList()))
-				.thenReturn(Flux.just(new EditionDetailsDTO().id(edition.getId()).course(course)));
+		LocalDateTime localDateTime = LocalDateTime.now();
+		when(editionApi.getAllEditions())
+				.thenReturn(Flux.just(new EditionDetailsDTO().id(edition.getId())
+						.startDate(localDateTime.minusYears(1)).endDate(localDateTime.plusYears(1))
+						.course(course)));
 
 		homeController.getHomePage(null, model);
 
-		assertThat((List<CourseSummaryDTO>) model.getAttribute("courses")).containsExactly(course);
+		Set<String> attributes = Set.of("availableFinished", "ownActive", "ownFinished", "managed");
+		for (String attribute : attributes) {
+			assertThat((List<CourseSummaryDTO>) model.getAttribute(attribute)).isEmpty();
+		}
+
+		assertThat((List<CourseSummaryDTO>) model.getAttribute("availableActive")).containsExactly(course);
 	}
 
 	@Test
