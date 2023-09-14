@@ -169,6 +169,20 @@ public class CheckpointControllerTest extends ControllerTest {
 	}
 
 	@Test
+	@WithUserDetails("admin")
+	public void patchCheckpointName() throws Exception {
+		mvc.perform(patch("/checkpoint/name").with(csrf())
+				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
+						new BasicNameValuePair("id", Long.toString(db.getCheckpointLectureOne().getId())),
+						new BasicNameValuePair("name", "editedName")))))
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+				.andExpect(status().isOk());
+
+		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(db.getCheckpointLectureOne().getId());
+		assertThat(checkpoint.getName()).isEqualTo("editedName");
+	}
+
+	@Test
 	public void patchCheckpointIsForbidden() throws Exception {
 		mvc.perform(patch("/checkpoint").with(csrf())
 				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
