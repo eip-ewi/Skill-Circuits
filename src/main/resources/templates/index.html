@@ -37,25 +37,37 @@
             <h1>Welcome to Skill Circuits</h1>
 
             <!-- TODO check if this should be a form, only display if needed, show currently selected visually -->
-            <div class="tabs">
-                <button class="tab" onclick="setCourseView('own')" type="button" th:if="displayOwn">
+
+            <div class="tabs" th:if="${displayOwn or displayAvailable}">
+                <button
+                    class="tab"
+                    onclick="setCourseView('own')"
+                    type="button"
+                    th:if="${displayOwn}">
                     Your Courses
                 </button>
                 <button
                     class="tab"
                     onclick="setCourseView('available')"
                     type="button"
-                    th:if="displayAvailable">
+                    th:if="${displayAvailable}">
                     Available Courses
                 </button>
             </div>
 
-            <!-- TODO display information text if no courses available at all, or no own courses etc. -->
-            <!-- TODO add some spacing between elements -->
+            <span
+                th:if="${not displayOwn and not displayAvailable}"
+                style="display: inline-block; margin-top: 1rem">
+                There are currently
+                <!-- spotless:off -->
+                <b>no courses available</b>.
+                <!-- spotless:on -->
+            </span>
 
-            <!-- Own courses -->
             <div id="own-courses" th:if="displayOwn">
-                <h2 th:if="!${#lists.isEmpty(ownActive)}">Active courses</h2>
+                <h2 th:if="!${#lists.isEmpty(ownActive)}" style="margin-bottom: 0.5rem">
+                    Active courses
+                </h2>
                 <div class="blocks" th:if="!${#lists.isEmpty(ownActive)}">
                     <th:block th:each="course : ${ownActive}">
                         <th:block>
@@ -72,7 +84,9 @@
                     </th:block>
                 </div>
 
-                <h2 th:if="!${#lists.isEmpty(ownFinished)}">Finished courses</h2>
+                <h2 th:if="!${#lists.isEmpty(ownFinished)}" style="margin-bottom: 0.5rem">
+                    Finished courses
+                </h2>
                 <div class="blocks" th:if="!${#lists.isEmpty(ownFinished)}">
                     <th:block th:each="course : ${ownFinished}">
                         <th:block>
@@ -89,7 +103,9 @@
                     </th:block>
                 </div>
 
-                <h2 th:if="!${#lists.isEmpty(managed)}">Managed courses</h2>
+                <h2 th:if="!${#lists.isEmpty(managed)}" style="margin-bottom: 0.5rem">
+                    Managed courses
+                </h2>
                 <div class="blocks" th:if="!${#lists.isEmpty(managed)}">
                     <th:block th:each="course : ${managed}">
                         <th:block>
@@ -105,13 +121,14 @@
                 </div>
             </div>
 
-            <!-- Available courses -->
             <div
                 id="available-courses"
                 th:if="displayAvailable"
-                aria-hidden="true"
-                style="display: none">
-                <h2 th:if="!${#lists.isEmpty(availableActive)}">Active courses</h2>
+                th:aria-hidden="!displayOwn ? 'true' : ''"
+                th:style="!displayOwn ? 'display: none' : ''">
+                <h2 th:if="!${#lists.isEmpty(availableActive)}" style="margin-bottom: 0.5rem">
+                    Active courses
+                </h2>
                 <div class="blocks" th:if="!${#lists.isEmpty(availableActive)}">
                     <th:block th:each="course : ${availableActive}">
                         <th:block>
@@ -128,7 +145,9 @@
                     </th:block>
                 </div>
 
-                <h2 th:if="!${#lists.isEmpty(availableFinished)}">Finished courses</h2>
+                <h2 th:if="!${#lists.isEmpty(availableFinished)}" style="margin-bottom: 0.5rem">
+                    Finished courses
+                </h2>
                 <div class="blocks" th:if="!${#lists.isEmpty(availableFinished)}">
                     <th:block th:each="course : ${availableFinished}">
                         <th:block>
@@ -145,32 +164,42 @@
                     </th:block>
                 </div>
             </div>
-
-            <!-- TODO conditions, move to fragment -->
-            <script>
-                function setCourseView(view) {
-                    const ownCourses = $("#own-courses");
-                    const availableCourses = $("#available-courses");
-
-                    if (view === "own") {
-                        ownCourses.css("display", "");
-                        ownCourses.removeAttr("aria-hidden");
-                        ownCourses.data("active", true);
-
-                        availableCourses.css("display", "none");
-                        availableCourses.attr("aria-hidden", "true");
-                        availableCourses.data("active", false);
-                    } else if (view === "available") {
-                        availableCourses.css("display", "");
-                        availableCourses.removeAttr("aria-hidden");
-                        availableCourses.data("active", true);
-
-                        ownCourses.css("display", "none");
-                        ownCourses.attr("aria-hidden", "true");
-                        ownCourses.data("active", false);
-                    }
-                }
-            </script>
         </div>
+
+        <script layout:fragment="script">
+            /**
+             * Sets the view of the courses to either "own" or "available". If no courses are visible,
+             * or the view to set to is not visible, does nothing.
+             *
+             * @param view The view to set to ("own" or "available").
+             */
+            function setCourseView(view) {
+                const ownCourses = $("#own-courses");
+                const availableCourses = $("#available-courses");
+
+                // If there is only one visible, view cannot be switched
+                if (ownCourses.length === 0 || availableCourses === 0) {
+                    return;
+                }
+
+                if (view === "own" && ownCourses.length > 0) {
+                    ownCourses.css("display", "");
+                    ownCourses.removeAttr("aria-hidden");
+                    ownCourses.data("active", true);
+
+                    availableCourses.css("display", "none");
+                    availableCourses.attr("aria-hidden", "true");
+                    availableCourses.data("active", false);
+                } else if (view === "available" && availableCourses.length > 0) {
+                    availableCourses.css("display", "");
+                    availableCourses.removeAttr("aria-hidden");
+                    availableCourses.data("active", true);
+
+                    ownCourses.css("display", "none");
+                    ownCourses.attr("aria-hidden", "true");
+                    ownCourses.data("active", false);
+                }
+            }
+        </script>
     </body>
 </html>

@@ -206,7 +206,6 @@ public class HomeController {
 
 			completedSkillsPerCourse.put(courseId, skillsDone);
 		}
-		completedSkillsPerCourse.values().stream().anyMatch(s -> s > 0);
 		return completedSkillsPerCourse;
 	}
 
