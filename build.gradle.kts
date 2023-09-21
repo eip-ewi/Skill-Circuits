@@ -245,9 +245,6 @@ dependencies {
     implementation("org.springframework:spring-web")
     implementation("org.springframework.security:spring-security-messaging")
 
-    // Gitlab API
-    implementation("org.gitlab4j:gitlab4j-api:5.3.0")
-
     // Spring Boot security
     implementation("org.springframework.boot:spring-boot-starter-security")
 
