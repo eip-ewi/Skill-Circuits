@@ -17,17 +17,25 @@
  */
 package nl.tudelft.skills.integration;
 
-import org.junit.jupiter.api.*;
+import java.io.IOException;
+import java.util.Properties;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
+import com.microsoft.playwright.options.AriaRole;
 
 public abstract class IntegrationTest {
 
 	private static Playwright playwright;
 	private static Browser browser;
+	private static Properties properties;
 
 	protected BrowserContext context;
 	protected Page page;
@@ -36,6 +44,12 @@ public abstract class IntegrationTest {
 	static void launchBrowser() {
 		playwright = Playwright.create();
 		browser = playwright.chromium().launch();
+	}
+
+	@BeforeAll
+	static void loadProperties() throws IOException {
+		properties = new Properties();
+		properties.load(IntegrationTest.class.getClassLoader().getResourceAsStream("integration.properties"));
 	}
 
 	@AfterAll
@@ -52,6 +66,32 @@ public abstract class IntegrationTest {
 	@AfterEach
 	void closeContext() {
 		context.close();
+	}
+
+	/**
+	 * Navigates to a specified path, prepending the base url.
+	 *
+	 * @param path The path to navigate to.
+	 */
+	protected void navigateTo(String path) {
+		String baseUrl = properties.getProperty("base-url");
+		if (!baseUrl.endsWith("/"))
+			baseUrl += "/";
+		page.navigate(baseUrl + path);
+	}
+
+	/**
+	 * Log in with a specific username and password.
+	 *
+	 * @param user     The username.
+	 * @param password The password.
+	 */
+	protected void logInAs(String user, String password) {
+		navigateTo("");
+		page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Login")).click();
+		page.getByLabel("Username").fill(user);
+		page.getByLabel("Password").fill(password);
+		page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Log in")).click();
 	}
 
 }
