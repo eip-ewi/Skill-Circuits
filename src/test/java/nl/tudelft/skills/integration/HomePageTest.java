@@ -45,7 +45,7 @@ public class HomePageTest extends IntegrationTest {
 
 		// Wait until timeout or user dropdown is visible
 		Locator userDropdown = page.getByText("CSE Teacher 1");
-		userDropdown.waitFor(new Locator.WaitForOptions().setTimeout(100));
+		userDropdown.waitFor();
 		assertThat(userDropdown.isVisible()).isTrue();
 
 		// Check redirection to homepage (with courses)
@@ -65,7 +65,7 @@ public class HomePageTest extends IntegrationTest {
 		logOut.click();
 
 		// Wait until timeout or log in is visible again
-		logIn.waitFor(new Locator.WaitForOptions().setTimeout(100));
+		logIn.waitFor();
 		assertThat(logIn.isVisible()).isTrue();
 
 		// Check that it is still on the homepage, but no courses are visible anymore
@@ -75,6 +75,83 @@ public class HomePageTest extends IntegrationTest {
 		assertThat(page.title()).isEqualTo("Skill Circuits");
 		assertThat(page.getByText("CSE1100").isVisible()).isFalse();
 		assertThat(page.getByText("CSE1305").isVisible()).isFalse();
+	}
+
+	/**
+	 * Publishes and un-publishes an edition, and asserts on the individual steps. Also asserts that the
+	 * edition is (in)visible to the student/visible on the homepage.
+	 */
+	@Test
+	void testPublishUnpublishEdition() {
+		navigateTo("");
+		Locator course = page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("CSE1100"));
+
+		// Assert that the edition is not visible
+		assertThat(course.isVisible()).isFalse();
+
+		logInAs("cseteacher1", "cseteacher1", "CSE Teacher 1");
+		navigateToSetupPaneAndAssert();
+
+		// Wait until timeout or publish button is visible
+		Locator publish = page.getByRole(AriaRole.BUTTON,
+				new Page.GetByRoleOptions().setName("Publish edition"));
+		publish.waitFor();
+		assertThat(publish.isVisible()).isTrue();
+		publish.click();
+
+		// Log out as teacher
+		logOutAs("CSE Teacher 1");
+
+		// Assert that the edition is visible
+		assertThat(course.isVisible()).isTrue();
+		logInAs("csestudent1", "csestudent1", "CSE Student 1");
+		assertThat(course.isVisible()).isTrue();
+		course.click();
+		Locator editionHeader = page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions()
+				.setName("Object-Oriented Programming - NOW"));
+		editionHeader.waitFor();
+		assertThat(editionHeader.isVisible()).isTrue();
+		logOutAs("CSE Student 1");
+
+		logInAs("cseteacher1", "cseteacher1", "CSE Teacher 1");
+		navigateToSetupPaneAndAssert();
+
+		// Wait until timeout or un-publish button is visible
+		Locator unpublish = page.getByRole(AriaRole.BUTTON,
+				new Page.GetByRoleOptions().setName("Unpublish edition"));
+		unpublish.waitFor();
+		assertThat(unpublish.isVisible()).isTrue();
+		unpublish.click();
+
+		// Log out as teacher
+		logOutAs("CSE Teacher 1");
+
+		// Assert that the edition is invisible
+		assertThat(course.isVisible()).isFalse();
+		logInAs("csestudent1", "csestudent1", "CSE Student 1");
+		assertThat(course.isVisible()).isFalse();
+		logOutAs("CSE Student 1");
+	}
+
+	/**
+	 * Navigates from the homepage to the setup pane of CSE1100 NOW, and asserts on the individual steps.
+	 */
+	protected void navigateToSetupPaneAndAssert() {
+		Locator course = page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("CSE1100"));
+		assertThat(course.isVisible()).isTrue();
+		course.click();
+
+		// Wait until timeout or edition name is visible
+		Locator editionLocator = page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("NOW"));
+		editionLocator.waitFor();
+		assertThat(editionLocator.isVisible()).isTrue();
+		editionLocator.click();
+
+		// Wait until timeout or setup button is visible
+		Locator setup = page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Setup"));
+		setup.waitFor();
+		assertThat(setup.isVisible()).isTrue();
+		setup.click();
 	}
 
 }

@@ -25,10 +25,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
-import com.microsoft.playwright.Browser;
-import com.microsoft.playwright.BrowserContext;
-import com.microsoft.playwright.Page;
-import com.microsoft.playwright.Playwright;
+import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.AriaRole;
 
 public abstract class IntegrationTest {
@@ -43,7 +40,7 @@ public abstract class IntegrationTest {
 	@BeforeAll
 	static void launchBrowser() {
 		playwright = Playwright.create();
-		browser = playwright.chromium().launch();
+		browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setTimeout(1000));
 	}
 
 	@BeforeAll
@@ -83,15 +80,84 @@ public abstract class IntegrationTest {
 	/**
 	 * Log in with a specific username and password.
 	 *
-	 * @param user     The username.
-	 * @param password The password.
+	 * @param user        The username for logging in.
+	 * @param password    The password.
+	 * @param displayName The username displayed in the UI.
 	 */
-	protected void logInAs(String user, String password) {
-		navigateTo("");
+	protected void logInAs(String user, String password, String displayName) {
 		page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Login")).click();
 		page.getByLabel("Username").fill(user);
 		page.getByLabel("Password").fill(password);
 		page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Log in")).click();
+
+		// Wait until timeout or user dropdown is visible
+		page.getByText(displayName).waitFor();
+	}
+
+	/**
+	 * Log out. The username is needed to open the log-out menu.
+	 *
+	 * @param displayName The username displayed in the UI.
+	 */
+	protected void logOutAs(String displayName) {
+		page.getByText(displayName).click();
+		page.getByText("Logout").click();
+
+		// Wait until timeout or log in is visible
+		page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Login")).waitFor();
+	}
+
+	/**
+	 * Private utility method for navigating from the homepage to the setup pane of a specific edition in a
+	 * course.
+	 *
+	 * @param courseCode The code of the course.
+	 * @param edition    The name of the edition.
+	 */
+	private void navigateToEditionSetup(String courseCode, String edition) {
+		page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName(courseCode)).click();
+		// Wait until timeout or edition name is visible
+		Locator editionLocator = page.getByRole(AriaRole.HEADING,
+				new Page.GetByRoleOptions().setName(edition));
+		editionLocator.waitFor();
+		editionLocator.click();
+		// Wait until timeout or setup button is visible
+		Locator setup = page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Setup"));
+		setup.waitFor();
+		setup.click();
+	}
+
+	/**
+	 * Performs the actions to publish an edition. This method assumes that the correct page (homepage) is
+	 * open, and that the user is a teacher for the corresponding course.
+	 *
+	 * @param courseCode The code of the course to publish an edition in.
+	 * @param edition    The name of the edition to publish.
+	 */
+	protected void publishEdition(String courseCode, String edition) {
+		navigateToEditionSetup(courseCode, edition);
+		// Wait until timeout or publish button is visible
+		Locator publish = page.getByRole(AriaRole.BUTTON,
+				new Page.GetByRoleOptions().setName("Publish edition"));
+		publish.waitFor();
+		publish.click();
+	}
+
+	/**
+	 * Performs the actions to un-publish an edition. This method assumes that the correct page (homepage) is
+	 * open, that the user is a teacher for the corresponding course, and that the edition was published
+	 * previously.
+	 *
+	 * @param courseCode The code of the course to un-publish an edition in.
+	 * @param edition    The name of the edition to un-publish.
+	 */
+	protected void unpublishEdition(String courseCode, String edition) {
+		navigateToEditionSetup(courseCode, edition);
+		// Wait until timeout or un-publish button is visible
+		Locator publish = page.getByRole(AriaRole.BUTTON,
+				new Page.GetByRoleOptions().setName("Unpublish edition"));
+		publish.waitFor();
+		publish.click();
 	}
 
 }
