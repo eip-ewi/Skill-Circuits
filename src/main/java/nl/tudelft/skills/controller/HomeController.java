@@ -30,9 +30,7 @@ import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
-import nl.tudelft.skills.repository.EditionRepository;
-import nl.tudelft.skills.repository.ModuleRepository;
-import nl.tudelft.skills.repository.PathPreferenceRepository;
+import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.CourseService;
 import nl.tudelft.skills.service.EditionService;
@@ -52,6 +50,9 @@ public class HomeController {
 	private final ModuleRepository moduleRepository;
 	private final PersonRepository personRepository;
 
+	private final SkillRepository skillRepository;
+	private final TaskRepository taskRepository;
+
 	private final EditionService editionService;
 	private final CourseService courseService;
 
@@ -60,13 +61,17 @@ public class HomeController {
 	@Autowired
 	public HomeController(EditionControllerApi editionApi, RoleControllerApi roleApi,
 			EditionRepository editionRepository, ModuleRepository moduleRepository,
-			PersonRepository personRepository, EditionService editionService, CourseService courseService,
+			PersonRepository personRepository, SkillRepository skillRepository, TaskRepository taskRepository,
+			EditionService editionService,
+			CourseService courseService,
 			PathPreferenceRepository pathPreferenceRepository) {
 		this.editionApi = editionApi;
 		this.roleApi = roleApi;
 		this.editionRepository = editionRepository;
 		this.moduleRepository = moduleRepository;
 		this.personRepository = personRepository;
+		this.skillRepository = skillRepository;
+		this.taskRepository = taskRepository;
 		this.editionService = editionService;
 		this.courseService = courseService;
 		this.pathPreferenceRepository = pathPreferenceRepository;
@@ -131,7 +136,7 @@ public class HomeController {
 		for (var course : courses) {
 			Long courseId = course.getId();
 
-			int skillsDone = 0;
+			int skillsDoneCount = 0;
 			Long editionId = courseService.getLastStudentEditionForCourseOrLast(courseId);
 
 			if (editionId != null) {
@@ -140,30 +145,87 @@ public class HomeController {
 
 				var personPathPreference = pathPreferenceRepository
 						.findAllByPersonIdAndEditionId(scperson.getId(), editionId);
+
+				List<Skill> skillsWithTasks;
+				Set<Skill> skillsDone;
+
 				if (personPathPreference.isEmpty() || personPathPreference.get(0).getPath() == null) {
 					var touchedSkill = tasksDone.stream().map(Task::getSkill).distinct().filter(
 							s -> Objects.equals(s.getSubmodule().getModule().getEdition().getId(),
 									editionId));
-					skillsDone = (int) touchedSkill.filter(s -> tasksDone.containsAll(s.getTasks())).count();
+					skillsDone = touchedSkill.filter(s -> tasksDone.containsAll(s.getTasks()))
+							.collect(Collectors.toSet());
+
+					skillsWithTasks = taskRepository.findAll().stream().map(Task::getSkill).toList();
+
 				} else {
 					Path personPath = personPathPreference.get(0).getPath();
-					var touchedSkill = tasksDone.stream().filter(t -> t.getPaths().contains(personPath))
+					List<Skill> touchedSkill = tasksDone.stream()
+							.filter(t -> t.getPaths().contains(personPath))
 							.map(Task::getSkill).distinct().filter(
 									s -> Objects.equals(s.getSubmodule().getModule().getEdition().getId(),
-											editionId));
+											editionId))
+							.toList();
 
-					var tasksOnPath = touchedSkill.map(Skill::getTasks)
-							.map(t -> t.stream().filter(x -> x.getPaths().contains(personPath)));
+					skillsDone = touchedSkill.stream().filter(x -> tasksDone.containsAll(
+							x.getTasks().stream().filter(y -> y.getPaths().contains(personPath)).toList()))
+							.collect(Collectors.toSet());
 
-					skillsDone = (int) tasksOnPath.filter(s -> tasksDone.containsAll(s.toList())).count();
-
+					skillsWithTasks = taskRepository.findAll().stream()
+							.filter(t -> t.getPaths().contains(personPath)).map(Task::getSkill).toList();
 				}
 
+				var emptySkills = skillRepository.findAll().stream().filter(x -> !skillsWithTasks.contains(x))
+						.filter(
+								s -> Objects.equals(s.getSubmodule().getModule().getEdition().getId(),
+										editionId))
+						.toList();
+
+				emptySkills.forEach(x -> addCompletedEmptySkills(skillsDone, emptySkills, x));
+
+				skillsDoneCount = skillsDone.size();
 			}
 
-			completedSkillsPerCourse.put(courseId, skillsDone);
+			completedSkillsPerCourse.put(courseId, skillsDoneCount);
 		}
 		return completedSkillsPerCourse;
+	}
+
+	/**
+	 * Checks if the given empty skill can be considered complete. If so, adds it to skillsDone. An empty
+	 * skill is complete if all its essential parents are complete.
+	 *
+	 * @param skillsDone  The list of completed skills
+	 * @param emptySkills The list of empty skills
+	 * @param empty       The empty skill that needs to be checked
+	 */
+	private void addCompletedEmptySkills(Set<Skill> skillsDone, List<Skill> emptySkills, Skill empty) {
+		if (empty == null) {
+			return;
+		}
+		if (skillsDone.contains(empty)) {
+			return;
+		}
+		List<AbstractSkill> parents = empty.getParents().stream().filter(p -> {
+			Skill sk = (Skill) p;
+			return sk.isEssential();
+		}).toList();
+
+		List<AbstractSkill> notCompletedParents = parents.stream()
+				.filter(x -> !skillsDone.contains((Skill) x)).toList();
+
+		for (AbstractSkill parent : notCompletedParents) {
+			if (emptySkills.contains((Skill) parent)) {
+				addCompletedEmptySkills(skillsDone, emptySkills, (Skill) parent);
+				if (!skillsDone.contains(parent)) {
+					return;
+				}
+			} else {
+				return;
+			}
+		}
+		skillsDone.add(empty);
+
 	}
 
 	/**

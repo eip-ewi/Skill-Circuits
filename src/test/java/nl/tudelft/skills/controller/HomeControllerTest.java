@@ -36,9 +36,7 @@ import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.TaskCompletion;
 import nl.tudelft.skills.model.labracore.SCPerson;
-import nl.tudelft.skills.repository.EditionRepository;
-import nl.tudelft.skills.repository.ModuleRepository;
-import nl.tudelft.skills.repository.PathPreferenceRepository;
+import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.CourseService;
 import nl.tudelft.skills.service.EditionService;
@@ -58,6 +56,8 @@ public class HomeControllerTest extends ControllerTest {
 	private final HomeController homeController;
 	private final EditionControllerApi editionApi;
 	private final RoleControllerApi roleApi;
+	private final SkillRepository skillRepository;
+	private final TaskRepository taskRepository;
 	private final EditionRepository editionRepository;
 	private final PersonRepository personRepository;
 	private final EditionService editionService;
@@ -67,17 +67,21 @@ public class HomeControllerTest extends ControllerTest {
 	@Autowired
 	public HomeControllerTest(EditionControllerApi editionApi, RoleControllerApi roleApi,
 			EditionRepository editionRepository, ModuleRepository moduleRepository,
-			PersonRepository personRepository, EditionService editionService,
+			SkillRepository skillRepository, TaskRepository taskRepository, PersonRepository personRepository,
+			EditionService editionService,
 			PathPreferenceRepository pathPreferenceRepository) {
 		this.editionApi = editionApi;
 		this.roleApi = roleApi;
 		this.editionRepository = editionRepository;
+		this.skillRepository = skillRepository;
+		this.taskRepository = taskRepository;
 		this.personRepository = personRepository;
 		this.editionService = editionService;
 		this.courseService = mock(CourseService.class);
 		this.pathPreferenceRepository = pathPreferenceRepository;
 		this.homeController = new HomeController(editionApi, roleApi, editionRepository, moduleRepository,
-				personRepository, editionService, courseService, pathPreferenceRepository);
+				personRepository, skillRepository, taskRepository, editionService, courseService,
+				pathPreferenceRepository);
 	}
 
 	@Test
