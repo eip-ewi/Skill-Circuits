@@ -18,7 +18,6 @@
 package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
@@ -124,8 +123,8 @@ public class HomeControllerTest extends ControllerTest {
 		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
 				person);
 
-		assertFalse(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
-		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(0);
+		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
+		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(3);
 	}
 
 	@Test
@@ -146,7 +145,38 @@ public class HomeControllerTest extends ControllerTest {
 		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
 				person);
 		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
-		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(1);
+		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(7);
+	}
+
+	@Test
+	void getCompletedSkillsAllCompleted() {
+		List<CourseSummaryDTO> courses = new ArrayList<>(
+				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
+		SCPerson person = new SCPerson();
+		TaskCompletion completion1 = TaskCompletion.builder().id(1L)
+				.person(person).task(db.getTaskRead12()).build();
+		TaskCompletion completion2 = TaskCompletion.builder().id(2L)
+				.person(person).task(db.getTaskDo12ae()).build();
+		TaskCompletion completion3 = TaskCompletion.builder().id(3L)
+				.person(person).task(db.getTaskRead11()).build();
+		TaskCompletion completion4 = TaskCompletion.builder().id(4L)
+				.person(person).task(db.getTaskDo11ad()).build();
+		TaskCompletion completion5 = TaskCompletion.builder().id(5L)
+				.person(person).task(db.getTaskRead10()).build();
+		TaskCompletion completion6 = TaskCompletion.builder().id(6L)
+				.person(person).task(db.getTaskDo10a()).build();
+		person.setTaskCompletions(
+				Set.of(completion1, completion2, completion3, completion4, completion5, completion6));
+
+		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
+				.thenReturn(db.getEditionRL().getId());
+
+		// All the skills are completed in the course
+		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
+				person);
+		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
+		assertThat(courseCompletedSkills.get(db.getCourseRL().getId()))
+				.isEqualTo(skillRepository.findAll().size());
 	}
 
 }
