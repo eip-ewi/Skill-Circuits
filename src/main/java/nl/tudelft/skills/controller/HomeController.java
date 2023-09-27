@@ -84,6 +84,8 @@ public class HomeController {
 	@Transactional
 	@GetMapping("/")
 	public String getHomePage(@AuthenticatedPerson(required = false) Person person, Model model) {
+		// TODO refactor this method and split it into smaller sub-methods
+
 		// Get all available editions
 		List<EditionDetailsDTO> editions = editionApi.getAllEditions().collectList().block();
 
@@ -107,12 +109,14 @@ public class HomeController {
 				.filter(e -> visible.contains(e.getId()) || teacherIds.contains(e.getId()))
 				.map(EditionDetailsDTO::getCourse).distinct().toList();
 
-		// Get number of completed skills for each course
+		// Get number of completed skills and if a task is completed for each course
 		Map<Long, Integer> completedSkillsPerCourse = new HashMap<>();
+		Map<Long, Boolean> completedTaskInCourse = new HashMap<>();
 		if (person != null) {
 			SCPerson scperson = personRepository.findByIdOrThrow(person.getId());
 
 			completedSkillsPerCourse = getCompletedSkillsPerCourse(courses, scperson);
+			completedTaskInCourse = getCompletedTaskInCourse(courses, scperson);
 		}
 
 		// Check if any skill has been completed
@@ -150,19 +154,19 @@ public class HomeController {
 		List<CourseSummaryDTO> managed = new ArrayList<>();
 		for (CourseSummaryDTO course : courses) {
 			boolean hasActiveEdition = courseHasActiveEdition.contains(course.getId());
-			Integer completedSkills = completedSkillsPerCourse.get(course.getId());
+			Boolean completedTask = completedTaskInCourse.get(course.getId());
 
 			if (person != null && authorisationService.canViewCourse(course.getId())) {
 				// managed: The user can see the course, so manages it
 				managed.add(course);
-			} else if (person != null && completedSkills > 0 && hasActiveEdition) {
+			} else if (person != null && completedTask && hasActiveEdition) {
 				// ownActive: The user has completed at least one skill, and the course has an active edition
 				ownActive.add(course);
-			} else if (person != null && completedSkills > 0) {
+			} else if (person != null && completedTask) {
 				// ownFinished: The user has completed at least one skill, and the course does not have
 				// an active edition
 				ownFinished.add(course);
-			} else if ((person == null || completedSkills == 0) && hasActiveEdition) {
+			} else if (hasActiveEdition) {
 				// availableActive: Course has an active edition, and the user is either not logged in
 				// or does not have any skills completed in it
 				availableActive.add(course);
@@ -207,6 +211,36 @@ public class HomeController {
 			completedSkillsPerCourse.put(courseId, skillsDone);
 		}
 		return completedSkillsPerCourse;
+	}
+
+	/**
+	 * Returns a map of courses and whether a task has been completed in a respective edition in that course.
+	 *
+	 * @param  courses  List of courses
+	 * @param  scperson person
+	 * @return          Map containing whether the person has a completed a task in each course.
+	 */
+	public Map<Long, Boolean> getCompletedTaskInCourse(List<CourseSummaryDTO> courses, SCPerson scperson) {
+		Map<Long, Boolean> completedTaskInCourse = new HashMap<>();
+		for (CourseSummaryDTO course : courses) {
+			Long courseId = course.getId();
+
+			boolean completedTask = false;
+			Long editionId = courseService.getLastStudentEditionForCourseOrLast(courseId);
+
+			if (editionId != null) {
+				List<Task> tasksDone = scperson.getTaskCompletions().stream().map(TaskCompletion::getTask)
+						.toList();
+
+				// TODO task completed regardless of active path, or should path be considered?
+				completedTask = tasksDone.stream()
+						.map((Task t) -> t.getSkill().getSubmodule().getModule().getEdition().getId())
+						.anyMatch((Long id) -> Objects.equals(id, editionId));
+			}
+
+			completedTaskInCourse.put(courseId, completedTask);
+		}
+		return completedTaskInCourse;
 	}
 
 	/**
