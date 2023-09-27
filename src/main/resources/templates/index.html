@@ -36,21 +36,23 @@
                         displayAvailable = !${#lists.isEmpty(availableActive)} or !${#lists.isEmpty(availableFinished)}">
             <h1>Welcome to Skill Circuits</h1>
 
-            <!-- TODO check if this should be a form, only display if needed, show currently selected visually -->
+            <!-- TODO show currently selected visually -->
 
             <div class="tabs" th:if="${displayOwn or displayAvailable}">
                 <button
+                    id="own-courses-button"
                     class="tab"
                     onclick="setCourseView('own')"
-                    type="button"
-                    th:if="${displayOwn}">
+                    th:data-active="${displayOwn} or (not ${displayAvailable} and not ${displayOwn})"
+                    type="button">
                     Your Courses
                 </button>
                 <button
+                    id="available-courses-button"
                     class="tab"
+                    th:data-active="${displayAvailable}"
                     onclick="setCourseView('available')"
-                    type="button"
-                    th:if="${displayAvailable}">
+                    type="button">
                     Available Courses
                 </button>
             </div>
@@ -65,7 +67,7 @@
             </span>
 
             <div id="own-courses" th:if="displayOwn">
-                <h2 th:if="!${#lists.isEmpty(ownActive)}" style="margin-bottom: 0.5rem">
+                <h2 th:if="!${#lists.isEmpty(ownActive)}" style="margin: 0.5rem 0">
                     Active courses
                 </h2>
                 <div class="blocks" th:if="!${#lists.isEmpty(ownActive)}">
@@ -84,7 +86,7 @@
                     </th:block>
                 </div>
 
-                <h2 th:if="!${#lists.isEmpty(ownFinished)}" style="margin-bottom: 0.5rem">
+                <h2 th:if="!${#lists.isEmpty(ownFinished)}" style="margin: 0.5rem 0">
                     Finished courses
                 </h2>
                 <div class="blocks" th:if="!${#lists.isEmpty(ownFinished)}">
@@ -103,7 +105,7 @@
                     </th:block>
                 </div>
 
-                <h2 th:if="!${#lists.isEmpty(managed)}" style="margin-bottom: 0.5rem">
+                <h2 th:if="!${#lists.isEmpty(managed)}" style="margin: 0.5rem 0">
                     Managed courses
                 </h2>
                 <div class="blocks" th:if="!${#lists.isEmpty(managed)}">
@@ -123,10 +125,10 @@
 
             <div
                 id="available-courses"
-                th:if="displayAvailable"
-                th:aria-hidden="!displayOwn ? 'true' : ''"
-                th:style="!displayOwn ? 'display: none' : ''">
-                <h2 th:if="!${#lists.isEmpty(availableActive)}" style="margin-bottom: 0.5rem">
+                th:if="${displayAvailable}"
+                th:aria-hidden="${displayOwn} ? 'true' : ''"
+                th:style="${displayOwn} ? 'display: none' : ''">
+                <h2 th:if="!${#lists.isEmpty(availableActive)}" style="margin: 0.5rem 0">
                     Active courses
                 </h2>
                 <div class="blocks" th:if="!${#lists.isEmpty(availableActive)}">
@@ -137,15 +139,12 @@
                                 th:href="@{|/edition/${@courseService.getLastEditionForCourse(course.id)}|}">
                                 <h2 th:text="${course.code}"></h2>
                                 <h2 th:text="${course.name}"></h2>
-                                <h3
-                                    style="font-size: 0.8rem"
-                                    th:text="|${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastEditionForCourse(course.id))} skills|"></h3>
                             </a>
                         </th:block>
                     </th:block>
                 </div>
 
-                <h2 th:if="!${#lists.isEmpty(availableFinished)}" style="margin-bottom: 0.5rem">
+                <h2 th:if="!${#lists.isEmpty(availableFinished)}" style="margin: 0.5rem 0">
                     Finished courses
                 </h2>
                 <div class="blocks" th:if="!${#lists.isEmpty(availableFinished)}">
@@ -156,9 +155,6 @@
                                 th:href="@{|/edition/${@courseService.getLastEditionForCourse(course.id)}|}">
                                 <h2 th:text="${course.code}"></h2>
                                 <h2 th:text="${course.name}"></h2>
-                                <h3
-                                    style="font-size: 0.8rem"
-                                    th:text="|${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastEditionForCourse(course.id))} skills|"></h3>
                             </a>
                         </th:block>
                     </th:block>
@@ -176,28 +172,30 @@
             function setCourseView(view) {
                 const ownCourses = $("#own-courses");
                 const availableCourses = $("#available-courses");
+                const ownCoursesBtn = $("#own-courses-button");
+                const availableCoursesBtn = $("#available-courses-button");
 
-                // If there is only one visible, view cannot be switched
+                // If there is only one (or neither) is visible, view cannot be switched
                 if (ownCourses.length === 0 || availableCourses === 0) {
                     return;
                 }
 
-                if (view === "own" && ownCourses.length > 0) {
+                if (view === "own") {
                     ownCourses.css("display", "");
                     ownCourses.removeAttr("aria-hidden");
-                    ownCourses.data("active", true);
+                    ownCoursesBtn.attr("data-active", "true");
 
                     availableCourses.css("display", "none");
                     availableCourses.attr("aria-hidden", "true");
-                    availableCourses.data("active", false);
-                } else if (view === "available" && availableCourses.length > 0) {
+                    availableCoursesBtn.attr("data-active", "false");
+                } else if (view === "available") {
                     availableCourses.css("display", "");
                     availableCourses.removeAttr("aria-hidden");
-                    availableCourses.data("active", true);
+                    availableCoursesBtn.attr("data-active", "true");
 
                     ownCourses.css("display", "none");
                     ownCourses.attr("aria-hidden", "true");
-                    ownCourses.data("active", false);
+                    ownCoursesBtn.attr("data-active", "false");
                 }
             }
         </script>
