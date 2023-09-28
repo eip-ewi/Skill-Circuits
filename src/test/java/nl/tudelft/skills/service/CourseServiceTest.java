@@ -26,6 +26,11 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
@@ -39,12 +44,6 @@ import nl.tudelft.skills.repository.CourseRepository;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.test.TestDatabaseLoader;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

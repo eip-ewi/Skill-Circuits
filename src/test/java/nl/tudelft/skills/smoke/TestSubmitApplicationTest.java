@@ -17,10 +17,10 @@
  */
 package nl.tudelft.skills.smoke;
 
-import nl.tudelft.skills.TestSkillCircuitsApplication;
-
 import org.junit.jupiter.api.Nested;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import nl.tudelft.skills.TestSkillCircuitsApplication;
 
 @Nested
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)

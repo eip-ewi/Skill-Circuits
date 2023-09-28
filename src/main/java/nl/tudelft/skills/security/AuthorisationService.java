@@ -21,6 +21,11 @@ import static nl.tudelft.labracore.api.dto.RoleDetailsDTO.TypeEnum.*;
 
 import javax.annotation.Nullable;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
 import nl.tudelft.labracore.api.dto.Id;
@@ -34,11 +39,6 @@ import nl.tudelft.skills.model.ExternalSkill;
 import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.*;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthorisationService {

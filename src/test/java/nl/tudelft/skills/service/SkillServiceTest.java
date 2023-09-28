@@ -24,6 +24,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithUserDetails;
+import org.springframework.transaction.annotation.Transactional;
+
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.RoleControllerApi;
@@ -38,14 +45,6 @@ import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.test.TestDatabaseLoader;
 import nl.tudelft.skills.test.TestUserDetailsService;
-
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.test.context.support.WithUserDetails;
-import org.springframework.transaction.annotation.Transactional;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -81,7 +80,9 @@ public class SkillServiceTest {
 			EditionControllerApi editionApi, CourseControllerApi courseApi,
 			SkillRepository skillRepository, ModuleRepository moduleRepository,
 			ExternalSkillRepository externalSkillRepository, EditionRepository editionRepository,
-			AuthorisationService authorisationService, RoleControllerApi roleApi, PersonRepository personRepository, ClickedLinkService clickedLinkService, ClickedLinkRepository clickedLinkRepository) {
+			AuthorisationService authorisationService, RoleControllerApi roleApi,
+			PersonRepository personRepository, ClickedLinkService clickedLinkService,
+			ClickedLinkRepository clickedLinkRepository) {
 		this.abstractSkillRepository = abstractSkillRepository;
 		this.taskCompletionRepository = taskCompletionRepository;
 		this.externalSkillRepository = externalSkillRepository;

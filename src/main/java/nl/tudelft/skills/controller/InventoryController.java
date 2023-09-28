@@ -17,18 +17,18 @@
  */
 package nl.tudelft.skills.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.InventoryViewDTO;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("inventory")

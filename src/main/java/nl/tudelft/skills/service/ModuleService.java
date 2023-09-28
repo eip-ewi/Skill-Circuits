@@ -24,6 +24,11 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
 
+import org.springframework.data.util.Pair;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
+
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
@@ -41,11 +46,6 @@ import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.PathRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.security.AuthorisationService;
-
-import org.springframework.data.util.Pair;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
 
 @Service
 public class ModuleService {

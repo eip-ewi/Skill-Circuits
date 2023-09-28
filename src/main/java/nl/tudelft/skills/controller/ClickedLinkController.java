@@ -23,6 +23,9 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.dto.view.ClickedLinkDTO;
@@ -32,9 +35,6 @@ import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.ClickedLinkRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
-
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/clicked_links")

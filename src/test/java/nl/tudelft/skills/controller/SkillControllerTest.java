@@ -31,6 +31,16 @@ import java.util.*;
 
 import javax.servlet.http.HttpSession;
 
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithUserDetails;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
+
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.lib.security.LabradorUserDetails;
 import nl.tudelft.labracore.lib.security.user.Person;
@@ -50,21 +60,11 @@ import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskType;
 import nl.tudelft.skills.repository.*;
-import nl.tudelft.skills.service.ClickedLinkService;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.service.ClickedLinkService;
 import nl.tudelft.skills.service.ModuleService;
 import nl.tudelft.skills.service.SkillService;
 import nl.tudelft.skills.service.TaskCompletionService;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.test.context.support.WithAnonymousUser;
-import org.springframework.security.test.context.support.WithUserDetails;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
 
 @Transactional
 @AutoConfigureMockMvc
@@ -356,7 +356,8 @@ public class SkillControllerTest extends ControllerTest {
 		SkillService mockSkillService = mock(SkillService.class);
 		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
 				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
-				pathRepository, personRepository, mockSkillService, moduleService, taskCompletionService, clickedLinkService,
+				pathRepository, personRepository, mockSkillService, moduleService, taskCompletionService,
+				clickedLinkService,
 				session);
 
 		// Save an external skill and mock the response

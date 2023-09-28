@@ -21,12 +21,12 @@ import java.util.ArrayDeque;
 import java.util.Optional;
 import java.util.Queue;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import nl.tudelft.skills.model.Checkpoint;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.CheckpointRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 public class CheckpointService {

@@ -23,6 +23,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.List;
 
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
@@ -34,11 +39,6 @@ import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.test.TestDatabaseLoader;
 import nl.tudelft.skills.test.TestUserDetailsService;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
@@ -72,11 +72,11 @@ public class ModuleServiceTest {
 				.flatMap(skill -> skill.getTasks().stream())
 				.filter(TaskViewDTO::isCompleted)
 				.map(TaskViewDTO::getId).toList())
-						.containsExactlyInAnyOrderElementsOf(
-								List.of(db.getTaskRead11().getId(),
-										db.getTaskDo11ad().getId(),
-										db.getTaskRead12().getId(),
-										db.getTaskDo12ae().getId()));
+				.containsExactlyInAnyOrderElementsOf(
+						List.of(db.getTaskRead11().getId(),
+								db.getTaskDo11ad().getId(),
+								db.getTaskRead12().getId(),
+								db.getTaskDo12ae().getId()));
 
 	}
 

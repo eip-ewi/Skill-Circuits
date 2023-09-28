@@ -17,13 +17,13 @@
  */
 package nl.tudelft.skills.dto.id;
 
+import org.springframework.data.repository.CrudRepository;
+
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import nl.tudelft.librador.dto.id.IdDTO;
 import nl.tudelft.skills.model.Submodule;
 import nl.tudelft.skills.repository.SubmoduleRepository;
-
-import org.springframework.data.repository.CrudRepository;
 
 @Data
 @SuperBuilder

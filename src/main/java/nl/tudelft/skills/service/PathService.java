@@ -22,6 +22,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.patch.PathPatchDTO;
 import nl.tudelft.skills.dto.view.edition.PathViewDTO;
@@ -29,10 +33,6 @@ import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.PathRepository;
 import nl.tudelft.skills.repository.TaskRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PathService {
