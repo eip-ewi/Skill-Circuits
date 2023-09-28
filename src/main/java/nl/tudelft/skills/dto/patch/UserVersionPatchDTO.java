@@ -17,8 +17,6 @@
  */
 package nl.tudelft.skills.dto.patch;
 
-import java.util.Date;
-
 import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
@@ -37,13 +35,9 @@ public class UserVersionPatchDTO extends Patch<UserVersion> {
 	@NotNull
 	private String version;
 
-	@NotNull
-	private Date releaseDate;
-
 	@Override
 	protected void applyOneToOne() {
 		updateNonNull(version, data::setVersion);
-		updateNonNull(releaseDate, data::setReleaseDate);
 	}
 
 	@Override

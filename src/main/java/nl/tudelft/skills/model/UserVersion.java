@@ -17,8 +17,6 @@
  */
 package nl.tudelft.skills.model;
 
-import java.util.Date;
-
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
@@ -44,7 +42,4 @@ public class UserVersion {
 
 	@NotNull
 	private String version;
-
-	@NotNull
-	private Date releaseDate;
 }

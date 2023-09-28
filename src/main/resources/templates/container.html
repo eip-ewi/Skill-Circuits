@@ -27,6 +27,17 @@
         <div class="container" layout:fragment="container">
             <div layout:replace="~{header :: header}"></div>
             <main class="main-section">
+                <div
+                    th:if="${@authorisationService.isAuthenticated() and not @userVersionService.isUpToDate()}"
+                    class="whats_new"
+                    id="version_update">
+                    <h1 id="title">What's new</h1>
+                    <div
+                        th:utext="${@userVersionService.versionInformation()}"
+                        id="update_text"></div>
+                    <button id="ok_button">OK</button>
+                </div>
+
                 <th:block layout:fragment="content" class="content">Content goes here.</th:block>
             </main>
             <div layout:replace="~{infobox :: infobox}"></div>
@@ -53,6 +64,19 @@
                     $("#infobox-container").removeAttr("hidden");
                 }
 
+                function updateSeenVersion() {
+                    $.ajax({
+                        type: "PATCH",
+                        url: "/user_version",
+                        processData: false,
+                        contentType: "application/json",
+                        success: () => {},
+                    });
+
+                    const element = document.getElementById("version_update");
+                    element.remove();
+                }
+
                 document.addEventListener("DOMContentLoaded", function () {
                     // Retrieve necessary data
                     $.get("/infobox", function (data) {
@@ -73,6 +97,8 @@
 
                         renderInfobox(data);
                     });
+
+                    $("#ok_button").click(updateSeenVersion);
                 });
             </script>
         </div>

@@ -16,6 +16,10 @@ val genSourceDir = file("$buildDir/skills/src/main/java")
 
 ext["log4j2.version"] = "2.16.0"
 
+springBoot{
+    buildInfo()
+}
+
 repositories {
     mavenLocal()
     mavenCentral()
