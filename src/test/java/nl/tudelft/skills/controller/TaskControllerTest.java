@@ -25,10 +25,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.EditLinkDTO;
-import nl.tudelft.skills.model.Task;
-
-import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.module.TaskViewDTO;
+import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.TaskRepository;
 
 import org.junit.jupiter.api.Test;
@@ -41,8 +39,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @AutoConfigureMockMvc

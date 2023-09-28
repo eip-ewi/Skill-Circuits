@@ -173,6 +173,8 @@
             });
         }
         function updateBlockState(blockId) {
+            if (!blockId.match(/\d+/)) return; // Skip incorrect block ids
+
             const block = $(`#block-${blockId}`);
 
             if (block.attr("data-external")) return;

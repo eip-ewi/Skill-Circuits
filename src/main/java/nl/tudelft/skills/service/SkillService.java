@@ -36,8 +36,8 @@ import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
 import nl.tudelft.skills.model.AbstractSkill;
 import nl.tudelft.skills.model.ExternalSkill;
 import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.AbstractSkillRepository;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
@@ -56,19 +56,6 @@ public class SkillService {
 	private final AuthorisationService authorisationService;
 	private final ClickedLinkService clickedLinkService;
 	private final PersonRepository personRepository;
-
-	@Autowired
-	public SkillService(AbstractSkillRepository abstractSkillRepository,
-			TaskCompletionRepository taskCompletionRepository,
-			CourseControllerApi courseApi, AuthorisationService authorisationService,
-			ClickedLinkService clickedLinkService, PersonRepository personRepository) {
-		this.abstractSkillRepository = abstractSkillRepository;
-		this.taskCompletionRepository = taskCompletionRepository;
-		this.courseApi = courseApi;
-		this.authorisationService = authorisationService;
-		this.clickedLinkService = clickedLinkService;
-		this.personRepository = personRepository;
-	}
 
 	/**
 	 * Deletes a skill.

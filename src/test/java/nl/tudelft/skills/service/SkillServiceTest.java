@@ -81,7 +81,9 @@ public class SkillServiceTest {
 			EditionControllerApi editionApi, CourseControllerApi courseApi,
 			SkillRepository skillRepository, ModuleRepository moduleRepository,
 			ExternalSkillRepository externalSkillRepository, EditionRepository editionRepository,
-			AuthorisationService authorisationService, RoleControllerApi roleApi, PersonRepository personRepository, ClickedLinkService clickedLinkService, ClickedLinkRepository clickedLinkRepository) {
+			AuthorisationService authorisationService, RoleControllerApi roleApi,
+			PersonRepository personRepository, ClickedLinkService clickedLinkService,
+			ClickedLinkRepository clickedLinkRepository) {
 		this.abstractSkillRepository = abstractSkillRepository;
 		this.taskCompletionRepository = taskCompletionRepository;
 		this.externalSkillRepository = externalSkillRepository;

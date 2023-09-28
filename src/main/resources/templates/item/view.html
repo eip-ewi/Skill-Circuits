@@ -28,7 +28,7 @@
         th:with="id = ${path == null} ? |item-${item.id}| : |item-${item.id}-${path.id}|"
         th:id="${id}"
         th:data-item="${item.id}"
-        th:data-path-ids="${item.pathIds}"
+        th:data-path-ids="${level == 'module'} ? ${item.pathIds} : ${null}"
         th:data-index="${iter == null} ? 0 : ${iter.size - iter.count}"
         th:data-index-initial="${iter == null} ? 0 : ${iter.size - iter.count}"
         th:classappend="${level == 'module'} ? ${item.completed ? 'completed' : ''} : ${''}"

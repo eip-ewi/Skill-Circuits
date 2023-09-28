@@ -50,8 +50,8 @@ import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskType;
 import nl.tudelft.skills.repository.*;
-import nl.tudelft.skills.service.ClickedLinkService;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.service.ClickedLinkService;
 import nl.tudelft.skills.service.ModuleService;
 import nl.tudelft.skills.service.SkillService;
 import nl.tudelft.skills.service.TaskCompletionService;
@@ -356,7 +356,8 @@ public class SkillControllerTest extends ControllerTest {
 		SkillService mockSkillService = mock(SkillService.class);
 		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
 				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
-				pathRepository, personRepository, mockSkillService, moduleService, taskCompletionService, clickedLinkService,
+				pathRepository, personRepository, mockSkillService, moduleService, taskCompletionService,
+				clickedLinkService,
 				session);
 
 		// Save an external skill and mock the response

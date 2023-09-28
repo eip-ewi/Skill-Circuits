@@ -42,7 +42,7 @@
                         th:unless="${modified}"
                         th:text="${@pathService.getPath(selectedPathId)?.name ?: 'No path'}"></span>
 
-                    <ul class="items">
+                    <ul class="items" style="flex-direction: column">
                         <th:block
                             th:each="item, iter : ${block.items}"
                             th:with="taskAdded = ${#sets.contains(tasksAdded.![id], item.id)}">
@@ -84,13 +84,6 @@
                         if (!event.target.closest(".expanded-skill")) {
                             toggleOverlay(`${block.id}-expanded-overlay`);
                         }
-                    })
-                );
-
-                const dialog = document.querySelectorAll(".expanded-skill");
-                dialog.forEach(d =>
-                    d.addEventListener("click", function (event) {
-                        if (event.target === d) d.close();
                     })
                 );
 

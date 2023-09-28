@@ -73,7 +73,7 @@
                 This skill has no tasks in this path
             </h3>
 
-            <ul>
+            <ul data-edit="always">
                 <th:block th:each="item, iter : ${block.items}">
                     <!-- Task view for teacher-->
                     <th:block th:if="${level == 'module' and canEdit}">
@@ -81,9 +81,10 @@
                     </th:block>
                     <!--  Task preview for student-->
                     <th:block
-                        th:with="skillModified = ${#sets.contains(skillsModified.![id], block.id)}">
+                        th:if="${level == 'module'}"
+                        th:with="skillModified = ${skillsModified == null ? false : #sets.contains(skillsModified.![id], block.id)}">
                         <li
-                            th:classappend="${level == 'module' and not canEdit and ((item.visible and not skillModified) or (skillModified and #sets.contains(tasksAdded.![id], item.id)))}? '' : 'hidden'"
+                            th:classappend="${not canEdit and ((item.visible and not skillModified) or (skillModified and #sets.contains(tasksAdded.![id], item.id)))}? '' : 'hidden'"
                             style="display: inline"
                             layout:insert="~{task/preview :: item}"></li>
                     </th:block>
