@@ -27,9 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
 
 import javax.servlet.http.HttpSession;
 
@@ -41,14 +39,19 @@ import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.create.CheckpointCreateDTO;
 import nl.tudelft.skills.dto.create.ExternalSkillCreateDTO;
 import nl.tudelft.skills.dto.create.SkillCreateDTO;
+import nl.tudelft.skills.dto.create.TaskCreateDTO;
 import nl.tudelft.skills.dto.id.*;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
+import nl.tudelft.skills.dto.patch.TaskPatchDTO;
 import nl.tudelft.skills.model.ExternalSkill;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.Skill;
+import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.TaskType;
 import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.service.ClickedLinkService;
 import nl.tudelft.skills.service.ModuleService;
 import nl.tudelft.skills.service.SkillService;
 import nl.tudelft.skills.service.TaskCompletionService;
@@ -80,6 +83,8 @@ public class SkillControllerTest extends ControllerTest {
 	private final SkillService skillService;
 	private final TaskCompletionService taskCompletionService;
 	private final TaskCompletionRepository taskCompletionRepository;
+	private final ClickedLinkService clickedLinkService;
+	private final ClickedLinkRepository clickedLinkRepository;
 	private final PersonRepository personRepository;
 	private final HttpSession session;
 	private final EditionRepository editionRepository;
@@ -91,6 +96,7 @@ public class SkillControllerTest extends ControllerTest {
 			ExternalSkillRepository externalSkillRepository,
 			AbstractSkillRepository abstractSkillRepository, CheckpointRepository checkpointRepository,
 			PathRepository pathRepository, TaskCompletionService taskCompletionService,
+			ClickedLinkService clickedLinkService, ClickedLinkRepository clickedLinkRepository,
 			TaskCompletionRepository taskCompletionRepository, EditionRepository editionRepository,
 			RoleControllerApi roleApi, PersonRepository personRepository) {
 		this.submoduleRepository = submoduleRepository;
@@ -98,6 +104,8 @@ public class SkillControllerTest extends ControllerTest {
 		this.moduleService = mock(ModuleService.class);
 		this.externalSkillRepository = externalSkillRepository;
 		this.taskRepository = taskRepository;
+		this.clickedLinkService = clickedLinkService;
+		this.clickedLinkRepository = clickedLinkRepository;
 		this.checkpointRepository = checkpointRepository;
 		this.pathRepository = pathRepository;
 		this.skillService = skillService;
@@ -112,8 +120,7 @@ public class SkillControllerTest extends ControllerTest {
 		this.skillController = new SkillController(skillRepository, externalSkillRepository,
 				abstractSkillRepository, taskRepository,
 				submoduleRepository, checkpointRepository, pathRepository, personRepository, skillService,
-				moduleService,
-				taskCompletionService, session);
+				moduleService, taskCompletionService, clickedLinkService, session);
 	}
 
 	@Test
@@ -128,6 +135,33 @@ public class SkillControllerTest extends ControllerTest {
 		skillController.createSkill(null, dto, mock(Model.class));
 
 		assertTrue(skillRepository.findAll().stream().anyMatch(s -> s.getName().equals("New Skill")));
+	}
+
+	@Test
+	void createSkillWithTasks() {
+		TaskCreateDTO taskDto = TaskCreateDTO.builder().name("New Task").type(TaskType.EXERCISE)
+				.skill(new SkillIdDTO())
+				.index(1).time(1).build();
+		var dto = SkillCreateDTO.builder()
+				.name("New Skill")
+				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
+				.checkpoint(new CheckpointIdDTO(db.getCheckpointLectureOne().getId()))
+				.requiredTaskIds(Collections.emptyList())
+				.column(10).row(11).newItems(new ArrayList<>()).build();
+		dto.setNewItems(List.of(taskDto));
+		skillController.createSkill(null, dto, mock(Model.class));
+
+		Optional<Skill> skill = skillRepository.findAll().stream()
+				.filter(s -> s.getName().equals("New Skill"))
+				.findFirst();
+		assertTrue(skill.isPresent());
+
+		Optional<Task> task = taskRepository.findAll().stream().filter(t -> t.getName().equals("New Task"))
+				.findFirst();
+		assertTrue(task.isPresent());
+
+		assertThat(task.get().getSkill()).isEqualTo(skill.get());
+		assertThat(skill.get().getTasks()).containsExactly(task.get());
 	}
 
 	@Test
@@ -149,7 +183,7 @@ public class SkillControllerTest extends ControllerTest {
 				abstractSkillRepository, taskRepository,
 				submoduleRepository, SpringContext.getBean(CheckpointRepository.class), pathRepository,
 				personRepository, skillService,
-				moduleService, taskCompletionService, session);
+				moduleService, taskCompletionService, clickedLinkService, session);
 
 		skc.createSkill(null, dto, mock(Model.class));
 
@@ -175,16 +209,34 @@ public class SkillControllerTest extends ControllerTest {
 
 	@Test
 	void patchSkill() {
+		Long skillId = db.getSkillVariables().getId();
+		Task old = db.getTaskRead10();
+		TaskCreateDTO taskAdded = TaskCreateDTO.builder().name("New Task").type(TaskType.EXERCISE)
+				.skill(new SkillIdDTO(skillId)).index(1).time(1).build();
+		TaskPatchDTO oldTask = TaskPatchDTO.builder().name(old.getName()).type(old.getType())
+				.id(old.getId()).index(old.getIdx()).time(old.getTime()).build();
+
+		// Add a task and remove a task
 		skillController.patchSkill(SkillPatchDTO.builder()
-				.id(db.getSkillVariables().getId())
+				.id(skillId)
 				.name("Updated")
 				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
+				.items(List.of(oldTask))
+				.newItems(List.of(taskAdded))
+				.removedItems(Set.of(db.getTaskDo10a().getId()))
 				.build(), model);
 
 		Skill skill = db.getSkillVariables();
 		assertThat(skill.getName()).isEqualTo("Updated");
 		assertThat(submoduleRepository.findByIdOrThrow(skill.getSubmodule().getId())).isEqualTo(
 				submoduleRepository.findByIdOrThrow(db.getSubmoduleCases().getId()));
+
+		// Check task related properties
+		Optional<Task> task = taskRepository.findAll().stream().filter(t -> t.getName().equals("New Task"))
+				.findFirst();
+		assertTrue(task.isPresent());
+		assertThat(skill.getTasks()).containsExactlyInAnyOrder(db.getTaskRead10(), task.get());
+		assertThat(task.get().getSkill()).isEqualTo(skill);
 
 		// Check that all TaskCompletion related information remains the same
 		assertThat(taskCompletionRepository.findAll()).hasSize(4);
@@ -220,6 +272,8 @@ public class SkillControllerTest extends ControllerTest {
 		assertThat(db.getTaskRead12().getCompletedBy()).hasSize(1);
 		assertThat(db.getTaskDo12ae().getCompletedBy()).hasSize(1);
 		assertThat(db.getTaskDo11ad().getCompletedBy()).hasSize(1);
+		//Check that ClickedLinks are deleted
+		assertThat(clickedLinkRepository.findAll()).hasSize(1);
 	}
 
 	@Test
@@ -268,7 +322,7 @@ public class SkillControllerTest extends ControllerTest {
 		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
 				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
 				pathRepository, personRepository, mockSkillService, moduleService, taskCompletionService,
-				session);
+				clickedLinkService, session);
 
 		// Save an external skill and mock the response
 		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
@@ -303,6 +357,7 @@ public class SkillControllerTest extends ControllerTest {
 		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
 				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
 				pathRepository, personRepository, mockSkillService, moduleService, taskCompletionService,
+				clickedLinkService,
 				session);
 
 		// Save an external skill and mock the response
@@ -368,7 +423,7 @@ public class SkillControllerTest extends ControllerTest {
 		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
 				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
 				pathRepository, personRepository, mockSkillService, moduleService, taskCompletionService,
-				session);
+				clickedLinkService, session);
 
 		// Save an external skill and mock the response
 		Skill linkedSkill = db.createSkillInEditionHelper(db.getEditionRL().getId() + 1, false);

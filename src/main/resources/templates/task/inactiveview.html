@@ -51,8 +51,7 @@
             <th:block layout:fragment="item-before-content">
                 <span
                     th:id="|item-${item.id}-icon|"
-                    th:class="|fa-solid fa-${item.type.icon} task-icon|"
-                    th:data-type="${item.type.icon}"></span>
+                    th:class="|fa-solid fa-${item.type.icon}|"></span>
                 <th:block layout:replace="~{task/edit :: icon}"></th:block>
             </th:block>
             <th:block layout:fragment="item-after-content">

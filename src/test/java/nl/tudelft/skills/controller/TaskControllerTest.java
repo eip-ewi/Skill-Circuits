@@ -18,16 +18,27 @@
 package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.dto.view.EditLinkDTO;
 import nl.tudelft.skills.dto.view.module.TaskViewDTO;
+import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.TaskRepository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Transactional
 @AutoConfigureMockMvc
@@ -36,11 +47,65 @@ public class TaskControllerTest extends ControllerTest {
 
 	private final TaskController taskController;
 	private final TaskRepository taskRepository;
+	private final RoleControllerApi roleApi;
 
 	@Autowired
-	public TaskControllerTest(TaskRepository taskRepository) {
+	public TaskControllerTest(TaskRepository taskRepository, RoleControllerApi roleApi) {
 		this.taskRepository = taskRepository;
+		this.roleApi = roleApi;
 		this.taskController = new TaskController(taskRepository);
+	}
+
+	private String createBody() throws JsonProcessingException {
+		ObjectMapper objectMapper = new ObjectMapper();
+		Long taskId = db.getTaskDo10a().getId();
+
+		return objectMapper.writeValueAsString(new EditLinkDTO(taskId, "www.test.com"));
+	}
+
+	@Test
+	void changeLinkUnauthenticatedForbidden() throws Exception {
+		mvc.perform(patch("/task/change-link").with(csrf())
+				.content(createBody())
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(redirectedUrlPattern("**/auth/login"));
+	}
+
+	@Test
+	@WithUserDetails("teacher")
+	public void updateLinkSuccessful() throws Exception {
+		mockRole(roleApi, "TEACHER");
+
+		mvc.perform(patch("/task/change-link").with(csrf())
+				.content(createBody())
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		Task task = taskRepository.getById(db.getTaskDo10a().getId());
+		assertThat(task.getLink()).isEqualTo("www.test.com");
+	}
+
+	@Test
+	@WithUserDetails("teacher")
+	public void updateLinkTaskDoesNotExist() throws Exception {
+		mockRole(roleApi, "TEACHER");
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		mvc.perform(patch("/task/change-link").with(csrf())
+				.content(objectMapper.writeValueAsString(new EditLinkDTO(-1L, "www.test.com")))
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotFound());
+	}
+
+	@Test
+	@WithUserDetails("student")
+	public void updateLinkUnauthorized() throws Exception {
+		mockRole(roleApi, "STUDENT");
+
+		mvc.perform(patch("/task/change-link").with(csrf())
+				.content(createBody())
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isForbidden());
 	}
 
 	@Test

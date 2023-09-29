@@ -15,33 +15,35 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view.edition;
+package nl.tudelft.skills.model;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
-import javax.validation.constraints.NotBlank;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.ItemView;
-import nl.tudelft.skills.dto.view.module.TaskViewDTO;
-import nl.tudelft.skills.model.Skill;
+import nl.tudelft.skills.model.labracore.SCPerson;
 
 @Data
+@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class EditionLevelSkillViewDTO extends View<Skill> implements ItemView {
-
-	@NotNull
+public class ClickedLink {
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
-	@NotBlank
-	private String name;
-	@NotNull
-	private Boolean hidden;
-	@NotNull
-	private List<TaskViewDTO> tasks;
 
+	@NotNull
+	@ManyToOne
+	private Task task;
+
+	@NotNull
+	@ManyToOne
+	private SCPerson person;
+
+	@NotNull
+	@Builder.Default
+	private LocalDateTime timestamp = LocalDateTime.now();
 }

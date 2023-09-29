@@ -72,6 +72,9 @@ public class SkillServiceTest {
 	private TestDatabaseLoader db;
 	private final LocalDateTime localDateTime;
 
+	private final ClickedLinkService clickedLinkService;
+	private final ClickedLinkRepository clickedLinkRepository;
+
 	@Autowired
 	public SkillServiceTest(AbstractSkillRepository abstractSkillRepository, TaskRepository taskRepository,
 			TestDatabaseLoader db, TaskCompletionRepository taskCompletionRepository,
@@ -79,7 +82,8 @@ public class SkillServiceTest {
 			SkillRepository skillRepository, ModuleRepository moduleRepository,
 			ExternalSkillRepository externalSkillRepository, EditionRepository editionRepository,
 			AuthorisationService authorisationService, RoleControllerApi roleApi,
-			PersonRepository personRepository) {
+			PersonRepository personRepository, ClickedLinkService clickedLinkService,
+			ClickedLinkRepository clickedLinkRepository) {
 		this.abstractSkillRepository = abstractSkillRepository;
 		this.taskCompletionRepository = taskCompletionRepository;
 		this.externalSkillRepository = externalSkillRepository;
@@ -87,6 +91,8 @@ public class SkillServiceTest {
 		this.moduleRepository = moduleRepository;
 		this.taskRepository = taskRepository;
 		this.skillRepository = skillRepository;
+		this.clickedLinkService = clickedLinkService;
+		this.clickedLinkRepository = clickedLinkRepository;
 		this.personRepository = personRepository;
 
 		// The service is not mocked to test the specifics of whether an edition is shown because it
@@ -101,7 +107,7 @@ public class SkillServiceTest {
 		this.editionApi = editionApi;
 
 		this.skillService = new SkillService(abstractSkillRepository, taskCompletionRepository, courseApi,
-				authorisationService, personRepository);
+				authorisationService, clickedLinkService, personRepository);
 	}
 
 	@Test
@@ -113,6 +119,15 @@ public class SkillServiceTest {
 
 		// All TaskCompletions are in other Skills, so they should not have been deleted
 		assertThat(taskCompletionRepository.findAll()).hasSize(4);
+	}
+
+	@Test
+	public void deleteSkillClickedLinksImpacted() {
+		Long id = db.getSkillNegation().getId();
+
+		assertThat(clickedLinkRepository.findAll()).hasSize(3);
+		skillService.deleteSkill(id);
+		assertThat(clickedLinkRepository.findAll()).hasSize(1);
 	}
 
 	@Test

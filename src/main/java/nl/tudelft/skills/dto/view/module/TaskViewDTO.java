@@ -52,6 +52,11 @@ public class TaskViewDTO extends View<Task> implements ItemView {
 
 	private Integer completedCount;
 
+	@NotNull
+	private String submoduleName;
+	@NotNull
+	private String skillName;
+	@NotNull
 	private Set<Long> pathIds;
 
 	/**
@@ -66,6 +71,8 @@ public class TaskViewDTO extends View<Task> implements ItemView {
 	public void postApply() {
 		super.postApply();
 		completedCount = data.getCompletedBy().size();
+		skillName = data.getSkill().getName();
+		submoduleName = data.getSkill().getSubmodule().getName();
 		pathIds = data.getPaths().stream().map(Path::getId).collect(Collectors.toSet());
 	}
 }

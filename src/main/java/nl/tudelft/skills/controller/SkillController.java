@@ -43,6 +43,7 @@ import nl.tudelft.skills.dto.view.module.ModuleLevelSubmoduleViewDTO;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.service.ClickedLinkService;
 import nl.tudelft.skills.service.ModuleService;
 import nl.tudelft.skills.service.SkillService;
 import nl.tudelft.skills.service.TaskCompletionService;
@@ -63,6 +64,7 @@ public class SkillController {
 	private final ExternalSkillRepository externalSkillRepository;
 	private final AbstractSkillRepository abstractSkillRepository;
 	private final TaskRepository taskRepository;
+
 	private final SubmoduleRepository submoduleRepository;
 	private final CheckpointRepository checkpointRepository;
 	private final PathRepository pathRepository;
@@ -70,6 +72,7 @@ public class SkillController {
 	private final SkillService skillService;
 	private final ModuleService moduleService;
 	private final TaskCompletionService taskCompletionService;
+	private final ClickedLinkService clickedLinkService;
 	private final HttpSession session;
 
 	@Autowired
@@ -78,7 +81,8 @@ public class SkillController {
 			SubmoduleRepository submoduleRepository, CheckpointRepository checkpointRepository,
 			PathRepository pathRepository, PersonRepository personRepository,
 			SkillService skillService, ModuleService moduleService,
-			TaskCompletionService taskCompletionService, HttpSession session) {
+			TaskCompletionService taskCompletionService, ClickedLinkService clickedLinkService,
+			HttpSession session) {
 		this.skillRepository = skillRepository;
 		this.externalSkillRepository = externalSkillRepository;
 		this.abstractSkillRepository = abstractSkillRepository;
@@ -90,6 +94,7 @@ public class SkillController {
 		this.skillService = skillService;
 		this.moduleService = moduleService;
 		this.taskCompletionService = taskCompletionService;
+		this.clickedLinkService = clickedLinkService;
 		this.session = session;
 	}
 
@@ -138,6 +143,9 @@ public class SkillController {
 					dto.setSkill(SkillIdDTO.builder().id(skill.getId()).build());
 					return dto.apply();
 				}).toList();
+		for (Task task : tasks) {
+			task.setSkill(skill);
+		}
 		skill.setTasks(taskRepository.saveAll(tasks));
 
 		checkpointRepository.findBySkillsContains(skill).getSkills().add(skill);
@@ -212,6 +220,8 @@ public class SkillController {
 
 		taskRepository.findAllByIdIn(patch.getRemovedItems())
 				.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
+		clickedLinkService.deleteClickedLinksForTasks(taskRepository.findAllByIdIn(patch.getRemovedItems()));
+
 		taskRepository.deleteAllByIdIn(patch.getRemovedItems());
 		taskRepository.saveAll(skill.getRequiredTasks());
 
@@ -222,6 +232,7 @@ public class SkillController {
 		skillRepository.findByIdOrThrow(skill.getId()).getTasks().stream().filter(t -> !oldTasks.contains(t))
 				.forEach(t -> {
 					t.setPaths(paths);
+					t.setSkill(skill);
 					taskRepository.save(t);
 				});
 

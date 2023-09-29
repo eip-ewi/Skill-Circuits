@@ -37,6 +37,7 @@ import nl.tudelft.skills.model.AbstractSkill;
 import nl.tudelft.skills.model.ExternalSkill;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.AbstractSkillRepository;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
@@ -53,6 +54,7 @@ public class SkillService {
 	private final TaskCompletionRepository taskCompletionRepository;
 	private final CourseControllerApi courseApi;
 	private final AuthorisationService authorisationService;
+	private final ClickedLinkService clickedLinkService;
 	private final PersonRepository personRepository;
 
 	/**
@@ -67,6 +69,8 @@ public class SkillService {
 		skill.getChildren().forEach(c -> c.getParents().remove(skill));
 		if (skill instanceof Skill s) {
 			s.getTasks().forEach(t -> taskCompletionRepository.deleteAll(t.getCompletedBy()));
+
+			clickedLinkService.deleteClickedLinksForTasks(s.getTasks());
 
 			s.getFutureEditionSkills().forEach(innerSkill -> innerSkill.setPreviousEditionSkill(null));
 			if (s.getPreviousEditionSkill() != null) {

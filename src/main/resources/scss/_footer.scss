@@ -2,7 +2,9 @@
     background-color: var(--primary-light);
     min-width: 100%;
     padding: 0.75rem 2rem;
-    text-align: right;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 
     a {
         color: var(--primary-green);

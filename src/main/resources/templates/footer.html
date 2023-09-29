@@ -23,8 +23,12 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <footer layout:fragment="footer" class="footer">
-        <span>Skill Circuits is open source. View the source code</span>
-        <a target="_blank" href="https://github.com/eip-ewi/Skill-Circuits">here</a>
-        <span>.</span>
+        <a th:href="@{/privacy}">Privacy statement</a>
+        <span>
+            Skill Circuits is open source. View the source code
+            <!-- spotless:off -->
+            <a target="_blank" href="https://github.com/eip-ewi/Skill-Circuits">here</a>.
+            <!-- spotless:on -->
+        </span>
     </footer>
 </html>

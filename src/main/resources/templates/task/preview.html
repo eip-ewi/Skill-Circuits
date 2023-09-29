@@ -27,7 +27,6 @@
             th:id="|item-${item.id}-icon|"
             th:class="|fa-solid fa-${item.type.icon} item__icon|"
             th:bgcolor="green"
-            th:data-type="${item.type.icon}"
             th:data-completed="${level == 'module'} ? ${item.completed ? 'true' : ''} : ${''}"
             th:classappend="${level == 'module'} ? ${item.completed ? 'completed' : ''} : ${''}"></span>
     </th:block>

@@ -31,6 +31,15 @@
         <div class="sidebar__content">
             <div class="sidebar__header">
                 <h1>Edition setup</h1>
+                <button
+                    onclick="toggleOverlay('link-overview-overlay')"
+                    id="linkOverviewButton"
+                    class="circuit__button"
+                    title="link overview"
+                    type="button">
+                    <i class="fa-solid fa-link"></i>
+                    Link overview
+                </button>
                 <form
                     method="post"
                     id="publish-edition-form"
@@ -213,5 +222,8 @@
         <th:block layout:replace="~{edition_setup/path-delete :: script}" />
         <th:block layout:replace="~{edition_setup/path-edit :: form}" />
         <th:block layout:replace="~{edition_setup/path-edit :: script}" />
+
+        <th:block layout:replace="~{edition_setup/link-overview :: link-overlay}" />
+        <th:block layout:replace="~{edition_setup/link-overview :: script}" />
     </div>
 </html>

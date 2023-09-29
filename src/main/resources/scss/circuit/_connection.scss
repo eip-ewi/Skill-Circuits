@@ -24,13 +24,14 @@
     overflow: visible;
     top: 0;
     left: 0;
-    margin-left: -2rem;
-    z-index: -1;
+    margin-left: -3rem;
+    pointer-events: none;
 
     & > .connection {
         stroke-width: 2;
         stroke: var(--grey-500);
         fill: none;
+        pointer-events: initial;
 
         &.highlighted {
             stroke: var(--primary-blue);

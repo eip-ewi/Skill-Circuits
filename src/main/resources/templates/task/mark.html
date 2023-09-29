@@ -66,7 +66,21 @@
                     },
                 });
             }
+
+            $(".link").click(clickedLink);
         });
+
+        function clickedLink() {
+            const taskId = $(this).parent().attr("id").split("-")[1];
+
+            $.ajax({
+                type: "POST",
+                url: "/clicked_links/clicked/" + taskId,
+                processData: false,
+                contentType: "application/json",
+                success: skills => {},
+            });
+        }
 
         function toggleCompleted(taskId) {
             const task = $(`#item-${taskId}`);
@@ -159,6 +173,8 @@
             });
         }
         function updateBlockState(blockId) {
+            if (!blockId.match(/\d+/)) return; // Skip incorrect block ids
+
             const block = $(`#block-${blockId}`);
 
             if (block.attr("data-external")) return;

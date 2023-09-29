@@ -15,33 +15,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view.edition;
+package nl.tudelft.skills.repository;
 
 import java.util.List;
+import java.util.Set;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import nl.tudelft.skills.model.ClickedLink;
 
-import lombok.*;
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.ItemView;
-import nl.tudelft.skills.dto.view.module.TaskViewDTO;
-import nl.tudelft.skills.model.Skill;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class EditionLevelSkillViewDTO extends View<Skill> implements ItemView {
+public interface ClickedLinkRepository extends JpaRepository<ClickedLink, Long> {
 
-	@NotNull
-	private Long id;
-	@NotBlank
-	private String name;
-	@NotNull
-	private Boolean hidden;
-	@NotNull
-	private List<TaskViewDTO> tasks;
+	default ClickedLink findByIdOrThrow(Long id) {
+		return findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("ClickedLink was not found: " + id));
+	}
 
+	Set<ClickedLink> getByPersonId(Long id);
+
+	List<ClickedLink> deleteAllByTaskIdIn(List<Long> taskIds);
 }

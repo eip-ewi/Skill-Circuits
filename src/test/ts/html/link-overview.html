@@ -1,0 +1,101 @@
+<dialog class="overlay link__overlay" id="link-overview-overlay">
+    <h2>Edition link overview</h2>
+    <div class="link__filter">
+        <form>
+            <label for="type-filter">Filter by task type</label>
+            <select id="type-filter" class="link__filter_element">
+                <option value="All types" selected="">All types</option>
+                <option value="fa-book">Reading</option>
+                <option value="fa-play">Video</option>
+                <option value="fa-clipboard-question">Quiz</option>
+                <option value="fa-desktop">Implementation</option>
+                <option value="fa-pencil-ruler">Exercise</option>
+                <option value="fa-people-carry">Collaboration</option>
+                <option value="fa-flask">Experiment</option>
+            </select>
+        </form>
+        <form>
+            <label for="link-searchbar">Filter by link</label>
+            <input id="link-searchbar" placeholder="Filter links" class="link__filter_element">
+        </form>
+    </div>
+    <div id="wrapper0" class="wrapper">
+        <div class="link__group">
+            <h3>Module 0</h3>
+            <table class="link__table">
+                <tbody>
+                <tr>
+                    <th><b>Link</b></th>
+                    <th><b>Task</b></th>
+                    <th><b>Skill</b></th>
+                    <th><b>Submodule</b></th>
+                </tr>
+                <tr id="link-row0" data-task-id="0" class="link_row">
+                    <td>
+                        <form id="link-form0" class="link__input" data-task-id="0">
+                            <input id="prev-link0" type="hidden" value="https://test0.com">
+                            <input id="link0" value="https://test0.com" data-task-id="0" type="url"
+                                   aria-label="Change task URL" title="Change task URL">
+                            <button id="delete-0" data-task-id="0" class="fa-solid fa-trash link__delete"></button>
+                        </form>
+                    </td>
+                    <td>
+                        <i class="fa-solid fa-book" id="task-icon0"></i>
+                        <span>Task Name 0</span>
+                    </td>
+                    <td>Skill Name 0</td>
+                    <td>Submodule Name 0</td>
+                </tr>
+                <tr id="link-row1" data-task-id="1" class="link_row">
+                    <td>
+                        <form id="link-form1" class="link__input" data-task-id="1">
+                            <input id="prev-link1" type="hidden" value="https://test1.com">
+                            <input id="link1" value="https://test1.com" data-task-id="1" type="url"
+                                   aria-label="Change task URL" title="Change task URL">
+                            <button id="delete-1" data-task-id="1" class="fa-solid fa-trash link__delete"></button>
+                        </form>
+                    </td>
+                    <td>
+                        <i class="fa-solid fa-pencil-ruler" id="task-icon1"></i>
+                        <span>Task Name 1</span>
+                    </td>
+                    <td>Skill Name 1</td>
+                    <td>Submodule Name 1</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div></div>
+    <div id="wrapper1" class="wrapper">
+        <div class="link__group">
+            <h3>Module 1</h3>
+            <table class="link__table">
+                <tbody>
+                <tr>
+                    <th><b>Link</b></th>
+                    <th><b>Task</b></th>
+                    <th><b>Skill</b></th>
+                    <th><b>Submodule</b></th>
+                </tr>
+                <tr id="link-row2" data-task-id="2" class="link_row">
+                    <td>
+                        <form id="link-form2" class="link__input" data-task-id="2">
+                            <input id="prev-link2" type="hidden" value="http://different-url.com">
+                            <input id="link2" value="http://different-url.com" data-task-id="2" type="url"
+                                   aria-label="Change task URL" title="Change task URL">
+                            <button id="delete-2" data-task-id="2" class="fa-solid fa-trash link__delete"></button>
+                        </form>
+                    </td>
+                    <td>
+                        <i class="fa-solid fa-pencil-ruler" id="task-icon2"></i>
+                        <span>Task Name 2</span>
+                    </td>
+                    <td>Skill Name 2</td>
+                    <td>Submodule Name 2</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</dialog>
