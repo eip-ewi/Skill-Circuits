@@ -34,14 +34,12 @@ import org.springframework.boot.info.BuildProperties;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @RestController
 @RequestMapping("/user_version")
 public class UserVersionController {
 	private final UserVersionRepository userVersionRepository;
 	private final PersonRepository scPersonRepository;
-	private final WebClient webClient;
 	private final BuildProperties buildProperties;
 
 	@Autowired
@@ -49,7 +47,6 @@ public class UserVersionController {
 			PersonRepository scPersonRepository, BuildProperties buildProperties) {
 		this.userVersionRepository = userVersionRepository;
 		this.scPersonRepository = scPersonRepository;
-		this.webClient = WebClient.builder().baseUrl("https://gitlab.ewi.tudelft.nl/").build();
 		this.buildProperties = buildProperties;
 	}
 

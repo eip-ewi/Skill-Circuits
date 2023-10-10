@@ -9,7 +9,7 @@
     padding: 20px 55px 50px;
     width: 40%;
     transform: translateX(50%);
-    overflow-y: scroll;
+    overflow-y: auto;
     max-height: 90%;
 
     & > button {
@@ -23,12 +23,26 @@
         transform: translateX(-50%);
     }
 }
+
 #title {
     text-align: center;
     padding-bottom: 10px;
 }
+
 #update_text {
     background: var(--background-colour);
     padding: 30px 50px 30px;
     position: relative;
+
+    & > h3 {
+        padding-top: 10px;
+    }
+}
+
+hr {
+    margin-top: 20px;
+
+    & + h2 {
+        padding-top: 10px;
+    }
 }

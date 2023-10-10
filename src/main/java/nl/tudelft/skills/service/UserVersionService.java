@@ -79,14 +79,15 @@ public class UserVersionService {
 			var userReleaseDate = Arrays.stream(releases)
 					.filter(r -> r.getName().equals(userVersion.get().getVersion()))
 					.map(Release::getReleased_at).findFirst();
-			List<String> newReleasesDesc = Arrays.stream(releases)
-					.filter(r -> r.getReleased_at().after(userReleaseDate.get()))
-					.map(Release::getDescription_html).toList();
-			return String.join("\n", newReleasesDesc);
+			List<Release> newReleases = Arrays.stream(releases)
+					.filter(r -> r.getReleased_at().after(userReleaseDate.get())).toList();
+			List<String> newReleasesDesc = newReleases.stream()
+					.map(x -> "<h2>" + x.getName() + "</h2>" + x.getDescription_html()).toList();
+			return String.join("<hr>", newReleasesDesc);
 		} else {
 			Optional<Release> latest = Arrays.stream(releases).findFirst();
 			if (latest.isPresent()) {
-				return latest.get().getDescription_html();
+				return "<h2>" + latest.get().getName() + "</h2>" + latest.get().getDescription_html();
 			}
 
 		}
