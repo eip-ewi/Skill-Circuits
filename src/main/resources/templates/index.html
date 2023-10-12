@@ -86,17 +86,9 @@
                     </h2>
                     <div class="blocks" th:if="!${#lists.isEmpty(ownActive)}">
                         <th:block th:each="course : ${ownActive}">
-                            <th:block>
-                                <a
-                                    class="block"
-                                    th:href="@{|/edition/${@courseService.getLastStudentEditionForCourseOrLast(course.id)}|}">
-                                    <h2 th:text="${course.code}"></h2>
-                                    <h2 th:text="${course.name}"></h2>
-                                    <h3
-                                        style="font-size: 0.8rem"
-                                        th:text="|${completedSkillsPerCourse.get(course.id)} / ${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastStudentEditionForCourseOrLast(course.id))} skills completed|"></h3>
-                                </a>
-                            </th:block>
+                            <th:block
+                                layout:replace="course/block :: course(${course.id}, ${course.code},
+                                ${course.name}, true)" />
                         </th:block>
                     </div>
 
@@ -105,17 +97,9 @@
                     </h2>
                     <div class="blocks" th:if="!${#lists.isEmpty(ownFinished)}">
                         <th:block th:each="course : ${ownFinished}">
-                            <th:block>
-                                <a
-                                    class="block"
-                                    th:href="@{|/edition/${@courseService.getLastStudentEditionForCourseOrLast(course.id)}|}">
-                                    <h2 th:text="${course.code}"></h2>
-                                    <h2 th:text="${course.name}"></h2>
-                                    <h3
-                                        style="font-size: 0.8rem"
-                                        th:text="|${completedSkillsPerCourse.get(course.id)} / ${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastStudentEditionForCourseOrLast(course.id))} skills completed|"></h3>
-                                </a>
-                            </th:block>
+                            <th:block
+                                layout:replace="course/block :: course(${course.id}, ${course.code},
+                                ${course.name}, true)" />
                         </th:block>
                     </div>
 
@@ -154,14 +138,9 @@
                     </h2>
                     <div class="blocks" th:if="!${#lists.isEmpty(availableActive)}">
                         <th:block th:each="course : ${availableActive}">
-                            <th:block>
-                                <a
-                                    class="block"
-                                    th:href="@{|/edition/${@courseService.getLastEditionForCourse(course.id)}|}">
-                                    <h2 th:text="${course.code}"></h2>
-                                    <h2 th:text="${course.name}"></h2>
-                                </a>
-                            </th:block>
+                            <th:block
+                                layout:replace="course/block :: course(${course.id}, ${course.code},
+                                ${course.name}, false)" />
                         </th:block>
                     </div>
 
@@ -170,14 +149,9 @@
                     </h2>
                     <div class="blocks" th:if="!${#lists.isEmpty(availableFinished)}">
                         <th:block th:each="course : ${availableFinished}">
-                            <th:block>
-                                <a
-                                    class="block"
-                                    th:href="@{|/edition/${@courseService.getLastEditionForCourse(course.id)}|}">
-                                    <h2 th:text="${course.code}"></h2>
-                                    <h2 th:text="${course.name}"></h2>
-                                </a>
-                            </th:block>
+                            <th:block
+                                layout:replace="course/block :: course(${course.id}, ${course.code},
+                                ${course.name}, false)" />
                         </th:block>
                     </div>
                 </div>
