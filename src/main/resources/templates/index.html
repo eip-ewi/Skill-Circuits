@@ -32,24 +32,27 @@
     <body>
         <div
             layout:fragment="content"
-            th:with="displayOwn = !${#lists.isEmpty(ownActive)} or !${#lists.isEmpty(ownFinished)} or !${#lists.isEmpty(managed)},
-                        displayAvailable = !${#lists.isEmpty(availableActive)} or !${#lists.isEmpty(availableFinished)}">
+            th:with="displayOwn = not ${#lists.isEmpty(ownActive)} or not ${#lists.isEmpty(ownFinished)} or not ${#lists.isEmpty(managed)},
+                        displayAvailable = not ${#lists.isEmpty(availableActive)} or not ${#lists.isEmpty(availableFinished)}">
             <h1>Welcome to Skill Circuits</h1>
 
-            <div class="tabs" th:if="${displayOwn} or ${displayAvailable}">
+            <div
+                class="tabs"
+                th:if="${displayOwn} or ${displayAvailable}"
+                th:with="yourCourses = ${displayOwn} or (not ${displayAvailable} and not ${displayOwn})">
                 <button
                     id="own-courses-button"
                     class="tab"
                     onclick="setCourseView('own')"
-                    th:data-active="${displayOwn} or (not ${displayAvailable} and not ${displayOwn})"
+                    th:data-active="${yourCourses}"
                     type="button">
                     Your Courses
                 </button>
                 <button
                     id="available-courses-button"
                     class="tab"
-                    th:data-active="not ${displayOwn} and ${displayAvailable}"
                     onclick="setCourseView('available')"
+                    th:data-active="not ${yourCourses}"
                     type="button">
                     Available Courses
                 </button>
@@ -81,10 +84,11 @@
                 </span>
 
                 <div th:if="${displayOwn}">
-                    <h2 th:if="!${#lists.isEmpty(ownActive)}" style="margin: 0.5rem 0">
-                        Active courses
-                    </h2>
-                    <div class="blocks" th:if="!${#lists.isEmpty(ownActive)}">
+                    <h2 class="group_header">Active courses</h2>
+                    <span th:if="${#lists.isEmpty(ownActive)}" class="active_course_info">
+                        There are no active courses.
+                    </span>
+                    <div class="blocks" th:if="not ${#lists.isEmpty(ownActive)}">
                         <th:block th:each="course : ${ownActive}">
                             <th:block
                                 layout:replace="course/block :: course(${course.id}, ${course.code},
@@ -92,10 +96,10 @@
                         </th:block>
                     </div>
 
-                    <h2 th:if="!${#lists.isEmpty(ownFinished)}" style="margin: 0.5rem 0">
+                    <h2 th:if="not ${#lists.isEmpty(ownFinished)}" class="group_header">
                         Finished courses
                     </h2>
-                    <div class="blocks" th:if="!${#lists.isEmpty(ownFinished)}">
+                    <div class="blocks" th:if="not ${#lists.isEmpty(ownFinished)}">
                         <th:block th:each="course : ${ownFinished}">
                             <th:block
                                 layout:replace="course/block :: course(${course.id}, ${course.code},
@@ -103,10 +107,10 @@
                         </th:block>
                     </div>
 
-                    <h2 th:if="!${#lists.isEmpty(managed)}" style="margin: 0.5rem 0">
+                    <h2 th:if="not ${#lists.isEmpty(managed)}" class="group_header">
                         Managed courses
                     </h2>
-                    <div class="blocks" th:if="!${#lists.isEmpty(managed)}">
+                    <div class="blocks" th:if="not ${#lists.isEmpty(managed)}">
                         <th:block th:each="course : ${managed}">
                             <th:block>
                                 <a class="block" th:href="@{|/course/${course.id}|}">
@@ -133,10 +137,11 @@
                 </span>
 
                 <div th:if="${displayAvailable}">
-                    <h2 th:if="!${#lists.isEmpty(availableActive)}" style="margin: 0.5rem 0">
-                        Active courses
-                    </h2>
-                    <div class="blocks" th:if="!${#lists.isEmpty(availableActive)}">
+                    <h2 class="group_header">Active courses</h2>
+                    <span th:if="${#lists.isEmpty(availableActive)}" class="active_course_info">
+                        There are no active courses.
+                    </span>
+                    <div class="blocks" th:if="not ${#lists.isEmpty(availableActive)}">
                         <th:block th:each="course : ${availableActive}">
                             <th:block
                                 layout:replace="course/block :: course(${course.id}, ${course.code},
@@ -144,10 +149,10 @@
                         </th:block>
                     </div>
 
-                    <h2 th:if="!${#lists.isEmpty(availableFinished)}" style="margin: 0.5rem 0">
+                    <h2 th:if="not ${#lists.isEmpty(availableFinished)}" class="group_header">
                         Finished courses
                     </h2>
-                    <div class="blocks" th:if="!${#lists.isEmpty(availableFinished)}">
+                    <div class="blocks" th:if="not ${#lists.isEmpty(availableFinished)}">
                         <th:block th:each="course : ${availableFinished}">
                             <th:block
                                 layout:replace="course/block :: course(${course.id}, ${course.code},
