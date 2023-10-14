@@ -84,8 +84,6 @@ public class HomeController {
 	@Transactional
 	@GetMapping("/")
 	public String getHomePage(@AuthenticatedPerson(required = false) Person person, Model model) {
-		// TODO refactor this method and split it into smaller sub-methods
-
 		// Get all available editions
 		List<EditionDetailsDTO> editions = editionApi.getAllEditions().collectList().block();
 
@@ -95,14 +93,7 @@ public class HomeController {
 				.filter(SCEdition::isVisible).map(SCEdition::getId).collect(Collectors.toSet());
 
 		// Get ids of editions for which the user is a teacher
-		Set<Long> teacherIds = person == null ? Set.of()
-				: roleApi
-						.getRolesById(
-								editions.stream().map(EditionDetailsDTO::getId).collect(Collectors.toSet()),
-								Set.of(person.getId()))
-						.collectList().block().stream()
-						.filter(r -> r.getType() == RoleDetailsDTO.TypeEnum.TEACHER)
-						.map(r -> r.getEdition().getId()).collect(Collectors.toSet());
+		Set<Long> teacherIds = getTeacherIds(person, editions);
 
 		// All visible courses or courses for which the user is teacher in an edition
 		List<CourseSummaryDTO> courses = editions.stream()
@@ -126,34 +117,43 @@ public class HomeController {
 		model.addAttribute("completedSkillsPerCourse", completedSkillsPerCourse);
 		model.addAttribute("isAnySkillCompleted", isAnySkillCompleted);
 
-		// Get courses which have an edition active at the current time
-		Set<Long> courseHasActiveEdition = new HashSet<>();
-		for (EditionDetailsDTO edition : editions) {
-			// Skip if the user is neither a teacher for this edition, nor it is visible
-			if (!visible.contains(edition.getId()) && !teacherIds.contains(edition.getId())) {
-				continue;
-			}
+		// Get courses for which the latest student edition/last edition is currently active
+		Set<Long> activeCourses = getActiveCourses(editions, visible, teacherIds);
 
-			// Check if edition is currently active, if so, add id to the Set
-			boolean afterStartIncl = edition.getStartDate().isBefore(LocalDateTime.now()) ||
-					edition.getStartDate().equals(LocalDateTime.now());
-			boolean beforeEndIncl = edition.getEndDate().isAfter(LocalDateTime.now()) ||
-					edition.getEndDate().equals(LocalDateTime.now());
-			if (afterStartIncl && beforeEndIncl) {
-				courseHasActiveEdition.add(edition.getCourse().getId());
-			}
+		// Get course groups and add them to the model
+		Map<String, List<CourseSummaryDTO>> courseGroups = getCourseGroups(person, courses, activeCourses,
+				completedTaskInCourse);
+		for (Map.Entry<String, List<CourseSummaryDTO>> group : courseGroups.entrySet()) {
+			model.addAttribute(group.getKey(), group.getValue());
 		}
 
-		// Group courses into own (> 0 skills completed), available (0 skills completed), and both of these into
-		// the courses which have a currently active edition/do not have one
-		// Also groups the courses managed by the user (courses which the user can see)
+		return "index";
+	}
+
+	/**
+	 * Group courses into own (> 0 skills completed), available (0 skills completed), and both of these into
+	 * the courses which have a currently active edition/do not have one Also groups the courses managed by
+	 * the user (courses which the user can see)
+	 *
+	 * @param  person                The logged-in person, if it exists, otherwise null.
+	 * @param  courses               The list of the course summaries to group.
+	 * @param  activeCourses         The ids of courses which should be considered as "active".
+	 * @param  completedTaskInCourse The ids of courses in which the user has completed at least one task in
+	 *                               the latest student edition/last edition.
+	 * @return                       A map of the model attribute strings, mapped to the list of the courses
+	 *                               corresponding to that group.
+	 */
+	public Map<String, List<CourseSummaryDTO>> getCourseGroups(Person person, List<CourseSummaryDTO> courses,
+			Set<Long> activeCourses,
+			Map<Long, Boolean> completedTaskInCourse) {
 		List<CourseSummaryDTO> availableActive = new ArrayList<>();
 		List<CourseSummaryDTO> availableFinished = new ArrayList<>();
 		List<CourseSummaryDTO> ownActive = new ArrayList<>();
 		List<CourseSummaryDTO> ownFinished = new ArrayList<>();
 		List<CourseSummaryDTO> managed = new ArrayList<>();
+
 		for (CourseSummaryDTO course : courses) {
-			boolean hasActiveEdition = courseHasActiveEdition.contains(course.getId());
+			boolean hasActiveEdition = activeCourses.contains(course.getId());
 			Boolean completedTask = completedTaskInCourse.get(course.getId());
 
 			if (person != null && authorisationService.canViewCourse(course.getId())) {
@@ -176,13 +176,69 @@ public class HomeController {
 				availableFinished.add(course);
 			}
 		}
-		model.addAttribute("availableActive", availableActive);
-		model.addAttribute("availableFinished", availableFinished);
-		model.addAttribute("ownActive", ownActive);
-		model.addAttribute("ownFinished", ownFinished);
-		model.addAttribute("managed", managed);
 
-		return "index";
+		Map<String, List<CourseSummaryDTO>> courseGroups = new HashMap<>();
+		courseGroups.put("availableActive", availableActive);
+		courseGroups.put("availableFinished", availableFinished);
+		courseGroups.put("ownActive", ownActive);
+		courseGroups.put("ownFinished", ownFinished);
+		courseGroups.put("managed", managed);
+
+		return courseGroups;
+	}
+
+	/**
+	 * Returns the ids of the editions in which the user is a teacher.
+	 *
+	 * @param  person   The logged-in person, if it exists, otherwise null.
+	 * @param  editions The editions.
+	 * @return          The ids of the editions in which the person is a teacher. Returns an empty set if the
+	 *                  user is not logged-in.
+	 */
+	public Set<Long> getTeacherIds(Person person, List<EditionDetailsDTO> editions) {
+		if (person == null) {
+			return Set.of();
+		}
+
+		return roleApi
+				.getRolesById(
+						editions.stream().map(EditionDetailsDTO::getId).collect(Collectors.toSet()),
+						Set.of(person.getId()))
+				.collectList().block().stream()
+				.filter(r -> r.getType() == RoleDetailsDTO.TypeEnum.TEACHER)
+				.map(r -> r.getEdition().getId()).collect(Collectors.toSet());
+	}
+
+	/**
+	 * Returns the ids of the courses in which either: 1. there is an active edition the user was a student in
+	 * 2. the user is not a student in any edition, and any of the editions is active
+	 *
+	 * @param  editions   The editions.
+	 * @param  visible    The ids of the visible editions.
+	 * @param  teacherIds The ids of the editions in which the user is a teacher.
+	 * @return            Ids of courses in which there is an active edition, following the above criteria.
+	 */
+	public Set<Long> getActiveCourses(List<EditionDetailsDTO> editions, Set<Long> visible,
+			Set<Long> teacherIds) {
+		// TODO change to take student editions into account
+		Set<Long> activeCourses = new HashSet<>();
+		for (EditionDetailsDTO edition : editions) {
+			// Skip if the user is neither a teacher for this edition, nor it is visible
+			if (!visible.contains(edition.getId()) && !teacherIds.contains(edition.getId())) {
+				continue;
+			}
+
+			// Check if edition is currently active, if so, add id to the Set
+			boolean afterStartIncl = edition.getStartDate().isBefore(LocalDateTime.now()) ||
+					edition.getStartDate().equals(LocalDateTime.now());
+			boolean beforeEndIncl = edition.getEndDate().isAfter(LocalDateTime.now()) ||
+					edition.getEndDate().equals(LocalDateTime.now());
+			if (afterStartIncl && beforeEndIncl) {
+				activeCourses.add(edition.getCourse().getId());
+			}
+		}
+
+		return activeCourses;
 	}
 
 	/**
