@@ -19,6 +19,7 @@ package nl.tudelft.skills.controller;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
@@ -118,7 +119,10 @@ public class HomeController {
 		model.addAttribute("isAnySkillCompleted", isAnySkillCompleted);
 
 		// Get courses for which the latest student edition/last edition is currently active
-		Set<Long> activeCourses = getActiveCourses(editions, visible, teacherIds);
+		Map<Long, EditionDetailsDTO> editionMap = editions.stream()
+				.collect(Collectors.toMap(EditionDetailsDTO::getId,
+						Function.identity()));
+		Set<Long> activeCourses = getActiveCourses(courses, editionMap, visible, teacherIds);
 
 		// Get course groups and add them to the model
 		Map<String, List<CourseSummaryDTO>> courseGroups = getCourseGroups(person, courses, activeCourses,
@@ -210,25 +214,31 @@ public class HomeController {
 	}
 
 	/**
-	 * Returns the ids of the courses in which either: 1. there is an active edition the user was a student in
-	 * 2. the user is not a student in any edition, and any of the editions is active
+	 * Returns the ids of the courses in which either: 1. if there is at least one student edition, the latest
+	 * edition the user was a student in, is active 2. the user is not a student in any edition, and the
+	 * latest edition is active
 	 *
-	 * @param  editions   The editions.
+	 * @param  courses    List of the course summaries.
+	 * @param  editions   Map of edition ids to the corresponding edition.
 	 * @param  visible    The ids of the visible editions.
 	 * @param  teacherIds The ids of the editions in which the user is a teacher.
 	 * @return            Ids of courses in which there is an active edition, following the above criteria.
 	 */
-	public Set<Long> getActiveCourses(List<EditionDetailsDTO> editions, Set<Long> visible,
-			Set<Long> teacherIds) {
-		// TODO change to take student editions into account
+	public Set<Long> getActiveCourses(List<CourseSummaryDTO> courses, Map<Long, EditionDetailsDTO> editions,
+			Set<Long> visible, Set<Long> teacherIds) {
 		Set<Long> activeCourses = new HashSet<>();
-		for (EditionDetailsDTO edition : editions) {
+
+		for (CourseSummaryDTO course : courses) {
+			// Get the id of either the latest student edition or the last edition, if no student edition exists
+			Long editionId = courseService.getLastStudentEditionForCourseOrLast(course.getId());
+
 			// Skip if the user is neither a teacher for this edition, nor it is visible
-			if (!visible.contains(edition.getId()) && !teacherIds.contains(edition.getId())) {
+			if (!visible.contains(editionId) && !teacherIds.contains(editionId)) {
 				continue;
 			}
 
 			// Check if edition is currently active, if so, add id to the Set
+			EditionDetailsDTO edition = editions.get(editionId);
 			boolean afterStartIncl = edition.getStartDate().isBefore(LocalDateTime.now()) ||
 					edition.getStartDate().equals(LocalDateTime.now());
 			boolean beforeEndIncl = edition.getEndDate().isAfter(LocalDateTime.now()) ||
@@ -288,7 +298,6 @@ public class HomeController {
 				List<Task> tasksDone = scperson.getTaskCompletions().stream().map(TaskCompletion::getTask)
 						.toList();
 
-				// TODO task completed regardless of active path, or should path be considered?
 				completedTask = tasksDone.stream()
 						.map((Task t) -> t.getSkill().getSubmodule().getModule().getEdition().getId())
 						.anyMatch((Long id) -> Objects.equals(id, editionId));
