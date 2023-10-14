@@ -69,16 +69,17 @@
 
             <div
                 id="own-courses"
+                th:if="${displayOwn} or ${displayAvailable}"
                 th:aria-hidden="${displayOwn} ? '' : 'true'"
                 th:style="${displayOwn} ? '' : 'display: none'">
                 <span
-                    th:if="not ${displayOwn} and ${displayAvailable} and ${@authorisationService.isAuthenticated()}">
+                    th:if="not ${displayOwn} and ${@authorisationService.isAuthenticated()}">
                     You are
                     <b>not active</b>
                     in any courses.
                 </span>
                 <span
-                    th:if="not ${displayOwn} and ${displayAvailable} and not ${@authorisationService.isAuthenticated()}">
+                    th:if="not ${displayOwn} and not ${@authorisationService.isAuthenticated()}">
                     <b>Log in</b>
                     to display courses in which you are active.
                 </span>
@@ -128,9 +129,10 @@
 
             <div
                 id="available-courses"
+                th:if="${displayOwn} or ${displayAvailable}"
                 th:aria-hidden="${displayOwn} ? 'true' : ''"
                 th:style="${displayOwn} ? 'display: none' : ''">
-                <span th:if="not ${displayAvailable} and ${displayOwn}">
+                <span th:if="not ${displayAvailable}">
                     There are
                     <b>no additional courses available</b>
                     in which you are not active.
