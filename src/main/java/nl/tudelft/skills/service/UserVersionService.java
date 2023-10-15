@@ -17,29 +17,41 @@
  */
 package nl.tudelft.skills.service;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.lib.security.user.Person;
+import nl.tudelft.skills.controller.UserVersionController;
 import nl.tudelft.skills.model.Release;
 import nl.tudelft.skills.model.UserVersion;
 import nl.tudelft.skills.repository.UserVersionRepository;
 import nl.tudelft.skills.security.AuthorisationService;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
-@AllArgsConstructor
 public class UserVersionService {
 	private final UserVersionRepository userVersionRepository;
-	private final AuthorisationService authorisationService;
-	private final WebClient webClient = WebClient.builder().baseUrl("https://gitlab.ewi.tudelft.nl/").build();
 
-	private BuildProperties buildProperties;
+	private final UserVersionController userVersionController;
+
+	private final AuthorisationService authorisationService;
+	private final GitLabClient gitLabClient;
+
+	private final BuildProperties buildProperties;
+
+	@Autowired
+	public UserVersionService(UserVersionRepository userVersionRepository,
+			UserVersionController userVersionController, AuthorisationService authorisationService,
+			GitLabClient gitLabClient, BuildProperties buildProperties) {
+		this.userVersionRepository = userVersionRepository;
+		this.userVersionController = userVersionController;
+		this.authorisationService = authorisationService;
+		this.gitLabClient = gitLabClient;
+		this.buildProperties = buildProperties;
+	}
 
 	public boolean isUpToDate() {
 		if (!authorisationService.isAuthenticated()) {
@@ -65,32 +77,33 @@ public class UserVersionService {
 
 		Optional<UserVersion> userVersion = userVersionRepository.findByPersonId(person.getId());
 
-		var entity = webClient.get()
-				.uri("api/v4/projects/7331/releases?include_html_description=true")
-				.retrieve()
-				.toEntity(Release[].class)
-				.block();
-		var releases = entity.getBody();
+		List<Release> releases = gitLabClient.getReleases();
 
 		if (releases == null)
 			return "";
 
 		if (userVersion.isPresent()) {
-			var userReleaseDate = Arrays.stream(releases)
+			var userReleaseDate = releases.stream()
 					.filter(r -> r.getName().equals(userVersion.get().getVersion()))
 					.map(Release::getReleased_at).findFirst();
-			List<Release> newReleases = Arrays.stream(releases)
-					.filter(r -> r.getReleased_at().after(userReleaseDate.get())).toList();
-			List<String> newReleasesDesc = newReleases.stream()
-					.map(x -> "<h2>" + x.getName() + "</h2>" + x.getDescription_html()).toList();
-			return String.join("<hr>", newReleasesDesc);
-		} else {
-			Optional<Release> latest = Arrays.stream(releases).findFirst();
-			if (latest.isPresent()) {
-				return "<h2>" + latest.get().getName() + "</h2>" + latest.get().getDescription_html();
+			if (userReleaseDate.isPresent()) {
+				List<Release> newReleases = releases.stream()
+						.filter(r -> r.getReleased_at().isAfter(userReleaseDate.get())).toList();
+				List<String> newReleasesDesc = newReleases.stream()
+						.map(x -> "<h2>" + x.getName() + "</h2>" + x.getDescription_html()).toList();
+				return String.join("<hr>", newReleasesDesc);
 			}
-
 		}
+		Optional<Release> latest = releases.stream().findFirst();
+		if (latest.isPresent()) {
+			if (latest.get().getName().equals(buildProperties.getVersion())) {
+				return "<h2>" + latest.get().getName() + "</h2>" + latest.get().getDescription_html();
+			} else {
+				userVersionController.versionUpdate(person);
+				return "";
+			}
+		}
+
 		return "";
 	}
 }

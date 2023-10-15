@@ -15,33 +15,26 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.model;
+package nl.tudelft.skills.service;
 
-import java.time.Instant;
+import java.util.Arrays;
+import java.util.List;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import nl.tudelft.skills.model.Release;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
-@Entity
-@Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class Release {
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	public long id;
+@Service
+public class GitLabClient {
+	private final WebClient webClient = WebClient.builder().baseUrl("https://gitlab.ewi.tudelft.nl/").build();
 
-	public String name;
-
-	public String description_html;
-
-	public Instant released_at;
+	public List<Release> getReleases() {
+		var entity = webClient.get()
+				.uri("api/v4/projects/7331/releases?include_html_description=true")
+				.retrieve()
+				.toEntity(Release[].class)
+				.block();
+		return Arrays.asList(entity.getBody());
+	}
 }
