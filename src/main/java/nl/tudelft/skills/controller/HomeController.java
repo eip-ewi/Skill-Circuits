@@ -244,7 +244,7 @@ public class HomeController {
 			boolean beforeEndIncl = edition.getEndDate().isAfter(LocalDateTime.now()) ||
 					edition.getEndDate().equals(LocalDateTime.now());
 			if (afterStartIncl && beforeEndIncl) {
-				activeCourses.add(edition.getCourse().getId());
+				activeCourses.add(course.getId());
 			}
 		}
 

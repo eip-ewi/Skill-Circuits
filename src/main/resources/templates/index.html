@@ -72,14 +72,12 @@
                 th:if="${displayOwn} or ${displayAvailable}"
                 th:aria-hidden="${displayOwn} ? '' : 'true'"
                 th:style="${displayOwn} ? '' : 'display: none'">
-                <span
-                    th:if="not ${displayOwn} and ${@authorisationService.isAuthenticated()}">
+                <span th:if="not ${displayOwn} and ${@authorisationService.isAuthenticated()}">
                     You are
                     <b>not active</b>
                     in any courses.
                 </span>
-                <span
-                    th:if="not ${displayOwn} and not ${@authorisationService.isAuthenticated()}">
+                <span th:if="not ${displayOwn} and not ${@authorisationService.isAuthenticated()}">
                     <b>Log in</b>
                     to display courses in which you are active.
                 </span>
