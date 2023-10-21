@@ -19,7 +19,6 @@ package nl.tudelft.skills.model;
 
 import java.time.Instant;
 
-import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
