@@ -73,13 +73,13 @@
                 th:aria-hidden="${displayOwn} ? '' : 'true'"
                 th:style="${displayOwn} ? '' : 'display: none'">
                 <span th:if="not ${displayOwn} and ${@authorisationService.isAuthenticated()}">
-                    You are
-                    <b>not active</b>
-                    in any courses.
+                    You have
+                    <b>not completed a task</b>
+                    in any course.
                 </span>
                 <span th:if="not ${displayOwn} and not ${@authorisationService.isAuthenticated()}">
                     <b>Log in</b>
-                    to display courses in which you are active.
+                    to display courses in which you have completed a task.
                 </span>
 
                 <div th:if="${displayOwn}">
@@ -132,8 +132,9 @@
                 th:style="${displayOwn} ? 'display: none' : ''">
                 <span th:if="not ${displayAvailable}">
                     There are
-                    <b>no additional courses available</b>
-                    in which you are not active.
+                    <!-- spotless:off -->
+                    <b>no additional courses available</b>.
+                    <!-- spotless:on -->
                 </span>
 
                 <div th:if="${displayAvailable}">
