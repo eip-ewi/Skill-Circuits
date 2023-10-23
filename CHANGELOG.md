@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 ## Changed
+- Split courses on homepage into categories and show finished/active courses (@ffiedrich)
 ## Fixed
 
 ## [2.2.3]
