@@ -95,7 +95,7 @@ public class HomeControllerTest extends ControllerTest {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	void getHomePage() {
+	void getHomePageExampleUserNull() {
 		// Exactly one edition which is currently active and visible, the user being null
 
 		SCEdition edition = db.getEditionRL();
@@ -118,6 +118,73 @@ public class HomeControllerTest extends ControllerTest {
 		}
 
 		assertThat((List<CourseSummaryDTO>) model.getAttribute("availableActive")).containsExactly(course);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	@WithUserDetails("username")
+	void getHomePageExampleLoggedIn() {
+		// One course is not active and has also not been worked in (course2), one course is active
+		// and has been worked in (course1), and one course is managed as teacher (course3)
+
+		SCEdition edition1 = db.getEditionRL();
+		edition1.setVisible(true);
+		editionRepository.saveAndFlush(edition1);
+		SCEdition edition2 = SCEdition.builder().id(db.getEditionRL().getId() + 1L).isVisible(true).build();
+		editionRepository.saveAndFlush(edition2);
+		SCEdition edition3 = SCEdition.builder().id(db.getEditionRL().getId() + 2L).isVisible(false).build();
+		editionRepository.saveAndFlush(edition3);
+
+		CourseSummaryDTO course1 = new CourseSummaryDTO().id(1L);
+		CourseSummaryDTO course2 = new CourseSummaryDTO().id(2L);
+		CourseSummaryDTO course3 = new CourseSummaryDTO().id(3L);
+
+		// Mock responses for editions and courses
+		LocalDateTime localDateTime = LocalDateTime.now();
+		Set<EditionDetailsDTO> editions = Set.of(
+				new EditionDetailsDTO().id(edition1.getId())
+						.startDate(localDateTime.minusYears(1)).endDate(localDateTime.plusYears(1))
+						.course(course1),
+				new EditionDetailsDTO().id(edition2.getId())
+						.startDate(localDateTime.minusYears(2)).endDate(localDateTime.minusYears(1))
+						.course(course2),
+				new EditionDetailsDTO().id(edition3.getId())
+						.startDate(localDateTime.minusYears(2)).endDate(localDateTime.plusYears(1))
+						.course(course3));
+		when(editionApi.getAllEditions()).thenReturn(Flux.fromIterable(editions));
+
+		when(courseService.getLastStudentEditionForCourseOrLast(1L)).thenReturn(edition1.getId());
+		when(courseService.getLastStudentEditionForCourseOrLast(2L)).thenReturn(edition2.getId());
+		when(courseService.getLastStudentEditionForCourseOrLast(3L)).thenReturn(edition3.getId());
+
+		when(courseApi.getCourseById(1L)).thenReturn(Mono.just(new CourseDetailsDTO()
+				.editions(List.of(new EditionSummaryDTO().id(edition1.getId())))));
+		when(courseApi.getCourseById(2L)).thenReturn(Mono.just(new CourseDetailsDTO()
+				.editions(List.of(new EditionSummaryDTO().id(edition2.getId())))));
+		when(courseApi.getCourseById(3L)).thenReturn(Mono.just(new CourseDetailsDTO()
+				.editions(List.of(new EditionSummaryDTO().id(edition3.getId())))));
+
+		// Mock roles of user
+		mockRoleForEdition(roleApi, "STUDENT", db.getEditionRL().getId());
+		mockRoleForEdition(roleApi, "STUDENT", db.getEditionRL().getId() + 1L);
+		mockRoleForEdition(roleApi, "TEACHER", db.getEditionRL().getId() + 2L);
+		Set<RoleDetailsDTO> roles = Set.of(
+				getRoleDetails(db.getEditionRL().getId(), RoleDetailsDTO.TypeEnum.STUDENT),
+				getRoleDetails(db.getEditionRL().getId() + 1L, RoleDetailsDTO.TypeEnum.STUDENT),
+				getRoleDetails(db.getEditionRL().getId() + 2L, RoleDetailsDTO.TypeEnum.TEACHER));
+		when(roleApi.getRolesById(eq(Set.of(db.getEditionRL().getId(), db.getEditionRL().getId() + 1L,
+				db.getEditionRL().getId() + 2L)), anySet())).thenReturn(Flux.fromIterable(roles));
+
+		Person person = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal()).getUser();
+		homeController.getHomePage(person, model);
+
+		assertThat((List<CourseSummaryDTO>) model.getAttribute("ownFinished")).isEmpty();
+		assertThat((List<CourseSummaryDTO>) model.getAttribute("availableActive")).isEmpty();
+		assertThat((List<CourseSummaryDTO>) model.getAttribute("ownActive")).containsExactly(course1);
+		assertThat((List<CourseSummaryDTO>) model.getAttribute("availableFinished"))
+				.containsExactly(course2);
+		assertThat((List<CourseSummaryDTO>) model.getAttribute("managed")).containsExactly(course3);
 	}
 
 	@Test
