@@ -90,8 +90,8 @@
                     <div class="blocks" th:if="not ${#lists.isEmpty(ownActive)}">
                         <th:block th:each="course : ${ownActive}">
                             <th:block
-                                layout:replace="course/block :: course(${course.id}, ${course.code},
-                                ${course.name}, true)" />
+                                layout:replace="~{course/block :: course(${course.id}, ${course.code},
+                                ${course.name}, true)}" />
                         </th:block>
                     </div>
 
@@ -101,8 +101,8 @@
                     <div class="blocks" th:if="not ${#lists.isEmpty(ownFinished)}">
                         <th:block th:each="course : ${ownFinished}">
                             <th:block
-                                layout:replace="course/block :: course(${course.id}, ${course.code},
-                                ${course.name}, true)" />
+                                layout:replace="~{course/block :: course(${course.id}, ${course.code},
+                                ${course.name}, true)}" />
                         </th:block>
                     </div>
 
@@ -145,8 +145,8 @@
                     <div class="blocks" th:if="not ${#lists.isEmpty(availableActive)}">
                         <th:block th:each="course : ${availableActive}">
                             <th:block
-                                layout:replace="course/block :: course(${course.id}, ${course.code},
-                                ${course.name}, false)" />
+                                layout:replace="~{course/block :: course(${course.id}, ${course.code},
+                                ${course.name}, false)}" />
                         </th:block>
                     </div>
 
@@ -156,8 +156,8 @@
                     <div class="blocks" th:if="not ${#lists.isEmpty(availableFinished)}">
                         <th:block th:each="course : ${availableFinished}">
                             <th:block
-                                layout:replace="course/block :: course(${course.id}, ${course.code},
-                                ${course.name}, false)" />
+                                layout:replace="~{course/block :: course(${course.id}, ${course.code},
+                                ${course.name}, false)}" />
                         </th:block>
                     </div>
                 </div>
