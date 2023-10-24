@@ -17,12 +17,16 @@
  */
 package nl.tudelft.skills.dto.view;
 
+import java.time.LocalDateTime;
+
 import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Data
 @Builder
@@ -48,5 +52,6 @@ public class ClickedLinkDTO {
 	private Long personId;
 
 	@NotNull
-	private String timestamp;
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	private LocalDateTime timestamp;
 }
