@@ -27,6 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.AriaRole;
+import com.microsoft.playwright.options.LoadState;
 
 public abstract class IntegrationTest {
 
@@ -75,6 +76,19 @@ public abstract class IntegrationTest {
 		if (!baseUrl.endsWith("/"))
 			baseUrl += "/";
 		page.navigate(baseUrl + path);
+		page.waitForLoadState(LoadState.DOMCONTENTLOADED);
+	}
+
+	/**
+	 * Clicks the given locator and waits for the page to load. This should be used if the click of a button
+	 * results in the redirection to another url. Otherwise, the page may not be loaded fully before the next
+	 * command.
+	 *
+	 * @param toClick The locator to click.
+	 */
+	protected void clickAndWaitForPageLoad(Locator toClick) {
+		toClick.click();
+		page.waitForLoadState(LoadState.DOMCONTENTLOADED);
 	}
 
 	/**
@@ -85,7 +99,7 @@ public abstract class IntegrationTest {
 	 * @param displayName The username displayed in the UI.
 	 */
 	protected void logInAs(String user, String password, String displayName) {
-		page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Login")).click();
+		clickAndWaitForPageLoad(page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Login")));
 		page.getByLabel("Username").fill(user);
 		page.getByLabel("Password").fill(password);
 		page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Log in")).click();
@@ -114,53 +128,35 @@ public abstract class IntegrationTest {
 	 * @param courseCode The code of the course.
 	 * @param edition    The name of the edition.
 	 */
-	private void navigateToEditionSetup(String courseCode, String edition) {
-		page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName(courseCode)).click();
-		// Wait until timeout or edition name is visible
+	protected void navigateToEditionSetup(String courseCode, String edition) {
+		clickAndWaitForPageLoad(
+				page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName(courseCode)));
+		// Click edition name
 		Locator editionLocator = page.getByRole(AriaRole.HEADING,
 				new Page.GetByRoleOptions().setName(edition));
-		editionLocator.waitFor();
-		editionLocator.click();
-		// Wait until timeout or setup button is visible
+		clickAndWaitForPageLoad(editionLocator);
+		// Click setup button
 		Locator setup = page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Setup"));
-		setup.waitFor();
 		setup.click();
+		// Wait until setup menu is visible
+		page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("Edition setup")).waitFor();
 	}
 
 	/**
-	 * Performs the actions to publish an edition. This method assumes that the correct page (homepage) is
-	 * open, and that the user is not logged in.
+	 * Performs the actions to toggle whether an edition is published or unpublished. This method assumes that
+	 * the correct page (homepage) is open, that the user is not logged in.
 	 *
-	 * @param courseCode The code of the course to publish an edition in.
-	 * @param edition    The name of the edition to publish.
+	 * @param courseCode The code of the course to (un)publish an edition in.
+	 * @param edition    The name of the edition to (un)publish.
 	 */
-	protected void publishEdition(String courseCode, String edition) {
+	protected void togglePublishUnpublish(String courseCode, String edition) {
 		logInAs("cseteacher1", "cseteacher1", "CSE Teacher 1");
 		navigateToEditionSetup(courseCode, edition);
-		// Wait until timeout or publish button is visible
+		// Wait until timeout or (un)publish button is visible
+		// Locator matches on both "Unpublish" and "Publish"
 		Locator publish = page.getByRole(AriaRole.BUTTON,
-				new Page.GetByRoleOptions().setName("Publish edition"));
-		publish.waitFor();
-		publish.click();
+				new Page.GetByRoleOptions().setName("publish edition"));
+		clickAndWaitForPageLoad(publish);
 		logOutAs("CSE Teacher 1");
 	}
-
-	/**
-	 * Performs the actions to un-publish an edition.This method assumes that the correct page (homepage) is
-	 * open, that the user is not logged in and that the edition was published previously.
-	 *
-	 * @param courseCode The code of the course to un-publish an edition in.
-	 * @param edition    The name of the edition to un-publish.
-	 */
-	protected void unpublishEdition(String courseCode, String edition) {
-		logInAs("cseteacher1", "cseteacher1", "CSE Teacher 1");
-		navigateToEditionSetup(courseCode, edition);
-		// Wait until timeout or un-publish button is visible
-		Locator publish = page.getByRole(AriaRole.BUTTON,
-				new Page.GetByRoleOptions().setName("Unpublish edition"));
-		publish.waitFor();
-		publish.click();
-		logOutAs("CSE Teacher 1");
-	}
-
 }

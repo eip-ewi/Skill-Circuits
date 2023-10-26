@@ -35,18 +35,18 @@ public class ExpandedSkillTest extends IntegrationTest {
 	@Test
 	void testOpenCloseSkillOverlay() {
 		navigateTo("");
-		publishEdition("CSE1100", "NOW");
+		togglePublishUnpublish("CSE1100", "NOW");
 		logInAs("csestudent1", "csestudent1", "CSE Student 1");
 
 		Locator course = page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("CSE1100"));
 		assertThat(course.isVisible()).isTrue();
-		course.click();
+		clickAndWaitForPageLoad(course);
 
 		Locator module = page.getByRole(AriaRole.HEADING,
 				new Page.GetByRoleOptions().setName("Proof Techniques"));
 		module.waitFor();
 		assertThat(module.isVisible()).isTrue();
-		module.click();
+		clickAndWaitForPageLoad(module);
 
 		Locator skillBox = page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("Implication")
 				.setExact(true));
@@ -70,21 +70,21 @@ public class ExpandedSkillTest extends IntegrationTest {
 
 		logOutAs("CSE Student 1");
 		navigateTo("");
-		unpublishEdition("CSE1100", "NOW");
+		togglePublishUnpublish("CSE1100", "NOW");
 	}
 
 	@Test
 	void testCompleteTask() {
 		navigateTo("");
-		publishEdition("CSE1100", "NOW");
+		togglePublishUnpublish("CSE1100", "NOW");
 		logInAs("csestudent1", "csestudent1", "CSE Student 1");
 
-		page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("CSE1100")).click();
+		clickAndWaitForPageLoad(
+				page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("CSE1100")));
 
 		Locator module = page.getByRole(AriaRole.HEADING,
 				new Page.GetByRoleOptions().setName("Proof Techniques"));
-		module.waitFor();
-		module.click();
+		clickAndWaitForPageLoad(module);
 
 		Locator skillBlock = page.locator(".block")
 				.filter(new Locator.FilterOptions().setHasText("Logic Basics Implication"));
@@ -138,7 +138,7 @@ public class ExpandedSkillTest extends IntegrationTest {
 
 		logOutAs("CSE Student 1");
 		navigateTo("");
-		unpublishEdition("CSE1100", "NOW");
+		togglePublishUnpublish("CSE1100", "NOW");
 	}
 
 }
