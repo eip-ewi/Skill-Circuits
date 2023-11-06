@@ -95,6 +95,13 @@
             const block = task.closest(".block");
             const blockId = block.attr("id").split("-")[1];
 
+            // Remove/add trash icon
+            if (completed) {
+                task.find("[name='removeFromPath']").addClass("hidden");
+            } else {
+                task.find("[name='removeFromPath']").removeClass("hidden");
+            }
+
             updateBlockState(blockId);
             [...block.data("children")].forEach(id => updateBlockState(id));
 
@@ -176,16 +183,15 @@
             if (!blockId.toString().match(/\d+/)) return; // Skip incorrect block ids
 
             const block = $(`#block-${blockId}`);
+            const left = block.find(".expanded-skill__content > :first-child");
 
             if (block.attr("data-external")) return;
 
             block.removeClass("completed active disabled");
 
             if (
-                (block.find(".item").length > 0 &&
-                    block.find(".item").not(".completed").length === 0) ||
-                (block.find(".item__icon").length > 0 &&
-                    block.find(".item__icon").not(".completed").length === 0)
+                left.find(".item").length > 0 &&
+                left.find(".item").not(".completed").length === 0
             ) {
                 block.addClass("completed");
             } else {

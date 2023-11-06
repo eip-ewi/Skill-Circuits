@@ -88,7 +88,9 @@
                 </div>
                 <button
                     th:if="${not canEdit}"
+                    name="removeFromPath"
                     class="circuit__button__symbol fa-solid fa-trash"
+                    th:classappend="${item.completed} ? 'hidden' : ''"
                     style="margin-left: auto"
                     title="Remove task from your path"
                     onclick="removeTaskFromEditedSkill(this)"></button>
