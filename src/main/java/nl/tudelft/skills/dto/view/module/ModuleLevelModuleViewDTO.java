@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import org.springframework.data.util.Pair;
+
 import lombok.*;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.CircuitView;
@@ -32,8 +34,6 @@ import nl.tudelft.skills.dto.view.checkpoint.CheckpointViewDTO;
 import nl.tudelft.skills.dto.view.edition.PathViewDTO;
 import nl.tudelft.skills.model.AbstractSkill;
 import nl.tudelft.skills.model.SCModule;
-
-import org.springframework.data.util.Pair;
 
 @Data
 @Builder

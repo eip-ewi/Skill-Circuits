@@ -5,6 +5,7 @@
 @import "infobox";
 @import "overlay";
 @import "components";
+@import "util";
 
 * {
     box-sizing: border-box;
@@ -29,8 +30,4 @@
 
 .main-section {
     flex-grow: 1;
-}
-
-.hidden {
-    display: none !important;
 }

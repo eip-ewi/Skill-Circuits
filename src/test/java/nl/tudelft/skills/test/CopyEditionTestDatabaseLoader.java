@@ -20,11 +20,11 @@ package nl.tudelft.skills.test;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-import nl.tudelft.skills.model.*;
-import nl.tudelft.skills.repository.*;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import nl.tudelft.skills.model.*;
+import nl.tudelft.skills.repository.*;
 
 @Service
 public class CopyEditionTestDatabaseLoader {

@@ -24,17 +24,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import nl.tudelft.labracore.api.CourseControllerApi;
-import nl.tudelft.labracore.api.EditionControllerApi;
-import nl.tudelft.labracore.api.RoleControllerApi;
-import nl.tudelft.labracore.api.dto.*;
-import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.model.*;
-import nl.tudelft.skills.repository.*;
-import nl.tudelft.skills.security.AuthorisationService;
-import nl.tudelft.skills.test.TestDatabaseLoader;
-import nl.tudelft.skills.test.TestUserDetailsService;
-
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +31,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
+import nl.tudelft.labracore.api.CourseControllerApi;
+import nl.tudelft.labracore.api.EditionControllerApi;
+import nl.tudelft.labracore.api.RoleControllerApi;
+import nl.tudelft.labracore.api.dto.*;
+import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.model.*;
+import nl.tudelft.skills.repository.*;
+import nl.tudelft.skills.repository.AbstractSkillRepository;
+import nl.tudelft.skills.repository.TaskCompletionRepository;
+import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.security.AuthorisationService;
+import nl.tudelft.skills.test.TestDatabaseLoader;
+import nl.tudelft.skills.test.TestUserDetailsService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -63,6 +66,8 @@ public class SkillServiceTest {
 	private final CourseControllerApi courseApi;
 	private final EditionControllerApi editionApi;
 
+	private final PersonRepository personRepository;
+
 	private TestDatabaseLoader db;
 	private final LocalDateTime localDateTime;
 
@@ -76,7 +81,8 @@ public class SkillServiceTest {
 			SkillRepository skillRepository, ModuleRepository moduleRepository,
 			ExternalSkillRepository externalSkillRepository, EditionRepository editionRepository,
 			AuthorisationService authorisationService, RoleControllerApi roleApi,
-			ClickedLinkService clickedLinkService, ClickedLinkRepository clickedLinkRepository) {
+			PersonRepository personRepository, ClickedLinkService clickedLinkService,
+			ClickedLinkRepository clickedLinkRepository) {
 		this.abstractSkillRepository = abstractSkillRepository;
 		this.taskCompletionRepository = taskCompletionRepository;
 		this.externalSkillRepository = externalSkillRepository;
@@ -86,6 +92,7 @@ public class SkillServiceTest {
 		this.skillRepository = skillRepository;
 		this.clickedLinkService = clickedLinkService;
 		this.clickedLinkRepository = clickedLinkRepository;
+		this.personRepository = personRepository;
 
 		// The service is not mocked to test the specifics of whether an edition is shown because it
 		// is visible, or because the person is at least a teacher in the edition
@@ -98,8 +105,8 @@ public class SkillServiceTest {
 		this.courseApi = courseApi;
 		this.editionApi = editionApi;
 
-		this.skillService = new SkillService(abstractSkillRepository, taskCompletionRepository, editionApi,
-				courseApi, skillRepository, editionRepository, authorisationService, clickedLinkService);
+		this.skillService = new SkillService(abstractSkillRepository, taskCompletionRepository, courseApi,
+				authorisationService, clickedLinkService, personRepository);
 	}
 
 	@Test

@@ -21,11 +21,11 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.repository.ClickedLinkRepository;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.repository.ClickedLinkRepository;
 
 @Service
 public class ClickedLinkService {

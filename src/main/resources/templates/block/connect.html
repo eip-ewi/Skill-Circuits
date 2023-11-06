@@ -191,7 +191,7 @@
         </script>
         <script th:if="${canEdit and level == 'module'}">
             function disconnect() {
-                let skill = $(`#${$(this).data("parent")}`);
+                let skill = $(`#${$(this).data("parents")}`);
                 let childId = parseInt($(this).data("child").split("-")[1]);
                 let children = skill.data("children").filter(id => id !== childId);
                 skill.data("children", children);

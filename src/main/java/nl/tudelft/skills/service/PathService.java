@@ -22,15 +22,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.patch.PathPatchDTO;
+import nl.tudelft.skills.dto.view.edition.PathViewDTO;
 import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.PathRepository;
 import nl.tudelft.skills.repository.TaskRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PathService {
@@ -78,4 +80,24 @@ public class PathService {
 		path.setTasks(newTasks);
 		pathRepository.save(path);
 	}
+
+	/**
+	 * Checks if a task is in a certain path.
+	 *
+	 * @param  taskId Id of the task.
+	 * @param  pathId Id of the path.
+	 * @return        True if task belongs to this path, false otherwise.
+	 */
+	public boolean isTaskInPath(Long taskId, Long pathId) {
+		return pathRepository.findByIdOrThrow(pathId).getTasks().stream()
+				.map(Task::getId)
+				.anyMatch(taskId::equals);
+	}
+
+	public PathViewDTO getPath(Long pathId) {
+		if (pathId == null)
+			return null;
+		return View.convert(pathRepository.getById(pathId), PathViewDTO.class);
+	}
+
 }

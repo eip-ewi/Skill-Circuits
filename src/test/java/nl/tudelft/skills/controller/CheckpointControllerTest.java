@@ -31,19 +31,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import nl.tudelft.labracore.api.RoleControllerApi;
-import nl.tudelft.labracore.api.dto.Id;
-import nl.tudelft.labracore.api.dto.PersonSummaryDTO;
-import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
-import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.model.Checkpoint;
-import nl.tudelft.skills.model.SCEdition;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.repository.CheckpointRepository;
-import nl.tudelft.skills.repository.EditionRepository;
-import nl.tudelft.skills.repository.SkillRepository;
-import nl.tudelft.skills.test.TestUserDetailsService;
-
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
@@ -59,6 +46,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
+import nl.tudelft.labracore.api.RoleControllerApi;
+import nl.tudelft.labracore.api.dto.Id;
+import nl.tudelft.labracore.api.dto.PersonSummaryDTO;
+import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
+import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.model.Checkpoint;
+import nl.tudelft.skills.model.SCEdition;
+import nl.tudelft.skills.model.Skill;
+import nl.tudelft.skills.repository.CheckpointRepository;
+import nl.tudelft.skills.repository.EditionRepository;
+import nl.tudelft.skills.repository.SkillRepository;
+import nl.tudelft.skills.test.TestUserDetailsService;
 import reactor.core.publisher.Flux;
 
 @Transactional
@@ -97,9 +96,9 @@ public class CheckpointControllerTest extends ControllerTest {
 
 		assertThat(skillRepository.findAll().stream()
 				.filter(skill -> skill.getCheckpoint().equals(checkpoint.get())))
-						.containsExactlyInAnyOrder(
-								db.getSkillImplication(),
-								db.getSkillNegation());
+				.containsExactlyInAnyOrder(
+						db.getSkillImplication(),
+						db.getSkillNegation());
 	}
 
 	@Test
@@ -410,7 +409,7 @@ public class CheckpointControllerTest extends ControllerTest {
 						db.getSkillVariables().getId(), db.getSkillProofOutline().getId(),
 						db.getSkillAssumption().getId()))
 				.stream().map(Skill::getCheckpoint))
-						.allSatisfy(cp -> assertThat(cp).isEqualTo(db.getCheckpointLectureTwo()));
+				.allSatisfy(cp -> assertThat(cp).isEqualTo(db.getCheckpointLectureTwo()));
 		assertThat(db.getSkillProofOutline().getCheckpoint())
 				.isEqualTo(db.getCheckpointLectureTwo());
 		// Checkpoint is deleted

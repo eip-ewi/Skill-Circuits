@@ -24,6 +24,11 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
 
+import org.springframework.data.util.Pair;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
+
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
@@ -33,6 +38,7 @@ import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSubmoduleViewDTO;
+import nl.tudelft.skills.dto.view.module.TaskViewDTO;
 import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.PathPreference;
 import nl.tudelft.skills.model.Task;
@@ -40,11 +46,6 @@ import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.PathRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.security.AuthorisationService;
-
-import org.springframework.data.util.Pair;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
 
 @Service
 public class ModuleService {
@@ -103,22 +104,14 @@ public class ModuleService {
 				: path.getTasks().stream().map(Task::getId).collect(Collectors.toSet());
 
 		if (path != null) {
-			// if path is selected (doesn't apply for no-path), show only skills & tasks on followed path
-			if (!(authorisationService.canViewThroughPath(module.getEdition().getId())
-					&& (studentMode == null || !studentMode))) {
-				// tasks not in path get removed
-				module.getSubmodules().stream().flatMap(s -> s.getSkills().stream()).forEach(
-						s -> s.setTasks(
-								s.getTasks().stream().filter(t -> taskIds.contains(t.getId())).toList()));
-			} else {
-				// tasks not in path get visibility property false
-				module.getSubmodules().stream().flatMap(s -> s.getSkills().stream()).forEach(
-						s -> s.setTasks(s.getTasks().stream().map(t -> {
-							t.setVisible(taskIds.contains(t.getId()));
-							return t;
-						}).toList()));
+			// if path is selected (doesn't apply for no-path), show only tasks on followed path
+			// tasks not in path get visibility property false
+			module.getSubmodules().stream().flatMap(s -> s.getSkills().stream()).forEach(
+					s -> s.setTasks(s.getTasks().stream().map(t -> {
+						t.setVisible(taskIds.contains(t.getId()));
+						return t;
+					}).toList()));
 
-			}
 		}
 
 		model.addAttribute("level", "module");
@@ -131,6 +124,11 @@ public class ModuleService {
 
 		model.addAttribute("selectedPathId", path != null ? path.getId() : null);
 		model.addAttribute("tasksInPathIds", taskIds);
+
+		model.addAttribute("tasksAdded", personRepository.getById(person.getId()).getTasksAdded().stream()
+				.map(at -> View.convert(at, TaskViewDTO.class)).toList());
+		model.addAttribute("skillsModified", personRepository.getById(person.getId()).getSkillsModified()
+				.stream().map(at -> View.convert(at, ModuleLevelSkillViewDTO.class)).toList());
 
 		EditionDetailsDTO edition = editionApi.getEditionById(module.getEdition().getId()).block();
 		CourseDetailsDTO course = courseApi.getCourseById(edition.getCourse().getId()).block();

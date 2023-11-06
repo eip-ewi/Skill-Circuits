@@ -17,10 +17,10 @@
  */
 package nl.tudelft.skills.repository;
 
-import nl.tudelft.skills.model.SCCourse;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+
+import nl.tudelft.skills.model.SCCourse;
 
 public interface CourseRepository extends JpaRepository<SCCourse, Long> {
 

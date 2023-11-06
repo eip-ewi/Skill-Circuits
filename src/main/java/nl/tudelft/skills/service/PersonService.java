@@ -19,13 +19,13 @@ package nl.tudelft.skills.service;
 
 import java.util.Optional;
 
-import nl.tudelft.skills.model.PathPreference;
-import nl.tudelft.skills.model.labracore.SCPerson;
-import nl.tudelft.skills.repository.labracore.PersonRepository;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import nl.tudelft.skills.model.PathPreference;
+import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 @Service
 public class PersonService {

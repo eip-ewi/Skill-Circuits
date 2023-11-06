@@ -103,6 +103,7 @@
             id="create-block-wrapper">
             <div layout:replace="~{block/view :: block}"></div>
         </div>
+
         <div layout:replace="~{block/edit :: form}"></div>
         <div layout:replace="~{block/delete :: overlay}"></div>
 
@@ -119,6 +120,8 @@
 
         <div layout:replace="~{item/edit :: script}"></div>
         <div layout:replace="~{item/delete :: script}"></div>
+
+        <div layout:replace="~{skill/expanded :: script}"></div>
 
         <script>
             function getRow(obj) {
