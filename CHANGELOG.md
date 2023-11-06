@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Added
 ## Changed
 ## Fixed
+- Fixed changing checkpoint name in setup for teachers (@bbakos)
 
 ## [2.2.3]
 

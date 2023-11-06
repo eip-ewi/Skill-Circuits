@@ -23,6 +23,7 @@ import java.util.Set;
 
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.CheckpointCreateDTO;
+import nl.tudelft.skills.dto.patch.CheckpointNamePatchDTO;
 import nl.tudelft.skills.dto.patch.CheckpointPatchDTO;
 import nl.tudelft.skills.dto.view.checkpoint.ChangeCheckpointDTO;
 import nl.tudelft.skills.dto.view.checkpoint.CheckpointViewDTO;
@@ -61,6 +62,15 @@ public class CheckpointController {
 	@PatchMapping
 	@PreAuthorize("@authorisationService.canEditCheckpoint(#patch.id)")
 	public ResponseEntity<Void> patchCheckpoint(CheckpointPatchDTO patch) {
+		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(patch.getId());
+		checkpointRepository.save(patch.apply(checkpoint));
+		return ResponseEntity.ok().build();
+	}
+
+	@Transactional
+	@PatchMapping("/name")
+	@PreAuthorize("@authorisationService.canEditCheckpoint(#patch.id)")
+	public ResponseEntity<Void> patchCheckpointName(CheckpointNamePatchDTO patch) {
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(patch.getId());
 		checkpointRepository.save(patch.apply(checkpoint));
 		return ResponseEntity.ok().build();

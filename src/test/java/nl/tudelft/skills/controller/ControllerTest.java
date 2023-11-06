@@ -78,12 +78,16 @@ public abstract class ControllerTest {
 	 * @param role    The role to return for the user.
 	 */
 	protected void mockRole(RoleControllerApi roleApi, String role) {
-		when(roleApi.getRolesById(anySet(), anySet()))
-				.thenReturn(Flux.just(new RoleDetailsDTO()
-						.id(new Id().editionId(db.getEditionRL().getId())
-								.personId(db.getPerson().getId()))
-						.person(new PersonSummaryDTO().id(db.getPerson().getId()).username("username"))
-						.type(RoleDetailsDTO.TypeEnum.valueOf(role))));
+		if (role == null || role.isBlank()) {
+			when(roleApi.getRolesById(anySet(), anySet())).thenReturn(Flux.empty());
+		} else {
+			when(roleApi.getRolesById(anySet(), anySet()))
+					.thenReturn(Flux.just(new RoleDetailsDTO()
+							.id(new Id().editionId(db.getEditionRL().getId())
+									.personId(db.getPerson().getId()))
+							.person(new PersonSummaryDTO().id(db.getPerson().getId()).username("username"))
+							.type(RoleDetailsDTO.TypeEnum.valueOf(role))));
+		}
 	}
 
 }

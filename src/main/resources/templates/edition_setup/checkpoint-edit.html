@@ -72,7 +72,7 @@
                 e.preventDefault();
                 $.ajax({
                     type: "PATCH",
-                    url: `/checkpoint`,
+                    url: `/checkpoint/name`,
                     data: $("#edit-checkpoint-form").serialize(),
                     success: () => {
                         $(`#checkpoint-${$("#edit-checkpoint-id").val()}-name`).text(
