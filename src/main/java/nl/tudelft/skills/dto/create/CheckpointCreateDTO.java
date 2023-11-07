@@ -24,12 +24,12 @@ import java.util.List;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import lombok.*;
 import nl.tudelft.librador.dto.create.Create;
 import nl.tudelft.skills.dto.id.SCEditionIdDTO;
 import nl.tudelft.skills.model.Checkpoint;
-
-import org.springframework.format.annotation.DateTimeFormat;
 
 @Data
 @Builder

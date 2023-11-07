@@ -19,6 +19,10 @@ package nl.tudelft.skills.config;
 
 import static org.modelmapper.convention.MatchingStrategies.STRICT;
 
+import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
 import nl.tudelft.librador.EnableLibrador;
 import nl.tudelft.librador.LibradorConfigAdapter;
 import nl.tudelft.librador.dto.id.IdMapperBuilder;
@@ -30,10 +34,6 @@ import nl.tudelft.skills.model.Checkpoint;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.model.Submodule;
-
-import org.modelmapper.ModelMapper;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @EnableLibrador

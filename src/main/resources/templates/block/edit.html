@@ -272,7 +272,7 @@
 
             return block
                 .children(".items")
-                .children(".item")
+                .find(".item")
                 .map((i, item) => serialiseItem($(item)))
                 .toArray();
         }

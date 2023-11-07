@@ -19,12 +19,6 @@ package nl.tudelft.skills.controller;
 
 import java.util.List;
 
-import nl.tudelft.labracore.api.CourseControllerApi;
-import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
-import nl.tudelft.skills.repository.CourseRepository;
-import nl.tudelft.skills.repository.EditionRepository;
-import nl.tudelft.skills.service.CourseService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -33,6 +27,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import nl.tudelft.labracore.api.CourseControllerApi;
+import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
+import nl.tudelft.skills.repository.CourseRepository;
+import nl.tudelft.skills.repository.EditionRepository;
+import nl.tudelft.skills.service.CourseService;
 
 @Controller
 @RequestMapping("course")

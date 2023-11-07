@@ -51,9 +51,11 @@ public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
 	@NotNull
 	private Integer column;
 	@NotNull
+	@EqualsAndHashCode.Exclude
 	private CheckpointViewDTO checkpoint;
 	@NotNull
 	@PostApply
+	@EqualsAndHashCode.Exclude
 	private List<TaskViewDTO> tasks;
 	@NotNull
 	private List<Long> parentIds;
@@ -63,6 +65,7 @@ public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
 	private List<Long> requiredTaskIds;
 	@NotNull
 	@Builder.Default
+	@EqualsAndHashCode.Exclude
 	private Boolean completedRequiredTasks = false;
 
 	@Override

@@ -20,13 +20,13 @@ package nl.tudelft.skills.cache;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import nl.tudelft.labracore.api.RoleControllerApi;
-import nl.tudelft.labracore.api.dto.Id;
-import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
+
+import nl.tudelft.labracore.api.RoleControllerApi;
+import nl.tudelft.labracore.api.dto.Id;
+import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
 
 @Component
 @RequestScope

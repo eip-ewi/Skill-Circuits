@@ -22,14 +22,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 
-import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.repository.ClickedLinkRepository;
-import nl.tudelft.skills.test.TestDatabaseLoader;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+
+import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.repository.ClickedLinkRepository;
+import nl.tudelft.skills.test.TestDatabaseLoader;
 
 @Transactional
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)

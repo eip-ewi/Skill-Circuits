@@ -46,7 +46,7 @@ plugins {
     id("io.spring.dependency-management").version("1.0.11.RELEASE")
     id("com.github.ben-manes.versions").version("0.39.0")
 
-    id("com.diffplug.spotless").version("6.0.1")
+    id("com.diffplug.spotless").version("6.22.0")
 
     id("com.github.hierynomus.license").version("0.16.1")
 }
