@@ -76,7 +76,7 @@
             <ul
                 data-edit="always"
                 class="items"
-                th:style="${canEdit} ? '' : 'flex-direction: row-reverse; justify-content: flex-end;'">
+                th:style="${level != 'module' or canEdit} ? '' : 'flex-direction: row-reverse; justify-content: flex-end;'">
                 <th:block th:each="item, iter : ${block.items}">
                     <!-- Task view for teacher-->
                     <th:block th:if="${level == 'module' and canEdit}">
