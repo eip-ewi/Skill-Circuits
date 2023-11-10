@@ -42,7 +42,7 @@
                         th:unless="${modified}"
                         th:text="${@pathService.getPath(selectedPathId)?.name ?: 'No path'}"></span>
 
-                    <ul class="items" style="flex-direction: column">
+                    <ul class="items">
                         <th:block
                             th:each="item, iter : ${block.items}"
                             th:with="taskAdded = ${#sets.contains(tasksAdded.![id], item.id)}">
