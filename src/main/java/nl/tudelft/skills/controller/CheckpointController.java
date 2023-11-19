@@ -21,17 +21,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.create.CheckpointCreateDTO;
-import nl.tudelft.skills.dto.patch.CheckpointPatchDTO;
-import nl.tudelft.skills.dto.view.checkpoint.ChangeCheckpointDTO;
-import nl.tudelft.skills.dto.view.checkpoint.CheckpointViewDTO;
-import nl.tudelft.skills.model.Checkpoint;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.repository.CheckpointRepository;
-import nl.tudelft.skills.repository.SkillRepository;
-import nl.tudelft.skills.service.CheckpointService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +29,18 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.dto.create.CheckpointCreateDTO;
+import nl.tudelft.skills.dto.patch.CheckpointNamePatchDTO;
+import nl.tudelft.skills.dto.patch.CheckpointPatchDTO;
+import nl.tudelft.skills.dto.view.checkpoint.ChangeCheckpointDTO;
+import nl.tudelft.skills.dto.view.checkpoint.CheckpointViewDTO;
+import nl.tudelft.skills.model.Checkpoint;
+import nl.tudelft.skills.model.Skill;
+import nl.tudelft.skills.repository.CheckpointRepository;
+import nl.tudelft.skills.repository.SkillRepository;
+import nl.tudelft.skills.service.CheckpointService;
 
 @Controller
 @RequestMapping("checkpoint")
@@ -61,6 +62,15 @@ public class CheckpointController {
 	@PatchMapping
 	@PreAuthorize("@authorisationService.canEditCheckpoint(#patch.id)")
 	public ResponseEntity<Void> patchCheckpoint(CheckpointPatchDTO patch) {
+		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(patch.getId());
+		checkpointRepository.save(patch.apply(checkpoint));
+		return ResponseEntity.ok().build();
+	}
+
+	@Transactional
+	@PatchMapping("/name")
+	@PreAuthorize("@authorisationService.canEditCheckpoint(#patch.id)")
+	public ResponseEntity<Void> patchCheckpointName(CheckpointNamePatchDTO patch) {
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(patch.getId());
 		checkpointRepository.save(patch.apply(checkpoint));
 		return ResponseEntity.ok().build();

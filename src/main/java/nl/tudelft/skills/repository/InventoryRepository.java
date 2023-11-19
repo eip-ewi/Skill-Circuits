@@ -19,10 +19,10 @@ package nl.tudelft.skills.repository;
 
 import java.util.Optional;
 
-import nl.tudelft.skills.model.Inventory;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+
+import nl.tudelft.skills.model.Inventory;
 
 public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 

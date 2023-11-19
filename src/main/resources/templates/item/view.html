@@ -25,27 +25,34 @@
     <li
         data-edit="always"
         class="item"
-        th:id="|item-${item.id}|"
-        th:data-index="${iter.size - iter.count}"
-        th:data-index-initial="${iter.size - iter.count}"
+        th:with="id = ${path == null} ? |item-${item.id}| : |item-${item.id}-${path.id}|"
+        th:id="${id}"
+        th:data-item="${item.id}"
+        th:data-path-ids="${level == 'module'} ? ${item.pathIds} : ${null}"
+        th:data-index="${iter == null} ? 0 : ${iter.size - iter.count}"
+        th:data-index-initial="${iter == null} ? 0 : ${iter.size - iter.count}"
         th:classappend="${level == 'module'} ? ${item.completed ? 'completed' : ''} : ${''}"
         layout:fragment="item">
         <input th:if="${canEdit}" name="id" type="hidden" th:value="${item.id}" />
         <th:block layout:fragment="item-decoration"></th:block>
         <th:block layout:fragment="item-content-element">
             <th:block layout:fragment="item-content">
-                <div data-edit="always" th:id="|item-${item.id}-content|" class="item__content">
+                <div
+                    style="flex-grow: 1"
+                    data-edit="always"
+                    th:id="|${id}-content|"
+                    class="item__content">
                     <th:block layout:fragment="item-before-content"></th:block>
                     <th:block layout:fragment="item-name">
                         <span
-                            th:if="not ${canEdit} and ((${level == 'module'} and ${item.visible}) or ${level != 'module'})"
-                            th:id="|item-${item.id}-name|"
+                            th:if="not ${canEdit} and ((${level == 'module'}) or ${level != 'module'})"
+                            th:id="|${id}-name|"
                             class="item__name"
                             th:text="${item.name}"
                             th:data-black="true"></span>
                         <span
                             th:if="${canEdit}"
-                            th:id="|item-${item.id}-name|"
+                            th:id="|${id}-name|"
                             class="item__name"
                             th:text="${item.name}"
                             th:data-black="(${level == 'module'} and ${item.visible}) or ${level != 'module'}"></span>
@@ -59,11 +66,13 @@
                             placeholder="Name"
                             th:value="${item.name}" />
                     </th:block>
-                    <th:block layout:fragment="item-after-content"></th:block>
+                    <th:block layout:fragment="item-end-content"></th:block>
                 </div>
             </th:block>
         </th:block>
-        <div class="item__buttons" th:id="|item-${item.id}-buttons|" data-edit="only">
+        <th:block layout:fragment="item-after-content"></th:block>
+
+        <div class="item__buttons" th:id="|${id}-buttons|" data-edit="only">
             <th:block layout:fragment="item-buttons">
                 <th:block th:if="${canEdit}">
                     <button

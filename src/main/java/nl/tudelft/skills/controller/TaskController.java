@@ -17,16 +17,19 @@
  */
 package nl.tudelft.skills.controller;
 
-import nl.tudelft.skills.dto.view.EditLinkDTO;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.repository.TaskRepository;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.dto.view.EditLinkDTO;
+import nl.tudelft.skills.dto.view.module.TaskViewDTO;
+import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.repository.TaskRepository;
 
 @Controller
 @RequestMapping("task")
@@ -54,4 +57,35 @@ public class TaskController {
 
 		return ResponseEntity.ok().build();
 	}
+
+	/**
+	 * Returns a task view for a custom path.
+	 *
+	 * @param  taskId The id of the task.
+	 * @param  model  The model to configure.
+	 * @return        Html page with the task.
+	 */
+	@GetMapping("{taskId}")
+	public String getTask(@PathVariable Long taskId, Model model) {
+		Task task = taskRepository.findByIdOrThrow(taskId);
+		model.addAttribute("item", View.convert(task, TaskViewDTO.class));
+		model.addAttribute("canEdit", false);
+		return "task/view";
+	}
+
+	/**
+	 * Returns task view paths overview in a exploded skill.
+	 *
+	 * @param  taskId The id of the task.
+	 * @param  model  The model to configure.
+	 * @return        Html page with the task.
+	 */
+	@GetMapping("{taskId}/preview")
+	public String getTaskForCustomPath(@PathVariable Long taskId, Model model) {
+		Task task = taskRepository.findByIdOrThrow(taskId);
+		model.addAttribute("item", View.convert(task, TaskViewDTO.class));
+		model.addAttribute("canEdit", false);
+		return "task/inactiveview :: item";
+	}
+
 }

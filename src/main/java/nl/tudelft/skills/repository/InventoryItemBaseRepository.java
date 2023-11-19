@@ -17,11 +17,11 @@
  */
 package nl.tudelft.skills.repository;
 
-import nl.tudelft.skills.model.InventoryItem;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+
+import nl.tudelft.skills.model.InventoryItem;
 
 @NoRepositoryBean
 public interface InventoryItemBaseRepository<T extends InventoryItem> extends JpaRepository<T, Long> {

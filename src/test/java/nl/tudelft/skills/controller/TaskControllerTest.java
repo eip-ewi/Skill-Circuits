@@ -22,12 +22,6 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import nl.tudelft.labracore.api.RoleControllerApi;
-import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.dto.view.EditLinkDTO;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.repository.TaskRepository;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -39,11 +33,19 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import nl.tudelft.labracore.api.RoleControllerApi;
+import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.dto.view.EditLinkDTO;
+import nl.tudelft.skills.dto.view.module.TaskViewDTO;
+import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.repository.TaskRepository;
+
 @Transactional
 @AutoConfigureMockMvc
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
 public class TaskControllerTest extends ControllerTest {
 
+	private final TaskController taskController;
 	private final TaskRepository taskRepository;
 	private final RoleControllerApi roleApi;
 
@@ -51,6 +53,7 @@ public class TaskControllerTest extends ControllerTest {
 	public TaskControllerTest(TaskRepository taskRepository, RoleControllerApi roleApi) {
 		this.taskRepository = taskRepository;
 		this.roleApi = roleApi;
+		this.taskController = new TaskController(taskRepository);
 	}
 
 	private String createBody() throws JsonProcessingException {
@@ -105,4 +108,21 @@ public class TaskControllerTest extends ControllerTest {
 				.andExpect(status().isForbidden());
 	}
 
+	@Test
+	void getTask() {
+		taskController.getTask(db.getTaskRead12().getId(), model);
+		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
+
+		assertThat(((TaskViewDTO) model.getAttribute("item")).getPathIds())
+				.containsExactly(db.getPathFinderPath().getId());
+	}
+
+	@Test
+	void getTaskForCustomPath() {
+		taskController.getTaskForCustomPath(db.getTaskRead12().getId(), model);
+		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
+
+		assertThat(((TaskViewDTO) model.getAttribute("item")).getPathIds())
+				.containsExactly(db.getPathFinderPath().getId());
+	}
 }

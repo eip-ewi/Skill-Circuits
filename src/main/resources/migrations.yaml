@@ -150,9 +150,9 @@ databaseChangeLog:
       id: 1661766741710-migrate-skill-positions
       author: Ruben Backx
       changes:
-      - sql:
-          comment: Migrate skill positions
-          sql: INSERT INTO abstract_skill (id, x_pos, y_pos) SELECT id, x_pos, y_pos FROM skill;
+        - sql:
+            comment: Migrate skill positions
+            sql: INSERT INTO abstract_skill (id, x_pos, y_pos) SELECT id, x_pos, y_pos FROM skill;
   - changeSet:
       id: 1661766741710-2
       author: ruben (generated)
@@ -178,9 +178,9 @@ databaseChangeLog:
       id: 1661764054983-migrate-skill-parents
       author: Ruben Backx
       changes:
-      - sql:
-          comment: Migrate skill parents
-          sql: INSERT INTO abstract_skill_parents SELECT * FROM skill_parents;
+        - sql:
+            comment: Migrate skill parents
+            sql: INSERT INTO abstract_skill_parents SELECT * FROM skill_parents;
   - changeSet:
       id: 1661766741710-6
       author: ruben (generated)
@@ -709,18 +709,18 @@ databaseChangeLog:
             referencedColumnNames: id
             referencedTableName: scperson
             validate: true
-#  - changeSet:
-#      id: 1682666888978-create-task-completion-id-sequence
-#      author: Fanni Fiedrich
-#      changes:
-#        - createSequence:
-#            cycle: false
-#            incrementBy: 1
-#            minValue: 1
-#            maxValue: 9223372036854775807
-#            ordered: true
-#            sequenceName: completion_seq
-#            startValue: 1
+  #  - changeSet:
+  #      id: 1682666888978-create-task-completion-id-sequence
+  #      author: Fanni Fiedrich
+  #      changes:
+  #        - createSequence:
+  #            cycle: false
+  #            incrementBy: 1
+  #            minValue: 1
+  #            maxValue: 9223372036854775807
+  #            ordered: true
+  #            sequenceName: completion_seq
+  #            startValue: 1
   - changeSet:
       id: task-completion-auto-increment-mysql
       author: Ruben Backx
@@ -764,7 +764,7 @@ databaseChangeLog:
       changes:
         - dropTable:
             tableName: scperson_tasks_completed
-# Skills can remember the skill in previous edition
+  # Skills can remember the skill in previous edition
   - changeSet:
       id: 1683394188548-1
       author: fanni (generated)
@@ -800,7 +800,7 @@ databaseChangeLog:
             referencedColumnNames: id
             referencedTableName: skill
             validate: true
-# Create table for logging clicked links
+  # Create table for logging clicked links
   - changeSet:
       id: 1691506242366-1
       author: bakos (generated)
@@ -873,6 +873,150 @@ databaseChangeLog:
             baseColumnNames: person_id
             baseTableName: clicked_link
             constraintName: FKpkdufyxedswqtr9wxbvxs4g09
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: scperson
+            validate: true
+
+  # Customise tasks in skill
+  - changeSet:
+      id: 1684509725437-1
+      author: mars (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_21
+                  name: person_modified_skill_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_21
+                  name: skills_modified_id
+                  type: BIGINT
+            tableName: scperson_skills_modified
+  - changeSet:
+      id: 1684509725437-2
+      author: mars (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_F8
+                  name: persons_that_added_task_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_F8
+                  name: tasks_added_id
+                  type: BIGINT
+            tableName: scperson_tasks_added
+  - changeSet:
+      id: 1684509725437-3
+      author: mars (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: skills_modified_id
+            indexName: FKeoxxf3njxk8axo1mjbfu3m7hp_INDEX_2
+            tableName: scperson_skills_modified
+  - changeSet:
+      id: 1684509725437-4
+      author: mars (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: persons_that_added_task_id
+            indexName: FKn444l2wfkopnym2dgvimw9ojo_INDEX_F
+            tableName: scperson_tasks_added
+  - changeSet:
+      id: 1684509725437-5
+      author: mars (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: tasks_added_id
+            indexName: FKrtd50gfy2hcf3h69oobl6klh3_INDEX_F
+            tableName: scperson_tasks_added
+  - changeSet:
+      id: 1684509725437-6
+      author: mars (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: person_modified_skill_id
+            indexName: FKsullxuw6a27c690fnuopkhape_INDEX_2
+            tableName: scperson_skills_modified
+  - changeSet:
+      id: 1684509725437-7
+      author: mars (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: skills_modified_id
+            baseTableName: scperson_skills_modified
+            constraintName: FKeoxxf3njxk8axo1mjbfu3m7hp
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: skill
+            validate: true
+  - changeSet:
+      id: 1684509725437-8
+      author: mars (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: persons_that_added_task_id
+            baseTableName: scperson_tasks_added
+            constraintName: FKn444l2wfkopnym2dgvimw9ojo
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: scperson
+            validate: true
+  - changeSet:
+      id: 1684509725437-9
+      author: mars (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: tasks_added_id
+            baseTableName: scperson_tasks_added
+            constraintName: FKrtd50gfy2hcf3h69oobl6klh3
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: task
+            validate: true
+  - changeSet:
+      id: 1684509725437-10
+      author: mars (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: person_modified_skill_id
+            baseTableName: scperson_skills_modified
+            constraintName: FKsullxuw6a27c690fnuopkhape
             deferrable: false
             initiallyDeferred: false
             onDelete: RESTRICT

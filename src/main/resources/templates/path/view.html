@@ -1,0 +1,59 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <th:block layout:fragment="path">
+        <div th:data-id="${path.id}" aria-expanded="false" class="path-toggle">
+            <button class="path-toggle__control">
+                <span th:text="${path.name}"></span>
+                <span class="fa-solid fa-chevron-down"></span>
+            </button>
+
+            <ul class="path-toggle__content">
+                <th:block
+                    th:each="item, iter : ${block.items}"
+                    th:with="taskAdded = ${#sets.contains(tasksAdded.![id], item.id)}">
+                    <th:block
+                        th:if="${@pathService.isTaskInPath(item.id, path.id) and not ((item.visible and not modified) or (modified and taskAdded))}">
+                        <li layout:replace="~{task/inactiveview :: item}"></li>
+                    </th:block>
+                </th:block>
+                <li class="hide-with-siblings">This skill has no extra tasks in this path</li>
+            </ul>
+        </div>
+    </th:block>
+
+    <script layout:fragment="script">
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".path-toggle__control").forEach(ctrl =>
+                ctrl.addEventListener("click", function () {
+                    const toggle = ctrl.closest(".path-toggle");
+                    toggle.setAttribute(
+                        "aria-expanded",
+                        toggle.getAttribute("aria-expanded") !== "true"
+                    );
+                })
+            );
+        });
+    </script>
+</html>
