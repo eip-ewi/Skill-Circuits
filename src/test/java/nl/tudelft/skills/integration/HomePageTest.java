@@ -39,13 +39,13 @@ public class HomePageTest extends IntegrationTest {
 		assertThat(page.title()).isEqualTo("Login");
 
 		// Login as teacher
-		page.getByLabel("Username").fill("cseteacher1");
-		page.getByLabel("Password").fill("cseteacher1");
+		page.getByLabel("Username").fill(teacherUserInfo.userName());
+		page.getByLabel("Password").fill(teacherUserInfo.password());
 		clickAndWaitForPageLoad(
 				page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Log in")));
 
 		// Wait until timeout or user dropdown is visible
-		Locator userDropdown = page.getByText("CSE Teacher 1");
+		Locator userDropdown = page.getByText(teacherUserInfo.displayName());
 		userDropdown.waitFor();
 		assertThat(userDropdown.isVisible()).isTrue();
 
@@ -85,8 +85,8 @@ public class HomePageTest extends IntegrationTest {
 		navigateTo("");
 
 		// To check if the edition is currently published, log in as teacher
-		logInAs("cseteacher1", "cseteacher1", "CSE Teacher 1");
-		navigateToEditionSetup("CSE1100", "NOW");
+		logInAs(teacherUserInfo);
+		navigateToEditionSetup(oopCourse.code(), getActiveEdition(oopCourse).name());
 
 		// The name is case-insensitive, so this matches on both "Unpublish edition" and "Publish edition"
 		Locator publishBtn = page.getByRole(AriaRole.BUTTON,
@@ -97,21 +97,22 @@ public class HomePageTest extends IntegrationTest {
 		page.locator("#close-edition-setup-sidebar").click();
 
 		// Log out to check visibility corresponding to whether the edition is published/unpublished
-		logOutAs("CSE Teacher 1");
+		logOutAs(teacherUserInfo);
 
 		// If it is currently published, unpublish it and publish it again, and vice versa
-		Locator course = page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("CSE1100"));
+		Locator course = page.getByRole(AriaRole.HEADING,
+				new Page.GetByRoleOptions().setName(oopCourse.code()));
 		if (published) {
 			assertEditionVisible(course);
-			togglePublishUnpublish("CSE1100", "NOW");
+			togglePublishUnpublish(oopCourse.code(), getActiveEdition(oopCourse).name());
 			assertEditionInvisible(course);
-			togglePublishUnpublish("CSE1100", "NOW");
+			togglePublishUnpublish(oopCourse.code(), getActiveEdition(oopCourse).name());
 			assertEditionVisible(course);
 		} else {
 			assertEditionInvisible(course);
-			togglePublishUnpublish("CSE1100", "NOW");
+			togglePublishUnpublish(oopCourse.code(), getActiveEdition(oopCourse).name());
 			assertEditionVisible(course);
-			togglePublishUnpublish("CSE1100", "NOW");
+			togglePublishUnpublish(oopCourse.code(), getActiveEdition(oopCourse).name());
 			assertEditionInvisible(course);
 		}
 	}
@@ -131,14 +132,14 @@ public class HomePageTest extends IntegrationTest {
 		//  considered). So, the state of the editions needs to be the following: 19/20 not published, NOW published
 
 		// Assert that the edition is visible when logged in as student
-		logInAs("csestudent1", "csestudent1", "CSE Student 1");
+		logInAs(studentUserInfo);
 		assertThat(course.isVisible()).isTrue();
 		clickAndWaitForPageLoad(course);
 		Locator editionHeader = page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions()
-				.setName("Object-Oriented Programming - NOW"));
+				.setName(oopCourse.name() + " - " + getActiveEdition(oopCourse).name()));
 		editionHeader.waitFor();
 		assertThat(editionHeader.isVisible()).isTrue();
-		logOutAs("CSE Student 1");
+		logOutAs(studentUserInfo);
 	}
 
 	/**
@@ -150,9 +151,9 @@ public class HomePageTest extends IntegrationTest {
 	protected void assertEditionInvisible(Locator course) {
 		assertThat(course.isVisible()).isFalse();
 
-		logInAs("csestudent1", "csestudent1", "CSE Student 1");
+		logInAs(studentUserInfo);
 		assertThat(course.isVisible()).isFalse();
-		logOutAs("CSE Student 1");
+		logOutAs(studentUserInfo);
 	}
 
 }

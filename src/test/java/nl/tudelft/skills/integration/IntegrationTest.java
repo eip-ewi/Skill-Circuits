@@ -19,6 +19,7 @@ package nl.tudelft.skills.integration;
 
 import java.io.IOException;
 import java.util.Properties;
+import java.util.Set;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -37,6 +38,24 @@ public abstract class IntegrationTest {
 
 	protected BrowserContext context;
 	protected Page page;
+
+	protected record UserInfo(String userName, String password, String displayName) {
+	}
+
+	protected record EditionInfo(String name, boolean active) {
+	}
+
+	protected record CourseInfo(String name, String code, Set<EditionInfo> editions) {
+	}
+
+	protected UserInfo teacherUserInfo = new UserInfo("cseteacher1", "cseteacher1",
+			"CSE Teacher 1");
+	protected UserInfo studentUserInfo = new UserInfo("csestudent1", "csestudent1",
+			"CSE Student 1");
+	protected CourseInfo oopCourse = new CourseInfo("Object-Oriented Programming", "CSE1100", Set.of(
+			new EditionInfo("NOW", true), new EditionInfo("19/20", false)));
+	protected CourseInfo adsCourse = new CourseInfo("Algorithms & Datastructures", "CSE1305", Set.of(
+			new EditionInfo("NOW", true), new EditionInfo("19/20", false)));
 
 	@BeforeAll
 	static void launchBrowser() {
@@ -92,29 +111,38 @@ public abstract class IntegrationTest {
 	}
 
 	/**
+	 * Gets an active edition for the given course. Usually, there should be exactly one active edition. This
+	 * method assumes that there is at least one.
+	 *
+	 * @param  courseInfo The course information.
+	 * @return            An active edition for the given course.
+	 */
+	protected EditionInfo getActiveEdition(CourseInfo courseInfo) {
+		return courseInfo.editions().stream().filter(EditionInfo::active).findFirst().get();
+	}
+
+	/**
 	 * Log in with a specific username and password.
 	 *
-	 * @param user        The username for logging in.
-	 * @param password    The password.
-	 * @param displayName The username displayed in the UI.
+	 * @param user The user information.
 	 */
-	protected void logInAs(String user, String password, String displayName) {
+	protected void logInAs(UserInfo user) {
 		clickAndWaitForPageLoad(page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Login")));
-		page.getByLabel("Username").fill(user);
-		page.getByLabel("Password").fill(password);
+		page.getByLabel("Username").fill(user.userName());
+		page.getByLabel("Password").fill(user.password());
 		page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Log in")).click();
 
 		// Wait until timeout or user dropdown is visible
-		page.getByText(displayName).waitFor();
+		page.getByText(user.displayName()).waitFor();
 	}
 
 	/**
 	 * Log out. The username is needed to open the log-out menu.
 	 *
-	 * @param displayName The username displayed in the UI.
+	 * @param user The user information.
 	 */
-	protected void logOutAs(String displayName) {
-		page.getByText(displayName).click();
+	protected void logOutAs(UserInfo user) {
+		page.getByText(user.displayName()).click();
 		page.getByText("Logout").click();
 
 		// Wait until timeout or log in is visible
@@ -150,13 +178,13 @@ public abstract class IntegrationTest {
 	 * @param edition    The name of the edition to (un)publish.
 	 */
 	protected void togglePublishUnpublish(String courseCode, String edition) {
-		logInAs("cseteacher1", "cseteacher1", "CSE Teacher 1");
+		logInAs(teacherUserInfo);
 		navigateToEditionSetup(courseCode, edition);
 		// Wait until timeout or (un)publish button is visible
 		// Locator matches on both "Unpublish" and "Publish"
 		Locator publish = page.getByRole(AriaRole.BUTTON,
 				new Page.GetByRoleOptions().setName("publish edition"));
 		clickAndWaitForPageLoad(publish);
-		logOutAs("CSE Teacher 1");
+		logOutAs(teacherUserInfo);
 	}
 }
