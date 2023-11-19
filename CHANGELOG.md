@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Added
 ## Changed
 ## Fixed
+- Fixed changing checkpoint name in setup for teachers (@bbakos)
 
 ## [2.2.3]
 
@@ -23,7 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Paths can now be customised per user. (@mcoman)
 
 ### Changed
->>>>>>> 05cc578 (Finalise expanded skills)
 
 ### Fixed
 - Copy edition confirmation pop up shows the correct edition. (@ffiedrich)

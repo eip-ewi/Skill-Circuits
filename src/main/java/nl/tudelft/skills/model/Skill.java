@@ -23,12 +23,12 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
+
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import nl.tudelft.skills.model.labracore.SCPerson;
-
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
 
 @Data
 @Entity

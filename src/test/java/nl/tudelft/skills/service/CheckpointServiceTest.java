@@ -19,14 +19,14 @@ package nl.tudelft.skills.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.repository.CheckpointRepository;
-import nl.tudelft.skills.test.TestDatabaseLoader;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+
+import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.repository.CheckpointRepository;
+import nl.tudelft.skills.test.TestDatabaseLoader;
 
 @Transactional
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
@@ -45,14 +45,14 @@ public class CheckpointServiceTest {
 	public void findNextCheckpoint() {
 		assertThat(checkpointService
 				.findNextCheckpoint(db.getCheckpointLectureOne()))
-						.hasValue(db.getCheckpointLectureTwo());
+				.hasValue(db.getCheckpointLectureTwo());
 	}
 
 	@Test
 	public void findNextCheckpointLast() {
 		assertThat(checkpointService
 				.findNextCheckpoint(db.getCheckpointLectureTwo()))
-						.isEmpty();
+				.isEmpty();
 	}
 
 }

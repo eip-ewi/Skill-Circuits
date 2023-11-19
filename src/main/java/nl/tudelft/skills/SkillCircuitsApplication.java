@@ -17,12 +17,12 @@
  */
 package nl.tudelft.skills;
 
-import nl.tudelft.labracore.lib.LabracoreApiConfig;
-import nl.tudelft.librador.EnableLibrador;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
+
+import nl.tudelft.labracore.lib.LabracoreApiConfig;
+import nl.tudelft.librador.EnableLibrador;
 
 @EnableLibrador
 @Import(LabracoreApiConfig.class)

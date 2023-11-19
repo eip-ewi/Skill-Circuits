@@ -19,14 +19,14 @@ package nl.tudelft.skills.smoke;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import nl.tudelft.skills.DevSkillCircuitsApplication;
-
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
+
+import nl.tudelft.skills.DevSkillCircuitsApplication;
 
 @Nested
 @SpringBootTest(classes = DevSkillCircuitsApplication.class)

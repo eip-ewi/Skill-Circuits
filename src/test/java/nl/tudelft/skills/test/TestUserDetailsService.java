@@ -17,15 +17,15 @@
  */
 package nl.tudelft.skills.test;
 
-import nl.tudelft.labracore.lib.security.LabradorUserDetails;
-import nl.tudelft.labracore.lib.security.user.DefaultRole;
-import nl.tudelft.labracore.lib.security.user.Person;
-
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import nl.tudelft.labracore.lib.security.LabradorUserDetails;
+import nl.tudelft.labracore.lib.security.user.DefaultRole;
+import nl.tudelft.labracore.lib.security.user.Person;
 
 @Primary
 @Service

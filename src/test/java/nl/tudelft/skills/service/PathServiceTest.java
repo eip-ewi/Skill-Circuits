@@ -21,15 +21,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
-import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.dto.patch.PathPatchDTO;
-import nl.tudelft.skills.model.Path;
-import nl.tudelft.skills.test.TestDatabaseLoader;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+
+import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.dto.patch.PathPatchDTO;
+import nl.tudelft.skills.model.Path;
+import nl.tudelft.skills.test.TestDatabaseLoader;
 
 @Transactional
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)

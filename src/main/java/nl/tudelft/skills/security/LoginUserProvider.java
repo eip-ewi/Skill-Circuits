@@ -19,10 +19,10 @@ package nl.tudelft.skills.security;
 
 import static nl.tudelft.labracore.lib.security.user.DefaultRole.*;
 
-import nl.tudelft.labracore.lib.security.memory.InMemoryUserProvider;
-
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+
+import nl.tudelft.labracore.lib.security.memory.InMemoryUserProvider;
 
 /**
  * Provider for in-memory user information.

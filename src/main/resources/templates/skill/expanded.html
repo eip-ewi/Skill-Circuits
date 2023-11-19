@@ -83,13 +83,18 @@
                     block.addEventListener("click", function (event) {
                         if (!event.target.closest(".expanded-skill")) {
                             toggleOverlay(`${block.id}-expanded-overlay`);
+                            history.pushState(
+                                "",
+                                document.title,
+                                window.location.pathname + window.location.search
+                            );
                         }
                     })
                 );
 
                 // Open skill overlay if url has location information
                 let openBlock = window.location.hash;
-                if (openBlock !== "") {
+                if (openBlock !== "" && /^#block-[0-9]+$/.test(openBlock)) {
                     toggleOverlay(`${openBlock.substring(1)}-expanded-overlay`);
                 }
             });

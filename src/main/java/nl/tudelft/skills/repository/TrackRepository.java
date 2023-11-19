@@ -17,10 +17,10 @@
  */
 package nl.tudelft.skills.repository;
 
-import nl.tudelft.skills.model.Track;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+
+import nl.tudelft.skills.model.Track;
 
 public interface TrackRepository extends JpaRepository<Track, Long> {
 

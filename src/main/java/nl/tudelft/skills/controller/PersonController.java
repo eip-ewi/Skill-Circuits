@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 
+import org.springframework.web.bind.annotation.*;
+
 import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
@@ -40,8 +42,6 @@ import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.TaskCompletionService;
-
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/person")

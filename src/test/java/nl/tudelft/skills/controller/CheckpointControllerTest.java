@@ -31,6 +31,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.test.context.support.WithUserDetails;
+import org.springframework.transaction.annotation.Transactional;
+
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.Id;
 import nl.tudelft.labracore.api.dto.PersonSummaryDTO;
@@ -43,20 +58,6 @@ import nl.tudelft.skills.repository.CheckpointRepository;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.test.TestUserDetailsService;
-
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.test.context.support.WithUserDetails;
-import org.springframework.transaction.annotation.Transactional;
-
 import reactor.core.publisher.Flux;
 
 @Transactional
@@ -95,9 +96,9 @@ public class CheckpointControllerTest extends ControllerTest {
 
 		assertThat(skillRepository.findAll().stream()
 				.filter(skill -> skill.getCheckpoint().equals(checkpoint.get())))
-						.containsExactlyInAnyOrder(
-								db.getSkillImplication(),
-								db.getSkillNegation());
+				.containsExactlyInAnyOrder(
+						db.getSkillImplication(),
+						db.getSkillNegation());
 	}
 
 	@Test
@@ -166,6 +167,40 @@ public class CheckpointControllerTest extends ControllerTest {
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(db.getCheckpointLectureOne().getId());
 		assertThat(checkpoint.getName()).isEqualTo("edited");
 		assertThat(checkpoint.getDeadline()).isEqualTo(LocalDateTime.of(2022, 12, 21, 23, 59));
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,200,editedName", "HEAD_TA,403,uneditedName", "TA,403,uneditedName",
+			"STUDENT,403,uneditedName", ",403,uneditedName" })
+	public void patchCheckpointName(String role, int status, String expectedName) throws Exception {
+		Checkpoint checkpoint = checkpointRepository.save(Checkpoint.builder().name("uneditedName")
+				.deadline((LocalDateTime.of(LocalDate.ofYearDay(2022, 42), LocalTime.MIDNIGHT)))
+				.edition(db.getEditionRL()).build());
+		mockRole(roleApi, role);
+
+		mvc.perform(patch("/checkpoint/name").with(csrf())
+				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
+						new BasicNameValuePair("id", Long.toString(checkpoint.getId())),
+						new BasicNameValuePair("name", "editedName")))))
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+				.andExpect(status().is(status));
+
+		Checkpoint checkpointNew = checkpointRepository.findByIdOrThrow(checkpoint.getId());
+		assertThat(checkpointNew.getName()).isEqualTo(expectedName);
+	}
+
+	@Test
+	public void patchCheckpointNameNotLoggedIn() throws Exception {
+		mvc.perform(patch("/checkpoint/name").with(csrf())
+				.content(EntityUtils.toString(new UrlEncodedFormEntity(List.of(
+						new BasicNameValuePair("id", Long.toString(db.getCheckpointLectureOne().getId())),
+						new BasicNameValuePair("name", "editedName")))))
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+				.andExpect(redirectedUrlPattern("**/auth/login"));
+
+		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(db.getCheckpointLectureOne().getId());
+		assertThat(checkpoint.getName()).isEqualTo("Lecture 1");
 	}
 
 	@Test
@@ -374,7 +409,7 @@ public class CheckpointControllerTest extends ControllerTest {
 						db.getSkillVariables().getId(), db.getSkillProofOutline().getId(),
 						db.getSkillAssumption().getId()))
 				.stream().map(Skill::getCheckpoint))
-						.allSatisfy(cp -> assertThat(cp).isEqualTo(db.getCheckpointLectureTwo()));
+				.allSatisfy(cp -> assertThat(cp).isEqualTo(db.getCheckpointLectureTwo()));
 		assertThat(db.getSkillProofOutline().getCheckpoint())
 				.isEqualTo(db.getCheckpointLectureTwo());
 		// Checkpoint is deleted
