@@ -33,7 +33,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithUserDetails;
 
+import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.*;
@@ -331,7 +334,7 @@ public class HomeControllerTest extends ControllerTest {
 				new EditionDetailsDTO().id(3L));
 		Long userId = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
 				.getPrincipal())
-						.getUser().getId();
+				.getUser().getId();
 		Person person = Person.builder().id(userId).build();
 		assertThat(homeController.getTeacherIds(person, editions)).containsExactlyInAnyOrder(2L, 3L);
 	}
