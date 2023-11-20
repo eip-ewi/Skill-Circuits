@@ -28,6 +28,12 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
 import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
@@ -38,13 +44,6 @@ import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.CourseRepository;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.service.CourseService;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
-
 import reactor.core.publisher.Mono;
 
 @Transactional

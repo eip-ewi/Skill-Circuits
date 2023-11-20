@@ -27,6 +27,7 @@
         class="block visible"
         th:style="|grid-row: ${block.row + 1}; grid-column: ${block.column + 1}|"
         th:draggable="${canEdit}"
+        th:data-id="${block.id}"
         th:data-group="${group.id}"
         th:data-create="${create}"
         th:with="
@@ -66,17 +67,35 @@
                     class="item__create fa-solid fa-plus"
                     th:data-block="${block.id}"></button>
             </li>
-            <h3 style="font-size: 0.8rem" th:if="${block.items.size() == 0 and level == 'module'}">
+            <h3
+                style="font-size: 0.8rem"
+                th:if="${block.items.size() == 0 and level == 'module' and canEdit}">
                 This skill has no tasks in this path
             </h3>
-            <th:block th:each="item, iter : ${block.items}">
-                <th:block th:if="${level == 'module'}">
-                    <li layout:replace="~{task/view :: item}"></li>
+
+            <ul
+                data-edit="always"
+                class="items"
+                th:style="${level != 'module' or canEdit} ? '' : 'flex-direction: row-reverse; justify-content: flex-end;'">
+                <th:block th:each="item, iter : ${block.items}">
+                    <!-- Task view for teacher-->
+                    <th:block th:if="${level == 'module' and canEdit}">
+                        <li layout:replace="~{task/view :: item}"></li>
+                    </th:block>
+                    <!--  Task preview for student-->
+                    <th:block
+                        th:if="${level == 'module'}"
+                        th:with="skillModified = ${skillsModified == null ? false : #sets.contains(skillsModified.![id], block.id)}">
+                        <li
+                            th:classappend="${not canEdit and ((item.visible and not skillModified) or (skillModified and #sets.contains(tasksAdded.![id], item.id)))}? '' : 'hidden'"
+                            style="display: inline"
+                            layout:insert="~{task/preview :: item}"></li>
+                    </th:block>
+                    <th:block th:unless="${level == 'module'}">
+                        <li layout:replace="~{item/view :: item}"></li>
+                    </th:block>
                 </th:block>
-                <th:block th:unless="${level == 'module'}">
-                    <li layout:replace="~{item/view :: item}"></li>
-                </th:block>
-            </th:block>
+            </ul>
         </ul>
 
         <div th:unless="${create}" data-edit="always" class="block__buttons">
@@ -108,6 +127,10 @@
             <div class="hidden block__connect to" th:data-skill="${block.id}">
                 <button><span class="fa-solid fa-link"></span></button>
             </div>
+        </th:block>
+
+        <th:block th:if="${level == 'module'}">
+            <div layout:replace="~{skill/expanded :: dialog}"></div>
         </th:block>
     </div>
 

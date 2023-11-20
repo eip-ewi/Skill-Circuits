@@ -22,6 +22,9 @@ function toggleOverlay(id) {
         overlay.close();
     } else {
         overlay.showModal();
+        if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
     }
 }
 

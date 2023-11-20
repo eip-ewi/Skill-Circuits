@@ -21,10 +21,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import nl.tudelft.skills.model.Skill;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+
+import nl.tudelft.skills.model.Skill;
 
 public interface SkillRepository extends JpaRepository<Skill, Long> {
 

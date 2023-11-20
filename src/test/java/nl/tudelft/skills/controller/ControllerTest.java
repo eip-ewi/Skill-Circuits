@@ -22,12 +22,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Random;
 
-import nl.tudelft.labracore.api.RoleControllerApi;
-import nl.tudelft.labracore.api.dto.Id;
-import nl.tudelft.labracore.api.dto.PersonSummaryDTO;
-import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
-import nl.tudelft.skills.test.TestDatabaseLoader;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInstance;
 import org.modelmapper.ModelMapper;
@@ -36,9 +30,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
-import reactor.core.publisher.Flux;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import nl.tudelft.labracore.api.RoleControllerApi;
+import nl.tudelft.labracore.api.dto.Id;
+import nl.tudelft.labracore.api.dto.PersonSummaryDTO;
+import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
+import nl.tudelft.skills.test.TestDatabaseLoader;
+import reactor.core.publisher.Flux;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class ControllerTest {
@@ -78,12 +77,16 @@ public abstract class ControllerTest {
 	 * @param role    The role to return for the user.
 	 */
 	protected void mockRole(RoleControllerApi roleApi, String role) {
-		when(roleApi.getRolesById(anySet(), anySet()))
-				.thenReturn(Flux.just(new RoleDetailsDTO()
-						.id(new Id().editionId(db.getEditionRL().getId())
-								.personId(db.getPerson().getId()))
-						.person(new PersonSummaryDTO().id(db.getPerson().getId()).username("username"))
-						.type(RoleDetailsDTO.TypeEnum.valueOf(role))));
+		if (role == null || role.isBlank()) {
+			when(roleApi.getRolesById(anySet(), anySet())).thenReturn(Flux.empty());
+		} else {
+			when(roleApi.getRolesById(anySet(), anySet()))
+					.thenReturn(Flux.just(new RoleDetailsDTO()
+							.id(new Id().editionId(db.getEditionRL().getId())
+									.personId(db.getPerson().getId()))
+							.person(new PersonSummaryDTO().id(db.getPerson().getId()).username("username"))
+							.type(RoleDetailsDTO.TypeEnum.valueOf(role))));
+		}
 	}
 
 }

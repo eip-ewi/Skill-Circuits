@@ -6,6 +6,7 @@
 @import "overlay";
 @import "components";
 @import "whats_new";
+@import "util";
 
 * {
     box-sizing: border-box;
@@ -30,8 +31,4 @@
 
 .main-section {
     flex-grow: 1;
-}
-
-.hidden {
-    display: none !important;
 }

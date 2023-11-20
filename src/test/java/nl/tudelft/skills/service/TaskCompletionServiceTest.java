@@ -20,6 +20,11 @@ package nl.tudelft.skills.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
@@ -33,12 +38,6 @@ import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.test.TestDatabaseLoader;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
-
 import reactor.core.publisher.Mono;
 
 @Transactional

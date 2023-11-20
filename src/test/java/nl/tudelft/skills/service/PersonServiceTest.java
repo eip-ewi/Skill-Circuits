@@ -21,14 +21,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
 
-import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.model.labracore.SCPerson;
-import nl.tudelft.skills.repository.labracore.PersonRepository;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+
+import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 @Transactional
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)

@@ -25,6 +25,11 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
 
+import org.springframework.data.util.Pair;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
+
 import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
@@ -32,11 +37,6 @@ import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.edition.*;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.*;
-
-import org.springframework.data.util.Pair;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
 
 @Service
 @AllArgsConstructor

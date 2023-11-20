@@ -23,13 +23,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.*;
 
-import nl.tudelft.labracore.api.EditionControllerApi;
-import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
-import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
-import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.model.*;
-import nl.tudelft.skills.repository.TaskCompletionRepository;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -38,6 +31,12 @@ import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
+import nl.tudelft.labracore.api.EditionControllerApi;
+import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
+import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
+import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.model.*;
+import nl.tudelft.skills.repository.TaskCompletionRepository;
 import reactor.core.publisher.Mono;
 
 @Transactional
