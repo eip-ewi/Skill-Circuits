@@ -21,18 +21,18 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.model.UserVersion;
-import nl.tudelft.skills.repository.UserVersionRepository;
-import nl.tudelft.skills.repository.labracore.PersonRepository;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+
+import nl.tudelft.labracore.lib.security.user.Person;
+import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.model.UserVersion;
+import nl.tudelft.skills.repository.UserVersionRepository;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 @Transactional
 @AutoConfigureMockMvc

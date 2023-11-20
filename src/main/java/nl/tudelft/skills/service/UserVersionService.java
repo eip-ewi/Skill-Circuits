@@ -20,16 +20,16 @@ package nl.tudelft.skills.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.info.BuildProperties;
+import org.springframework.stereotype.Service;
+
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.controller.UserVersionController;
 import nl.tudelft.skills.model.Release;
 import nl.tudelft.skills.model.UserVersion;
 import nl.tudelft.skills.repository.UserVersionRepository;
 import nl.tudelft.skills.security.AuthorisationService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.info.BuildProperties;
-import org.springframework.stereotype.Service;
 
 @Service
 public class UserVersionService {

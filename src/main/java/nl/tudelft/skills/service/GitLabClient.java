@@ -20,10 +20,10 @@ package nl.tudelft.skills.service;
 import java.util.Arrays;
 import java.util.List;
 
-import nl.tudelft.skills.model.Release;
-
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import nl.tudelft.skills.model.Release;
 
 @Service
 public class GitLabClient {
