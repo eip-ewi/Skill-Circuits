@@ -17,6 +17,9 @@
  */
 package nl.tudelft.skills.dto.view.module;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -24,6 +27,7 @@ import javax.validation.constraints.NotNull;
 import lombok.*;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.ItemView;
+import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskType;
 
@@ -49,17 +53,18 @@ public class TaskViewDTO extends View<Task> implements ItemView {
 	private Integer completedCount;
 
 	@NotNull
-	@PostApply
 	private String submoduleName;
 	@NotNull
-	@PostApply
 	private String skillName;
+	@NotNull
+	private Set<Long> pathIds;
 
 	/**
 	 * Visibility of a task is set to true if it is part of the path currently displayed.
 	 */
 	@Builder.Default
 	@NotNull
+	@EqualsAndHashCode.Exclude
 	private Boolean visible = true;
 
 	@Override
@@ -68,5 +73,6 @@ public class TaskViewDTO extends View<Task> implements ItemView {
 		completedCount = data.getCompletedBy().size();
 		skillName = data.getSkill().getName();
 		submoduleName = data.getSkill().getSubmodule().getName();
+		pathIds = data.getPaths().stream().map(Path::getId).collect(Collectors.toSet());
 	}
 }

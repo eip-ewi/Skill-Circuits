@@ -23,6 +23,11 @@ import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.*;
@@ -34,11 +39,6 @@ import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.CourseService;
 import nl.tudelft.skills.service.EditionService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class HomeController {

@@ -21,14 +21,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import nl.tudelft.labracore.api.PersonControllerApi;
-import nl.tudelft.labracore.api.dto.PersonSummaryDTO;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.ApplicationScope;
+
+import nl.tudelft.labracore.api.PersonControllerApi;
+import nl.tudelft.labracore.api.dto.PersonSummaryDTO;
 
 @Component
 @ApplicationScope

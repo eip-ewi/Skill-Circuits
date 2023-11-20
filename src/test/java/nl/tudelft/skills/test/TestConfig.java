@@ -17,10 +17,10 @@
  */
 package nl.tudelft.skills.test;
 
-import nl.tudelft.labracore.api.*;
-
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
+
+import nl.tudelft.labracore.api.*;
 
 @Configuration
 public class TestConfig {

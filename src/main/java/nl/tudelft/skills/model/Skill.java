@@ -23,11 +23,12 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import lombok.*;
-import lombok.experimental.SuperBuilder;
-
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
+
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import nl.tudelft.skills.model.labracore.SCPerson;
 
 @Data
 @Entity
@@ -93,6 +94,12 @@ public class Skill extends AbstractSkill {
 	@EqualsAndHashCode.Exclude
 	@OneToMany(mappedBy = "previousEditionSkill")
 	private Set<Skill> futureEditionSkills = new HashSet<>();
+
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@ManyToMany(mappedBy = "skillsModified")
+	private Set<SCPerson> personModifiedSkill = new HashSet<>();
 
 	public void setTasks(List<Task> tasks) {
 		this.tasks = tasks;

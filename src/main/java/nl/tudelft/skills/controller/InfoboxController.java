@@ -17,17 +17,17 @@
  */
 package nl.tudelft.skills.controller;
 
-import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.skills.dto.view.InfoboxDTO;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.security.AuthorisationService;
-import nl.tudelft.skills.service.TaskCompletionService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import nl.tudelft.labracore.lib.security.user.Person;
+import nl.tudelft.skills.dto.view.InfoboxDTO;
+import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.security.AuthorisationService;
+import nl.tudelft.skills.service.TaskCompletionService;
 
 @Controller
 @RequestMapping("infobox")

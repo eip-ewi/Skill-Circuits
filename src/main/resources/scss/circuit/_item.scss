@@ -25,6 +25,12 @@
         color: var(--grey-500);
     }
 
+    &__icon {
+        &.completed {
+            color: var(--primary-green);
+        }
+    }
+
     &__button {
         align-self: stretch;
         min-width: 2.5rem;
@@ -34,7 +40,7 @@
             border: 1px solid var(--primary-light);
             color: var(--primary-light);
         }
-        &[data-staff="false"] {
+        &:not([data-staff="true"]) {
             @include button(
                 var(--primary-dark),
                 var(--primary-light),

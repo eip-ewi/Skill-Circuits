@@ -39,9 +39,9 @@
                 toUpdate.forEach(taskId => {
                     const task = document.getElementById(`item-${taskId}`);
                     // If this task is not in this view, ignore.
-                    if (task !== null) {
-                        task.classList.add("completed");
-                    }
+                    // if (task !== null) {
+                    //     task.classList.add("completed");
+                    // }
                 });
             }
 
@@ -86,9 +86,23 @@
             const task = $(`#item-${taskId}`);
             task.toggleClass("completed");
 
+            // toggles task icon in skill preview
+            const taskIcon = $(`#item-${taskId}-icon`);
+            taskIcon.toggleClass("completed");
+
             const completed = task.hasClass("completed");
-            const block = $(task.parents(".block")[0]);
-            updateBlockState(block.prop("id").split("-")[1]);
+
+            const block = task.closest(".block");
+            const blockId = block.attr("id").split("-")[1];
+
+            // Remove/add trash icon
+            if (completed) {
+                task.find("[name='removeFromPath']").addClass("hidden");
+            } else {
+                task.find("[name='removeFromPath']").removeClass("hidden");
+            }
+
+            updateBlockState(blockId);
             [...block.data("children")].forEach(id => updateBlockState(id));
 
             //send update to server if user is authenticated
@@ -166,12 +180,19 @@
             });
         }
         function updateBlockState(blockId) {
+            if (!blockId.toString().match(/\d+/)) return; // Skip incorrect block ids
+
             const block = $(`#block-${blockId}`);
+            const left = block.find(".expanded-skill__content > :first-child");
+
             if (block.attr("data-external")) return;
 
             block.removeClass("completed active disabled");
 
-            if (block.find(".item").not(".completed").length === 0) {
+            if (
+                left.find(".item").length > 0 &&
+                left.find(".item").not(".completed").length === 0
+            ) {
                 block.addClass("completed");
             } else {
                 const allParentsCompleted = [...block.data("parents")].every(

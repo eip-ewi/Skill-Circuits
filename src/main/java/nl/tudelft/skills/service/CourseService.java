@@ -19,6 +19,10 @@ package nl.tudelft.skills.service;
 
 import java.util.Comparator;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
@@ -31,10 +35,6 @@ import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.CourseRepository;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.security.AuthorisationService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CourseService {

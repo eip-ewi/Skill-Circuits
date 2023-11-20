@@ -21,19 +21,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
-import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.dto.view.ClickedLinkDTO;
-import nl.tudelft.skills.repository.ClickedLinkRepository;
-import nl.tudelft.skills.repository.TaskRepository;
-import nl.tudelft.skills.repository.labracore.PersonRepository;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
+
+import nl.tudelft.labracore.lib.security.user.Person;
+import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.dto.view.ClickedLinkDTO;
+import nl.tudelft.skills.repository.ClickedLinkRepository;
+import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 @Transactional
 @AutoConfigureMockMvc

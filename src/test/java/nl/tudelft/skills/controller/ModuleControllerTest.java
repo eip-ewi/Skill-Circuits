@@ -30,20 +30,6 @@ import java.util.stream.Stream;
 
 import javax.servlet.http.HttpSession;
 
-import nl.tudelft.labracore.api.RoleControllerApi;
-import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.dto.create.SCModuleCreateDTO;
-import nl.tudelft.skills.dto.id.SCEditionIdDTO;
-import nl.tudelft.skills.dto.patch.SCModulePatchDTO;
-import nl.tudelft.skills.dto.view.SkillSummaryDTO;
-import nl.tudelft.skills.model.SCModule;
-import nl.tudelft.skills.repository.ClickedLinkRepository;
-import nl.tudelft.skills.repository.ModuleRepository;
-import nl.tudelft.skills.repository.TaskCompletionRepository;
-import nl.tudelft.skills.service.ClickedLinkService;
-import nl.tudelft.skills.service.ModuleService;
-import nl.tudelft.skills.service.TaskCompletionService;
-
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
@@ -57,6 +43,20 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
+
+import nl.tudelft.labracore.api.RoleControllerApi;
+import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.dto.create.SCModuleCreateDTO;
+import nl.tudelft.skills.dto.id.SCEditionIdDTO;
+import nl.tudelft.skills.dto.patch.SCModulePatchDTO;
+import nl.tudelft.skills.dto.view.SkillSummaryDTO;
+import nl.tudelft.skills.model.SCModule;
+import nl.tudelft.skills.repository.ClickedLinkRepository;
+import nl.tudelft.skills.repository.ModuleRepository;
+import nl.tudelft.skills.repository.TaskCompletionRepository;
+import nl.tudelft.skills.service.ClickedLinkService;
+import nl.tudelft.skills.service.ModuleService;
+import nl.tudelft.skills.service.TaskCompletionService;
 
 @Transactional
 @AutoConfigureMockMvc
