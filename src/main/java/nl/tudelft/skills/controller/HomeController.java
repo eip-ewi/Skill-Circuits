@@ -133,6 +133,7 @@ public class HomeController {
 	 */
 	public Map<Long, Integer> getCompletedSkillsPerCourse(List<CourseSummaryDTO> courses, SCPerson scperson) {
 		Map<Long, Integer> completedSkillsPerCourse = new HashMap<>();
+		var ownSkills = scperson.getSkillsModified();
 		for (var course : courses) {
 			Long courseId = course.getId();
 
@@ -146,17 +147,27 @@ public class HomeController {
 				var personPathPreference = pathPreferenceRepository
 						.findAllByPersonIdAndEditionId(scperson.getId(), editionId);
 
-				List<Skill> skillsWithTasks;
+				Set<Skill> skillsWithTasks;
 				Set<Skill> skillsDone;
+
+				Set<Skill> ownSkillsDone = ownSkills.stream()
+						.filter(s -> Objects.equals(s.getSubmodule().getModule().getEdition().getId(),
+								editionId))
+						.filter(s -> tasksDone.containsAll(
+								scperson.getTasksAdded().stream().filter(t -> t.getSkill().equals(s))
+										.toList()))
+						.collect(Collectors.toSet());
 
 				if (personPathPreference.isEmpty() || personPathPreference.get(0).getPath() == null) {
 					var touchedSkill = tasksDone.stream().map(Task::getSkill).distinct().filter(
 							s -> Objects.equals(s.getSubmodule().getModule().getEdition().getId(),
 									editionId));
-					skillsDone = touchedSkill.filter(s -> tasksDone.containsAll(s.getTasks()))
+					skillsDone = touchedSkill
+							.filter(s -> !ownSkills.contains(s) && tasksDone.containsAll(s.getTasks()))
 							.collect(Collectors.toSet());
 
-					skillsWithTasks = taskRepository.findAll().stream().map(Task::getSkill).toList();
+					skillsWithTasks = taskRepository.findAll().stream().map(Task::getSkill)
+							.collect(Collectors.toSet());
 
 				} else {
 					Path personPath = personPathPreference.get(0).getPath();
@@ -167,12 +178,15 @@ public class HomeController {
 											editionId))
 							.toList();
 
-					skillsDone = touchedSkill.stream().filter(x -> tasksDone.containsAll(
-							x.getTasks().stream().filter(y -> y.getPaths().contains(personPath)).toList()))
+					skillsDone = touchedSkill
+							.stream().filter(x -> !ownSkills.contains(x) && tasksDone.containsAll(
+									x.getTasks().stream().filter(y -> y.getPaths().contains(personPath))
+											.toList()))
 							.collect(Collectors.toSet());
 
 					skillsWithTasks = taskRepository.findAll().stream()
-							.filter(t -> t.getPaths().contains(personPath)).map(Task::getSkill).toList();
+							.filter(t -> t.getPaths().contains(personPath)).map(Task::getSkill)
+							.collect(Collectors.toSet());
 				}
 
 				var emptySkills = skillRepository.findAll().stream().filter(x -> !skillsWithTasks.contains(x))
@@ -182,6 +196,8 @@ public class HomeController {
 						.toList();
 
 				emptySkills.forEach(x -> addCompletedEmptySkills(skillsDone, emptySkills, x));
+
+				skillsDone.addAll(ownSkillsDone);
 
 				skillsDoneCount = skillsDone.size();
 			}
