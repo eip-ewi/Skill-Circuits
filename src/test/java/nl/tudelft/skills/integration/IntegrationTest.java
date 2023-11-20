@@ -86,7 +86,7 @@ public abstract class IntegrationTest {
 	}
 
 	/**
-	 * Navigates to a specified path, prepending the base url.
+	 * Navigates to a specified path prepending the base url, if it is not the current url.
 	 *
 	 * @param path The path to navigate to.
 	 */
@@ -94,8 +94,11 @@ public abstract class IntegrationTest {
 		String baseUrl = properties.getProperty("base-url");
 		if (!baseUrl.endsWith("/"))
 			baseUrl += "/";
-		page.navigate(baseUrl + path);
-		page.waitForLoadState(LoadState.DOMCONTENTLOADED);
+
+		if (!page.url().equals(baseUrl + path)) {
+			page.navigate(baseUrl + path);
+			page.waitForLoadState(LoadState.DOMCONTENTLOADED);
+		}
 	}
 
 	/**
@@ -150,19 +153,26 @@ public abstract class IntegrationTest {
 	}
 
 	/**
-	 * Private utility method for navigating from the homepage to the setup pane of a specific edition in a
-	 * course.
+	 * Private utility method for navigating to the setup pane of a specific edition in a course.
 	 *
 	 * @param courseCode The code of the course.
 	 * @param edition    The name of the edition.
 	 */
 	protected void navigateToEditionSetup(String courseCode, String edition) {
+		navigateTo("");
 		clickAndWaitForPageLoad(
 				page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName(courseCode)));
 		// Click edition name
 		Locator editionLocator = page.getByRole(AriaRole.HEADING,
 				new Page.GetByRoleOptions().setName(edition));
 		clickAndWaitForPageLoad(editionLocator);
+		openEditionSetupOnCurrentPage();
+	}
+
+	/**
+	 * Opens the edition setup pane, assuming the edition page is open.
+	 */
+	protected void openEditionSetupOnCurrentPage() {
 		// Click setup button
 		Locator setup = page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Setup"));
 		setup.click();
@@ -171,20 +181,40 @@ public abstract class IntegrationTest {
 	}
 
 	/**
+	 * Makes an edition published, if it is not yet published, or unpublished if it is not yet unpublished.
+	 * This assumes that the user is logged in as a teacher for the edition.
+	 *
+	 * @param publish    Whether to publish (true) or unpublish (false).
+	 * @param courseCode The code of the course to (un)publish an edition in.
+	 * @param edition    The name of the edition to (un)publish.
+	 */
+	protected void setEditionState(boolean publish, String courseCode, String edition) {
+		navigateToEditionSetup(courseCode, edition);
+
+		// Check current publish state
+		Locator publishBtn = page.getByRole(AriaRole.BUTTON,
+				new Page.GetByRoleOptions().setName("publish edition"));
+		boolean isPublished = publishBtn.innerText().contains("Unpublish");
+
+		// If it is not the desired state (un)publish the edition
+		if (isPublished && !publish || !isPublished && publish) {
+			clickAndWaitForPageLoad(publishBtn);
+		}
+	}
+
+	/**
 	 * Performs the actions to toggle whether an edition is published or unpublished. This method assumes that
-	 * the correct page (homepage) is open, that the user is not logged in.
+	 * the user is logged in as a teacher for the edition.
 	 *
 	 * @param courseCode The code of the course to (un)publish an edition in.
 	 * @param edition    The name of the edition to (un)publish.
 	 */
 	protected void togglePublishUnpublish(String courseCode, String edition) {
-		logInAs(teacherUserInfo);
 		navigateToEditionSetup(courseCode, edition);
 		// Wait until timeout or (un)publish button is visible
 		// Locator matches on both "Unpublish" and "Publish"
 		Locator publish = page.getByRole(AriaRole.BUTTON,
 				new Page.GetByRoleOptions().setName("publish edition"));
 		clickAndWaitForPageLoad(publish);
-		logOutAs(teacherUserInfo);
 	}
 }

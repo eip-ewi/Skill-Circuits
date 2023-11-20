@@ -83,10 +83,18 @@ public class HomePageTest extends IntegrationTest {
 	@Test
 	void testPublishUnpublishEdition() {
 		navigateTo("");
-
-		// To check if the edition is currently published, log in as teacher
+		String editionName = getActiveEdition(oopCourse).name();
 		logInAs(teacherUserInfo);
-		navigateToEditionSetup(oopCourse.code(), getActiveEdition(oopCourse).name());
+
+		// Ensure that all other editions are not published so that this does not interfere with the test
+		for (EditionInfo edition : oopCourse.editions()) {
+			if (!edition.name().equals(editionName)) {
+				setEditionState(false, oopCourse.code(), edition.name());
+			}
+		}
+
+		// Check if the edition is published or not
+		navigateToEditionSetup(oopCourse.code(), editionName);
 
 		// The name is case-insensitive, so this matches on both "Unpublish edition" and "Publish edition"
 		Locator publishBtn = page.getByRole(AriaRole.BUTTON,
@@ -103,18 +111,53 @@ public class HomePageTest extends IntegrationTest {
 		Locator course = page.getByRole(AriaRole.HEADING,
 				new Page.GetByRoleOptions().setName(oopCourse.code()));
 		if (published) {
+			// Unpublish the edition
 			assertEditionVisible(course);
+			logInAs(teacherUserInfo);
 			togglePublishUnpublish(oopCourse.code(), getActiveEdition(oopCourse).name());
+			assertPublishButtonLabel(false);
+			logOutAs(teacherUserInfo);
+
+			// Publish the edition
 			assertEditionInvisible(course);
+			logInAs(teacherUserInfo);
 			togglePublishUnpublish(oopCourse.code(), getActiveEdition(oopCourse).name());
+			assertPublishButtonLabel(true);
+			logOutAs(teacherUserInfo);
+
 			assertEditionVisible(course);
 		} else {
+			// Publish the edition
 			assertEditionInvisible(course);
+			logInAs(teacherUserInfo);
 			togglePublishUnpublish(oopCourse.code(), getActiveEdition(oopCourse).name());
+			assertPublishButtonLabel(true);
+			logOutAs(teacherUserInfo);
+
+			// Unpublish the edition
 			assertEditionVisible(course);
+			logInAs(teacherUserInfo);
 			togglePublishUnpublish(oopCourse.code(), getActiveEdition(oopCourse).name());
+			assertPublishButtonLabel(false);
+			logOutAs(teacherUserInfo);
+
 			assertEditionInvisible(course);
 		}
+	}
+
+	/**
+	 * Asserts whether the button in the edition setup pane has the correct label (corresponding to the
+	 * publish state). If it is published, it should contain "Unpublish", if it is not, then it should not
+	 * contain "Unpublish".
+	 *
+	 * @param published Whether the edition is currently published.
+	 */
+	protected void assertPublishButtonLabel(boolean published) {
+		openEditionSetupOnCurrentPage();
+		Locator publishBtn = page.getByRole(AriaRole.BUTTON,
+				new Page.GetByRoleOptions().setName("publish edition"));
+		assertThat(publishBtn.innerText().contains("Unpublish")).isEqualTo(published);
+		page.locator("#close-edition-setup-sidebar").click();
 	}
 
 	/**
@@ -126,10 +169,6 @@ public class HomePageTest extends IntegrationTest {
 	protected void assertEditionVisible(Locator course) {
 		// Assert that the course is visible not logged in
 		assertThat(course.isVisible()).isTrue();
-
-		// TODO This needs to be adjusted with new homepage considerations. There may be another edition published
-		//  which will now be displayed instead of this one for the student (latest or last student edition is
-		//  considered). So, the state of the editions needs to be the following: 19/20 not published, NOW published
 
 		// Assert that the edition is visible when logged in as student
 		logInAs(studentUserInfo);
