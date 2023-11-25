@@ -107,6 +107,12 @@ public class SkillController {
 		ModuleLevelSkillViewDTO view = View.convert(skill, ModuleLevelSkillViewDTO.class);
 		view.setCompletedRequiredTasks(true);
 
+		// Set completed tasks
+		Set<Long> completedTasks = personRepository.getById(person.getId()).getTaskCompletions().stream()
+				.map(tc -> tc.getTask().getId()).collect(Collectors.toSet());
+		view.getTasks().forEach(t -> t.setCompleted(completedTasks.contains(t.getId())));
+
+		// Add general model attributes
 		model.addAttribute("level", "module");
 		model.addAttribute("groupType", "submodule");
 		model.addAttribute("block", view);
@@ -115,7 +121,7 @@ public class SkillController {
 		model.addAttribute("canEdit", false);
 		model.addAttribute("canDelete", false);
 
-		// Only add information for this specific skill to model
+		// Only add information for this specific skill concerning personal path to model
 		SCModule module = moduleRepository.findByIdOrThrow(skill.getSubmodule().getModule().getId());
 		Path path = moduleService.getDefaultOrPreferredPath(person.getId(), module.getEdition().getId());
 		SCPerson scPerson = personRepository.getById(person.getId());
@@ -126,7 +132,7 @@ public class SkillController {
 				.filter(t -> skillTaskIds.contains(t.getId())).map(at -> View.convert(at, TaskViewDTO.class))
 				.toList());
 		model.addAttribute("skillsModified",
-				scPerson.getSkillsModified().contains(skill) ? List.of(skill) : List.of());
+				scPerson.getSkillsModified().contains(skill) ? List.of(view) : List.of());
 
 		if (path != null) {
 			Set<Long> taskIds = path.getTasks().stream().map(Task::getId).collect(Collectors.toSet());

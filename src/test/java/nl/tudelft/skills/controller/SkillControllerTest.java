@@ -44,6 +44,7 @@ import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.lib.security.LabradorUserDetails;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.SpringContext;
+import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.create.CheckpointCreateDTO;
 import nl.tudelft.skills.dto.create.ExternalSkillCreateDTO;
@@ -53,11 +54,9 @@ import nl.tudelft.skills.dto.id.*;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
 import nl.tudelft.skills.dto.patch.TaskPatchDTO;
-import nl.tudelft.skills.model.ExternalSkill;
-import nl.tudelft.skills.model.SCEdition;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.model.TaskType;
+import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
+import nl.tudelft.skills.dto.view.module.TaskViewDTO;
+import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.ClickedLinkService;
@@ -406,6 +405,87 @@ public class SkillControllerTest extends ControllerTest {
 		// (Which is needed as a parameter to the method)
 		mvc.perform(get("/skill/external/" + externalSkill.getId()).with(csrf()))
 				.andExpect(status().is4xxClientError());
+	}
+
+	@Test
+	@WithUserDetails("username")
+	void testGetSkillUnmodified() {
+		// Setup for test
+		db.getEditionRL().setVisible(true);
+		editionRepository.save(db.getEditionRL());
+		mockRole(roleApi, "STUDENT");
+		Skill skill = db.getSkillVariables();
+
+		// Get authenticated person
+		Person authPerson = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal()).getUser();
+
+		// Call method
+		skillController.getSkill(authPerson, skill.getId(), model);
+
+		// Assert on added model attributes concerning paths and added tasks/modified skills
+		assertThat(model.getAttribute("selectedPathId")).isNull();
+		assertThat(model.getAttribute("tasksAdded")).isEqualTo(List.of());
+		assertThat(model.getAttribute("skillsModified")).isEqualTo(List.of());
+
+		// The skill view should be unmodified (all tasks with their initial visibility, meaning all are visible)
+		ModuleLevelSkillViewDTO view = View.convert(skill, ModuleLevelSkillViewDTO.class);
+		assertThat(model.getAttribute("block")).isEqualTo(view);
+	}
+
+	@Test
+	@WithUserDetails("username")
+	void testGetSkillModified() {
+		// General setup for test
+		SCEdition edition = db.getEditionRL();
+		edition.setVisible(true);
+		editionRepository.save(edition);
+		mockRole(roleApi, "STUDENT");
+		Skill skill = db.getSkillVariables();
+
+		// Create new path
+		Path explorerPath = Path.builder().name("Explorer").edition(edition)
+				.tasks(Set.of(db.getTaskDo10a())).build();
+		pathRepository.save(explorerPath);
+		edition.getPaths().add(explorerPath);
+		editionRepository.save(edition);
+
+		// Set preferred path
+		Path pathfinderPath = db.getPathFinderPath();
+		when(moduleService.getDefaultOrPreferredPath(db.getPerson().getId(), edition.getId()))
+				.thenReturn(pathfinderPath);
+
+		// Add tasks to paths
+		pathfinderPath.getTasks().add(db.getTaskRead10());
+		pathRepository.save(pathfinderPath);
+		db.getTaskRead10().getPaths().add(pathfinderPath);
+		db.getTaskDo10a().getPaths().add(explorerPath);
+		taskRepository.save(db.getTaskRead10());
+		taskRepository.save(db.getTaskDo10a());
+
+		// "Remove" taskRead10 and add taskDo10a
+		db.getPerson().getSkillsModified().add(skill);
+		db.getPerson().getTasksAdded().add(db.getTaskDo10a());
+		personRepository.save(db.getPerson());
+
+		// Get authenticated person
+		Person authPerson = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal()).getUser();
+
+		// Call method
+		skillController.getSkill(authPerson, skill.getId(), model);
+
+		// Removed task should be invisible
+		ModuleLevelSkillViewDTO view = View.convert(skill, ModuleLevelSkillViewDTO.class);
+		view.getTasks().stream().filter(t -> t.getId().equals(db.getTaskRead10().getId()))
+				.findFirst().get().setVisible(false);
+		assertThat(model.getAttribute("block")).isEqualTo(view);
+
+		// Assert on added model attributes concerning paths and added tasks/modified skills
+		assertThat(model.getAttribute("selectedPathId")).isEqualTo(pathfinderPath.getId());
+		assertThat(model.getAttribute("tasksAdded")).isEqualTo(List.of(
+				View.convert(db.getTaskDo10a(), TaskViewDTO.class)));
+		assertThat(model.getAttribute("skillsModified")).isEqualTo(List.of(view));
 	}
 
 	@Test
