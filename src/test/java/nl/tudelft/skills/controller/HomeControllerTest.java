@@ -37,7 +37,9 @@ import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.model.PathPreference;
 import nl.tudelft.skills.model.SCEdition;
+import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskCompletion;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.*;
@@ -176,6 +178,80 @@ public class HomeControllerTest extends ControllerTest {
 		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
 		assertThat(courseCompletedSkills.get(db.getCourseRL().getId()))
 				.isEqualTo(skillRepository.findAll().size());
+	}
+
+	@Test
+	void getCompletedSkillsCustomizedEmpty() {
+		List<CourseSummaryDTO> courses = new ArrayList<>(
+				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
+		SCPerson person = new SCPerson();
+		person.setSkillsModified(new HashSet<>(Arrays.asList(db.getSkillImplication())));
+
+		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
+				.thenReturn(db.getEditionRL().getId());
+
+		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
+				person);
+		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
+		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(7);
+	}
+
+	@Test
+	void getCompletedSkillsCustomizedCompleted() {
+		List<CourseSummaryDTO> courses = new ArrayList<>(
+				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
+		SCPerson person = new SCPerson();
+		person.setSkillsModified(new HashSet<>(Arrays.asList(db.getSkillNegation())));
+		person.setTasksAdded(new HashSet<>(Arrays.asList(db.getTaskRead11())));
+
+		TaskCompletion completion1 = TaskCompletion.builder().id(1L)
+				.person(person).task(db.getTaskRead11()).build();
+
+		person.setTaskCompletions(Set.of(completion1));
+
+		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
+				.thenReturn(db.getEditionRL().getId());
+
+		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
+				person);
+		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
+		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(5);
+	}
+
+	@Test
+	void getCompletedSkillsPathFinderPath() {
+		List<CourseSummaryDTO> courses = new ArrayList<>(
+				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
+		SCPerson person = new SCPerson();
+		PathPreference pathPreference = PathPreference.builder().path(db.getPathFinderPath())
+				.edition(db.getEditionRL()).person(person).build();
+		person.setPathPreferences(new HashSet<>(Arrays.asList(pathPreference)));
+
+		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
+				.thenReturn(db.getEditionRL().getId());
+
+		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
+				person);
+		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
+		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(6);
+	}
+
+	@Test
+	void getCompletedSkillsCustomizedEmptyNotCompleted() {
+		List<CourseSummaryDTO> courses = new ArrayList<>(
+				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
+		SCPerson person = new SCPerson();
+		Task t = Task.builder().name("Task").time(3).build();
+		db.getSkillAssumption().setTasks(Arrays.asList(t));
+		person.setSkillsModified(new HashSet<>(Arrays.asList(db.getSkillAssumption())));
+
+		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
+				.thenReturn(db.getEditionRL().getId());
+
+		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
+				person);
+		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
+		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(3);
 	}
 
 }
