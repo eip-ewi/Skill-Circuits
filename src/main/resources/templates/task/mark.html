@@ -123,6 +123,15 @@
                             $.get(`/skill/${s}`, html => {
                                 const skill = $($("<div/>").append(html).children()[0]);
                                 $("#circuit").append(skill);
+
+                                // Add necessary event listeners
+                                addClickSkillEventListener(skill[0]);
+                                skill
+                                    .find(".path-toggle__control")
+                                    .toArray()
+                                    .forEach(addTogglePathDropdownEventListener);
+
+                                // Recalculate the connections
                                 recalculateConnections();
                             })
                         );
@@ -183,7 +192,7 @@
             if (!blockId.toString().match(/\d+/)) return; // Skip incorrect block ids
 
             const block = $(`#block-${blockId}`);
-            if (!block.length) return; // Skip hidden blocks
+            if (!block.length) return; // Skip currently hidden blocks
 
             const left = block.find(".expanded-skill__content > :first-child");
 

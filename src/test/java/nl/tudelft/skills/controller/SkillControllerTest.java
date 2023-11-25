@@ -23,7 +23,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDateTime;
@@ -86,6 +85,7 @@ public class SkillControllerTest extends ControllerTest {
 	private final ClickedLinkService clickedLinkService;
 	private final ClickedLinkRepository clickedLinkRepository;
 	private final PersonRepository personRepository;
+	private final ModuleRepository moduleRepository;
 	private final HttpSession session;
 	private final EditionRepository editionRepository;
 	private final RoleControllerApi roleApi;
@@ -98,7 +98,7 @@ public class SkillControllerTest extends ControllerTest {
 			PathRepository pathRepository, TaskCompletionService taskCompletionService,
 			ClickedLinkService clickedLinkService, ClickedLinkRepository clickedLinkRepository,
 			TaskCompletionRepository taskCompletionRepository, EditionRepository editionRepository,
-			RoleControllerApi roleApi, PersonRepository personRepository) {
+			RoleControllerApi roleApi, PersonRepository personRepository, ModuleRepository moduleRepository) {
 		this.submoduleRepository = submoduleRepository;
 		this.session = mock(HttpSession.class);
 		this.moduleService = mock(ModuleService.class);
@@ -111,6 +111,7 @@ public class SkillControllerTest extends ControllerTest {
 		this.skillService = skillService;
 		this.taskCompletionService = taskCompletionService;
 		this.personRepository = personRepository;
+		this.moduleRepository = moduleRepository;
 		this.skillRepository = skillRepository;
 		this.abstractSkillRepository = abstractSkillRepository;
 		this.taskCompletionRepository = taskCompletionRepository;
@@ -118,8 +119,8 @@ public class SkillControllerTest extends ControllerTest {
 		this.roleApi = roleApi;
 
 		this.skillController = new SkillController(skillRepository, externalSkillRepository,
-				abstractSkillRepository, taskRepository,
-				submoduleRepository, checkpointRepository, pathRepository, personRepository, skillService,
+				abstractSkillRepository, taskRepository, submoduleRepository, moduleRepository,
+				checkpointRepository, pathRepository, personRepository, skillService,
 				moduleService, taskCompletionService, clickedLinkService, session);
 	}
 
@@ -181,8 +182,8 @@ public class SkillControllerTest extends ControllerTest {
 		SkillController skc = new SkillController(SpringContext.getBean(SkillRepository.class),
 				externalSkillRepository,
 				abstractSkillRepository, taskRepository,
-				submoduleRepository, SpringContext.getBean(CheckpointRepository.class), pathRepository,
-				personRepository, skillService,
+				submoduleRepository, moduleRepository, SpringContext.getBean(CheckpointRepository.class),
+				pathRepository, personRepository, skillService,
 				moduleService, taskCompletionService, clickedLinkService, session);
 
 		skc.createSkill(null, dto, mock(Model.class));
@@ -320,7 +321,8 @@ public class SkillControllerTest extends ControllerTest {
 		// of the recentActiveEditionForSkillOrLatest method
 		SkillService mockSkillService = mock(SkillService.class);
 		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
-				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
+				abstractSkillRepository, taskRepository, submoduleRepository, moduleRepository,
+				checkpointRepository,
 				pathRepository, personRepository, mockSkillService, moduleService, taskCompletionService,
 				clickedLinkService, session);
 
@@ -355,7 +357,8 @@ public class SkillControllerTest extends ControllerTest {
 		// of the recentActiveEditionForSkillOrLatest method
 		SkillService mockSkillService = mock(SkillService.class);
 		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
-				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
+				abstractSkillRepository, taskRepository, submoduleRepository, moduleRepository,
+				checkpointRepository,
 				pathRepository, personRepository, mockSkillService, moduleService, taskCompletionService,
 				clickedLinkService,
 				session);
@@ -406,12 +409,12 @@ public class SkillControllerTest extends ControllerTest {
 	}
 
 	@Test
-	@WithAnonymousUser
-	void getSkillNotAuthenticated() throws Exception {
-		// An unauthenticated user should not be able to get a skill
+	@WithUserDetails("username")
+	void getSkillNotAuthorized() throws Exception {
+		// A student should not be able to see a skill in an unpublished edition
+		mockRole(roleApi, "STUDENT");
 		mvc.perform(get("/skill/{id}", db.getSkillVariables().getId()))
-				.andExpect(status().is3xxRedirection())
-				.andExpect(redirectedUrlPattern("**/auth/login"));
+				.andExpect(status().isForbidden());
 	}
 
 	@Test
@@ -421,7 +424,8 @@ public class SkillControllerTest extends ControllerTest {
 		// of the recentActiveEditionForSkillOrLatest method
 		SkillService mockSkillService = mock(SkillService.class);
 		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
-				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
+				abstractSkillRepository, taskRepository, submoduleRepository, moduleRepository,
+				checkpointRepository,
 				pathRepository, personRepository, mockSkillService, moduleService, taskCompletionService,
 				clickedLinkService, session);
 
@@ -462,7 +466,6 @@ public class SkillControllerTest extends ControllerTest {
 		mvc.perform(post("/skill/disconnect/1/2"))
 				.andExpect(status().isForbidden());
 		mvc.perform(get("/skill/{id}", db.getSkillVariables().getId()))
-				.andExpect(status().is3xxRedirection())
-				.andExpect(redirectedUrlPattern("**/auth/login"));
+				.andExpect(status().isUnauthorized());
 	}
 }
