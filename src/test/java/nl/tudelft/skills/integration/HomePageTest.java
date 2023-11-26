@@ -29,7 +29,6 @@ public class HomePageTest extends IntegrationTest {
 
 	@Test
 	void testLogInLogOut() {
-		navigateTo("");
 		Locator logIn = page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Login"));
 		clickAndWaitForPageLoad(logIn);
 
@@ -82,7 +81,6 @@ public class HomePageTest extends IntegrationTest {
 	 */
 	@Test
 	void testPublishUnpublishEdition() {
-		navigateTo("");
 		String editionName = getActiveEdition(oopCourse).name();
 		logInAs(teacherUserInfo);
 

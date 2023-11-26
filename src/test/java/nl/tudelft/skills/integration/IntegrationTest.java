@@ -20,6 +20,7 @@ package nl.tudelft.skills.integration;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.Set;
+import java.util.UUID;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -77,7 +78,9 @@ public abstract class IntegrationTest {
 	@BeforeEach
 	void createContextAndPage() {
 		context = browser.newContext();
-		page = context.newPage(); // TODO set default timeout
+		context.setDefaultTimeout(10000);
+		page = context.newPage();
+		navigateTo("");
 	}
 
 	@AfterEach
@@ -130,6 +133,7 @@ public abstract class IntegrationTest {
 	 * @param user The user information.
 	 */
 	protected void logInAs(UserInfo user) {
+		navigateTo("");
 		clickAndWaitForPageLoad(page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Login")));
 		page.getByLabel("Username").fill(user.userName());
 		page.getByLabel("Password").fill(user.password());
@@ -145,6 +149,7 @@ public abstract class IntegrationTest {
 	 * @param user The user information.
 	 */
 	protected void logOutAs(UserInfo user) {
+		navigateTo("");
 		page.getByText(user.displayName()).click();
 		page.getByText("Logout").click();
 
@@ -216,5 +221,24 @@ public abstract class IntegrationTest {
 		Locator publish = page.getByRole(AriaRole.BUTTON,
 				new Page.GetByRoleOptions().setName("publish edition"));
 		clickAndWaitForPageLoad(publish);
+	}
+
+	/**
+	 * Creates a new module. This method assumes that the user is logged in as a teacher for the edition.
+	 *
+	 * @param  courseCode The code of the course.
+	 * @param  edition    The name of the edition.
+	 * @return            The name of the module (UUID).
+	 */
+	protected String createModule(String courseCode, String edition) {
+		String moduleName = UUID.randomUUID().toString();
+
+		navigateToEditionSetup(courseCode, edition);
+		page.getByPlaceholder("New Module").click();
+		page.getByPlaceholder("New Module").fill(moduleName);
+		page.locator("#new-module-form").getByRole(AriaRole.BUTTON,
+				new Locator.GetByRoleOptions().setName("create")).click();
+
+		return moduleName;
 	}
 }
