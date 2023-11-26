@@ -78,7 +78,8 @@ public class CourseController {
 	@PreAuthorize("@authorisationService.canGetEditionsOfCourse(#id)")
 	public @ResponseBody List<EditionSummaryDTO> getEditionsOfCourse(@PathVariable Long id) {
 		return courseApi.getCourseById(id).block().getEditions().stream()
-				.filter(e -> editionRepository.existsById(e.getId())).toList();
+				.filter(e -> editionRepository.existsById(e.getId()))
+				.sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList();
 	}
 
 }

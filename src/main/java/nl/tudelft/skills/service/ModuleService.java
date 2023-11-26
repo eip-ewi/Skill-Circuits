@@ -133,7 +133,8 @@ public class ModuleService {
 		EditionDetailsDTO edition = editionApi.getEditionById(module.getEdition().getId()).block();
 		CourseDetailsDTO course = courseApi.getCourseById(edition.getCourse().getId()).block();
 		model.addAttribute("courses",
-				courseApi.getAllCoursesByProgram(course.getProgram().getId()).collectList().block());
+				courseApi.getAllCoursesByProgram(course.getProgram().getId())
+						.sort((a, b) -> a.getName().compareToIgnoreCase(b.getName())).collectList().block());
 	}
 
 	/**
