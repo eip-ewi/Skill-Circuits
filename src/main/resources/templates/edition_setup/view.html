@@ -157,13 +157,38 @@
                     $.post("/module/setup", $("#new-module-form").serialize(), html => {
                         const element = $("<div/>").append(html).children()[0];
                         const newModuleId = $(element).data("module");
-                        const newModuleName = $(element).text();
+                        const newModuleName = $("#new-module-name").val();
 
                         $(element).find(".module__edit").click(editModule);
                         $(element).find(".module__delete").click(deleteModule);
-                        $("select[name='module.id']").append(
-                            `<option data-edit="only" value="${newModuleId}">${newModuleName}<option>`
-                        );
+
+                        let options = $("select[name='module.id']")[0];
+
+                        let insertIndex = options.length;
+                        for (let i = 0; i < options.length; i++) {
+                            if (newModuleName.toLowerCase() < options[i].text.toLowerCase()) {
+                                insertIndex = i;
+                                break;
+                            }
+                        }
+
+                        $.each($("select[name='module.id']"), function () {
+                            if (
+                                $(this).find("option").length == 0 ||
+                                insertIndex == options.length
+                            ) {
+                                $(this).append(
+                                    `<option data-edit="only" value="${newModuleId}">${newModuleName}<option>`
+                                );
+                            } else {
+                                $(this)
+                                    .find("option")
+                                    .eq(insertIndex)
+                                    .before(
+                                        `<option data-edit="only" value="${newModuleId}">${newModuleName}<option>`
+                                    );
+                            }
+                        });
 
                         $("#new-module-name").val("");
                         $("#module-list").prepend(element);

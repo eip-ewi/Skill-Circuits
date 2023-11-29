@@ -98,9 +98,9 @@ public class CourseControllerTest extends ControllerTest {
 
 	@Test
 	void getEditionsOfCourse() {
-		EditionSummaryDTO edition1 = new EditionSummaryDTO().id(randomId());
-		EditionSummaryDTO edition2 = new EditionSummaryDTO().id(randomId());
-		EditionSummaryDTO edition3 = new EditionSummaryDTO().id(randomId());
+		EditionSummaryDTO edition1 = new EditionSummaryDTO().id(randomId()).name("A");
+		EditionSummaryDTO edition2 = new EditionSummaryDTO().id(randomId()).name("B");
+		EditionSummaryDTO edition3 = new EditionSummaryDTO().id(randomId()).name("C");
 		editionRepository.save(SCEdition.builder().id(edition1.getId()).build());
 		editionRepository.save(SCEdition.builder().id(edition2.getId()).build());
 

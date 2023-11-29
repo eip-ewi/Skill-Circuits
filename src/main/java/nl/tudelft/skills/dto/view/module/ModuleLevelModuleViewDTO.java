@@ -72,7 +72,7 @@ public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitV
 
 	@Override
 	public List<? extends GroupView> getGroups() {
-		return submodules;
+		return submodules.stream().sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList();
 	}
 
 	@Override
@@ -80,7 +80,8 @@ public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitV
 		super.postApply();
 		// get all checkpoints in this edition
 		this.checkpointsInEdition = data.getEdition().getCheckpoints().stream()
-				.map(cp -> View.convert(cp, CheckpointViewDTO.class)).toList();
+				.map(cp -> View.convert(cp, CheckpointViewDTO.class))
+				.sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList();
 		// get all checkpoints that contain a skill that is in this module
 		Set<Long> skillIdsInModule = data.getSubmodules().stream()
 				.flatMap(sub -> sub.getSkills().stream().map(AbstractSkill::getId))
