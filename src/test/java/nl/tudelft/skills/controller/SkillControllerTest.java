@@ -23,7 +23,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDateTime;
@@ -45,6 +44,7 @@ import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.lib.security.LabradorUserDetails;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.SpringContext;
+import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.create.CheckpointCreateDTO;
 import nl.tudelft.skills.dto.create.ExternalSkillCreateDTO;
@@ -54,11 +54,10 @@ import nl.tudelft.skills.dto.id.*;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
 import nl.tudelft.skills.dto.patch.TaskPatchDTO;
-import nl.tudelft.skills.model.ExternalSkill;
-import nl.tudelft.skills.model.SCEdition;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.model.TaskType;
+import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
+import nl.tudelft.skills.dto.view.module.TaskViewDTO;
+import nl.tudelft.skills.model.*;
+import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.ClickedLinkService;
@@ -86,6 +85,7 @@ public class SkillControllerTest extends ControllerTest {
 	private final ClickedLinkService clickedLinkService;
 	private final ClickedLinkRepository clickedLinkRepository;
 	private final PersonRepository personRepository;
+	private final ModuleRepository moduleRepository;
 	private final HttpSession session;
 	private final EditionRepository editionRepository;
 	private final RoleControllerApi roleApi;
@@ -98,7 +98,7 @@ public class SkillControllerTest extends ControllerTest {
 			PathRepository pathRepository, TaskCompletionService taskCompletionService,
 			ClickedLinkService clickedLinkService, ClickedLinkRepository clickedLinkRepository,
 			TaskCompletionRepository taskCompletionRepository, EditionRepository editionRepository,
-			RoleControllerApi roleApi, PersonRepository personRepository) {
+			RoleControllerApi roleApi, PersonRepository personRepository, ModuleRepository moduleRepository) {
 		this.submoduleRepository = submoduleRepository;
 		this.session = mock(HttpSession.class);
 		this.moduleService = mock(ModuleService.class);
@@ -111,6 +111,7 @@ public class SkillControllerTest extends ControllerTest {
 		this.skillService = skillService;
 		this.taskCompletionService = taskCompletionService;
 		this.personRepository = personRepository;
+		this.moduleRepository = moduleRepository;
 		this.skillRepository = skillRepository;
 		this.abstractSkillRepository = abstractSkillRepository;
 		this.taskCompletionRepository = taskCompletionRepository;
@@ -118,8 +119,8 @@ public class SkillControllerTest extends ControllerTest {
 		this.roleApi = roleApi;
 
 		this.skillController = new SkillController(skillRepository, externalSkillRepository,
-				abstractSkillRepository, taskRepository,
-				submoduleRepository, checkpointRepository, pathRepository, personRepository, skillService,
+				abstractSkillRepository, taskRepository, submoduleRepository, moduleRepository,
+				checkpointRepository, pathRepository, personRepository, skillService,
 				moduleService, taskCompletionService, clickedLinkService, session);
 	}
 
@@ -181,8 +182,8 @@ public class SkillControllerTest extends ControllerTest {
 		SkillController skc = new SkillController(SpringContext.getBean(SkillRepository.class),
 				externalSkillRepository,
 				abstractSkillRepository, taskRepository,
-				submoduleRepository, SpringContext.getBean(CheckpointRepository.class), pathRepository,
-				personRepository, skillService,
+				submoduleRepository, moduleRepository, SpringContext.getBean(CheckpointRepository.class),
+				pathRepository, personRepository, skillService,
 				moduleService, taskCompletionService, clickedLinkService, session);
 
 		skc.createSkill(null, dto, mock(Model.class));
@@ -320,7 +321,8 @@ public class SkillControllerTest extends ControllerTest {
 		// of the recentActiveEditionForSkillOrLatest method
 		SkillService mockSkillService = mock(SkillService.class);
 		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
-				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
+				abstractSkillRepository, taskRepository, submoduleRepository, moduleRepository,
+				checkpointRepository,
 				pathRepository, personRepository, mockSkillService, moduleService, taskCompletionService,
 				clickedLinkService, session);
 
@@ -355,7 +357,8 @@ public class SkillControllerTest extends ControllerTest {
 		// of the recentActiveEditionForSkillOrLatest method
 		SkillService mockSkillService = mock(SkillService.class);
 		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
-				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
+				abstractSkillRepository, taskRepository, submoduleRepository, moduleRepository,
+				checkpointRepository,
 				pathRepository, personRepository, mockSkillService, moduleService, taskCompletionService,
 				clickedLinkService,
 				session);
@@ -406,12 +409,105 @@ public class SkillControllerTest extends ControllerTest {
 	}
 
 	@Test
-	@WithAnonymousUser
-	void getSkillNotAuthenticated() throws Exception {
-		// An unauthenticated user should not be able to get a skill
+	@WithUserDetails("username")
+	void testGetSkillUnmodified() {
+		// Setup for test
+		db.getEditionRL().setVisible(true);
+		editionRepository.save(db.getEditionRL());
+		mockRole(roleApi, "STUDENT");
+		Skill skill = db.getSkillVariables();
+
+		// Get authenticated person
+		Person authPerson = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal()).getUser();
+
+		// Call method
+		skillController.getSkill(authPerson, skill.getId(), model);
+
+		// Assert on added model attributes concerning paths and added tasks/modified skills
+		assertThat(model.getAttribute("selectedPathId")).isNull();
+		assertThat(model.getAttribute("tasksAdded")).isEqualTo(List.of());
+		assertThat(model.getAttribute("skillsModified")).isEqualTo(List.of());
+
+		// The skill view should be unmodified (all tasks with their initial visibility, meaning all are visible)
+		ModuleLevelSkillViewDTO view = View.convert(skill, ModuleLevelSkillViewDTO.class);
+		assertThat(model.getAttribute("block")).isEqualTo(view);
+	}
+
+	@Test
+	@WithUserDetails("username")
+	void testGetSkillModified() {
+		// General setup for test
+		SCEdition edition = db.getEditionRL();
+		SCPerson person = db.getPerson();
+		Skill skill = db.getSkillVariables();
+		Task taskDo = db.getTaskDo10a();
+		Task taskRead = db.getTaskRead10();
+		edition.setVisible(true);
+		mockRole(roleApi, "STUDENT");
+
+		// Create new path
+		Path explorerPath = Path.builder().name("Explorer").edition(edition)
+				.tasks(Set.of(taskDo)).build();
+		edition.getPaths().add(explorerPath);
+
+		// Set preferred path
+		Path pathfinderPath = db.getPathFinderPath();
+		when(moduleService.getDefaultOrPreferredPath(person.getId(), edition.getId()))
+				.thenReturn(pathfinderPath);
+
+		// Add tasks to paths
+		pathfinderPath.getTasks().add(taskRead);
+		taskRead.getPaths().add(pathfinderPath);
+		taskDo.getPaths().add(explorerPath);
+
+		// "Remove" taskRead10 and add taskDo10a
+		person.getSkillsModified().add(skill);
+		person.getTasksAdded().add(taskDo);
+
+		// Set taskRead10 to be completed
+		TaskCompletion completion = TaskCompletion.builder().person(person).task(taskDo).build();
+		person.getTaskCompletions().add(completion);
+		taskDo.getCompletedBy().add(completion);
+
+		// Save all changes to the db
+		pathRepository.save(pathfinderPath);
+		pathRepository.save(explorerPath);
+		taskCompletionRepository.save(completion);
+		editionRepository.save(edition);
+		taskRepository.save(taskRead);
+		taskRepository.save(taskDo);
+		personRepository.save(person);
+
+		// Get authenticated person
+		Person authPerson = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal()).getUser();
+
+		// Call method
+		skillController.getSkill(authPerson, skill.getId(), model);
+
+		// Removed task should be invisible
+		ModuleLevelSkillViewDTO view = View.convert(skill, ModuleLevelSkillViewDTO.class);
+		view.getTasks().stream().filter(t -> t.getId().equals(taskRead.getId()))
+				.findFirst().get().setVisible(false);
+		view.getTasks().stream().filter(t -> t.getId().equals(taskDo.getId()))
+				.findFirst().get().setCompleted(true);
+		assertThat(model.getAttribute("block")).isEqualTo(view);
+
+		// Assert on added model attributes concerning paths and added tasks/modified skills
+		assertThat(model.getAttribute("selectedPathId")).isEqualTo(pathfinderPath.getId());
+		assertThat(model.getAttribute("tasksAdded")).isEqualTo(List.of(
+				View.convert(taskDo, TaskViewDTO.class)));
+		assertThat(model.getAttribute("skillsModified")).isEqualTo(List.of(view));
+	}
+
+	@Test
+	@WithUserDetails("username")
+	void getSkillNotAuthorized() throws Exception {
+		// A student should not be able to see a skill in an unpublished edition
+		mockRole(roleApi, "STUDENT");
 		mvc.perform(get("/skill/{id}", db.getSkillVariables().getId()))
-				.andExpect(status().is3xxRedirection())
-				.andExpect(redirectedUrlPattern("**/auth/login"));
+				.andExpect(status().isForbidden());
 	}
 
 	@Test
@@ -421,7 +517,8 @@ public class SkillControllerTest extends ControllerTest {
 		// of the recentActiveEditionForSkillOrLatest method
 		SkillService mockSkillService = mock(SkillService.class);
 		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
-				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
+				abstractSkillRepository, taskRepository, submoduleRepository, moduleRepository,
+				checkpointRepository,
 				pathRepository, personRepository, mockSkillService, moduleService, taskCompletionService,
 				clickedLinkService, session);
 
@@ -462,7 +559,6 @@ public class SkillControllerTest extends ControllerTest {
 		mvc.perform(post("/skill/disconnect/1/2"))
 				.andExpect(status().isForbidden());
 		mvc.perform(get("/skill/{id}", db.getSkillVariables().getId()))
-				.andExpect(status().is3xxRedirection())
-				.andExpect(redirectedUrlPattern("**/auth/login"));
+				.andExpect(status().isUnauthorized());
 	}
 }

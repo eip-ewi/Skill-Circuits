@@ -44,17 +44,12 @@ import nl.tudelft.skills.dto.id.CheckpointIdDTO;
 import nl.tudelft.skills.dto.id.SkillIdDTO;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
-import nl.tudelft.skills.dto.view.module.ModuleLevelEditionViewDTO;
-import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
-import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
-import nl.tudelft.skills.dto.view.module.ModuleLevelSubmoduleViewDTO;
+import nl.tudelft.skills.dto.view.module.*;
 import nl.tudelft.skills.model.*;
+import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
-import nl.tudelft.skills.service.ClickedLinkService;
-import nl.tudelft.skills.service.ModuleService;
-import nl.tudelft.skills.service.SkillService;
-import nl.tudelft.skills.service.TaskCompletionService;
+import nl.tudelft.skills.service.*;
 
 @Controller
 @RequestMapping("skill")
@@ -64,8 +59,8 @@ public class SkillController {
 	private final ExternalSkillRepository externalSkillRepository;
 	private final AbstractSkillRepository abstractSkillRepository;
 	private final TaskRepository taskRepository;
-
 	private final SubmoduleRepository submoduleRepository;
+	private final ModuleRepository moduleRepository;
 	private final CheckpointRepository checkpointRepository;
 	private final PathRepository pathRepository;
 	private final PersonRepository personRepository;
@@ -78,9 +73,9 @@ public class SkillController {
 	@Autowired
 	public SkillController(SkillRepository skillRepository, ExternalSkillRepository externalSkillRepository,
 			AbstractSkillRepository abstractSkillRepository, TaskRepository taskRepository,
-			SubmoduleRepository submoduleRepository, CheckpointRepository checkpointRepository,
-			PathRepository pathRepository, PersonRepository personRepository,
-			SkillService skillService, ModuleService moduleService,
+			SubmoduleRepository submoduleRepository, ModuleRepository moduleRepository,
+			CheckpointRepository checkpointRepository, PathRepository pathRepository,
+			PersonRepository personRepository, SkillService skillService, ModuleService moduleService,
 			TaskCompletionService taskCompletionService, ClickedLinkService clickedLinkService,
 			HttpSession session) {
 		this.skillRepository = skillRepository;
@@ -88,6 +83,7 @@ public class SkillController {
 		this.abstractSkillRepository = abstractSkillRepository;
 		this.taskRepository = taskRepository;
 		this.submoduleRepository = submoduleRepository;
+		this.moduleRepository = moduleRepository;
 		this.checkpointRepository = checkpointRepository;
 		this.pathRepository = pathRepository;
 		this.personRepository = personRepository;
@@ -106,11 +102,17 @@ public class SkillController {
 	 */
 	@GetMapping("{id}")
 	@PreAuthorize("@authorisationService.canViewSkill(#id)")
-	public String getSkill(@PathVariable Long id, Model model) {
+	public String getSkill(@AuthenticatedPerson Person person, @PathVariable Long id, Model model) {
 		Skill skill = skillRepository.findByIdOrThrow(id);
 		ModuleLevelSkillViewDTO view = View.convert(skill, ModuleLevelSkillViewDTO.class);
 		view.setCompletedRequiredTasks(true);
 
+		// Set completed tasks
+		Set<Long> completedTasks = personRepository.getById(person.getId()).getTaskCompletions().stream()
+				.map(tc -> tc.getTask().getId()).collect(Collectors.toSet());
+		view.getTasks().forEach(t -> t.setCompleted(completedTasks.contains(t.getId())));
+
+		// Add general model attributes
 		model.addAttribute("level", "module");
 		model.addAttribute("groupType", "submodule");
 		model.addAttribute("block", view);
@@ -118,6 +120,24 @@ public class SkillController {
 		model.addAttribute("circuit", buildCircuitFromSkill(skill));
 		model.addAttribute("canEdit", false);
 		model.addAttribute("canDelete", false);
+
+		// Only add information for this specific skill concerning personal path to model
+		SCModule module = moduleRepository.findByIdOrThrow(skill.getSubmodule().getModule().getId());
+		Path path = moduleService.getDefaultOrPreferredPath(person.getId(), module.getEdition().getId());
+		SCPerson scPerson = personRepository.getById(person.getId());
+		Set<Long> skillTaskIds = skill.getTasks().stream().map(Task::getId).collect(Collectors.toSet());
+
+		model.addAttribute("selectedPathId", path != null ? path.getId() : null);
+		model.addAttribute("tasksAdded", scPerson.getTasksAdded().stream()
+				.filter(t -> skillTaskIds.contains(t.getId())).map(at -> View.convert(at, TaskViewDTO.class))
+				.toList());
+		model.addAttribute("skillsModified",
+				scPerson.getSkillsModified().contains(skill) ? List.of(view) : List.of());
+
+		if (path != null) {
+			Set<Long> taskIds = path.getTasks().stream().map(Task::getId).collect(Collectors.toSet());
+			view.getTasks().forEach(t -> t.setVisible(taskIds.contains(t.getId())));
+		}
 
 		return "block/view";
 	}
