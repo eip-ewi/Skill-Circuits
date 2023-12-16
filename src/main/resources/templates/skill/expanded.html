@@ -78,19 +78,26 @@
         <div layout:replace="~{task/inactiveview :: script}"></div>
 
         <script>
+            /**
+             * Adds an event listener to the given block that opens the expanded skill overlay on click.
+             *
+             * @param block The block to add the event listener to.
+             */
+            function addClickSkillEventListener(block) {
+                block.addEventListener("click", () => {
+                    if (!event.target.closest(".expanded-skill")) {
+                        toggleOverlay(`${block.id}-expanded-overlay`);
+                        history.pushState(
+                            "",
+                            document.title,
+                            window.location.pathname + window.location.search
+                        );
+                    }
+                });
+            }
+
             document.addEventListener("DOMContentLoaded", function () {
-                document.querySelectorAll(".block").forEach(block =>
-                    block.addEventListener("click", function (event) {
-                        if (!event.target.closest(".expanded-skill")) {
-                            toggleOverlay(`${block.id}-expanded-overlay`);
-                            history.pushState(
-                                "",
-                                document.title,
-                                window.location.pathname + window.location.search
-                            );
-                        }
-                    })
-                );
+                document.querySelectorAll(".block").forEach(addClickSkillEventListener);
 
                 // Open skill overlay if url has location information
                 let openBlock = window.location.hash;
