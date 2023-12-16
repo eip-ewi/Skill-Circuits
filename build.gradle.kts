@@ -3,18 +3,17 @@ import org.springframework.boot.gradle.tasks.bundling.BootJar
 import nl.javadude.gradle.plugins.license.DownloadLicensesExtension
 import nl.javadude.gradle.plugins.license.LicenseExtension
 import org.gradle.internal.fingerprint.classpath.impl.ClasspathFingerprintingStrategy.runtimeClasspath
+import java.nio.file.Files
 
 group = "nl.tudelft.skills"
-version = "2.2.2"
+version = "2.2.4"
 
 val javaVersion = JavaVersion.VERSION_17
 
-val labradoorVersion = "1.4.1-SNAPSHOT"
-val libradorVersion = "1.0.3-SNAPSHOT7"
+val labradoorVersion = "1.4.1"
+val libradorVersion = "1.3.0"
 
 val genSourceDir = file("$buildDir/skills/src/main/java")
-
-ext["log4j2.version"] = "2.16.0"
 
 repositories {
     mavenLocal()
@@ -42,11 +41,11 @@ plugins {
     jacoco
     `maven-publish`
 
-    id("org.springframework.boot").version("2.5.6")
-    id("io.spring.dependency-management").version("1.0.11.RELEASE")
-    id("com.github.ben-manes.versions").version("0.39.0")
+    id("org.springframework.boot").version("2.7.18")
+    id("io.spring.dependency-management").version("1.1.4")
+    id("com.github.ben-manes.versions").version("0.50.0")
 
-    id("com.diffplug.spotless").version("6.22.0")
+    id("com.diffplug.spotless").version("6.23.3")
 
     id("com.github.hierynomus.license").version("0.16.1")
 }
@@ -136,17 +135,43 @@ val jacocoTestReport by tasks.getting(JacocoReport::class) {
         xml.required.set(true)
         csv.required.set(true)
 
-        html.destination = file("$buildDir/reports/coverage")
+        html.outputLocation.set(file("$buildDir/reports/coverage"))
+    }
+}
+
+tasks.register("ensureDirectory") {
+    // Store target directory into a variable to avoid project reference in the configuration cache
+    val directory = file("src/main/resources/static/css")
+
+    doLast {
+        Files.createDirectories(directory.toPath())
     }
 }
 
 task<Exec>("sassCompile") {
+    dependsOn.add(tasks.getByName("ensureDirectory"))
     if (System.getProperty("os.name").contains("windows",true)) {
-        commandLine("cmd", "/c", "npm", "run", "sassCompile")
+        commandLine("cmd", "/c", "sass", "src/main/resources/scss:src/main/resources/static/css")
     } else {
-        commandLine("npm", "run", "sassCompile")
+        commandLine("echo", "Checking for sass or sassc...")
+        doLast {
+            val res = exec {
+                isIgnoreExitValue = true
+                executable = "bash"
+                args = listOf("-l", "-c", "sass --version")
+            }
+            if (res.exitValue == 0) {
+                exec { commandLine("sass", "src/main/resources/scss:src/main/resources/static/css") }
+            } else {
+                File("src/main/resources/scss").listFiles()!!.filter { it.extension == "scss" && !it.name.startsWith("_") }.forEach {
+                    exec { commandLine("sassc", "src/main/resources/scss/${it.name}", "src/main/resources/static/css/${it.                        nameWithoutExtension}.css") }
+                }
+            }
+        }
     }
 }
+
+
 task<Exec>("tsCompile") {
     if (System.getProperty("os.name").contains("windows",true)) {
         commandLine("cmd", "/c", "npm", "run", "tsCompile")
@@ -227,7 +252,7 @@ dependencies {
     // DB Drivers / Migration
     implementation("org.liquibase:liquibase-core")
     implementation("com.h2database:h2")
-    implementation("mysql:mysql-connector-java")
+    implementation("com.mysql:mysql-connector-j")
     implementation("org.mariadb.jdbc:mariadb-java-client")
     implementation("org.postgresql:postgresql")
 

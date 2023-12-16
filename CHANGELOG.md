@@ -14,7 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Added
 ## Changed
 ## Fixed
+
+## [2.2.4]
+
+## Added
+## Changed
+## Fixed
 - Fixed changing checkpoint name in setup for teachers (@bbakos)
+- Fixed task completion to send request and to show hidden skill (@ffiedrich)
 - Fixed deleting hidden skills with at least one dependency (@ffiedrich)
 
 ## [2.2.3]
