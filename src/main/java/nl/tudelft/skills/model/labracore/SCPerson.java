@@ -67,7 +67,7 @@ public class SCPerson {
 //	@ToString.Exclude
 //	@EqualsAndHashCode.Exclude
 //	@OneToMany(mappedBy = "person")
-//	private Set<Task> tasksRevealed = new HashSet<>();
+//	private Set<Skill> skillsRevealed = new HashSet<>();
 
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
