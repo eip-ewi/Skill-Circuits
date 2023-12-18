@@ -77,6 +77,8 @@ public class PersonController {
 			return new TaskCompletedDTO(task.getRequiredFor().stream()
 					.filter(s -> completedTasks.containsAll(s.getRequiredTasks()))
 					.map(Skill::getId).toList());
+//			store unlocked tasks in authPerson.tasksRevealed
+
 		} else {
 			taskCompletionService.deleteTaskCompletion(person, task);
 		}

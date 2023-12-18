@@ -17,6 +17,7 @@
 #
 
 databaseChangeLog:
+  # Store revealed tasks
   # Introduce ordering
   - changeSet:
       id: 1659611816234-1
