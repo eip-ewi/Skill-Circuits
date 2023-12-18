@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 ## Changed
+- Assigning student role after task completion if user had no role yet and is student by default (@ffiedrich)
 ## Fixed
 
 ## [2.2.4]
