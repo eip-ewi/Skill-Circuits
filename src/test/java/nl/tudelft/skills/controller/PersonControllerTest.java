@@ -30,8 +30,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
+import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.TaskCompletedDTO;
@@ -44,6 +46,7 @@ import nl.tudelft.skills.repository.PathRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.TaskCompletionService;
 
 @Transactional
@@ -56,19 +59,25 @@ public class PersonControllerTest extends ControllerTest {
 	private final TaskRepository taskRepository;
 	private final TaskCompletionService taskCompletionService;
 	private final PathPreferenceRepository pathPreferenceRepository;
+	private final AuthorisationService authorisationService;
+	private final RoleControllerApi roleApi;
 
 	@Autowired
 	public PersonControllerTest(PersonRepository personRepository, TaskRepository taskRepository,
 			TaskCompletionService taskCompletionService,
 			PathPreferenceRepository pathPreferenceRepository,
 			SkillRepository skillRepository,
-			PathRepository pathRepository) {
+			PathRepository pathRepository,
+			AuthorisationService authorisationService,
+			RoleControllerApi roleApi) {
 		this.personRepository = personRepository;
 		this.personController = new PersonController(taskRepository, personRepository, taskCompletionService,
-				skillRepository, pathRepository);
+				skillRepository, pathRepository, authorisationService, roleApi);
 		this.taskRepository = taskRepository;
 		this.taskCompletionService = taskCompletionService;
 		this.pathPreferenceRepository = pathPreferenceRepository;
+		this.authorisationService = authorisationService;
+		this.roleApi = roleApi;
 	}
 
 	@Test
@@ -88,7 +97,10 @@ public class PersonControllerTest extends ControllerTest {
 	}
 
 	@Test
+	@WithUserDetails("username")
 	void updateTaskCompletedForPersonTrue() {
+		mockRole(roleApi, "STUDENT");
+
 		List<Task> tasksCompleted = db.getPerson().getTaskCompletions().stream()
 				.map(TaskCompletion::getTask).toList();
 		assertThat(tasksCompleted).doesNotContain(db.getTaskDo10a());

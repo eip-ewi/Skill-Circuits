@@ -138,6 +138,24 @@ public class AuthorisationServiceTest {
 	}
 
 	@Test
+	@WithUserDetails("username")
+	void isStudent() {
+		assertThat(authorisationService.isStudent()).isTrue();
+	}
+
+	@Test
+	@WithUserDetails("teacher")
+	void isNotStudentButTeacher() {
+		assertThat(authorisationService.isStudent()).isFalse();
+	}
+
+	@Test
+	@WithUserDetails("admin")
+	void isNotStudentButAdmin() {
+		assertThat(authorisationService.isStudent()).isFalse();
+	}
+
+	@Test
 	@WithAnonymousUser
 	void cannotViewIfNotAuthenticated() {
 		assertThat(authorisationService.canViewCourse(db.getCourseRL().getId())).isFalse();
