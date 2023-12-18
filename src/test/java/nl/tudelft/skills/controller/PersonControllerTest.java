@@ -19,7 +19,7 @@ package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -27,6 +27,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,6 +36,9 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
 import nl.tudelft.labracore.api.RoleControllerApi;
+import nl.tudelft.labracore.api.dto.EditionIdDTO;
+import nl.tudelft.labracore.api.dto.PersonIdDTO;
+import nl.tudelft.labracore.api.dto.RoleCreateDTO;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.TaskCompletedDTO;
@@ -48,6 +53,7 @@ import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.TaskCompletionService;
+import reactor.core.publisher.Mono;
 
 @Transactional
 @AutoConfigureMockMvc
@@ -96,10 +102,29 @@ public class PersonControllerTest extends ControllerTest {
 		assertThat(tasksCompletedAfter).contains(db.getTaskDo10a(), db.getTaskRead10());
 	}
 
-	@Test
+	@ParameterizedTest
 	@WithUserDetails("username")
-	void updateTaskCompletedForPersonTrue() {
-		mockRole(roleApi, "STUDENT");
+	@CsvSource({ "TEACHER,false", "HEAD_TA,false", "TA,false", "STUDENT,false", ",true" })
+	void updateTaskCompletedForPersonTrue(String role, boolean addRole) {
+		completeTaskTrueHelper(role, addRole);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("teacher")
+	@CsvSource({ "TEACHER,false", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	void updateTaskCompletedForPersonTrueDefaultTeacherRole(String role, boolean addRole) {
+		completeTaskTrueHelper(role, addRole);
+	}
+
+	/**
+	 * Grouped functionality for tests checking a task being completed. It is used in multiple tests since
+	 * different user details are needed.
+	 */
+	void completeTaskTrueHelper(String role, boolean addRole) {
+		mockRole(roleApi, role);
+
+		// Return value is not checked, only call on method
+		when(roleApi.addRole(any())).thenReturn(Mono.empty());
 
 		List<Task> tasksCompleted = db.getPerson().getTaskCompletions().stream()
 				.map(TaskCompletion::getTask).toList();
@@ -114,6 +139,18 @@ public class PersonControllerTest extends ControllerTest {
 				.map(TaskCompletion::getTask).toList();
 		assertThat(tasksCompletedAfter).contains(db.getTaskDo10a());
 		assertThat(taskCompletedDTO.getShowSkills()).hasSize(0);
+
+		// Assert that a role was added or that no role was added
+		if (addRole) {
+			RoleCreateDTO roleCreateDTO = new RoleCreateDTO()
+					.person(new PersonIdDTO().id(db.getPerson().getId()))
+					.edition(new EditionIdDTO().id(db.getEditionRL().getId()))
+					.type(RoleCreateDTO.TypeEnum.STUDENT);
+
+			verify(roleApi).addRole(roleCreateDTO);
+		} else {
+			verify(roleApi, never()).addRole(any());
+		}
 	}
 
 	@Test
