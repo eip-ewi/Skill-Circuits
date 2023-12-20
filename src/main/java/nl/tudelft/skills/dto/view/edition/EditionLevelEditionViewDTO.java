@@ -58,6 +58,11 @@ public class EditionLevelEditionViewDTO extends View<SCEdition> implements Circu
 	@NotNull
 	private Set<PathViewDTO> paths;
 
+	public List<EditionLevelModuleViewDTO> getModules() {
+		return modules.stream()
+				.sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList();
+	}
+
 	@Override
 	public List<? extends GroupView> getGroups() {
 		return modules.stream().sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList();
