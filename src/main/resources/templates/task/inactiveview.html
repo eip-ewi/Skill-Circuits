@@ -88,6 +88,8 @@
 
             const taskId = button.closest(".item").dataset.item;
             const expandedSkill = button.closest(".expanded-skill");
+            const blockId = button.closest(".overlay").id.split("-")[1];
+            const block = $(`#block-${blockId}`);
             const leftSide = expandedSkill.querySelector(".expanded-skill__content > :first-child");
             const rightSide = expandedSkill.querySelector(".expanded-skill__content > :last-child");
 
@@ -126,6 +128,10 @@
 
                     // Show icon in preview
                     document.getElementById(`item-${taskId}-icon`).classList.remove("hidden");
+
+                    // Update completion status of skill and child skills
+                    updateBlockState(blockId);
+                    [...block.data("children")].forEach(id => updateBlockState(id));
                 },
                 error: () => {
                     alert("Failed to add task");
@@ -146,6 +152,8 @@
             const taskId = button.closest(".item").dataset.item;
             const paths = button.closest(".item").dataset.pathIds;
             const expandedSkill = button.closest(".expanded-skill");
+            const blockId = button.closest(".overlay").id.split("-")[1];
+            const block = $(`#block-${blockId}`);
             const leftSide = expandedSkill.querySelector(".expanded-skill__content > :first-child");
             const rightSide = expandedSkill.querySelector(".expanded-skill__content > :last-child");
 
@@ -188,6 +196,10 @@
 
                     // Hide icon in preview
                     document.getElementById(`item-${taskId}-icon`).classList.add("hidden");
+
+                    // Update completion status of skill and child skills
+                    updateBlockState(blockId);
+                    [...block.data("children")].forEach(id => updateBlockState(id));
                 },
                 error: () => {
                     alert("Failed to remove task");
