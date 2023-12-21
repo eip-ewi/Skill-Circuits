@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed task completion to send request and to show hidden skill (@ffiedrich)
 - Fixed being able to remove dependency lines (@ffiedrich)
 - Fixed deleting hidden skills with at least one dependency (@ffiedrich)
+- Fixed adding/removing task frontend bugs and updating skill completion status (@ffiedrich)
 
 ## [2.2.3]
 
