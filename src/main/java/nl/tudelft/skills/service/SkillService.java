@@ -56,6 +56,7 @@ public class SkillService {
 	private final AuthorisationService authorisationService;
 	private final ClickedLinkService clickedLinkService;
 	private final PersonRepository personRepository;
+	private final TaskRepository taskRepository;
 
 	/**
 	 * Deletes a skill.
@@ -88,6 +89,11 @@ public class SkillService {
 						person.getTasksAdded().stream().filter(t -> !t.getSkill().getId().equals(s.getId()))
 								.collect(Collectors.toSet()));
 				personRepository.save(person);
+			});
+
+			s.getRequiredTasks().forEach(t -> {
+				t.getRequiredFor().remove(s);
+				taskRepository.save(t);
 			});
 		}
 		abstractSkillRepository.delete(skill);
