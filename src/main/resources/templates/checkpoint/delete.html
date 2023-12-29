@@ -55,6 +55,7 @@
     <script th:if="${canEdit}" layout:fragment="script">
         function deleteCheckpoint() {
             toggleOverlay("delete-checkpoint-overlay");
+            // TODO check if this should be refactored
             let checkpointId = $(this).data("checkpoint");
             $("#delete-checkpoint-id").val(checkpointId);
             $("#delete-checkpoint-module").val($("#circuit").data("id"));
@@ -97,7 +98,9 @@
                             $(
                                 "#delete-checkpoint-form > .confirmation__buttons > button[type=submit]"
                             ).addClass("disabled");
-                            $("#delete-checkpoint-error").removeClass("hidden");
+                            let errorText = $("#delete-checkpoint-error");
+                            errorText.text(res.responseText);
+                            errorText.removeClass("hidden");
                         }
                     },
                 });

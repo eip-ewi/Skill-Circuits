@@ -17,9 +17,6 @@
  */
 package nl.tudelft.skills.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,18 +38,6 @@ public class CheckpointServiceTest {
 	@Autowired
 	private CheckpointRepository checkpointRepository;
 
-	@Test
-	public void findNextCheckpoint() {
-		assertThat(checkpointService
-				.findNextCheckpoint(db.getCheckpointLectureOne()))
-				.hasValue(db.getCheckpointLectureTwo());
-	}
-
-	@Test
-	public void findNextCheckpointLast() {
-		assertThat(checkpointService
-				.findNextCheckpoint(db.getCheckpointLectureTwo()))
-				.isEmpty();
-	}
+	// TODO Test checkpoint service methods.
 
 }

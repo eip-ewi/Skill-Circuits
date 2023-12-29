@@ -20,6 +20,7 @@ package nl.tudelft.skills.controller;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -37,8 +38,10 @@ import nl.tudelft.skills.dto.patch.CheckpointPatchDTO;
 import nl.tudelft.skills.dto.view.checkpoint.ChangeCheckpointDTO;
 import nl.tudelft.skills.dto.view.checkpoint.CheckpointViewDTO;
 import nl.tudelft.skills.model.Checkpoint;
+import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.CheckpointRepository;
+import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.service.CheckpointService;
 
@@ -49,13 +52,16 @@ public class CheckpointController {
 	private final CheckpointRepository checkpointRepository;
 	private final CheckpointService checkpointService;
 	private final SkillRepository skillRepository;
+	private final ModuleRepository moduleRepository;
 
 	@Autowired
 	public CheckpointController(CheckpointRepository checkpointRepository,
-			CheckpointService checkpointService, SkillRepository skillRepository) {
+			CheckpointService checkpointService,
+			SkillRepository skillRepository, ModuleRepository moduleRepository) {
 		this.checkpointRepository = checkpointRepository;
 		this.checkpointService = checkpointService;
 		this.skillRepository = skillRepository;
+		this.moduleRepository = moduleRepository;
 	}
 
 	@Transactional
@@ -138,25 +144,54 @@ public class CheckpointController {
 		return "redirect:/module/" + moduleId;
 	}
 
+	/**
+	 * Deletes a specified set of skills from a checkpoint. The skills need to be in the same module. If they
+	 * are not in the same module, 409 Conflict is returned. A request with such data should already be
+	 * prevented from the frontend.
+	 *
+	 * @param  id       The id of the checkpoint.
+	 * @param  skillIds The skills to delete.
+	 * @return          200 OK if the skills could be deleted from the checkpoint. 409 Conflict if the skills
+	 *                  are not in the same module, or the checkpoint is the last checkpoint. The returned
+	 *                  response also contains descriptive text to distinguish the conflicts.
+	 */
 	@Transactional
 	@DeleteMapping("{id}/skills")
 	@PreAuthorize("@authorisationService.canEditCheckpoint(#id)")
-	public ResponseEntity<Void> deleteSkillsFromCheckpoint(@PathVariable Long id,
+	public ResponseEntity<String> deleteSkillsFromCheckpoint(@PathVariable Long id,
 			@RequestBody List<Long> skillIds) {
+		if (skillIds.isEmpty()) {
+			return ResponseEntity.ok().build();
+		}
+		// TODO this method should be refactored to simplify it
+
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(id);
-		Optional<Checkpoint> nextCheckpoint = checkpointService.findNextCheckpoint(checkpoint);
+		Set<Skill> skills = skillRepository.findAllByIdIn(skillIds);
+
+		// Check if skills are all in the same module
+		Set<Long> moduleIds = skills.stream().map(s -> s.getSubmodule().getModule().getId())
+				.collect(Collectors.toSet());
+		if (moduleIds.size() > 1) {
+			return new ResponseEntity<>("Skills need to be in the same module", HttpStatus.CONFLICT);
+		}
+		Long moduleId = moduleIds.iterator().next();
+
+		// Check if checkpoint is the last checkpoint in the module
+		SCModule module = moduleRepository.findByIdOrThrow(moduleId);
+		Optional<Checkpoint> nextCheckpoint = checkpointService.findNextCheckpointInModule(checkpoint,
+				module);
 		if (nextCheckpoint.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.CONFLICT);
+			return new ResponseEntity<>("Cannot delete last checkpoint", HttpStatus.CONFLICT);
 		}
 
-		Set<Skill> skills = skillRepository.findAllByIdIn(skillIds);
+		// Remove skills from checkpoint
 		checkpoint.getSkills().removeAll(skills);
 		skills.forEach(skill -> {
 			skill.setCheckpoint(nextCheckpoint.get());
 			skillRepository.save(skill);
 		});
 
-		//if checkpoint has no skills left, delete it
+		// If checkpoint has no skills left, delete it
 		if (checkpoint.getSkills().isEmpty()) {
 			checkpointRepository.delete(checkpoint);
 		}
@@ -164,24 +199,35 @@ public class CheckpointController {
 		return ResponseEntity.ok().build();
 	}
 
-	@Transactional
+	/**
+	 * Deletes a given checkpoint, iff it is never the last checkpoint in any module.
+	 *
+	 * @param  id The id of the checkpoint to delete.
+	 * @return    200 OK iff the checkpoint could be deleted, 409 Conflict otherwise.
+	 */
 	@DeleteMapping
 	@PreAuthorize("@authorisationService.canDeleteCheckpoint(#id)")
 	public ResponseEntity<Void> deleteCheckpoint(@RequestParam Long id) {
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(id);
-		Optional<Checkpoint> nextCheckpoint = checkpointService.findNextCheckpoint(checkpoint);
-		if (!checkpoint.getSkills().isEmpty() && nextCheckpoint.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.CONFLICT);
-		}
-		checkpoint.getSkills().forEach(skill -> {
-			skill.setCheckpoint(nextCheckpoint.get());
-			skillRepository.save(skill);
-		});
 
-		checkpointRepository.delete(checkpoint);
-		return new ResponseEntity<>(HttpStatus.OK);
+		// The method returns whether the checkpoint could be deleted
+		// It is deleted iff it is never the last checkpoint in any module
+		boolean deletedCheckpoint = checkpointService.deleteCheckpoint(checkpoint);
+
+		if (deletedCheckpoint) {
+			return new ResponseEntity<>(HttpStatus.OK);
+		}
+		return new ResponseEntity<>(HttpStatus.CONFLICT);
 	}
 
+	/**
+	 * Creates a checkpoint in a given module. Adds the skills in the DTO to the checkpoint.
+	 *
+	 * @param  dto      The CheckpointCreateDTO containing information about the checkpoint to create and the
+	 *                  ids of the skills to add to it.
+	 * @param  moduleId The id of the module to which the checkpoint is added to reload the page.
+	 * @return          Redirection to the module page.
+	 */
 	@Transactional
 	@PostMapping
 	@PreAuthorize("@authorisationService.canCreateCheckpointInEdition(#dto.edition.id)")

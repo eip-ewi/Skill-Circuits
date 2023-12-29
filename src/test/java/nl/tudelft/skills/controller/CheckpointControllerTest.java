@@ -378,6 +378,8 @@ public class CheckpointControllerTest extends ControllerTest {
 		assertThat(checkpoint.getSkills()).contains(db.getSkillImplication());
 	}
 
+	// TODO Test additional checkpoint skill deletion functionality.
+
 	@Test
 	@WithUserDetails("admin")
 	public void deleteSomeSkillsFromCheckpoint() {
