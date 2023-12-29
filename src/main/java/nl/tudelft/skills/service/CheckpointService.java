@@ -28,15 +28,18 @@ import nl.tudelft.skills.model.Checkpoint;
 import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.CheckpointRepository;
+import nl.tudelft.skills.repository.ModuleRepository;
 
 @Service
 public class CheckpointService {
 
 	private final CheckpointRepository checkpointRepository;
+	private final ModuleRepository moduleRepository;
 
 	@Autowired
-	public CheckpointService(CheckpointRepository checkpointRepository) {
+	public CheckpointService(CheckpointRepository checkpointRepository, ModuleRepository moduleRepository) {
 		this.checkpointRepository = checkpointRepository;
+		this.moduleRepository = moduleRepository;
 	}
 
 	/**
@@ -59,6 +62,35 @@ public class CheckpointService {
 		return Optional
 				.of(sortedSkills.stream().filter(s -> !s.getCheckpoint().equals(checkpoint)).findFirst()
 						.get().getCheckpoint());
+	}
+
+	/**
+	 * Deletes a given set of skills from a checkpoint in a specific module.
+	 *
+	 * @param  checkpoint The checkpoint from which to delete the skills.
+	 * @param  skills     The set of skills to delete.
+	 * @param  moduleId   The module in which the skills are.
+	 * @return            True iff skills could be deleted from checkpoint (checkpoint is not last
+	 *                    checkpoint), false otherwise.
+	 */
+	@Transactional
+	public boolean deleteSkillsFromCheckpoint(Checkpoint checkpoint, Set<Skill> skills, Long moduleId) {
+		// Check if checkpoint is the last checkpoint in the module
+		SCModule module = moduleRepository.findByIdOrThrow(moduleId);
+		Optional<Checkpoint> nextCheckpoint = findNextCheckpointInModule(checkpoint, module);
+		if (nextCheckpoint.isEmpty()) {
+			return false;
+		}
+
+		// Remove skills from checkpoint
+		checkpoint.getSkills().removeAll(skills);
+		skills.forEach(skill -> skill.setCheckpoint(nextCheckpoint.get()));
+
+		// If checkpoint has no skills left, delete it
+		if (checkpoint.getSkills().isEmpty()) {
+			checkpointRepository.delete(checkpoint);
+		}
+		return true;
 	}
 
 	/**

@@ -18,7 +18,6 @@
 package nl.tudelft.skills.controller;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,10 +37,8 @@ import nl.tudelft.skills.dto.patch.CheckpointPatchDTO;
 import nl.tudelft.skills.dto.view.checkpoint.ChangeCheckpointDTO;
 import nl.tudelft.skills.dto.view.checkpoint.CheckpointViewDTO;
 import nl.tudelft.skills.model.Checkpoint;
-import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.CheckpointRepository;
-import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.service.CheckpointService;
 
@@ -52,16 +49,13 @@ public class CheckpointController {
 	private final CheckpointRepository checkpointRepository;
 	private final CheckpointService checkpointService;
 	private final SkillRepository skillRepository;
-	private final ModuleRepository moduleRepository;
 
 	@Autowired
 	public CheckpointController(CheckpointRepository checkpointRepository,
-			CheckpointService checkpointService,
-			SkillRepository skillRepository, ModuleRepository moduleRepository) {
+			CheckpointService checkpointService, SkillRepository skillRepository) {
 		this.checkpointRepository = checkpointRepository;
 		this.checkpointService = checkpointService;
 		this.skillRepository = skillRepository;
-		this.moduleRepository = moduleRepository;
 	}
 
 	@Transactional
@@ -155,7 +149,6 @@ public class CheckpointController {
 	 *                  are not in the same module, or the checkpoint is the last checkpoint. The returned
 	 *                  response also contains descriptive text to distinguish the conflicts.
 	 */
-	@Transactional
 	@DeleteMapping("{id}/skills")
 	@PreAuthorize("@authorisationService.canEditCheckpoint(#id)")
 	public ResponseEntity<String> deleteSkillsFromCheckpoint(@PathVariable Long id,
@@ -163,8 +156,6 @@ public class CheckpointController {
 		if (skillIds.isEmpty()) {
 			return ResponseEntity.ok().build();
 		}
-		// TODO this method should be refactored to simplify it
-
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(id);
 		Set<Skill> skills = skillRepository.findAllByIdIn(skillIds);
 
@@ -174,29 +165,16 @@ public class CheckpointController {
 		if (moduleIds.size() > 1) {
 			return new ResponseEntity<>("Skills need to be in the same module", HttpStatus.CONFLICT);
 		}
-		Long moduleId = moduleIds.iterator().next();
 
-		// Check if checkpoint is the last checkpoint in the module
-		SCModule module = moduleRepository.findByIdOrThrow(moduleId);
-		Optional<Checkpoint> nextCheckpoint = checkpointService.findNextCheckpointInModule(checkpoint,
-				module);
-		if (nextCheckpoint.isEmpty()) {
-			return new ResponseEntity<>("Cannot delete last checkpoint", HttpStatus.CONFLICT);
+		// The method returns whether the skills could be deleted from the checkpoint
+		boolean deletedCheckpoint = checkpointService.deleteSkillsFromCheckpoint(checkpoint, skills,
+				moduleIds.iterator().next());
+
+		// If they could not be deleted, the checkpoint is the last checkpoint in the module
+		if (deletedCheckpoint) {
+			return new ResponseEntity<>(HttpStatus.OK);
 		}
-
-		// Remove skills from checkpoint
-		checkpoint.getSkills().removeAll(skills);
-		skills.forEach(skill -> {
-			skill.setCheckpoint(nextCheckpoint.get());
-			skillRepository.save(skill);
-		});
-
-		// If checkpoint has no skills left, delete it
-		if (checkpoint.getSkills().isEmpty()) {
-			checkpointRepository.delete(checkpoint);
-		}
-
-		return ResponseEntity.ok().build();
+		return new ResponseEntity<>("Cannot delete last checkpoint", HttpStatus.CONFLICT);
 	}
 
 	/**
