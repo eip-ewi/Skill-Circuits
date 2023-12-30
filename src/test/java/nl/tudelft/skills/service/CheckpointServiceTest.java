@@ -158,7 +158,7 @@ public class CheckpointServiceTest {
 		Checkpoint checkpointA = db.getCheckpointLectureOne();
 		Checkpoint checkpointB = db.getCheckpointLectureTwo();
 
-		createSkillsInNewModuleHelper(checkpointA, checkpointB);
+		db.createSkillsInNewModuleHelper(checkpointA, checkpointB);
 
 		boolean retVal = checkpointService.deleteCheckpoint(checkpointA);
 		assertThat(retVal).isTrue();
@@ -176,7 +176,7 @@ public class CheckpointServiceTest {
 		Checkpoint checkpointA = db.getCheckpointLectureOne();
 		Checkpoint checkpointB = db.getCheckpointLectureTwo();
 
-		createSkillsInNewModuleHelper(checkpointB, checkpointA);
+		db.createSkillsInNewModuleHelper(checkpointB, checkpointA);
 
 		boolean retVal = checkpointService.deleteCheckpoint(checkpointA);
 		assertThat(retVal).isFalse();
@@ -194,7 +194,7 @@ public class CheckpointServiceTest {
 		Checkpoint checkpointA = db.getCheckpointLectureTwo();
 		Checkpoint checkpointB = db.getCheckpointLectureOne();
 
-		createSkillsInNewModuleHelper(checkpointB, checkpointA);
+		db.createSkillsInNewModuleHelper(checkpointB, checkpointA);
 
 		boolean retVal = checkpointService.deleteCheckpoint(checkpointA);
 		assertThat(retVal).isFalse();
@@ -202,36 +202,5 @@ public class CheckpointServiceTest {
 				.containsAll(checkpointA.getSkills());
 		assertThat(checkpointRepository.findByIdOrThrow(checkpointB.getId()).getSkills())
 				.containsAll(checkpointB.getSkills());
-	}
-
-	/**
-	 * Helper method for database setup. Creates a new module with 2 skills, 2 checkpoints (given as
-	 * parameters) and 1 submodule.
-	 *
-	 * @param checkpointA The first checkpoint.
-	 * @param checkpointB The last checkpoint.
-	 */
-	public void createSkillsInNewModuleHelper(Checkpoint checkpointA, Checkpoint checkpointB) {
-		SCModule module = SCModule.builder().name("Module").edition(db.getEditionRL()).build();
-		moduleRepository.save(module);
-		Submodule submodule = Submodule.builder().name("Submodule").module(module).row(0).column(0).build();
-		submoduleRepository.save(submodule);
-		SCEdition edition = db.getEditionRL();
-		edition.getModules().add(module);
-		editionRepository.save(edition);
-		module.getSubmodules().add(submodule);
-		moduleRepository.save(module);
-		Skill skillA = Skill.builder().name("Skill A").row(0).column(0).checkpoint(checkpointA)
-				.submodule(submodule)
-				.build();
-		Skill skillB = Skill.builder().name("Skill B").row(1).column(0).checkpoint(checkpointB)
-				.submodule(submodule)
-				.build();
-		submodule.getSkills().addAll(Set.of(skillA, skillB));
-		skillRepository.saveAll(Set.of(skillA, skillB));
-		submoduleRepository.save(submodule);
-		checkpointA.getSkills().add(skillA);
-		checkpointB.getSkills().add(skillB);
-		checkpointRepository.saveAll(Set.of(checkpointA, checkpointB));
 	}
 }
