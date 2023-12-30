@@ -29,17 +29,21 @@ import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.CheckpointRepository;
 import nl.tudelft.skills.repository.ModuleRepository;
+import nl.tudelft.skills.repository.SkillRepository;
 
 @Service
 public class CheckpointService {
 
 	private final CheckpointRepository checkpointRepository;
 	private final ModuleRepository moduleRepository;
+	private final SkillRepository skillRepository;
 
 	@Autowired
-	public CheckpointService(CheckpointRepository checkpointRepository, ModuleRepository moduleRepository) {
+	public CheckpointService(CheckpointRepository checkpointRepository, ModuleRepository moduleRepository,
+			SkillRepository skillRepository) {
 		this.checkpointRepository = checkpointRepository;
 		this.moduleRepository = moduleRepository;
+		this.skillRepository = skillRepository;
 	}
 
 	/**
@@ -83,9 +87,13 @@ public class CheckpointService {
 		}
 
 		// Remove skills from checkpoint
+		skills.forEach(skill -> {
+			skill.setCheckpoint(nextCheckpoint.get());
+			skillRepository.save(skill);
+		});
 		checkpoint.getSkills().removeAll(skills);
-		skills.forEach(skill -> skill.setCheckpoint(nextCheckpoint.get()));
 
+		// TODO Check if this still is desired behavior.
 		// If checkpoint has no skills left, delete it
 		if (checkpoint.getSkills().isEmpty()) {
 			checkpointRepository.delete(checkpoint);
