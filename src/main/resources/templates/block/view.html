@@ -39,6 +39,21 @@
         th:data-hidden="${level == 'module'} ? ${canEdit and block.hidden} : ${null}"
         th:data-checkpoint="${level == 'module'} ? ${block.checkpoint.id} : ${null}"
         th:if="${level != 'module'} or ${block.completedRequiredTasks or canEdit or not block.hidden}"
+        <!--
+        Add
+        condition
+        above
+        to
+        check
+        if
+        the
+        block
+        was
+        already
+        revealed
+        by
+        the
+        user-->
         layout:fragment="block">
         <div th:unless="${create}" th:id="|block-${block.id}-header|" class="block__header">
             <p
