@@ -63,11 +63,12 @@ public class SCPerson {
 	// For configuring a skill with any task in any path
 	private Set<Task> tasksAdded = new HashSet<>();
 
-	//	@Builder.Default
-	//	@ToString.Exclude
-	//	@EqualsAndHashCode.Exclude
-	//	@OneToMany(mappedBy = "person")
-	//	private Set<Skill> skillsRevealed = new HashSet<>();
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@OneToMany
+	// To remember which skills have already been revealed
+	private Set<Skill> skillsRevealed = new HashSet<>();
 
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude

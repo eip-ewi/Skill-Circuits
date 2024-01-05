@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
 
+import nl.tudelft.skills.model.Skill;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -129,6 +130,9 @@ public class ModuleService {
 				.map(at -> View.convert(at, TaskViewDTO.class)).toList());
 		model.addAttribute("skillsModified", personRepository.getById(person.getId()).getSkillsModified()
 				.stream().map(at -> View.convert(at, ModuleLevelSkillViewDTO.class)).toList());
+		model.addAttribute("skillsRevealedIds", personRepository.getById(person.getId()).getSkillsRevealed()
+				.stream().map(Skill::getId).collect(Collectors.toSet()));
+
 
 		EditionDetailsDTO edition = editionApi.getEditionById(module.getEdition().getId()).block();
 		CourseDetailsDTO course = courseApi.getCourseById(edition.getCourse().getId()).block();

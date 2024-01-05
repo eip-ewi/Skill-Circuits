@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 
+import nl.tudelft.skills.service.PersonService;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.AllArgsConstructor;
@@ -53,6 +54,7 @@ public class PersonController {
 	private final TaskCompletionService taskCompletionService;
 	private final SkillRepository skillRepository;
 	private final PathRepository pathRepository;
+	private final PersonService personService;
 
 	/**
 	 * Marks a certain task as completed or uncompleted for a certain person.
@@ -73,11 +75,14 @@ public class PersonController {
 			List<Task> completedTasks = person.getTaskCompletions().stream()
 					.map(TaskCompletion::getTask).toList();
 
-			// TODO skill remains visible (see issue #90)
-			return new TaskCompletedDTO(task.getRequiredFor().stream()
-					.filter(s -> completedTasks.containsAll(s.getRequiredTasks()))
-					.map(Skill::getId).toList());
-			//			store unlocked tasks in authPerson.tasksRevealed
+
+			List<Skill> revealedSkills = task.getRequiredFor().stream()
+					.filter(s -> completedTasks.containsAll(s.getRequiredTasks())).toList();
+
+			// Store unlocked skills in authPerson.tasksRevealed
+			revealedSkills.forEach(s -> personService.addRevealedSkill(authPerson.getId(), s));
+			return new TaskCompletedDTO(revealedSkills.stream().map(Skill::getId).toList());
+
 
 		} else {
 			taskCompletionService.deleteTaskCompletion(person, task);

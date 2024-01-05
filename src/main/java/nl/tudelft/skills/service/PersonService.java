@@ -19,6 +19,7 @@ package nl.tudelft.skills.service;
 
 import java.util.Optional;
 
+import nl.tudelft.skills.model.Skill;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,5 +61,17 @@ public class PersonService {
 	public SCPerson getOrCreateSCPerson(Long personId) {
 		return personRepository.findById(personId)
 				.orElseGet(() -> personRepository.save(SCPerson.builder().id(personId).build()));
+	}
+
+	/**
+	 * Stores a revealed skill for a given person id.
+	 *
+	 * @param  personId The id of the person
+	 * @param  skill	The skill that has been revealed
+	 */
+	@Transactional
+	public void addRevealedSkill(Long personId, Skill skill) {
+		SCPerson scPerson = personRepository.findByIdOrThrow(personId);
+		scPerson.getSkillsRevealed().add(skill);
 	}
 }
