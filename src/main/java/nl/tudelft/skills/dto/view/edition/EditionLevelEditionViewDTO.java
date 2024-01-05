@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.dto.view.edition;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -75,6 +76,8 @@ public class EditionLevelEditionViewDTO extends View<SCEdition> implements Circu
 				SpringContext.getBean(CheckpointRepository.class)
 						.findAllById(this.data.getCheckpoints().stream().map(Checkpoint::getId).toList()),
 				CheckpointViewDTO.class);
+		this.checkpointsInEdition = this.checkpointsInEdition.stream()
+				.sorted(Comparator.comparing(CheckpointViewDTO::getDeadline)).toList();
 	}
 
 	@Override

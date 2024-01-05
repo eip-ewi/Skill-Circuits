@@ -207,7 +207,7 @@
                         $(element).find(".checkpoint__edit").click(editCheckpoint);
                         $(element).find(".checkpoint__delete").click(deleteCheckpoint);
                         $("#new-checkpoint-name").val("");
-                        $("#checkpoint-list").prepend(element);
+                        $("#checkpoint-list").append(element);
                     });
                 });
                 $("#new-path-form").submit(e => {

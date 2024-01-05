@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.dto.view.module;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -81,7 +82,7 @@ public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitV
 		// get all checkpoints in this edition
 		this.checkpointsInEdition = data.getEdition().getCheckpoints().stream()
 				.map(cp -> View.convert(cp, CheckpointViewDTO.class))
-				.sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList();
+				.sorted(Comparator.comparing(CheckpointViewDTO::getDeadline)).toList();
 		// get all checkpoints that contain a skill that is in this module
 		Set<Long> skillIdsInModule = data.getSubmodules().stream()
 				.flatMap(sub -> sub.getSkills().stream().map(AbstractSkill::getId))
