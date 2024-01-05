@@ -36,7 +36,7 @@ import nl.tudelft.skills.repository.UserVersionRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 @RestController
-@RequestMapping("/user_version")
+@RequestMapping("/user-version")
 public class UserVersionController {
 	private final UserVersionRepository userVersionRepository;
 	private final PersonRepository scPersonRepository;
@@ -50,6 +50,11 @@ public class UserVersionController {
 		this.buildProperties = buildProperties;
 	}
 
+	/**
+	 * Updates the version for a given person to the latest one
+	 *
+	 * @param authPerson The person to update the version for
+	 */
 	@PatchMapping
 	@Transactional
 	public void versionUpdate(@AuthenticatedPerson Person authPerson) {

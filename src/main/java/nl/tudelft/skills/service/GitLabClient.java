@@ -29,6 +29,11 @@ import nl.tudelft.skills.model.Release;
 public class GitLabClient {
 	private final WebClient webClient = WebClient.builder().baseUrl("https://gitlab.ewi.tudelft.nl/").build();
 
+	/**
+	 * Collects all Skill Circuits releases from GitLab
+	 *
+	 * @return An array of Releases for Skill Circuits
+	 */
 	public List<Release> getReleases() {
 		var entity = webClient.get()
 				.uri("api/v4/projects/7331/releases?include_html_description=true")

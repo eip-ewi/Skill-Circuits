@@ -18,7 +18,6 @@
 package nl.tudelft.skills.repository;
 
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -30,8 +29,6 @@ public interface UserVersionRepository extends JpaRepository<UserVersion, Long> 
 		return findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("UserVersion was not found: " + id));
 	}
-
-	Set<UserVersion> getByPersonId(Long id);
 
 	Optional<UserVersion> findByPersonId(Long id);
 }

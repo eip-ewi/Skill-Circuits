@@ -53,6 +53,11 @@ public class UserVersionService {
 		this.buildProperties = buildProperties;
 	}
 
+	/**
+	 * Checks if the person has seen the latest version before
+	 *
+	 * @return True if the person already seen the newest version, false otherwise
+	 */
 	public boolean isUpToDate() {
 		if (!authorisationService.isAuthenticated()) {
 			return true;
@@ -66,6 +71,11 @@ public class UserVersionService {
 		return userVersion.isPresent() && userVersion.get().getVersion().equals(latestVersion);
 	}
 
+	/**
+	 * Creates html code for the release information that the user haven't seen yet
+	 *
+	 * @return The html code containing the release information
+	 */
 	public String versionInformation() {
 		if (!authorisationService.isAuthenticated()) {
 			return "";
