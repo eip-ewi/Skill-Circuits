@@ -91,6 +91,7 @@
                 getRow(cp)
             );
             $(".ghost_checkpoint").remove();
+            rowsInGrid.shift();
             rowsInGrid.filter(r => !rowsWithCheckpoints.includes(r)).forEach(addGhostCheckpoint);
         }
 
