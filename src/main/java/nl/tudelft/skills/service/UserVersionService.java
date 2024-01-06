@@ -26,7 +26,7 @@ import org.springframework.stereotype.Service;
 
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.controller.UserVersionController;
-import nl.tudelft.skills.model.Release;
+import nl.tudelft.skills.dto.view.ReleaseDTO;
 import nl.tudelft.skills.model.UserVersion;
 import nl.tudelft.skills.repository.UserVersionRepository;
 import nl.tudelft.skills.security.AuthorisationService;
@@ -87,7 +87,7 @@ public class UserVersionService {
 
 		Optional<UserVersion> userVersion = userVersionRepository.findByPersonId(person.getId());
 
-		List<Release> releases = gitLabClient.getReleases();
+		List<ReleaseDTO> releases = gitLabClient.getReleases();
 
 		if (releases == null)
 			return "";
@@ -95,16 +95,16 @@ public class UserVersionService {
 		if (userVersion.isPresent()) {
 			var userReleaseDate = releases.stream()
 					.filter(r -> r.getName().equals(userVersion.get().getVersion()))
-					.map(Release::getReleased_at).findFirst();
+					.map(ReleaseDTO::getReleased_at).findFirst();
 			if (userReleaseDate.isPresent()) {
-				List<Release> newReleases = releases.stream()
+				List<ReleaseDTO> newReleases = releases.stream()
 						.filter(r -> r.getReleased_at().isAfter(userReleaseDate.get())).toList();
 				List<String> newReleasesDesc = newReleases.stream()
 						.map(x -> "<h2>" + x.getName() + "</h2>" + x.getDescription_html()).toList();
 				return String.join("<hr>", newReleasesDesc);
 			}
 		}
-		Optional<Release> latest = releases.stream().findFirst();
+		Optional<ReleaseDTO> latest = releases.stream().findFirst();
 		if (latest.isPresent()) {
 			if (latest.get().getName().equals(buildProperties.getVersion())) {
 				return "<h2>" + latest.get().getName() + "</h2>" + latest.get().getDescription_html();

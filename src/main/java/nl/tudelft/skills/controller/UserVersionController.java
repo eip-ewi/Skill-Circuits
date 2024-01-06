@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.skills.dto.patch.UserVersionPatchDTO;
 import nl.tudelft.skills.model.UserVersion;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.UserVersionRepository;
@@ -63,8 +62,9 @@ public class UserVersionController {
 		String latestVersion = buildProperties.getVersion();
 
 		if (userVersion.isPresent()) {
-			UserVersionPatchDTO patch = UserVersionPatchDTO.builder().version(latestVersion).build();
-			userVersionRepository.save(patch.apply(userVersion.get()));
+			UserVersion presentVersion = userVersion.get();
+			presentVersion.setVersion(latestVersion);
+			userVersionRepository.save(presentVersion);
 		} else {
 			userVersionRepository.save(UserVersion.builder().version(latestVersion)
 					.person(person).build());

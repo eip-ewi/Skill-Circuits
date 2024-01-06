@@ -15,33 +15,27 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.patch;
+package nl.tudelft.skills.dto.view;
 
-import javax.validation.constraints.NotNull;
+import java.time.Instant;
+
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import nl.tudelft.librador.dto.patch.Patch;
-import nl.tudelft.skills.model.UserVersion;
 
-@Data
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserVersionPatchDTO extends Patch<UserVersion> {
+public class ReleaseDTO {
+	public String name;
 
-	@NotNull
-	private String version;
+	public String description_html;
 
-	@Override
-	protected void applyOneToOne() {
-		updateNonNull(version, data::setVersion);
-	}
-
-	@Override
-	protected void validate() {
-
-	}
+	public Instant released_at;
 }

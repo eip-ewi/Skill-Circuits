@@ -23,7 +23,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import nl.tudelft.skills.model.Release;
+import nl.tudelft.skills.dto.view.ReleaseDTO;
 
 @Service
 public class GitLabClient {
@@ -34,11 +34,11 @@ public class GitLabClient {
 	 *
 	 * @return An array of Releases for Skill Circuits
 	 */
-	public List<Release> getReleases() {
+	public List<ReleaseDTO> getReleases() {
 		var entity = webClient.get()
 				.uri("api/v4/projects/7331/releases?include_html_description=true")
 				.retrieve()
-				.toEntity(Release[].class)
+				.toEntity(ReleaseDTO[].class)
 				.block();
 		return Arrays.asList(entity.getBody());
 	}

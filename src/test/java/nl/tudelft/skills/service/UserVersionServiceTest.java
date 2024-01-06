@@ -36,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.controller.UserVersionController;
-import nl.tudelft.skills.model.Release;
+import nl.tudelft.skills.dto.view.ReleaseDTO;
 import nl.tudelft.skills.model.UserVersion;
 import nl.tudelft.skills.repository.UserVersionRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
@@ -116,9 +116,9 @@ class UserVersionServiceTest {
 	@WithUserDetails("username")
 	public void versionInformationNotPresent() {
 		when(buildProperties.getVersion()).thenReturn("1.2.0");
-		Release r1 = Release.builder().name("1.2.0").description_html("<p>desc1</p>")
+		ReleaseDTO r1 = ReleaseDTO.builder().name("1.2.0").description_html("<p>desc1</p>")
 				.released_at(Instant.parse("2023-03-01T00:00:00.793+02:00")).build();
-		Release r2 = Release.builder().name("1.1.0").description_html("<p>desc2</p>")
+		ReleaseDTO r2 = ReleaseDTO.builder().name("1.1.0").description_html("<p>desc2</p>")
 				.released_at(Instant.parse("2023-01-01T00:00:00.793+02:00")).build();
 		when(gitLabClient.getReleases()).thenReturn(List.of(r1, r2));
 		String update = userVersionService.versionInformation();
@@ -134,11 +134,11 @@ class UserVersionServiceTest {
 		userVersionRepository.save(UserVersion.builder()
 				.person(scPersonRepository.findByIdOrThrow(person.getId())).version("1.1.0").build());
 
-		Release r0 = Release.builder().name("2.1.0").description_html("<p>desc0</p>")
+		ReleaseDTO r0 = ReleaseDTO.builder().name("2.1.0").description_html("<p>desc0</p>")
 				.released_at(Instant.parse("2023-07-01T00:00:00.793+02:00")).build();
-		Release r1 = Release.builder().name("1.2.0").description_html("<p>desc1</p>")
+		ReleaseDTO r1 = ReleaseDTO.builder().name("1.2.0").description_html("<p>desc1</p>")
 				.released_at(Instant.parse("2023-03-01T00:00:00.793+02:00")).build();
-		Release r2 = Release.builder().name("1.1.0").description_html("<p>desc2</p>")
+		ReleaseDTO r2 = ReleaseDTO.builder().name("1.1.0").description_html("<p>desc2</p>")
 				.released_at(Instant.parse("2023-01-01T00:00:00.793+02:00")).build();
 		when(gitLabClient.getReleases()).thenReturn(List.of(r0, r1, r2));
 		String update = userVersionService.versionInformation();
@@ -154,11 +154,11 @@ class UserVersionServiceTest {
 		userVersionRepository.save(UserVersion.builder()
 				.person(scPersonRepository.findByIdOrThrow(person.getId())).version("2.2.0").build());
 
-		Release r0 = Release.builder().name("2.1.0").description_html("<p>desc0</p>")
+		ReleaseDTO r0 = ReleaseDTO.builder().name("2.1.0").description_html("<p>desc0</p>")
 				.released_at(Instant.parse("2023-07-01T00:00:00.793+02:00")).build();
-		Release r1 = Release.builder().name("1.2.0").description_html("<p>desc1</p>")
+		ReleaseDTO r1 = ReleaseDTO.builder().name("1.2.0").description_html("<p>desc1</p>")
 				.released_at(Instant.parse("2023-03-01T00:00:00.793+02:00")).build();
-		Release r2 = Release.builder().name("1.1.0").description_html("<p>desc2</p>")
+		ReleaseDTO r2 = ReleaseDTO.builder().name("1.1.0").description_html("<p>desc2</p>")
 				.released_at(Instant.parse("2023-01-01T00:00:00.793+02:00")).build();
 		when(gitLabClient.getReleases()).thenReturn(List.of(r0, r1, r2));
 		String update = userVersionService.versionInformation();
@@ -175,11 +175,11 @@ class UserVersionServiceTest {
 		userVersionRepository.save(UserVersion.builder()
 				.person(scPersonRepository.findByIdOrThrow(person.getId())).version("2.2.0").build());
 
-		Release r0 = Release.builder().name("2.3.0").description_html("<p>desc0</p>")
+		ReleaseDTO r0 = ReleaseDTO.builder().name("2.3.0").description_html("<p>desc0</p>")
 				.released_at(Instant.parse("2023-07-01T00:00:00.793+02:00")).build();
-		Release r1 = Release.builder().name("1.2.0").description_html("<p>desc1</p>")
+		ReleaseDTO r1 = ReleaseDTO.builder().name("1.2.0").description_html("<p>desc1</p>")
 				.released_at(Instant.parse("2023-03-01T00:00:00.793+02:00")).build();
-		Release r2 = Release.builder().name("1.1.0").description_html("<p>desc2</p>")
+		ReleaseDTO r2 = ReleaseDTO.builder().name("1.1.0").description_html("<p>desc2</p>")
 				.released_at(Instant.parse("2023-01-01T00:00:00.793+02:00")).build();
 		when(gitLabClient.getReleases()).thenReturn(List.of(r0, r1, r2));
 		String update = userVersionService.versionInformation();
