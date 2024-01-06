@@ -18,6 +18,7 @@
 package nl.tudelft.skills.service;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -40,6 +41,10 @@ public class GitLabClient {
 				.retrieve()
 				.toEntity(ReleaseDTO[].class)
 				.block();
-		return Arrays.asList(entity.getBody());
+		if (entity == null || entity.getBody() == null) {
+			return Collections.emptyList();
+		} else {
+			return Arrays.asList(entity.getBody());
+		}
 	}
 }
