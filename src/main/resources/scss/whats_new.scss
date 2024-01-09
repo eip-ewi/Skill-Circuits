@@ -1,12 +1,11 @@
 .whats_new {
-    scale: 1;
-    opacity: 1;
     border: 1px solid var(--primary-dark);
     position: fixed;
     right: 50%;
     z-index: 10000;
     background: var(--primary-light);
-    padding: 20px 55px 50px;
+    padding: 1rem 3rem 3rem;
+    top: 4rem;
     width: 40%;
     transform: translateX(50%);
     overflow-y: auto;
@@ -15,8 +14,8 @@
     & > button {
         text-align: center;
         position: relative;
-        padding: 5px 25px;
-        top: 20px;
+        padding: 0.4rem 2rem;
+        top: 1.3rem;
         background: var(--primary-green);
         color: var(--primary-light);
         left: 50%;
@@ -26,23 +25,25 @@
 
 #title {
     text-align: center;
-    padding-bottom: 10px;
+    padding-bottom: 1rem;
 }
 
 #update_text {
     background: var(--background-colour);
-    padding: 30px 50px 30px;
+    padding: 0 4rem 1rem 2rem;
     position: relative;
 
+    & > h2,
     & > h3 {
-        padding-top: 10px;
+        padding-top: 1rem;
+    }
+
+    & > ul {
+        position: relative;
+        left: 2rem;
     }
 }
 
 hr {
-    margin-top: 20px;
-
-    & + h2 {
-        padding-top: 10px;
-    }
+    margin-top: 1rem;
 }

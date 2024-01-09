@@ -26,15 +26,16 @@
     <body>
         <div class="container" layout:fragment="container">
             <div layout:replace="~{header :: header}"></div>
-            <main class="main-section">
+            <main
+                th:with="versionInformation=${@userVersionService.versionInformation()}"
+                class="main-section">
                 <div
-                    th:if="${@authorisationService.isAuthenticated() and not @userVersionService.isUpToDate()}"
+                    th:if="${@authorisationService.isAuthenticated() and not @userVersionService.isUpToDate()
+                    and versionInformation != ''}"
                     class="whats_new"
                     id="version_update">
                     <h1 id="title">What's new</h1>
-                    <div
-                        th:utext="${@userVersionService.versionInformation()}"
-                        id="update_text"></div>
+                    <div th:utext="${versionInformation}" id="update_text"></div>
                     <button id="ok_button">OK</button>
                 </div>
 
