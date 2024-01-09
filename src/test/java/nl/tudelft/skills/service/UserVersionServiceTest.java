@@ -35,7 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.controller.UserVersionController;
 import nl.tudelft.skills.dto.view.ReleaseDTO;
 import nl.tudelft.skills.model.UserVersion;
 import nl.tudelft.skills.repository.UserVersionRepository;
@@ -50,8 +49,6 @@ import nl.tudelft.skills.test.TestUserDetailsService;
 class UserVersionServiceTest {
 	private final UserVersionRepository userVersionRepository;
 	private final PersonRepository scPersonRepository;
-	private final UserVersionController userVersionController;
-
 	private final AuthorisationService authorisationService;
 	private final BuildProperties buildProperties;
 	private final GitLabClient gitLabClient;
@@ -69,9 +66,7 @@ class UserVersionServiceTest {
 		this.db = db;
 		this.buildProperties = mock(BuildProperties.class);
 		this.gitLabClient = mock(GitLabClient.class);
-		this.userVersionController = new UserVersionController(userVersionRepository, scPersonRepository,
-				this.buildProperties);
-		this.userVersionService = new UserVersionService(userVersionRepository, this.userVersionController,
+		this.userVersionService = new UserVersionService(userVersionRepository,
 				authorisationService, gitLabClient, this.buildProperties);
 	}
 
@@ -163,7 +158,7 @@ class UserVersionServiceTest {
 		when(gitLabClient.getReleases()).thenReturn(List.of(r0, r1, r2));
 		String update = userVersionService.versionInformation();
 		assertEquals("", update);
-		assertEquals("2.3.0", userVersionRepository.findByPersonId(person.getId()).get().getVersion());
+		assertEquals("2.2.0", userVersionRepository.findByPersonId(person.getId()).get().getVersion());
 	}
 
 	@Test
