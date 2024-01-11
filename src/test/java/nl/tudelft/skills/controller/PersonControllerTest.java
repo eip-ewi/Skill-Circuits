@@ -26,6 +26,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import nl.tudelft.skills.service.PersonService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -56,19 +57,22 @@ public class PersonControllerTest extends ControllerTest {
 	private final TaskRepository taskRepository;
 	private final TaskCompletionService taskCompletionService;
 	private final PathPreferenceRepository pathPreferenceRepository;
+	private final PersonService personService;
 
 	@Autowired
 	public PersonControllerTest(PersonRepository personRepository, TaskRepository taskRepository,
-			TaskCompletionService taskCompletionService,
-			PathPreferenceRepository pathPreferenceRepository,
-			SkillRepository skillRepository,
-			PathRepository pathRepository) {
+								TaskCompletionService taskCompletionService,
+								PathPreferenceRepository pathPreferenceRepository,
+								SkillRepository skillRepository,
+								PathRepository pathRepository,
+								PersonService personService) {
 		this.personRepository = personRepository;
 		this.personController = new PersonController(taskRepository, personRepository, taskCompletionService,
-				skillRepository, pathRepository);
+				skillRepository, pathRepository, personService);
 		this.taskRepository = taskRepository;
 		this.taskCompletionService = taskCompletionService;
 		this.pathPreferenceRepository = pathPreferenceRepository;
+		this.personService = personService;
 	}
 
 	@Test
