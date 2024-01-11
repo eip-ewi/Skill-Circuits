@@ -66,7 +66,7 @@ public class SCPerson {
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@OneToMany
+	@ManyToMany
 	// To remember which skills have already been revealed
 	private Set<Skill> skillsRevealed = new HashSet<>();
 
