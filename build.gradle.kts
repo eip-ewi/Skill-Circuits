@@ -15,6 +15,10 @@ val libradorVersion = "1.3.0"
 
 val genSourceDir = file("$buildDir/skills/src/main/java")
 
+springBoot{
+    buildInfo()
+}
+
 repositories {
     mavenLocal()
     mavenCentral()

@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## Added
+- Show a changelog to users on new releases (@bbakos)
 ## Changed
 ## Fixed
 
