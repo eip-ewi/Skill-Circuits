@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Added
 ## Changed
 ## Fixed
+- Fixed skill completion tracker (@bbakos)
 - Fixed changing checkpoint name in setup for teachers (@bbakos)
 - Fixed task completion to send request and to show hidden skill (@ffiedrich)
 - Fixed being able to remove dependency lines (@ffiedrich)
