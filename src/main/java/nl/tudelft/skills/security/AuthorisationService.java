@@ -21,18 +21,17 @@ import static nl.tudelft.labracore.api.dto.RoleDetailsDTO.TypeEnum.*;
 
 import javax.annotation.Nullable;
 
-import lombok.AllArgsConstructor;
-import nl.tudelft.labracore.api.PersonControllerApi;
-import nl.tudelft.labracore.api.dto.RoleEditionDetailsDTO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.api.CourseControllerApi;
+import nl.tudelft.labracore.api.PersonControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
 import nl.tudelft.labracore.api.dto.Id;
 import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
+import nl.tudelft.labracore.api.dto.RoleEditionDetailsDTO;
 import nl.tudelft.labracore.lib.security.LabradorUserDetails;
 import nl.tudelft.labracore.lib.security.user.DefaultRole;
 import nl.tudelft.labracore.lib.security.user.Person;
@@ -111,7 +110,10 @@ public class AuthorisationService {
 	 * @return True iff the authenticated user is a manager
 	 */
 	public boolean isManagerAnywhere() {
-		return isStaff() || personApi.getRolesForPerson(getAuthPerson().getId()).any(r -> r.getType() == RoleEditionDetailsDTO.TypeEnum.HEAD_TA || r.getType() == RoleEditionDetailsDTO.TypeEnum.TEACHER).block();
+		return isStaff() || personApi.getRolesForPerson(getAuthPerson().getId())
+				.any(r -> r.getType() == RoleEditionDetailsDTO.TypeEnum.HEAD_TA
+						|| r.getType() == RoleEditionDetailsDTO.TypeEnum.TEACHER)
+				.block();
 	}
 
 	/**
