@@ -169,7 +169,7 @@ public class AuthorisationServiceTest {
 
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canViewEdition(String role, boolean expected) {
 		mockRole(role);
 
@@ -201,7 +201,7 @@ public class AuthorisationServiceTest {
 
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canViewModule(String role, boolean expected) {
 		mockRole(role);
 
@@ -225,7 +225,7 @@ public class AuthorisationServiceTest {
 
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canViewSkill(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canViewSkill(db.getSkillAssumption().getId())).isEqualTo(expected);
@@ -244,7 +244,7 @@ public class AuthorisationServiceTest {
 
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canViewSkillExternalSameEdition(String role, boolean expected) {
 		mockRole(role);
 		ExternalSkill externalSkill = db.createExternalSkill(db.getSkillAssumption());
@@ -275,7 +275,7 @@ public class AuthorisationServiceTest {
 
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canPublishEdition(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canPublishEdition(db.getEditionRL().getId())).isEqualTo(expected);
@@ -283,7 +283,7 @@ public class AuthorisationServiceTest {
 
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canDeleteCreateInEdition(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canCreateModuleInEdition(db.getEditionRL().getId()))
@@ -292,7 +292,7 @@ public class AuthorisationServiceTest {
 
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canDeleteModuleInEdition(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canDeleteModuleInEdition(db.getEditionRL().getId()))
@@ -301,7 +301,7 @@ public class AuthorisationServiceTest {
 
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canDeleteModule(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canDeleteModule(db.getModuleProofTechniques().getId()))
@@ -310,7 +310,7 @@ public class AuthorisationServiceTest {
 
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canEditModuleInEdition(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canEditModuleInEdition(db.getEditionRL().getId()))
@@ -319,7 +319,7 @@ public class AuthorisationServiceTest {
 
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canEditModule(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canEditModule(db.getModuleProofTechniques().getId()))
@@ -328,7 +328,7 @@ public class AuthorisationServiceTest {
 
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canCreateSubmoduleInEdition(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canCreateSubmoduleInEdition(db.getEditionRL().getId()))
@@ -338,7 +338,7 @@ public class AuthorisationServiceTest {
 	@Transactional
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canCreateSubmodule(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canCreateSubmodule(db.getModuleProofTechniques().getId()))
@@ -347,7 +347,7 @@ public class AuthorisationServiceTest {
 
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canEditSubmoduleInEdition(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canEditSubmoduleInEdition(db.getEditionRL().getId()))
@@ -357,7 +357,7 @@ public class AuthorisationServiceTest {
 	@Transactional
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canEditSubmodule(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canEditSubmodule(db.getSubmoduleCases().getId())).isEqualTo(expected);
@@ -365,7 +365,7 @@ public class AuthorisationServiceTest {
 
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canDeleteSubmoduleInEdition(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canDeleteSubmoduleInEdition(db.getEditionRL().getId()))
@@ -375,7 +375,7 @@ public class AuthorisationServiceTest {
 	@Transactional
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canDeleteSubmodule(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canDeleteSubmodule(db.getSubmoduleCases().getId()))
@@ -384,7 +384,7 @@ public class AuthorisationServiceTest {
 
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canCreateSkillInEdition(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canCreateSkillInEdition(db.getEditionRL().getId()))
@@ -394,7 +394,7 @@ public class AuthorisationServiceTest {
 	@Transactional
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canCreateSkillInModule(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canCreateSkillInEdition(db.getEditionRL().getId()))
@@ -403,7 +403,7 @@ public class AuthorisationServiceTest {
 
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canCreateSkill(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canCreateSkill(db.getSubmoduleCases().getId())).isEqualTo(expected);
@@ -411,7 +411,7 @@ public class AuthorisationServiceTest {
 
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canEditSkillInEdition(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canEditSkillInEdition(db.getEditionRL().getId())).isEqualTo(expected);
@@ -420,7 +420,7 @@ public class AuthorisationServiceTest {
 	@Transactional
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canEditSkill(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canEditSkill(db.getSkillAssumption().getId())).isEqualTo(expected);
@@ -429,7 +429,7 @@ public class AuthorisationServiceTest {
 	@Transactional
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canEditExternalSkill(String role, boolean expected) {
 		Long id = externalSkillRepository.save(ExternalSkill.builder()
 				.module(db.getModuleProofTechniques())
@@ -443,7 +443,7 @@ public class AuthorisationServiceTest {
 
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canDeleteSkillInEdition(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canDeleteSkillInEdition(db.getEditionRL().getId()))
@@ -453,7 +453,7 @@ public class AuthorisationServiceTest {
 	@Transactional
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canDeleteSkill(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canDeleteSkill(db.getSkillAssumption().getId())).isEqualTo(expected);
@@ -462,7 +462,7 @@ public class AuthorisationServiceTest {
 	@Transactional
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canDeleteExternalSkill(String role, boolean expected) {
 		Long id = externalSkillRepository.save(ExternalSkill.builder()
 				.module(db.getModuleProofTechniques())
@@ -477,7 +477,7 @@ public class AuthorisationServiceTest {
 	@Transactional
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canEditTask(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canEditTask(db.getTaskDo10a().getId())).isEqualTo(expected);
@@ -486,7 +486,7 @@ public class AuthorisationServiceTest {
 	@Transactional
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canDeleteTask(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canDeleteTask(db.getTaskDo10a().getId())).isEqualTo(expected);
@@ -495,7 +495,7 @@ public class AuthorisationServiceTest {
 	@Transactional
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canCreateCheckpointInEdition(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canCreateCheckpointInEdition(db.getEditionRL().getId()))
@@ -505,7 +505,7 @@ public class AuthorisationServiceTest {
 	@Transactional
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canEditCheckpoint(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canEditCheckpoint(db.getCheckpointLectureOne().getId()))
@@ -515,7 +515,7 @@ public class AuthorisationServiceTest {
 	@Transactional
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canDeleteCheckpoint(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canDeleteCheckpoint(db.getCheckpointLectureOne().getId()))
@@ -525,7 +525,7 @@ public class AuthorisationServiceTest {
 	@Transactional
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canCreatePathInEdition(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canCreatePathInEdition(db.getEditionRL().getId()))
@@ -535,7 +535,7 @@ public class AuthorisationServiceTest {
 	@Transactional
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canEditPathInEdition(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canEditPathInEdition(db.getEditionRL().getId()))
@@ -545,7 +545,7 @@ public class AuthorisationServiceTest {
 	@Transactional
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canEditPath(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canEditPath(db.getPathFinderPath().getId()))
@@ -555,7 +555,7 @@ public class AuthorisationServiceTest {
 	@Transactional
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canDeletePath(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canDeletePath(db.getPathFinderPath().getId()))
@@ -565,7 +565,7 @@ public class AuthorisationServiceTest {
 	@Transactional
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,true", "HEAD_TA,false", "TA,false", "STUDENT,false", ",false" })
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canViewThroughPath(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canViewThroughPath(db.getEditionRL().getId()))
