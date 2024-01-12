@@ -565,8 +565,11 @@ public class AuthorisationService {
 	 * @return           True iff the user is an admin, teacher, or head TA in the edition
 	 */
 	public boolean isAtLeastHeadTAInEdition(Long editionId) {
+		if (isAdmin()){
+			return true;
+		}
 		var role = getRoleInEdition(editionId);
-		return isAdmin() || role == TEACHER || role == HEAD_TA;
+		return role == TEACHER || role == HEAD_TA;
 	}
 
 	/**
@@ -576,8 +579,11 @@ public class AuthorisationService {
 	 * @return           True iff the user is an admin, teacher, head TA, or TA in the edition
 	 */
 	public boolean isAtLeastTAInEdition(Long editionId) {
+		if (isAdmin()){
+			return true;
+		}
 		var role = getRoleInEdition(editionId);
-		return isAdmin() || role == TEACHER || role == HEAD_TA || role == TA;
+		return role == TEACHER || role == HEAD_TA || role == TA;
 	}
 
 	/**
@@ -587,8 +593,11 @@ public class AuthorisationService {
 	 * @return           True iff the user is an admin, teacher, head TA, TA or student in the edition
 	 */
 	public boolean isAtLeastStudentInEdition(Long editionId) {
+		if (isAdmin()){
+			return true;
+		}
 		var role = getRoleInEdition(editionId);
-		return isAdmin() || (role != null && role != BLOCKED && role != TEACHER_RO);
+		return role != null && role != BLOCKED && role != TEACHER_RO;
 	}
 
 	/**
