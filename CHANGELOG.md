@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 - Head TAs have the same permissions in a course edition as the teacher (@rglans)
 ## Fixed
+- Revealed skills are not hidden again when required tasks are marked as uncomplete (@rglans)
 
 ## [2.2.4]
 
