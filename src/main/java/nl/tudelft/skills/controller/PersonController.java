@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 
-import nl.tudelft.skills.service.PersonService;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.AllArgsConstructor;
@@ -42,6 +41,7 @@ import nl.tudelft.skills.repository.PathRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.service.PersonService;
 import nl.tudelft.skills.service.TaskCompletionService;
 
 @RestController
@@ -75,14 +75,12 @@ public class PersonController {
 			List<Task> completedTasks = person.getTaskCompletions().stream()
 					.map(TaskCompletion::getTask).toList();
 
-
 			List<Skill> revealedSkills = task.getRequiredFor().stream()
 					.filter(s -> completedTasks.containsAll(s.getRequiredTasks())).toList();
 
 			// Store unlocked skills in authPerson.tasksRevealed
 			revealedSkills.forEach(s -> personService.addRevealedSkill(authPerson.getId(), s));
 			return new TaskCompletedDTO(revealedSkills.stream().map(Skill::getId).toList());
-
 
 		} else {
 			taskCompletionService.deleteTaskCompletion(person, task);
