@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Added
 ## Changed
 ## Fixed
+- The correct checkpoint is considered as the last checkpoint (@ffiedrich)
+- Checkpoint deletion makes the correct next checkpoint be used instead (@ffiedrich)
+- Moving the last skill from a checkpoint makes the checkpoint disappear (@ffiedrich)
+- Redundant ghost checkpoint at bottom of page is removed (@ffiedrich)
 
 ## [2.2.5]
 
