@@ -58,10 +58,10 @@
                     <input
                         type="hidden"
                         id="tasks-in-path-edit-input"
-                        th:if="${@authorisationService.isAtLeastTeacherInEdition(module.edition.id)} and not ${studentMode}"
+                        th:if="${@authorisationService.isAtLeastHeadTAInEdition(module.edition.id)} and not ${studentMode}"
                         th:value="${#strings.listJoin(tasksInPathIds, ',')}" />
                     <button
-                        th:if="${@authorisationService.isAtLeastTeacherInEdition(module.edition.id)} and not ${studentMode} and not ${selectedPathId == null}"
+                        th:if="${@authorisationService.isAtLeastHeadTAInEdition(module.edition.id)} and not ${studentMode} and not ${selectedPathId == null}"
                         type="submit"
                         class="circuit__button"
                         name="edit-path-tasks"
@@ -73,7 +73,7 @@
                     <div class="circuit__header__group">
                         <form
                             style="display: flex"
-                            th:if="${@authorisationService.isAtLeastTeacherInEdition(module.edition.id)}"
+                            th:if="${@authorisationService.isAtLeastHeadTAInEdition(module.edition.id)}"
                             method="post"
                             th:action="@{|/module/${module.id}/studentmode|}">
                             <button th:if="${studentMode}" type="submit" class="circuit__button">

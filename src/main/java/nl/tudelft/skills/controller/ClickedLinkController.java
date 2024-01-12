@@ -17,7 +17,6 @@
  */
 package nl.tudelft.skills.controller;
 
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,7 +89,7 @@ public class ClickedLinkController {
 			Long personId = clickedLink.getPerson().getId();
 			ClickedLinkDTO clickedLinkInfo = new ClickedLinkDTO(clickedLink.getId(), taskId, taskName,
 					skillName, editionId, personId,
-					clickedLink.getTimestamp().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+					clickedLink.getTimestamp());
 			clickedLinksInfo.add(clickedLinkInfo);
 		}
 		return clickedLinksInfo;

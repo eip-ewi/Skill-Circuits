@@ -106,7 +106,7 @@ public class SkillServiceTest {
 		this.editionApi = editionApi;
 
 		this.skillService = new SkillService(abstractSkillRepository, taskCompletionRepository, courseApi,
-				authorisationService, clickedLinkService, personRepository);
+				authorisationService, clickedLinkService, personRepository, taskRepository);
 	}
 
 	@Test
@@ -127,6 +127,26 @@ public class SkillServiceTest {
 		assertThat(clickedLinkRepository.findAll()).hasSize(3);
 		skillService.deleteSkill(id);
 		assertThat(clickedLinkRepository.findAll()).hasSize(1);
+	}
+
+	@Test
+	public void deleteSkillRequiredForImpacted() {
+		// Make skill a hidden skill
+		Skill skill = db.getSkillNegation();
+		Task taskRequired = db.getTaskRead12();
+		skill.setHidden(true);
+		skill.getRequiredTasks().add(taskRequired);
+		taskRequired.getRequiredFor().add(skill);
+		abstractSkillRepository.save(skill);
+		taskRepository.save(taskRequired);
+
+		// Delete skill
+		Long id = skill.getId();
+		skillService.deleteSkill(id);
+		assertThat(abstractSkillRepository.existsById(id)).isFalse();
+
+		// The connection to the task that was required to make the skill appear, should have been removed
+		assertThat(db.getTaskRead12().getRequiredFor()).doesNotContain(skill);
 	}
 
 	@Test
