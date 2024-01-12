@@ -34,6 +34,7 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
 import nl.tudelft.labracore.api.CourseControllerApi;
+import nl.tudelft.labracore.api.PersonControllerApi;
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
@@ -69,6 +70,7 @@ public class AuthorisationServiceTest {
 	private final PathRepository pathRepository;
 	private final AbstractSkillRepository abstractSkillRepository;
 	private final ExternalSkillRepository externalSkillRepository;
+	private final PersonControllerApi personApi;
 
 	@Autowired
 	public AuthorisationServiceTest(RoleCacheManager roleCacheManager,
@@ -81,7 +83,8 @@ public class AuthorisationServiceTest {
 			TaskRepository taskRepository, CheckpointRepository checkpointRepository,
 			PathRepository pathRepository,
 			AbstractSkillRepository abstractSkillRepository,
-			ExternalSkillRepository externalSkillRepository) {
+			ExternalSkillRepository externalSkillRepository,
+			PersonControllerApi personApi) {
 		this.authorisationService = authorisationService;
 		this.roleCacheManager = roleCacheManager;
 		this.roleApi = roleApi;
@@ -97,6 +100,7 @@ public class AuthorisationServiceTest {
 		this.externalSkillRepository = externalSkillRepository;
 
 		this.courseApi = mock(CourseControllerApi.class);
+		this.personApi = personApi;
 	}
 
 	@Test
@@ -159,7 +163,7 @@ public class AuthorisationServiceTest {
 				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
 				checkpointRepository, pathRepository,
 				abstractSkillRepository,
-				courseApi);
+				courseApi, personApi);
 		when(courseApi.getCourseById(anyLong()))
 				.thenReturn(Mono.just(new CourseDetailsDTO().id(db.getCourseRL().getId())
 						.editions(List.of(new EditionSummaryDTO().id(db.getEditionRL().getId())))));
@@ -176,7 +180,7 @@ public class AuthorisationServiceTest {
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
 				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
 				checkpointRepository, pathRepository, abstractSkillRepository,
-				courseApi);
+				courseApi, personApi);
 
 		assertThat(authorisationService.canViewEdition(db.getEditionRL().getId())).isEqualTo(expected);
 	}
@@ -190,7 +194,7 @@ public class AuthorisationServiceTest {
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
 				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
 				checkpointRepository, pathRepository, abstractSkillRepository,
-				courseApi);
+				courseApi, personApi);
 
 		SCEdition edition = db.getEditionRL();
 		edition.setVisible(true);
@@ -597,7 +601,7 @@ public class AuthorisationServiceTest {
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
 				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
 				checkpointRepository, pathRepository, abstractSkillRepository,
-				courseApi);
+				courseApi, personApi);
 
 		when(courseApi.getCourseById(anyLong()))
 				.thenReturn(Mono.just(new CourseDetailsDTO().id(db.getCourseRL().getId())

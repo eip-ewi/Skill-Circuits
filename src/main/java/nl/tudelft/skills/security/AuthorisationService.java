@@ -53,10 +53,10 @@ public class AuthorisationService {
 	private SubmoduleRepository submoduleRepository;
 	private SkillRepository skillRepository;
 
-	private AbstractSkillRepository abstractSkillRepository;
 	private TaskRepository taskRepository;
 	private CheckpointRepository checkpointRepository;
 	private PathRepository pathRepository;
+	private AbstractSkillRepository abstractSkillRepository;
 
 	private CourseControllerApi courseApi;
 	private PersonControllerApi personApi;
