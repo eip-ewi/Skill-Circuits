@@ -1084,14 +1084,14 @@ databaseChangeLog:
                   constraints:
                     nullable: false
                     primaryKey: true
-                    primaryKeyName: CONSTRAINT_36
+                    primaryKeyName: CONSTRAINT_37
                   name: person_revealed_skill_id
                   type: BIGINT
               - column:
                   constraints:
                     nullable: false
                     primaryKey: true
-                    primaryKeyName: CONSTRAINT_36
+                    primaryKeyName: CONSTRAINT_37
                   name: skills_revealed_id
                   type: BIGINT
             tableName: scperson_skills_revealed
