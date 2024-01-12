@@ -565,7 +565,7 @@ public class AuthorisationService {
 	 * @return           True iff the user is an admin, teacher, or head TA in the edition
 	 */
 	public boolean isAtLeastHeadTAInEdition(Long editionId) {
-		if (isAdmin()){
+		if (isAdmin()) {
 			return true;
 		}
 		var role = getRoleInEdition(editionId);
@@ -579,7 +579,7 @@ public class AuthorisationService {
 	 * @return           True iff the user is an admin, teacher, head TA, or TA in the edition
 	 */
 	public boolean isAtLeastTAInEdition(Long editionId) {
-		if (isAdmin()){
+		if (isAdmin()) {
 			return true;
 		}
 		var role = getRoleInEdition(editionId);
@@ -593,7 +593,7 @@ public class AuthorisationService {
 	 * @return           True iff the user is an admin, teacher, head TA, TA or student in the edition
 	 */
 	public boolean isAtLeastStudentInEdition(Long editionId) {
-		if (isAdmin()){
+		if (isAdmin()) {
 			return true;
 		}
 		var role = getRoleInEdition(editionId);
