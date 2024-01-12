@@ -19,13 +19,7 @@ package nl.tudelft.skills.service;
 
 import static java.util.stream.Collectors.toMap;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -39,6 +33,7 @@ import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
 import nl.tudelft.skills.model.AbstractSkill;
 import nl.tudelft.skills.model.ExternalSkill;
 import nl.tudelft.skills.model.Skill;
+import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.AbstractSkillRepository;
@@ -182,6 +177,20 @@ public class SkillService {
 		}
 
 		return skills;
+	}
+
+	/**
+	 * Collects the customized skills that have at least one task in them
+	 *
+	 * @param  scperson  The person having the customized skills
+	 * @param  editionId The edition
+	 * @return           The set of customized skills
+	 */
+	public Set<Skill> getOwnSkillsWithTask(SCPerson scperson, long editionId) {
+		return scperson.getTasksAdded().stream().map(Task::getSkill)
+				.filter(s -> Objects.equals(s.getSubmodule().getModule().getEdition().getId(),
+						editionId))
+				.collect(Collectors.toSet());
 	}
 
 }

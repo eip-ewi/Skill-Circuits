@@ -173,7 +173,7 @@ public class CheckpointControllerTest extends ControllerTest {
 
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "TEACHER,200,editedName", "HEAD_TA,403,uneditedName", "TA,403,uneditedName",
+	@CsvSource({ "TEACHER,200,editedName", "HEAD_TA,200,editedName", "TA,403,uneditedName",
 			"STUDENT,403,uneditedName", ",403,uneditedName" })
 	public void patchCheckpointName(String role, int status, String expectedName) throws Exception {
 		Checkpoint checkpoint = checkpointRepository.save(Checkpoint.builder().name("uneditedName")

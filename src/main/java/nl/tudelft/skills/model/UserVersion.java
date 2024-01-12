@@ -15,43 +15,31 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view;
+package nl.tudelft.skills.model;
 
-import java.time.LocalDateTime;
-
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import nl.tudelft.skills.model.labracore.SCPerson;
 
 @Data
+@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClickedLinkDTO {
-	@NotNull
+public class UserVersion {
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
 
 	@NotNull
-	private Long TaskId;
+	@OneToOne
+	private SCPerson person;
 
 	@NotNull
-	private String taskName;
-
-	@NotNull
-	private String skillName;
-
-	@NotNull
-	private Long editionId;
-
-	@NotNull
-	private Long personId;
-
-	@NotNull
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private LocalDateTime timestamp;
+	private String version;
 }
