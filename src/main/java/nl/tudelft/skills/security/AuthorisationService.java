@@ -138,7 +138,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can view the edition.
 	 */
 	public boolean canViewEdition(Long editionId) {
-		return isAuthenticated() && (isAtLeastTeacherInEdition(editionId)
+		return isAuthenticated() && (isAtLeastHeadTAInEdition(editionId)
 				|| editionRepository.findByIdOrThrow(editionId).isVisible());
 	}
 
@@ -175,7 +175,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can publish the edition.
 	 */
 	public boolean canEditEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -185,7 +185,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can publish the edition.
 	 */
 	public boolean canPublishEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -195,7 +195,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can create a module in the edition.
 	 */
 	public boolean canCreateModuleInEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -205,7 +205,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can delete a module in the edition.
 	 */
 	public boolean canDeleteModuleInEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -226,7 +226,7 @@ public class AuthorisationService {
 	 */
 	@Transactional
 	public boolean canEditModuleInEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -248,7 +248,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can create submodules in the edition
 	 */
 	public boolean canCreateSubmoduleInEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -269,7 +269,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can delete a submodule in the edition.
 	 */
 	public boolean canDeleteSubmoduleInEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -291,7 +291,7 @@ public class AuthorisationService {
 	 */
 	@Transactional
 	public boolean canEditSubmoduleInEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -313,7 +313,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can create skills in the edition
 	 */
 	public boolean canCreateSkillInEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -345,7 +345,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can edit the skills in the edition
 	 */
 	public boolean canEditSkillInEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -371,7 +371,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can delete skills in the edition
 	 */
 	public boolean canDeleteSkillInEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -413,7 +413,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can edit checkpoints in the edition
 	 */
 	public boolean canEditCheckpointInEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -465,7 +465,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can create a path in an edition.
 	 */
 	public boolean canCreatePathInEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -475,7 +475,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can modify path related elements in edition.
 	 */
 	public boolean canEditPathInEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -507,7 +507,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can view tasks not in path.
 	 */
 	public boolean canViewThroughPath(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
