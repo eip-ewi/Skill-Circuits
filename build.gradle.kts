@@ -6,7 +6,7 @@ import org.gradle.internal.fingerprint.classpath.impl.ClasspathFingerprintingStr
 import java.nio.file.Files
 
 group = "nl.tudelft.skills"
-version = "2.2.4"
+version = "2.2.5"
 
 val javaVersion = JavaVersion.VERSION_17
 
