@@ -46,6 +46,8 @@ import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.CourseService;
 import nl.tudelft.skills.service.EditionService;
+import nl.tudelft.skills.service.SkillService;
+import nl.tudelft.skills.service.TaskCompletionService;
 import reactor.core.publisher.Flux;
 
 @AutoConfigureMockMvc
@@ -63,13 +65,16 @@ public class HomeControllerTest extends ControllerTest {
 	private final EditionService editionService;
 	private final CourseService courseService;
 	private final PathPreferenceRepository pathPreferenceRepository;
+	private final SkillService skillService;
+	private final TaskCompletionService taskCompletionService;
 
 	@Autowired
 	public HomeControllerTest(EditionControllerApi editionApi, RoleControllerApi roleApi,
 			EditionRepository editionRepository, ModuleRepository moduleRepository,
 			SkillRepository skillRepository, TaskRepository taskRepository, PersonRepository personRepository,
 			EditionService editionService,
-			PathPreferenceRepository pathPreferenceRepository) {
+			PathPreferenceRepository pathPreferenceRepository, SkillService skillService,
+			TaskCompletionService taskCompletionService) {
 		this.editionApi = editionApi;
 		this.roleApi = roleApi;
 		this.editionRepository = editionRepository;
@@ -77,10 +82,13 @@ public class HomeControllerTest extends ControllerTest {
 		this.taskRepository = taskRepository;
 		this.personRepository = personRepository;
 		this.editionService = editionService;
+		this.skillService = skillService;
+		this.taskCompletionService = taskCompletionService;
 		this.courseService = mock(CourseService.class);
 		this.pathPreferenceRepository = pathPreferenceRepository;
 		this.homeController = new HomeController(editionApi, roleApi, editionRepository, moduleRepository,
 				personRepository, skillRepository, taskRepository, editionService, courseService,
+				skillService, taskCompletionService,
 				pathPreferenceRepository);
 	}
 

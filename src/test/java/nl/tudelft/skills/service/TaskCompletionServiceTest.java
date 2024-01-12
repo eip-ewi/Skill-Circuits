@@ -18,7 +18,10 @@
 package nl.tudelft.skills.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
+
+import java.util.*;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +35,11 @@ import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.model.SCCourse;
 import nl.tudelft.skills.model.SCEdition;
+import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskCompletion;
 import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.test.TestDatabaseLoader;
@@ -47,17 +52,20 @@ public class TaskCompletionServiceTest {
 	private final EditionControllerApi editionApi;
 	private final TaskCompletionRepository taskCompletionRepository;
 	private final TaskCompletionService taskCompletionService;
+	private final SkillRepository skillRepository;
 
 	private final TestDatabaseLoader db;
 
 	@Autowired
 	public TaskCompletionServiceTest(EditionControllerApi editionApi, PersonRepository personRepository,
-			TaskCompletionRepository taskCompletionRepository, TestDatabaseLoader db) {
+			TaskCompletionRepository taskCompletionRepository, SkillRepository skillRepository,
+			TestDatabaseLoader db) {
 		this.editionApi = editionApi;
 		this.taskCompletionRepository = taskCompletionRepository;
+		this.skillRepository = skillRepository;
 		this.db = db;
 		this.taskCompletionService = new TaskCompletionService(taskCompletionRepository, personRepository,
-				editionApi);
+				editionApi, this.skillRepository);
 	}
 
 	@Test
@@ -166,5 +174,49 @@ public class TaskCompletionServiceTest {
 		assertThat(db.getTaskRead12().getCompletedBy()).isEmpty();
 		assertThat(db.getPerson().getTaskCompletions()).doesNotContain(taskCompletion);
 		assertThat(taskCompletionRepository.findById(taskCompletion.getId())).isEmpty();
+	}
+
+	@Test
+	public void determineSkillsDone() {
+		SCPerson person = new SCPerson();
+		TaskCompletion completion1 = TaskCompletion.builder().id(1L)
+				.person(person).task(db.getTaskRead12()).build();
+		TaskCompletion completion2 = TaskCompletion.builder().id(2L)
+				.person(person).task(db.getTaskDo12ae()).build();
+		person.setTaskCompletions(Set.of(completion1, completion2));
+		Set<Skill> skillsDone = taskCompletionService.determineSkillsDone(Collections.emptySet(), person,
+				db.getEditionRL().getId(), Collections.emptyList());
+		assertEquals((Set.of(db.getSkillImplication())), skillsDone);
+	}
+
+	@Test
+	public void determineEmptySkills() {
+		SCPerson person = new SCPerson();
+		Set<Skill> skillsDone = taskCompletionService.determineEmptySkills(Collections.emptySet(),
+				Collections.emptyList(), person, db.getEditionRL().getId());
+		assertEquals((Set.of(db.getSkillProofOutline(), db.getSkillAssumption(),
+				db.getSkillGeneralisationPractice(), db.getSkillDividingIntoCases(),
+				db.getSkillCasesPractice(), db.getSkillContradictionPractice(),
+				db.getSkillNegateImplications(), db.getSkillContrapositivePractice(),
+				db.getSkillTransitiveProperty(), db.getSkillInductionPractice())), skillsDone);
+	}
+
+	@Test
+	public void addCompletedEmptySkills() {
+		SCPerson person = new SCPerson();
+		TaskCompletion completion1 = TaskCompletion.builder().id(1L)
+				.person(person).task(db.getTaskRead12()).build();
+		TaskCompletion completion2 = TaskCompletion.builder().id(2L)
+				.person(person).task(db.getTaskDo12ae()).build();
+		person.setTaskCompletions(Set.of(completion1, completion2));
+		Set<Skill> skillsDone = new HashSet<>(Arrays.asList(db.getSkillImplication()));
+		taskCompletionService.addCompletedEmptySkills(skillsDone,
+				Set.of(db.getSkillProofOutline(), db.getSkillAssumption(),
+						db.getSkillGeneralisationPractice(), db.getSkillDividingIntoCases(),
+						db.getSkillCasesPractice(), db.getSkillContradictionPractice(),
+						db.getSkillNegateImplications(), db.getSkillContrapositivePractice(),
+						db.getSkillTransitiveProperty(), db.getSkillInductionPractice()),
+				db.getSkillAssumption());
+		assertEquals((Set.of(db.getSkillImplication(), db.getSkillAssumption())), skillsDone);
 	}
 }
