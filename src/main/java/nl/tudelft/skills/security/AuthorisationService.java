@@ -21,6 +21,9 @@ import static nl.tudelft.labracore.api.dto.RoleDetailsDTO.TypeEnum.*;
 
 import javax.annotation.Nullable;
 
+import lombok.AllArgsConstructor;
+import nl.tudelft.labracore.api.PersonControllerApi;
+import nl.tudelft.labracore.api.dto.RoleEditionDetailsDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -41,6 +44,7 @@ import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.*;
 
 @Service
+@AllArgsConstructor
 public class AuthorisationService {
 
 	private RoleCacheManager roleCache;
@@ -56,27 +60,7 @@ public class AuthorisationService {
 	private PathRepository pathRepository;
 
 	private CourseControllerApi courseApi;
-
-	@Autowired
-	public AuthorisationService(RoleCacheManager roleCache, EditionRepository editionRepository,
-			ModuleRepository moduleRepository, SubmoduleRepository submoduleRepository,
-			SkillRepository skillRepository, TaskRepository taskRepository,
-			CheckpointRepository checkpointRepository, PathRepository pathRepository,
-			AbstractSkillRepository abstractSkillRepository,
-			CourseControllerApi courseControllerApi) {
-		this.roleCache = roleCache;
-
-		this.editionRepository = editionRepository;
-		this.moduleRepository = moduleRepository;
-		this.submoduleRepository = submoduleRepository;
-		this.abstractSkillRepository = abstractSkillRepository;
-		this.skillRepository = skillRepository;
-		this.taskRepository = taskRepository;
-		this.checkpointRepository = checkpointRepository;
-		this.pathRepository = pathRepository;
-
-		this.courseApi = courseControllerApi;
-	}
+	private PersonControllerApi personApi;
 
 	/**
 	 * Gets the currently authenticated user.
@@ -119,6 +103,15 @@ public class AuthorisationService {
 	 */
 	public boolean isStaff() {
 		return isAdmin() || getAuthPerson().getDefaultRole() == DefaultRole.TEACHER;
+	}
+
+	/**
+	 * Gets whether the authenticated user is a manager somewhere.
+	 *
+	 * @return True iff the authenticated user is a manager
+	 */
+	public boolean isManagerAnywhere() {
+		return isStaff() || personApi.getRolesForPerson(getAuthPerson().getId()).any(r -> r.getType() == RoleEditionDetailsDTO.TypeEnum.HEAD_TA || r.getType() == RoleEditionDetailsDTO.TypeEnum.TEACHER).block();
 	}
 
 	/**
@@ -617,7 +610,7 @@ public class AuthorisationService {
 	 * @return          True iff true user can get the editions of the course
 	 */
 	public boolean canGetEditionsOfCourse(Long courseId) {
-		return isStaff();
+		return isManagerAnywhere();
 	}
 
 	/**
@@ -627,7 +620,7 @@ public class AuthorisationService {
 	 * @return           True iff true user can get the modules of the edition
 	 */
 	public boolean canGetModulesOfEdition(Long editionId) {
-		return isStaff();
+		return isManagerAnywhere();
 	}
 
 	/**
@@ -637,7 +630,7 @@ public class AuthorisationService {
 	 * @return          True iff true user can get the skills of the module
 	 */
 	public boolean canGetSkillsOfModule(Long moduleId) {
-		return isStaff();
+		return isManagerAnywhere();
 	}
 
 }
