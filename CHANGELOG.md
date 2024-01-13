@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 ## Changed
+- Empty path toggles are greyed out, and padding is added between expanded toggles (@ffiedrich)
 ## Fixed
 
 ## [2.2.5]
