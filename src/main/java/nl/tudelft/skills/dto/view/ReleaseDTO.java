@@ -17,41 +17,21 @@
  */
 package nl.tudelft.skills.dto.view;
 
-import java.time.LocalDateTime;
-
-import javax.validation.constraints.NotNull;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
+import java.time.Instant;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Data
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClickedLinkDTO {
-	@NotNull
-	private Long id;
+public class ReleaseDTO {
+	public String name;
 
-	@NotNull
-	private Long TaskId;
+	public String description_html;
 
-	@NotNull
-	private String taskName;
-
-	@NotNull
-	private String skillName;
-
-	@NotNull
-	private Long editionId;
-
-	@NotNull
-	private Long personId;
-
-	@NotNull
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private LocalDateTime timestamp;
+	public Instant released_at;
 }
