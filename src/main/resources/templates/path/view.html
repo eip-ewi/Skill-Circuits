@@ -23,7 +23,11 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <th:block layout:fragment="path">
-        <div th:data-id="${path.id}" aria-expanded="false" class="path-toggle">
+        <div
+            th:data-id="${path.id}"
+            aria-expanded="false"
+            aria-disabled="false"
+            class="path-toggle">
             <button class="path-toggle__control">
                 <span th:text="${path.name}"></span>
                 <span class="fa-solid fa-chevron-down"></span>
@@ -38,7 +42,6 @@
                         <li layout:replace="~{task/inactiveview :: item}"></li>
                     </th:block>
                 </th:block>
-                <li class="hide-with-siblings">This skill has no extra tasks in this path</li>
             </ul>
         </div>
     </th:block>
@@ -46,23 +49,31 @@
     <script layout:fragment="script">
         /**
          * Adds an event listener to the path toggle that opens the dropdown with the additional skills.
+         * Disable the toggle if it does not contain skills.
          *
          * @param pathCtrl The path dropdown toggle control.
          */
-        function addTogglePathDropdownEventListener(pathCtrl) {
+        function togglePathDropdownSetup(pathCtrl) {
+            // Note: When CSS "has" is safely usable, this functionality can (partially) be moved to CSS
+            const toggle = pathCtrl.closest(".path-toggle");
+
             pathCtrl.addEventListener("click", function () {
-                const toggle = pathCtrl.closest(".path-toggle");
-                toggle.setAttribute(
-                    "aria-expanded",
-                    toggle.getAttribute("aria-expanded") !== "true"
-                );
+                // Only expand if it is possible to toggle (contains one or more skills)
+                if ($(toggle).find("li").length !== 0) {
+                    toggle.setAttribute(
+                        "aria-expanded",
+                        toggle.getAttribute("aria-expanded") !== "true"
+                    );
+                }
             });
+
+            if ($(toggle).find("li").length === 0) {
+                toggle.setAttribute("aria-disabled", "true");
+            }
         }
 
         document.addEventListener("DOMContentLoaded", function () {
-            document
-                .querySelectorAll(".path-toggle__control")
-                .forEach(addTogglePathDropdownEventListener);
+            document.querySelectorAll(".path-toggle__control").forEach(togglePathDropdownSetup);
         });
     </script>
 </html>
