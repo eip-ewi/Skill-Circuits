@@ -16,13 +16,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Assigning student role after task completion if user had no role yet and is student by default (@ffiedrich)
 ## Fixed
 
+## [2.2.5]
+
+## Added
+- Show a changelog to users on new releases (@bbakos)
+## Changed
+- Head TAs have the same permissions in a course edition as the teacher (@rglans)
+## Fixed
+
 ## [2.2.4]
 
 ## Added
 ## Changed
 ## Fixed
+- Fixed skill completion tracker (@bbakos)
 - Fixed changing checkpoint name in setup for teachers (@bbakos)
 - Fixed task completion to send request and to show hidden skill (@ffiedrich)
+- Fixed being able to remove dependency lines (@ffiedrich)
+- Fixed deleting hidden skills with at least one dependency (@ffiedrich)
 
 ## [2.2.3]
 
