@@ -27,8 +27,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.test.TestDatabaseLoader;
 
 @Transactional
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
@@ -38,9 +40,12 @@ public class PersonServiceTest {
 
 	private PersonService personService;
 
+	private TestDatabaseLoader db;
+
 	@Autowired
-	public PersonServiceTest(PersonRepository personRepository) {
+	public PersonServiceTest(PersonRepository personRepository, TestDatabaseLoader db) {
 		this.personRepository = personRepository;
+		this.db = db;
 		personService = new PersonService(personRepository);
 	}
 
@@ -61,6 +66,17 @@ public class PersonServiceTest {
 
 		assertThat(personService.getPathForEdition(person.getId(), editionId)).isNotPresent();
 
+	}
+
+	@Test
+	public void testAddRevealedSkill() {
+		SCPerson person = db.getPerson();
+		Skill skill = db.getSkillNegation();
+
+		assertThat(person.getSkillsRevealed()).doesNotContain(skill);
+		personService.addRevealedSkill(person.getId(), skill);
+
+		assertThat(person.getSkillsRevealed()).contains(skill);
 	}
 
 }
