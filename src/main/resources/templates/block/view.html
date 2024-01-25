@@ -84,7 +84,7 @@
                     </th:block>
                     <!--  Task preview for student-->
                     <th:block
-                        th:if="${level == 'module'}"
+                        th:if="${level == 'module' and !canEdit}"
                         th:with="skillModified = ${skillsModified == null ? false : #sets.contains(skillsModified.![id], block.id)}">
                         <li
                             th:classappend="${not canEdit and ((item.visible and not skillModified) or (skillModified and #sets.contains(tasksAdded.![id], item.id)))}? '' : 'hidden'"
