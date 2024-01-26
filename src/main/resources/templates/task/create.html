@@ -106,13 +106,18 @@
             elem.removeClass("hidden");
             elem.children("input[type='hidden']").val(button.data("block"));
 
-            const index = button.closest(".items").children().length;
+            // The index of a new task is the amount of items in the containing list
+            // and the amount of saved tasks (in the nested flex list)
+            const taskList = button.closest("ul");
+            const index =
+                taskList.children("li").length +
+                taskList.find(".items:first").children().length -
+                1;
             elem.attr("data-index", index);
             elem.data("index", index);
 
             button.parent().after(elem);
             button.closest("ul").find("li:nth-child(2) input[name='time']").focus();
-        //     Update the button's parent to
         }
 
         document.addEventListener("DOMContentLoaded", function () {
