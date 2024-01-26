@@ -117,7 +117,7 @@
             elem.data("index", index);
 
             button.parent().after(elem);
-            button.closest("ul").find("li:nth-child(2) input[name='time']").focus();
+            button.closest("ul").find("li:eq(1) input[name='time']").focus();
         }
 
         document.addEventListener("DOMContentLoaded", function () {
