@@ -124,13 +124,6 @@
                                 const skill = $($("<div/>").append(html).children()[0]);
                                 $("#circuit").append(skill);
 
-                                // Add necessary event listeners
-                                addClickSkillEventListener(skill[0]);
-                                skill
-                                    .find(".path-toggle__control")
-                                    .toArray()
-                                    .forEach(addTogglePathDropdownEventListener);
-
                                 // Recalculate the connections
                                 recalculateConnections();
                             })

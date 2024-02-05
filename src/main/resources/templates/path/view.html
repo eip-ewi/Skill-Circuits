@@ -24,7 +24,7 @@
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <th:block layout:fragment="path">
         <div th:data-id="${path.id}" aria-expanded="false" class="path-toggle">
-            <button class="path-toggle__control">
+            <button class="path-toggle__control" onclick="clickToggleDropdown(this)">
                 <span th:text="${path.name}"></span>
                 <span class="fa-solid fa-chevron-down"></span>
             </button>
@@ -45,24 +45,13 @@
 
     <script layout:fragment="script">
         /**
-         * Adds an event listener to the path toggle that opens the dropdown with the additional skills.
+         * Event listener for a path toggle dropdown click. It toggles the dropdown state.
          *
-         * @param pathCtrl The path dropdown toggle control.
+         * @param pathCtrl The path toggle control element.
          */
-        function addTogglePathDropdownEventListener(pathCtrl) {
-            pathCtrl.addEventListener("click", function () {
-                const toggle = pathCtrl.closest(".path-toggle");
-                toggle.setAttribute(
-                    "aria-expanded",
-                    toggle.getAttribute("aria-expanded") !== "true"
-                );
-            });
+        function clickToggleDropdown(pathCtrl) {
+            const toggle = pathCtrl.closest(".path-toggle");
+            toggle.setAttribute("aria-expanded", toggle.getAttribute("aria-expanded") !== "true");
         }
-
-        document.addEventListener("DOMContentLoaded", function () {
-            document
-                .querySelectorAll(".path-toggle__control")
-                .forEach(addTogglePathDropdownEventListener);
-        });
     </script>
 </html>
