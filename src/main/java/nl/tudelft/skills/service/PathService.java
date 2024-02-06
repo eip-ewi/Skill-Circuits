@@ -94,6 +94,12 @@ public class PathService {
 				.anyMatch(taskId::equals);
 	}
 
+	/**
+	 * Gets the PathViewDTO of a path, if the path id is not null. Otherwise, returns null.
+	 *
+	 * @param  pathId The path id, or null.
+	 * @return        The PathViewDTO of the path, if the path id is not null. Otherwise, null.
+	 */
 	public PathViewDTO getPath(Long pathId) {
 		if (pathId == null)
 			return null;

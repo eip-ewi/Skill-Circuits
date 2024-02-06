@@ -17,24 +17,41 @@
  */
 package nl.tudelft.skills.service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 
+import nl.tudelft.labracore.lib.security.user.Person;
+import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
+import nl.tudelft.skills.dto.view.module.TaskViewDTO;
+import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.PathPreference;
+import nl.tudelft.skills.model.Skill;
+import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.repository.PathRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 @Service
 public class PersonService {
 
 	private PersonRepository personRepository;
+	private PathRepository pathRepository;
+	private EditionService editionService;
 
 	@Autowired
-	public PersonService(PersonRepository personRepository) {
+	public PersonService(PersonRepository personRepository, PathRepository pathRepository,
+			EditionService editionService) {
 		this.personRepository = personRepository;
+		this.pathRepository = pathRepository;
+		this.editionService = editionService;
 	}
 
 	/**
@@ -61,4 +78,66 @@ public class PersonService {
 		return personRepository.findById(personId)
 				.orElseGet(() -> personRepository.save(SCPerson.builder().id(personId).build()));
 	}
+
+	/**
+	 * Adds attributes concerning the personal path, and selected path of a person to the response model.
+	 * Returns the path's task ids, iff a path is selected. TODO adding tests for this method. TODO modify
+	 * possibility of Person being null (outdated).
+	 *
+	 * @param  person    The person connected to the request, or null if there is none.
+	 * @param  model     The response model.
+	 * @param  editionId The id of the edition.
+	 * @param  skill     If the attributes should only be added for a specific skill, the skill. Otherwise,
+	 *                   null.
+	 * @return           If a path is selected, an Optional containing the set of the task ids in the path.
+	 *                   Otherwise, an empty Optional.
+	 */
+	public Optional<Set<Long>> setPersonalPathAttributes(Person person, Model model, Long editionId,
+			Skill skill) {
+		Path path = getDefaultOrPreferredPath((person != null ? person.getId() : null), editionId);
+		model.addAttribute("selectedPathId", path != null ? path.getId() : null);
+
+		SCPerson scPerson = personRepository.getById(person.getId());
+		Set<Task> tasks = scPerson.getTasksAdded();
+		Set<Skill> skillsModified = scPerson.getSkillsModified();
+		// If the skill is null, the tasksAdded and skillsModified are all added tasks and modified skills. Otherwise,
+		// they are only added corresponding to the skill (tasks in the skill and the skill itself, if modified).
+		if (skill == null) {
+			model.addAttribute("tasksAdded",
+					tasks.stream().map(at -> View.convert(at, TaskViewDTO.class)).toList());
+			model.addAttribute("skillsModified", skillsModified.stream()
+					.map(at -> View.convert(at, ModuleLevelSkillViewDTO.class)).toList());
+		} else {
+			model.addAttribute("tasksAdded", tasks.stream().filter(t -> skill.getTasks().contains(t))
+					.map(at -> View.convert(at, TaskViewDTO.class)).toList());
+			model.addAttribute("skillsModified",
+					skillsModified.contains(skill)
+							? List.of(View.convert(skill, ModuleLevelSkillViewDTO.class))
+							: List.of());
+		}
+
+		// Returns an Optional of the tasks in the path if a path is selected, and an empty Optional otherwise.
+		return path == null ? Optional.empty()
+				: Optional.of(path.getTasks().stream().map(Task::getId).collect(Collectors.toSet()));
+	}
+
+	/**
+	 * Return the followed path in an edition. This is either the user preferred path or the default one.
+	 *
+	 * @param  personId  Authenticated person id, or null if not authenticated
+	 * @param  editionId Edition id.
+	 * @return           Followed path.
+	 */
+	public Path getDefaultOrPreferredPath(Long personId, Long editionId) {
+		Path path = editionService.getDefaultPath(editionId);
+
+		Optional<PathPreference> preference = getPathForEdition(personId, editionId);
+		if (personId == null || preference.isEmpty()) {
+			return path;
+		}
+
+		return preference.filter(p -> p.getPath() != null)
+				.flatMap(p -> pathRepository.findById(p.getPath().getId())).orElse(null);
+	}
+
 }
