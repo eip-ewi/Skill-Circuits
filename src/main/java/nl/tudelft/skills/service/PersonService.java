@@ -81,10 +81,9 @@ public class PersonService {
 
 	/**
 	 * Adds attributes concerning the personal path, and selected path of a person to the response model.
-	 * Returns the path's task ids, iff a path is selected. TODO adding tests for this method. TODO modify
-	 * possibility of Person being null (outdated).
+	 * Returns the path's task ids, iff a path is selected. TODO adding tests for this method.
 	 *
-	 * @param  person    The person connected to the request, or null if there is none.
+	 * @param  person    The currently authenticated person (non-null).
 	 * @param  model     The response model.
 	 * @param  editionId The id of the edition.
 	 * @param  skill     If the attributes should only be added for a specific skill, the skill. Otherwise,
@@ -94,7 +93,7 @@ public class PersonService {
 	 */
 	public Optional<Set<Long>> setPersonalPathAttributes(Person person, Model model, Long editionId,
 			Skill skill) {
-		Path path = getDefaultOrPreferredPath((person != null ? person.getId() : null), editionId);
+		Path path = getDefaultOrPreferredPath(person.getId(), editionId);
 		model.addAttribute("selectedPathId", path != null ? path.getId() : null);
 
 		SCPerson scPerson = personRepository.getById(person.getId());

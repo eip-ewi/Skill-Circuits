@@ -65,7 +65,7 @@ public class ModuleService {
 	/**
 	 * Configures the model for the module circuit view.
 	 *
-	 * @param person  The currently logged in person, null if none
+	 * @param person  The currently logged in person (non-null)
 	 * @param id      The id of the module
 	 * @param model   The module to configure
 	 * @param session The http session
@@ -75,9 +75,7 @@ public class ModuleService {
 		ModuleLevelModuleViewDTO module = View.convert(moduleRepository.findByIdOrThrow(id),
 				ModuleLevelModuleViewDTO.class);
 
-		if (person != null) {
-			setCompletedTasksForPerson(module, person.getId());
-		}
+		setCompletedTasksForPerson(module, person.getId());
 
 		Set<Pair<Integer, Integer>> positions = module.getFilledPositions();
 		int columns = positions.stream().mapToInt(Pair::getFirst).max().orElse(0) + 1;
