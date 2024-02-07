@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 
-import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
 import nl.tudelft.skills.dto.view.module.TaskViewDTO;
@@ -81,9 +80,9 @@ public class PersonService {
 
 	/**
 	 * Adds attributes concerning the personal path, and selected path of a person to the response model.
-	 * Returns the path's task ids, iff a path is selected. TODO adding tests for this method.
+	 * Returns the path's task ids, iff a path is selected.
 	 *
-	 * @param  person    The currently authenticated person (non-null).
+	 * @param  personId  The id of the currently authenticated person (non-null).
 	 * @param  model     The response model.
 	 * @param  editionId The id of the edition.
 	 * @param  skill     If the attributes should only be added for a specific skill, the skill. Otherwise,
@@ -91,12 +90,12 @@ public class PersonService {
 	 * @return           If a path is selected, an Optional containing the set of the task ids in the path.
 	 *                   Otherwise, an empty Optional.
 	 */
-	public Optional<Set<Long>> setPersonalPathAttributes(Person person, Model model, Long editionId,
+	public Optional<Set<Long>> setPersonalPathAttributes(Long personId, Model model, Long editionId,
 			Skill skill) {
-		Path path = getDefaultOrPreferredPath(person.getId(), editionId);
+		Path path = getDefaultOrPreferredPath(personId, editionId);
 		model.addAttribute("selectedPathId", path != null ? path.getId() : null);
 
-		SCPerson scPerson = personRepository.getById(person.getId());
+		SCPerson scPerson = personRepository.findByIdOrThrow(personId);
 		Set<Task> tasks = scPerson.getTasksAdded();
 		Set<Skill> skillsModified = scPerson.getSkillsModified();
 		// If the skill is null, the tasksAdded and skillsModified are all added tasks and modified skills. Otherwise,

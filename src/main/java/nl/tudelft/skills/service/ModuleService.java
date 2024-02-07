@@ -83,7 +83,7 @@ public class ModuleService {
 		Boolean studentMode = (Boolean) session.getAttribute("student-mode-" + module.getEdition().getId());
 
 		// Set the path and modified skill/task properties, if a path is selected, get tasks in it
-		Optional<Set<Long>> taskIdsInPath = personService.setPersonalPathAttributes(person, model,
+		Optional<Set<Long>> taskIdsInPath = personService.setPersonalPathAttributes(person.getId(), model,
 				module.getEdition().getId(), null);
 
 		// If path is selected (doesn't apply for no-path), show only tasks on followed path

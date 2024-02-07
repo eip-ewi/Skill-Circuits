@@ -95,7 +95,7 @@ public class SkillController {
 		model.addAttribute("canDelete", false);
 
 		// Add information concerning personal path to model
-		Optional<Set<Long>> taskIdsInPath = personService.setPersonalPathAttributes(person, model,
+		Optional<Set<Long>> taskIdsInPath = personService.setPersonalPathAttributes(person.getId(), model,
 				skill.getSubmodule().getModule().getEdition().getId(), skill);
 		taskIdsInPath.ifPresent(
 				taskIdsInner -> view.getTasks().forEach(t -> t.setVisible(taskIdsInner.contains(t.getId()))));
