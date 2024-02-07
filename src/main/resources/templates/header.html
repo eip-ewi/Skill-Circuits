@@ -36,6 +36,9 @@
                     Login
                 </a>
             </li>
+            <th:block th:if="${@authorisationService.isAuthenticated()}">
+                <li layout:replace="~{playlist/header-button :: button}"></li>
+            </th:block>
             <li class="header__icon" th:if="${@authorisationService.isAuthenticated()}">
                 <button class="header__button" id="dropdown-button">
                     <span th:text="${@authorisationService.getAuthPerson().displayName}"></span>
@@ -65,5 +68,9 @@
                 </ul>
             </li>
         </ul>
+        <th:block th:if="${@authorisationService.isAuthenticated()}">
+            <div layout:replace="playlist/header-button :: script"></div>
+        </th:block>
     </header>
+
 </html>

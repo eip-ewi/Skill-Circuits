@@ -1,0 +1,43 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+        lang="en"
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <dialog
+            layout:fragment="opt-in-dialog"
+            class="overlay"
+            th:id="opt-in-dialog">
+        <div class="whats_new">
+            <div>
+                <span class="expanded-skill__group" th:text="Playlist"></span>
+                <h2 th:text="Opt-in for research"></h2>
+            </div>
+
+    <!--        <form th:action="@{|/person/reset/${block.id}|}" method="post">-->
+    <!--            <button class="button" th:classappend="${modified} ? '' : 'hidden'" type="submit">-->
+    <!--                Reset-->
+    <!--            </button>-->
+    <!--        </form>-->
+
+        </div>
+    </dialog>
+</html>

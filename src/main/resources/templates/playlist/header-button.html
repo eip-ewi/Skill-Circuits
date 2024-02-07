@@ -1,0 +1,67 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+        lang="en"
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <li class="header__icon" layout:fragment="button">
+        <button class="header__button" id="playlist-button">
+            <span class="fa-solid fa-circle-play"></span>
+            <span>Playlist</span>
+            <!--            If opted in, show playlist functionality. Else open dialog box to opt-in-->
+
+        </button>
+        <dialog
+                layout:fragment="opt-in-dialog"
+                class="overlay"
+                id="opt-in-dialog">
+<!--            <div class="whats_new">-->
+                <div>
+                    <span class="expanded-skill__group">NEW: Playlist</span>
+                    <h2>Opt-in for research</h2>
+<!--                </div>-->
+
+                <!--        <form th:action="@{|/person/reset/${block.id}|}" method="post">-->
+                <!--            <button class="button" th:classappend="${modified} ? '' : 'hidden'" type="submit">-->
+                <!--                Reset-->
+                <!--            </button>-->
+                <!--        </form>-->
+
+            </div>
+        </dialog>
+    </li>
+
+    <script layout:fragment="script">
+        document.addEventListener("DOMContentLoaded", function () {
+            const playlistButton = document.getElementById("playlist-button");
+            playlistButton.addEventListener("click", () => {
+                console.log("Playlist button clicked");
+                toggleOverlay("opt-in-dialog");
+                history.pushState(
+                    "",
+                    document.title,
+                    window.location.pathname + window.location.search
+                );
+            });
+        });
+    </script>
+
+</html>
