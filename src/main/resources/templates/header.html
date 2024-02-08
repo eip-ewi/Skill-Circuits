@@ -68,8 +68,9 @@
                 </ul>
             </li>
         </ul>
+<!--        Playlist feature-->
         <th:block th:if="${@authorisationService.isAuthenticated()}">
-            <div layout:replace="playlist/header-button :: script"></div>
+            <div layout:replace="playlist/opt-in :: script"></div>
         </th:block>
     </header>
 

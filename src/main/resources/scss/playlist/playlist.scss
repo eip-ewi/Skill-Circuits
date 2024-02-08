@@ -1,36 +1,67 @@
 @import "../header";
 @import "../whats_new";
 @import "../overlay";
-
-
+@import "../_mixins";
 
 
 #playlist-button {
   @extend #dropdown-button
 }
 
-#opt-in-dialog{
+#opt-in__dialog {
   @extend .overlay;
   //position: fixed;
   border: 1px solid var(--primary-dark);
   //left: 50%;
-  //background: var(--primary-light);
   padding: 1rem 3rem 3rem;
   top: 4rem;;
-  width: 40%;
+  width: 60%;
   transform: translateX(-50%);
   overflow-y: auto;
   max-height: 90%;
-  //
 }
 
-.closeDialog {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  cursor: pointer;
-  background: none;
-  border: none;
-  font-size: var();
-  color: #888;
+.opt-in__content{
+  @extend #update_text;
+  padding-right: 3rem;
+  & > a{
+    color: var(--primary-green)
+  }
+}
+
+.tldr{
+  font-style: italic;
+  font-size: 0.7em;
+}
+
+ .opt-in__button-container {
+   display: flex;
+   justify-content: space-between;
+   padding: 1rem 0 1rem 0;
+   position: relative;
+
+   & > button{
+     width: 5rem;
+     padding: 0.5rem;
+     @include button($background: var(--primary-green),
+     $border: var(--primary-dark),
+     $colour: var(--primary-light),
+     $background-active: var(--primary-light),
+     $border-active: var(--primary-dark),
+     $colour-active: var(--primary-green))
+   }
+}
+
+.checkbox__container{
+  display: flex;
+  align-items: flex-start;
+  padding: 1rem 1rem;
+
+  & > input{
+    margin-top: 0.4rem;
+  }
+  & > span {
+    flex: 1;
+    padding-left: 0.5rem;
+  }
 }
