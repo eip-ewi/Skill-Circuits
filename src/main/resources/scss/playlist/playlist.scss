@@ -1,0 +1,36 @@
+@import "../header";
+@import "../whats_new";
+@import "../overlay";
+
+
+
+
+#playlist-button {
+  @extend #dropdown-button
+}
+
+#opt-in-dialog{
+  @extend .overlay;
+  //position: fixed;
+  border: 1px solid var(--primary-dark);
+  //left: 50%;
+  //background: var(--primary-light);
+  padding: 1rem 3rem 3rem;
+  top: 4rem;;
+  width: 40%;
+  transform: translateX(-50%);
+  overflow-y: auto;
+  max-height: 90%;
+  //
+}
+
+.closeDialog {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-size: var();
+  color: #888;
+}

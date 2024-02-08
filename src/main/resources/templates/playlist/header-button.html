@@ -31,12 +31,14 @@
         </button>
         <dialog
                 layout:fragment="opt-in-dialog"
-                class="overlay"
                 id="opt-in-dialog">
-<!--            <div class="whats_new">-->
-                <div>
-                    <span class="expanded-skill__group">NEW: Playlist</span>
-                    <h2>Opt-in for research</h2>
+            <div class="opt-in">
+                <button class="closeDialog">x</button>
+                <span class="expanded-skill__group">NEW: Playlist</span>
+                <h2>Opt-in for research</h2>
+                <div class="expanded-skill__content">
+                    <span class="path-name">Testing content</span>
+                </div>
 <!--                </div>-->
 
                 <!--        <form th:action="@{|/person/reset/${block.id}|}" method="post">-->
