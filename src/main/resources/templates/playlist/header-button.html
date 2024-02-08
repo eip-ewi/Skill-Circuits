@@ -22,11 +22,7 @@
         lang="en"
         xmlns:th="http://www.thymeleaf.org"
         xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-    <li class="header__icon" layout:fragment="button">
-        <button class="header__button" id="playlist-button">
-            <span class="fa-solid fa-circle-play"></span>
-            <span>Playlist</span>
-            <!--            If opted in, show playlist functionality. Else open dialog box to opt-in-->
+       <!--            If opted in, show playlist functionality. Else open dialog box to opt-in-->
 
         </button>
         <dialog
@@ -105,6 +101,23 @@
 
             </div>
         </dialog>
-    </li>
+
+    <script layout:fragment="script">
+        document.addEventListener("DOMContentLoaded", function () {
+            const playlistButton = document.getElementById("playlist-button");
+            const cancelButton = document.getElementById("opt-in-button-cancel");
+            function toggleOptIn() {
+                toggleOverlay("opt-in__dialog");
+                history.pushState(
+                    "",
+                    document.title,
+                    window.location.pathname + window.location.search
+                );
+            }
+
+            playlistButton.addEventListener("click", toggleOptIn);
+            cancelButton.addEventListener("click", toggleOptIn);
+        });
+    </script>
 
 </html>
