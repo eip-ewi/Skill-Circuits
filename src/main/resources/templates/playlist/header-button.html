@@ -173,7 +173,7 @@
         </div>
     </dialog>
     <script th:inline="javascript" layout:fragment="script">
-
+        document.getElementById("opt-in__dialog").scrollTop = 0;
         function toggleOptDialog() {
             toggleOverlay("opt-in__dialog");
             history.pushState(

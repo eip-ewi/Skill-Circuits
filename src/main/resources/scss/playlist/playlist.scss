@@ -10,9 +10,7 @@
 
 #opt-in__dialog {
     @extend .overlay;
-    //position: fixed;
     border: 1px solid var(--primary-dark);
-    //left: 50%;
     padding: 1rem 3rem 3rem;
     top: 4rem;
     width: 60%;
