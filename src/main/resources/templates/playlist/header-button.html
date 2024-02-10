@@ -72,7 +72,7 @@
                     If you want to join the research study and test the Playlist feature, please check the box below.
                 </p>
                 <div class="checkbox__container">
-                    <input type="checkbox" id="Opt-in-Checkbox">
+                    <label for="opt-in-checkbox" style="font-size: 0;">opt-in</label><input type="checkbox" id="opt-in-checkbox">
                     <span>I agree that my anonymized usage data of Skill Circuit and the Playlist feature will be
                                 collected for the research study <i>“Skill Circuit and Playlists”</i>. This data and any
                                 feedback I decide to give during the study will be used to improve the feature's design and
@@ -86,37 +86,56 @@
                     r.n.glans@student.tudelft.nl
                 </p>
 
-                <!--                </div>-->
+                <div class="opt-in__button-container">
+                    <button id="opt-in-button-cancel">Cancel</button>
+                    <button disabled id="opt-in-button-submit">I'm in!</button>
 
-                <!--        <form th:action="@{|/person/reset/${block.id}|}" method="post">-->
-                <!--            <button class="button" th:classappend="${modified} ? '' : 'hidden'" type="submit">-->
-                <!--                Reset-->
-                <!--            </button>-->
-                <!--        </form>-->
-
-            </div>
-            <div class="opt-in__button-container">
-                <button id="opt-in-button-cancel">Cancel</button>
-                <button id="opt-in-button-submit">I'm in!</button>
-
+                </div>
             </div>
         </dialog>
 
     <script layout:fragment="script">
+
+        function toggleOptIn() {
+            toggleOverlay("opt-in__dialog");
+            history.pushState(
+                "",
+                document.title,
+                window.location.pathname + window.location.search
+            );
+        }
         document.addEventListener("DOMContentLoaded", function () {
-            const playlistButton = document.getElementById("playlist-button");
-            const cancelButton = document.getElementById("opt-in-button-cancel");
-            function toggleOptIn() {
-                toggleOverlay("opt-in__dialog");
-                history.pushState(
-                    "",
-                    document.title,
-                    window.location.pathname + window.location.search
-                );
+
+            let playlistButton = document.getElementById("playlist-button-m");
+            if (playlistButton === null){
+                playlistButton = document.getElementById("playlist-button-c");
             }
+            const cancelButton = document.getElementById("opt-in-button-cancel");
 
             playlistButton.addEventListener("click", toggleOptIn);
             cancelButton.addEventListener("click", toggleOptIn);
+        });
+
+        const checkbox = document.getElementById("opt-in-checkbox");
+        const submitButton = document.getElementById("opt-in-button-submit");
+
+        checkbox.addEventListener("change", function() {
+            // Enable or disable the button based on the checkbox state
+            submitButton.disabled = !checkbox.checked;
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            $("#opt-in-button-submit").on("click", function(){
+                $.ajax({
+                    type: "POST",
+                    url: "/playlist/optIn",
+                    success: () => {
+                       console.log("yay");
+                       toggleOptIn();
+                    },
+                });
+            });
+
         });
     </script>
 

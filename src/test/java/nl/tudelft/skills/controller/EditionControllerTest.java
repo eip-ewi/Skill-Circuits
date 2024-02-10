@@ -28,6 +28,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
+import nl.tudelft.skills.playlists.ResearchParticipantService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -66,7 +67,7 @@ public class EditionControllerTest extends ControllerTest {
 		this.editionService = mock(EditionService.class);
 		this.session = mock(HttpSession.class);
 		this.editionController = new EditionController(editionRepository, editionService,
-				authorisationService, session);
+				authorisationService, session, mock(ResearchParticipantService.class));
 		this.roleApi = roleApi;
 	}
 

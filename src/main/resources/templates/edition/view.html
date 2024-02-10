@@ -36,8 +36,6 @@
                 th:with="visible = ${@editionRepository.findByIdOrThrow(edition.id).isVisible()}">
                 <div class="circuit__header__group">
                     <h1 th:text="${edition.name}"></h1>
-                    <!--            Playlist feature-->
-<!--                    <span>Test</span>-->
                     <div layout:replace="~{edition_copy/copy :: copy-edition}"></div>
                     <div layout:replace="~{edition_copy/copy :: script}"></div>
                     <div layout:replace="~{edition_copy/copy :: overlay}"></div>
@@ -68,8 +66,9 @@
                     </button>
                 </div>
 
-                <div class = circuit__header__group>
-                    <button class="circuit__button" id="playlist-button"><span class="fa-solid fa-circle-play"></span>Playlist</button>
+<!--                Playlist feature-->
+                <div class = circuit__header__group th:if="${studentOptedIn != null}">
+                    <button class="circuit__button" id="playlist-button-c"><span class="fa-solid fa-circle-play"></span>Playlist</button>
                     <div layout:replace="~{playlist/header-button :: opt-in-dialog}"></div>
                 </div>
                 <div layout:replace="~{edition_setup/view :: setup-overlay}"></div>
@@ -125,7 +124,7 @@
                 <div layout:replace="~{circuit/view :: script}"></div>
 
                 <!--        Playlist feature-->
-                <div layout:replace="playlist/header-button :: script"></div>
+                <div layout:replace="playlist/header-button :: script(view='c')"></div>
 
             </th:block>
         </div>

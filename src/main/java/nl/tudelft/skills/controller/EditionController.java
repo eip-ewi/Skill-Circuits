@@ -23,6 +23,7 @@ import java.util.List;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
+import nl.tudelft.skills.playlists.ResearchParticipantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -44,14 +45,21 @@ public class EditionController {
 	private AuthorisationService authorisationService;
 	private HttpSession session;
 
+//	Playlist feature
+	private ResearchParticipantService researchParticipantService;
+
 	@Autowired
 	public EditionController(EditionRepository editionRepository, EditionService editionService,
 			AuthorisationService authorisationService,
-			HttpSession session) {
+			HttpSession session,
+			ResearchParticipantService researchParticipantService) {
 		this.editionRepository = editionRepository;
 		this.editionService = editionService;
 		this.authorisationService = authorisationService;
 		this.session = session;
+
+//		Playlist feature
+		this.researchParticipantService = researchParticipantService;
 	}
 
 	/**
@@ -67,6 +75,13 @@ public class EditionController {
 	public String getEditionPage(@PathVariable Long id, @RequestParam(required = false) String view,
 			Model model) {
 		editionService.configureEditionModel(id, model, session);
+
+//		Playlist feature
+		if(id==2L & !authorisationService.canEditEdition(2L)) {
+			researchParticipantService.addRPInfoToModel(authorisationService.getAuthPerson(), model);
+//			TODO: set id for ACC
+		}
+
 		if (authorisationService.canEditEdition(id) && view == null) {
 			view = "circuit";
 		}

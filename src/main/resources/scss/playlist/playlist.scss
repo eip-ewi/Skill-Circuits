@@ -2,11 +2,12 @@
 @import "../whats_new";
 @import "../overlay";
 @import "../_mixins";
+@import "../circuit";
 
 
-//#playlist-button {
-//  @extend #dropdown-button
-//}
+.playlist-button {
+  @extend .circuit__button;
+}
 
 #opt-in__dialog {
   @extend .overlay;
@@ -40,15 +41,25 @@
    padding: 1rem 0 1rem 0;
    position: relative;
 
-   & > button{
+   & > button {
      width: 5rem;
      padding: 0.5rem;
+   }
+
+   & > button:enabled{
      @include button($background: var(--primary-green),
      $border: var(--primary-dark),
      $colour: var(--primary-light),
      $background-active: var(--primary-light),
      $border-active: var(--primary-dark),
      $colour-active: var(--primary-green))
+   }
+
+   & > button:disabled{
+     background-color: var(--grey-500);
+     border: var(--primary-dark);
+     color: var(--primary-dark);
+     cursor: default;
    }
 }
 
@@ -63,5 +74,7 @@
   & > span {
     flex: 1;
     padding-left: 0.5rem;
+    font-style: italic;
+    font-weight: bold;
   }
 }

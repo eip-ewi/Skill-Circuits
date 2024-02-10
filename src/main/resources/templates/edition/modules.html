@@ -35,6 +35,7 @@
                 <div>
                     <h1 th:text="|${edition.course.name} - ${edition.name}|"></h1>
                 </div>
+
                 <div>
                     <form
                         th:if="${@authorisationService.canEditEdition(edition.id)}"
@@ -49,8 +50,12 @@
                         </button>
                     </form>
                 </div>
+                <!--                Playlist feature-->
+                <div th:if="${studentOptedIn != null}">
+                        <button class="playlist-button" id="playlist-button-m"><span class="fa-solid fa-circle-play"></span>Playlist</button>
+                        <div layout:replace="~{playlist/header-button :: opt-in-dialog}"></div>
+                </div>
             </div>
-
             <form class="tabs" th:with="view = ${param?.view}">
                 <button
                     class="tab"
@@ -78,6 +83,11 @@
                     </a>
                 </th:block>
             </div>
+
+            <!--        Playlist feature-->
+            <div layout:replace="~{playlist/header-button :: script}"></div>
         </div>
+
     </body>
+
 </html>
