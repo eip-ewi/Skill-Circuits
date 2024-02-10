@@ -173,9 +173,10 @@
         </div>
     </dialog>
     <script th:inline="javascript" layout:fragment="script">
-        document.getElementById("opt-in__dialog").scrollTop = 0;
+
         function toggleOptDialog() {
             toggleOverlay("opt-in__dialog");
+            document.getElementById("opt-in__dialog").scrollTop = 0;
             history.pushState(
                 "",
                 document.title,
@@ -246,7 +247,7 @@
             }
             document.addEventListener("DOMContentLoaded", function () {
                 // Remove any AJAX request that could have been added.
-                ("#opt-in-button-submit").off();
+                $("#opt-in-button-submit").off();
                 $("#opt-in-button-submit").on("click", toggleOpt);
 
             });
@@ -271,7 +272,7 @@
             }
             document.addEventListener("DOMContentLoaded", function () {
                 // Remove any AJAX request that could have been added.
-                $("#opt-in-button-submit").off();
+                $("#opt-out-button-submit").off();
                 $("#opt-out-button-submit").on("click", toggleOpt);
 
             });
