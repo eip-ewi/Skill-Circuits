@@ -23,7 +23,6 @@ import java.util.List;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
-import nl.tudelft.skills.playlists.ResearchParticipantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -33,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.SCModuleSummaryDTO;
 import nl.tudelft.skills.model.SCEdition;
+import nl.tudelft.skills.playlists.ResearchParticipantService;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.EditionService;
@@ -45,7 +45,7 @@ public class EditionController {
 	private AuthorisationService authorisationService;
 	private HttpSession session;
 
-//	Playlist feature
+	//	Playlist feature
 	private ResearchParticipantService researchParticipantService;
 
 	@Autowired
@@ -58,7 +58,7 @@ public class EditionController {
 		this.authorisationService = authorisationService;
 		this.session = session;
 
-//		Playlist feature
+		//		Playlist feature
 		this.researchParticipantService = researchParticipantService;
 	}
 
@@ -76,10 +76,10 @@ public class EditionController {
 			Model model) {
 		editionService.configureEditionModel(id, model, session);
 
-//		Playlist feature
-		if(id==2L & !authorisationService.canEditEdition(2L)) {
+		//		Playlist feature
+		if (id == 2L & !authorisationService.canEditEdition(2L)) {
 			researchParticipantService.addRPInfoToModel(authorisationService.getAuthPerson(), model);
-//			TODO: set id for ACC
+			//			TODO: set id for ACC
 		}
 
 		if (authorisationService.canEditEdition(id) && view == null) {

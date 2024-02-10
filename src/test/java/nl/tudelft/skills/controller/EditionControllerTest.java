@@ -28,7 +28,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
-import nl.tudelft.skills.playlists.ResearchParticipantService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -44,6 +43,7 @@ import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.SCModuleSummaryDTO;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.SCModule;
+import nl.tudelft.skills.playlists.ResearchParticipantService;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.EditionService;

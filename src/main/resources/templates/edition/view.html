@@ -66,10 +66,14 @@
                     </button>
                 </div>
 
-<!--                Playlist feature-->
-                <div class = circuit__header__group th:if="${studentOptedIn != null}">
-                    <button class="circuit__button" id="playlist-button-c"><span class="fa-solid fa-circle-play"></span>Playlist</button>
-                    <div layout:replace="~{playlist/header-button :: opt-in-dialog(studentOptedIn)}"></div>
+                <!--                Playlist feature-->
+                <div class="circuit__header__group" th:if="${studentOptedIn != null}">
+                    <button class="circuit__button" id="playlist-button-c">
+                        <span class="fa-solid fa-circle-play"></span>
+                        Playlist
+                    </button>
+                    <div
+                        layout:replace="~{playlist/header-button :: opt-in-dialog(studentOptedIn)}"></div>
                 </div>
                 <div layout:replace="~{edition_setup/view :: setup-overlay}"></div>
             </div>
@@ -94,9 +98,6 @@
                 </button>
             </form>
 
-
-
-            </th:block>
             <th:block
                 th:with="circuit = ${edition},
                        canCreate = ${@authorisationService.canCreateSubmoduleInEdition(edition.id) and not studentMode},
@@ -127,7 +128,6 @@
                 <th:block th:if="${studentOptedIn != null}">
                     <div layout:replace="~{playlist/header-button :: script}"></div>
                 </th:block>
-
             </th:block>
         </div>
     </body>
