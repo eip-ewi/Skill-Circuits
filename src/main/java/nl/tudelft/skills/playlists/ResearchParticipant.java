@@ -19,7 +19,7 @@ public class ResearchParticipant {
 
     @NotNull
     @OneToOne
-    @Column(unique = true)
+    @JoinColumn(unique = true)
     private SCPerson person;
 
     @NotNull

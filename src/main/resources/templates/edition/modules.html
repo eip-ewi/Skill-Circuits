@@ -85,7 +85,11 @@
             </div>
 
             <!--        Playlist feature-->
-            <div layout:replace="~{playlist/header-button :: script}"></div>
+            <th:block th:if="${studentOptedIn != null}">
+                <div layout:replace="~{playlist/header-button :: script}"></div>
+            </th:block>
+
+
         </div>
 
     </body>

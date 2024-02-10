@@ -24,79 +24,114 @@
         xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
        <!--            If opted in, show playlist functionality. Else open dialog box to opt-in-->
 
-        </button>
-        <dialog
-                layout:fragment="opt-in-dialog"
-                id="opt-in__dialog">
-            <div class="opt-in__content">
-                <h1>Co-design a new feature: Playlist</h1>
-                <p class="tldr">TL;DR: A playlist can be seen as an automatically generated to-do list that takes
-                    into account the time needed to complete tasks. During this quarter the feature will be further
-                    developed based on theory and your feedback! We of course need your permission to collect your data
-                    and feedback.</p>
-                <h2>What is this Playlist?</h2>
-                <p>
-                    As part of a Master's thesis a new feature for Skill Circuit will be tested.
-                    Called <em>Playlist</em>, this feature creates a to-do list for you based on the activities in your
-                    circuit and the time you have available to study. It will then <i>play</i> through these activities
-                    to help structure your study session. <br>
-                    Throughout this academic quarter different functionalities of <em>Playlist</em> will be tested,
-                    starting with a basic implementation in week 3.2. <br>
-                    The different iterations of <em>Playlist</em> allow us to try different ways of implementing this
-                    feature while collecting your usage data and feedback on its usefulness. Additionally, we would love
-                    to involve you in its design process if you wish to do so.
-                </p>
-                <h2>Opt-in required for research</h2>
-                <p>
-                    If you wish to use and test this feature, you are required to give permission for your usage data to
-                    be collected and used in research. The research study is titled <i>“Skill Circuit and
-                    Playlists”</i> and is being done as part of a master's thesis. Data will be collected throughout Q3
-                    of academic year 2023/2024 at the TU Delft. Examples of such data are how long you have been logged
-                    in or which buttons you have clicked.<br>
-                    Throughout your usage of this feature you will also be asked to give feedback on the tool. This is
-                    not mandatory but highly appreciated. The purpose of this research study is to gain insights and
-                    feedback on both the initial design of a learning tool and its design process. The data will be
-                    used for adjusting the tool’s design and design process, and further guide the master’s thesis.
-                    De-identified or aggregated data may be published in an openly available repository, in accordance
-                    with the TU Delft Research Data policy.<br>
-                    <strong>Without giving your permission to collect usage data you cannot use and test this new
-                        feature</strong>. <br><br>
-                    To the best of our ability your data collected in this study
-                    will remain confidential. We will minimalize any risks by only collecting the following personally
-                    identifiable research data (PIRD): the course you are using the <em>Playlist</em> feature in.
-                    Your participation in this study is entirely voluntary and you can withdraw at any time.
-                    You are free to omit any feedback prompts given by the tool and leave the study prematurely.
-                    If you decide to leave the study prematurely, your permission will be asked to still use your data
-                    collected up until that point. If you do not consent, no data of yours will be used. You will also
-                    no longer have access to the <em>Playlist</em> feature. <br>
-                    If you want to join the research study and test the Playlist feature, please check the box below.
-                </p>
-                <div class="checkbox__container">
-                    <label for="opt-in-checkbox" style="font-size: 0;">opt-in</label><input type="checkbox" id="opt-in-checkbox">
-                    <span>I agree that my anonymized usage data of Skill Circuit and the Playlist feature will be
-                                collected for the research study <i>“Skill Circuit and Playlists”</i>. This data and any
-                                feedback I decide to give during the study will be used to improve the feature's design and
-                                design process during Q3. I understand that I can withdraw the study at any time.
-                            </span>
-                </div>
-                <br>
-                <p>
-                    For more information you may contact the master student: <br>
-                    <a href="mailto:r.n.glans@student.tudelft.nl?subject=[PlaylistFeedback]">Rebecca Glans</a>,<br>
-                    r.n.glans@student.tudelft.nl
-                </p>
-
-                <div class="opt-in__button-container">
-                    <button id="opt-in-button-cancel">Cancel</button>
-                    <button disabled id="opt-in-button-submit">I'm in!</button>
-
-                </div>
+    </button>
+    <dialog
+            layout:fragment="opt-in-dialog"
+            id="opt-in__dialog">
+        <div th:if="${studentOptedIn.isPresent() && studentOptedIn.get()}" class="opt-in__content">
+            <h1>Co-design a new feature: Playlist</h1>
+            <h2>You already opted in!</h2>
+            <p>
+                Thank you so much for joining this research! The first testing iteration will start in week 3.2. Feel
+                free to contact the master student in the meantime if you have any questions. <br>
+                If you wish to opt-out already, you can do so below.
+            </p>
+            <h2>What is this Playlist?</h2>
+            <p>
+                As part of a Master's thesis a new feature for Skill Circuit will be tested.
+                Called <em>Playlist</em>, this feature creates a to-do list for you based on the activities in your
+                circuit and the time you have available to study. It will then <i>play</i> through these activities
+                to help structure your study session. <br>
+                Throughout this academic quarter different functionalities of <em>Playlist</em> will be tested,
+                starting with a basic implementation in week 3.2. <br>
+                The different iterations of <em>Playlist</em> allow us to try different ways of implementing this
+                feature while collecting your usage data and feedback on its usefulness. Additionally, we would love
+                to involve you in its design process if you wish to do so.
+            </p>
+            <br>
+            <p>
+                For more information you may contact the master student: <br>
+                <a href="mailto:r.n.glans@student.tudelft.nl?subject=[PlaylistFeedback]">Rebecca Glans</a>,<br>
+                r.n.glans@student.tudelft.nl
+            </p>
+            <div class="checkbox__container">
+                <label for="opt-out-checkbox" style="font-size: 0;">opt-in</label><input type="checkbox" id="opt-out-checkbox">
+                <span>I would like to opt-out of this research.</span>
             </div>
-        </dialog>
+            <div class="opt-in__button-container">
+                <button class="opt-button-cancel">Cancel</button>
+                <button disabled id="opt-out-button-submit">I'm out!</button>
 
-    <script layout:fragment="script">
+            </div>
+        </div>
+        <div th:unless="${studentOptedIn.isPresent() && studentOptedIn.get()}" class="opt-in__content" >
+            <h1>Co-design a new feature: Playlist</h1>
+            <p class="tldr">TL;DR: A playlist can be seen as an automatically generated to-do list that takes
+                into account the time needed to complete tasks. During this quarter the feature will be further
+                developed based on theory and your feedback! We of course need your permission to collect your data
+                and feedback.</p>
+            <h2>What is this Playlist?</h2>
+            <p>
+                As part of a Master's thesis a new feature for Skill Circuit will be tested.
+                Called <em>Playlist</em>, this feature creates a to-do list for you based on the activities in your
+                circuit and the time you have available to study. It will then <i>play</i> through these activities
+                to help structure your study session. <br>
+                Throughout this academic quarter different functionalities of <em>Playlist</em> will be tested,
+                starting with a basic implementation in week 3.2. <br>
+                The different iterations of <em>Playlist</em> allow us to try different ways of implementing this
+                feature while collecting your usage data and feedback on its usefulness. Additionally, we would love
+                to involve you in its design process if you wish to do so.
+            </p>
+            <h2>Opt-in required for research</h2>
+            <p>
+                If you wish to use and test this feature, you are required to give permission for your usage data to
+                be collected and used in research. The research study is titled <i>“Skill Circuit and
+                Playlists”</i> and is being done as part of a master's thesis. Data will be collected throughout Q3
+                of academic year 2023/2024 at the TU Delft. Examples of such data are how long you have been logged
+                in or which buttons you have clicked.<br>
+                Throughout your usage of this feature you will also be asked to give feedback on the tool. This is
+                not mandatory but highly appreciated. The purpose of this research study is to gain insights and
+                feedback on both the initial design of a learning tool and its design process. The data will be
+                used for adjusting the tool’s design and design process, and further guide the master’s thesis.
+                De-identified or aggregated data may be published in an openly available repository, in accordance
+                with the TU Delft Research Data policy.<br>
+                <strong>Without giving your permission to collect usage data you cannot use and test this new
+                    feature</strong>. <br><br>
+                To the best of our ability your data collected in this study
+                will remain confidential. We will minimalize any risks by only collecting the following personally
+                identifiable research data (PIRD): the course you are using the <em>Playlist</em> feature in.
+                Your participation in this study is entirely voluntary and you can withdraw at any time.
+                You are free to omit any feedback prompts given by the tool and leave the study prematurely.
+                If you decide to leave the study prematurely, your permission will be asked to still use your data
+                collected up until that point. If you do not consent, no data of yours will be used. You will also
+                no longer have access to the <em>Playlist</em> feature. <br>
+                If you want to join the research study and test the Playlist feature, please check the box below.
+            </p>
+            <div class="checkbox__container">
+                <label for="opt-in-checkbox" style="font-size: 0;">opt-in</label><input type="checkbox" id="opt-in-checkbox">
+                <span>I agree that my anonymized usage data of Skill Circuit and the Playlist feature will be
+                            collected for the research study <i>“Skill Circuit and Playlists”</i>. This data and any
+                            feedback I decide to give during the study will be used to improve the feature's design and
+                            design process during Q3. I understand that I can withdraw the study at any time.
+                        </span>
+            </div>
+            <br>
+            <p>
+                For more information you may contact the master student: <br>
+                <a href="mailto:r.n.glans@student.tudelft.nl?subject=[PlaylistFeedback]">Rebecca Glans</a>,<br>
+                r.n.glans@student.tudelft.nl
+            </p>
 
-        function toggleOptIn() {
+            <div class="opt-in__button-container">
+                <button class="opt-button-cancel">Cancel</button>
+                <button disabled id="opt-in-button-submit">I'm in!</button>
+
+            </div>
+        </div>
+    </dialog>
+    <script th:inline="javascript" layout:fragment="script">
+
+        function toggleOptDialog() {
             toggleOverlay("opt-in__dialog");
             history.pushState(
                 "",
@@ -110,33 +145,98 @@
             if (playlistButton === null){
                 playlistButton = document.getElementById("playlist-button-c");
             }
-            const cancelButton = document.getElementById("opt-in-button-cancel");
+            const cancelButtons = document.getElementsByClassName("opt-button-cancel");
 
-            playlistButton.addEventListener("click", toggleOptIn);
-            cancelButton.addEventListener("click", toggleOptIn);
+            playlistButton.addEventListener("click", toggleOptDialog);
+            for (let i = 0; i < cancelButtons.length; i++) {
+                cancelButtons[i].addEventListener("click", toggleOptDialog);
+            }
         });
 
-        const checkbox = document.getElementById("opt-in-checkbox");
-        const submitButton = document.getElementById("opt-in-button-submit");
-
-        checkbox.addEventListener("change", function() {
+        function linkCheckBoxButton(checkbox, button){
             // Enable or disable the button based on the checkbox state
-            submitButton.disabled = !checkbox.checked;
-        });
+            button.disabled = !checkbox.checked;
+        }
+        const studentOptedIn = [[${studentOptedIn.isPresent() ? studentOptedIn.get() : null}]];
+        <!--        TODO: refactor duplicate code -->
+        if(studentOptedIn === null){
+            const checkbox = document.getElementById("opt-in-checkbox");
+            const submitButton = document.getElementById("opt-in-button-submit");
 
-        document.addEventListener("DOMContentLoaded", function () {
-            $("#opt-in-button-submit").on("click", function(){
-                $.ajax({
-                    type: "POST",
-                    url: "/playlist/optIn",
-                    success: () => {
-                       console.log("yay");
-                       toggleOptIn();
-                    },
-                });
+            checkbox.addEventListener("change", function(){
+                linkCheckBoxButton(checkbox, submitButton);
             });
 
-        });
+            document.addEventListener("DOMContentLoaded", function () {
+                $("#opt-in-button-submit").on("click", function(){
+                    $.ajax({
+                        type: "POST",
+                        url: "/playlist/optIn",
+                        success: () => {
+                            location.reload(true);
+                        },
+                    });
+                });
+
+            });
+        }
+        else if(!studentOptedIn) {
+            const checkbox = document.getElementById("opt-in-checkbox");
+            const submitButton = document.getElementById("opt-in-button-submit");
+
+            if(checkbox !== null && submitButton !== null){
+
+            }
+            checkbox.addEventListener("change", function(){
+                linkCheckBoxButton(checkbox, submitButton);
+            });
+
+            function toggleOpt(){
+                // Once they've opted in once, they can toggle in and out again
+                $.ajax({
+                    type: "PATCH",
+                    url: "/playlist/optIn",
+                    success: () => {
+                        location.reload(true);
+                    },
+                });
+            }
+            document.addEventListener("DOMContentLoaded", function () {
+                // Remove any AJAX request that could have been added.
+                ("#opt-in-button-submit").off();
+                $("#opt-in-button-submit").on("click", toggleOpt);
+
+            });
+        }
+        else {
+            const checkbox = document.getElementById("opt-out-checkbox");
+            const submitButton = document.getElementById("opt-out-button-submit");
+
+            checkbox.addEventListener("change", function(){
+                linkCheckBoxButton(checkbox, submitButton);
+            });
+
+            function toggleOpt(){
+                // Once they've opted in once, they can toggle in and out again
+                $.ajax({
+                    type: "PATCH",
+                    url: "/playlist/optIn",
+                    success: () => {
+                        location.reload(true);
+                    },
+                });
+            }
+            document.addEventListener("DOMContentLoaded", function () {
+                // Remove any AJAX request that could have been added.
+                $("#opt-in-button-submit").off();
+                $("#opt-out-button-submit").on("click", toggleOpt);
+
+            });
+        }
+
+
     </script>
+
+
 
 </html>
