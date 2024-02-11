@@ -427,8 +427,8 @@ public class SkillControllerTest extends ControllerTest {
 
 		// Assert on added model attributes concerning paths and added tasks/modified skills
 		assertThat(model.getAttribute("selectedPathId")).isNull();
-		assertThat(model.getAttribute("tasksAdded")).isEqualTo(List.of());
-		assertThat(model.getAttribute("skillsModified")).isEqualTo(List.of());
+		assertThat(model.getAttribute("tasksAdded")).isEqualTo(Set.of());
+		assertThat(model.getAttribute("skillsModified")).isEqualTo(Set.of());
 
 		// The skill view should be unmodified (all tasks with their initial visibility, meaning all are visible)
 		ModuleLevelSkillViewDTO view = View.convert(skill, ModuleLevelSkillViewDTO.class);
@@ -500,9 +500,9 @@ public class SkillControllerTest extends ControllerTest {
 
 		// Assert on added model attributes concerning paths and added tasks/modified skills
 		assertThat(model.getAttribute("selectedPathId")).isEqualTo(pathfinderPath.getId());
-		assertThat(model.getAttribute("tasksAdded")).isEqualTo(List.of(
+		assertThat(model.getAttribute("tasksAdded")).isEqualTo(Set.of(
 				View.convert(taskDo, TaskViewDTO.class)));
-		assertThat(model.getAttribute("skillsModified")).isEqualTo(List.of(view));
+		assertThat(model.getAttribute("skillsModified")).isEqualTo(Set.of(view));
 	}
 
 	@Test

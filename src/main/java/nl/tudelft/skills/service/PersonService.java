@@ -17,7 +17,6 @@
  */
 package nl.tudelft.skills.service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -102,16 +101,17 @@ public class PersonService {
 		// they are only added corresponding to the skill (tasks in the skill and the skill itself, if modified).
 		if (skill == null) {
 			model.addAttribute("tasksAdded",
-					tasks.stream().map(at -> View.convert(at, TaskViewDTO.class)).toList());
+					tasks.stream().map(at -> View.convert(at, TaskViewDTO.class))
+							.collect(Collectors.toSet()));
 			model.addAttribute("skillsModified", skillsModified.stream()
-					.map(at -> View.convert(at, ModuleLevelSkillViewDTO.class)).toList());
+					.map(at -> View.convert(at, ModuleLevelSkillViewDTO.class)).collect(Collectors.toSet()));
 		} else {
 			model.addAttribute("tasksAdded", tasks.stream().filter(t -> skill.getTasks().contains(t))
-					.map(at -> View.convert(at, TaskViewDTO.class)).toList());
+					.map(at -> View.convert(at, TaskViewDTO.class)).collect(Collectors.toSet()));
 			model.addAttribute("skillsModified",
 					skillsModified.contains(skill)
-							? List.of(View.convert(skill, ModuleLevelSkillViewDTO.class))
-							: List.of());
+							? Set.of(View.convert(skill, ModuleLevelSkillViewDTO.class))
+							: Set.of());
 		}
 
 		// Returns an Optional of the tasks in the path if a path is selected, and an empty Optional otherwise.

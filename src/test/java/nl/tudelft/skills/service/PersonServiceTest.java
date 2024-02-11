@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -159,8 +158,6 @@ public class PersonServiceTest {
 		task.getPersonsThatAddedTask().add(person);
 	}
 
-	// TODO make the assertions with type safety checks.
-
 	@Test
 	void setPersonalPathAttributesPathAndSkillNull() {
 		// Path: null, skill: null, tasksAdded: contains a task, skillsModified: contains some skills
@@ -171,12 +168,11 @@ public class PersonServiceTest {
 
 		assertThat(taskIds).isEmpty();
 		assertThat(model.getAttribute("selectedPathId")).isNull();
-		assertThat((List<TaskViewDTO>) model.getAttribute("tasksAdded"))
-				.containsExactlyInAnyOrder(View.convert(db.getTaskDo10a(), TaskViewDTO.class));
-		assertThat((List<ModuleLevelSkillViewDTO>) model.getAttribute("skillsModified"))
-				.containsExactlyInAnyOrder(
-						View.convert(db.getSkillVariables(), ModuleLevelSkillViewDTO.class),
-						View.convert(db.getSkillImplication(), ModuleLevelSkillViewDTO.class));
+		assertThat(model.getAttribute("tasksAdded"))
+				.isEqualTo(Set.of(View.convert(db.getTaskDo10a(), TaskViewDTO.class)));
+		assertThat(model.getAttribute("skillsModified")).isEqualTo(
+				Set.of(View.convert(db.getSkillVariables(), ModuleLevelSkillViewDTO.class),
+						View.convert(db.getSkillImplication(), ModuleLevelSkillViewDTO.class)));
 	}
 
 	@Test
@@ -195,12 +191,11 @@ public class PersonServiceTest {
 		assertThat(taskIds).isNotEmpty();
 		assertThat(taskIds.get()).containsExactly(db.getTaskRead12().getId());
 		assertThat(model.getAttribute("selectedPathId")).isEqualTo(db.getPathFinderPath().getId());
-		assertThat((List<TaskViewDTO>) model.getAttribute("tasksAdded"))
-				.containsExactlyInAnyOrder(View.convert(db.getTaskDo10a(), TaskViewDTO.class));
-		assertThat((List<ModuleLevelSkillViewDTO>) model.getAttribute("skillsModified"))
-				.containsExactlyInAnyOrder(
-						View.convert(db.getSkillVariables(), ModuleLevelSkillViewDTO.class),
-						View.convert(db.getSkillImplication(), ModuleLevelSkillViewDTO.class));
+		assertThat(model.getAttribute("tasksAdded"))
+				.isEqualTo(Set.of(View.convert(db.getTaskDo10a(), TaskViewDTO.class)));
+		assertThat(model.getAttribute("skillsModified")).isEqualTo(
+				Set.of(View.convert(db.getSkillVariables(), ModuleLevelSkillViewDTO.class),
+						View.convert(db.getSkillImplication(), ModuleLevelSkillViewDTO.class)));
 	}
 
 	@Test
@@ -227,11 +222,10 @@ public class PersonServiceTest {
 		assertThat(taskIds).isNotEmpty();
 		assertThat(taskIds.get()).containsExactly(db.getTaskRead12().getId());
 		assertThat(model.getAttribute("selectedPathId")).isEqualTo(db.getPathFinderPath().getId());
-		assertThat((List<TaskViewDTO>) model.getAttribute("tasksAdded"))
-				.containsExactlyInAnyOrder(View.convert(db.getTaskDo10a(), TaskViewDTO.class));
-		assertThat((List<ModuleLevelSkillViewDTO>) model.getAttribute("skillsModified"))
-				.containsExactlyInAnyOrder(
-						View.convert(db.getSkillVariables(), ModuleLevelSkillViewDTO.class));
+		assertThat(model.getAttribute("tasksAdded"))
+				.isEqualTo(Set.of(View.convert(db.getTaskDo10a(), TaskViewDTO.class)));
+		assertThat(model.getAttribute("skillsModified")).isEqualTo(
+				Set.of(View.convert(db.getSkillVariables(), ModuleLevelSkillViewDTO.class)));
 	}
 
 	@Test
@@ -262,8 +256,8 @@ public class PersonServiceTest {
 		assertThat(taskIds).isNotEmpty();
 		assertThat(taskIds.get()).containsExactly(db.getTaskRead12().getId());
 		assertThat(model.getAttribute("selectedPathId")).isEqualTo(db.getPathFinderPath().getId());
-		assertThat((List<TaskViewDTO>) model.getAttribute("tasksAdded")).isEmpty();
-		assertThat((List<ModuleLevelSkillViewDTO>) model.getAttribute("skillsModified")).isEmpty();
+		assertThat(model.getAttribute("tasksAdded")).isEqualTo(Set.of());
+		assertThat(model.getAttribute("skillsModified")).isEqualTo(Set.of());
 	}
 
 	@Test
@@ -281,8 +275,8 @@ public class PersonServiceTest {
 		assertThat(taskIds).isNotEmpty();
 		assertThat(taskIds.get()).containsExactly(db.getTaskRead12().getId());
 		assertThat(model.getAttribute("selectedPathId")).isEqualTo(db.getPathFinderPath().getId());
-		assertThat((List<TaskViewDTO>) model.getAttribute("tasksAdded")).isEmpty();
-		assertThat((List<ModuleLevelSkillViewDTO>) model.getAttribute("skillsModified")).isEmpty();
+		assertThat(model.getAttribute("tasksAdded")).isEqualTo(Set.of());
+		assertThat(model.getAttribute("skillsModified")).isEqualTo(Set.of());
 	}
 
 }
