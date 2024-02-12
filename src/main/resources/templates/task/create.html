@@ -106,18 +106,14 @@
             elem.removeClass("hidden");
             elem.children("input[type='hidden']").val(button.data("block"));
 
-            // The index of a new task is the amount of items in the containing list
-            // and the amount of saved tasks (in the nested flex list)
-            const taskList = button.closest("ul");
-            const index =
-                taskList.children("li").length +
-                taskList.find(".items:first").children().length -
-                1;
+            const taskList = button.closest("ul").find("ul").first();
+            const index = taskList.children().length;
             elem.attr("data-index", index);
             elem.data("index", index);
 
-            button.parent().after(elem);
-            button.closest("ul").find("li:eq(1) input[name='time']").focus();
+            // As the <ul> has flex-direction: column-reverse we prepend the new task to have it at the end of the list
+            taskList.prepend(elem);
+            elem.find("input[name='time']").focus();
         }
 
         document.addEventListener("DOMContentLoaded", function () {
