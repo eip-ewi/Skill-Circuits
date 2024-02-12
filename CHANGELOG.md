@@ -14,7 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Added
 ## Changed
 ## Fixed
-- Reordering of tasks now works on first click
+- Teacher view: Reordering of tasks now works on first click (@rglans)
+- Teacher view: Can now reorder new tasks on creation (@rglans)
 
 ## [2.2.5]
 
