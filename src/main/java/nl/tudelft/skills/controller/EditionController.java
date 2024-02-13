@@ -77,7 +77,7 @@ public class EditionController {
 		editionService.configureEditionModel(id, model, session);
 
 		//		Playlist feature
-		if (id == 643L & !authorisationService.canEditEdition(643L)) {
+		if (id == 2L & !authorisationService.canEditEdition(2L)) {
 			researchParticipantService.addRPInfoToModel(authorisationService.getAuthPerson(), model);
 			//			TODO: Make this work locally
 		}

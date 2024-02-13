@@ -45,16 +45,30 @@ public class PlaylistController {
 		this.personService = personService;
 	}
 
+	/**
+	 * Creates a new research participant
+	 *
+	 * @param person authenticated person who should a student
+	 * @param editionId the edition from which participants are allowed
+	 * @return ResponseEntity with OK status on success
+	 */
 	@PostMapping("optIn")
 	@Transactional
 	@PreAuthorize("!@authorisationService.canEditEdition(#editionId)")
 	public ResponseEntity<Void> optIn(@AuthenticatedPerson Person person, Long editionId) {
-		SCPerson scPerson = personService.getOrCreateSCPerson(person.getId());
 		//        TODO: change edition to ACC
+		//        TODO: authorize students only
+		SCPerson scPerson = personService.getOrCreateSCPerson(person.getId());
+
 		researchParticipantService.saveOptIn(scPerson);
 		return ResponseEntity.ok().build();
 	}
 
+	/**
+	 * Toggle the research participant's opt status
+	 * @param person The authenticated student that is a research participant
+	 * @return A string indicating the new opt status
+	 */
 	@PatchMapping("optIn")
 	public ResponseEntity<String> patchOptIn(@AuthenticatedPerson Person person) {
 		//        TODO: use patch object and rename method

@@ -28,6 +28,11 @@ public interface ResearchParticipantRepository extends JpaRepository<ResearchPar
 				.orElseThrow(() -> new ResourceNotFoundException("ResearchParticipant was not found: " + id));
 	}
 
+	/**
+	 * Find ResearchParticipant by SCPerson
+	 * @param person SCPersion
+	 * @return ResearchParticipant
+	 */
 	ResearchParticipant findByPerson(SCPerson person);
 
 }
