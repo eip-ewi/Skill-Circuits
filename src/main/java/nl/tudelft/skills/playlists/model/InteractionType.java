@@ -15,35 +15,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.playlists;
+package nl.tudelft.skills.playlists.model;
 
-import java.time.LocalDateTime;
-
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-
-import lombok.*;
-import nl.tudelft.skills.model.labracore.SCPerson;
-
-@Data
-@Entity
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class ResearchParticipant {
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private Long id;
-
-	@NotNull
-	@OneToOne
-	@JoinColumn(unique = true)
-	private SCPerson person;
-
-	@NotNull
-	@Builder.Default
-	private LocalDateTime optIn = LocalDateTime.now();
-
-	private LocalDateTime optOut;
+public enum InteractionType {
+	LOGIN,
+	LOGOUT,
+	PL_PLAY,
+	PL_PAUSE,
+	PL_ADD,
+	PL_REMOVE,
+	PL_SKIP,
 
 }

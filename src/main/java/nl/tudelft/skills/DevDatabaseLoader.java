@@ -412,41 +412,59 @@ public class DevDatabaseLoader {
 		taskRepository.save(Task.builder().name("Do exercise 1.1a-d").skill(skillNegation).time(10).build());
 		taskRepository.save(Task.builder().name("Read chapter 1.0").skill(skillVariables).time(10)
 				.type(TaskType.READING).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
-		taskRepository.save(Task.builder().name("Do exercise 1.0a").skill(skillVariables).time(10).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
+		taskRepository.save(Task.builder().name("Do exercise 1.0a").skill(skillVariables).time(10)
+				.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
 
-		taskRepository.save(Task.builder().name("Read chapter 2.0").skill(skillProofOutline).time(10).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
+		taskRepository.save(Task.builder().name("Read chapter 2.0").skill(skillProofOutline).time(10)
+				.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
 		taskRepository.save(Task.builder().name("Do exercise 2.0a-f").skill(skillProofOutline).time(10)
 				.type(TaskType.COLLABORATION).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
 		taskRepository.save(
-				Task.builder().name("Watch lecture 1").skill(skillProofOutline).time(10).type(TaskType.VIDEO).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
-		taskRepository.save(Task.builder().name("Read chapter 2.1").skill(skillAssumption).time(10).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
-		taskRepository.save(Task.builder().name("Do exercise 2.1a-g").skill(skillAssumption).time(10).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
+				Task.builder().name("Watch lecture 1").skill(skillProofOutline).time(10).type(TaskType.VIDEO)
+						.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
+		taskRepository.save(Task.builder().name("Read chapter 2.1").skill(skillAssumption).time(10)
+				.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
+		taskRepository.save(Task.builder().name("Do exercise 2.1a-g").skill(skillAssumption).time(10)
+				.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
 		taskRepository
-				.save(Task.builder().name("Read chapter 2.2").skill(skillGeneralisationPractice).time(10).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
+				.save(Task.builder().name("Read chapter 2.2").skill(skillGeneralisationPractice).time(10)
+						.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
 		taskRepository
-				.save(Task.builder().name("Do exercise 2.2a-b").skill(skillGeneralisationPractice).time(10).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
+				.save(Task.builder().name("Do exercise 2.2a-b").skill(skillGeneralisationPractice).time(10)
+						.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
 		taskRepository.save(Task.builder().name("TA Check 1").skill(skillGeneralisationPractice).time(10)
 				.type(TaskType.QUIZ).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
 
-		taskRepository.save(Task.builder().name("Read chapter 2.3").skill(skillDividingIntoCases).time(10).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
-		taskRepository.save(Task.builder().name("Watch lecture 2").skill(skillDividingIntoCases).time(10).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
-		taskRepository.save(Task.builder().name("Do exercise 2.3a-d").skill(skillCasesPractice).time(10).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
+		taskRepository.save(Task.builder().name("Read chapter 2.3").skill(skillDividingIntoCases).time(10)
+				.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
+		taskRepository.save(Task.builder().name("Watch lecture 2").skill(skillDividingIntoCases).time(10)
+				.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
+		taskRepository.save(Task.builder().name("Do exercise 2.3a-d").skill(skillCasesPractice).time(10)
+				.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
 
 		taskRepository
-				.save(Task.builder().name("Read chapter 2.4").skill(skillContradictionPractice).time(10).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
-		taskRepository.save(Task.builder().name("Watch lecture 3").skill(skillContradictionPractice).time(10).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
-		taskRepository.save(Task.builder().name("TA Check 2").skill(skillContradictionPractice).time(10).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
+				.save(Task.builder().name("Read chapter 2.4").skill(skillContradictionPractice).time(10)
+						.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
+		taskRepository.save(Task.builder().name("Watch lecture 3").skill(skillContradictionPractice).time(10)
+				.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
+		taskRepository.save(Task.builder().name("TA Check 2").skill(skillContradictionPractice).time(10)
+				.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
 
-		taskRepository.save(Task.builder().name("Read chapter 2.5").skill(skillNegateImplications).time(10).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
+		taskRepository.save(Task.builder().name("Read chapter 2.5").skill(skillNegateImplications).time(10)
+				.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
 		taskRepository.save(Task.builder().name("Watch video 1").skill(skillContrapositivePractice).time(10)
 				.link("https://www.youtube.com/watch?v=dQw4w9WgXcQ").build());
 		taskRepository
-				.save(Task.builder().name("Do exercise 2.5a").skill(skillContrapositivePractice).time(10).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
+				.save(Task.builder().name("Do exercise 2.5a").skill(skillContrapositivePractice).time(10)
+						.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
 
-		taskRepository.save(Task.builder().name("Read chapter 2.5").skill(skillTransitiveProperty).time(10).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
-		taskRepository.save(Task.builder().name("Do exercise 2.5a").skill(skillTransitiveProperty).time(10).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
+		taskRepository.save(Task.builder().name("Read chapter 2.5").skill(skillTransitiveProperty).time(10)
+				.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
+		taskRepository.save(Task.builder().name("Do exercise 2.5a").skill(skillTransitiveProperty).time(10)
+				.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
 		taskRepository
-				.save(Task.builder().name("Watch video 2: dominos").skill(skillTransitiveProperty).time(10).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
+				.save(Task.builder().name("Watch video 2: dominos").skill(skillTransitiveProperty).time(10)
+						.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
 
 		taskRepository.save(Task.builder().name("Watch lecture 4").skill(skillInductionPractice).time(10)
 				.type(TaskType.VIDEO).build());
@@ -460,8 +478,9 @@ public class DevDatabaseLoader {
 				.type(TaskType.QUIZ).build());
 		taskRepository.save(Task.builder().name("Implement DFS").skill(skillInductionPractice).time(10)
 				.type(TaskType.IMPLEMENTATION).build());
-		taskRepository.save(Task.builder().name("Experiment with run time").skill(skillInductionPractice).time(10)
-				.type(TaskType.EXPERIMENT).build());
+		taskRepository
+				.save(Task.builder().name("Experiment with run time").skill(skillInductionPractice).time(10)
+						.type(TaskType.EXPERIMENT).build());
 
 		taskRepository.save(Task.builder().name("Task 1").skill(skillSimpleA).time(10).build());
 		taskRepository.save(Task.builder().name("Task 2").skill(skillSimpleA).time(10).build());

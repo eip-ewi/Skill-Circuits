@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.playlists;
+package nl.tudelft.skills.playlists.service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -28,6 +28,8 @@ import org.springframework.ui.Model;
 
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.playlists.model.ResearchParticipant;
+import nl.tudelft.skills.playlists.repository.ResearchParticipantRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 @Service
@@ -46,8 +48,9 @@ public class ResearchParticipantService {
 
 	/**
 	 * Create a new research participant
-	 * @param scPerson authenticated student
-	 * @return created ResearchParticipant
+	 *
+	 * @param  scPerson authenticated student
+	 * @return          created ResearchParticipant
 	 */
 	@Transactional
 	public ResearchParticipant saveOptIn(SCPerson scPerson) {
@@ -58,8 +61,9 @@ public class ResearchParticipantService {
 
 	/**
 	 * Toggles the opt status of a ResearchParticipant
-	 * @param scPerson authenticated student which is a research particiapnt
-	 * @return String holding the new opt status
+	 *
+	 * @param  scPerson authenticated student which is a research particiapnt
+	 * @return          String holding the new opt status
 	 */
 	@Transactional
 	public String toggleOpt(SCPerson scPerson) {
@@ -83,8 +87,9 @@ public class ResearchParticipantService {
 
 	/**
 	 * Checks whether a student is opted-in or -out
-	 * @param scPerson Student to be checked
-	 * @return boolean indicating opted-in (true) or opted-out (false)
+	 *
+	 * @param  scPerson Student to be checked
+	 * @return          boolean indicating opted-in (true) or opted-out (false)
 	 */
 	public Optional<Boolean> optedIn(SCPerson scPerson) {
 		ResearchParticipant rp = researchParticipantRepository.findByPerson(scPerson);
@@ -105,8 +110,9 @@ public class ResearchParticipantService {
 
 	/**
 	 * Method used to add ResearhParticipant data to the Thymeleaf Model
+	 *
 	 * @param person authenticated person to get ResearchParticipant info of
-	 * @param model to add info to
+	 * @param model  to add info to
 	 */
 	public void addRPInfoToModel(Person person, Model model) {
 		if (person != null) {

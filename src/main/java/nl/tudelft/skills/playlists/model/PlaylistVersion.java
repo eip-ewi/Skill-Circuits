@@ -15,24 +15,36 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.playlists;
+package nl.tudelft.skills.playlists.model;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import java.util.HashSet;
+import java.util.Set;
 
-import nl.tudelft.skills.model.labracore.SCPerson;
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
-public interface ResearchParticipantRepository extends JpaRepository<ResearchParticipant, Long> {
-	default ResearchParticipant findByIdOrThrow(Long id) {
-		return findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("ResearchParticipant was not found: " + id));
-	}
+import lombok.*;
 
-	/**
-	 * Find ResearchParticipant by SCPerson
-	 * @param person SCPersion
-	 * @return ResearchParticipant
-	 */
-	ResearchParticipant findByPerson(SCPerson person);
+@Data
+@Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class PlaylistVersion {
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	private Long id;
 
+	@NotNull
+	private Long playlistId;
+
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@ManyToMany
+	private Set<PlaylistTask> tasks = new HashSet<>();
+
+	@NotNull
+	@Builder.Default
+	private Integer totalTime = 0;
 }
