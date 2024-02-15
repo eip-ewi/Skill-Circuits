@@ -20,6 +20,10 @@ package nl.tudelft.skills.playlists.service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import liquibase.pro.packaged.L;
+import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.service.TaskCompletionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -45,20 +49,22 @@ public class PlaylistService {
 	private PersonService personService;
 	private TaskRepository taskRepository;
 	private CheckpointRepository checkpointRepository;
-	private SkillRepository skillRepository;
+	private TaskCompletionService taskCompletionService;
+	private PersonRepository personRepository;
 
 	@Autowired
 	public PlaylistService(PlaylistRepository playlistRepository,
 			ResearchParticipantService researchParticipantService,
 			ModuleRepository moduleRepository, PersonService personService, TaskRepository taskRepository,
-			CheckpointRepository checkpointRepository, SkillRepository skillRepository) {
+			CheckpointRepository checkpointRepository, TaskCompletionService taskCompletionService, PersonRepository personRepository) {
 		this.playlistRepository = playlistRepository;
 		this.researchParticipantService = researchParticipantService;
 		this.moduleRepository = moduleRepository;
 		this.personService = personService;
 		this.taskRepository = taskRepository;
 		this.checkpointRepository = checkpointRepository;
-		this.skillRepository = skillRepository;
+		this.taskCompletionService = taskCompletionService;
+		this.personRepository = personRepository;
 	}
 
 	public String getDefaultPathForEdition(Long personId) {
@@ -85,39 +91,44 @@ public class PlaylistService {
 		return task.getName();
 	}
 
-	public Set<Long> getTasks(Long personId) {
-		ModuleLevelModuleViewDTO module = View.convert(moduleRepository.findByIdOrThrow(3L),
-				ModuleLevelModuleViewDTO.class);
+	public Map<Long,List<Long>> getTasks(Set<TaskCompletion> taskCompletions, Skill skill) {
 
-		if (personService.getPathForEdition(personId, 2L).isEmpty()) {
-			return new HashSet<>();
+		Map<Long, List<Long>> tasks = new HashMap<>();
+
+
+		for(Task t: skill.getTasks()){
+			boolean completed = taskCompletions.stream().anyMatch(tC -> tC.getTask().getId().equals(t.getId()));
+			tasks.put(t.getId(), List.of(13L, completed?1L:0L));
 		}
-		Path path = personService.getPathForEdition(personId, 2L).get().getPath();
 
-		Set<Long> taskIds = path == null ? new HashSet<>()
-				: path.getTasks().stream().map(Task::getId).collect(Collectors.toSet());
-
-		if (path != null) {
-			// if path is selected (doesn't apply for no-path), show only tasks on followed path
-			// tasks not in path get visibility property false
-			module.getSubmodules().stream().flatMap(s -> s.getSkills().stream()).forEach(
-					s -> s.setTasks(s.getTasks().stream().map(t -> {
-						t.setVisible(taskIds.contains(t.getId()));
-						return t;
-					}).toList()));
-
-		}
-		return taskIds;
+		return tasks;
 	}
 
 	public Map<SkillSummaryDTO, Set<Long>> getSkills(Long personId) {
+		SCPerson person = personRepository.findByIdOrThrow(personId);
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(13L);
 		List<Skill> skills = checkpoint.getSkills().stream().toList();
 		Map<SkillSummaryDTO, Set<Long>> items = new HashMap<>();
+
+		Set<TaskCompletion> taskCompletions = person.getTaskCompletions();
 		for (Skill skill : skills) {
 			items.put(View.convert(skill, SkillSummaryDTO.class),
 					skill.getTasks().stream().map(Task::getId).collect(Collectors.toSet()));
 		}
 		return items;
 	}
+
+	//	public Map<SkillSummaryDTO, Map<Long,List<Long>>> getSkills(Long personId) {
+//		SCPerson person = personRepository.findByIdOrThrow(personId);
+//		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(13L);
+//		List<Skill> skills = checkpoint.getSkills().stream().toList();
+//		Map<SkillSummaryDTO, Map<Long,List<Long>>> items = new HashMap<>();
+//
+//		Set<TaskCompletion> taskCompletions = person.getTaskCompletions();
+//		for (Skill skill : skills) {
+//			items.put(View.convert(skill, SkillSummaryDTO.class),
+//					getTasks(taskCompletions, skill));
+//		}
+//		return items;
+//	}
 }
