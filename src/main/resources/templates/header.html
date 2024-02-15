@@ -43,12 +43,10 @@
                     <span>Playlist</span>
                 </button>
                 <ul
-                    th:if="${@authorisationService.isAuthenticated()}"
+                    th:if="${@authorisationService.isAuthenticated() && studentOptedIn != null && studentOptedIn.isPresent() && studentOptedIn.get()}"
                     class="header__dropdown"
                     id="playlist">
-                    <!--                <th:block-->
-                    <!--                        th:if="${@authorisationService.isAuthenticated()} and not ${@authorisationService.canViewCourse(course.id)} and ${completedSkillsPerCourse.get(course.id)} > 0">-->
-                    <li>
+                   <li>
                         <th:block
                             th:with="path='Your default path: ' + ${@playlistService.getDefaultPathForEdition(@authorisationService.getAuthPerson().getId())}">
                             <span class="fa-solid fa-road"></span>

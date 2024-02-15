@@ -21,6 +21,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
+import nl.tudelft.skills.playlists.service.PlaylistService;
+import nl.tudelft.skills.playlists.service.ResearchParticipantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -53,15 +55,19 @@ public class ModuleController {
 	private final TaskCompletionService taskCompletionService;
 	private final ClickedLinkService clickedLinkService;
 
+//	Playlist feature
+	private ResearchParticipantService researchParticipantService;
+
 	@Autowired
 	public ModuleController(ModuleRepository moduleRepository, ModuleService moduleService,
 			HttpSession session, TaskCompletionService taskCompletionService,
-			ClickedLinkService clickedLinkService) {
+			ClickedLinkService clickedLinkService, ResearchParticipantService researchParticipantService) {
 		this.moduleRepository = moduleRepository;
 		this.moduleService = moduleService;
 		this.session = session;
 		this.taskCompletionService = taskCompletionService;
 		this.clickedLinkService = clickedLinkService;
+		this.researchParticipantService = researchParticipantService;
 	}
 
 	/**
@@ -78,6 +84,7 @@ public class ModuleController {
 	public String getModulePage(@AuthenticatedPerson(required = false) Person person, @PathVariable Long id,
 			Model model) {
 		moduleService.configureModuleModel(person, id, model, session);
+		researchParticipantService.addRPInfoToModel(person, model);
 		return "module/view";
 	}
 
