@@ -49,21 +49,20 @@ public class PlaylistService {
 	private PersonService personService;
 	private TaskRepository taskRepository;
 	private CheckpointRepository checkpointRepository;
-	private TaskCompletionService taskCompletionService;
 	private PersonRepository personRepository;
+	private Long ACCId = 643L;
 
 	@Autowired
 	public PlaylistService(PlaylistRepository playlistRepository,
 			ResearchParticipantService researchParticipantService,
 			ModuleRepository moduleRepository, PersonService personService, TaskRepository taskRepository,
-			CheckpointRepository checkpointRepository, TaskCompletionService taskCompletionService, PersonRepository personRepository) {
+			CheckpointRepository checkpointRepository, PersonRepository personRepository) {
 		this.playlistRepository = playlistRepository;
 		this.researchParticipantService = researchParticipantService;
 		this.moduleRepository = moduleRepository;
 		this.personService = personService;
 		this.taskRepository = taskRepository;
 		this.checkpointRepository = checkpointRepository;
-		this.taskCompletionService = taskCompletionService;
 		this.personRepository = personRepository;
 	}
 
@@ -95,40 +94,26 @@ public class PlaylistService {
 
 		Map<Long, List<Long>> tasks = new HashMap<>();
 
-
+//		For each task, get the module it belongs to and whether the student has already completed it
 		for(Task t: skill.getTasks()){
 			boolean completed = taskCompletions.stream().anyMatch(tC -> tC.getTask().getId().equals(t.getId()));
-			tasks.put(t.getId(), List.of(13L, completed?1L:0L));
+			tasks.put(t.getId(), List.of(getModuleId(t.getId()), completed?1L:0L));
 		}
 
 		return tasks;
 	}
 
-	public Map<SkillSummaryDTO, Set<Long>> getSkills(Long personId) {
+	public Map<SkillSummaryDTO, Map<Long,List<Long>>> getSkills(Long personId, Long checkpointId) {
 		SCPerson person = personRepository.findByIdOrThrow(personId);
-		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(13L);
+		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(checkpointId);
 		List<Skill> skills = checkpoint.getSkills().stream().toList();
-		Map<SkillSummaryDTO, Set<Long>> items = new HashMap<>();
+		Map<SkillSummaryDTO, Map<Long,List<Long>>> items = new HashMap<>();
 
 		Set<TaskCompletion> taskCompletions = person.getTaskCompletions();
 		for (Skill skill : skills) {
 			items.put(View.convert(skill, SkillSummaryDTO.class),
-					skill.getTasks().stream().map(Task::getId).collect(Collectors.toSet()));
+					getTasks(taskCompletions, skill));
 		}
 		return items;
 	}
-
-	//	public Map<SkillSummaryDTO, Map<Long,List<Long>>> getSkills(Long personId) {
-//		SCPerson person = personRepository.findByIdOrThrow(personId);
-//		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(13L);
-//		List<Skill> skills = checkpoint.getSkills().stream().toList();
-//		Map<SkillSummaryDTO, Map<Long,List<Long>>> items = new HashMap<>();
-//
-//		Set<TaskCompletion> taskCompletions = person.getTaskCompletions();
-//		for (Skill skill : skills) {
-//			items.put(View.convert(skill, SkillSummaryDTO.class),
-//					getTasks(taskCompletions, skill));
-//		}
-//		return items;
-//	}
 }

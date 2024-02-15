@@ -56,19 +56,19 @@
                         </th:block>
                     </li>
                     <th:block
-                        th:with="items =  ${@playlistService.getSkills(@authorisationService.getAuthPerson().getId())}">
+                        th:with="items =  ${@playlistService.getSkills(@authorisationService.getAuthPerson().getId(), 13)}">
                         <li th:each="skill : ${items.entrySet()}">
                             <span class="fa-solid circle"></span>
-                            <span th:text="${skill.key.getName()}"></span>
+                            <span th:text="${skill.getKey().getName()}"></span>
                             <ul class="header__icons" style="display: block">
-                                <li th:each="task : ${skill.value}">
+                                <li th:each="task : ${skill.getValue().entrySet()}">
                                     <a
-                                        th:href="@{'/module/' + ${@playlistService.getModuleId(task)} +
-                                        '#block-' + ${skill.key.getId()}}">
-                                        <!--TODO: Open skill by adding queryParams -->
+                                        th:href="@{'/module/' + ${task.getValue().get(0)} +
+                                        '#block-' + ${skill.getKey().getId()}}">
                                         <span class="fa-solid fa-square"></span>
-                                        <span
-                                            th:text="${@playlistService.getTaskName(task)}"></span>
+                                        <!--Strikethrough the text if the task has already been done -->
+                                        <span th:style="${task.getValue().get(1) == 1? 'text-decoration: line-through;' : ''}"
+                                            th:text="${@playlistService.getTaskName(task.getKey())}"></span>
                                         <!-- TODO: Add playing or something -->
                                     </a>
                                 </li>
