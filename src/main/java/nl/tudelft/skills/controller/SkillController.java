@@ -100,7 +100,6 @@ public class SkillController {
 		taskIdsInPath.ifPresent(
 				taskIdsInner -> view.getTasks().forEach(t -> t.setVisible(taskIdsInner.contains(t.getId()))));
 
-		// TODO completion status of added skill in frontend is not yet updated.
 		return "block/view";
 	}
 

@@ -124,6 +124,14 @@
                                 const skill = $($("<div/>").append(html).children()[0]);
                                 $("#circuit").append(skill);
 
+                                // Update the completion status of the skill
+                                updateBlockState(s);
+
+                                // Usually, hidden blocks should be not essential, so the children would also not
+                                // be updated. The following ensures that they are still updated if the block is
+                                // essential nonetheless.
+                                [...skill.data("children")].forEach(id => updateBlockState(id));
+
                                 // Recalculate the connections
                                 recalculateConnections();
                             })
