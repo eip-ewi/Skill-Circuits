@@ -72,8 +72,12 @@
                         <span class="fa-solid fa-circle-play"></span>
                         Playlist
                     </button>
+                    <th:block th:if="${studentOptedIn.isPresent() && studentOptedIn.get()}">
+                        <div layout:replace="~{playlist/playlist :: playlist}"></div>
+                    </th:block>
                     <div layout:replace="~{playlist/header-button :: opt-in-dialog}"></div>
                 </div>
+
                 <div layout:replace="~{edition_setup/view :: setup-overlay}"></div>
             </div>
 

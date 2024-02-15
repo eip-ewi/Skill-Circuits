@@ -36,51 +36,6 @@
                     Login
                 </a>
             </li>
-            <li th:if="${@authorisationService.isAuthenticated()}">
-                <!--TODO: and isResearchParticipant -->
-                <button class="header__button" id="playlist-button">
-                    <span class="fa-solid fa-circle-play"></span>
-                    <span>Playlist</span>
-                </button>
-                <ul
-                    th:if="${@authorisationService.isAuthenticated() && studentOptedIn != null && studentOptedIn.isPresent() && studentOptedIn.get()}"
-                    class="header__dropdown"
-                    id="playlist">
-                   <li>
-                        <th:block
-                            th:with="path='Your default path: ' + ${@playlistService.getDefaultPathForEdition(@authorisationService.getAuthPerson().getId())}">
-                            <span class="fa-solid fa-road"></span>
-                            <span th:text="${path}"></span>
-                        </th:block>
-                    </li>
-                    <th:block
-                        th:with="items =  ${@playlistService.getSkills(@authorisationService.getAuthPerson().getId(), 13)}">
-                        <li th:each="skill : ${items.entrySet()}">
-                            <span class="fa-solid circle"></span>
-                            <span th:text="${skill.getKey().getName()}"></span>
-                            <ul class="header__icons" style="display: block">
-                                <li th:each="task : ${skill.getValue().entrySet()}">
-                                    <a
-                                        th:href="@{'/module/' + ${task.getValue().get(0)} +
-                                        '#block-' + ${skill.getKey().getId()}}">
-                                        <span class="fa-solid fa-square"></span>
-                                        <!--Strikethrough the text if the task has already been done -->
-                                        <span th:style="${task.getValue().get(1) == 1? 'text-decoration: line-through;' : ''}"
-                                            th:text="${@playlistService.getTaskName(task.getKey())}"></span>
-                                        <!-- TODO: Add playing or something -->
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li><span>=========</span></li>
-                        <li>
-                            <span class="fa-solid fa-bullseye"></span>
-                            <span th:text="'Checkpoint: Lecture 1'"></span>
-                        </li>
-                    </th:block>
-                    <!--            </th:block>-->
-                </ul>
-            </li>
             <li class="header__icon" th:if="${@authorisationService.isAuthenticated()}">
                 <button class="header__button" id="dropdown-button">
                     <span th:text="${@authorisationService.getAuthPerson().displayName}"></span>

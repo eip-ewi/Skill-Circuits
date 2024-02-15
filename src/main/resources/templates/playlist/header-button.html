@@ -181,6 +181,8 @@
     </dialog>
     <script th:inline="javascript" layout:fragment="script">
 
+        const studentOptedIn = [[${studentOptedIn.isPresent() ? studentOptedIn.get() : null}]];
+
         function toggleOptDialog() {
             toggleOverlay("opt-in__dialog");
             document.getElementById("opt-in__dialog").scrollTop = 0;
@@ -192,13 +194,14 @@
         }
         document.addEventListener("DOMContentLoaded", function () {
 
-            let playlistButton = document.getElementById("playlist-button-m");
-            if (playlistButton === null){
-                playlistButton = document.getElementById("playlist-button-c");
+            if(studentOptedIn){
+                document.getElementById("playlist-button-m")?.addEventListener("click", toggleOptDialog);
+            } else {
+                document.getElementById("playlist-button-c").addEventListener("click", toggleOptDialog);
             }
+
             const cancelButtons = document.getElementsByClassName("opt-button-cancel");
 
-            playlistButton.addEventListener("click", toggleOptDialog);
             for (let i = 0; i < cancelButtons.length; i++) {
                 cancelButtons[i].addEventListener("click", toggleOptDialog);
             }
@@ -208,7 +211,7 @@
             // Enable or disable the button based on the checkbox state
             button.disabled = !checkbox.checked;
         }
-        const studentOptedIn = [[${studentOptedIn.isPresent() ? studentOptedIn.get() : null}]];
+
         <!--        TODO: refactor duplicate code -->
         if(studentOptedIn === null){
             const checkbox = document.getElementById("opt-in-checkbox");

@@ -21,8 +21,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
-import nl.tudelft.skills.playlists.service.PlaylistService;
-import nl.tudelft.skills.playlists.service.ResearchParticipantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,6 +38,7 @@ import nl.tudelft.skills.dto.patch.SCModulePatchDTO;
 import nl.tudelft.skills.dto.view.SkillSummaryDTO;
 import nl.tudelft.skills.dto.view.edition.EditionLevelModuleViewDTO;
 import nl.tudelft.skills.model.SCModule;
+import nl.tudelft.skills.playlists.service.ResearchParticipantService;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.service.ClickedLinkService;
 import nl.tudelft.skills.service.ModuleService;
@@ -55,7 +54,7 @@ public class ModuleController {
 	private final TaskCompletionService taskCompletionService;
 	private final ClickedLinkService clickedLinkService;
 
-//	Playlist feature
+	//	Playlist feature
 	private ResearchParticipantService researchParticipantService;
 
 	@Autowired

@@ -30,8 +30,6 @@ import java.util.stream.Stream;
 
 import javax.servlet.http.HttpSession;
 
-import nl.tudelft.skills.playlists.service.PlaylistService;
-import nl.tudelft.skills.playlists.service.ResearchParticipantService;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
@@ -53,6 +51,7 @@ import nl.tudelft.skills.dto.id.SCEditionIdDTO;
 import nl.tudelft.skills.dto.patch.SCModulePatchDTO;
 import nl.tudelft.skills.dto.view.SkillSummaryDTO;
 import nl.tudelft.skills.model.SCModule;
+import nl.tudelft.skills.playlists.service.ResearchParticipantService;
 import nl.tudelft.skills.repository.ClickedLinkRepository;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
@@ -76,14 +75,15 @@ public class ModuleControllerTest extends ControllerTest {
 	private final ClickedLinkService clickedLinkService;
 	private final ClickedLinkRepository clickedLinkRepository;
 
-//	Playlist feature
+	//	Playlist feature
 	private final ResearchParticipantService researchParticipantService;
 
 	@Autowired
 	public ModuleControllerTest(ModuleController moduleController, RoleControllerApi roleControllerApi,
 			ModuleRepository moduleRepository, TaskCompletionService taskCompletionService,
 			TaskCompletionRepository taskCompletionRepository, ClickedLinkService clickedLinkService,
-			ClickedLinkRepository clickedLinkRepository, ResearchParticipantService researchParticipantService) {
+			ClickedLinkRepository clickedLinkRepository,
+			ResearchParticipantService researchParticipantService) {
 		this.moduleController = moduleController;
 		this.roleControllerApi = roleControllerApi;
 		this.moduleRepository = moduleRepository;
@@ -117,7 +117,8 @@ public class ModuleControllerTest extends ControllerTest {
 	@Test
 	void createModuleSetup() throws Exception {
 		new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionService, clickedLinkService, researchParticipantService).createModuleInEditionSetup(
+				session, taskCompletionService, clickedLinkService, researchParticipantService)
+				.createModuleInEditionSetup(
 						SCModuleCreateDTO.builder()
 								.name("Module").edition(new SCEditionIdDTO(db.getEditionRL().getId()))
 								.build(),
@@ -140,7 +141,8 @@ public class ModuleControllerTest extends ControllerTest {
 		assertThat(moduleRepository.existsById(moduleId)).isTrue();
 
 		new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionService, clickedLinkService, researchParticipantService).deleteModule(moduleId);
+				session, taskCompletionService, clickedLinkService, researchParticipantService)
+				.deleteModule(moduleId);
 
 		assertThat(moduleRepository.existsById(moduleId)).isFalse();
 		assertThat(taskCompletionRepository.findAll()).hasSize(0);
@@ -154,7 +156,8 @@ public class ModuleControllerTest extends ControllerTest {
 		assertThat(moduleRepository.existsById(moduleId)).isTrue();
 
 		new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionService, clickedLinkService, researchParticipantService).deleteModuleSetup(moduleId);
+				session, taskCompletionService, clickedLinkService, researchParticipantService)
+				.deleteModuleSetup(moduleId);
 
 		assertThat(moduleRepository.existsById(moduleId)).isFalse();
 		assertThat(taskCompletionRepository.findAll()).hasSize(0);
