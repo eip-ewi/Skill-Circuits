@@ -151,7 +151,7 @@ public class HomeController {
 
 	/**
 	 * Group courses into own (> 0 skills completed), available (0 skills completed), and both of these into
-	 * the courses which have a currently active edition/do not have one Also groups the courses managed by
+	 * the courses which have a currently active edition/do not have one. Also groups the courses managed by
 	 * the user (courses which the user can see)
 	 *
 	 * @param  person                The logged-in person, if it exists, otherwise null.
@@ -173,7 +173,7 @@ public class HomeController {
 
 		for (CourseSummaryDTO course : courses) {
 			boolean hasActiveEdition = activeCourses.contains(course.getId());
-			Boolean completedTask = completedTaskInCourse.get(course.getId());
+			boolean completedTask = completedTaskInCourse.getOrDefault(course.getId(), false);
 
 			if (person != null && authorisationService.canViewCourse(course.getId())) {
 				// managed: The user can see the course, so manages it
