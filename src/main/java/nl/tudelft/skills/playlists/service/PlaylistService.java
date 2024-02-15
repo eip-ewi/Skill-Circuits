@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.dto.view.SkillSummaryDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.playlists.repository.PlaylistRepository;
@@ -109,12 +110,12 @@ public class PlaylistService {
 		return taskIds;
 	}
 
-	public Map<String, Set<Long>> getSkills(Long personId) {
+	public Map<SkillSummaryDTO, Set<Long>> getSkills(Long personId) {
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(13L);
-		Set<Skill> skills = checkpoint.getSkills();
-		Map<String, Set<Long>> items = new HashMap<>();
+		List<Skill> skills = checkpoint.getSkills().stream().toList();
+		Map<SkillSummaryDTO, Set<Long>> items = new HashMap<>();
 		for (Skill skill : skills) {
-			items.put(skill.getName(),
+			items.put(View.convert(skill, SkillSummaryDTO.class),
 					skill.getTasks().stream().map(Task::getId).collect(Collectors.toSet()));
 		}
 		return items;

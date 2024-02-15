@@ -59,15 +59,17 @@
                         th:with="items =  ${@playlistService.getSkills(@authorisationService.getAuthPerson().getId())}">
                         <li th:each="skill : ${items.entrySet()}">
                             <span class="fa-solid circle"></span>
-                            <span th:text="${skill.key}"></span>
+                            <span th:text="${skill.key.getName()}"></span>
                             <ul class="header__icons" style="display: block">
                                 <li th:each="task : ${skill.value}">
                                     <a
-                                        th:href="@{/module/{moduleId}(moduleId=${@playlistService.getModuleId(task)})}">
-                                        <!--TODO: Open skill as well -->
+                                        th:href="@{'/module/' + ${@playlistService.getModuleId(task)} +
+                                        '#block-' + ${skill.key.getId()}}">
+                                        <!--TODO: Open skill by adding queryParams -->
                                         <span class="fa-solid fa-square"></span>
                                         <span
                                             th:text="${@playlistService.getTaskName(task)}"></span>
+                                        <!-- TODO: Add playing or something -->
                                     </a>
                                 </li>
                             </ul>
