@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 ## Changed
+- Split courses on homepage into categories and show finished/active courses (@ffiedrich)
+- Assigning student role after task completion if user had no role yet and is student by default (@ffiedrich)
 ## Fixed
 - Fixed adding/removing task frontend bugs and updating skill completion status (@ffiedrich)
 - Teacher view: Reordering of tasks now works on first click (@rglans)

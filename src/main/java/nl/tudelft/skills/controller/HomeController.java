@@ -19,6 +19,7 @@ package nl.tudelft.skills.controller;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
@@ -37,6 +38,7 @@ import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.CourseService;
 import nl.tudelft.skills.service.EditionService;
 import nl.tudelft.skills.service.SkillService;
@@ -59,6 +61,7 @@ public class HomeController {
 	private final CourseService courseService;
 	private final SkillService skillService;
 	private final TaskCompletionService taskCompletionService;
+	private final AuthorisationService authorisationService;
 
 	private final PathPreferenceRepository pathPreferenceRepository;
 
@@ -69,7 +72,8 @@ public class HomeController {
 			EditionService editionService,
 			CourseService courseService,
 			SkillService skillService, TaskCompletionService taskCompletionService,
-			PathPreferenceRepository pathPreferenceRepository) {
+			PathPreferenceRepository pathPreferenceRepository,
+			AuthorisationService authorisationService) {
 		this.editionApi = editionApi;
 		this.roleApi = roleApi;
 		this.editionRepository = editionRepository;
@@ -82,6 +86,7 @@ public class HomeController {
 		this.skillService = skillService;
 		this.taskCompletionService = taskCompletionService;
 		this.pathPreferenceRepository = pathPreferenceRepository;
+		this.authorisationService = authorisationService;
 	}
 
 	/**
@@ -95,40 +100,170 @@ public class HomeController {
 	@Transactional
 	@GetMapping("/")
 	public String getHomePage(@AuthenticatedPerson(required = false) Person person, Model model) {
-		List<EditionDetailsDTO> editions = person == null
-				? editionApi.getEditionsById(editionApi.getAllEditionsActiveAtDate(LocalDateTime.now())
-						.map(EditionSummaryDTO::getId).collectList().block()).collectList().block()
-				: editionApi.getAllEditionsActiveOrTaughtBy(person.getId()).collectList().block();
+		// Get all available editions
+		List<EditionDetailsDTO> editions = editionApi.getAllEditions().collectList().block();
+
+		// Filter visible editions in SC
 		Set<Long> visible = editionRepository
 				.findAllById(editions.stream().map(EditionDetailsDTO::getId).toList()).stream()
 				.filter(SCEdition::isVisible).map(SCEdition::getId).collect(Collectors.toSet());
-		Set<Long> teacherIds = person == null ? Set.of()
-				: roleApi
-						.getRolesById(
-								editions.stream().map(EditionDetailsDTO::getId).collect(Collectors.toSet()),
-								Set.of(person.getId()))
-						.collectList().block().stream()
-						.filter(r -> r.getType() == RoleDetailsDTO.TypeEnum.TEACHER)
-						.map(r -> r.getEdition().getId()).collect(Collectors.toSet());
 
+		// Get ids of editions for which the user is a teacher
+		Set<Long> teacherIds = getTeacherIds(person, editions);
+
+		// All visible courses or courses for which the user is teacher in an edition
 		List<CourseSummaryDTO> courses = editions.stream()
 				.filter(e -> visible.contains(e.getId()) || teacherIds.contains(e.getId()))
 				.map(EditionDetailsDTO::getCourse).distinct().toList();
 
-		// Gets number of completed skills for each course
+		// Get number of completed skills and if a task is completed for each course
 		Map<Long, Integer> completedSkillsPerCourse = new HashMap<>();
+		Map<Long, Boolean> completedTaskInCourse = new HashMap<>();
 		if (person != null) {
 			SCPerson scperson = personRepository.findByIdOrThrow(person.getId());
 
 			completedSkillsPerCourse = getCompletedSkillsPerCourse(courses, scperson);
+			completedTaskInCourse = getCompletedTaskInCourse(courses, scperson);
 		}
 
+		// Check if any skill has been completed
 		boolean isAnySkillCompleted = completedSkillsPerCourse.entrySet().stream()
 				.anyMatch(e -> e.getValue() > 0);
-		model.addAttribute("courses", courses);
+
 		model.addAttribute("completedSkillsPerCourse", completedSkillsPerCourse);
 		model.addAttribute("isAnySkillCompleted", isAnySkillCompleted);
+
+		// Get courses for which the latest student edition/last edition is currently active
+		Map<Long, EditionDetailsDTO> editionMap = editions.stream()
+				.collect(Collectors.toMap(EditionDetailsDTO::getId,
+						Function.identity()));
+		Set<Long> activeCourses = getActiveCourses(courses, editionMap, visible, teacherIds);
+
+		// Get course groups and add them to the model
+		Map<String, List<CourseSummaryDTO>> courseGroups = getCourseGroups(person, courses, activeCourses,
+				completedTaskInCourse);
+		for (Map.Entry<String, List<CourseSummaryDTO>> group : courseGroups.entrySet()) {
+			model.addAttribute(group.getKey(), group.getValue());
+		}
+
 		return "index";
+	}
+
+	/**
+	 * Group courses into own (> 0 skills completed), available (0 skills completed), and both of these into
+	 * the courses which have a currently active edition/do not have one. Also groups the courses managed by
+	 * the user (courses which the user can see)
+	 *
+	 * @param  person                The logged-in person, if it exists, otherwise null.
+	 * @param  courses               The list of the course summaries to group.
+	 * @param  activeCourses         The ids of courses which should be considered as "active".
+	 * @param  completedTaskInCourse The ids of courses in which the user has completed at least one task in
+	 *                               the latest student edition/last edition.
+	 * @return                       A map of the model attribute strings, mapped to the list of the courses
+	 *                               corresponding to that group.
+	 */
+	public Map<String, List<CourseSummaryDTO>> getCourseGroups(Person person, List<CourseSummaryDTO> courses,
+			Set<Long> activeCourses,
+			Map<Long, Boolean> completedTaskInCourse) {
+		List<CourseSummaryDTO> availableActive = new ArrayList<>();
+		List<CourseSummaryDTO> availableFinished = new ArrayList<>();
+		List<CourseSummaryDTO> ownActive = new ArrayList<>();
+		List<CourseSummaryDTO> ownFinished = new ArrayList<>();
+		List<CourseSummaryDTO> managed = new ArrayList<>();
+
+		for (CourseSummaryDTO course : courses) {
+			boolean hasActiveEdition = activeCourses.contains(course.getId());
+			boolean completedTask = completedTaskInCourse.getOrDefault(course.getId(), false);
+
+			if (person != null && authorisationService.canViewCourse(course.getId())) {
+				// managed: The user can see the course, so manages it
+				managed.add(course);
+			} else if (person != null && completedTask && hasActiveEdition) {
+				// ownActive: The user has completed at least one skill, and the course has an active edition
+				ownActive.add(course);
+			} else if (person != null && completedTask) {
+				// ownFinished: The user has completed at least one skill, and the course does not have
+				// an active edition
+				ownFinished.add(course);
+			} else if (hasActiveEdition) {
+				// availableActive: Course has an active edition, and the user is either not logged in
+				// or does not have any skills completed in it
+				availableActive.add(course);
+			} else {
+				// availableFinished: Course does not have an active edition, and the user is either not logged in
+				// or does not have any skills completed in it
+				availableFinished.add(course);
+			}
+		}
+
+		Map<String, List<CourseSummaryDTO>> courseGroups = new HashMap<>();
+		courseGroups.put("availableActive", availableActive);
+		courseGroups.put("availableFinished", availableFinished);
+		courseGroups.put("ownActive", ownActive);
+		courseGroups.put("ownFinished", ownFinished);
+		courseGroups.put("managed", managed);
+
+		return courseGroups;
+	}
+
+	/**
+	 * Returns the ids of the editions in which the user is a teacher.
+	 *
+	 * @param  person   The logged-in person, if it exists, otherwise null.
+	 * @param  editions The editions.
+	 * @return          The ids of the editions in which the person is a teacher. Returns an empty set if the
+	 *                  user is not logged-in.
+	 */
+	public Set<Long> getTeacherIds(Person person, List<EditionDetailsDTO> editions) {
+		if (person == null) {
+			return Set.of();
+		}
+
+		return roleApi
+				.getRolesById(
+						editions.stream().map(EditionDetailsDTO::getId).collect(Collectors.toSet()),
+						Set.of(person.getId()))
+				.collectList().block().stream()
+				.filter(r -> r.getType() == RoleDetailsDTO.TypeEnum.TEACHER)
+				.map(r -> r.getEdition().getId()).collect(Collectors.toSet());
+	}
+
+	/**
+	 * Returns the ids of the courses in which either: 1. if there is at least one student edition, the latest
+	 * edition the user was a student in, is active 2. the user is not a student in any edition, and the
+	 * latest edition is active
+	 *
+	 * @param  courses    List of the course summaries.
+	 * @param  editions   Map of edition ids to the corresponding edition.
+	 * @param  visible    The ids of the visible editions.
+	 * @param  teacherIds The ids of the editions in which the user is a teacher.
+	 * @return            Ids of courses in which there is an active edition, following the above criteria.
+	 */
+	public Set<Long> getActiveCourses(List<CourseSummaryDTO> courses, Map<Long, EditionDetailsDTO> editions,
+			Set<Long> visible, Set<Long> teacherIds) {
+		Set<Long> activeCourses = new HashSet<>();
+
+		for (CourseSummaryDTO course : courses) {
+			// Get the id of either the latest student edition or the last edition, if no student edition exists
+			Long editionId = courseService.getLastStudentEditionForCourseOrLast(course.getId());
+
+			// Skip if the user is neither a teacher for this edition, nor it is visible
+			if (!visible.contains(editionId) && !teacherIds.contains(editionId)) {
+				continue;
+			}
+
+			// Check if edition is currently active, if so, add id to the Set
+			EditionDetailsDTO edition = editions.get(editionId);
+			boolean afterStartIncl = edition.getStartDate().isBefore(LocalDateTime.now()) ||
+					edition.getStartDate().equals(LocalDateTime.now());
+			boolean beforeEndIncl = edition.getEndDate().isAfter(LocalDateTime.now()) ||
+					edition.getEndDate().equals(LocalDateTime.now());
+			if (afterStartIncl && beforeEndIncl) {
+				activeCourses.add(course.getId());
+			}
+		}
+
+		return activeCourses;
 	}
 
 	/**
@@ -171,6 +306,35 @@ public class HomeController {
 			completedSkillsPerCourse.put(courseId, skillsDoneCount);
 		}
 		return completedSkillsPerCourse;
+	}
+
+	/**
+	 * Returns a map of courses and whether a task has been completed in a respective edition in that course.
+	 *
+	 * @param  courses  List of courses
+	 * @param  scperson person
+	 * @return          Map containing whether the person has a completed a task in each course.
+	 */
+	public Map<Long, Boolean> getCompletedTaskInCourse(List<CourseSummaryDTO> courses, SCPerson scperson) {
+		Map<Long, Boolean> completedTaskInCourse = new HashMap<>();
+		for (CourseSummaryDTO course : courses) {
+			Long courseId = course.getId();
+
+			boolean completedTask = false;
+			Long editionId = courseService.getLastStudentEditionForCourseOrLast(courseId);
+
+			if (editionId != null) {
+				List<Task> tasksDone = scperson.getTaskCompletions().stream().map(TaskCompletion::getTask)
+						.toList();
+
+				completedTask = tasksDone.stream()
+						.map((Task t) -> t.getSkill().getSubmodule().getModule().getEdition().getId())
+						.anyMatch((Long id) -> Objects.equals(id, editionId));
+			}
+
+			completedTaskInCourse.put(courseId, completedTask);
+		}
+		return completedTaskInCourse;
 	}
 
 	/**

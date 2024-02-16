@@ -30,71 +30,176 @@
     </head>
 
     <body>
-        <div layout:fragment="content">
+        <div
+            layout:fragment="content"
+            th:with="displayOwn = not ${#lists.isEmpty(ownActive)} or not ${#lists.isEmpty(ownFinished)} or not ${#lists.isEmpty(managed)},
+                        displayAvailable = not ${#lists.isEmpty(availableActive)} or not ${#lists.isEmpty(availableFinished)}">
             <h1>Welcome to Skill Circuits</h1>
 
-            <h2 th:if="${@authorisationService.isAuthenticated()} and ${isAnySkillCompleted}">
-                Your Courses
-            </h2>
-
-            <div class="blocks">
-                <th:block th:each="course : ${courses}">
-                    <th:block
-                        th:if="${@authorisationService.isAuthenticated()} and not ${@authorisationService.canViewCourse(course.id)} and ${completedSkillsPerCourse.get(course.id)} > 0">
-                        <a
-                            class="block"
-                            th:href="@{|/edition/${@courseService.getLastStudentEditionForCourseOrLast(course.id)}|}">
-                            <h2 th:text="${course.code}"></h2>
-                            <h2 th:text="${course.name}"></h2>
-                            <h3
-                                style="font-size: 0.8rem"
-                                th:text="|${completedSkillsPerCourse.get(course.id)} / ${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastStudentEditionForCourseOrLast(course.id))} skills completed|"></h3>
-                        </a>
-                    </th:block>
-
-                    <th:block th:if="${@authorisationService.canViewCourse(course.id)}">
-                        <a class="block" th:href="@{|/course/${course.id}|}">
-                            <h2 th:text="${course.code}"></h2>
-                            <h2 th:text="${course.name}"></h2>
-                            <h3
-                                style="font-size: 0.8rem"
-                                th:text="|${@courseService.getNumberOfEditions(course.id)} editions|"></h3>
-                        </a>
-                    </th:block>
-                </th:block>
+            <div
+                class="tabs"
+                th:if="${displayOwn} or ${displayAvailable}"
+                th:with="yourCourses = ${displayOwn} or (not ${displayAvailable} and not ${displayOwn})">
+                <button
+                    id="own-courses-button"
+                    class="tab"
+                    onclick="setCourseView('own')"
+                    th:data-active="${yourCourses}"
+                    type="button">
+                    Your Courses
+                </button>
+                <button
+                    id="available-courses-button"
+                    class="tab"
+                    onclick="setCourseView('available')"
+                    th:data-active="not ${yourCourses}"
+                    type="button">
+                    Available Courses
+                </button>
             </div>
 
-            <h2>Available Courses</h2>
-            <div class="blocks">
-                <th:block th:each="course : ${courses}">
-                    <th:block th:if="not${@authorisationService.isAuthenticated()}">
-                        <a
-                            class="block"
-                            th:href="@{|/edition/${@courseService.getLastEditionForCourse(course.id)}|}">
-                            <h2 th:text="${course.code}"></h2>
-                            <h2 th:text="${course.name}"></h2>
-                            <h3
-                                style="font-size: 0.8rem"
-                                th:text="|${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastEditionForCourse(course.id))} skills|"></h3>
-                        </a>
-                    </th:block>
+            <span
+                th:if="not ${displayOwn} and not ${displayAvailable}"
+                style="display: inline-block; margin-top: 1rem">
+                There are currently
+                <!-- spotless:off -->
+                <b>no courses available</b>.
+                <!-- spotless:on -->
+            </span>
 
-                    <th:block
-                        th:if="${@authorisationService.isAuthenticated()} and not ${@authorisationService.canViewCourse(course.id)} and ${completedSkillsPerCourse.get(course.id)}==0">
-                        <a
-                            class="block"
-                            th:href="@{|/edition/${@courseService.getLastStudentEditionForCourseOrLast(course.id)}|}">
-                            <h2 th:text="${course.code}"></h2>
-                            <h2 th:text="${course.name}"></h2>
-                            <h3
-                                style="font-size: 0.8rem"
-                                th:text="|${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastStudentEditionForCourseOrLast(course.id))} skills|"></h3>
-                        </a>
-                    </th:block>
-                </th:block>
+            <div
+                id="own-courses"
+                th:if="${displayOwn} or ${displayAvailable}"
+                th:aria-hidden="${displayOwn} ? '' : 'true'"
+                th:style="${displayOwn} ? '' : 'display: none'">
+                <span th:if="not ${displayOwn} and ${@authorisationService.isAuthenticated()}">
+                    You have
+                    <b>not completed a task</b>
+                    in any course.
+                </span>
+                <span th:if="not ${displayOwn} and not ${@authorisationService.isAuthenticated()}">
+                    <b>Log in</b>
+                    to display courses in which you have completed a task.
+                </span>
+
+                <div th:if="${displayOwn}">
+                    <h2 class="group_header">Active courses</h2>
+                    <span th:if="${#lists.isEmpty(ownActive)}" class="active_course_info">
+                        There are no active courses.
+                    </span>
+                    <div class="blocks" th:if="not ${#lists.isEmpty(ownActive)}">
+                        <th:block th:each="course : ${ownActive}">
+                            <th:block
+                                layout:replace="~{course/block :: course(${course.id}, ${course.code},
+                                ${course.name}, true)}" />
+                        </th:block>
+                    </div>
+
+                    <h2 th:if="not ${#lists.isEmpty(ownFinished)}" class="group_header">
+                        Finished courses
+                    </h2>
+                    <div class="blocks" th:if="not ${#lists.isEmpty(ownFinished)}">
+                        <th:block th:each="course : ${ownFinished}">
+                            <th:block
+                                layout:replace="~{course/block :: course(${course.id}, ${course.code},
+                                ${course.name}, true)}" />
+                        </th:block>
+                    </div>
+
+                    <h2 th:if="not ${#lists.isEmpty(managed)}" class="group_header">
+                        Managed courses
+                    </h2>
+                    <div class="blocks" th:if="not ${#lists.isEmpty(managed)}">
+                        <th:block th:each="course : ${managed}">
+                            <th:block>
+                                <a class="block" th:href="@{|/course/${course.id}|}">
+                                    <h2 th:text="${course.code}"></h2>
+                                    <h2 th:text="${course.name}"></h2>
+                                    <h3
+                                        style="font-size: 0.8rem"
+                                        th:text="|${@courseService.getNumberOfEditions(course.id)} editions|"></h3>
+                                </a>
+                            </th:block>
+                        </th:block>
+                    </div>
+                </div>
             </div>
 
-            <br />
+            <div
+                id="available-courses"
+                th:if="${displayOwn} or ${displayAvailable}"
+                th:aria-hidden="${displayOwn} ? 'true' : ''"
+                th:style="${displayOwn} ? 'display: none' : ''">
+                <span th:if="not ${displayAvailable}">
+                    There are
+                    <!-- spotless:off -->
+                    <b>no additional courses available</b>.
+                    <!-- spotless:on -->
+                </span>
+
+                <div th:if="${displayAvailable}">
+                    <h2 class="group_header">Active courses</h2>
+                    <span th:if="${#lists.isEmpty(availableActive)}" class="active_course_info">
+                        There are no active courses.
+                    </span>
+                    <div class="blocks" th:if="not ${#lists.isEmpty(availableActive)}">
+                        <th:block th:each="course : ${availableActive}">
+                            <th:block
+                                layout:replace="~{course/block :: course(${course.id}, ${course.code},
+                                ${course.name}, false)}" />
+                        </th:block>
+                    </div>
+
+                    <h2 th:if="not ${#lists.isEmpty(availableFinished)}" class="group_header">
+                        Finished courses
+                    </h2>
+                    <div class="blocks" th:if="not ${#lists.isEmpty(availableFinished)}">
+                        <th:block th:each="course : ${availableFinished}">
+                            <th:block
+                                layout:replace="~{course/block :: course(${course.id}, ${course.code},
+                                ${course.name}, false)}" />
+                        </th:block>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <script layout:fragment="script">
+            /**
+             * Sets the view of the courses to either "own" or "available". If no courses are visible,
+             * or the view to set to is not visible, does nothing.
+             *
+             * @param view The view to set to ("own" or "available").
+             */
+            function setCourseView(view) {
+                const ownCourses = $("#own-courses");
+                const availableCourses = $("#available-courses");
+                const ownCoursesBtn = $("#own-courses-button");
+                const availableCoursesBtn = $("#available-courses-button");
+
+                // If there is only one (or neither) is visible, view cannot be switched
+                if (ownCourses.length === 0 || availableCourses === 0) {
+                    return;
+                }
+
+                if (view === "own") {
+                    ownCourses.css("display", "");
+                    ownCourses.removeAttr("aria-hidden");
+                    ownCoursesBtn.attr("data-active", "true");
+
+                    availableCourses.css("display", "none");
+                    availableCourses.attr("aria-hidden", "true");
+                    availableCoursesBtn.attr("data-active", "false");
+                } else if (view === "available") {
+                    availableCourses.css("display", "");
+                    availableCourses.removeAttr("aria-hidden");
+                    availableCoursesBtn.attr("data-active", "true");
+
+                    ownCourses.css("display", "none");
+                    ownCourses.attr("aria-hidden", "true");
+                    ownCoursesBtn.attr("data-active", "false");
+                }
+            }
+        </script>
     </body>
 </html>
