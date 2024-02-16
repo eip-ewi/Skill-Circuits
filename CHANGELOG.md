@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 ## Fixed
 - Completion status of revealed hidden skills is updated without page reload (@ffiedrich)
+- Teacher view: Reordering of tasks now works on first click (@rglans)
+- Teacher view: Can now reorder new tasks on creation (@rglans)
 
 ## [2.2.5]
 
