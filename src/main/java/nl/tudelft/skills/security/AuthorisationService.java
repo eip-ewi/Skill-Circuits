@@ -117,6 +117,17 @@ public class AuthorisationService {
 	}
 
 	/**
+	 * Gets whether the authenticated user is a student by default.
+	 *
+	 * @return True iff the authenticated user is a student by default.
+	 */
+	public boolean isStudent() {
+		if (!isAuthenticated())
+			return false;
+		return getAuthPerson().getDefaultRole() == DefaultRole.STUDENT;
+	}
+
+	/**
 	 * Gets whether the authenticated user can view all the editions of a course.
 	 *
 	 * @param  courseId The id of the course.
