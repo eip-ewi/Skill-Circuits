@@ -381,11 +381,12 @@ public class TestDatabaseLoader {
 	}
 
 	private void initCheckpoint() {
+		checkpointLectureTwo.setEdition(this.getEditionRL());
+		checkpointLectureTwo = checkpointRepository.save(checkpointLectureTwo);
+
 		checkpointLectureOne.setEdition(this.getEditionRL());
 		checkpointLectureOne = checkpointRepository.save(checkpointLectureOne);
 
-		checkpointLectureTwo.setEdition(this.getEditionRL());
-		checkpointLectureTwo = checkpointRepository.save(checkpointLectureTwo);
 	}
 
 	private void initSkill() {
