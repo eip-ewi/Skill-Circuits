@@ -1,3 +1,10 @@
 .hidden {
     display: none !important;
 }
+
+.hide-with-siblings {
+    display: none;
+    &:first-child:last-child {
+        display: initial;
+    }
+}
