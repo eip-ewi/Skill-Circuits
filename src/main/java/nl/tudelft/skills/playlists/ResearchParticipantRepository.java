@@ -15,43 +15,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view;
+package nl.tudelft.skills.playlists;
 
-import java.time.LocalDateTime;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
-import javax.validation.constraints.NotNull;
+import nl.tudelft.skills.model.labracore.SCPerson;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+public interface ResearchParticipantRepository extends JpaRepository<ResearchParticipant, Long> {
+	default ResearchParticipant findByIdOrThrow(Long id) {
+		return findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("ResearchParticipant was not found: " + id));
+	}
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+	ResearchParticipant findByPerson(SCPerson person);
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class ClickedLinkDTO {
-	@NotNull
-	private Long id;
-
-	@NotNull
-	private Long TaskId;
-
-	@NotNull
-	private String taskName;
-
-	@NotNull
-	private String skillName;
-
-	@NotNull
-	private Long editionId;
-
-	@NotNull
-	private Long personId;
-
-	@NotNull
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private LocalDateTime timestamp;
 }

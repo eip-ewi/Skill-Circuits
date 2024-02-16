@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.SCModuleSummaryDTO;
 import nl.tudelft.skills.model.SCEdition;
+import nl.tudelft.skills.playlists.ResearchParticipantService;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.EditionService;
@@ -44,14 +45,21 @@ public class EditionController {
 	private AuthorisationService authorisationService;
 	private HttpSession session;
 
+	//	Playlist feature
+	private ResearchParticipantService researchParticipantService;
+
 	@Autowired
 	public EditionController(EditionRepository editionRepository, EditionService editionService,
 			AuthorisationService authorisationService,
-			HttpSession session) {
+			HttpSession session,
+			ResearchParticipantService researchParticipantService) {
 		this.editionRepository = editionRepository;
 		this.editionService = editionService;
 		this.authorisationService = authorisationService;
 		this.session = session;
+
+		//		Playlist feature
+		this.researchParticipantService = researchParticipantService;
 	}
 
 	/**
@@ -67,6 +75,13 @@ public class EditionController {
 	public String getEditionPage(@PathVariable Long id, @RequestParam(required = false) String view,
 			Model model) {
 		editionService.configureEditionModel(id, model, session);
+
+		//		Playlist feature
+		if (id == 643L & !authorisationService.canEditEdition(643L)) {
+			researchParticipantService.addRPInfoToModel(authorisationService.getAuthPerson(), model);
+			//			TODO: Make this work locally
+		}
+
 		if (authorisationService.canEditEdition(id) && view == null) {
 			view = "circuit";
 		}

@@ -113,7 +113,7 @@ public class CourseService {
 	}
 
 	/**
-	 * Returns whwter the course has any visible editions.
+	 * Returns whether the course has any visible editions.
 	 *
 	 * @param  id Id of the course.
 	 * @return    True if the course has any editions set to visible for students.

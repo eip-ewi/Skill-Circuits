@@ -880,6 +880,55 @@ databaseChangeLog:
             referencedColumnNames: id
             referencedTableName: scperson
             validate: true
+  - changeSet:
+      id: 1697897070404-1
+      author: bakos (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_6F
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: version
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: person_id
+                  type: BIGINT
+            tableName: user_version
+  - changeSet:
+      id: 1697897070404-2
+      author: bakos (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: person_id
+            indexName: FK4hnnv70ddmpa33xy9ogk078t5_INDEX_6
+            tableName: user_version
+  - changeSet:
+      id: 1697897070404-3
+      author: bakos (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: person_id
+            baseTableName: user_version
+            constraintName: FK4hnnv70ddmpa33xy9ogk078t5
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: scperson
+            validate: true
 
   # Customise tasks in skill
   - changeSet:
@@ -1024,3 +1073,55 @@ databaseChangeLog:
             referencedColumnNames: id
             referencedTableName: scperson
             validate: true
+#  Playlist feature Q3 2023-2024
+  - changeSet:
+      id: 1707577509701-1
+      author: rngla (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_2D
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: opt_in
+                  type: TIMESTAMP
+              - column:
+                  name: opt_out
+                  type: TIMESTAMP
+              - column:
+                  constraints:
+                    nullable: false
+                  name: person_id
+                  type: BIGINT
+            tableName: research_participant
+  - changeSet:
+      id: 1707577509701-2
+      author: rngla (generated)
+      changes:
+        - addUniqueConstraint:
+            columnNames: person_id
+            constraintName: UK_64dt4vh7o4k7vbrfgmu5qrql3
+            tableName: research_participant
+  - changeSet:
+      id: 1707577509701-3
+      author: rngla (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: person_id
+            baseTableName: research_participant
+            constraintName: FKnoawfap41wy1l5xgop178dgfq
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: scperson
+            validate: true
+

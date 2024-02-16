@@ -17,9 +17,8 @@
  */
 package nl.tudelft.skills.service;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,11 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Submodule;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.model.TaskCompletion;
+import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 
@@ -41,14 +38,17 @@ public class TaskCompletionService {
 
 	private final EditionControllerApi editionApi;
 	private final PersonRepository personRepository;
+	private final SkillRepository skillRepository;
 	private final TaskCompletionRepository taskCompletionRepository;
 
 	@Autowired
 	public TaskCompletionService(TaskCompletionRepository taskCompletionRepository,
-			PersonRepository personRepository, EditionControllerApi editionApi) {
+			PersonRepository personRepository, EditionControllerApi editionApi,
+			SkillRepository skillRepository) {
 		this.taskCompletionRepository = taskCompletionRepository;
 		this.personRepository = personRepository;
 		this.editionApi = editionApi;
+		this.skillRepository = skillRepository;
 	}
 
 	/**
@@ -147,5 +147,129 @@ public class TaskCompletionService {
 		taskCompletions.forEach(tc -> tc.getPerson().getTaskCompletions().remove(tc));
 		// In case the Task will be used later on, also clear its TaskCompletion set
 		task.setCompletedBy(new HashSet<>());
+	}
+
+	/**
+	 * Collects the completed tasks in an edition
+	 *
+	 * @param  scperson  The person completing the tasks
+	 * @param  editionId The edition
+	 * @return           The set of completed tasks
+	 */
+	private Set<Task> getTasksDone(SCPerson scperson, long editionId) {
+		return scperson.getTaskCompletions().stream().map(TaskCompletion::getTask)
+				.filter(s -> Objects.equals(
+						s.getSkill().getSubmodule().getModule().getEdition().getId(), editionId))
+				.collect(Collectors.toSet());
+	}
+
+	/**
+	 * Collects the completed skills based on the given path preference and customized skills
+	 *
+	 * @param  ownSkillsWithTask    All the customized non-empty skills in current edition
+	 * @param  scPerson             The person completing skills
+	 * @param  editionId            The edition
+	 * @param  personPathPreference The chosen path for the current edition
+	 * @return                      The set of completed skills
+	 */
+	public Set<Skill> determineSkillsDone(Set<Skill> ownSkillsWithTask, SCPerson scPerson, long editionId,
+			List<PathPreference> personPathPreference) {
+		Set<Task> tasksDone = getTasksDone(scPerson, editionId);
+
+		// Completed skills from the customized skills
+		Set<Skill> ownSkillsDone = ownSkillsWithTask.stream()
+				.filter(s -> tasksDone.containsAll(scPerson.getTasksAdded().stream()
+						.filter(t -> t.getSkill().equals(s)).toList()))
+				.collect(Collectors.toSet());
+
+		// Completed non-customized skills based on chosen path
+		Set<Skill> skillsDone;
+		if (personPathPreference.isEmpty() || personPathPreference.get(0).getPath() == null) {
+			skillsDone = tasksDone.stream()
+					.map(Task::getSkill)
+					.filter(s -> !ownSkillsWithTask.contains(s) && tasksDone.containsAll(s.getTasks()))
+					.collect(Collectors.toSet());
+		} else {
+			Path personPath = personPathPreference.get(0).getPath();
+			skillsDone = tasksDone.stream()
+					.filter(t -> t.getPaths().contains(personPath))
+					.map(Task::getSkill)
+					.filter(x -> !ownSkillsWithTask.contains(x) && tasksDone.containsAll(x.getTasks()
+							.stream().filter(y -> y.getPaths().contains(personPath)).toList()))
+					.collect(Collectors.toSet());
+		}
+		skillsDone.addAll(ownSkillsDone);
+
+		return skillsDone;
+	}
+
+	/**
+	 * Collects the empty skills based on path preferences and customized skills
+	 *
+	 * @param  ownSkillsWithTask    All the customized non-empty skills in current edition
+	 * @param  personPathPreference The chosen path for the current edition
+	 * @param  scPerson             The person completing skills
+	 * @param  editionId            The edition
+	 * @return                      The set of empty skills
+	 */
+	public Set<Skill> determineEmptySkills(Set<Skill> ownSkillsWithTask,
+			List<PathPreference> personPathPreference,
+			SCPerson scPerson, long editionId) {
+		Set<Skill> ownSkills = scPerson.getSkillsModified().stream().filter(s -> Objects.equals(
+				s.getSubmodule().getModule().getEdition().getId(), editionId))
+				.collect(Collectors.toSet());
+
+		// Customized empty skills
+		Set<Skill> ownEmptySkills = ownSkills.stream()
+				.filter(s -> !ownSkillsWithTask.contains(s)).collect(Collectors.toSet());
+
+		// Non-customized empty skills based on chosen path
+		Set<Skill> emptySkills;
+		Set<Skill> notOwnSkills = skillRepository.findAll().stream()
+				.filter(s -> Objects.equals(s.getSubmodule().getModule().getEdition().getId(),
+						editionId))
+				.filter(s -> !ownSkills.contains(s)).collect(Collectors.toSet());
+
+		if (personPathPreference.isEmpty() || personPathPreference.get(0).getPath() == null) {
+			emptySkills = notOwnSkills.stream().filter(s -> s.getTasks().isEmpty())
+					.collect(Collectors.toSet());
+		} else {
+			Path personPath = personPathPreference.get(0).getPath();
+			emptySkills = notOwnSkills.stream().filter(s -> s.getTasks().stream()
+					.filter(t -> t.getPaths().contains(personPath)).collect(Collectors.toSet()).isEmpty())
+					.collect(Collectors.toSet());
+		}
+		emptySkills.addAll(ownEmptySkills);
+		return emptySkills;
+	}
+
+	/**
+	 * Checks if the given empty skill can be considered complete. If so, adds it to skillsDone. An empty
+	 * skill is complete if all its essential parents are complete.
+	 *
+	 * @param skillsDone  The list of completed skills
+	 * @param emptySkills The list of empty skills
+	 * @param empty       The empty skill that needs to be checked
+	 */
+	public void addCompletedEmptySkills(Set<Skill> skillsDone, Set<Skill> emptySkills, Skill empty) {
+		if (skillsDone.contains(empty)) {
+			return;
+		}
+		List<AbstractSkill> parents = empty.getParents().stream()
+				.filter(p -> p instanceof Skill sk && sk.isEssential()).toList();
+
+		List<AbstractSkill> notCompletedParents = parents.stream()
+				.filter(x -> !skillsDone.contains((Skill) x)).toList();
+
+		for (AbstractSkill parent : notCompletedParents) {
+			if (!emptySkills.contains((Skill) parent)) {
+				return;
+			}
+			addCompletedEmptySkills(skillsDone, emptySkills, (Skill) parent);
+			if (!skillsDone.contains(parent)) {
+				return;
+			}
+		}
+		skillsDone.add(empty);
 	}
 }
