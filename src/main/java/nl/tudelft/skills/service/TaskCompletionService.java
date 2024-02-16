@@ -255,10 +255,8 @@ public class TaskCompletionService {
 		if (skillsDone.contains(empty)) {
 			return;
 		}
-		List<AbstractSkill> parents = empty.getParents().stream().filter(p -> {
-			Skill sk = (Skill) p;
-			return sk.isEssential();
-		}).toList();
+		List<AbstractSkill> parents = empty.getParents().stream()
+				.filter(p -> p instanceof Skill sk && sk.isEssential()).toList();
 
 		List<AbstractSkill> notCompletedParents = parents.stream()
 				.filter(x -> !skillsDone.contains((Skill) x)).toList();
