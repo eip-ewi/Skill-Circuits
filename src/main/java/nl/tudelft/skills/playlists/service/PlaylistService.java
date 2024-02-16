@@ -23,12 +23,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.SkillSummaryDTO;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.playlists.dto.PlaylistSkillDTO;
+import nl.tudelft.skills.playlists.model.PlaylistVersion;
 import nl.tudelft.skills.playlists.repository.PlaylistRepository;
 import nl.tudelft.skills.repository.CheckpointRepository;
-import nl.tudelft.skills.repository.ModuleRepository;
+import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.PersonService;
@@ -39,7 +40,7 @@ public class PlaylistService {
 
 	private ResearchParticipantService researchParticipantService;
 
-	private ModuleRepository moduleRepository;
+	private EditionRepository editionRepository;
 
 	private PersonService personService;
 	private TaskRepository taskRepository;
@@ -50,11 +51,11 @@ public class PlaylistService {
 	@Autowired
 	public PlaylistService(PlaylistRepository playlistRepository,
 			ResearchParticipantService researchParticipantService,
-			ModuleRepository moduleRepository, PersonService personService, TaskRepository taskRepository,
+			EditionRepository editionRepository, PersonService personService, TaskRepository taskRepository,
 			CheckpointRepository checkpointRepository, PersonRepository personRepository) {
 		this.playlistRepository = playlistRepository;
 		this.researchParticipantService = researchParticipantService;
-		this.moduleRepository = moduleRepository;
+		this.editionRepository = editionRepository;
 		this.personService = personService;
 		this.taskRepository = taskRepository;
 		this.checkpointRepository = checkpointRepository;
@@ -86,6 +87,7 @@ public class PlaylistService {
 	}
 
 	public Map<Long, List<Long>> getTasks(Set<TaskCompletion> taskCompletions, Skill skill) {
+		//		TODO: use DTOs
 
 		Map<Long, List<Long>> tasks = new HashMap<>();
 
@@ -99,17 +101,64 @@ public class PlaylistService {
 		return tasks;
 	}
 
-	public Map<SkillSummaryDTO, Map<Long, List<Long>>> getSkills(Long personId, Long checkpointId) {
+	public Map<PlaylistSkillDTO, Map<Long, List<Long>>> getSkills(Long personId, Long checkpointId) {
 		SCPerson person = personRepository.findByIdOrThrow(personId);
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(checkpointId);
+		//		TODO: filter out skills not revealed yet
 		List<Skill> skills = checkpoint.getSkills().stream().toList();
-		Map<SkillSummaryDTO, Map<Long, List<Long>>> items = new HashMap<>();
+		Map<PlaylistSkillDTO, Map<Long, List<Long>>> items = new HashMap<>();
 
 		Set<TaskCompletion> taskCompletions = person.getTaskCompletions();
+		List<Long> complTaskIds = taskCompletions.stream().map(TaskCompletion::getTask).map(Task::getId)
+				.toList();
 		for (Skill skill : skills) {
-			items.put(View.convert(skill, SkillSummaryDTO.class),
-					getTasks(taskCompletions, skill));
+			int remainingTime = getSkillRemainingTasks(skill, complTaskIds).stream()
+					.map(taskRepository::findByIdOrThrow).map(Task::getTime).reduce(0, Integer::sum);
+			PlaylistSkillDTO view = View.convert(skill, PlaylistSkillDTO.class);
+			view.setTotalTime(remainingTime);
+			items.put(view, getTasks(taskCompletions, skill));
 		}
 		return items;
+	}
+
+	private List<Long> getCheckpointRemainingTasks(Checkpoint checkpoint, List<Long> complTaskIds) {
+
+		return checkpoint.getSkills().stream().map(s -> getSkillRemainingTasks(s, complTaskIds))
+				.flatMap(Collection::stream).toList();
+	}
+
+	private List<Long> getSkillRemainingTasks(Skill skill, List<Long> complTaskIds) {
+		return skill.getTasks().stream().map(Task::getId).filter(t -> !complTaskIds.contains(t)).toList();
+
+	}
+
+	public Long getCheckpoints(Long personId) {
+		SCPerson person = personRepository.findByIdOrThrow(personId);
+		SCEdition edition = editionRepository.findByIdOrThrow(2L);
+
+		//		Sort checkpoint according to their deadline
+		List<Checkpoint> checkpoints = edition.getCheckpoints().stream()
+				.sorted(Comparator.comparing(Checkpoint::getDeadline)).toList();
+		//		Get all taskcompletions for a student
+		List<Long> complTaskIds = person.getTaskCompletions().stream().map(TaskCompletion::getTask)
+				.map(Task::getId).toList();
+		Map<Checkpoint, Integer> times = new HashMap<>();
+
+		for (Checkpoint cp : checkpoints) {
+
+			List<Long> remainingTasks = getCheckpointRemainingTasks(cp, complTaskIds);
+			if (!remainingTasks.isEmpty()) {
+				int remainingTime = remainingTasks.stream().map(taskRepository::findByIdOrThrow)
+						.map(Task::getTime).reduce(0, Integer::sum);
+				times.put(cp, remainingTime);
+			}
+			//check if any skills are not yet completed. if so, return that checkpoint
+		}
+		return 1L;
+	}
+
+	public int getPlaylistTotalTime(Long id) {
+		PlaylistVersion playlist = playlistRepository.findByIdOrThrow(id).getLatestVersion();
+		return playlist.getTotalTime();
 	}
 }

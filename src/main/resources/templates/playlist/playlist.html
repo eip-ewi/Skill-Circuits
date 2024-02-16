@@ -23,6 +23,12 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <div layout:fragment="playlist" id="playlist">
+        <h1>Playlist name</h1>
+        <h3>
+            <span class="fa-solid fa-clock"></span>
+            <span>Total time</span>
+            <span style="font-style: italic; font-size: 80%">paused</span>
+        </h3>
         <div class="opt-in__button-container">
             <button>
                 <span class="fa-solid fa-play-circle"></span>
@@ -34,19 +40,26 @@
                 <span class="fa-solid fa-trash-can"></span>
             </button>
         </div>
+        <h2>
+            <span class="fa-solid fa-road"></span>
+            <span
+                th:text="${@playlistService.getDefaultPathForEdition(@authorisationService.getAuthPerson().getId())}"></span>
+        </h2>
+        <h3>
+            <span class="fa-solid fa-music"></span>
+            <span>Time played</span>
+        </h3>
         <ul class="playlist-items">
-            <li>
-                <th:block
-                    th:with="path='Your default path: ' + ${@playlistService.getDefaultPathForEdition(@authorisationService.getAuthPerson().getId())}">
-                    <span class="fa-solid fa-road"></span>
-                    <span th:text="${path}"></span>
-                </th:block>
-            </li>
             <th:block
                 th:with="items =  ${@playlistService.getSkills(@authorisationService.getAuthPerson().getId(), 13)}">
                 <li th:each="skill : ${items.entrySet()}">
                     <span class="fa-solid circle"></span>
-                    <span th:text="${skill.getKey().getName()}"></span>
+                    <span
+                        style="font-weight: bold"
+                        th:text="${skill.getKey().getName()} + ': '"></span>
+                    <span
+                        style="font-style: italic"
+                        th:text="${skill.getKey().getTotalTime()} + ' minutes remaining'"></span>
                     <ul class="playlist-items">
                         <li th:each="task : ${skill.getValue().entrySet()}">
                             <a
