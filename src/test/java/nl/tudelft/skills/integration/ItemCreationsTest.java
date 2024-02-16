@@ -30,6 +30,7 @@ public class ItemCreationsTest extends IntegrationTest {
 	@Test
 	public void testCreateModule() {
 		logInAs(teacherUserInfo);
+		closeChangelogBoxIfOpen();
 		String moduleName = createModule(oopCourse.code(), getActiveEdition(oopCourse).name());
 
 		// Assert it being added to the list

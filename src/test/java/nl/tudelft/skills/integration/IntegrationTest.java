@@ -30,6 +30,7 @@ import org.junit.jupiter.api.BeforeEach;
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.AriaRole;
 import com.microsoft.playwright.options.LoadState;
+import com.microsoft.playwright.options.WaitForSelectorState;
 
 public abstract class IntegrationTest {
 
@@ -155,6 +156,25 @@ public abstract class IntegrationTest {
 
 		// Wait until timeout or log in is visible
 		page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Login")).waitFor();
+	}
+
+	/**
+	 * On any page, if the changelog ("what's new") box is open, it is closed.
+	 */
+	protected void closeChangelogBoxIfOpen() {
+		// Identify box by two main components: header and button
+		Locator okayButtonLocator = page.getByRole(AriaRole.BUTTON,
+				new Page.GetByRoleOptions().setName("OK"));
+		Locator whatsNewHeader = page.getByRole(AriaRole.HEADING,
+				new Page.GetByRoleOptions().setName("What's new"));
+
+		if (okayButtonLocator.isVisible() && whatsNewHeader.isVisible()) {
+			okayButtonLocator.click();
+
+			// Wait until the box is hidden
+			whatsNewHeader.waitFor(new Locator.WaitForOptions().setState(WaitForSelectorState.HIDDEN));
+			okayButtonLocator.waitFor(new Locator.WaitForOptions().setState(WaitForSelectorState.HIDDEN));
+		}
 	}
 
 	/**

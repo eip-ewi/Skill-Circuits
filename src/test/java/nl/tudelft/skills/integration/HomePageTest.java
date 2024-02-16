@@ -43,6 +43,9 @@ public class HomePageTest extends IntegrationTest {
 		clickAndWaitForPageLoad(
 				page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Log in")));
 
+		// Close the changelog box if it is open
+		closeChangelogBoxIfOpen();
+
 		// Wait until timeout or user dropdown is visible
 		Locator userDropdown = page.getByText(teacherUserInfo.displayName());
 		userDropdown.waitFor();
@@ -83,6 +86,7 @@ public class HomePageTest extends IntegrationTest {
 	void testPublishUnpublishEdition() {
 		String editionName = getActiveEdition(oopCourse).name();
 		logInAs(teacherUserInfo);
+		closeChangelogBoxIfOpen();
 
 		// Ensure that all other editions are not published so that this does not interfere with the test
 		for (EditionInfo edition : oopCourse.editions()) {
@@ -170,6 +174,7 @@ public class HomePageTest extends IntegrationTest {
 
 		// Assert that the edition is visible when logged in as student
 		logInAs(studentUserInfo);
+		closeChangelogBoxIfOpen();
 		assertThat(course.isVisible()).isTrue();
 		clickAndWaitForPageLoad(course);
 		Locator editionHeader = page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions()
@@ -189,6 +194,7 @@ public class HomePageTest extends IntegrationTest {
 		assertThat(course.isVisible()).isFalse();
 
 		logInAs(studentUserInfo);
+		closeChangelogBoxIfOpen();
 		assertThat(course.isVisible()).isFalse();
 		logOutAs(studentUserInfo);
 	}
