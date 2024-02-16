@@ -21,15 +21,17 @@ import static nl.tudelft.labracore.api.dto.RoleDetailsDTO.TypeEnum.*;
 
 import javax.annotation.Nullable;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.api.CourseControllerApi;
+import nl.tudelft.labracore.api.PersonControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
 import nl.tudelft.labracore.api.dto.Id;
 import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
+import nl.tudelft.labracore.api.dto.RoleEditionDetailsDTO;
 import nl.tudelft.labracore.lib.security.LabradorUserDetails;
 import nl.tudelft.labracore.lib.security.user.DefaultRole;
 import nl.tudelft.labracore.lib.security.user.Person;
@@ -41,6 +43,7 @@ import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.*;
 
 @Service
+@AllArgsConstructor
 public class AuthorisationService {
 
 	private RoleCacheManager roleCache;
@@ -50,33 +53,13 @@ public class AuthorisationService {
 	private SubmoduleRepository submoduleRepository;
 	private SkillRepository skillRepository;
 
-	private AbstractSkillRepository abstractSkillRepository;
 	private TaskRepository taskRepository;
 	private CheckpointRepository checkpointRepository;
 	private PathRepository pathRepository;
+	private AbstractSkillRepository abstractSkillRepository;
 
 	private CourseControllerApi courseApi;
-
-	@Autowired
-	public AuthorisationService(RoleCacheManager roleCache, EditionRepository editionRepository,
-			ModuleRepository moduleRepository, SubmoduleRepository submoduleRepository,
-			SkillRepository skillRepository, TaskRepository taskRepository,
-			CheckpointRepository checkpointRepository, PathRepository pathRepository,
-			AbstractSkillRepository abstractSkillRepository,
-			CourseControllerApi courseControllerApi) {
-		this.roleCache = roleCache;
-
-		this.editionRepository = editionRepository;
-		this.moduleRepository = moduleRepository;
-		this.submoduleRepository = submoduleRepository;
-		this.abstractSkillRepository = abstractSkillRepository;
-		this.skillRepository = skillRepository;
-		this.taskRepository = taskRepository;
-		this.checkpointRepository = checkpointRepository;
-		this.pathRepository = pathRepository;
-
-		this.courseApi = courseControllerApi;
-	}
+	private PersonControllerApi personApi;
 
 	/**
 	 * Gets the currently authenticated user.
@@ -122,6 +105,18 @@ public class AuthorisationService {
 	}
 
 	/**
+	 * Gets whether the authenticated user is a manager somewhere.
+	 *
+	 * @return True iff the authenticated user is a manager
+	 */
+	public boolean isManagerAnywhere() {
+		return isStaff() || personApi.getRolesForPerson(getAuthPerson().getId())
+				.any(r -> r.getType() == RoleEditionDetailsDTO.TypeEnum.HEAD_TA
+						|| r.getType() == RoleEditionDetailsDTO.TypeEnum.TEACHER)
+				.block();
+	}
+
+	/**
 	 * Gets whether the authenticated user can view all the editions of a course.
 	 *
 	 * @param  courseId The id of the course.
@@ -138,7 +133,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can view the edition.
 	 */
 	public boolean canViewEdition(Long editionId) {
-		return isAuthenticated() && (isAtLeastTeacherInEdition(editionId)
+		return isAuthenticated() && (isAtLeastHeadTAInEdition(editionId)
 				|| editionRepository.findByIdOrThrow(editionId).isVisible());
 	}
 
@@ -175,7 +170,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can publish the edition.
 	 */
 	public boolean canEditEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -185,7 +180,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can publish the edition.
 	 */
 	public boolean canPublishEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -195,7 +190,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can create a module in the edition.
 	 */
 	public boolean canCreateModuleInEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -205,7 +200,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can delete a module in the edition.
 	 */
 	public boolean canDeleteModuleInEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -226,7 +221,7 @@ public class AuthorisationService {
 	 */
 	@Transactional
 	public boolean canEditModuleInEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -248,7 +243,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can create submodules in the edition
 	 */
 	public boolean canCreateSubmoduleInEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -269,7 +264,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can delete a submodule in the edition.
 	 */
 	public boolean canDeleteSubmoduleInEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -291,7 +286,7 @@ public class AuthorisationService {
 	 */
 	@Transactional
 	public boolean canEditSubmoduleInEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -313,7 +308,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can create skills in the edition
 	 */
 	public boolean canCreateSkillInEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -345,7 +340,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can edit the skills in the edition
 	 */
 	public boolean canEditSkillInEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -371,7 +366,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can delete skills in the edition
 	 */
 	public boolean canDeleteSkillInEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -413,7 +408,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can edit checkpoints in the edition
 	 */
 	public boolean canEditCheckpointInEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -465,7 +460,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can create a path in an edition.
 	 */
 	public boolean canCreatePathInEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -475,7 +470,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can modify path related elements in edition.
 	 */
 	public boolean canEditPathInEdition(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -507,7 +502,7 @@ public class AuthorisationService {
 	 * @return           True iff the user can view tasks not in path.
 	 */
 	public boolean canViewThroughPath(Long editionId) {
-		return isAtLeastTeacherInEdition(editionId);
+		return isAtLeastHeadTAInEdition(editionId);
 	}
 
 	/**
@@ -565,8 +560,11 @@ public class AuthorisationService {
 	 * @return           True iff the user is an admin, teacher, or head TA in the edition
 	 */
 	public boolean isAtLeastHeadTAInEdition(Long editionId) {
+		if (isAdmin()) {
+			return true;
+		}
 		var role = getRoleInEdition(editionId);
-		return isAdmin() || role == TEACHER || role == HEAD_TA;
+		return role == TEACHER || role == HEAD_TA;
 	}
 
 	/**
@@ -576,8 +574,11 @@ public class AuthorisationService {
 	 * @return           True iff the user is an admin, teacher, head TA, or TA in the edition
 	 */
 	public boolean isAtLeastTAInEdition(Long editionId) {
+		if (isAdmin()) {
+			return true;
+		}
 		var role = getRoleInEdition(editionId);
-		return isAdmin() || role == TEACHER || role == HEAD_TA || role == TA;
+		return role == TEACHER || role == HEAD_TA || role == TA;
 	}
 
 	/**
@@ -587,8 +588,11 @@ public class AuthorisationService {
 	 * @return           True iff the user is an admin, teacher, head TA, TA or student in the edition
 	 */
 	public boolean isAtLeastStudentInEdition(Long editionId) {
+		if (isAdmin()) {
+			return true;
+		}
 		var role = getRoleInEdition(editionId);
-		return isAdmin() || (role != null && role != BLOCKED && role != TEACHER_RO);
+		return role != null && role != BLOCKED && role != TEACHER_RO;
 	}
 
 	/**
@@ -608,7 +612,7 @@ public class AuthorisationService {
 	 * @return          True iff true user can get the editions of the course
 	 */
 	public boolean canGetEditionsOfCourse(Long courseId) {
-		return isStaff();
+		return isManagerAnywhere();
 	}
 
 	/**
@@ -618,7 +622,7 @@ public class AuthorisationService {
 	 * @return           True iff true user can get the modules of the edition
 	 */
 	public boolean canGetModulesOfEdition(Long editionId) {
-		return isStaff();
+		return isManagerAnywhere();
 	}
 
 	/**
@@ -628,7 +632,7 @@ public class AuthorisationService {
 	 * @return          True iff true user can get the skills of the module
 	 */
 	public boolean canGetSkillsOfModule(Long moduleId) {
-		return isStaff();
+		return isManagerAnywhere();
 	}
 
 }

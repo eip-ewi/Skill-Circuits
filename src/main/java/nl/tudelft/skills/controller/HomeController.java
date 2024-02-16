@@ -33,15 +33,14 @@ import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.skills.model.SCEdition;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.model.TaskCompletion;
+import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
-import nl.tudelft.skills.repository.EditionRepository;
-import nl.tudelft.skills.repository.ModuleRepository;
+import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.CourseService;
 import nl.tudelft.skills.service.EditionService;
+import nl.tudelft.skills.service.SkillService;
+import nl.tudelft.skills.service.TaskCompletionService;
 
 @Controller
 public class HomeController {
@@ -53,20 +52,36 @@ public class HomeController {
 	private final ModuleRepository moduleRepository;
 	private final PersonRepository personRepository;
 
+	private final SkillRepository skillRepository;
+	private final TaskRepository taskRepository;
+
 	private final EditionService editionService;
 	private final CourseService courseService;
+	private final SkillService skillService;
+	private final TaskCompletionService taskCompletionService;
+
+	private final PathPreferenceRepository pathPreferenceRepository;
 
 	@Autowired
 	public HomeController(EditionControllerApi editionApi, RoleControllerApi roleApi,
 			EditionRepository editionRepository, ModuleRepository moduleRepository,
-			PersonRepository personRepository, EditionService editionService, CourseService courseService) {
+			PersonRepository personRepository, SkillRepository skillRepository, TaskRepository taskRepository,
+			EditionService editionService,
+			CourseService courseService,
+			SkillService skillService, TaskCompletionService taskCompletionService,
+			PathPreferenceRepository pathPreferenceRepository) {
 		this.editionApi = editionApi;
 		this.roleApi = roleApi;
 		this.editionRepository = editionRepository;
 		this.moduleRepository = moduleRepository;
 		this.personRepository = personRepository;
+		this.skillRepository = skillRepository;
+		this.taskRepository = taskRepository;
 		this.editionService = editionService;
 		this.courseService = courseService;
+		this.skillService = skillService;
+		this.taskCompletionService = taskCompletionService;
+		this.pathPreferenceRepository = pathPreferenceRepository;
 	}
 
 	/**
@@ -125,21 +140,35 @@ public class HomeController {
 	 */
 	public Map<Long, Integer> getCompletedSkillsPerCourse(List<CourseSummaryDTO> courses, SCPerson scperson) {
 		Map<Long, Integer> completedSkillsPerCourse = new HashMap<>();
+
 		for (var course : courses) {
 			Long courseId = course.getId();
-
-			int skillsDone = 0;
+			int skillsDoneCount = 0;
 			Long editionId = courseService.getLastStudentEditionForCourseOrLast(courseId);
 
 			if (editionId != null) {
-				List<Task> tasksDone = scperson.getTaskCompletions().stream().map(TaskCompletion::getTask)
-						.toList();
+				Set<Skill> ownSkillsWithTask = skillService.getOwnSkillsWithTask(scperson, editionId);
+				var personPathPreference = scperson.getPathPreferences().stream()
+						.filter(p -> Objects.equals(p.getEdition().getId(), editionId)).toList();
 
-				skillsDone = (int) tasksDone.stream().map(Task::getSkill).distinct()
-						.filter(s -> tasksDone.containsAll(s.getTasks())).count();
+				// All completed skills
+				Set<Skill> skillsDone = taskCompletionService.determineSkillsDone(ownSkillsWithTask, scperson,
+						editionId,
+						personPathPreference);
+
+				// All empty skills
+				Set<Skill> emptySkills = taskCompletionService.determineEmptySkills(ownSkillsWithTask,
+						personPathPreference,
+						scperson, editionId);
+
+				// Collect completed empty skills
+				emptySkills.forEach(
+						x -> taskCompletionService.addCompletedEmptySkills(skillsDone, emptySkills, x));
+
+				skillsDoneCount = skillsDone.size();
 			}
 
-			completedSkillsPerCourse.put(courseId, skillsDone);
+			completedSkillsPerCourse.put(courseId, skillsDoneCount);
 		}
 		return completedSkillsPerCourse;
 	}

@@ -44,16 +44,25 @@
     </th:block>
 
     <script layout:fragment="script">
+        /**
+         * Adds an event listener to the path toggle that opens the dropdown with the additional skills.
+         *
+         * @param pathCtrl The path dropdown toggle control.
+         */
+        function addTogglePathDropdownEventListener(pathCtrl) {
+            pathCtrl.addEventListener("click", function () {
+                const toggle = pathCtrl.closest(".path-toggle");
+                toggle.setAttribute(
+                    "aria-expanded",
+                    toggle.getAttribute("aria-expanded") !== "true"
+                );
+            });
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
-            document.querySelectorAll(".path-toggle__control").forEach(ctrl =>
-                ctrl.addEventListener("click", function () {
-                    const toggle = ctrl.closest(".path-toggle");
-                    toggle.setAttribute(
-                        "aria-expanded",
-                        toggle.getAttribute("aria-expanded") !== "true"
-                    );
-                })
-            );
+            document
+                .querySelectorAll(".path-toggle__control")
+                .forEach(addTogglePathDropdownEventListener);
         });
     </script>
 </html>

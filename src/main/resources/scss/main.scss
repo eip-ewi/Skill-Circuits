@@ -5,7 +5,11 @@
 @import "infobox";
 @import "overlay";
 @import "components";
+@import "whats_new";
 @import "util";
+
+//Playlist feature
+@import "playlist/playlist";
 
 * {
     box-sizing: border-box;
