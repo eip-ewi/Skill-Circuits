@@ -192,18 +192,21 @@ public class ModuleControllerTest extends ControllerTest {
 		ModuleController moduleController = new ModuleController(moduleRepository, moduleService,
 				session, taskCompletionService, clickedLinkService);
 		assertThat(moduleController.getSkillsOfModule(db.getModuleProofTechniques().getId()))
-				.containsExactlyInAnyOrder(Stream
+				.containsExactly(Stream
 						.of(
-								db.getSkillVariables(),
-								db.getSkillNegation(),
-								db.getSkillImplication(),
-								db.getSkillNegateImplications(),
-								db.getSkillContrapositivePractice(),
-								db.getSkillDividingIntoCases(), db.getSkillCasesPractice(),
-								db.getSkillContradictionPractice(),
 								db.getSkillAssumption(),
-								db.getSkillGeneralisationPractice(), db.getSkillProofOutline(),
-								db.getSkillTransitiveProperty(), db.getSkillInductionPractice())
+								db.getSkillCasesPractice(),
+								db.getSkillContradictionPractice(),
+								db.getSkillContrapositivePractice(),
+								db.getSkillDividingIntoCases(),
+								db.getSkillGeneralisationPractice(),
+								db.getSkillImplication(),
+								db.getSkillInductionPractice(),
+								db.getSkillNegateImplications(),
+								db.getSkillNegation(),
+								db.getSkillProofOutline(),
+								db.getSkillTransitiveProperty(),
+								db.getSkillVariables())
 						.map(s -> mapper.map(s, SkillSummaryDTO.class)).toList()
 						.toArray(new SkillSummaryDTO[0]));
 	}

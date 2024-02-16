@@ -116,7 +116,8 @@ public class EditionControllerTest extends ControllerTest {
 	@Test
 	void getModulesOfEdition() {
 		assertThat(editionController.getModulesOfEdition(db.getEditionRL().getId()))
-				.isEqualTo(List.of(mapper.map(db.getModuleProofTechniques(), SCModuleSummaryDTO.class)));
+				.isEqualTo(List.of(mapper.map(db.getModule(), SCModuleSummaryDTO.class),
+						mapper.map(db.getModuleProofTechniques(), SCModuleSummaryDTO.class)));
 	}
 
 	@Test
