@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 ## Changed
+## Fixed
+
+## [2.2.6]
+
+## Added
+## Changed
 - Empty path toggles are greyed out, and padding is added between expanded toggles (@ffiedrich)
 - Split courses on homepage into categories and show finished/active courses (@ffiedrich)
 - Assigning student role after task completion if user had no role yet and is student by default (@ffiedrich)
