@@ -1,0 +1,79 @@
+@import "../header";
+@import "../whats_new";
+@import "../overlay";
+@import "../_mixins";
+@import "../circuit";
+
+.playlist-button {
+    @extend .circuit__button;
+}
+
+#opt-in__dialog {
+    @extend .overlay;
+    border: 1px solid var(--primary-dark);
+    padding: 1rem 3rem 3rem;
+    top: 4rem;
+    width: 60%;
+    transform: translateX(-50%);
+    overflow-y: auto;
+    max-height: 90%;
+}
+
+.opt-in__content {
+    @extend #update_text;
+    padding-right: 3rem;
+    & > a {
+        color: var(--primary-green);
+    }
+}
+
+.tldr {
+    font-style: italic;
+    font-size: 0.7em;
+}
+
+.opt-in__button-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 0 1rem 0;
+    position: relative;
+
+    & > button {
+        width: 5rem;
+        padding: 0.5rem;
+    }
+
+    & > button:enabled {
+        @include button(
+            $background: var(--primary-green),
+            $border: var(--primary-dark),
+            $colour: var(--primary-light),
+            $background-active: var(--primary-light),
+            $border-active: var(--primary-dark),
+            $colour-active: var(--primary-green)
+        );
+    }
+
+    & > button:disabled {
+        background-color: var(--grey-500);
+        border: var(--primary-dark);
+        color: var(--primary-dark);
+        cursor: default;
+    }
+}
+
+.checkbox__container {
+    display: flex;
+    align-items: flex-start;
+    padding: 1rem 1rem;
+
+    & > input {
+        margin-top: 0.4rem;
+    }
+    & > span {
+        flex: 1;
+        padding-left: 0.5rem;
+        font-style: italic;
+        font-weight: bold;
+    }
+}

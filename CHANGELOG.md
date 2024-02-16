@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 ## Fixed
 - Fixed adding/removing task frontend bugs and updating skill completion status (@ffiedrich)
+- Teacher view: Reordering of tasks now works on first click (@rglans)
+- Teacher view: Can now reorder new tasks on creation (@rglans)
 
 ## [2.2.5]
 
