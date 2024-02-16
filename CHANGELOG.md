@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Assigning student role after task completion if user had no role yet and is student by default (@ffiedrich)
 
 ## Fixed
+- Fixed adding/removing task frontend bugs and updating skill completion status (@ffiedrich)
 - Teacher view: Reordering of tasks now works on first click (@rglans)
 - Teacher view: Can now reorder new tasks on creation (@rglans)
 
