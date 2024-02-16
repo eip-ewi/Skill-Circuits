@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 ## Changed
+- Teacher view: Sorting modules, submodules and checkpoints at selection dropdowns (@bbakos)
 ## Fixed
 - Fixed changing checkpoint name in setup for teachers (@bbakos)
 
