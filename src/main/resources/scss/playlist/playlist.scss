@@ -30,6 +30,18 @@
         right: 0;
         display: flex;
     }
+
+    & > ul {
+        padding-top: 1.5rem;
+    }
+
+    p {
+        padding-top: 1rem;
+    }
+
+    h2 {
+        padding-top: 1rem;
+    }
 }
 
 .playlist-items {
@@ -93,6 +105,7 @@
         color: var(--primary-dark);
         cursor: default;
     }
+
 }
 
 .checkbox__container {

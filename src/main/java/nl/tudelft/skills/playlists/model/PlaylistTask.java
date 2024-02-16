@@ -24,6 +24,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import nl.tudelft.skills.model.Task;
+
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -39,9 +42,14 @@ public class PlaylistTask {
 	@ManyToOne
 	private ResearchParticipant person;
 
+	@ManyToOne
+	private Task task;
+
 	@NotNull
 	@Builder.Default
 	private Integer idx = 0;
 
+	private LocalDateTime started;
+	private LocalDateTime completed;
 	private Integer completionTime;
 }

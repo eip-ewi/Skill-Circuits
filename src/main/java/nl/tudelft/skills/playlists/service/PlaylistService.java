@@ -17,8 +17,10 @@
  */
 package nl.tudelft.skills.playlists.service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
+import nl.tudelft.skills.playlists.dto.PlaylistTaskDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -86,27 +88,37 @@ public class PlaylistService {
 		return task.getName();
 	}
 
-	public Map<Long, List<Long>> getTasks(Set<TaskCompletion> taskCompletions, Skill skill) {
+	public List<PlaylistTaskDTO> getTasks(Set<TaskCompletion> taskCompletions, Skill skill) {
 		//		TODO: use DTOs
 
-		Map<Long, List<Long>> tasks = new HashMap<>();
+		List<PlaylistTaskDTO> tasks = new LinkedList<>();
 
 		//		For each task, get the module it belongs to and whether the student has already completed it
 		for (Task t : skill.getTasks()) {
 			boolean completed = taskCompletions.stream()
 					.anyMatch(tC -> tC.getTask().getId().equals(t.getId()));
-			tasks.put(t.getId(), List.of(getModuleId(t.getId()), completed ? 1L : 0L));
-		}
+			if(completed){
+				tasks.add(PlaylistTaskDTO.builder().id(t.getId()).type(t.getType())
+						.moduleId(getModuleId(t.getId())).skillId(skill.getId())
+						.completed(LocalDateTime.now()).taskName(t.getName()).build());
+			} else{
+				tasks.add(PlaylistTaskDTO.builder().id(t.getId()).type(t.getType())
+						.moduleId(getModuleId(t.getId())).skillId(skill.getId())
+						.started(LocalDateTime.now()).taskName(t.getName()).build());
+			}
 
+		}
+//		skill.getTasks().stream().map(t -> PlaylistTaskDTO.builder().id(t.getId())
+//				.moduleId(getModuleId(t.getId())).completed(LocalDateTime.now()).taskName(t.getName()).build()).toList();
 		return tasks;
 	}
 
-	public Map<PlaylistSkillDTO, Map<Long, List<Long>>> getSkills(Long personId, Long checkpointId) {
+	public Map<PlaylistSkillDTO, List<PlaylistTaskDTO>> getSkills(Long personId, Long checkpointId) {
 		SCPerson person = personRepository.findByIdOrThrow(personId);
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(checkpointId);
 		//		TODO: filter out skills not revealed yet
 		List<Skill> skills = checkpoint.getSkills().stream().toList();
-		Map<PlaylistSkillDTO, Map<Long, List<Long>>> items = new HashMap<>();
+		Map<PlaylistSkillDTO, List<PlaylistTaskDTO>> items = new HashMap<>();
 
 		Set<TaskCompletion> taskCompletions = person.getTaskCompletions();
 		List<Long> complTaskIds = taskCompletions.stream().map(TaskCompletion::getTask).map(Task::getId)
