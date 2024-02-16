@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 - Split courses on homepage into categories and show finished/active courses (@ffiedrich)
 ## Fixed
+- Teacher view: Reordering of tasks now works on first click (@rglans)
+- Teacher view: Can now reorder new tasks on creation (@rglans)
 
 ## [2.2.5]
 
