@@ -127,7 +127,9 @@
                         .classList.remove("hidden");
 
                     // Show icon in preview
-                    document.getElementById(`item-${taskId}-icon`).classList.remove("hidden");
+                    document
+                        .getElementById(`item-${taskId}-icon`)
+                        .parentElement.classList.remove("hidden");
 
                     // Update completion status of skill and child skills
                     updateBlockState(blockId);
@@ -195,7 +197,9 @@
                         .classList.remove("hidden");
 
                     // Hide icon in preview
-                    document.getElementById(`item-${taskId}-icon`).classList.add("hidden");
+                    document
+                        .getElementById(`item-${taskId}-icon`)
+                        .parentElement.classList.add("hidden");
 
                     // Update completion status of skill and child skills
                     updateBlockState(blockId);
