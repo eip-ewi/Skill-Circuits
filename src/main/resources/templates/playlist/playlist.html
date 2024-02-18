@@ -29,7 +29,7 @@
             <span>Estimated time</span>
             <span style="font-style: italic; font-size: 80%">paused</span>
         </h3>
-        <hr>
+        <hr />
         <div class="opt-in__button-container">
             <button>
                 <span class="fa-solid fa-play-circle"></span>
@@ -92,30 +92,133 @@
         <div>
             <h1>Playlist 1.0</h1>
             <h3>A basic playthrough</h3>
-            <hr>
+            <hr />
             <h2>Welcome!</h2>
             <p>
-                And, thank you for choosing to join this design journey towards an educational tool. First up, is a basic
-                version of the Playlist feature. When you click the button below you will be able to create a
-                playlist that can consist of different tasks found in the ACC Skill Circuit.
+                And, thank you for choosing to join this design journey towards an educational tool.
+                First up, is a basic version of the Playlist feature. When you click the button
+                below you will be able to create a playlist that can consist of different tasks
+                found in the ACC Skill Circuit.
             </p>
             <p>
-                Determine the amount of time you want to be busy studying and fill the playlist with tasks
-                <i>estimated</i> to fit that timeframe. During studying the playlist will help you keep track of time
-                passed and adjust the playlist accordingly. </br>
+                Determine the amount of time you want to be busy studying and fill the playlist with
+                tasks
+                <i>estimated</i>
+                to fit that timeframe. During studying the playlist will help you keep track of time
+                passed and adjust the playlist accordingly.
+                <br />
             </p>
             <p>
-                We cannot guarantee this feature is bug-free, so please bear with us. Any feedback you have is of course
-                highly appreciated, but as this is part of a research we must collect that anonymously. A way to provide
-                anonymous feedback will be added soon&trade;
+                We cannot guarantee this feature is bug-free, so please bear with us. Any feedback
+                you have is of course highly appreciated, but as this is part of a research we must
+                collect that anonymously. A way to provide anonymous feedback will be added
+                soon&trade;.
             </p>
 
-            <div class="opt-in__button-container" style="justify-content: center;">
+            <div class="opt-in__button-container_single">
                 <button>
                     <span class="fa-solid fa-play-circle"></span>
                 </button>
             </div>
         </div>
     </div>
-    <script></script>
+
+    <div layout:fragment="create" id="playlist-cr" class="playlist-content">
+        <div>
+            <h1>Playlist creation</h1>
+            <h3>
+                <span class="fa-solid fa-clock"></span>
+                <span>Estimated time:</span>
+                <span id="total-est-time-cr">0</span>
+            </h3>
+            <hr />
+        </div>
+        <div id="playlist-cr-adding-tasks">
+            <h2>Choose the tasks to add</h2>
+
+            <th:block
+                th:with="checkpoints = ${@playlistService.getCheckpointDTOs(@authorisationService.getAuthPerson().getId())}">
+                <ul th:each="cp : ${checkpoints}" class="playlist-items">
+                    <li>
+                        <h3 th:text="'To be completed for: ' + ${cp.getName()}"></h3>
+                    </li>
+                    <li th:each="skill : ${cp.getSkills()}">
+                        <span style="font-weight: bold" th:text="${skill.getName()}"></span>
+                        <ul class="playlist-items">
+                            <li th:each="task : ${skill.getTasks()}">
+                                <input
+                                    type="checkbox"
+                                    th:id="'add-task-' + ${task.getTaskId()}"
+                                    th:attr="est-time=${task.getEstTime()}, idx=${task.getIdx()}"
+                                    th:aria-label="'Add task ' + ${task.getTaskName()} + ' to playlist'" />
+                                <span th:class="'fa-solid fa-' + ${task.getType().icon}"></span>
+                                <span th:text="${task.getTaskName()}"></span>
+                                <span
+                                    style="font-style: italic"
+                                    th:text="${task.getEstTime()} + ' minutes'"></span>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </th:block>
+        </div>
+        <div class="opt-in__button-container_single">
+            <button id="create-playlist">Create playlist!</button>
+        </div>
+        <script layout:fragment="script">
+            function updateTotalEstTimeCr() {
+                const checkboxes = document.querySelectorAll('input[id^="add-task-"]:checked');
+                let totalEstTime = 0;
+
+                checkboxes.forEach(function (checkbox) {
+                    totalEstTime += parseInt(checkbox.getAttribute("est-time"));
+                });
+
+                document.getElementById("total-est-time-cr").textContent = totalEstTime;
+            }
+
+            addEventListener("DOMContentLoaded", function () {
+                const checkboxes = document.querySelectorAll('input[id^="add-task-"]');
+                checkboxes.forEach(checkbox =>
+                    checkbox.addEventListener("change", updateTotalEstTimeCr)
+                );
+            });
+
+            function createPlaylistTaskDTO(task){
+                console.log(task)
+                const data = {};
+                data.taskId = parseInt(task.id.replace("add-task-", ""));
+                data.idx = parseInt(task.getAttribute("idx"));
+
+                return data;
+            }
+            function getSelectedTasks(){
+                const data = {};
+                const playListVersionData = {};
+                playListVersionData.taskCreates = [];
+                const checkedTasks = document.querySelectorAll('input[id^="add-task-"]:checked');
+                checkedTasks.forEach( task => {
+                    playListVersionData.taskCreates.push(createPlaylistTaskDTO(task));
+                });
+                playListVersionData.totalTime = parseInt(document.getElementById("total-est-time-cr").textContent);
+                data.playlistVersionCreate = playListVersionData;
+                return data;
+            }
+
+            document.addEventListener("DOMContentLoaded", function () {
+                $("#create-playlist").off("click").on("click", function () {
+                    const data = getSelectedTasks();
+
+                    $.post({
+                        url: "/playlist",
+                        contentType: "application/json",
+                        data: JSON.stringify(data),
+                        success: () => {
+                            location.reload(true);
+                        },
+                    });
+                });
+            });
+        </script>
+    </div>
 </html>

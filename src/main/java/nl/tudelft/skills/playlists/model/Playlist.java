@@ -34,15 +34,15 @@ public class Playlist {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
 
-	@NotNull
-	@OneToOne
+
+	@OneToOne(cascade = CascadeType.PERSIST)
 	private PlaylistVersion latestVersion;
 
 	@Builder.Default
 	private boolean active = false;
 
 	@ManyToOne
-	private ResearchParticipant person;
+	private ResearchParticipant participant;
 
 	@Builder.Default
 	private PlaylistState state = PlaylistState.CREATED;

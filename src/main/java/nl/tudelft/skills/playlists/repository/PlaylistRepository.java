@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.playlists.repository;
 
+import nl.tudelft.skills.playlists.model.ResearchParticipant;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
@@ -28,4 +29,7 @@ public interface PlaylistRepository extends JpaRepository<Playlist, Long> {
 		return findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Playlist was not found: " + id));
 	}
+
+	Playlist findByParticipantAndActive(ResearchParticipant participant, boolean Active);
+
 }

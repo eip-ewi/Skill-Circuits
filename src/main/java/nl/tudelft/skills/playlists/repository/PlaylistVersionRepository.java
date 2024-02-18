@@ -15,25 +15,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.playlists.dto;
+package nl.tudelft.skills.playlists.repository;
 
-import javax.validation.constraints.NotNull;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
-import lombok.*;
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.model.Skill;
+import nl.tudelft.skills.playlists.model.PlaylistVersion;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class PlaylistSkillDTO extends View<Skill> {
-
-	@NotNull
-	private Long id;
-	@NotNull
-	private String name;
-	@Builder.Default
-	private int totalTime = 0;
+public interface PlaylistVersionRepository extends JpaRepository<PlaylistVersion, Long> {
+	default PlaylistVersion findByIdOrThrow(Long id) {
+		return findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Playlist version was not found: " + id));
+	}
 }

@@ -15,41 +15,40 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.playlists.model;
+package nl.tudelft.skills.playlists.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import nl.tudelft.skills.model.Task;
+import lombok.*;
+import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.model.Checkpoint;
 
 @Data
-@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PlaylistTask {
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private Long id;
-
-	@ManyToOne
-	private ResearchParticipant participant;
-
-
-	private Long taskId;
+@EqualsAndHashCode(callSuper = false)
+public class PlaylistCheckpointDTO extends View<Checkpoint> {
 
 	@NotNull
-	@Builder.Default
-	private Integer idx = 0;
+	private Long id;
 
-	private LocalDateTime started;
-	private LocalDateTime completed;
-	private Integer completionTime;
+	@NotBlank
+	private String name;
+
+	@NotNull
+	private LocalDateTime deadline;
+
+	private List<PlaylistSkillViewDTO> skills;
+
+	private Integer totalTime;
+
+	public void postApply(List<PlaylistSkillViewDTO> skills) {
+		this.skills = skills.stream().filter(s -> !s.getTasks().isEmpty()).toList();
+		totalTime = skills.stream().map(PlaylistSkillViewDTO::getTotalTime).reduce(0, Integer::sum);
+	}
 }

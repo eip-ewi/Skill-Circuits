@@ -15,39 +15,44 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.playlists.model;
+package nl.tudelft.skills.playlists.dto;
 
 import java.time.LocalDateTime;
 
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import nl.tudelft.skills.model.Task;
+import lombok.*;
+import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.model.TaskType;
+import nl.tudelft.skills.playlists.model.PlaylistTask;
 
 @Data
-@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PlaylistTask {
+@EqualsAndHashCode(callSuper = false)
+public class PlaylistTaskViewDTO extends View<PlaylistTask> {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private Long id;
-
-	@ManyToOne
-	private ResearchParticipant participant;
-
-
-	private Long taskId;
 
 	@NotNull
-	@Builder.Default
-	private Integer idx = 0;
+	private String taskName;
+
+	private int estTime;
+
+	@NotNull
+	private Integer idx;
+
+	@NotNull
+	private TaskType type;
+
+	@NotNull
+	private Long moduleId;
+
+	@NotNull
+	private Long skillId;
+
+	@NotNull
+	private Long taskId;
 
 	private LocalDateTime started;
 	private LocalDateTime completed;

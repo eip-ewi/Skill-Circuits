@@ -19,6 +19,15 @@ package nl.tudelft.skills.playlists.controller;
 
 import javax.transaction.Transactional;
 
+import nl.tudelft.skills.playlists.dto.PlaylistCreateDTO;
+import nl.tudelft.skills.playlists.dto.PlaylistTaskCreateDTO;
+import nl.tudelft.skills.playlists.dto.PlaylistTaskViewDTO;
+import nl.tudelft.skills.playlists.dto.PlaylistVersionCreateDTO;
+import nl.tudelft.skills.playlists.model.*;
+import nl.tudelft.skills.playlists.repository.PlaylistTaskRepository;
+import nl.tudelft.skills.playlists.repository.PlaylistVersionRepository;
+import nl.tudelft.skills.playlists.repository.ResearchParticipantRepository;
+import nl.tudelft.skills.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,31 +47,66 @@ import nl.tudelft.skills.playlists.service.PlaylistService;
 import nl.tudelft.skills.playlists.service.ResearchParticipantService;
 import nl.tudelft.skills.service.PersonService;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 @Controller
 @RequestMapping("playlist")
 public class PlaylistController {
 	private ResearchParticipantService researchParticipantService;
+	private ResearchParticipantRepository researchParticipantRepository;
 	private PersonService personService;
 
 	private PlaylistService playlistService;
 	private PlaylistRepository playlistRepository;
+	private PlaylistTaskRepository playlistTaskRepository;
+	private PlaylistVersionRepository playlistVersionRepository;
+	private TaskRepository taskRepository;
+	public Long accEdition = 643L;
 
 	@Autowired
 	public PlaylistController(ResearchParticipantService researchParticipantService,
+			ResearchParticipantRepository researchParticipantRepository,
 			PersonService personService, PlaylistService playlistService,
-			PlaylistRepository playlistRepository) {
+			PlaylistRepository playlistRepository, PlaylistTaskRepository playlistTaskRepository,
+			PlaylistVersionRepository playlistVersionRepository, TaskRepository taskRepository) {
 		this.researchParticipantService = researchParticipantService;
+		this.researchParticipantRepository = researchParticipantRepository;
 		this.personService = personService;
 		this.playlistService = playlistService;
 		this.playlistRepository = playlistRepository;
+		this.playlistTaskRepository = playlistTaskRepository;
+		this.playlistVersionRepository = playlistVersionRepository;
+		this.taskRepository = taskRepository;
 	}
 
 	@PostMapping
 	@Transactional
-	public String createPlaylist(@AuthenticatedPerson Person person, @RequestBody SkillCreateDTO create,
+	@PreAuthorize("@researchParticipantService.canCreatePlaylist(#person)")
+	public ResponseEntity<Void> createPlaylist(@AuthenticatedPerson Person person, @RequestBody PlaylistCreateDTO create,
 			Model model) {
+		ResearchParticipant participant = researchParticipantRepository
+				.findByPerson(personService.getOrCreateSCPerson(person.getId()));
+		create.setParticipant(participant);
+		Playlist playlist = create.apply();
 
-		return "Success";
+		PlaylistVersionCreateDTO playlistVersionCreate = create.getPlaylistVersionCreate();
+		List<PlaylistTaskCreateDTO> taskCreates = playlistVersionCreate.getTaskCreates();
+		taskCreates.forEach(t -> create.setParticipant(participant));
+		Set<PlaylistTask> tasks = taskCreates.stream()
+				.map(PlaylistTaskCreateDTO::apply).collect(Collectors.toSet());
+		playlistVersionCreate.setTasks(new HashSet<>((tasks)));
+
+		PlaylistVersion playlistVersion = playlistVersionCreate.apply();
+		playlistVersion.setPlaylist(playlist);
+		playlist.setLatestVersion(playlistVersion);
+		playlistRepository.saveAndFlush(playlist);
+
+		model.addAttribute("playlistStep", PlaylistStep.PLAY);
+//		Return fragment with this playlist
+//		In that fragment you have to get skills etc
+		return ResponseEntity.ok().build();
 	}
 
 	/**
@@ -74,7 +118,7 @@ public class PlaylistController {
 	 */
 	@PostMapping("optIn")
 	@Transactional
-	@PreAuthorize("!@authorisationService.canEditEdition(#editionId)")
+	@PreAuthorize("!@authorisationService.canEditEdition(this.accEdition)")
 	public ResponseEntity<Void> optIn(@AuthenticatedPerson Person person, Long editionId) {
 		//        TODO: change edition to ACC
 		//        TODO: authorize students only

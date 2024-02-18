@@ -20,14 +20,15 @@ package nl.tudelft.skills.playlists.service;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import nl.tudelft.skills.playlists.dto.PlaylistTaskDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.playlists.dto.PlaylistCheckpointDTO;
 import nl.tudelft.skills.playlists.dto.PlaylistSkillDTO;
+import nl.tudelft.skills.playlists.dto.PlaylistTaskDTO;
 import nl.tudelft.skills.playlists.model.PlaylistVersion;
 import nl.tudelft.skills.playlists.repository.PlaylistRepository;
 import nl.tudelft.skills.repository.CheckpointRepository;
@@ -88,28 +89,39 @@ public class PlaylistService {
 		return task.getName();
 	}
 
-	public List<PlaylistTaskDTO> getTasks(Set<TaskCompletion> taskCompletions, Skill skill) {
-		//		TODO: use DTOs
-
+	public List<PlaylistTaskDTO> getTaskDTOs(Set<TaskCompletion> taskCompletions, Skill skill) {
 		List<PlaylistTaskDTO> tasks = new LinkedList<>();
 
 		//		For each task, get the module it belongs to and whether the student has already completed it
 		for (Task t : skill.getTasks()) {
 			boolean completed = taskCompletions.stream()
 					.anyMatch(tC -> tC.getTask().getId().equals(t.getId()));
-			if(completed){
+			if (completed) {
+				//				Using existing task id for now
 				tasks.add(PlaylistTaskDTO.builder().id(t.getId()).type(t.getType())
 						.moduleId(getModuleId(t.getId())).skillId(skill.getId())
 						.completed(LocalDateTime.now()).taskName(t.getName()).build());
-			} else{
+			} else {
+				//				Using existing task id for now
 				tasks.add(PlaylistTaskDTO.builder().id(t.getId()).type(t.getType())
 						.moduleId(getModuleId(t.getId())).skillId(skill.getId())
 						.started(LocalDateTime.now()).taskName(t.getName()).build());
 			}
 
 		}
-//		skill.getTasks().stream().map(t -> PlaylistTaskDTO.builder().id(t.getId())
-//				.moduleId(getModuleId(t.getId())).completed(LocalDateTime.now()).taskName(t.getName()).build()).toList();
+		return tasks;
+	}
+
+	public List<PlaylistTaskDTO> getTaskDTOs(List<Long> taskIds) {
+		List<PlaylistTaskDTO> tasks = new LinkedList<>();
+		for (Long id : taskIds) {
+			Task t = taskRepository.findByIdOrThrow(id);
+			//			Using existing task id for now
+			tasks.add(PlaylistTaskDTO.builder().id(t.getId()).type(t.getType()).idx(t.getIdx())
+					.estTime(t.getTime())
+					.moduleId(getModuleId(t.getId())).skillId(t.getSkill().getId())
+					.taskName(t.getName()).build());
+		}
 		return tasks;
 	}
 
@@ -128,15 +140,21 @@ public class PlaylistService {
 					.map(taskRepository::findByIdOrThrow).map(Task::getTime).reduce(0, Integer::sum);
 			PlaylistSkillDTO view = View.convert(skill, PlaylistSkillDTO.class);
 			view.setTotalTime(remainingTime);
-			items.put(view, getTasks(taskCompletions, skill));
+			items.put(view, getTaskDTOs(taskCompletions, skill));
 		}
 		return items;
 	}
 
-	private List<Long> getCheckpointRemainingTasks(Checkpoint checkpoint, List<Long> complTaskIds) {
-
-		return checkpoint.getSkills().stream().map(s -> getSkillRemainingTasks(s, complTaskIds))
-				.flatMap(Collection::stream).toList();
+	private List<PlaylistSkillDTO> getCheckpointRemainingSkills(Checkpoint checkpoint,
+			List<Long> complTaskIds) {
+		List<PlaylistSkillDTO> skills = new LinkedList<>();
+		for (Skill s : checkpoint.getSkills()) {
+			//			TODO: don't include hidden skills
+			PlaylistSkillDTO skillDTO = View.convert(s, PlaylistSkillDTO.class);
+			skillDTO.postApply(taskRepository, getTaskDTOs(getSkillRemainingTasks(s, complTaskIds)));
+			skills.add(skillDTO);
+		}
+		return Collections.unmodifiableList(skills);
 	}
 
 	private List<Long> getSkillRemainingTasks(Skill skill, List<Long> complTaskIds) {
@@ -144,29 +162,32 @@ public class PlaylistService {
 
 	}
 
-	public Long getCheckpoints(Long personId) {
+	public List<PlaylistCheckpointDTO> getCheckpointDTOs(Long personId) {
 		SCPerson person = personRepository.findByIdOrThrow(personId);
 		SCEdition edition = editionRepository.findByIdOrThrow(2L);
 
 		//		Sort checkpoint according to their deadline
 		List<Checkpoint> checkpoints = edition.getCheckpoints().stream()
 				.sorted(Comparator.comparing(Checkpoint::getDeadline)).toList();
+
 		//		Get all taskcompletions for a student
 		List<Long> complTaskIds = person.getTaskCompletions().stream().map(TaskCompletion::getTask)
 				.map(Task::getId).toList();
-		Map<Checkpoint, Integer> times = new HashMap<>();
+		List<PlaylistCheckpointDTO> checkpointDTOs = new LinkedList<>();
 
+		//		For each checkpoint, get uncompleted skills
 		for (Checkpoint cp : checkpoints) {
 
-			List<Long> remainingTasks = getCheckpointRemainingTasks(cp, complTaskIds);
-			if (!remainingTasks.isEmpty()) {
-				int remainingTime = remainingTasks.stream().map(taskRepository::findByIdOrThrow)
-						.map(Task::getTime).reduce(0, Integer::sum);
-				times.put(cp, remainingTime);
+			List<PlaylistSkillDTO> remainingSkills = getCheckpointRemainingSkills(cp, complTaskIds);
+			if (!remainingSkills.isEmpty()) {
+				PlaylistCheckpointDTO cpDTO = View.convert(cp, PlaylistCheckpointDTO.class);
+				cpDTO.postApply(remainingSkills);
+				int remainingTime = remainingSkills.stream().map(PlaylistSkillDTO::getTotalTime).reduce(0,
+						Integer::sum);
+				checkpointDTOs.add(cpDTO);
 			}
-			//check if any skills are not yet completed. if so, return that checkpoint
 		}
-		return 1L;
+		return Collections.unmodifiableList(checkpointDTOs);
 	}
 
 	public int getPlaylistTotalTime(Long id) {

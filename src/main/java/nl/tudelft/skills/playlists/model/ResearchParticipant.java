@@ -18,6 +18,8 @@
 package nl.tudelft.skills.playlists.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -40,10 +42,16 @@ public class ResearchParticipant {
 	@JoinColumn(unique = true)
 	private SCPerson person;
 
+	@OneToMany(mappedBy = "participant")
+	@OrderBy("created")
+	private List<Playlist> playlists;
+
 	@NotNull
 	@Builder.Default
 	private LocalDateTime optIn = LocalDateTime.now();
 
 	private LocalDateTime optOut;
+
+
 
 }

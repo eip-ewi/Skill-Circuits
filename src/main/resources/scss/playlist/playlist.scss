@@ -24,6 +24,8 @@
     border: 2px solid var(--primary-dark);
     padding: 0.5rem 1rem;
     display: none;
+    overflow-y: auto;
+    height: 80vh;
 
     &:hover,
     &:focus-within {
@@ -44,6 +46,18 @@
     }
 }
 
+.playlist-content {
+    display: flex; /* Make the content div a flex container */
+    flex-direction: column; /* Stack the children vertically */
+    flex-grow: 1; /* Allow the content div to grow and take up remaining space */
+    overflow-y: auto;
+}
+
+#playlist-cr-adding-tasks {
+    //height: 0.75 * 80vh;
+    flex-grow: 1;
+    overflow-y: auto;
+}
 .playlist-items {
     list-style: none;
     padding-bottom: 1rem;
@@ -105,7 +119,11 @@
         color: var(--primary-dark);
         cursor: default;
     }
+}
 
+.opt-in__button-container_single {
+    @extend .opt-in__button-container;
+    justify-content: center;
 }
 
 .checkbox__container {

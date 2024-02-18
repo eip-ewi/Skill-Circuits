@@ -15,37 +15,25 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.playlists.dto;
+package nl.tudelft.skills.playlists.model;
 
-import java.time.LocalDateTime;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 
-import javax.persistence.ManyToOne;
-import javax.validation.constraints.NotNull;
-
-import lombok.*;
-import nl.tudelft.librador.dto.create.Create;
-import nl.tudelft.skills.playlists.model.Playlist;
-import nl.tudelft.skills.playlists.model.ResearchParticipant;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class PlaylistDTO extends Create<Playlist> {
-
-	@Builder.Default
-	private boolean active = true;
-
-	@ManyToOne
-	private ResearchParticipant person;
-
-	@NotNull
-	private LocalDateTime created;
-
-	@Override
-	public Class<Playlist> clazz() {
-		return Playlist.class;
-	}
-
+public class PlaylistCheckpoint {
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	private Long id;
 }

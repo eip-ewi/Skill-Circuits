@@ -35,13 +35,13 @@ public class PlaylistVersion {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
 
-	@NotNull
-	private Long playlistId;
+	@ManyToOne
+	private Playlist playlist;
 
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToMany
+	@OneToMany
 	private Set<PlaylistTask> tasks = new HashSet<>();
 
 	@NotNull

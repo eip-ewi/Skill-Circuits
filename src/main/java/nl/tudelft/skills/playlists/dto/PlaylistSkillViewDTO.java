@@ -15,41 +15,38 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.playlists.model;
+package nl.tudelft.skills.playlists.dto;
 
-import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
 
-import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import nl.tudelft.skills.model.Task;
+import lombok.*;
+import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.model.Skill;
+import nl.tudelft.skills.repository.TaskRepository;
 
 @Data
-@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PlaylistTask {
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private Long id;
-
-	@ManyToOne
-	private ResearchParticipant participant;
-
-
-	private Long taskId;
+@EqualsAndHashCode(callSuper = false)
+public class PlaylistSkillViewDTO extends View<Skill> {
 
 	@NotNull
+	private Long id;
+	@NotBlank
+	private String name;
 	@Builder.Default
-	private Integer idx = 0;
+	private int totalTime = 0;
 
-	private LocalDateTime started;
-	private LocalDateTime completed;
-	private Integer completionTime;
+	private List<PlaylistTaskViewDTO> tasks;
+
+	public void postApply(TaskRepository taskRepository, List<PlaylistTaskViewDTO> tasks) {
+		this.tasks = tasks;
+		this.totalTime = tasks.stream().map(PlaylistTaskViewDTO::getEstTime).reduce(0, Integer::sum);
+		tasks.sort(Comparator.comparing(PlaylistTaskViewDTO::getIdx));
+	}
 }

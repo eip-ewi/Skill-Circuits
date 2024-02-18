@@ -17,39 +17,27 @@
  */
 package nl.tudelft.skills.playlists.model;
 
-import java.time.LocalDateTime;
+public enum PlaylistStep {
+	FIRST_TIME(
+		"first_time"
+	),
+	CREATE(
+		"create"
+	),
+	PLAY(
+		"play"
+	),
+	EDIT(
+		"edit"
+	);
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+	private final String step;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import nl.tudelft.skills.model.Task;
+	PlaylistStep(String step) {
+		this.step = step;
+	}
 
-@Data
-@Entity
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class PlaylistTask {
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private Long id;
-
-	@ManyToOne
-	private ResearchParticipant participant;
-
-
-	private Long taskId;
-
-	@NotNull
-	@Builder.Default
-	private Integer idx = 0;
-
-	private LocalDateTime started;
-	private LocalDateTime completed;
-	private Integer completionTime;
+	public String getStep() {
+		return step;
+	}
 }
