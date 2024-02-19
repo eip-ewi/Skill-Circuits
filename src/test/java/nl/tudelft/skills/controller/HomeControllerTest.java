@@ -345,11 +345,12 @@ public class HomeControllerTest extends ControllerTest {
 				.getPrincipal())
 				.getUser().getId();
 
-		Map<Long, String> roleMap = Map.of(1L, "STUDENT", 2L, "HEAD_TA", 3L, "TEACHER");
+		Map<Long, String> roleMap = Map.of(1L, "STUDENT", 2L, "HEAD_TA", 3L, "TEACHER",
+				4L, "ADMIN", 5L, "TA");
 		mockRolesForEditions(roleMap, userId);
 
 		Person person = Person.builder().id(userId).build();
-		assertThat(homeController.getTeacherIds(person)).containsExactlyInAnyOrder(2L, 3L);
+		assertThat(homeController.getTeacherIds(person)).containsExactlyInAnyOrder(2L, 3L, 4L);
 	}
 
 	@Test
