@@ -30,7 +30,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import nl.tudelft.labracore.api.EditionControllerApi;
-import nl.tudelft.labracore.api.RoleControllerApi;
+import nl.tudelft.labracore.api.PersonControllerApi;
 import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
@@ -48,7 +48,7 @@ import nl.tudelft.skills.service.TaskCompletionService;
 public class HomeController {
 
 	private final EditionControllerApi editionApi;
-	private final RoleControllerApi roleApi;
+	private final PersonControllerApi personApi;
 
 	private final EditionRepository editionRepository;
 	private final ModuleRepository moduleRepository;
@@ -66,7 +66,7 @@ public class HomeController {
 	private final PathPreferenceRepository pathPreferenceRepository;
 
 	@Autowired
-	public HomeController(EditionControllerApi editionApi, RoleControllerApi roleApi,
+	public HomeController(EditionControllerApi editionApi, PersonControllerApi personApi,
 			EditionRepository editionRepository, ModuleRepository moduleRepository,
 			PersonRepository personRepository, SkillRepository skillRepository, TaskRepository taskRepository,
 			EditionService editionService,
@@ -75,7 +75,7 @@ public class HomeController {
 			PathPreferenceRepository pathPreferenceRepository,
 			AuthorisationService authorisationService) {
 		this.editionApi = editionApi;
-		this.roleApi = roleApi;
+		this.personApi = personApi;
 		this.editionRepository = editionRepository;
 		this.moduleRepository = moduleRepository;
 		this.personRepository = personRepository;
@@ -100,19 +100,20 @@ public class HomeController {
 	@Transactional
 	@GetMapping("/")
 	public String getHomePage(@AuthenticatedPerson(required = false) Person person, Model model) {
-		// Get all available editions
-		List<EditionDetailsDTO> editions = editionApi.getAllEditions().collectList().block();
+		Set<Long> visible = editionRepository.findByIsVisible(true).stream().map(SCEdition::getId)
+				.collect(Collectors.toSet());
 
-		// Filter visible editions in SC
-		Set<Long> visible = editionRepository
-				.findAllById(editions.stream().map(EditionDetailsDTO::getId).toList()).stream()
-				.filter(SCEdition::isVisible).map(SCEdition::getId).collect(Collectors.toSet());
+		Set<Long> teacherIds = getTeacherIds(person);
 
-		// Get ids of editions for which the user is a teacher
-		Set<Long> teacherIds = getTeacherIds(person, editions);
+		Set<Long> visibleOrManagedIds = new HashSet<>();
+		visibleOrManagedIds.addAll(visible);
+		visibleOrManagedIds.addAll(teacherIds);
+
+		List<EditionDetailsDTO> visibleOrManagedEditions = visibleOrManagedIds.isEmpty() ? new ArrayList<>()
+				: editionApi.getEditionsById(visibleOrManagedIds.stream().toList()).collectList().block();
 
 		// All visible courses or courses for which the user is teacher in an edition
-		List<CourseSummaryDTO> courses = editions.stream()
+		List<CourseSummaryDTO> courses = visibleOrManagedEditions.stream()
 				.filter(e -> visible.contains(e.getId()) || teacherIds.contains(e.getId()))
 				.map(EditionDetailsDTO::getCourse).distinct().toList();
 
@@ -134,7 +135,7 @@ public class HomeController {
 		model.addAttribute("isAnySkillCompleted", isAnySkillCompleted);
 
 		// Get courses for which the latest student edition/last edition is currently active
-		Map<Long, EditionDetailsDTO> editionMap = editions.stream()
+		Map<Long, EditionDetailsDTO> editionMap = visibleOrManagedEditions.stream()
 				.collect(Collectors.toMap(EditionDetailsDTO::getId,
 						Function.identity()));
 		Set<Long> activeCourses = getActiveCourses(courses, editionMap, visible, teacherIds);
@@ -209,23 +210,24 @@ public class HomeController {
 	/**
 	 * Returns the ids of the editions in which the user is a teacher.
 	 *
-	 * @param  person   The logged-in person, if it exists, otherwise null.
-	 * @param  editions The editions.
-	 * @return          The ids of the editions in which the person is a teacher. Returns an empty set if the
-	 *                  user is not logged-in.
+	 * @param  person The logged-in person, if it exists, otherwise null.
+	 * @return        The ids of the editions in which the person is a teacher. Returns an empty set if the
+	 *                user is not logged-in.
 	 */
-	public Set<Long> getTeacherIds(Person person, List<EditionDetailsDTO> editions) {
+	public Set<Long> getTeacherIds(Person person) {
 		if (person == null) {
 			return Set.of();
 		}
 
-		return roleApi
-				.getRolesById(
-						editions.stream().map(EditionDetailsDTO::getId).collect(Collectors.toSet()),
-						Set.of(person.getId()))
-				.collectList().block().stream()
-				.filter(r -> r.getType() == RoleDetailsDTO.TypeEnum.TEACHER)
-				.map(r -> r.getEdition().getId()).collect(Collectors.toSet());
+		// Retrieve the roles of the logged-in user
+		List<RoleEditionDetailsDTO> roles = personApi.getRolesForPerson(person.getId()).collectList().block();
+
+		// The user needs to be at least a head ta to manage the edition
+		return roles.stream()
+				.filter(role -> role.getType().equals(RoleEditionDetailsDTO.TypeEnum.TEACHER)
+						|| role.getType().equals(RoleEditionDetailsDTO.TypeEnum.HEAD_TA))
+				.map(role -> role.getId().getEditionId())
+				.collect(Collectors.toSet());
 	}
 
 	/**

@@ -37,6 +37,7 @@ import org.springframework.security.test.context.support.WithUserDetails;
 
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.EditionControllerApi;
+import nl.tudelft.labracore.api.PersonControllerApi;
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.labracore.lib.security.LabradorUserDetails;
@@ -66,6 +67,7 @@ public class HomeControllerTest extends ControllerTest {
 	private final HomeController homeController;
 	private final EditionControllerApi editionApi;
 	private final RoleControllerApi roleApi;
+	private final PersonControllerApi personApi;
 	private final SkillRepository skillRepository;
 	private final TaskRepository taskRepository;
 	private final CourseControllerApi courseApi;
@@ -79,6 +81,7 @@ public class HomeControllerTest extends ControllerTest {
 
 	@Autowired
 	public HomeControllerTest(EditionControllerApi editionApi, RoleControllerApi roleApi,
+			PersonControllerApi personApi,
 			EditionRepository editionRepository, ModuleRepository moduleRepository,
 			SkillRepository skillRepository, TaskRepository taskRepository, PersonRepository personRepository,
 			EditionService editionService,
@@ -88,6 +91,7 @@ public class HomeControllerTest extends ControllerTest {
 		this.editionApi = editionApi;
 		this.roleApi = roleApi;
 		this.courseApi = courseApi;
+		this.personApi = personApi;
 		this.editionRepository = editionRepository;
 		this.skillRepository = skillRepository;
 		this.taskRepository = taskRepository;
@@ -97,7 +101,7 @@ public class HomeControllerTest extends ControllerTest {
 		this.taskCompletionService = taskCompletionService;
 		this.courseService = mock(CourseService.class);
 		this.pathPreferenceRepository = pathPreferenceRepository;
-		this.homeController = new HomeController(editionApi, roleApi, editionRepository, moduleRepository,
+		this.homeController = new HomeController(editionApi, personApi, editionRepository, moduleRepository,
 				personRepository, skillRepository, taskRepository, editionService, courseService,
 				skillService, taskCompletionService,
 				pathPreferenceRepository, authorisationService);
@@ -120,7 +124,7 @@ public class HomeControllerTest extends ControllerTest {
 		CourseSummaryDTO course = new CourseSummaryDTO().id(randomId());
 
 		LocalDateTime localDateTime = LocalDateTime.now();
-		when(editionApi.getAllEditions())
+		when(editionApi.getEditionsById(eq(List.of(edition.getId()))))
 				.thenReturn(Flux.just(new EditionDetailsDTO().id(edition.getId())
 						.startDate(localDateTime.minusYears(1)).endDate(localDateTime.plusYears(1))
 						.course(course)));
@@ -166,7 +170,8 @@ public class HomeControllerTest extends ControllerTest {
 				new EditionDetailsDTO().id(edition3.getId())
 						.startDate(localDateTime.minusYears(2)).endDate(localDateTime.plusYears(1))
 						.course(course3));
-		when(editionApi.getAllEditions()).thenReturn(Flux.fromIterable(editions));
+		when(editionApi.getEditionsById(List.of(edition1.getId(), edition2.getId(), edition3.getId())))
+				.thenReturn(Flux.fromIterable(editions));
 
 		when(courseService.getLastStudentEditionForCourseOrLast(1L)).thenReturn(edition1.getId());
 		when(courseService.getLastStudentEditionForCourseOrLast(2L)).thenReturn(edition2.getId());
@@ -192,6 +197,10 @@ public class HomeControllerTest extends ControllerTest {
 
 		Person person = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
 				.getPrincipal()).getUser();
+		Map<Long, String> roleMap = Map.of(db.getEditionRL().getId(), "STUDENT",
+				db.getEditionRL().getId() + 1L, "STUDENT", db.getEditionRL().getId() + 2L, "TEACHER");
+		mockRolesForEditions(roleMap, person.getId());
+
 		homeController.getHomePage(person, model);
 
 		assertThat((List<CourseSummaryDTO>) model.getAttribute("ownFinished")).isEmpty();
@@ -311,9 +320,7 @@ public class HomeControllerTest extends ControllerTest {
 
 	@Test
 	public void testGetTeacherIdsPersonNull() {
-		List<EditionDetailsDTO> editions = List.of(new EditionDetailsDTO().id(1L),
-				new EditionDetailsDTO().id(2L));
-		assertThat(homeController.getTeacherIds(null, editions)).isEmpty();
+		assertThat(homeController.getTeacherIds(null)).isEmpty();
 	}
 
 	@Test
@@ -325,34 +332,24 @@ public class HomeControllerTest extends ControllerTest {
 		when(roleApi.getRolesById(eq(Set.of(1L, 2L, 3L)), anySet()))
 				.thenReturn(Flux.fromIterable(roles));
 
-		mockRoleForEdition(roleApi, "STUDENT", 1L);
-		mockRoleForEdition(roleApi, "STUDENT", 2L);
-		mockRoleForEdition(roleApi, "STUDENT", 3L);
-
-		List<EditionDetailsDTO> editions = List.of(new EditionDetailsDTO().id(1L),
-				new EditionDetailsDTO().id(2L),
-				new EditionDetailsDTO().id(3L));
 		Person person = Person.builder().id(db.getPerson().getId()).build();
-		assertThat(homeController.getTeacherIds(person, editions)).isEmpty();
+		Map<Long, String> roleMap = Map.of(1L, "STUDENT", 2L, "STUDENT", 3L, "STUDENT");
+		mockRolesForEditions(roleMap, person.getId());
+		assertThat(homeController.getTeacherIds(person)).isEmpty();
 	}
 
 	@Test
 	@WithUserDetails("username")
 	public void testGetTeacherIds() {
-		Set<RoleDetailsDTO> roles = Set.of(getRoleDetails(1L, RoleDetailsDTO.TypeEnum.STUDENT),
-				getRoleDetails(2L, RoleDetailsDTO.TypeEnum.TEACHER),
-				getRoleDetails(3L, RoleDetailsDTO.TypeEnum.TEACHER));
-		when(roleApi.getRolesById(eq(Set.of(1L, 2L, 3L)), anySet()))
-				.thenReturn(Flux.fromIterable(roles));
-
-		List<EditionDetailsDTO> editions = List.of(new EditionDetailsDTO().id(1L),
-				new EditionDetailsDTO().id(2L),
-				new EditionDetailsDTO().id(3L));
 		Long userId = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
 				.getPrincipal())
 				.getUser().getId();
+
+		Map<Long, String> roleMap = Map.of(1L, "STUDENT", 2L, "HEAD_TA", 3L, "TEACHER");
+		mockRolesForEditions(roleMap, userId);
+
 		Person person = Person.builder().id(userId).build();
-		assertThat(homeController.getTeacherIds(person, editions)).containsExactlyInAnyOrder(2L, 3L);
+		assertThat(homeController.getTeacherIds(person)).containsExactlyInAnyOrder(2L, 3L);
 	}
 
 	@Test
@@ -547,6 +544,17 @@ public class HomeControllerTest extends ControllerTest {
 				person);
 		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
 		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(3);
+	}
+
+	void mockRolesForEditions(Map<Long, String> roles, Long personId) {
+		// TODO set edition summary?
+		List<RoleEditionDetailsDTO> roleDTOS = roles
+				.entrySet().stream().map(entry -> new RoleEditionDetailsDTO()
+						.id(new Id().editionId(entry.getKey())
+								.personId(db.getPerson().getId()))
+						.type(RoleEditionDetailsDTO.TypeEnum.valueOf(entry.getValue())))
+				.toList();
+		when(personApi.getRolesForPerson(eq(personId))).thenReturn(Flux.fromIterable(roleDTOS));
 	}
 
 }
