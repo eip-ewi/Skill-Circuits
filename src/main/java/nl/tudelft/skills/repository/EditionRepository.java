@@ -17,6 +17,8 @@
  */
 package nl.tudelft.skills.repository;
 
+import java.util.Set;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
@@ -27,4 +29,7 @@ public interface EditionRepository extends JpaRepository<SCEdition, Long> {
 	default SCEdition findByIdOrThrow(Long id) {
 		return findById(id).orElseThrow(() -> new ResourceNotFoundException("Edition was not found: " + id));
 	}
+
+	Set<SCEdition> findByIsVisible(boolean isVisible);
+
 }

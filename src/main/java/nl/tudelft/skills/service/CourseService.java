@@ -105,8 +105,14 @@ public class CourseService {
 		CourseDetailsDTO course = courseApi.getCourseById(id).block();
 
 		return course.getEditions().stream()
-				.filter(e -> editionRepository.findById(e.getId()).map(SCEdition::isVisible).orElse(false))
-				.filter(e -> authorisationService.isStudentInEdition(e.getId()))
+				.filter(e -> {
+					if (!authorisationService.isHeadTAInEdition(e.getId())) {
+						return editionRepository.findById(e.getId()).map(SCEdition::isVisible).orElse(false)
+								&&
+								authorisationService.isStudentInEdition(e.getId());
+					}
+					return true;
+				})
 				.max(Comparator.comparing(EditionSummaryDTO::getStartDate))
 				.map(EditionSummaryDTO::getId)
 				.orElseGet(() -> getLastEditionForCourse(id));
