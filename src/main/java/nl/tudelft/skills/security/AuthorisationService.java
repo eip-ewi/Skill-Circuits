@@ -579,6 +579,16 @@ public class AuthorisationService {
 	}
 
 	/**
+	 * Checks whether the authenticated user is a head TA in an edition.
+	 *
+	 * @param  editionId The id of the edition
+	 * @return           True iff the user is a head TA in the edition
+	 */
+	public boolean isHeadTAInEdition(Long editionId) {
+		return getRoleInEdition(editionId) == HEAD_TA;
+	}
+
+	/**
 	 * Checks whether the authenticated user is at least a TA in an edition.
 	 *
 	 * @param  editionId The id of the edition
