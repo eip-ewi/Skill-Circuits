@@ -208,7 +208,7 @@ public class HomeController {
 	}
 
 	/**
-	 * Returns the ids of the editions in which the user is a teacher.
+	 * Returns the ids of the editions in which the user is a teacher or a head TA.
 	 *
 	 * @param  person The logged-in person, if it exists, otherwise null.
 	 * @return        The ids of the editions in which the person is a teacher. Returns an empty set if the
@@ -222,9 +222,10 @@ public class HomeController {
 		// Retrieve the roles of the logged-in user
 		List<RoleEditionDetailsDTO> roles = personApi.getRolesForPerson(person.getId()).collectList().block();
 
-		// The user needs to be at least a head ta to manage the edition
+		// The user needs to be at least a head TA to manage the edition
 		return roles.stream()
-				.filter(role -> role.getType().equals(RoleEditionDetailsDTO.TypeEnum.TEACHER)
+				.filter(role -> role.getType().equals(RoleEditionDetailsDTO.TypeEnum.ADMIN)
+						|| role.getType().equals(RoleEditionDetailsDTO.TypeEnum.TEACHER)
 						|| role.getType().equals(RoleEditionDetailsDTO.TypeEnum.HEAD_TA))
 				.map(role -> role.getId().getEditionId())
 				.collect(Collectors.toSet());
