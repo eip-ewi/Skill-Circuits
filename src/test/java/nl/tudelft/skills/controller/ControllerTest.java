@@ -18,9 +18,11 @@
 package nl.tudelft.skills.controller;
 
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Random;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInstance;
@@ -71,7 +73,7 @@ public abstract class ControllerTest {
 	}
 
 	/**
-	 * Mocks the response of the role api for a given role.
+	 * Mocks the response of the role api for a given role for any set of one edition.
 	 *
 	 * @param roleApi The roleApi.
 	 * @param role    The role to return for the user.
@@ -87,6 +89,22 @@ public abstract class ControllerTest {
 							.person(new PersonSummaryDTO().id(db.getPerson().getId()).username("username"))
 							.type(RoleDetailsDTO.TypeEnum.valueOf(role))));
 		}
+	}
+
+	/**
+	 * Mocks the response of the role api for a given role for a specific edition.
+	 *
+	 * @param roleApi The roleApi.
+	 * @param role    The role to return for the user.
+	 * @param edition The edition for which to return this role.
+	 */
+	protected void mockRoleForEdition(RoleControllerApi roleApi, String role, Long edition) {
+		when(roleApi.getRolesById(eq(Set.of(edition)), anySet()))
+				.thenReturn(Flux.just(new RoleDetailsDTO()
+						.id(new Id().editionId(edition)
+								.personId(db.getPerson().getId()))
+						.person(new PersonSummaryDTO().id(db.getPerson().getId()).username("username"))
+						.type(RoleDetailsDTO.TypeEnum.valueOf(role))));
 	}
 
 }
