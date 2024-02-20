@@ -153,8 +153,11 @@ public class CourseServiceTest {
 		when(courseApi.getCourseById(anyLong())).thenReturn(Mono.just(courseDetailsDTO));
 
 		when(authorisationService.isStudentInEdition(1L)).thenReturn(true);
+		when(authorisationService.isHeadTAInEdition(1L)).thenReturn(false);
 		when(authorisationService.isStudentInEdition(2L)).thenReturn(true);
+		when(authorisationService.isHeadTAInEdition(2L)).thenReturn(false);
 		when(authorisationService.isStudentInEdition(3L)).thenReturn(false);
+		when(authorisationService.isHeadTAInEdition(3L)).thenReturn(false);
 
 		editionRepository.save(new SCEdition(1L, true, null, null, null, null));
 		editionRepository.save(new SCEdition(2L, true, null, null, null, null));
@@ -162,6 +165,50 @@ public class CourseServiceTest {
 
 		// if student is at least in one edition, then most recent active edition is returned
 		assertThat(courseService.getLastStudentEditionForCourseOrLast(3L)).isEqualTo(2L);
+	}
+
+	@Test
+	public void getLastStudentEditionForCourseOrLastReturnsLastHeadTAEdition() {
+		CourseDetailsDTO courseDetailsDTO = new CourseDetailsDTO().editions(
+				List.of(new EditionSummaryDTO().id(1L).startDate(localDateTime),
+						new EditionSummaryDTO().id(2L).startDate(localDateTime.plusMinutes(1)),
+						new EditionSummaryDTO().id(3L).startDate(localDateTime.plusMinutes(2))));
+		when(courseApi.getCourseById(anyLong())).thenReturn(Mono.just(courseDetailsDTO));
+
+		when(authorisationService.isStudentInEdition(1L)).thenReturn(true);
+		when(authorisationService.isHeadTAInEdition(1L)).thenReturn(false);
+		when(authorisationService.isStudentInEdition(2L)).thenReturn(true);
+		when(authorisationService.isHeadTAInEdition(2L)).thenReturn(false);
+		when(authorisationService.isStudentInEdition(3L)).thenReturn(false);
+		when(authorisationService.isHeadTAInEdition(3L)).thenReturn(true);
+
+		editionRepository.save(new SCEdition(1L, true, null, null, null, null));
+		editionRepository.save(new SCEdition(2L, true, null, null, null, null));
+		editionRepository.save(new SCEdition(3L, false, null, null, null, null));
+
+		assertThat(courseService.getLastStudentEditionForCourseOrLast(3L)).isEqualTo(3L);
+	}
+
+	@Test
+	public void getLastStudentEditionForCourseOrLastReturnsLastStudentEdition() {
+		CourseDetailsDTO courseDetailsDTO = new CourseDetailsDTO().editions(
+				List.of(new EditionSummaryDTO().id(1L).startDate(localDateTime),
+						new EditionSummaryDTO().id(2L).startDate(localDateTime.plusMinutes(1)),
+						new EditionSummaryDTO().id(3L).startDate(localDateTime.plusMinutes(2))));
+		when(courseApi.getCourseById(anyLong())).thenReturn(Mono.just(courseDetailsDTO));
+
+		when(authorisationService.isStudentInEdition(1L)).thenReturn(true);
+		when(authorisationService.isHeadTAInEdition(1L)).thenReturn(false);
+		when(authorisationService.isStudentInEdition(2L)).thenReturn(false);
+		when(authorisationService.isHeadTAInEdition(2L)).thenReturn(true);
+		when(authorisationService.isStudentInEdition(3L)).thenReturn(true);
+		when(authorisationService.isHeadTAInEdition(3L)).thenReturn(false);
+
+		editionRepository.save(new SCEdition(1L, true, null, null, null, null));
+		editionRepository.save(new SCEdition(2L, true, null, null, null, null));
+		editionRepository.save(new SCEdition(3L, true, null, null, null, null));
+
+		assertThat(courseService.getLastStudentEditionForCourseOrLast(3L)).isEqualTo(3L);
 	}
 
 	@Test

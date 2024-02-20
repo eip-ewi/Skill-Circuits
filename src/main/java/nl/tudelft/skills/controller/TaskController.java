@@ -70,6 +70,7 @@ public class TaskController {
 		Task task = taskRepository.findByIdOrThrow(taskId);
 		model.addAttribute("item", View.convert(task, TaskViewDTO.class));
 		model.addAttribute("canEdit", false);
+		model.addAttribute("level", "module");
 		return "task/view";
 	}
 

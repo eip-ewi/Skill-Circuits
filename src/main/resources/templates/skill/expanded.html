@@ -51,7 +51,9 @@
                                 <li layout:replace="~{task/view :: item}"></li>
                             </th:block>
                         </th:block>
-                        <li class="hide-with-siblings">This skill has no tasks in this path</li>
+                        <li th:if="not ${canEdit}" class="hide-with-siblings">
+                            This skill has no tasks in this path
+                        </li>
                     </ul>
                 </div>
 

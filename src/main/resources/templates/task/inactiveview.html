@@ -78,7 +78,7 @@
 
     <script layout:fragment="script" th:inline="javascript">
         function addTaskToEditedSkill(button) {
-            // Send custom path update if user is authenticate
+            // Send custom path update if user is authenticated
 
             /*<![CDATA[*/
             const personId = /*[[${@authorisationService.authPerson?.id}]]*/ null;
@@ -89,6 +89,8 @@
 
             const taskId = button.closest(".item").dataset.item;
             const expandedSkill = button.closest(".expanded-skill");
+            const blockId = button.closest(".overlay").id.split("-")[1];
+            const block = $(`#block-${blockId}`);
             const leftSide = expandedSkill.querySelector(".expanded-skill__content > :first-child");
             const rightSide = expandedSkill.querySelector(".expanded-skill__content > :last-child");
 
@@ -113,9 +115,17 @@
                     leftSide.querySelector(".items").appendChild(task);
 
                     // Remove tasks from right side
-                    rightSide
-                        .querySelectorAll(`.item[data-item="${taskId}"`)
-                        .forEach(item => item.remove());
+                    rightSide.querySelectorAll(`.item[data-item="${taskId}"`).forEach(item => {
+                        const pathToggle = $(item.closest(".path-toggle"));
+                        item.remove();
+
+                        // Make all empty path toggles collapsed and disabled
+                        // Note: When CSS "has" is safely usable, this functionality can be moved to CSS
+                        if (pathToggle.find("li").length === 0) {
+                            pathToggle.attr("aria-disabled", "true");
+                            pathToggle.attr("aria-expanded", "false");
+                        }
+                    });
 
                     // Change path name to 'Your path'
                     leftSide.querySelector(".path-name").innerText = "Your path";
@@ -126,7 +136,13 @@
                         .classList.remove("hidden");
 
                     // Show icon in preview
-                    document.getElementById(`item-${taskId}-icon`).classList.remove("hidden");
+                    document
+                        .getElementById(`item-${taskId}-icon`)
+                        .parentElement.classList.remove("hidden");
+
+                    // Update completion status of skill and child skills
+                    updateBlockState(blockId);
+                    [...block.data("children")].forEach(id => updateBlockState(id));
                 },
                 error: () => {
                     alert("Failed to add task");
@@ -147,6 +163,8 @@
             const taskId = button.closest(".item").dataset.item;
             const paths = button.closest(".item").dataset.pathIds;
             const expandedSkill = button.closest(".expanded-skill");
+            const blockId = button.closest(".overlay").id.split("-")[1];
+            const block = $(`#block-${blockId}`);
             const leftSide = expandedSkill.querySelector(".expanded-skill__content > :first-child");
             const rightSide = expandedSkill.querySelector(".expanded-skill__content > :last-child");
 
@@ -177,6 +195,11 @@
                             path.querySelector(".path-toggle__content").appendChild(
                                 task.cloneNode(true)
                             );
+                            // Make path toggle enabled if it was the first task
+                            // Note: When CSS "has" is safely usable, this functionality can be moved to CSS
+                            if (path.getAttribute("aria-disabled") === "true") {
+                                path.setAttribute("aria-disabled", "false");
+                            }
                         });
 
                     // Change path name to 'Your path'
@@ -188,7 +211,13 @@
                         .classList.remove("hidden");
 
                     // Hide icon in preview
-                    document.getElementById(`item-${taskId}-icon`).classList.add("hidden");
+                    document
+                        .getElementById(`item-${taskId}-icon`)
+                        .parentElement.classList.add("hidden");
+
+                    // Update completion status of skill and child skills
+                    updateBlockState(blockId);
+                    [...block.data("children")].forEach(id => updateBlockState(id));
                 },
                 error: () => {
                     alert("Failed to remove task");
