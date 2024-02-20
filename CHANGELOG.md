@@ -14,9 +14,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Added
 ## Changed
 - Teacher view: Sorting modules, submodules and checkpoints at selection dropdowns (@bbakos)
+## Fixed
+
+## [2.2.6]
+
+## Added
+## Changed
+- Empty path toggles are greyed out, and padding is added between expanded toggles (@ffiedrich)
 - Split courses on homepage into categories and show finished/active courses (@ffiedrich)
 - Assigning student role after task completion if user had no role yet and is student by default (@ffiedrich)
+
 ## Fixed
+- Fixed adding/removing task frontend bugs and updating skill completion status (@ffiedrich)
 - Teacher view: Reordering of tasks now works on first click (@rglans)
 - Teacher view: Can now reorder new tasks on creation (@rglans)
 
