@@ -61,7 +61,7 @@ public class PlaylistService {
 	private CheckpointRepository checkpointRepository;
 	private PersonRepository personRepository;
 	private SkillRepository skillRepository;
-	private final Long ACCId = 643L;
+	private final Long ACCId = 2L;
 
 	@Autowired
 	public PlaylistService(PlaylistRepository playlistRepository,
@@ -118,16 +118,11 @@ public class PlaylistService {
 	}
 
 	public String getDefaultPathForEdition(Long personId) {
-		Long editionId = 2L;
-		Optional<PathPreference> pathPref = personService.getPathForEdition(personId, editionId);
-		if (pathPref.isEmpty()) {
-			return "not selected";
+		Optional<PathPreference> pathPref = personService.getPathForEdition(personId, ACCId);
+		if (pathPref.isPresent()) {
+			return pathPref.get().getPath().getName();
 		} else {
-			PathPreference pp = pathPref.get();
-			if (pp.getPath() != null) {
-				return pp.getPath().getName();
-			}
-			return "not selected";
+			return "Path not selected";
 		}
 	}
 

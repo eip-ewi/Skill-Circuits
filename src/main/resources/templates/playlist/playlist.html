@@ -23,8 +23,7 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <div layout:fragment="playlist" id="playlist-list">
-        <th:block
-                th:with="playlist =  ${@playlistService.getPlaylist(@authorisationService.getAuthPerson().getId())}">
+        <th:block th:with="playlist =  ${@playlistService.getPlaylist(@authorisationService.getAuthPerson().getId())}">
             <h1>Playlist name</h1>
             <span style="font-style: italic; font-size: 80%">paused</span>
             <h3>
@@ -48,11 +47,7 @@
                     <span class="fa-solid fa-trash-can"></span>
                 </button>
             </div>
-            <h2>
-                <span class="fa-solid fa-road"></span>
-                <span
-                    th:text="${@playlistService.getDefaultPathForEdition(@authorisationService.getAuthPerson().getId())}"></span>
-            </h2>
+            <hr />
             <h2>
                 <span>Tasks:</span>
             </h2>
@@ -121,6 +116,11 @@
     <div layout:fragment="create" id="playlist-cr" class="playlist-content">
         <div>
             <h1>Playlist creation</h1>
+            <h2>
+                <span class="fa-solid fa-road"></span>
+                <span
+                        th:text="${@playlistService.getDefaultPathForEdition(@authorisationService.getAuthPerson().getId())}"></span>
+            </h2>
             <h3>
                 <span class="fa-solid fa-clock"></span>
                 <span>Estimated time:</span>
