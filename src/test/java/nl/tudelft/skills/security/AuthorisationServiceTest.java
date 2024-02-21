@@ -129,6 +129,14 @@ public class AuthorisationServiceTest {
 		assertThat(authorisationService.isAdmin()).isEqualTo(expected);
 	}
 
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "ADMIN,false", "TEACHER,false", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
+	void isHeadTA(String role, boolean expected) {
+		mockRole(role);
+		assertThat(authorisationService.isHeadTAInEdition(db.getEditionRL().getId())).isEqualTo(expected);
+	}
+
 	@Test
 	@WithUserDetails("teacher")
 	void isStaff() {
