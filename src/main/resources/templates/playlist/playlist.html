@@ -23,66 +23,60 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <div layout:fragment="playlist" id="playlist-list">
-        <h1>Playlist name</h1>
-        <h3>
-            <span class="fa-solid fa-clock"></span>
-            <span>Estimated time</span>
+        <th:block
+                th:with="playlist =  ${@playlistService.getPlaylist(@authorisationService.getAuthPerson().getId())}">
+            <h1>Playlist name</h1>
             <span style="font-style: italic; font-size: 80%">paused</span>
-        </h3>
-        <hr />
-        <div class="opt-in__button-container">
-            <button>
-                <span class="fa-solid fa-play-circle"></span>
-            </button>
-            <button>
-                <span class="fa-solid fa-pause-circle"></span>
-            </button>
-            <button>
-                <span class="fa-solid fa-trash-can"></span>
-            </button>
-        </div>
-        <h2>
-            <span class="fa-solid fa-road"></span>
-            <span
-                th:text="${@playlistService.getDefaultPathForEdition(@authorisationService.getAuthPerson().getId())}"></span>
-        </h2>
-        <h3>
-            <span class="fa-solid fa-music"></span>
-            <span>Time passed</span>
-        </h3>
-        <ul class="playlist-items">
-            <th:block
-                th:with="items =  ${@playlistService.getSkills(@authorisationService.getAuthPerson().getId(), 13)}">
-                <li th:each="skill : ${items.entrySet()}">
-                    <span class="fa-solid circle"></span>
-                    <span
-                        style="font-weight: bold"
-                        th:text="${skill.getKey().getName()} + ': '"></span>
-                    <span
-                        style="font-style: italic"
-                        th:text="${skill.getKey().getTotalTime()} + ' minutes remaining'"></span>
-                    <ul class="playlist-items">
-                        <li th:each="task : ${skill.getValue()}">
-                            <a
-                                th:href="@{'/module/' + ${task.getModuleId()} +
-                                        '#block-' + ${task.getSkillId()}}">
-                                <span th:class="'fa-solid fa-'+ ${task.getType().icon}"></span>
-                                <!--Strikethrough the text if the task has already been done -->
-                                <span
-                                    th:style="${task.getCompleted() != null ? 'text-decoration: line-through;' : ''}"
-                                    th:text="${task.getTaskName()}"></span>
-                                <!-- TODO: Add playing or something -->
-                            </a>
-                        </li>
-                    </ul>
+            <h3>
+                <span class="fa-solid fa-clock"></span>
+                <span th:text="${playlist.getEstTime()}"></span>
+                <br>
+                <span class="fa-solid fa-music"></span>
+                <span th:text="${playlist.getTimePlayed()}"></span>
+                <span>minutes played</span>
+
+            </h3>
+            <hr />
+            <div class="opt-in__button-container">
+                <button>
+                    <span class="fa-solid fa-play-circle"></span>
+                </button>
+                <button>
+                    <span class="fa-solid fa-pause-circle"></span>
+                </button>
+                <button>
+                    <span class="fa-solid fa-trash-can"></span>
+                </button>
+            </div>
+            <h2>
+                <span class="fa-solid fa-road"></span>
+                <span
+                    th:text="${@playlistService.getDefaultPathForEdition(@authorisationService.getAuthPerson().getId())}"></span>
+            </h2>
+            <h2>
+                <span>Tasks:</span>
+            </h2>
+            <ul class="playlist-items">
+                <li th:each="task : ${playlist.getTasks()}">
+                    <a
+                        th:href="@{'/module/' + ${task.getModuleId()} +
+                                '#block-' + ${task.getSkillId()}}">
+                        <span th:class="'fa-solid fa-'+ ${task.getType().icon}"></span>
+                        <!--Strikethrough the text if the task has already been done -->
+                        <span
+                            th:style="${task.getCompleted() != null ? 'text-decoration: line-through;' : ''}"
+                            th:text="${task.getTaskName()}"></span>
+                        <!-- TODO: Add playing or something -->
+                    </a>
                 </li>
                 <li><span>=========</span></li>
                 <li>
                     <span class="fa-solid fa-bullseye"></span>
-                    <span th:text="'Checkpoint: Lecture 1'"></span>
+                    <span th:text="'Achieved'"></span>
                 </li>
-            </th:block>
-        </ul>
+            </ul>
+        </th:block>
+
         <div class="opt-in__button-container">
             <button id="playlist-button-m">Opt out</button>
         </div>

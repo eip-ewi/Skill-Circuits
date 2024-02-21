@@ -93,10 +93,10 @@ public class PlaylistController {
 
 		PlaylistVersionCreateDTO playlistVersionCreate = create.getPlaylistVersionCreate();
 		List<PlaylistTaskCreateDTO> taskCreates = playlistVersionCreate.getTaskCreates();
-		taskCreates.forEach(t -> create.setParticipant(participant));
+		taskCreates.forEach(t -> t.setParticipant(participant));
 		Set<PlaylistTask> tasks = taskCreates.stream()
-				.map(PlaylistTaskCreateDTO::apply).collect(Collectors.toSet());
-		playlistVersionCreate.setTasks(new HashSet<>((tasks)));
+				.map(PlaylistTaskCreateDTO::apply).map(playlistTaskRepository:: saveAndFlush).collect(Collectors.toSet());
+		playlistVersionCreate.setTasks((tasks));
 
 		PlaylistVersion playlistVersion = playlistVersionCreate.apply();
 		playlistVersion.setPlaylist(playlist);

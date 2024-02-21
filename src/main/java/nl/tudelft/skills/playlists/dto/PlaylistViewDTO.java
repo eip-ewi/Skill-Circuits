@@ -42,8 +42,8 @@ public class PlaylistViewDTO extends View<Playlist> {
 	@NotNull
 	private int estTime;
 
-
-	private int timePlayed;
+	@Builder.Default
+	private int timePlayed = 0;
 
 	@NotNull
 	private List<PlaylistTaskViewDTO> tasks;

@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.playlists.model;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 import javax.persistence.*;
@@ -34,6 +35,8 @@ public class Playlist {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
 
+	@ManyToOne
+	private ResearchParticipant participant;
 
 	@OneToOne(cascade = CascadeType.PERSIST)
 	private PlaylistVersion latestVersion;
@@ -41,8 +44,7 @@ public class Playlist {
 	@Builder.Default
 	private boolean active = false;
 
-	@ManyToOne
-	private ResearchParticipant participant;
+	private int timePlayed;
 
 	@Builder.Default
 	private PlaylistState state = PlaylistState.CREATED;
