@@ -194,9 +194,7 @@
         }
         document.addEventListener("DOMContentLoaded", function () {
 
-            if(studentOptedIn){
-                document.getElementById("playlist-button-m")?.addEventListener("click", toggleOptDialog);
-            } else {
+            if(!studentOptedIn){
                 document.getElementById("playlist-button-c").addEventListener("click", toggleOptDialog);
             }
 

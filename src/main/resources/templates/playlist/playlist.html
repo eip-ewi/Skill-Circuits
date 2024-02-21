@@ -77,8 +77,8 @@
             </ul>
         </th:block>
 
-        <div class="opt-in__button-container">
-            <button id="playlist-button-m">Opt out</button>
+        <div class="opt-in__button-container_single">
+            <button class="opt-button-cancel">Opt out</button>
         </div>
     </div>
 
@@ -109,9 +109,10 @@
                 soon&trade;.
             </p>
 
-            <div class="opt-in__button-container_single">
+            <div class="opt-in__button-container">
                 <button>
                     <span class="fa-solid fa-play-circle"></span>
+                    <button class="opt-button-cancel">Opt out</button>
                 </button>
             </div>
         </div>
@@ -156,8 +157,9 @@
                 </ul>
             </th:block>
         </div>
-        <div class="opt-in__button-container_single">
+        <div class="opt-in__button-container">
             <button id="create-playlist">Create playlist!</button>
+            <button class="opt-button-cancel">Opt out</button>
         </div>
         <script layout:fragment="script">
             function updateTotalEstTimeCr() {
