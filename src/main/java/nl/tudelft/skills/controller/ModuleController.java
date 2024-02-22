@@ -18,9 +18,11 @@
 package nl.tudelft.skills.controller;
 
 import java.util.List;
+import java.util.Objects;
 
 import javax.servlet.http.HttpSession;
 
+import nl.tudelft.skills.security.AuthorisationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -56,17 +58,20 @@ public class ModuleController {
 
 	//	Playlist feature
 	private ResearchParticipantService researchParticipantService;
+	private AuthorisationService authorisationService;
 
-	@Autowired
+    @Autowired
 	public ModuleController(ModuleRepository moduleRepository, ModuleService moduleService,
 			HttpSession session, TaskCompletionService taskCompletionService,
-			ClickedLinkService clickedLinkService, ResearchParticipantService researchParticipantService) {
+			ClickedLinkService clickedLinkService, ResearchParticipantService researchParticipantService,
+							AuthorisationService authorisationService) {
 		this.moduleRepository = moduleRepository;
 		this.moduleService = moduleService;
 		this.session = session;
 		this.taskCompletionService = taskCompletionService;
 		this.clickedLinkService = clickedLinkService;
 		this.researchParticipantService = researchParticipantService;
+		this.authorisationService = authorisationService;
 	}
 
 	/**
@@ -83,7 +88,12 @@ public class ModuleController {
 	public String getModulePage(@AuthenticatedPerson(required = false) Person person, @PathVariable Long id,
 			Model model) {
 		moduleService.configureModuleModel(person, id, model, session);
-		researchParticipantService.addRPInfoToModel(person, model);
+
+//		Playlist feature
+        long accId = 2L;
+        if (moduleRepository.findByIdOrThrow(id).getEdition().getId() == accId & !authorisationService.canEditEdition(accId)) {
+			researchParticipantService.addRPInfoToModel(person, model);
+		}
 		return "module/view";
 	}
 
