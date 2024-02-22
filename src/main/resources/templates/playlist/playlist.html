@@ -22,279 +22,32 @@
     lang="en"
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-    <div layout:fragment="playlist" id="playlist-list">
-        <th:block th:with="playlist =  ${@playlistService.getPlaylist(@authorisationService.getAuthPerson().getId())}">
-            <h1 th:text="'Study session ' + ${playlist.getCreated()}"> </h1>
-            <span id="playlist-state" style="font-style: italic; font-size: 80%"></span>
-            <h3>
-                <span class="fa-solid fa-clock"></span>
-                <span th:text="${playlist.getEstTime()}"></span>
-            </h3>
-            <h3>
-                <span class="fa-solid fa-music"></span>
-                <span th:text="${playlist.getTimePlayed()}"></span>
-                <span>minutes played</span>
-
-            </h3>
-            <h3>
-                <span class="fa-solid fa-music"></span>
-                <span id="pl-timer-h">00</span> <span>:</span>
-                <span id="pl-timer-min">00</span> <span>:</span>
-                <span id="pl-timer-sec">00</span>
-
-            </h3>
-            <hr />
-            <div class="opt-in__button-container">
-                <button id="playlist-play">
-                    <span class="fa-solid fa-play-circle"></span>
-                </button>
-                <button id="playlist-pause">
-                    <span class="fa-solid fa-pause-circle"></span>
-                </button>
-                <button id="playlist-delete">
-                    <span class="fa-solid fa-trash-can"></span>
-                </button>
-            </div>
-            <hr />
-            <h2>
-                <span>Tasks:</span>
-            </h2>
-            <ul id="playlist-tasks" class="playlist-items">
-                <li th:each="task : ${playlist.getTasks()}">
-                    <a
-                        th:href="@{'/module/' + ${task.getModuleId()} +
-                                '#block-' + ${task.getSkillId()}}">
-                        <span th:class="'fa-solid fa-'+ ${task.getType().icon}"></span>
-                        <!--Strikethrough the text if the task has already been done -->
-                        <span
-                            th:style="${task.getCompleted() != null ? 'text-decoration: line-through;' : ''}"
-                            th:text="${task.getTaskName()}"></span>
-                        <!-- TODO: Add playing or something -->
-                    </a>
-                </li>
-                <li><span>=========</span></li>
-                <li>
-                    <span class="fa-solid fa-bullseye"></span>
-                    <span th:text="'Achieved'"></span>
-                </li>
-            </ul>
+    <div id="playlist" layout:fragment="playlistView" th:switch="${step}">
+        <th:block th:case="'first_time'">
+            <div layout:replace="~{playlist/playlistViews :: create}"></div>
+            <div layout:replace="~{playlist/playlistViews :: first-time}"></div>
         </th:block>
-
-        <div class="opt-in__button-container_single">
-            <button class="opt-button-cancel">Opt out</button>
-        </div>
+        <th:block th:case="'create'">
+            <div layout:replace="~{playlist/playlistViews :: create}"></div>
+        </th:block>
+        <th:block th:case="'play'">
+            <div layout:replace="~{playlist/playlistViews :: playlist}"></div>
+        </th:block>
+        <th:block th:case="'edit'">
+            <div layout:replace="~{playlist/playlistViews :: edit}"></div>
+        </th:block>
     </div>
 
-    <div layout:fragment="first-time" id="playlist-ft">
-        <div>
-            <h1>Playlist 1.0</h1>
-            <h3>A basic playthrough</h3>
-            <hr />
-            <h2>Welcome!</h2>
-            <p>
-                And, thank you for choosing to join this design journey towards an educational tool.
-                First up, is a basic version of the Playlist feature. When you click the button
-                below you will be able to create a playlist that can consist of different tasks
-                found in the ACC Skill Circuit.
-            </p>
-            <p>
-                Determine the amount of time you want to be busy studying and fill the playlist with
-                tasks
-                <i>estimated</i>
-                to fit that timeframe. During studying the playlist will help you keep track of time
-                passed and adjust the playlist accordingly.
-                <br />
-            </p>
-            <p>
-                We cannot guarantee this feature is bug-free, so please bear with us. Any feedback
-                you have is of course highly appreciated, but as this is part of a research we must
-                collect that anonymously. A way to provide anonymous feedback will be added
-                soon&trade;.
-            </p>
-
-            <div class="opt-in__button-container">
-                <button id="playlist-ft-ok">
-                    <span class="fa-solid fa-play-circle"></span>
-                </button>
-                <button class="opt-button-cancel">Opt out</button>
-            </div>
-        </div>
+    <div layout:fragment="script" th:switch="${step}">
+        <th:block th:case="'first_time'">
+            <script layout:replace="playlist/scripts :: first-time"></script>
+            <script layout:replace="playlist/scripts :: create"></script>
+        </th:block>
+        <th:block th:case="'create'">
+            <script layout:replace="playlist/scripts :: create"></script>
+        </th:block>
+        <th:block th:case="'play'">
+            <script layout:replace="playlist/scripts :: play"></script>
+        </th:block>
     </div>
-
-    <div layout:fragment="create" id="playlist-cr" class="playlist-content">
-        <div>
-            <h1>Playlist creation</h1>
-            <h2>
-                <span class="fa-solid fa-road"></span>
-                <span
-                        th:text="${@playlistService.getDefaultPathForEdition(@authorisationService.getAuthPerson().getId())}"></span>
-            </h2>
-            <h3>
-                <span class="fa-solid fa-clock"></span>
-                <span>Estimated time:</span>
-                <span id="total-est-time-cr">0</span>
-            </h3>
-            <hr />
-        </div>
-        <div id="playlist-cr-adding-tasks">
-            <h2>Choose the tasks to add</h2>
-
-            <th:block
-                th:with="checkpoints = ${@playlistService.getCheckpointDTOs(@authorisationService.getAuthPerson().getId())}">
-                <ul th:each="cp : ${checkpoints}" class="playlist-items">
-                    <li>
-                        <h3 th:text="'To be completed for: ' + ${cp.getName()}"></h3>
-                    </li>
-                    <li th:each="skill : ${cp.getSkills()}">
-                        <span style="font-weight: bold" th:text="${skill.getName()}"></span>
-                        <ul class="playlist-items">
-                            <li th:each="task : ${skill.getTasks()}">
-                                <input
-                                    type="checkbox"
-                                    th:id="'add-task-' + ${task.getTaskId()}"
-                                    th:attr="est-time=${task.getEstTime()}, idx=${task.getIdx()}"
-                                    th:aria-label="'Add task ' + ${task.getTaskName()} + ' to playlist'" />
-                                <span th:class="'fa-solid fa-' + ${task.getType().icon}"></span>
-                                <span th:text="${task.getTaskName()}"></span>
-                                <span
-                                    style="font-style: italic"
-                                    th:text="${task.getEstTime()} + ' minutes'"></span>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </th:block>
-        </div>
-        <div class="opt-in__button-container">
-            <button id="create-playlist">Create playlist!</button>
-            <button class="opt-button-cancel">Opt out</button>
-        </div>
-    </div>
-    <script layout:fragment="script">
-        addEventListener("DOMContentLoaded", function (){
-
-            $("#playlist-ft-ok").off().on("click", function (){
-                $("#playlist-ft").hide();
-            })
-        })
-        function updateTotalEstTimeCr() {
-            const checkboxes = document.querySelectorAll('input[id^="add-task-"]:checked');
-            let totalEstTime = 0;
-
-            checkboxes.forEach(function (checkbox) {
-                totalEstTime += parseInt(checkbox.getAttribute("est-time"));
-            });
-
-            document.getElementById("total-est-time-cr").textContent = totalEstTime;
-        }
-
-        addEventListener("DOMContentLoaded", function () {
-            const checkboxes = document.querySelectorAll('input[id^="add-task-"]');
-            checkboxes.forEach(checkbox =>
-                checkbox.addEventListener("change", updateTotalEstTimeCr)
-            );
-        });
-
-        function createPlaylistTaskDTO(task){
-            console.log(task)
-            const data = {};
-            data.taskId = parseInt(task.id.replace("add-task-", ""));
-            data.idx = parseInt(task.getAttribute("idx"));
-
-            return data;
-        }
-        function getSelectedTasks(){
-            const data = {};
-            const playListVersionData = {};
-            playListVersionData.taskCreates = [];
-            const checkedTasks = document.querySelectorAll('input[id^="add-task-"]:checked');
-            checkedTasks.forEach( task => {
-                playListVersionData.taskCreates.push(createPlaylistTaskDTO(task));
-            });
-            playListVersionData.totalTime = parseInt(document.getElementById("total-est-time-cr").textContent);
-            data.playlistVersionCreate = playListVersionData;
-            return data;
-        }
-
-        document.addEventListener("DOMContentLoaded", function () {
-            $("#create-playlist").off("click").on("click", function () {
-                const data = getSelectedTasks();
-
-                $.post({
-                    url: "/playlist",
-                    contentType: "application/json",
-                    data: JSON.stringify(data),
-                    success: () => {
-                        sessionStorage.setItem("openPlDialog", "true");
-                        location.reload(true);
-                    },
-                });
-            });
-        });
-
-        //     Code for the timers in the playlist
-        let timer;
-        let startTime = null;
-        let elapsedTime = 0;
-        function startTimer(){
-            document.getElementById("playlist-state").innerText = "playing";
-            localStorage.setItem("playlist-state", "playing");
-
-            timer = setInterval(updateTimer, 1000)
-        }
-
-        function pauseTimer(){
-            document.getElementById("playlist-state").innerText = "paused";
-            localStorage.setItem("playlist-state", "paused");
-            clearInterval(timer);
-        }
-
-
-        function updateTimer(){
-            elapsedTime ++;
-            console.log(elapsedTime);
-            let hours = Math.floor(elapsedTime/60/60);
-            let minutes = Math.floor(elapsedTime/60%60);
-            let seconds = Math.floor(elapsedTime%60);
-
-            document.getElementById("pl-timer-h").textContent = pad(hours);
-            document.getElementById("pl-timer-min").textContent = pad(minutes);
-            document.getElementById("pl-timer-sec").textContent = pad(seconds);
-
-            saveTimer();
-
-        }
-        function pad(value){
-            return value < 10? '0' + value : value;
-        }
-
-        function saveTimer(){
-            localStorage.setItem("plElapsedTime", elapsedTime);
-        }
-
-        function getSavedTimer(){
-            elapsedTime = localStorage.getItem("plElapsedTime") || 0;
-            const plState = localStorage.getItem("playlist-state") || "";
-            if(plState === "paused"){
-                document.getElementById("playlist-state").innerText = "paused";
-            } else if(plState === "playing"){
-                document.getElementById("playlist-state").innerText = "playing";
-                startTimer();
-            }
-
-        }
-
-        addEventListener("DOMContentLoaded", function(){
-            document.getElementById("playlist-play").addEventListener("click", startTimer);
-            document.getElementById("playlist-pause").addEventListener("click", pauseTimer);
-        });
-
-        window.addEventListener("load", function (){
-            getSavedTimer();
-            if(sessionStorage.getItem("openPlDialog") === "true"){
-                $("#playlist-button-c").trigger("focus");
-                sessionStorage.setItem("openPlDialog","false");
-            }
-        })
-    </script>
 </html>

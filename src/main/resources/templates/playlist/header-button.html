@@ -225,7 +225,8 @@
                         type: "POST",
                         url: "/playlist/optIn",
                         success: () => {
-                            location.reload(true);
+                            sessionStorage.setItem("openPlDialog", "true");
+                            location.reload();
                         },
                     });
                 });
@@ -249,7 +250,8 @@
                     type: "PATCH",
                     url: "/playlist/optIn",
                     success: () => {
-                        location.reload(true);
+                        sessionStorage.setItem("openPlDialog", "true");
+                        location.reload();
                     },
                 });
             }
@@ -274,7 +276,8 @@
                     type: "PATCH",
                     url: "/playlist/optIn",
                     success: () => {
-                        location.reload(true);
+                        sessionStorage.setItem("openPlDialog", "true");
+                        location.reload();
                     },
                 });
             }
@@ -285,5 +288,12 @@
 
             });
         }
+
+        window.addEventListener("load", function (){
+            if(sessionStorage.getItem("openPlDialog") === "true"){
+                $("#playlist-button-c").trigger("focus");
+                sessionStorage.setItem("openPlDialog","false");
+            }
+        })
     </script>
 </html>

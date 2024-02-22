@@ -47,9 +47,9 @@
 }
 
 .playlist-content {
-    display: flex; /* Make the content div a flex container */
-    flex-direction: column; /* Stack the children vertically */
-    flex-grow: 1; /* Allow the content div to grow and take up remaining space */
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
     overflow-y: auto;
 }
 
@@ -141,5 +141,3 @@
         font-weight: bold;
     }
 }
-
-

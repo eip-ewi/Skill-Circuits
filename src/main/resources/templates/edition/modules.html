@@ -57,21 +57,8 @@
                         Playlist
                     </button>
                     <th:block th:if="${studentOptedIn.isPresent() && studentOptedIn.get()}">
-                        <div id="playlist" th:switch="${playlistStep.getStep()}">
-                            <th:block th:case="'first_time'">
-                                <div layout:replace="~{playlist/playlist :: create}"></div>
-                                <div layout:replace="~{playlist/playlist :: first-time}"></div>
-                            </th:block>
-                            <th:block th:case="'create'">
-                                <div layout:replace="~{playlist/playlist :: create}"></div>
-                            </th:block>
-                            <th:block th:case="'play'">
-                                <div layout:replace="~{playlist/playlist :: playlist}"></div>
-                            </th:block>
-                            <th:block th:case="'edit'">
-                                <div layout:replace="~{playlist/playlist :: edit}"></div>
-                            </th:block>
-                        </div>
+                        <div
+                            layout:replace="~{playlist/playlist :: playlistView(step=${playlistStep.getStep()})}"></div>
                     </th:block>
                     <div layout:replace="~{playlist/header-button :: opt-in-dialog}"></div>
                 </div>
@@ -107,7 +94,10 @@
             <!--        Playlist feature-->
             <th:block th:if="${studentOptedIn != null}">
                 <div layout:replace="~{playlist/header-button :: script}"></div>
-                <div layout:replace="~{playlist/playlist :: script}"></div>
+                <th:block th:if="${studentOptedIn.isPresent() && studentOptedIn.get()}">
+                    <div
+                        layout:replace="~{playlist/playlist :: script(step=${playlistStep.getStep()})}"></div>
+                </th:block>
             </th:block>
         </div>
     </body>
