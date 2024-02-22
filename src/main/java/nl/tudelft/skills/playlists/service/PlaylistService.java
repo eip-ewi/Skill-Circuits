@@ -114,7 +114,8 @@ public class PlaylistService {
 			tasks.addAll(skills.get(skillId));
 		}
 		return PlaylistViewDTO.builder()
-				.estTime(playlist.getLatestVersion().getTotalTime()).tasks(tasks).build();
+				.created(playlist.getCreated().toLocalDate()).estTime(playlist.getLatestVersion().getTotalTime())
+				.tasks(tasks).build();
 	}
 
 	public String getDefaultPathForEdition(Long personId) {

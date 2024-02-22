@@ -24,8 +24,8 @@
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <div layout:fragment="playlist" id="playlist-list">
         <th:block th:with="playlist =  ${@playlistService.getPlaylist(@authorisationService.getAuthPerson().getId())}">
-            <h1>Playlist name</h1>
-            <span style="font-style: italic; font-size: 80%">paused</span>
+            <h1 th:text="'Study session ' + ${playlist.getCreated()}"> </h1>
+            <span id="playlist-state" style="font-style: italic; font-size: 80%"></span>
             <h3>
                 <span class="fa-solid fa-clock"></span>
                 <span th:text="${playlist.getEstTime()}"></span>
@@ -38,8 +38,8 @@
             </h3>
             <h3>
                 <span class="fa-solid fa-music"></span>
-                <span id="pl-timer-h">00</span>:
-                <span id="pl-timer-min">00</span>:
+                <span id="pl-timer-h">00</span> <span>:</span>
+                <span id="pl-timer-min">00</span> <span>:</span>
                 <span id="pl-timer-sec">00</span>
 
             </h3>
@@ -113,10 +113,10 @@
             </p>
 
             <div class="opt-in__button-container">
-                <button>
+                <button id="playlist-ft-ok">
                     <span class="fa-solid fa-play-circle"></span>
-                    <button class="opt-button-cancel">Opt out</button>
                 </button>
+                <button class="opt-button-cancel">Opt out</button>
             </div>
         </div>
     </div>
@@ -171,6 +171,12 @@
         </div>
     </div>
     <script layout:fragment="script">
+        addEventListener("DOMContentLoaded", function (){
+
+            $("#playlist-ft-ok").off().on("click", function (){
+                $("#playlist-ft").hide();
+            })
+        })
         function updateTotalEstTimeCr() {
             const checkboxes = document.querySelectorAll('input[id^="add-task-"]:checked');
             let totalEstTime = 0;
@@ -219,6 +225,7 @@
                     contentType: "application/json",
                     data: JSON.stringify(data),
                     success: () => {
+                        sessionStorage.setItem("openPlDialog", "true");
                         location.reload(true);
                     },
                 });
@@ -228,20 +235,24 @@
         //     Code for the timers in the playlist
         let timer;
         let startTime = null;
+        let elapsedTime = 0;
         function startTimer(){
-            if(startTime == null) {
-                startTime = new Date().getTime();
-            }
+            document.getElementById("playlist-state").innerText = "playing";
+            localStorage.setItem("playlist-state", "playing");
+
             timer = setInterval(updateTimer, 1000)
         }
 
         function pauseTimer(){
+            document.getElementById("playlist-state").innerText = "paused";
+            localStorage.setItem("playlist-state", "paused");
             clearInterval(timer);
         }
 
 
         function updateTimer(){
-            const elapsedTime = (new Date().getTime() - startTime)/1000;
+            elapsedTime ++;
+            console.log(elapsedTime);
             let hours = Math.floor(elapsedTime/60/60);
             let minutes = Math.floor(elapsedTime/60%60);
             let seconds = Math.floor(elapsedTime%60);
@@ -250,14 +261,40 @@
             document.getElementById("pl-timer-min").textContent = pad(minutes);
             document.getElementById("pl-timer-sec").textContent = pad(seconds);
 
+            saveTimer();
+
         }
         function pad(value){
             return value < 10? '0' + value : value;
+        }
+
+        function saveTimer(){
+            localStorage.setItem("plElapsedTime", elapsedTime);
+        }
+
+        function getSavedTimer(){
+            elapsedTime = localStorage.getItem("plElapsedTime") || 0;
+            const plState = localStorage.getItem("playlist-state") || "";
+            if(plState === "paused"){
+                document.getElementById("playlist-state").innerText = "paused";
+            } else if(plState === "playing"){
+                document.getElementById("playlist-state").innerText = "playing";
+                startTimer();
+            }
+
         }
 
         addEventListener("DOMContentLoaded", function(){
             document.getElementById("playlist-play").addEventListener("click", startTimer);
             document.getElementById("playlist-pause").addEventListener("click", pauseTimer);
         });
+
+        window.addEventListener("load", function (){
+            getSavedTimer();
+            if(sessionStorage.getItem("openPlDialog") === "true"){
+                $("#playlist-button-c").trigger("focus");
+                sessionStorage.setItem("openPlDialog","false");
+            }
+        })
     </script>
 </html>

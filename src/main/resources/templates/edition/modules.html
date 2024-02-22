@@ -59,6 +59,7 @@
                     <th:block th:if="${studentOptedIn.isPresent() && studentOptedIn.get()}">
                         <div id="playlist" th:switch="${playlistStep.getStep()}">
                             <th:block th:case="'first_time'">
+                                <div layout:replace="~{playlist/playlist :: create}"></div>
                                 <div layout:replace="~{playlist/playlist :: first-time}"></div>
                             </th:block>
                             <th:block th:case="'create'">

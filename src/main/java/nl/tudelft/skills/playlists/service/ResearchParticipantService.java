@@ -144,10 +144,9 @@ public class ResearchParticipantService {
 			if (!playlists.isEmpty()){
 				return playlists.stream().anyMatch(Playlist::isActive)? PlaylistStep.PLAY : PlaylistStep.CREATE;
 			}
-			return PlaylistStep.CREATE;
-		} else {
-			return PlaylistStep.FIRST_TIME;
 		}
+			return PlaylistStep.FIRST_TIME;
+
 	}
 
 	public boolean canCreatePlaylist(Person person){

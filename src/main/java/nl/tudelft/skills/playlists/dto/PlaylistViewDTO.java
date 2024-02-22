@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.playlists.dto;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -38,6 +39,8 @@ import nl.tudelft.skills.playlists.model.ResearchParticipant;
 @EqualsAndHashCode(callSuper = false)
 public class PlaylistViewDTO extends View<Playlist> {
 
+	@NotNull
+	private LocalDate created;
 
 	@NotNull
 	private int estTime;
