@@ -136,6 +136,26 @@
                             })
                         );
                         reloadInfobox();
+
+                        //     Playlist feature
+                        //     If this is a student and ACC edition, prompt to ask how much time they needed to complete the task
+                        if (completed) {
+                            /*<![CDATA[*/
+                            const canEdit = /*[[${canEdit}]]*/ null;
+                            const edition = /*[[${module.edition.id}]]*/ null;
+                            /*]]>*/
+
+                            if ((canEdit != null) & !canEdit && edition === 2) {
+                                const userNumber = prompt(
+                                    "You completed a task! 🎉 \n" +
+                                        "Did you actually take 5 minutes to complete it? If not, feel free to change " +
+                                        "the amount of minutes below.\n" +
+                                        "By pressing OK your completion time is actually stored.",
+                                    "5"
+                                );
+                                console.log("User entered: " + userNumber);
+                            }
+                        }
                     },
                 });
             } else {

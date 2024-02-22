@@ -54,6 +54,7 @@ public class PlaylistTaskViewDTO extends View<PlaylistTask> {
 	private Long taskId;
 
 	private LocalDateTime started;
-	private LocalDateTime completed;
+
+	private Boolean completed = false;
 	private Integer completionTime;
 }

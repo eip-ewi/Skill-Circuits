@@ -48,6 +48,6 @@ public class PlaylistTask {
 	private Integer idx = 0;
 
 	private LocalDateTime started;
-	private LocalDateTime completed;
+	private Boolean completed;
 	private Integer completionTime;
 }

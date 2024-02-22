@@ -28,7 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -84,8 +83,7 @@ public class PlaylistController {
 	@Transactional
 	@PreAuthorize("@researchParticipantService.canCreatePlaylist(#person)")
 	public ResponseEntity<Void> createPlaylist(@AuthenticatedPerson Person person,
-			@RequestBody PlaylistCreateDTO create,
-			Model model) {
+			@RequestBody PlaylistCreateDTO create) {
 		ResearchParticipant participant = researchParticipantRepository
 				.findByPerson(personService.getOrCreateSCPerson(person.getId()));
 		create.setParticipant(participant);
@@ -104,9 +102,6 @@ public class PlaylistController {
 		playlist.setLatestVersion(playlistVersion);
 		playlistRepository.saveAndFlush(playlist);
 
-		model.addAttribute("playlistStep", PlaylistStep.PLAY);
-		//		Return fragment with this playlist
-		//		In that fragment you have to get skills etc
 		return ResponseEntity.ok().build();
 	}
 

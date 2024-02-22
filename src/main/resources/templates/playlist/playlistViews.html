@@ -68,7 +68,7 @@
                         <span th:class="'fa-solid fa-'+ ${task.getType().icon}"></span>
                         <!--Strikethrough the text if the task has already been done -->
                         <span
-                            th:style="${task.getCompleted() != null ? 'text-decoration: line-through;' : ''}"
+                            th:style="${task.getCompleted() != null and task.getCompleted() ? 'text-decoration: line-through;' : ''}"
                             th:text="${task.getTaskName()}"></span>
                         <!-- TODO: Add playing or something -->
                     </a>

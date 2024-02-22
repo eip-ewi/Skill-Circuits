@@ -21,6 +21,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
 import nl.tudelft.skills.playlists.model.PlaylistTask;
+import nl.tudelft.skills.playlists.model.ResearchParticipant;
 
 public interface PlaylistTaskRepository extends JpaRepository<PlaylistTask, Long> {
 
@@ -28,4 +29,6 @@ public interface PlaylistTaskRepository extends JpaRepository<PlaylistTask, Long
 		return findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("PlaylistTask was not found: " + id));
 	}
+
+	PlaylistTask findByParticipantAndTaskId(ResearchParticipant participant, Long taskId);
 }

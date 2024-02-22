@@ -32,9 +32,9 @@ import nl.tudelft.skills.playlists.dto.PlaylistTaskViewDTO;
 import nl.tudelft.skills.playlists.dto.PlaylistViewDTO;
 import nl.tudelft.skills.playlists.model.Playlist;
 import nl.tudelft.skills.playlists.model.PlaylistTask;
-import nl.tudelft.skills.playlists.model.PlaylistVersion;
 import nl.tudelft.skills.playlists.model.ResearchParticipant;
 import nl.tudelft.skills.playlists.repository.PlaylistRepository;
+import nl.tudelft.skills.playlists.repository.PlaylistTaskRepository;
 import nl.tudelft.skills.playlists.repository.ResearchParticipantRepository;
 import nl.tudelft.skills.repository.CheckpointRepository;
 import nl.tudelft.skills.repository.EditionRepository;
@@ -46,6 +46,7 @@ import nl.tudelft.skills.service.PersonService;
 @Service
 public class PlaylistService {
 	private PlaylistRepository playlistRepository;
+	private PlaylistTaskRepository playlistTaskRepository;
 
 	private ResearchParticipantService researchParticipantService;
 
@@ -61,12 +62,14 @@ public class PlaylistService {
 
 	@Autowired
 	public PlaylistService(PlaylistRepository playlistRepository,
+			PlaylistTaskRepository playlistTaskRepository,
 			ResearchParticipantRepository researchParticipantRepository,
 			ResearchParticipantService researchParticipantService,
 			EditionRepository editionRepository, PersonService personService, TaskRepository taskRepository,
 			CheckpointRepository checkpointRepository, PersonRepository personRepository,
 			SkillRepository skillRepository) {
 		this.playlistRepository = playlistRepository;
+		this.playlistTaskRepository = playlistTaskRepository;
 		this.researchParticipantRepository = researchParticipantRepository;
 		this.researchParticipantService = researchParticipantService;
 		this.editionRepository = editionRepository;
@@ -78,18 +81,20 @@ public class PlaylistService {
 	}
 
 	public PlaylistViewDTO getPlaylist(Long personId) {
+		SCPerson person = personRepository.findByIdOrThrow(personId);
 		ResearchParticipant participant = researchParticipantRepository
-				.findByPerson(personRepository.findByIdOrThrow(personId));
+				.findByPerson(person);
 		Playlist playlist = playlistRepository.findByParticipantAndActive(participant, true);
 
 		//		Group selected tasks based on the skill they belong to
 		Map<Long, List<PlaylistTaskViewDTO>> skills = new HashMap<>();
 		for (PlaylistTask task : playlist.getLatestVersion().getTasks()) {
 			Task t = taskRepository.findByIdOrThrow(task.getTaskId());
+
 			//			Using existing task id for now
 			PlaylistTaskViewDTO taskViewDTO = PlaylistTaskViewDTO.builder().taskId(t.getId())
 					.type(t.getType()).idx(t.getIdx())
-					.estTime(t.getTime())
+					.estTime(t.getTime()).completed(task.getCompleted())
 					.moduleId(getModuleId(t.getId())).skillId(t.getSkill().getId())
 					.taskName(t.getName()).build();
 			if (skills.containsKey(t.getSkill().getId())) {
@@ -131,11 +136,6 @@ public class PlaylistService {
 		return task.getSkill().getSubmodule().getModule().getId();
 	}
 
-	public String getTaskName(Long taskId) {
-		Task task = taskRepository.findByIdOrThrow(taskId);
-		return task.getName();
-	}
-
 	private List<Long> getSkillOrder(List<Long> skillIds) {
 		//		Does not take into account module order
 		List<Skill> skills = skillIds.stream().map(skillRepository::findByIdOrThrow)
@@ -155,7 +155,7 @@ public class PlaylistService {
 				//				Using existing task id for now
 				tasks.add(PlaylistTaskViewDTO.builder().taskId(t.getId()).type(t.getType())
 						.moduleId(getModuleId(t.getId())).skillId(skill.getId())
-						.completed(LocalDateTime.now()).taskName(t.getName()).build());
+						.completed(true).taskName(t.getName()).build());
 			} else {
 				//				Using existing task id for now
 				tasks.add(PlaylistTaskViewDTO.builder().taskId(t.getId()).type(t.getType())
@@ -165,6 +165,17 @@ public class PlaylistService {
 
 		}
 		return tasks;
+	}
+
+	public void setPlTaskCompleted(SCPerson person, Task task, boolean completed) {
+		ResearchParticipant participant = researchParticipantRepository.findByPerson(person);
+		if (participant != null) {
+			PlaylistTask plTask = playlistTaskRepository
+					.findByParticipantAndTaskId(participant, task.getId());
+			if (plTask != null) {
+				plTask.setCompleted(completed);
+			}
+		}
 	}
 
 	public List<PlaylistTaskViewDTO> getTaskDTOs(List<Long> taskIds) {
@@ -237,16 +248,11 @@ public class PlaylistService {
 			if (!remainingSkills.isEmpty()) {
 				PlaylistCheckpointDTO cpDTO = View.convert(cp, PlaylistCheckpointDTO.class);
 				cpDTO.postApply(remainingSkills);
-				int remainingTime = remainingSkills.stream().map(PlaylistSkillViewDTO::getTotalTime).reduce(0,
-						Integer::sum);
+
 				checkpointDTOs.add(cpDTO);
 			}
 		}
 		return Collections.unmodifiableList(checkpointDTOs);
 	}
 
-	public int getPlaylistTotalTime(Long id) {
-		PlaylistVersion playlist = playlistRepository.findByIdOrThrow(id).getLatestVersion();
-		return playlist.getTotalTime();
-	}
 }
