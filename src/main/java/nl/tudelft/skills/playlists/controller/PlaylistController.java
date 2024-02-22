@@ -17,17 +17,12 @@
  */
 package nl.tudelft.skills.playlists.controller;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import javax.transaction.Transactional;
 
-import nl.tudelft.skills.playlists.dto.PlaylistCreateDTO;
-import nl.tudelft.skills.playlists.dto.PlaylistTaskCreateDTO;
-import nl.tudelft.skills.playlists.dto.PlaylistTaskViewDTO;
-import nl.tudelft.skills.playlists.dto.PlaylistVersionCreateDTO;
-import nl.tudelft.skills.playlists.model.*;
-import nl.tudelft.skills.playlists.repository.PlaylistTaskRepository;
-import nl.tudelft.skills.playlists.repository.PlaylistVersionRepository;
-import nl.tudelft.skills.playlists.repository.ResearchParticipantRepository;
-import nl.tudelft.skills.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,17 +35,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.skills.dto.create.SkillCreateDTO;
 import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.playlists.dto.PlaylistCreateDTO;
+import nl.tudelft.skills.playlists.dto.PlaylistTaskCreateDTO;
+import nl.tudelft.skills.playlists.dto.PlaylistVersionCreateDTO;
+import nl.tudelft.skills.playlists.model.*;
 import nl.tudelft.skills.playlists.repository.PlaylistRepository;
+import nl.tudelft.skills.playlists.repository.PlaylistTaskRepository;
+import nl.tudelft.skills.playlists.repository.PlaylistVersionRepository;
+import nl.tudelft.skills.playlists.repository.ResearchParticipantRepository;
 import nl.tudelft.skills.playlists.service.PlaylistService;
 import nl.tudelft.skills.playlists.service.ResearchParticipantService;
+import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.service.PersonService;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 @Controller
 @RequestMapping("playlist")
 public class PlaylistController {
@@ -84,7 +82,8 @@ public class PlaylistController {
 	@PostMapping
 	@Transactional
 	@PreAuthorize("@researchParticipantService.canCreatePlaylist(#person)")
-	public ResponseEntity<Void> createPlaylist(@AuthenticatedPerson Person person, @RequestBody PlaylistCreateDTO create,
+	public ResponseEntity<Void> createPlaylist(@AuthenticatedPerson Person person,
+			@RequestBody PlaylistCreateDTO create,
 			Model model) {
 		ResearchParticipant participant = researchParticipantRepository
 				.findByPerson(personService.getOrCreateSCPerson(person.getId()));
@@ -95,7 +94,8 @@ public class PlaylistController {
 		List<PlaylistTaskCreateDTO> taskCreates = playlistVersionCreate.getTaskCreates();
 		taskCreates.forEach(t -> t.setParticipant(participant));
 		Set<PlaylistTask> tasks = taskCreates.stream()
-				.map(PlaylistTaskCreateDTO::apply).map(playlistTaskRepository:: saveAndFlush).collect(Collectors.toSet());
+				.map(PlaylistTaskCreateDTO::apply).map(playlistTaskRepository::saveAndFlush)
+				.collect(Collectors.toSet());
 		playlistVersionCreate.setTasks((tasks));
 
 		PlaylistVersion playlistVersion = playlistVersionCreate.apply();
@@ -104,8 +104,8 @@ public class PlaylistController {
 		playlistRepository.saveAndFlush(playlist);
 
 		model.addAttribute("playlistStep", PlaylistStep.PLAY);
-//		Return fragment with this playlist
-//		In that fragment you have to get skills etc
+		//		Return fragment with this playlist
+		//		In that fragment you have to get skills etc
 		return ResponseEntity.ok().build();
 	}
 

@@ -17,7 +17,6 @@
  */
 package nl.tudelft.skills.playlists.model;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 
 import javax.persistence.*;

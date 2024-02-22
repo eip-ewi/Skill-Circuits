@@ -19,7 +19,6 @@ package nl.tudelft.skills.playlists.model;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -51,7 +50,5 @@ public class ResearchParticipant {
 	private LocalDateTime optIn = LocalDateTime.now();
 
 	private LocalDateTime optOut;
-
-
 
 }

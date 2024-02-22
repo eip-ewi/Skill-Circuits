@@ -19,18 +19,8 @@ package nl.tudelft.skills.playlists.service;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
-import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.skills.playlists.dto.PlaylistViewDTO;
-import nl.tudelft.skills.playlists.model.Playlist;
-import nl.tudelft.skills.playlists.model.PlaylistTask;
-import nl.tudelft.skills.playlists.model.ResearchParticipant;
-import nl.tudelft.skills.playlists.repository.ResearchParticipantRepository;
-import nl.tudelft.skills.repository.SkillRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import nl.tudelft.librador.dto.view.View;
@@ -39,10 +29,16 @@ import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.playlists.dto.PlaylistCheckpointDTO;
 import nl.tudelft.skills.playlists.dto.PlaylistSkillViewDTO;
 import nl.tudelft.skills.playlists.dto.PlaylistTaskViewDTO;
+import nl.tudelft.skills.playlists.dto.PlaylistViewDTO;
+import nl.tudelft.skills.playlists.model.Playlist;
+import nl.tudelft.skills.playlists.model.PlaylistTask;
 import nl.tudelft.skills.playlists.model.PlaylistVersion;
+import nl.tudelft.skills.playlists.model.ResearchParticipant;
 import nl.tudelft.skills.playlists.repository.PlaylistRepository;
+import nl.tudelft.skills.playlists.repository.ResearchParticipantRepository;
 import nl.tudelft.skills.repository.CheckpointRepository;
 import nl.tudelft.skills.repository.EditionRepository;
+import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.PersonService;
@@ -68,7 +64,8 @@ public class PlaylistService {
 			ResearchParticipantRepository researchParticipantRepository,
 			ResearchParticipantService researchParticipantService,
 			EditionRepository editionRepository, PersonService personService, TaskRepository taskRepository,
-			CheckpointRepository checkpointRepository, PersonRepository personRepository, SkillRepository skillRepository) {
+			CheckpointRepository checkpointRepository, PersonRepository personRepository,
+			SkillRepository skillRepository) {
 		this.playlistRepository = playlistRepository;
 		this.researchParticipantRepository = researchParticipantRepository;
 		this.researchParticipantService = researchParticipantService;
@@ -80,41 +77,43 @@ public class PlaylistService {
 		this.skillRepository = skillRepository;
 	}
 
-	public PlaylistViewDTO getPlaylist(Long personId){
+	public PlaylistViewDTO getPlaylist(Long personId) {
 		ResearchParticipant participant = researchParticipantRepository
 				.findByPerson(personRepository.findByIdOrThrow(personId));
 		Playlist playlist = playlistRepository.findByParticipantAndActive(participant, true);
 
-//		Group selected tasks based on the skill they belong to
+		//		Group selected tasks based on the skill they belong to
 		Map<Long, List<PlaylistTaskViewDTO>> skills = new HashMap<>();
-		for (PlaylistTask task : playlist.getLatestVersion().getTasks() ){
+		for (PlaylistTask task : playlist.getLatestVersion().getTasks()) {
 			Task t = taskRepository.findByIdOrThrow(task.getTaskId());
 			//			Using existing task id for now
-			PlaylistTaskViewDTO taskViewDTO = PlaylistTaskViewDTO.builder().taskId(t.getId()).type(t.getType()).idx(t.getIdx())
+			PlaylistTaskViewDTO taskViewDTO = PlaylistTaskViewDTO.builder().taskId(t.getId())
+					.type(t.getType()).idx(t.getIdx())
 					.estTime(t.getTime())
 					.moduleId(getModuleId(t.getId())).skillId(t.getSkill().getId())
 					.taskName(t.getName()).build();
-			if(skills.containsKey(t.getSkill().getId())){
+			if (skills.containsKey(t.getSkill().getId())) {
 				skills.get(t.getSkill().getId()).add(taskViewDTO);
-			} else{
+			} else {
 
 				skills.put(t.getSkill().getId(), new LinkedList<>(List.of(taskViewDTO)));
 			}
 		}
 
-//		Sort each list tasks based on their idx (order within the skill)
-		for(var entry : skills.entrySet()){
+		//		Sort each list tasks based on their idx (order within the skill)
+		for (var entry : skills.entrySet()) {
 			entry.getValue().sort(Comparator.comparingInt(PlaylistTaskViewDTO::getIdx));
 		}
 
-//		Add tasks to one list in order of skills in the circuit
+		//		Add tasks to one list in order of skills in the circuit
 		List<Long> skillOrder = getSkillOrder(skills.keySet().stream().toList());
 		List<PlaylistTaskViewDTO> tasks = new ArrayList<>();
-		for(Long skillId : skillOrder){
+		for (Long skillId : skillOrder) {
 			tasks.addAll(skills.get(skillId));
 		}
 		return PlaylistViewDTO.builder()
-				.created(playlist.getCreated().toLocalDate()).estTime(playlist.getLatestVersion().getTotalTime())
+				.created(playlist.getCreated().toLocalDate())
+				.estTime(playlist.getLatestVersion().getTotalTime())
 				.tasks(tasks).build();
 	}
 
@@ -137,14 +136,13 @@ public class PlaylistService {
 		return task.getName();
 	}
 
-	private List<Long> getSkillOrder(List<Long> skillIds){
-//		Does not take into account module order
+	private List<Long> getSkillOrder(List<Long> skillIds) {
+		//		Does not take into account module order
 		List<Skill> skills = skillIds.stream().map(skillRepository::findByIdOrThrow)
 				.sorted(Comparator.comparingInt(Skill::getRow)).toList();
-      	return skills.stream().map(Skill::getId).toList();
+		return skills.stream().map(Skill::getId).toList();
 
-		}
-
+	}
 
 	public List<PlaylistTaskViewDTO> getTaskDTOs(Set<TaskCompletion> taskCompletions, Skill skill) {
 		List<PlaylistTaskViewDTO> tasks = new LinkedList<>();
@@ -203,7 +201,7 @@ public class PlaylistService {
 	}
 
 	private List<PlaylistSkillViewDTO> getCheckpointRemainingSkills(Checkpoint checkpoint,
-                                                                    List<Long> complTaskIds) {
+			List<Long> complTaskIds) {
 		List<PlaylistSkillViewDTO> skills = new LinkedList<>();
 		for (Skill s : checkpoint.getSkills()) {
 			//			TODO: don't include hidden skills

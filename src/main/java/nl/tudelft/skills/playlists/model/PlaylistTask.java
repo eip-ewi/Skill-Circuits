@@ -26,7 +26,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import nl.tudelft.skills.model.Task;
 
 @Data
 @Entity
@@ -41,7 +40,6 @@ public class PlaylistTask {
 
 	@ManyToOne
 	private ResearchParticipant participant;
-
 
 	private Long taskId;
 

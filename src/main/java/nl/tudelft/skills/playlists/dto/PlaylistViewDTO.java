@@ -18,19 +18,13 @@
 package nl.tudelft.skills.playlists.dto;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
-import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
-import nl.tudelft.librador.dto.create.Create;
 import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.playlists.model.Playlist;
-import nl.tudelft.skills.playlists.model.ResearchParticipant;
 
 @Data
 @Builder
@@ -50,6 +44,5 @@ public class PlaylistViewDTO extends View<Playlist> {
 
 	@NotNull
 	private List<PlaylistTaskViewDTO> tasks;
-
 
 }

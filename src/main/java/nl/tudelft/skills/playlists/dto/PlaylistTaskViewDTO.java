@@ -33,7 +33,6 @@ import nl.tudelft.skills.playlists.model.PlaylistTask;
 @EqualsAndHashCode(callSuper = false)
 public class PlaylistTaskViewDTO extends View<PlaylistTask> {
 
-
 	@NotNull
 	private String taskName;
 

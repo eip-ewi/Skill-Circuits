@@ -20,20 +20,19 @@ package nl.tudelft.skills.playlists.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.transaction.Transactional;
 
-import nl.tudelft.skills.playlists.model.Playlist;
-import nl.tudelft.skills.playlists.repository.PlaylistRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.playlists.model.Playlist;
 import nl.tudelft.skills.playlists.model.PlaylistStep;
 import nl.tudelft.skills.playlists.model.ResearchParticipant;
+import nl.tudelft.skills.playlists.repository.PlaylistRepository;
 import nl.tudelft.skills.playlists.repository.ResearchParticipantRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 
@@ -47,7 +46,8 @@ public class ResearchParticipantService {
 
 	@Autowired
 	public ResearchParticipantService(PersonRepository personRepository,
-			ResearchParticipantRepository researchParticipantRepository, PlaylistRepository playlistRepository) {
+			ResearchParticipantRepository researchParticipantRepository,
+			PlaylistRepository playlistRepository) {
 
 		this.personRepository = personRepository;
 		this.researchParticipantRepository = researchParticipantRepository;
@@ -136,20 +136,21 @@ public class ResearchParticipantService {
 
 	}
 
-	private PlaylistStep getPlaylistStep(SCPerson person, Optional<Boolean> optedIn){
-		if(optedIn.isPresent() && optedIn.get()){
-			ResearchParticipant rp =  researchParticipantRepository.findByPerson(person);
+	private PlaylistStep getPlaylistStep(SCPerson person, Optional<Boolean> optedIn) {
+		if (optedIn.isPresent() && optedIn.get()) {
+			ResearchParticipant rp = researchParticipantRepository.findByPerson(person);
 
 			List<Playlist> playlists = rp.getPlaylists();
-			if (!playlists.isEmpty()){
-				return playlists.stream().anyMatch(Playlist::isActive)? PlaylistStep.PLAY : PlaylistStep.CREATE;
+			if (!playlists.isEmpty()) {
+				return playlists.stream().anyMatch(Playlist::isActive) ? PlaylistStep.PLAY
+						: PlaylistStep.CREATE;
 			}
 		}
-			return PlaylistStep.FIRST_TIME;
+		return PlaylistStep.FIRST_TIME;
 
 	}
 
-	public boolean canCreatePlaylist(Person person){
+	public boolean canCreatePlaylist(Person person) {
 		if (person != null) {
 			SCPerson scPerson = personRepository.findByIdOrThrow(person.getId());
 			Optional<Boolean> optedIn = optedIn(scPerson);

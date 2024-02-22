@@ -17,11 +17,11 @@
  */
 package nl.tudelft.skills.playlists.repository;
 
-import nl.tudelft.skills.playlists.model.ResearchParticipant;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
 import nl.tudelft.skills.playlists.model.Playlist;
+import nl.tudelft.skills.playlists.model.ResearchParticipant;
 
 public interface PlaylistRepository extends JpaRepository<Playlist, Long> {
 
