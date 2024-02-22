@@ -18,11 +18,9 @@
 package nl.tudelft.skills.controller;
 
 import java.util.List;
-import java.util.Objects;
 
 import javax.servlet.http.HttpSession;
 
-import nl.tudelft.skills.security.AuthorisationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,6 +40,7 @@ import nl.tudelft.skills.dto.view.edition.EditionLevelModuleViewDTO;
 import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.playlists.service.ResearchParticipantService;
 import nl.tudelft.skills.repository.ModuleRepository;
+import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.ClickedLinkService;
 import nl.tudelft.skills.service.ModuleService;
 import nl.tudelft.skills.service.TaskCompletionService;
@@ -60,11 +59,11 @@ public class ModuleController {
 	private ResearchParticipantService researchParticipantService;
 	private AuthorisationService authorisationService;
 
-    @Autowired
+	@Autowired
 	public ModuleController(ModuleRepository moduleRepository, ModuleService moduleService,
 			HttpSession session, TaskCompletionService taskCompletionService,
 			ClickedLinkService clickedLinkService, ResearchParticipantService researchParticipantService,
-							AuthorisationService authorisationService) {
+			AuthorisationService authorisationService) {
 		this.moduleRepository = moduleRepository;
 		this.moduleService = moduleService;
 		this.session = session;
@@ -89,9 +88,10 @@ public class ModuleController {
 			Model model) {
 		moduleService.configureModuleModel(person, id, model, session);
 
-//		Playlist feature
-        long accId = 2L;
-        if (moduleRepository.findByIdOrThrow(id).getEdition().getId() == accId & !authorisationService.canEditEdition(accId)) {
+		//		Playlist feature
+		long accId = 2L;
+		if (moduleRepository.findByIdOrThrow(id).getEdition().getId() == accId
+				& !authorisationService.canEditEdition(accId)) {
 			researchParticipantService.addRPInfoToModel(person, model);
 		}
 		return "module/view";

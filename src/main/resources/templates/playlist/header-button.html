@@ -69,9 +69,14 @@
                 r.n.glans@student.tudelft.nl
             </p>
             <div class="checkbox__container">
-                <label for="opt-out-checkbox" style="font-size: 0">opt-in</label>
+                <label for="opt-out-checkbox" style="font-size: 0">opt-out</label>
                 <input type="checkbox" id="opt-out-checkbox" />
                 <span>I would like to opt-out of this research.</span>
+                <label for="opt-out-clear-data-checkbox" style="font-size: 0">
+                    opt-out and clear data
+                </label>
+                <input type="checkbox" id="opt-out-clear-data-checkbox" />
+                <span>I would like any data collected during my usage to be deleted.</span>
             </div>
             <div class="opt-in__button-container">
                 <button class="opt-button-cancel">Cancel</button>
@@ -272,9 +277,15 @@
 
             function toggleOpt(){
                 // Once they've opted in once, they can toggle in and out again
+                const checkboxData = document.getElementById("opt-out-clear-data-checkbox");
+                const data = {};
+                data.clear_data = !!checkboxData.checked;
+
                 $.ajax({
                     type: "PATCH",
                     url: "/playlist/optIn",
+                    contentType: "application/json",
+                    data: JSON.stringify(data),
                     success: () => {
                         sessionStorage.setItem("openPlDialog", "true");
                         location.reload();

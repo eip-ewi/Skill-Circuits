@@ -48,7 +48,7 @@ public class EditionController {
 	//	Playlist feature
 	private ResearchParticipantService researchParticipantService;
 
-    @Autowired
+	@Autowired
 	public EditionController(EditionRepository editionRepository, EditionService editionService,
 			AuthorisationService authorisationService,
 			HttpSession session,
@@ -77,8 +77,8 @@ public class EditionController {
 		editionService.configureEditionModel(id, model, session);
 
 		//		Playlist feature
-        long accId = 2L;
-        if (id == accId & !authorisationService.canEditEdition(accId)) {
+		long accId = 2L;
+		if (id == accId & !authorisationService.canEditEdition(accId)) {
 			researchParticipantService.addRPInfoToModel(authorisationService.getAuthPerson(), model);
 
 		}

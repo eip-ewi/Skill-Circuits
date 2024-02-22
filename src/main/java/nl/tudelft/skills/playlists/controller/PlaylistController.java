@@ -18,6 +18,7 @@
 package nl.tudelft.skills.playlists.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -135,9 +136,12 @@ public class PlaylistController {
 	 * @return        A string indicating the new opt status
 	 */
 	@PatchMapping("optIn")
-	public ResponseEntity<String> patchOptIn(@AuthenticatedPerson Person person) {
+	public ResponseEntity<String> patchOptIn(@AuthenticatedPerson Person person,
+			@RequestBody(required = false) Map<String, Boolean> data) {
 		//        TODO: use patch object and rename method
+		boolean clearData = data != null ? data.get("clear_data") : false;
 		return ResponseEntity
-				.ok(researchParticipantService.toggleOpt(personService.getOrCreateSCPerson(person.getId())));
+				.ok(researchParticipantService.toggleOpt(personService.getOrCreateSCPerson(person.getId()),
+						clearData));
 	}
 }

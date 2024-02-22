@@ -51,4 +51,6 @@ public class ResearchParticipant {
 
 	private LocalDateTime optOut;
 
+	private boolean clearData;
+
 }

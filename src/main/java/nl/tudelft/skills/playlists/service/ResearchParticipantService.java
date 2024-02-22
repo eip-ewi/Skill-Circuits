@@ -74,13 +74,14 @@ public class ResearchParticipantService {
 	 * @return          String holding the new opt status
 	 */
 	@Transactional
-	public String toggleOpt(SCPerson scPerson) {
+	public String toggleOpt(SCPerson scPerson, boolean clearData) {
 		Optional<Boolean> opt = optedIn(scPerson);
 		ResearchParticipant rp = researchParticipantRepository.findByPerson(scPerson);
 
 		if (opt.isPresent()) {
 			if (opt.get()) {
 				rp.setOptOut(LocalDateTime.now());
+				rp.setClearData(clearData);
 				return "Opted out";
 			} else {
 				rp.setOptIn(LocalDateTime.now());
