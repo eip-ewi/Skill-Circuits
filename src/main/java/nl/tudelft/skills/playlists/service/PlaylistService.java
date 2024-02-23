@@ -218,7 +218,10 @@ public class PlaylistService {
 			List<Long> complTaskIds) {
 		List<PlaylistSkillViewDTO> skills = new LinkedList<>();
 		for (Skill s : checkpoint.getSkills()) {
-			//			TODO: don't include hidden skills
+			//	Filter out skills that are still hidden for the participant
+			if(!complTaskIds.containsAll(s.getRequiredTasks().stream().map(Task::getId).toList())){
+				continue;
+			}
 			PlaylistSkillViewDTO skillDTO = View.convert(s, PlaylistSkillViewDTO.class);
 			skillDTO.postApply(taskRepository, getTaskDTOs(getSkillRemainingTasks(s, complTaskIds)));
 			skills.add(skillDTO);
