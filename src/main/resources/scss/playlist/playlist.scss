@@ -18,7 +18,6 @@
     top: 0;
     right: -20%;
     width: 20%;
-    transition: right 0.3s ease;
     flex-direction: column;
     position: absolute;
     border: 2px solid var(--primary-dark);
@@ -46,6 +45,13 @@
     }
 }
 
+
+
+#playlist-ft{
+    position: absolute;
+    background-color: var(--background-colour);
+    height: 100%;
+}
 .playlist-content {
     display: flex;
     flex-direction: column;
