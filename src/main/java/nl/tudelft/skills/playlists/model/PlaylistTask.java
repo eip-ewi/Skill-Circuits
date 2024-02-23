@@ -48,6 +48,7 @@ public class PlaylistTask {
 	private Integer idx = 0;
 
 	private LocalDateTime started;
-	private Boolean completed;
+	@Builder.Default
+	private Boolean completed=false;
 	private Integer completionTime;
 }

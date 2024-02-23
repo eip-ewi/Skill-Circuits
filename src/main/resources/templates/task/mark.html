@@ -94,8 +94,8 @@
             // If the clicked link belongs to a task in the playlist, we update the playlist
             if(!canEdit && edition === ACCID){
                 const plTask = document.getElementById("pl-task-status-" + taskId);
-                if(plTask != null && plTask.dataset.completed !== "true"){
-                    plTask.innerText= "playing";
+                if(plTask != null){
+                    plTask.click();
                 }
             }
 
@@ -162,8 +162,10 @@
                         if ((canEdit != null) && !canEdit && edition === ACCID) {
                             const plTask = document.getElementById("pl-task-status-" + taskId);
                             if (completed) {
+                                // Check if this task is in the playlist
                                 if(plTask != null) {
                                     plTask.innerText = "";
+                                    plTask.dataset.completed = "true";
                                     const userNumber = prompt(
                                         "You completed a task! 🎉 \n" +
                                         "Did you actually take 5 minutes to complete it? If not, feel free to change " +

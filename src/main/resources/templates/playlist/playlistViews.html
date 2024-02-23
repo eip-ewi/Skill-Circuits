@@ -61,7 +61,7 @@
                         <!--Strikethrough the text if the task has already been done -->
                         <span
                             th:id="|pl-task-name-${task.getTaskId()}|"
-                            th:style="${task.getCompleted() != null and task.getCompleted() ? 'text-decoration: line-through;' : ''}"
+                            th:style="${task.getCompleted() ? 'text-decoration: line-through;' : ''}"
                             th:text="${task.getTaskName()}"></span>
 
                     </a>

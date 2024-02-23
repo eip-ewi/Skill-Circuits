@@ -101,13 +101,12 @@
     <script layout:fragment="play">
         //     Code for the timers in the playlist
         let timer;
-        let startTime = null;
-        let elapsedTime = 0;
+        let elapsedTime = {main: 0};
         function toggleTimer() {
-           const plState = localStorage.getItem("playlist-state") || "paused";
+           const plState = localStorage.getItem("playlistState") || "paused";
            if(plState === "paused"){
                document.getElementById("playlist-state").innerText = "playing";
-               localStorage.setItem("playlist-state", "playing");
+               localStorage.setItem("playlistState", "playing");
 
                timer = setInterval(updateTimer, 1000);
 
@@ -115,18 +114,44 @@
 
            } else{
                document.getElementById("playlist-state").innerText = "paused";
-               localStorage.setItem("playlist-state", "paused");
+               localStorage.setItem("playlistState", "paused");
                document.getElementById("playlist-play-pause").firstElementChild.className = "fa-solid fa-play-circle" ;
                clearInterval(timer);
            }
 
         }
 
+        function toggleTaskTimer(elem){
+            console.log(elem);
+            if(elem.dataset.completed === "false"){
+                const taskId = elem.id.replace("pl-task-status-","");
+                if(elem.innerText ==="queued" && document.getElementById("playlist-state").innerText === "playing") {
+                    elem.innerText = "playing"
+                    elapsedTime[taskId] = 0;
+
+                } else if(elem.innerText ==="playing") {
+                    elem.innerText = "paused"
+                    const pausedTasks = JSON.parse(localStorage.getItem("plPausedTasks"))|| {};
+
+                    pausedTasks[taskId] = elapsedTime[taskId];
+                    localStorage.setItem("plPausedTasks", JSON.stringify(pausedTasks));
+                    delete elapsedTime[taskId];
+
+
+                } else if(elem.innerText ==="paused" && document.getElementById("playlist-state").innerText === "playing") {
+                    elem.innerText = "playing"
+                    elapsedTime[taskId] = JSON.parse(localStorage.getItem("plElapsedTime")) || 0;
+                }
+
+            }
+        }
         function updateTimer() {
-            elapsedTime++;
-            let hours = Math.floor(elapsedTime / 60 / 60);
-            let minutes = Math.floor((elapsedTime / 60) % 60);
-            let seconds = Math.floor(elapsedTime % 60);
+            Object.keys(elapsedTime).forEach(timer => {
+                elapsedTime[timer]++;
+            });
+            let hours = Math.floor(elapsedTime["main"] / 60 / 60);
+            let minutes = Math.floor((elapsedTime["main"] / 60) % 60);
+            let seconds = Math.floor(elapsedTime["main"] % 60);
 
             document.getElementById("pl-timer-h").textContent = pad(hours);
             document.getElementById("pl-timer-min").textContent = pad(minutes);
@@ -139,12 +164,20 @@
         }
 
         function saveTimer() {
-            localStorage.setItem("plElapsedTime", elapsedTime);
+            localStorage.setItem("plElapsedTime", JSON.stringify(elapsedTime));
         }
 
         function getSavedTimer() {
-            elapsedTime = localStorage.getItem("plElapsedTime") || 0;
-            const plState = localStorage.getItem("playlist-state") || "";
+            if(localStorage.getItem("plElapsedTime")){
+                elapsedTime = JSON.parse(localStorage.getItem("plElapsedTime"));
+                Object.entries(elapsedTime).forEach(([timer, time]) => {
+                    elapsedTime[timer] = Number(time);
+                    });
+            }
+            else{
+                elapsedTime = {main:0};
+            }
+            const plState = localStorage.getItem("playlistState") || "";
             if (plState === "paused") {
                 document.getElementById("playlist-state").innerText = "paused";
             } else if (plState === "playing") {
@@ -162,6 +195,9 @@
                     url: "/playlist/" + playlistId,
                     type: "DELETE",
                     success: () => {
+                        localStorage.removeItem("playlistState");
+                        localStorage.removeItem("plElapsedTime");
+                        localStorage.removeItem("plPausedTasks");
                         sessionStorage.setItem("openPlDialog", "true");
                         location.reload();
                     },
@@ -171,6 +207,10 @@
 
         addEventListener("DOMContentLoaded", function () {
             document.getElementById("playlist-play-pause").addEventListener("click", toggleTimer);
+            document.querySelectorAll('button[id^="pl-task-status-"]').forEach(button => {
+                button.addEventListener("click", function () {
+                    toggleTaskTimer(this)});
+            })
             document
                 .querySelector('button[id^="playlist-delete-"]')
                 .addEventListener("click", function () {
