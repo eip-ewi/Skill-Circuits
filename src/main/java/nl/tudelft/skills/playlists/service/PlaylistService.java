@@ -109,7 +109,7 @@ public class PlaylistService {
 
 		//		Sort each list tasks based on their idx (order within the skill)
 		for (var entry : skills.entrySet()) {
-			entry.getValue().sort(Comparator.comparingInt(PlaylistTaskViewDTO::getIdx));
+			entry.getValue().sort(Comparator.comparingInt(PlaylistTaskViewDTO::getIdx).reversed());
 		}
 
 		//		Add tasks to one list in order of skills in the circuit

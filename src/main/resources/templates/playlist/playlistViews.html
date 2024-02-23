@@ -61,17 +61,24 @@
                 <span>Tasks:</span>
             </h2>
             <ul id="playlist-tasks" class="playlist-items">
-                <li th:each="task : ${playlist.getTasks()}">
+                <li th:each="task : ${playlist.getTasks()}" th:id="|pl-task-${task.getTaskId()}|">
                     <a
                         th:href="@{'/module/' + ${task.getModuleId()} +
                                 '#block-' + ${task.getSkillId()}}">
                         <span th:class="'fa-solid fa-'+ ${task.getType().icon}"></span>
                         <!--Strikethrough the text if the task has already been done -->
                         <span
+                            th:id="|pl-task-name-${task.getTaskId()}|"
                             th:style="${task.getCompleted() != null and task.getCompleted() ? 'text-decoration: line-through;' : ''}"
                             th:text="${task.getTaskName()}"></span>
+
                         <!-- TODO: Add playing or something -->
                     </a>
+                    <button
+                            th:attr="data-completed=${task.getCompleted()}"
+                            th:id="|pl-task-status-${task.getTaskId()}|"
+                            class="pl-task-status"
+                    >queued</button>
                 </li>
                 <li><span>=========</span></li>
                 <li>
