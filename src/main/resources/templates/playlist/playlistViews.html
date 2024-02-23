@@ -33,11 +33,6 @@
             </h3>
             <h3>
                 <span class="fa-solid fa-music"></span>
-                <span th:text="${playlist.getTimePlayed()}"></span>
-                <span>minutes played</span>
-            </h3>
-            <h3>
-                <span class="fa-solid fa-music"></span>
                 <span id="pl-timer-h">00</span>
                 <span>:</span>
                 <span id="pl-timer-min">00</span>
@@ -46,11 +41,8 @@
             </h3>
             <hr />
             <div class="opt-in__button-container">
-                <button id="playlist-play">
+                <button id="playlist-play-pause">
                     <span class="fa-solid fa-play-circle"></span>
-                </button>
-                <button id="playlist-pause">
-                    <span class="fa-solid fa-pause-circle"></span>
                 </button>
                 <button th:id="|playlist-delete-${playlist.getId()}|">
                     <span class="fa-solid fa-trash-can"></span>
@@ -72,7 +64,6 @@
                             th:style="${task.getCompleted() != null and task.getCompleted() ? 'text-decoration: line-through;' : ''}"
                             th:text="${task.getTaskName()}"></span>
 
-                        <!-- TODO: Add playing or something -->
                     </a>
                     <button
                             th:attr="data-completed=${task.getCompleted()}"

@@ -103,17 +103,23 @@
         let timer;
         let startTime = null;
         let elapsedTime = 0;
-        function startTimer() {
-            document.getElementById("playlist-state").innerText = "playing";
-            localStorage.setItem("playlist-state", "playing");
+        function toggleTimer() {
+           const plState = localStorage.getItem("playlist-state") || "paused";
+           if(plState === "paused"){
+               document.getElementById("playlist-state").innerText = "playing";
+               localStorage.setItem("playlist-state", "playing");
 
-            timer = setInterval(updateTimer, 1000);
-        }
+               timer = setInterval(updateTimer, 1000);
 
-        function pauseTimer() {
-            document.getElementById("playlist-state").innerText = "paused";
-            localStorage.setItem("playlist-state", "paused");
-            clearInterval(timer);
+               document.getElementById("playlist-play-pause").firstElementChild.className = "fa-solid fa-pause-circle" ;
+
+           } else{
+               document.getElementById("playlist-state").innerText = "paused";
+               localStorage.setItem("playlist-state", "paused");
+               document.getElementById("playlist-play-pause").firstElementChild.className = "fa-solid fa-play-circle" ;
+               clearInterval(timer);
+           }
+
         }
 
         function updateTimer() {
@@ -143,7 +149,7 @@
                 document.getElementById("playlist-state").innerText = "paused";
             } else if (plState === "playing") {
                 document.getElementById("playlist-state").innerText = "playing";
-                startTimer();
+                toggleTimer();
             }
         }
 
@@ -164,8 +170,7 @@
         }
 
         addEventListener("DOMContentLoaded", function () {
-            document.getElementById("playlist-play").addEventListener("click", startTimer);
-            document.getElementById("playlist-pause").addEventListener("click", pauseTimer);
+            document.getElementById("playlist-play-pause").addEventListener("click", toggleTimer);
             document
                 .querySelector('button[id^="playlist-delete-"]')
                 .addEventListener("click", function () {
