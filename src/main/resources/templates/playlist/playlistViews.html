@@ -52,7 +52,7 @@
                 <button id="playlist-pause">
                     <span class="fa-solid fa-pause-circle"></span>
                 </button>
-                <button id="playlist-delete">
+                <button th:id="|playlist-delete-${playlist.getId()}|">
                     <span class="fa-solid fa-trash-can"></span>
                 </button>
             </div>

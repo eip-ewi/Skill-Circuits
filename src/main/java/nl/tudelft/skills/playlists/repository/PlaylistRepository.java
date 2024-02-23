@@ -32,4 +32,5 @@ public interface PlaylistRepository extends JpaRepository<Playlist, Long> {
 
 	Playlist findByParticipantAndActive(ResearchParticipant participant, boolean Active);
 
+	Playlist findByIdAndParticipant(Long id, ResearchParticipant participant);
 }

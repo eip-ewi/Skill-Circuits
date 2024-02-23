@@ -52,7 +52,6 @@
         });
 
         function createPlaylistTaskDTO(task) {
-            console.log(task);
             const data = {};
             data.taskId = parseInt(task.id.replace("add-task-", ""));
             data.idx = parseInt(task.getAttribute("idx"));
@@ -119,7 +118,6 @@
 
         function updateTimer() {
             elapsedTime++;
-            console.log(elapsedTime);
             let hours = Math.floor(elapsedTime / 60 / 60);
             let minutes = Math.floor((elapsedTime / 60) % 60);
             let seconds = Math.floor(elapsedTime % 60);
@@ -149,9 +147,30 @@
             }
         }
 
+        function deletePlaylist(buttonId) {
+            const confirmation = window.confirm("Are you sure you want to delete this playlist");
+
+            if (confirmation) {
+                const playlistId = parseInt(buttonId.substring("playlist-delete-".length));
+                $.ajax({
+                    url: "/playlist/" + playlistId,
+                    type: "DELETE",
+                    success: () => {
+                        sessionStorage.setItem("openPlDialog", "true");
+                        location.reload();
+                    },
+                });
+            }
+        }
+
         addEventListener("DOMContentLoaded", function () {
             document.getElementById("playlist-play").addEventListener("click", startTimer);
             document.getElementById("playlist-pause").addEventListener("click", pauseTimer);
+            document
+                .querySelector('button[id^="playlist-delete-"]')
+                .addEventListener("click", function () {
+                    deletePlaylist(this.id);
+                });
         });
 
         window.addEventListener("load", function () {

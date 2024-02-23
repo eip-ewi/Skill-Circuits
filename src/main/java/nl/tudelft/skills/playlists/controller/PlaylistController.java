@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.playlists.controller;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,10 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
@@ -86,6 +84,9 @@ public class PlaylistController {
 			@RequestBody PlaylistCreateDTO create) {
 		ResearchParticipant participant = researchParticipantRepository
 				.findByPerson(personService.getOrCreateSCPerson(person.getId()));
+		//		Check if there is an active playlist that should be deactivated
+		playlistService.deactivateActivePlaylist(participant);
+
 		create.setParticipant(participant);
 		Playlist playlist = create.apply();
 
@@ -138,5 +139,24 @@ public class PlaylistController {
 		return ResponseEntity
 				.ok(researchParticipantService.toggleOpt(personService.getOrCreateSCPerson(person.getId()),
 						clearData));
+	}
+
+	@DeleteMapping("/{playlistId}")
+	@Transactional
+	@PreAuthorize("@researchParticipantService.canCreatePlaylist(#person)")
+	public ResponseEntity<Void> deletePlaylist(@AuthenticatedPerson Person person,
+			@PathVariable Long playlistId) {
+
+		ResearchParticipant participant = researchParticipantRepository
+				.findByPerson(personService.getOrCreateSCPerson(person.getId()));
+		if (participant != null) {
+			Playlist playlist = playlistRepository.findByIdOrThrow(playlistId);
+			if (playlist != null) {
+				playlist.setActive(false);
+				playlist.setDeleted(LocalDateTime.now());
+				return ResponseEntity.ok().build();
+			}
+		}
+		return ResponseEntity.notFound().build();
 	}
 }

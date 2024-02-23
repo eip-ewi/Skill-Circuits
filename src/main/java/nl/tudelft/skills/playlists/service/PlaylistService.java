@@ -20,6 +20,8 @@ package nl.tudelft.skills.playlists.service;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -117,6 +119,7 @@ public class PlaylistService {
 			tasks.addAll(skills.get(skillId));
 		}
 		return PlaylistViewDTO.builder()
+				.id(playlist.getId())
 				.created(playlist.getCreated().toLocalDate())
 				.estTime(playlist.getLatestVersion().getTotalTime())
 				.tasks(tasks).build();
@@ -255,4 +258,13 @@ public class PlaylistService {
 		return Collections.unmodifiableList(checkpointDTOs);
 	}
 
+	@Transactional
+	public void deactivateActivePlaylist(ResearchParticipant participant) {
+		Playlist playlist = playlistRepository.findByParticipantAndActive(participant, true);
+		if (playlist != null) {
+			playlist.setActive(false);
+			playlistRepository.saveAndFlush(playlist);
+		}
+
+	}
 }

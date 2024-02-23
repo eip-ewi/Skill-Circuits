@@ -34,6 +34,8 @@ import nl.tudelft.skills.playlists.model.Playlist;
 public class PlaylistViewDTO extends View<Playlist> {
 
 	@NotNull
+	private Long id;
+	@NotNull
 	private LocalDate created;
 
 	@NotNull
