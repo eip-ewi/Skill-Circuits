@@ -93,12 +93,20 @@ public class PlaylistController {
 		PlaylistVersionCreateDTO playlistVersionCreate = create.getPlaylistVersionCreate();
 		List<PlaylistTaskCreateDTO> taskCreates = playlistVersionCreate.getTaskCreates();
 		taskCreates.forEach(t -> t.setParticipant(participant));
-		Set<PlaylistTask> tasks = taskCreates.stream()
-				.map(PlaylistTaskCreateDTO::apply).map(playlistTaskRepository::saveAndFlush)
+		Set<PlaylistTask> tasks = taskCreates.stream().map(t -> {
+			PlaylistTask exists = playlistTaskRepository.findByParticipantAndTaskId(participant,
+					t.getTaskId());
+			if (exists != null) {
+				return exists;
+			} else {
+				return playlistTaskRepository.saveAndFlush(t.apply());
+			}
+		})
 				.collect(Collectors.toSet());
-		playlistVersionCreate.setTasks((tasks));
 
-		PlaylistVersion playlistVersion = playlistVersionCreate.apply();
+		PlaylistVersion playlistVersion = playlistVersionRepository
+				.saveAndFlush(playlistVersionCreate.apply());
+		playlistVersion.setTasks(tasks);
 		playlistVersion.setPlaylist(playlist);
 		playlist.setLatestVersion(playlistVersion);
 		playlistRepository.saveAndFlush(playlist);

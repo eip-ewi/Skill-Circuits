@@ -23,14 +23,12 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <script layout:fragment="script" th:inline="javascript">
-
         //Playlist feature
         const ACCID = 2;
         /*<![CDATA[*/
         const canEdit = /*[[${canEdit}]]*/ null;
         const edition = /*[[${module.edition.id}]]*/ null;
         /*]]>*/
-
 
         addEventListener("DOMContentLoaded", function () {
             let toUpdate = null;
@@ -92,14 +90,12 @@
 
             // Playlist feature
             // If the clicked link belongs to a task in the playlist, we update the playlist
-            if(!canEdit && edition === ACCID){
+            if (!canEdit && edition === ACCID) {
                 const plTask = document.getElementById("pl-task-status-" + taskId);
-                if(plTask != null){
+                if (plTask != null) {
                     plTask.click();
                 }
             }
-
-
         }
 
         function toggleCompleted(taskId) {
@@ -159,26 +155,41 @@
 
                         //     Playlist feature
                         //     If this is a student and ACC edition, prompt to ask how much time they needed to complete the task
-                        if ((canEdit != null) && !canEdit && edition === ACCID) {
+                        if (canEdit != null && !canEdit && edition === ACCID) {
                             const plTask = document.getElementById("pl-task-status-" + taskId);
                             if (completed) {
                                 // Check if this task is in the playlist
-                                if(plTask != null) {
-                                    plTask.innerText = "";
+                                if (plTask != null) {
                                     plTask.dataset.completed = "true";
+
+                                    // Get the time spent on the task for the student
+                                    plTask.click();
+                                    const minSpent = Math.floor(
+                                        (parseInt(plTask.innerText) || 0) / 60
+                                    );
                                     const userNumber = prompt(
                                         "You completed a task! 🎉 \n" +
-                                        "Did you actually take 5 minutes to complete it? If not, feel free to change " +
-                                        "the amount of minutes below.\n" +
-                                        "By pressing OK your completion time is actually stored.",
-                                        "5"
+                                            "Did you actually take " +
+                                            minSpent +
+                                            " minutes to complete it?" +
+                                            "If not, feel free to change the amount of minutes below.\n" +
+                                            "By pressing OK your completion time is actually stored.",
+                                        minSpent
                                     );
-                                    console.log("User entered: " + userNumber);
+
+                                    if (userNumber) {
+                                        //     Todo: store this amount in the db
+                                        plTask.innerText = userNumber + "min";
+                                    } else {
+                                        plTask.innerText = "";
+                                    }
                                 }
-                            } else{
-                                document.getElementById("pl-task-name-" + taskId).style.textDecoration="none";
+                            } else {
+                                document.getElementById(
+                                    "pl-task-name-" + taskId
+                                ).style.textDecoration = "none";
                             }
-                        }
+                        } //End Playlist feature
                     },
                 });
             } else {

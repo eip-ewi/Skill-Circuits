@@ -101,48 +101,70 @@
     <script layout:fragment="play">
         //     Code for the timers in the playlist
         let timer;
-        let elapsedTime = {main: 0};
+        let elapsedTime = { main: 0 };
         function toggleTimer() {
-           const plState = localStorage.getItem("playlistState") || "paused";
-           if(plState === "paused"){
-               document.getElementById("playlist-state").innerText = "playing";
-               localStorage.setItem("playlistState", "playing");
+            const plState = localStorage.getItem("playlistState") || "paused";
+            if (plState === "paused") {
+                document.getElementById("playlist-state").innerText = "playing";
+                localStorage.setItem("playlistState", "playing");
 
-               timer = setInterval(updateTimer, 1000);
+                timer = setInterval(updateTimer, 1000);
 
-               document.getElementById("playlist-play-pause").firstElementChild.className = "fa-solid fa-pause-circle" ;
-
-           } else{
-               document.getElementById("playlist-state").innerText = "paused";
-               localStorage.setItem("playlistState", "paused");
-               document.getElementById("playlist-play-pause").firstElementChild.className = "fa-solid fa-play-circle" ;
-               clearInterval(timer);
-           }
-
+                document.getElementById("playlist-play-pause").firstElementChild.className =
+                    "fa-solid fa-pause-circle";
+            } else {
+                document.getElementById("playlist-state").innerText = "paused";
+                localStorage.setItem("playlistState", "paused");
+                document.getElementById("playlist-play-pause").firstElementChild.className =
+                    "fa-solid fa-play-circle";
+                clearInterval(timer);
+            }
         }
 
-        function toggleTaskTimer(elem){
-            console.log(elem);
-            if(elem.dataset.completed === "false"){
-                const taskId = elem.id.replace("pl-task-status-","");
-                if(elem.innerText ==="queued" && document.getElementById("playlist-state").innerText === "playing") {
-                    elem.innerText = "playing"
-                    elapsedTime[taskId] = 0;
-
-                } else if(elem.innerText ==="playing") {
-                    elem.innerText = "paused"
-                    const pausedTasks = JSON.parse(localStorage.getItem("plPausedTasks"))|| {};
+        function toggleTaskTimer(elem) {
+            const taskId = elem.id.replace("pl-task-status-", "");
+            if (elem.dataset.completed === "false") {
+                if (
+                    elem.innerText === "queued" &&
+                    document.getElementById("playlist-state").innerText === "playing"
+                ) {
+                    elem.innerText = "playing";
+                    elapsedTime[taskId] = 1;
+                } else if (elem.innerText === "playing") {
+                    elem.innerText = "paused";
+                    const pausedTasks = JSON.parse(localStorage.getItem("plPausedTasks")) || {};
 
                     pausedTasks[taskId] = elapsedTime[taskId];
                     localStorage.setItem("plPausedTasks", JSON.stringify(pausedTasks));
                     delete elapsedTime[taskId];
+                } else if (
+                    elem.innerText === "paused" &&
+                    document.getElementById("playlist-state").innerText === "playing"
+                ) {
+                    elem.innerText = "playing";
+                    elapsedTime[taskId] =
+                        parseInt(JSON.parse(localStorage.getItem("plPausedTasks"))[taskId]) || 0;
+                }
+            } else if (
+                elem.dataset.completed === "true" &&
+                /^$|paused|playing/.test(elem.innerText)
+            ) {
+                // This task has just been completed thus we want to know how long its timer ran
 
+                const paused = JSON.parse(localStorage.getItem("plPausedTasks")) || {};
+                const pausedTime = parseInt(paused[taskId]) || 0;
+                const elapsed = elapsedTime[taskId] || 0;
 
-                } else if(elem.innerText ==="paused" && document.getElementById("playlist-state").innerText === "playing") {
-                    elem.innerText = "playing"
-                    elapsedTime[taskId] = JSON.parse(localStorage.getItem("plElapsedTime")) || 0;
+                // Remove the taskId from local storage if it's still there
+                if (pausedTime !== 0) {
+                    delete paused[taskId];
+                    localStorage.setItem("plPausedTasks", JSON.stringify(paused));
                 }
 
+                if (elapsed !== 0) {
+                    delete elapsedTime[taskId];
+                }
+                elem.innerText = Math.max(pausedTime, elapsed);
             }
         }
         function updateTimer() {
@@ -168,14 +190,13 @@
         }
 
         function getSavedTimer() {
-            if(localStorage.getItem("plElapsedTime")){
+            if (localStorage.getItem("plElapsedTime")) {
                 elapsedTime = JSON.parse(localStorage.getItem("plElapsedTime"));
                 Object.entries(elapsedTime).forEach(([timer, time]) => {
                     elapsedTime[timer] = Number(time);
-                    });
-            }
-            else{
-                elapsedTime = {main:0};
+                });
+            } else {
+                elapsedTime = { main: 0 };
             }
             const plState = localStorage.getItem("playlistState") || "";
             if (plState === "paused") {
@@ -209,8 +230,9 @@
             document.getElementById("playlist-play-pause").addEventListener("click", toggleTimer);
             document.querySelectorAll('button[id^="pl-task-status-"]').forEach(button => {
                 button.addEventListener("click", function () {
-                    toggleTaskTimer(this)});
-            })
+                    toggleTaskTimer(this);
+                });
+            });
             document
                 .querySelector('button[id^="playlist-delete-"]')
                 .addEventListener("click", function () {

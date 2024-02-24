@@ -63,13 +63,12 @@
                             th:id="|pl-task-name-${task.getTaskId()}|"
                             th:style="${task.getCompleted() ? 'text-decoration: line-through;' : ''}"
                             th:text="${task.getTaskName()}"></span>
-
                     </a>
                     <button
-                            th:attr="data-completed=${task.getCompleted()}"
-                            th:id="|pl-task-status-${task.getTaskId()}|"
-                            class="pl-task-status"
-                    >queued</button>
+                        th:attr="data-completed=${task.getCompleted()}"
+                        th:id="|pl-task-status-${task.getTaskId()}|"
+                        class="pl-task-status"
+                        th:text="${!task.getCompleted() ? 'queued' : ''}"></button>
                 </li>
                 <li><span>=========</span></li>
                 <li>

@@ -41,7 +41,7 @@ public class PlaylistVersion {
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@OneToMany
+	@ManyToMany
 	private Set<PlaylistTask> tasks = new HashSet<>();
 
 	@NotNull

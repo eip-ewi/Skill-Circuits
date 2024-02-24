@@ -219,7 +219,7 @@ public class PlaylistService {
 		List<PlaylistSkillViewDTO> skills = new LinkedList<>();
 		for (Skill s : checkpoint.getSkills()) {
 			//	Filter out skills that are still hidden for the participant
-			if(!complTaskIds.containsAll(s.getRequiredTasks().stream().map(Task::getId).toList())){
+			if (!complTaskIds.containsAll(s.getRequiredTasks().stream().map(Task::getId).toList())) {
 				continue;
 			}
 			PlaylistSkillViewDTO skillDTO = View.convert(s, PlaylistSkillViewDTO.class);
