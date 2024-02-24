@@ -15,21 +15,35 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.repository;
+package nl.tudelft.skills.playlists;
 
-import java.util.Set;
+import java.time.LocalDateTime;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
-import nl.tudelft.skills.model.SCEdition;
+import lombok.*;
+import nl.tudelft.skills.model.labracore.SCPerson;
 
-public interface EditionRepository extends JpaRepository<SCEdition, Long> {
+@Data
+@Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class ResearchParticipant {
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	private Long id;
 
-	default SCEdition findByIdOrThrow(Long id) {
-		return findById(id).orElseThrow(() -> new ResourceNotFoundException("Edition was not found: " + id));
-	}
+	@NotNull
+	@OneToOne
+	@JoinColumn(unique = true)
+	private SCPerson person;
 
-	Set<SCEdition> findByIsVisible(boolean isVisible);
+	@NotNull
+	@Builder.Default
+	private LocalDateTime optIn = LocalDateTime.now();
+
+	private LocalDateTime optOut;
 
 }

@@ -15,21 +15,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.repository;
-
-import java.util.Set;
+package nl.tudelft.skills.playlists;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
-import nl.tudelft.skills.model.SCEdition;
+import nl.tudelft.skills.model.labracore.SCPerson;
 
-public interface EditionRepository extends JpaRepository<SCEdition, Long> {
-
-	default SCEdition findByIdOrThrow(Long id) {
-		return findById(id).orElseThrow(() -> new ResourceNotFoundException("Edition was not found: " + id));
+public interface ResearchParticipantRepository extends JpaRepository<ResearchParticipant, Long> {
+	default ResearchParticipant findByIdOrThrow(Long id) {
+		return findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("ResearchParticipant was not found: " + id));
 	}
 
-	Set<SCEdition> findByIsVisible(boolean isVisible);
+	ResearchParticipant findByPerson(SCPerson person);
 
 }

@@ -41,7 +41,7 @@
                     th:value="${circuit.id}" />
                 <input id="create-checkpoint-skills" name="skillIds" type="hidden" hidden />
                 <th:block
-                    layout:replace="components/select_or_new :: select('create-checkpoint-name', 'name')">
+                    layout:replace="~{components/select_or_new :: select('create-checkpoint-name', 'name')}">
                     <th:block layout:fragment="select-options">
                         <option
                             th:each="checkpoint: ${circuit.checkpointsInEdition}"
