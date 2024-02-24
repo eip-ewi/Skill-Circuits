@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Checkpoint deletion makes the correct next checkpoint be used instead (@ffiedrich)
 - Moving the last skill from a checkpoint makes the checkpoint disappear (@ffiedrich)
 - Redundant ghost checkpoint at bottom of page is removed (@ffiedrich)
+- After dragging a checkpoint, the menu disappears unless it is hovered (@ffiedrich)
 
 ## [2.2.6]
 
