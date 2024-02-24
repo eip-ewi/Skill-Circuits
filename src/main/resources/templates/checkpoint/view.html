@@ -44,8 +44,9 @@
                 class="checkpoint__buttons"
                 th:id="|checkpoint-${checkpoint.id}-buttons|">
                 <button
-                    th:if="${#lists.size(module.remainingCheckpointsInEdition) > 0}"
-                    class="fa-solid fa-right-left checkpoint__change"
+                    th:class="'fa-solid fa-right-left checkpoint__change' +
+                              (${#lists.size(module.remainingCheckpointsInEdition) > 0} ? '' : ' hidden')"
+                    th:aria-hidden="${#lists.size(module.remainingCheckpointsInEdition) > 0} ? '' : 'true'"
                     th:data-checkpoint="${checkpoint.id}"
                     tabindex="1"></button>
                 <button
@@ -79,6 +80,16 @@
                     const row = $(cp).css("grid-row");
                     $(cp).remove();
                     addGhostCheckpoint(row);
+
+                    // Since a previously valid checkpoint is now removed from the module,
+                    // - Make swap button visible for checkpoints
+                    // - Add checkpoint to the dropdown list
+                    const cpChangers = $(".checkpoint__change");
+                    cpChangers.removeAttr("aria-hidden");
+                    cpChangers.removeClass("hidden");
+                    $(".checkpoint__change__select").append(
+                        `<option value=${id}>${$(cp).data("name")}</option>`
+                    );
                 } else {
                     // Else, update the CSS grid row of the checkpoint.
                     $(cp).css("grid-row", checkpointRows.get(cp.id.split("-")[1]));
