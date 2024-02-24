@@ -58,7 +58,10 @@
             // Note: When CSS "has" is safely usable, this functionality can (partially) be moved to CSS
             // Only expand if it is possible to toggle (contains one or more skills)
             if ($(toggle).find("li").length !== 0) {
-                toggle.setAttribute("aria-expanded", toggle.getAttribute("aria-expanded") !== "true");
+                toggle.setAttribute(
+                    "aria-expanded",
+                    toggle.getAttribute("aria-expanded") !== "true"
+                );
             }
         }
     </script>
