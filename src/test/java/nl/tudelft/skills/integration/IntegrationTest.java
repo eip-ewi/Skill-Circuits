@@ -36,8 +36,6 @@ import com.microsoft.playwright.options.WaitForSelectorState;
 
 public abstract class IntegrationTest {
 
-	// TODO change assertions of (...).isTrue to the Locator assertions.
-
 	private static Playwright playwright;
 	private static Browser browser;
 	private static Properties properties;

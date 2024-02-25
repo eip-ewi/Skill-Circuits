@@ -34,8 +34,8 @@ public class HomePageTest extends IntegrationTest {
 		clickAndWaitForPageLoad(logIn);
 
 		// Check redirection to login page
-		assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("Login")).isVisible())
-				.isTrue();
+		assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("Login")))
+				.isVisible();
 		assertThat(page.title()).isEqualTo("Login");
 
 		// Login as teacher
@@ -49,32 +49,32 @@ public class HomePageTest extends IntegrationTest {
 
 		// Wait until timeout or user dropdown is visible
 		Locator userDropdown = page.getByText(teacherUserInfo.displayName());
-		userDropdown.waitFor();
-		assertThat(userDropdown.isVisible()).isTrue();
+		assertThat(userDropdown).isVisible();
 
 		// Check redirection to homepage
 		assertThat(page
-				.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("Welcome to Skill Circuits"))
-				.isVisible()).isTrue();
+				.getByRole(AriaRole.HEADING,
+						new Page.GetByRoleOptions().setName("Welcome to Skill Circuits")))
+				.isVisible();
 		assertThat(page.title()).isEqualTo("Skill Circuits");
 
 		// Log out again
 		userDropdown.click();
-		assertThat(page.getByText("Your Profile").isVisible()).isTrue();
-		assertThat(page.getByText("Inventory").isVisible()).isTrue();
+		assertThat(page.getByText("Your Profile")).isVisible();
+		assertThat(page.getByText("Inventory")).isVisible();
 		Locator logOut = page.getByText("Logout");
-		assertThat(logOut.isVisible()).isTrue();
+		assertThat(logOut).isVisible();
 		clickAndWaitForPageLoad(logOut);
 
 		// Wait until timeout or log in is visible again
-		logIn.waitFor();
-		assertThat(logIn.isVisible()).isTrue();
-		assertThat(userDropdown.isVisible()).isFalse();
+		assertThat(logIn).isVisible();
+		assertThat(userDropdown).isHidden();
 
 		// Check that it is still on the homepage
 		assertThat(page
-				.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("Welcome to Skill Circuits"))
-				.isVisible()).isTrue();
+				.getByRole(AriaRole.HEADING,
+						new Page.GetByRoleOptions().setName("Welcome to Skill Circuits")))
+				.isVisible();
 		assertThat(page.title()).isEqualTo("Skill Circuits");
 	}
 
@@ -159,7 +159,7 @@ public class HomePageTest extends IntegrationTest {
 		openEditionSetupOnCurrentPage();
 		Locator publishBtn = page.getByRole(AriaRole.BUTTON,
 				new Page.GetByRoleOptions().setName("publish edition"));
-		assertThat(publishBtn.innerText().contains("Unpublish")).isEqualTo(published);
+		assertThat(publishBtn).hasText(published ? "Unpublish edition" : "Publish edition");
 		page.locator("#close-edition-setup-sidebar").click();
 	}
 
@@ -171,7 +171,7 @@ public class HomePageTest extends IntegrationTest {
 	 */
 	protected void assertEditionVisible(Locator course) {
 		// Assert that the course is visible not logged in
-		assertThat(course.isVisible()).isTrue();
+		assertThat(course).isVisible();
 
 		// Assert that the edition is visible when logged in as student
 		logInAs(studentUserInfo);
@@ -184,7 +184,6 @@ public class HomePageTest extends IntegrationTest {
 		clickAndWaitForPageLoad(course);
 		Locator editionHeader = page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions()
 				.setName(oopCourse.name() + " - " + getActiveEdition(oopCourse).name()));
-		editionHeader.waitFor();
 		assertThat(editionHeader).isVisible();
 		logOutAs(studentUserInfo);
 	}

@@ -17,7 +17,7 @@
  */
 package nl.tudelft.skills.integration;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
@@ -35,8 +35,7 @@ public class ItemCreationsTest extends IntegrationTest {
 
 		// Assert it being added to the list
 		Locator linkLocator = page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName(moduleName));
-		linkLocator.waitFor();
-		assertThat(linkLocator.isVisible()).isTrue();
+		assertThat(linkLocator).isVisible();
 
 		// Assert it is visible in the circuit in student view
 		page.locator("#close-edition-setup-sidebar").click();
@@ -46,8 +45,7 @@ public class ItemCreationsTest extends IntegrationTest {
 				page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Modules")));
 		Locator moduleLocator = page.getByRole(AriaRole.LINK,
 				new Page.GetByRoleOptions().setName(moduleName));
-		moduleLocator.waitFor();
-		assertThat(moduleLocator.isVisible()).isTrue();
+		assertThat(moduleLocator).isVisible();
 	}
 
 }
