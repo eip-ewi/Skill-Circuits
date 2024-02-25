@@ -17,6 +17,8 @@
  */
 package nl.tudelft.skills.integration;
 
+import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
+
 import java.io.IOException;
 import java.util.Properties;
 import java.util.Set;
@@ -33,6 +35,8 @@ import com.microsoft.playwright.options.LoadState;
 import com.microsoft.playwright.options.WaitForSelectorState;
 
 public abstract class IntegrationTest {
+
+	// TODO change assertions of (...).isTrue to the Locator assertions.
 
 	private static Playwright playwright;
 	private static Browser browser;
@@ -174,6 +178,36 @@ public abstract class IntegrationTest {
 			// Wait until the box is hidden
 			whatsNewHeader.waitFor(new Locator.WaitForOptions().setState(WaitForSelectorState.HIDDEN));
 			okayButtonLocator.waitFor(new Locator.WaitForOptions().setState(WaitForSelectorState.HIDDEN));
+		}
+	}
+
+	/**
+	 * If the course is not visible in the current homepage tab, switch to the other tab.
+	 *
+	 * @param course The locator for the course to check.
+	 */
+	protected void ifCourseHiddenSwitchToOtherHomepageTab(Locator course) {
+		navigateTo("");
+
+		// If it is not visible currently, check the other tab
+		if (!course.isVisible()) {
+			Locator yourCourses = page.getByRole(AriaRole.BUTTON,
+					new Page.GetByRoleOptions().setName("Your Courses"));
+			Locator availableCourses = page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions()
+					.setName("Available Courses"));
+
+			// If no tabs are visible, that means no courses are visible at all
+			if (!yourCourses.isVisible()) {
+				return;
+			}
+
+			// Find current tab, assert on attributes and switch tabs
+			Locator currentTab = yourCourses.getAttribute("data-active").equals("true") ? yourCourses
+					: availableCourses;
+			Locator otherTab = currentTab.equals(yourCourses) ? availableCourses : yourCourses;
+			assertThat(currentTab).hasAttribute("data-active", "true");
+			assertThat(otherTab).hasAttribute("data-active", "false");
+			otherTab.click();
 		}
 	}
 

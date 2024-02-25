@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.integration;
 
+import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import org.junit.jupiter.api.Test;
@@ -175,12 +176,16 @@ public class HomePageTest extends IntegrationTest {
 		// Assert that the edition is visible when logged in as student
 		logInAs(studentUserInfo);
 		closeChangelogBoxIfOpen();
-		assertThat(course.isVisible()).isTrue();
+
+		// Take the homepage grouping into account
+		ifCourseHiddenSwitchToOtherHomepageTab(course);
+		assertThat(course).isVisible();
+
 		clickAndWaitForPageLoad(course);
 		Locator editionHeader = page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions()
 				.setName(oopCourse.name() + " - " + getActiveEdition(oopCourse).name()));
 		editionHeader.waitFor();
-		assertThat(editionHeader.isVisible()).isTrue();
+		assertThat(editionHeader).isVisible();
 		logOutAs(studentUserInfo);
 	}
 
@@ -191,11 +196,15 @@ public class HomePageTest extends IntegrationTest {
 	 * @param course The Locator for the course heading on the homepage.
 	 */
 	protected void assertEditionInvisible(Locator course) {
-		assertThat(course.isVisible()).isFalse();
+		assertThat(course).isHidden();
 
 		logInAs(studentUserInfo);
 		closeChangelogBoxIfOpen();
-		assertThat(course.isVisible()).isFalse();
+
+		// Take the homepage grouping into account
+		ifCourseHiddenSwitchToOtherHomepageTab(course);
+		assertThat(course).isHidden();
+
 		logOutAs(studentUserInfo);
 	}
 
