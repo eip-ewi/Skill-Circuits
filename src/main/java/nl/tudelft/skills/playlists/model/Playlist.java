@@ -34,9 +34,13 @@ public class Playlist {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
 
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
 	@ManyToOne
 	private ResearchParticipant participant;
 
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
 	@OneToOne(cascade = CascadeType.PERSIST)
 	private PlaylistVersion latestVersion;
 

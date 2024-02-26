@@ -162,7 +162,7 @@
         }
         function updateTimer(playing = true) {
             if (playing) {
-                plData["updated"] = new Date();
+                plData["updated"] = Date.now();
                 Object.keys(plData["timers"]).forEach(timer => {
                     plData["timers"][timer]++;
                 });
@@ -174,23 +174,8 @@
 
             // Every minute we want to upload the timers
             if (plData["timers"]["main"] % 60 === 0 && playing) {
-                let data = {
-                    id: 0,
-                    elapsedTime: plData["timers"]["main"],
-                    taskTimes: [],
-                };
-                for (const [taskId, time] of Object.entries(plData["timers"])) {
-                    if (taskId === "main") {
-                        continue;
-                    }
-                    data["taskTimes"].push({ taskId: taskId, completionTime: time });
-                }
-                for (const [taskId, time] of Object.entries(plData["paused"])) {
-                    data["taskTimes"].push({ taskId: taskId, completionTime: time });
-                }
-                saveTimer(data);
+                uploadTimes();
             }
-
             saveTimer();
 
             document.getElementById("pl-timer-h").textContent = pad(hours);
@@ -202,30 +187,47 @@
             return value < 10 ? "0" + value : value;
         }
 
-        function saveTimer(data = {}) {
+        function saveTimer() {
             localStorage.setItem("plData", JSON.stringify(plData));
+        }
 
-            // Upload timers
-            if (Object.keys(data).length !== 0) {
-                const playlist = document.querySelector('[id^="playlist-"][id$="-tasks"]');
-                if (playlist) {
-                    console.log("hallo?");
-                    const playlistId = playlist.id.match(/playlist-(\d+)-tasks/)[1];
-                    $.ajax({
-                        url: "/playlist/" + playlistId + "/times",
-                        type: "PATCH",
-                        contentType: "application/json",
-                        data: JSON.stringify(data),
-                    });
+        function uploadTimes() {
+            let data = {
+                id: 0,
+                elapsedTime: plData["timers"]["main"],
+                taskTimes: [],
+            };
+            for (const [taskId, time] of Object.entries(plData["timers"])) {
+                if (taskId === "main") {
+                    continue;
                 }
+                data["taskTimes"].push({ taskId: taskId, completionTime: time });
+            }
+            for (const [taskId, time] of Object.entries(plData["paused"])) {
+                data["taskTimes"].push({ taskId: taskId, completionTime: time });
+            }
+            const playlist = document.querySelector('[id^="playlist-"][id$="-tasks"]');
+            if (playlist) {
+                const playlistId = playlist.id.match(/playlist-(\d+)-tasks/)[1];
+                $.ajax({
+                    url: "/playlist/" + playlistId + "/times",
+                    type: "PATCH",
+                    contentType: "application/json",
+                    data: JSON.stringify(data),
+                });
             }
         }
 
         function getSavedTimer() {
             if (localStorage.getItem("plData")) {
                 plData = JSON.parse(localStorage.getItem("plData"));
+                // Check times on the server every 25 min
+                if (!plData["synced"] || new Date(plData["synced"]) < Date.now() - 25 * 60 * 1000) {
+                    downloadTimes(true);
+                }
             } else {
-                plData = { updated: new Date(), state: "paused", timers: { main: 0 }, paused: {} };
+                plData = { updated: Date.now(), state: "paused", timers: { main: 0 }, paused: {} };
+                downloadTimes(false);
             }
 
             if (plData["state"] === "paused") {
@@ -256,27 +258,62 @@
             }
         }
 
-        // function downloadTimes(){
-        //     const playlist = document.querySelector('[id^="playlist-"][id$="-tasks"]');
-        //     if (playlist) {
-        //         const playlistId = playlist.id.match(/playlist-(\d+)-tasks/)[1];
-        //         $.ajax({
-        //             url: "/playlist/" + playlistId + "/times",
-        //             type: "GET",
-        //             success: (data) => {
-        //                 // if elapsedTimeUpdated > local one
-        //                 // get elapsedTime
-        //                 // get taskTimes (id, minutes)
-        //
-        //                 // localStorage.removeItem("playlistState");
-        //                 // localStorage.removeItem("plData");
-        //                 // localStorage.removeItem("plPausedTasks");
-        //                 // sessionStorage.setItem("openPlDialog", "true");
-        //                 // location.reload();
-        //             },
-        //         });
-        //     }
-        // }
+        function downloadTimes(localData) {
+            const playlist = document.querySelector('[id^="playlist-"][id$="-tasks"]');
+            if (playlist) {
+                const playlistId = playlist.id.match(/playlist-(\d+)-tasks/)[1];
+                $.ajax({
+                    url: "/playlist/" + playlistId + "/times",
+                    type: "GET",
+                    success: data => {
+                        if (!localData) {
+                            if (data["elapsedTime"] === 0) {
+                                plData = {
+                                    updated: Date.now(),
+                                    state: "paused",
+                                    timers: { main: 0 },
+                                    paused: {},
+                                };
+                            } else {
+                                plData = {
+                                    updated: new Date(data["elapsedTimeUpdated"]),
+                                    state: "paused",
+                                    timers: { main: data["elapsedTime"] },
+                                    paused: {},
+                                };
+                                for (const [taskId, time] of Object.entries(data["taskTimes"])) {
+                                    if (time > 0) {
+                                        plData["paused"][taskId] = time;
+                                    }
+                                }
+                            }
+                        } else {
+                            const lastUpdatedServer = new Date(data["elapsedTimeUpdated"]);
+                            const lastUpdatedLocal = new Date(plData["updated"]);
+
+                            if (lastUpdatedLocal > lastUpdatedServer) {
+                                uploadTimes();
+                            } else {
+                                plData["updated"] = new Date(data["elapsedTimeUpdated"]);
+                                for (const taskGroup of ["timers", "paused"]) {
+                                    for (const [taskId, time] of Object.entries(
+                                        plData[taskGroup]
+                                    )) {
+                                        if (taskId === "main") {
+                                            plData[taskGroup][taskId] = data["elapsedTime"];
+                                            continue;
+                                        }
+                                        plData[taskGroup][taskId] = time;
+                                    }
+                                }
+                            }
+                        }
+                        plData["synced"] = Date.now();
+                        localStorage.setItem("plData", JSON.stringify(plData));
+                    },
+                });
+            }
+        }
 
         function updateTaskStates(state) {
             if (state === "playing") {
@@ -298,6 +335,8 @@
                 }
             }
         }
+
+        // Event listeners
         addEventListener("DOMContentLoaded", function () {
             document.getElementById("playlist-play-pause").addEventListener("click", toggleTimer);
             document.querySelectorAll('button[id^="pl-task-status-"]').forEach(button => {
