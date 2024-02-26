@@ -172,7 +172,8 @@ public class PlaylistController {
 			@RequestBody(required = true) PlaylistVersionPatchDTO patch,
 			@PathVariable Long playlistId) {
 		Playlist playlist = playlistRepository.findByIdOrThrow(playlistId);
-
+		ResearchParticipant participant = researchParticipantRepository
+				.findByPerson(personService.getOrCreateSCPerson(person.getId()));
 		if (!playlist.isActive()) {
 			return ResponseEntity.badRequest().build();
 		}
@@ -180,10 +181,14 @@ public class PlaylistController {
 		patch.setId(playlist.getLatestVersion().getId());
 
 		List<PlaylistTaskPatchDTO> taskTimes = patch.getTaskTimes();
-		playlistTaskRepository.saveAll(
-				taskTimes.stream()
-						.map(taskP -> taskP.apply(playlistTaskRepository.findByIdOrThrow(taskP.getId())))
-						.toList());
+		//		TODO: Refactor to use PlaylistTask id from the start
+		for (PlaylistTaskPatchDTO pTask : taskTimes) {
+			PlaylistTask task = playlistTaskRepository.findByParticipantAndTaskId(participant,
+					pTask.getTaskId());
+			pTask.setId(task.getId());
+			PlaylistTask newTask = pTask.apply(task);
+			playlistTaskRepository.save(newTask);
+		}
 
 		PlaylistVersion playlistVersion = playlistVersionRepository.findByIdOrThrow(patch.getId());
 

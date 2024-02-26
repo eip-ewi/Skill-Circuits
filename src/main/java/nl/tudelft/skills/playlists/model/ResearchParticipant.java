@@ -36,11 +36,15 @@ public class ResearchParticipant {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
 
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
 	@NotNull
 	@OneToOne
 	@JoinColumn(unique = true)
 	private SCPerson person;
 
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
 	@OneToMany(mappedBy = "participant")
 	@OrderBy("created")
 	private List<Playlist> playlists;

@@ -33,8 +33,10 @@ import nl.tudelft.skills.playlists.model.PlaylistTask;
 @AllArgsConstructor
 public class PlaylistTaskPatchDTO extends Patch<PlaylistTask> {
 
-	@NotNull
 	private Long id;
+
+	@NotNull
+	private Long taskId;
 
 	@NotNull
 	@Min(0)

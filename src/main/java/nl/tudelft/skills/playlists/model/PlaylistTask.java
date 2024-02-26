@@ -23,10 +23,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @Entity
@@ -39,9 +36,13 @@ public class PlaylistTask {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
 
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
 	@ManyToOne
 	private ResearchParticipant participant;
 
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
 	@NotNull
 	private Long taskId;
 
@@ -49,6 +50,8 @@ public class PlaylistTask {
 	@Builder.Default
 	private Integer idx = 0;
 
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
 	private LocalDateTime started;
 
 	@Builder.Default
