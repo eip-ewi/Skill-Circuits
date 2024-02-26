@@ -15,46 +15,40 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.playlists.model;
+package nl.tudelft.skills.playlists.dto;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-import javax.persistence.*;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.playlists.model.PlaylistTask;
+import nl.tudelft.skills.playlists.model.PlaylistVersion;
 
 @Data
-@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PlaylistVersion {
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private Long id;
-
-	@ManyToOne
-	private Playlist playlist;
-
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany
-	private Set<PlaylistTask> tasks = new HashSet<>();
+public class PlaylistVersionViewDTO extends View<PlaylistVersion> {
 
 	@NotNull
-	@Builder.Default
-	private Integer estimatedTime = 0;
-
-	@Min(0)
-	@Builder.Default
-	private Integer elapsedTime = 0;
+	private Integer elapsedTime;
 
 	@NotNull
-	@Builder.Default
-	private LocalDateTime elapsedTimeUpdated = LocalDateTime.now();
+	private LocalDateTime elapsedTimeUpdated;
+
+	@NotNull
+	private Map<Long, Integer> taskTimes;
+
+	@Override
+	public void postApply() {
+		this.taskTimes = data.getTasks().stream()
+				.collect(Collectors.toMap(PlaylistTask::getTaskId, PlaylistTask::getCompletionTime));
+	}
 }

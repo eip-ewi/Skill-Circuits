@@ -41,7 +41,7 @@ public class PlaylistVersionCreateDTO extends Create<PlaylistVersion> {
 
 	@NotNull
 	@Builder.Default
-	private Integer totalTime = 0;
+	private Integer estimatedTime = 0;
 
 	@Override
 	public Class<PlaylistVersion> clazz() {

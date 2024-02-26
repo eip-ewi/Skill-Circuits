@@ -66,7 +66,7 @@
             checkedTasks.forEach(task => {
                 playListVersionData.taskCreates.push(createPlaylistTaskDTO(task));
             });
-            playListVersionData.totalTime = parseInt(
+            playListVersionData.estimatedTime = parseInt(
                 document.getElementById("total-est-time-cr").textContent
             );
             data.playlistVersionCreate = playListVersionData;
@@ -167,26 +167,59 @@
                 elem.innerText = Math.max(pausedTime, elapsed);
             }
         }
-        function updateTimer() {
-            Object.keys(elapsedTime).forEach(timer => {
-                elapsedTime[timer]++;
-            });
+        function updateTimer(playing = true) {
+            if (playing) {
+                Object.keys(elapsedTime).forEach(timer => {
+                    elapsedTime[timer]++;
+                });
+            }
             let hours = Math.floor(elapsedTime["main"] / 60 / 60);
             let minutes = Math.floor((elapsedTime["main"] / 60) % 60);
             let seconds = Math.floor(elapsedTime["main"] % 60);
 
+            // Every minute we want to upload the timers
+            if (elapsedTime["main"] % 60 === 0 && playing) {
+                let data = {
+                    id: 0,
+                    elapsedTime: elapsedTime["main"],
+                    taskTimes: [],
+                };
+                Object.entries(elapsedTime).forEach(([taskId, time]) => {
+                    if (taskId === "main") {
+                        return;
+                    }
+                    data["taskTimes"].push({ id: taskId, completionTime: time });
+                });
+                saveTimer(data);
+            }
+
+            saveTimer();
+
             document.getElementById("pl-timer-h").textContent = pad(hours);
             document.getElementById("pl-timer-min").textContent = pad(minutes);
             document.getElementById("pl-timer-sec").textContent = pad(seconds);
-
-            saveTimer();
         }
+
         function pad(value) {
             return value < 10 ? "0" + value : value;
         }
 
-        function saveTimer() {
+        function saveTimer(data = {}) {
             localStorage.setItem("plElapsedTime", JSON.stringify(elapsedTime));
+
+            // Upload timers
+            if (Object.keys(data).length !== 0) {
+                const playlist = document.querySelector('[id^="playlist-"][id$="-tasks"]');
+                if (playlist) {
+                    const playlistId = playlist.id.match(/playlist-(\d+)-tasks/)[1];
+                    $.ajax({
+                        url: "/playlist/" + playlistId + "/times",
+                        type: "PATCH",
+                        contentType: "application/json",
+                        data: JSON.stringify(data),
+                    });
+                }
+            }
         }
 
         function getSavedTimer() {
@@ -200,9 +233,10 @@
             }
             const plState = localStorage.getItem("playlistState") || "";
             if (plState === "paused") {
+                updateTimer(false);
                 document.getElementById("playlist-state").innerText = "paused";
             } else if (plState === "playing") {
-                document.getElementById("playlist-state").innerText = "playing";
+                localStorage.setItem("playlistState", "paused"); //so it gets toggled to playing
                 toggleTimer();
             }
         }

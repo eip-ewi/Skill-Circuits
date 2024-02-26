@@ -52,7 +52,7 @@
             <h2>
                 <span>Tasks:</span>
             </h2>
-            <ul id="playlist-tasks" class="playlist-items">
+            <ul th:id="|playlist-${playlist.getId()}-tasks|" class="playlist-items">
                 <li th:each="task : ${playlist.getTasks()}" th:id="|pl-task-${task.getTaskId()}|">
                     <a
                         th:href="@{'/module/' + ${task.getModuleId()} +

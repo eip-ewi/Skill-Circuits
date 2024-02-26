@@ -20,6 +20,7 @@ package nl.tudelft.skills.playlists.model;
 import java.time.LocalDateTime;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
@@ -41,6 +42,7 @@ public class PlaylistTask {
 	@ManyToOne
 	private ResearchParticipant participant;
 
+	@NotNull
 	private Long taskId;
 
 	@NotNull
@@ -48,7 +50,11 @@ public class PlaylistTask {
 	private Integer idx = 0;
 
 	private LocalDateTime started;
+
 	@Builder.Default
 	private Boolean completed = false;
-	private Integer completionTime;
+
+	@Min(0)
+	@Builder.Default
+	private Integer completionTime = 0;
 }

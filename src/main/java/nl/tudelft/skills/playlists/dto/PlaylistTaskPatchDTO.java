@@ -15,46 +15,37 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.playlists.model;
+package nl.tudelft.skills.playlists.dto;
 
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import nl.tudelft.librador.dto.patch.Patch;
+import nl.tudelft.skills.playlists.model.PlaylistTask;
 
 @Data
-@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PlaylistVersion {
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+public class PlaylistTaskPatchDTO extends Patch<PlaylistTask> {
+
+	@NotNull
 	private Long id;
 
-	@ManyToOne
-	private Playlist playlist;
-
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany
-	private Set<PlaylistTask> tasks = new HashSet<>();
-
 	@NotNull
-	@Builder.Default
-	private Integer estimatedTime = 0;
-
 	@Min(0)
-	@Builder.Default
-	private Integer elapsedTime = 0;
+	private Integer completionTime;
 
-	@NotNull
-	@Builder.Default
-	private LocalDateTime elapsedTimeUpdated = LocalDateTime.now();
+	@Override
+	protected void applyOneToOne() {
+		updateNonNull(completionTime, data::setCompletionTime);
+	}
+
+	@Override
+	protected void validate() {
+	}
 }

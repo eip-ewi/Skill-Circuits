@@ -18,9 +18,7 @@
 package nl.tudelft.skills.playlists.controller;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
@@ -33,10 +31,9 @@ import org.springframework.web.bind.annotation.*;
 
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
+import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.model.labracore.SCPerson;
-import nl.tudelft.skills.playlists.dto.PlaylistCreateDTO;
-import nl.tudelft.skills.playlists.dto.PlaylistTaskCreateDTO;
-import nl.tudelft.skills.playlists.dto.PlaylistVersionCreateDTO;
+import nl.tudelft.skills.playlists.dto.*;
 import nl.tudelft.skills.playlists.model.*;
 import nl.tudelft.skills.playlists.repository.PlaylistRepository;
 import nl.tudelft.skills.playlists.repository.PlaylistTaskRepository;
@@ -166,5 +163,44 @@ public class PlaylistController {
 			}
 		}
 		return ResponseEntity.notFound().build();
+	}
+
+	@PatchMapping("/{playlistId}/times")
+	@Transactional
+	@PreAuthorize("@researchParticipantService.canEditPlaylist(#person, #playlistId)")
+	public ResponseEntity<Void> storeCompletionTimes(@AuthenticatedPerson Person person,
+			@RequestBody(required = true) PlaylistVersionPatchDTO patch,
+			@PathVariable Long playlistId) {
+		Playlist playlist = playlistRepository.findByIdOrThrow(playlistId);
+
+		if (!playlist.isActive()) {
+			return ResponseEntity.badRequest().build();
+		}
+
+		patch.setId(playlist.getLatestVersion().getId());
+
+		List<PlaylistTaskPatchDTO> taskTimes = patch.getTaskTimes();
+		playlistTaskRepository.saveAll(
+				taskTimes.stream()
+						.map(taskP -> taskP.apply(playlistTaskRepository.findByIdOrThrow(taskP.getId())))
+						.toList());
+
+		PlaylistVersion playlistVersion = playlistVersionRepository.findByIdOrThrow(patch.getId());
+
+		playlistVersionRepository.save(patch.apply(playlistVersion));
+		return ResponseEntity.ok().build();
+
+	}
+
+	@GetMapping("/{playlistId}/times")
+	@Transactional
+	@ResponseBody
+	@PreAuthorize("@researchParticipantService.canEditPlaylist(#person, #playlistId)")
+	public PlaylistVersionViewDTO getCompletionTimes(@AuthenticatedPerson Person person,
+			@PathVariable Long playlistId) {
+		Playlist playlist = playlistRepository.findByIdOrThrow(playlistId);
+
+		return View.convert(playlist.getLatestVersion(), PlaylistVersionViewDTO.class);
+
 	}
 }

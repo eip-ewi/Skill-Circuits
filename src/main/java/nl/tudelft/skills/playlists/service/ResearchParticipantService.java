@@ -151,6 +151,7 @@ public class ResearchParticipantService {
 
 	}
 
+	@Transactional
 	public boolean canCreatePlaylist(Person person) {
 		if (person != null) {
 			SCPerson scPerson = personRepository.findByIdOrThrow(person.getId());
@@ -159,6 +160,21 @@ public class ResearchParticipantService {
 		} else {
 			return false;
 		}
+	}
+
+	@Transactional
+	public boolean canEditPlaylist(Person person, Long playlistId) {
+		if (person != null) {
+			SCPerson scPerson = personRepository.findByIdOrThrow(person.getId());
+			Optional<Boolean> optedIn = optedIn(scPerson);
+			if (optedIn.orElse(false)) {
+				ResearchParticipant participant = researchParticipantRepository.findByPerson(scPerson);
+				Playlist playlist = playlistRepository.findByIdAndParticipant(playlistId, participant);
+				return playlist != null && playlist.isActive();
+			}
+		}
+
+		return false;
 	}
 
 }

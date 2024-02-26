@@ -121,7 +121,7 @@ public class PlaylistService {
 		return PlaylistViewDTO.builder()
 				.id(playlist.getId())
 				.created(playlist.getCreated().toLocalDate())
-				.estTime(playlist.getLatestVersion().getTotalTime())
+				.estTime(playlist.getLatestVersion().getEstimatedTime())
 				.tasks(tasks).build();
 	}
 

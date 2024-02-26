@@ -43,8 +43,6 @@ public class Playlist {
 	@Builder.Default
 	private boolean active = false;
 
-	private int timePlayed;
-
 	@Builder.Default
 	private PlaylistState state = PlaylistState.CREATED;
 
