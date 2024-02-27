@@ -90,6 +90,7 @@
     overflow-y: auto;
 }
 .playlist-items {
+    @extend #playlist-cr-adding-tasks;
     list-style: none;
     padding-bottom: 1rem;
 }
@@ -121,6 +122,7 @@
 
 .opt-in__content {
     @extend #update_text;
+    flex: 1;
     padding-right: 3rem;
     & > a {
         color: var(--primary-green);
@@ -165,7 +167,6 @@
 .opt-in__button-container_single {
     @extend .opt-in__button-container;
     bottom: 0;
-    position: absolute;
     justify-content: center;
 }
 
@@ -183,4 +184,9 @@
         font-style: italic;
         font-weight: bold;
     }
+}
+
+//Prompt for task duration
+#pl-tc-prompt {
+    @extend .overlay;
 }

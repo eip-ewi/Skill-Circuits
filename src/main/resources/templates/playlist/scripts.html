@@ -336,6 +336,32 @@
             }
         }
 
+        // Confirming task completion time with participant
+        function promptCompletionTime(taskId) {
+            const min = Math.floor(plData["timers"][taskId] || plData["paused"][taskId] || 0 / 60);
+            document.getElementById("pl-tc-min").textContent = min.toString();
+            document.getElementById("pl-tc-user").value = min;
+            document.getElementById("playlist").style.display = "flex";
+            document.getElementById("pl-tc-form").addEventListener("submit", function (e) {
+                e.preventDefault();
+                handleSubmit(taskId);
+            });
+            document.getElementById("pl-tc-prompt").showModal();
+        }
+
+        function handleSubmit(taskId) {
+            const plTask = document.getElementById("pl-task-status-" + taskId);
+            const userNumber = document.getElementById("pl-tc-user").value;
+            if (userNumber) {
+                plData["paused"][taskId] = userNumber;
+                delete plData["timers"][taskId];
+                plTask.innerText = userNumber + "min";
+            } else {
+                plTask.innerText = "";
+            }
+            document.getElementById("pl-task-name-" + taskId).style.textDecoration = "line-through";
+            document.getElementById("pl-tc-prompt").close();
+        }
         // Event listeners
         addEventListener("DOMContentLoaded", function () {
             document.getElementById("playlist-play-pause").addEventListener("click", toggleTimer);
