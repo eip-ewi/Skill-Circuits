@@ -39,6 +39,17 @@
                 <span>:</span>
                 <span id="pl-timer-sec">00</span>
             </h3>
+            <span class="fa-solid fa-question hasTooltip"></span>
+            <div class="tooltip">
+                <p>
+                    <strong>No timers can be reset</strong>
+                    , only paused. This means you have to remember to pause the playlist if you
+                    decide to do other things while an ACC page is open. When you create a new
+                    playlist with tasks you included in a previous playlist and have already worked
+                    on, the task's individual timer will continue. The progress you already made on
+                    that task was precious time, after all!
+                </p>
+            </div>
             <hr />
             <div class="opt-in__button-container">
                 <button id="playlist-play-pause">
@@ -48,10 +59,23 @@
                     <span class="fa-solid fa-trash-can"></span>
                 </button>
             </div>
+            <span class="fa-solid fa-question hasTooltip"></span>
+            <div class="tooltip">
+                <p>
+                    <strong>Play/pause button</strong>
+                    : Starts and pauses the playlist's main timer. This helps you track you playing
+                    through the list! The main timer should be running to be able to start a timer
+                    for individual tasks. When the main timer is paused, the task timers are paused
+                    as well. The playlist timer only runs when you are on an ACC page on Skill
+                    Circuit.
+                </p>
+                <p>
+                    <strong>Trash can</strong>
+                    : lets you yeet this playlist and start a new one.
+                </p>
+            </div>
             <hr />
-            <h2>
-                <span>Tasks:</span>
-            </h2>
+            <h2>Tasks:</h2>
             <ul th:id="|playlist-${playlist.getId()}-tasks|" class="playlist-items">
                 <li th:each="task : ${playlist.getTasks()}" th:id="|pl-task-${task.getTaskId()}|">
                     <a
@@ -76,10 +100,31 @@
                     <span th:text="'Achieved'"></span>
                 </li>
             </ul>
+            <span class="fa-solid fa-question hasTooltip"></span>
+            <div class="tooltip">
+                <p>
+                    <b>Clicking a task's name</b>
+                    opens its associated skill. Clicking on the task's redirect link in the skill,
+                    sets the task to playing. This starts the task's timer.
+                    <br />
+                    If the task does not have an associated link, you can manually start it by
+                    clicking the task's status in the playlist. Clicking the status when the task's
+                    timer is running (
+                    <i>playing</i>
+                    ) pauses the task's timer.
+                </p>
+                <p>
+                    <b>Completing a task</b>
+                    automatically stops the task's timer for you. It then asks you to confirm if the
+                    timed
+                    <s>play</s>
+                    study duration is correct.
+                </p>
+            </div>
         </th:block>
 
         <div class="opt-in__button-container_single">
-            <button class="opt-button-cancel">Opt out</button>
+            <button class="opt-button-cancel pl-task-status">Opt out</button>
         </div>
     </div>
 

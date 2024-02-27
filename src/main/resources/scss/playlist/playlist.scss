@@ -4,6 +4,33 @@
 @import "../_mixins";
 @import "../circuit";
 
+//Info
+
+.hasTooltip {
+    font-size: 0.7em;
+    float: right;
+    vertical-align: bottom;
+    &:hover + .tooltip {
+        display: block;
+    }
+}
+.tooltip {
+    border: none;
+    float: right;
+    opacity: 0.9;
+    background-color: var(--secondary-green);
+    width: 80%;
+    padding: 0 1em 1em 1em;
+    left: 50%;
+    transform: translate(-50%, -10%);
+    display: none;
+    position: absolute;
+    overflow-y: auto;
+    font-size: 0.7em;
+    z-index: 1;
+}
+
+//Playlist
 #playlist-button-c {
     &:focus ~ #playlist {
         right: 0;
@@ -70,7 +97,17 @@
 .playlist-button {
     @extend .circuit__button;
 }
+.pl-task-status {
+    @extend .tldr;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    color: var(--primary-green);
+}
 
+//Opt in
 #opt-in__dialog {
     @extend .overlay;
     border: 1px solid var(--primary-dark);
@@ -93,16 +130,6 @@
 .tldr {
     font-style: italic;
     font-size: 0.7em;
-}
-
-.pl-task-status {
-    @extend .tldr;
-    background: none;
-    border: none;
-    padding: 0;
-    margin: 0;
-    cursor: pointer;
-    color: var(--primary-green);
 }
 
 .opt-in__button-container {
@@ -137,6 +164,8 @@
 
 .opt-in__button-container_single {
     @extend .opt-in__button-container;
+    bottom: 0;
+    position: absolute;
     justify-content: center;
 }
 
