@@ -85,6 +85,7 @@ public class CourseService {
 	 * @return    The most recent edition for the course.
 	 */
 	public Long getLastEditionForCourse(Long id) {
+		// TODO can this parameter be passed to minimize requests?
 		CourseDetailsDTO course = courseApi.getCourseById(id).block();
 
 		return course.getEditions().stream()

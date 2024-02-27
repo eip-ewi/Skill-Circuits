@@ -129,6 +129,8 @@ public class HomeControllerTest extends ControllerTest {
 						.startDate(localDateTime.minusYears(1)).endDate(localDateTime.plusYears(1))
 						.course(course)));
 
+		when(courseService.getLastStudentEditionForCourseOrLast(course.getId())).thenReturn(edition.getId());
+
 		homeController.getHomePage(null, model);
 
 		Set<String> attributes = Set.of("availableFinished", "ownActive", "ownFinished", "managed");
@@ -220,12 +222,11 @@ public class HomeControllerTest extends ControllerTest {
 				.person(person).task(db.getTaskRead12()).build();
 		person.setTaskCompletions(Set.of(completion));
 
-		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
-				.thenReturn(db.getEditionRL().getId());
+		Map<Long, Long> courseToEditionMap = Map.of(db.getCourseRL().getId(), db.getEditionRL().getId());
 
 		// There are no completed skills in the course
 		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
-				person);
+				person, courseToEditionMap);
 
 		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
 		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(3);
@@ -242,12 +243,11 @@ public class HomeControllerTest extends ControllerTest {
 				.person(person).task(db.getTaskDo12ae()).build();
 		person.setTaskCompletions(Set.of(completion1, completion2));
 
-		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
-				.thenReturn(db.getEditionRL().getId());
+		Map<Long, Long> courseToEditionMap = Map.of(db.getCourseRL().getId(), db.getEditionRL().getId());
 
 		// There is one completed skill in the course
 		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
-				person);
+				person, courseToEditionMap);
 		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
 		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(7);
 	}
@@ -365,12 +365,13 @@ public class HomeControllerTest extends ControllerTest {
 
 		Set<Long> visible = Set.of(2L, 4L, 5L, 7L, 8L, 10L);
 		Set<Long> teacherIds = Set.of(3L, 4L, 6L, 7L, 9L, 10L);
+		Map<Long, Long> courseToEditionMap = Map.of(1L, 1L, 2L, 2L, 3L, 3L, 4L, 4L, 5L, 5L, 6L, 6L, 7L, 7L,
+				8L, 8L, 9L, 9L, 10L, 10L);
 
 		// Make each course contain exactly one edition with the same id as the course
 		List<CourseSummaryDTO> courseSummaries = new ArrayList<>();
 		for (long i = 1L; i <= 10L; i++) {
 			courseSummaries.add(new CourseSummaryDTO().id(i));
-			when(courseService.getLastStudentEditionForCourseOrLast(i)).thenReturn(i);
 			editionRepository.save(SCEdition.builder().id(i).build());
 		}
 
@@ -396,7 +397,8 @@ public class HomeControllerTest extends ControllerTest {
 
 		// Should only contain 8, 9, 10 as active courses (for all others there are different reasons as to why they
 		// are not active)
-		assertThat(homeController.getActiveCourses(courseSummaries, editions, visible, teacherIds))
+		assertThat(homeController.getActiveCourses(courseSummaries, editions, visible, teacherIds,
+				courseToEditionMap))
 				.containsExactlyInAnyOrder(8L, 9L, 10L);
 	}
 
@@ -405,9 +407,8 @@ public class HomeControllerTest extends ControllerTest {
 		Long usedEditionId = db.getEditionRL().getId();
 
 		// Mock latest or last edition values
-		when(courseService.getLastStudentEditionForCourseOrLast(1L)).thenReturn(usedEditionId);
-		when(courseService.getLastStudentEditionForCourseOrLast(2L)).thenReturn(usedEditionId + 1);
-		when(courseService.getLastStudentEditionForCourseOrLast(3L)).thenReturn(usedEditionId + 2);
+		Map<Long, Long> courseToEditionMap = Map.of(1L, usedEditionId, 2L, usedEditionId + 1, 3L,
+				usedEditionId + 2);
 
 		// Save new editions and add a task completion to the second edition
 		editionRepository.save(SCEdition.builder().id(usedEditionId + 1).build());
@@ -421,7 +422,8 @@ public class HomeControllerTest extends ControllerTest {
 		// and exactly one in the second saved edition
 		List<CourseSummaryDTO> courses = List.of(new CourseSummaryDTO().id(1L), new CourseSummaryDTO().id(2L),
 				new CourseSummaryDTO().id(3L));
-		Map<Long, Boolean> completedTask = homeController.getCompletedTaskInCourse(courses, db.getPerson());
+		Map<Long, Boolean> completedTask = homeController.getCompletedTaskInCourse(courses, db.getPerson(),
+				courseToEditionMap);
 		assertThat(completedTask.keySet()).containsExactlyInAnyOrder(1L, 2L, 3L);
 		assertThat(completedTask.get(1L)).isTrue();
 		assertThat(completedTask.get(2L)).isFalse();
@@ -462,12 +464,11 @@ public class HomeControllerTest extends ControllerTest {
 		person.setTaskCompletions(
 				Set.of(completion1, completion2, completion3, completion4, completion5, completion6));
 
-		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
-				.thenReturn(db.getEditionRL().getId());
+		Map<Long, Long> courseToEditionMap = Map.of(db.getCourseRL().getId(), db.getEditionRL().getId());
 
 		// All the skills are completed in the course
 		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
-				person);
+				person, courseToEditionMap);
 		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
 		assertThat(courseCompletedSkills.get(db.getCourseRL().getId()))
 				.isEqualTo(skillRepository.findAll().size());
@@ -480,11 +481,10 @@ public class HomeControllerTest extends ControllerTest {
 		SCPerson person = new SCPerson();
 		person.setSkillsModified(new HashSet<>(Arrays.asList(db.getSkillImplication())));
 
-		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
-				.thenReturn(db.getEditionRL().getId());
+		Map<Long, Long> courseToEditionMap = Map.of(db.getCourseRL().getId(), db.getEditionRL().getId());
 
 		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
-				person);
+				person, courseToEditionMap);
 		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
 		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(7);
 	}
@@ -502,11 +502,10 @@ public class HomeControllerTest extends ControllerTest {
 
 		person.setTaskCompletions(Set.of(completion1));
 
-		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
-				.thenReturn(db.getEditionRL().getId());
+		Map<Long, Long> courseToEditionMap = Map.of(db.getCourseRL().getId(), db.getEditionRL().getId());
 
 		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
-				person);
+				person, courseToEditionMap);
 		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
 		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(5);
 	}
@@ -520,11 +519,10 @@ public class HomeControllerTest extends ControllerTest {
 				.edition(db.getEditionRL()).person(person).build();
 		person.setPathPreferences(new HashSet<>(Arrays.asList(pathPreference)));
 
-		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
-				.thenReturn(db.getEditionRL().getId());
+		Map<Long, Long> courseToEditionMap = Map.of(db.getCourseRL().getId(), db.getEditionRL().getId());
 
 		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
-				person);
+				person, courseToEditionMap);
 		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
 		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(6);
 	}
@@ -538,17 +536,15 @@ public class HomeControllerTest extends ControllerTest {
 		db.getSkillAssumption().setTasks(Arrays.asList(t));
 		person.setSkillsModified(new HashSet<>(Arrays.asList(db.getSkillAssumption())));
 
-		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
-				.thenReturn(db.getEditionRL().getId());
+		Map<Long, Long> courseToEditionMap = Map.of(db.getCourseRL().getId(), db.getEditionRL().getId());
 
 		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
-				person);
+				person, courseToEditionMap);
 		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
 		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(3);
 	}
 
 	void mockRolesForEditions(Map<Long, String> roles, Long personId) {
-		// TODO set edition summary?
 		List<RoleEditionDetailsDTO> roleDTOS = roles
 				.entrySet().stream().map(entry -> new RoleEditionDetailsDTO()
 						.id(new Id().editionId(entry.getKey())
