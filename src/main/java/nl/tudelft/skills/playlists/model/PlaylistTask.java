@@ -33,7 +33,7 @@ import lombok.*;
 public class PlaylistTask {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@ToString.Exclude

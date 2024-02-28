@@ -31,7 +31,7 @@ import lombok.*;
 @AllArgsConstructor
 public class Playlist {
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@ToString.Exclude

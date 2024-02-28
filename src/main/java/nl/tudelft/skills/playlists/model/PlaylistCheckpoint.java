@@ -34,6 +34,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PlaylistCheckpoint {
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 }

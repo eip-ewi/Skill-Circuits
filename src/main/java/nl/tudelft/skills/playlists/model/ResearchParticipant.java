@@ -33,7 +33,7 @@ import nl.tudelft.skills.model.labracore.SCPerson;
 @AllArgsConstructor
 public class ResearchParticipant {
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@ToString.Exclude
