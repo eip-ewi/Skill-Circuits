@@ -183,12 +183,12 @@
                 elapsedTime: plData["timers"]["main"],
                 taskTimes: [],
             };
-            for(const group of ["timers", "paused", "completed"]) {
+            for (const group of ["timers", "paused", "completed"]) {
                 for (const [taskId, time] of Object.entries(plData[group])) {
                     if (taskId === "main") {
                         continue;
                     }
-                    data["taskTimes"].push({taskId: taskId, completionTime: time});
+                    data["taskTimes"].push({ taskId: taskId, completionTime: time });
                 }
             }
             plData["completed"] = {};
@@ -212,7 +212,13 @@
                     downloadTimes(true);
                 }
             } else {
-                plData = { updated: Date.now(), state: "paused", timers: { main: 0 }, paused: {}, completed: {} };
+                plData = {
+                    updated: Date.now(),
+                    state: "paused",
+                    timers: { main: 0 },
+                    paused: {},
+                    completed: {},
+                };
                 downloadTimes(false);
             }
 
@@ -257,7 +263,7 @@
                                     state: "paused",
                                     timers: { main: 0 },
                                     paused: {},
-                                    completed: {}
+                                    completed: {},
                                 };
                             } else {
                                 plData = {
@@ -265,7 +271,7 @@
                                     state: "paused",
                                     timers: { main: data["elapsedTime"] },
                                     paused: {},
-                                    completed: {}
+                                    completed: {},
                                 };
                                 for (const [taskId, time] of Object.entries(data["taskTimes"])) {
                                     if (time > 0) {
@@ -324,7 +330,9 @@
 
         // Confirming task completion time with participant
         function promptCompletionTime(taskId) {
-            const min = Math.floor((plData["timers"][taskId] || plData["paused"][taskId] || 0 )/ 60);
+            const min = Math.floor(
+                (plData["timers"][taskId] || plData["paused"][taskId] || 0) / 60
+            );
             document.getElementById("pl-tc-min").textContent = min.toString();
             document.getElementById("pl-tc-user").value = min;
             document.getElementById("playlist").style.display = "flex";

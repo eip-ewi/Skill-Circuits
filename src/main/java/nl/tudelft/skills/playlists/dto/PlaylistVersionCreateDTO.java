@@ -40,7 +40,7 @@ public class PlaylistVersionCreateDTO extends Create<PlaylistVersion> {
 
 	@NotNull
 	@Builder.Default
-	private Set<PlaylistTask> tasks =  new HashSet<>();
+	private Set<PlaylistTask> tasks = new HashSet<>();
 
 	@NotNull
 	@Builder.Default

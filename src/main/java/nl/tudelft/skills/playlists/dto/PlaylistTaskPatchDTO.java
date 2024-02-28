@@ -17,6 +17,8 @@
  */
 package nl.tudelft.skills.playlists.dto;
 
+import java.time.LocalDateTime;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
@@ -26,8 +28,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import nl.tudelft.librador.dto.patch.Patch;
 import nl.tudelft.skills.playlists.model.PlaylistTask;
-
-import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -49,8 +49,8 @@ public class PlaylistTaskPatchDTO extends Patch<PlaylistTask> {
 		updateNonNull(completionTime, data::setCompletionTime);
 	}
 
-	protected void postApply(){
-		if(data.getStarted() == null){
+	protected void postApply() {
+		if (data.getStarted() == null) {
 			data.setStarted(LocalDateTime.now());
 		}
 	}

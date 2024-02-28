@@ -178,7 +178,7 @@ public class PlaylistController {
 			return ResponseEntity.badRequest().build();
 		}
 
-		if (playlist.getState() != PlaylistState.IN_USE){
+		if (playlist.getState() != PlaylistState.IN_USE) {
 			playlist.setState(PlaylistState.IN_USE);
 		}
 

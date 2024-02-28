@@ -30,6 +30,11 @@
             <h3>
                 <span class="fa-solid fa-clock"></span>
                 <span th:text="${playlist.getEstTime()}"></span>
+                <a
+                    class="fa-solid fa-message"
+                    style="float: right"
+                    th:href="|https://tudelft.fra1.qualtrics.com/jfe/form/SV_2nRHlGSDGTRcBzU?participant=${participantId}|"
+                    target="_blank"></a>
             </h3>
             <h3>
                 <span class="fa-solid fa-music"></span>
@@ -39,6 +44,7 @@
                 <span>:</span>
                 <span id="pl-timer-sec">00</span>
             </h3>
+
             <span class="fa-solid fa-question hasTooltip"></span>
             <div class="tooltip">
                 <p>
@@ -95,11 +101,6 @@
                         th:text="${!task.getCompleted() ? 'queued' :
                             (task.getCompletionTime() !=null ? #numbers.formatDecimal(task.getCompletionTime() / 60, 0) + 'min' : '' )}"></button>
                 </li>
-                <li><span>=========</span></li>
-                <li>
-                    <span class="fa-solid fa-bullseye"></span>
-                    <span th:text="'Achieved'"></span>
-                </li>
             </ul>
             <span class="fa-solid fa-question hasTooltip"></span>
             <div class="tooltip">
@@ -152,8 +153,13 @@
             <p>
                 We cannot guarantee this feature is bug-free, so please bear with us. Any feedback
                 you have is of course highly appreciated, but as this is part of a research we must
-                collect that anonymously. A way to provide anonymous feedback will be added
-                soon&trade;.
+                collect that anonymously. A way to provide anonymous feedback can be done by
+                clicking on
+                <a
+                    class="fa-solid fa-message"
+                    th:href="|https://tudelft.fra1.qualtrics.com/jfe/form/SV_2nRHlGSDGTRcBzU?participant=${participantId}|"
+                    target="_blank"></a>
+                .
             </p>
 
             <div class="opt-in__button-container">
@@ -161,7 +167,6 @@
                 <button id="playlist-ft-ok">
                     <span class="fa-solid fa-play-circle"></span>
                 </button>
-
             </div>
         </div>
     </div>
@@ -178,6 +183,11 @@
                 <span class="fa-solid fa-clock"></span>
                 <span>Estimated time:</span>
                 <span id="total-est-time-cr">0</span>
+                <a
+                    class="fa-solid fa-message"
+                    style="float: right"
+                    th:href="|https://tudelft.fra1.qualtrics.com/jfe/form/SV_2nRHlGSDGTRcBzU?participant=${participantId}|"
+                    target="_blank"></a>
             </h3>
             <hr />
         </div>
@@ -213,7 +223,6 @@
         <div class="opt-in__button-container">
             <button class="opt-button-cancel">Opt out</button>
             <button id="create-playlist">Create playlist!</button>
-
         </div>
     </div>
 </html>

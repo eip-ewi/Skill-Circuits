@@ -128,8 +128,11 @@ public class ResearchParticipantService {
 			SCPerson scPerson = personRepository.findByIdOrThrow(person.getId());
 			Optional<Boolean> optedIn = optedIn(scPerson);
 			model.addAttribute("studentOptedIn", optedIn);
-
-			model.addAttribute("playlistStep", getPlaylistStep(scPerson, optedIn));
+			if (optedIn.orElse(false)) {
+				model.addAttribute("playlistStep", getPlaylistStep(scPerson, optedIn));
+				model.addAttribute("participantId",
+						researchParticipantRepository.findByPerson(scPerson).getId());
+			}
 
 		} else {
 			model.addAttribute("studentOptedIn", Optional.empty());
