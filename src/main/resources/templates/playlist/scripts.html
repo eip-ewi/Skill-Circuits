@@ -144,20 +144,6 @@
                     delete plData["paused"][taskId];
                     localStorage.setItem("plData", JSON.stringify(plData));
                 }
-            } else if (
-                elem.dataset.completed === "true" &&
-                /^$|paused|playing/.test(elem.innerText)
-            ) {
-                // This task has just been completed thus we want to know how long its timer ran
-                const pausedTime = plData["paused"][taskId] || 0;
-                const elapsed = plData["timers"][taskId] || 0;
-
-                // Remove the taskId
-                delete plData["timers"][taskId];
-                delete plData["paused"][taskId];
-                localStorage.setItem("plData", JSON.stringify(plData));
-
-                elem.innerText = Math.max(pausedTime, elapsed);
             }
         }
         function updateTimer(playing = true) {
@@ -197,15 +183,15 @@
                 elapsedTime: plData["timers"]["main"],
                 taskTimes: [],
             };
-            for (const [taskId, time] of Object.entries(plData["timers"])) {
-                if (taskId === "main") {
-                    continue;
+            for(const group of ["timers", "paused", "completed"]) {
+                for (const [taskId, time] of Object.entries(plData[group])) {
+                    if (taskId === "main") {
+                        continue;
+                    }
+                    data["taskTimes"].push({taskId: taskId, completionTime: time});
                 }
-                data["taskTimes"].push({ taskId: taskId, completionTime: time });
             }
-            for (const [taskId, time] of Object.entries(plData["paused"])) {
-                data["taskTimes"].push({ taskId: taskId, completionTime: time });
-            }
+            plData["completed"] = {};
             const playlist = document.querySelector('[id^="playlist-"][id$="-tasks"]');
             if (playlist) {
                 const playlistId = playlist.id.match(/playlist-(\d+)-tasks/)[1];
@@ -226,7 +212,7 @@
                     downloadTimes(true);
                 }
             } else {
-                plData = { updated: Date.now(), state: "paused", timers: { main: 0 }, paused: {} };
+                plData = { updated: Date.now(), state: "paused", timers: { main: 0 }, paused: {}, completed: {} };
                 downloadTimes(false);
             }
 
@@ -248,9 +234,7 @@
                     url: "/playlist/" + playlistId,
                     type: "DELETE",
                     success: () => {
-                        localStorage.removeItem("playlistState");
                         localStorage.removeItem("plData");
-                        localStorage.removeItem("plPausedTasks");
                         sessionStorage.setItem("openPlDialog", "true");
                         location.reload();
                     },
@@ -273,6 +257,7 @@
                                     state: "paused",
                                     timers: { main: 0 },
                                     paused: {},
+                                    completed: {}
                                 };
                             } else {
                                 plData = {
@@ -280,6 +265,7 @@
                                     state: "paused",
                                     timers: { main: data["elapsedTime"] },
                                     paused: {},
+                                    completed: {}
                                 };
                                 for (const [taskId, time] of Object.entries(data["taskTimes"])) {
                                     if (time > 0) {
@@ -338,7 +324,7 @@
 
         // Confirming task completion time with participant
         function promptCompletionTime(taskId) {
-            const min = Math.floor(plData["timers"][taskId] || plData["paused"][taskId] || 0 / 60);
+            const min = Math.floor((plData["timers"][taskId] || plData["paused"][taskId] || 0 )/ 60);
             document.getElementById("pl-tc-min").textContent = min.toString();
             document.getElementById("pl-tc-user").value = min;
             document.getElementById("playlist").style.display = "flex";
@@ -353,12 +339,14 @@
             const plTask = document.getElementById("pl-task-status-" + taskId);
             const userNumber = document.getElementById("pl-tc-user").value;
             if (userNumber) {
-                plData["paused"][taskId] = userNumber;
+                plData["completed"][taskId] = userNumber;
                 delete plData["timers"][taskId];
+                delete plData["paused"][taskId];
                 plTask.innerText = userNumber + "min";
             } else {
                 plTask.innerText = "";
             }
+            uploadTimes();
             document.getElementById("pl-task-name-" + taskId).style.textDecoration = "line-through";
             document.getElementById("pl-tc-prompt").close();
         }

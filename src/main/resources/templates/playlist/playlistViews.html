@@ -92,7 +92,8 @@
                         th:attr="data-completed=${task.getCompleted()}"
                         th:id="|pl-task-status-${task.getTaskId()}|"
                         class="pl-task-status"
-                        th:text="${!task.getCompleted() ? 'queued' : ''}"></button>
+                        th:text="${!task.getCompleted() ? 'queued' :
+                            (task.getCompletionTime() !=null ? #numbers.formatDecimal(task.getCompletionTime() / 60, 0) + 'min' : '' )}"></button>
                 </li>
                 <li><span>=========</span></li>
                 <li>
