@@ -157,6 +157,7 @@ public class PlaylistController {
 			Playlist playlist = playlistRepository.findByIdOrThrow(playlistId);
 			if (playlist != null) {
 				playlist.setActive(false);
+				playlist.setState(PlaylistState.ABORTED);
 				playlist.setDeleted(LocalDateTime.now());
 				return ResponseEntity.ok().build();
 			}
@@ -175,6 +176,10 @@ public class PlaylistController {
 				.findByPerson(personService.getOrCreateSCPerson(person.getId()));
 		if (!playlist.getActive()) {
 			return ResponseEntity.badRequest().build();
+		}
+
+		if (playlist.getState() != PlaylistState.IN_USE){
+			playlist.setState(PlaylistState.IN_USE);
 		}
 
 		patch.setId(playlist.getLatestVersion().getId());

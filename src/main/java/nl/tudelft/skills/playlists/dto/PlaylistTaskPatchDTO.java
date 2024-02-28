@@ -27,6 +27,8 @@ import lombok.NoArgsConstructor;
 import nl.tudelft.librador.dto.patch.Patch;
 import nl.tudelft.skills.playlists.model.PlaylistTask;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -45,6 +47,12 @@ public class PlaylistTaskPatchDTO extends Patch<PlaylistTask> {
 	@Override
 	protected void applyOneToOne() {
 		updateNonNull(completionTime, data::setCompletionTime);
+	}
+
+	protected void postApply(){
+		if(data.getStarted() == null){
+			data.setStarted(LocalDateTime.now());
+		}
 	}
 
 	@Override
