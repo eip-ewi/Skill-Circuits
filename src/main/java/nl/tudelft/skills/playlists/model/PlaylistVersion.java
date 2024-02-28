@@ -38,8 +38,9 @@ public class PlaylistVersion {
 	private Long id;
 
 	@ManyToOne
-	private Playlist playlist;
+	private Playlist playlist; //Needs to be non-nullable
 
+	@NotNull
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
@@ -51,6 +52,7 @@ public class PlaylistVersion {
 	private Integer estimatedTime = 0;
 
 	@Min(0)
+	@NotNull
 	@Builder.Default
 	private Integer elapsedTime = 0;
 

@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.playlists.dto;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -37,7 +38,9 @@ public class PlaylistVersionCreateDTO extends Create<PlaylistVersion> {
 	@NotNull
 	private List<PlaylistTaskCreateDTO> taskCreates;
 
-	private Set<PlaylistTask> tasks;
+	@NotNull
+	@Builder.Default
+	private Set<PlaylistTask> tasks =  new HashSet<>();
 
 	@NotNull
 	@Builder.Default

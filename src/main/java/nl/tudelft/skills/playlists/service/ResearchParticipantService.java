@@ -143,7 +143,7 @@ public class ResearchParticipantService {
 
 			List<Playlist> playlists = rp.getPlaylists();
 			if (!playlists.isEmpty()) {
-				return playlists.stream().anyMatch(Playlist::isActive) ? PlaylistStep.PLAY
+				return playlists.stream().anyMatch(Playlist::getActive) ? PlaylistStep.PLAY
 						: PlaylistStep.CREATE;
 			}
 		}
@@ -170,7 +170,7 @@ public class ResearchParticipantService {
 			if (optedIn.orElse(false)) {
 				ResearchParticipant participant = researchParticipantRepository.findByPerson(scPerson);
 				Playlist playlist = playlistRepository.findByIdAndParticipant(playlistId, participant);
-				return playlist != null && playlist.isActive();
+				return playlist != null && playlist.getActive();
 			}
 		}
 

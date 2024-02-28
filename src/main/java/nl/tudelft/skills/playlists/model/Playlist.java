@@ -39,19 +39,21 @@ public class Playlist {
 	@ManyToOne
 	private ResearchParticipant participant;
 
+	@NotNull
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@OneToOne(cascade = CascadeType.PERSIST)
 	private PlaylistVersion latestVersion;
 
 	@Builder.Default
-	private boolean active = false;
+	private Boolean active = false;
 
 	@Builder.Default
 	private PlaylistState state = PlaylistState.CREATED;
 
 	@NotNull
-	private LocalDateTime created;
+	@Builder.Default
+	private LocalDateTime created = LocalDateTime.now();
 
 	private LocalDateTime deleted;
 

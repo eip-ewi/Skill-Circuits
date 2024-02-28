@@ -101,11 +101,10 @@ public class PlaylistController {
 		})
 				.collect(Collectors.toSet());
 
-		PlaylistVersion playlistVersion = playlistVersionRepository
-				.saveAndFlush(playlistVersionCreate.apply());
-		playlistVersion.setTasks(tasks);
-		playlistVersion.setPlaylist(playlist);
+		playlistVersionCreate.setTasks(tasks);
+		PlaylistVersion playlistVersion = playlistVersionCreate.apply();
 		playlist.setLatestVersion(playlistVersion);
+		playlistVersion.setPlaylist(playlist);
 		playlistRepository.saveAndFlush(playlist);
 
 		return ResponseEntity.ok().build();
@@ -174,7 +173,7 @@ public class PlaylistController {
 		Playlist playlist = playlistRepository.findByIdOrThrow(playlistId);
 		ResearchParticipant participant = researchParticipantRepository
 				.findByPerson(personService.getOrCreateSCPerson(person.getId()));
-		if (!playlist.isActive()) {
+		if (!playlist.getActive()) {
 			return ResponseEntity.badRequest().build();
 		}
 
