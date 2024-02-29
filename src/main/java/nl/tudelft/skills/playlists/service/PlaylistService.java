@@ -22,6 +22,7 @@ import java.util.*;
 
 import javax.transaction.Transactional;
 
+import nl.tudelft.skills.playlists.model.PlaylistVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -122,7 +123,13 @@ public class PlaylistService {
 				.id(playlist.getId())
 				.created(playlist.getCreated().toLocalDate())
 				.estTime(playlist.getLatestVersion().getEstimatedTime())
+				.completed(playlistCompleted(playlist.getLatestVersion()))
 				.tasks(tasks).build();
+	}
+
+	private boolean playlistCompleted(PlaylistVersion version){
+		return version.getTasks().stream().allMatch(PlaylistTask::getCompleted);
+
 	}
 
 	public String getDefaultPathForEdition(Long personId) {
@@ -170,6 +177,7 @@ public class PlaylistService {
 		return tasks;
 	}
 
+	@Transactional
 	public void setPlTaskCompleted(SCPerson person, Task task, boolean completed) {
 		ResearchParticipant participant = researchParticipantRepository.findByPerson(person);
 		if (participant != null) {

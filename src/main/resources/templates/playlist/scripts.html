@@ -358,6 +358,19 @@
             document.getElementById("pl-task-name-" + taskId).style.textDecoration = "line-through";
             document.getElementById("pl-tc-prompt").close();
         }
+
+        // Completing playlist
+        function completePlaylist(playlistId){
+        data = {completed: true};
+
+            $.ajax({
+                url: "/playlist/" + playlistId,
+                type: "PATCH",
+                contentType: "application/json",
+                data: JSON.stringify(data),
+            });
+        }
+
         // Event listeners
         addEventListener("DOMContentLoaded", function () {
             document.getElementById("playlist-play-pause").addEventListener("click", toggleTimer);

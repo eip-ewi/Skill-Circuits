@@ -123,11 +123,13 @@
                     study duration is correct.
                 </p>
             </div>
-        </th:block>
 
-        <div class="opt-in__button-container_single">
-            <button class="opt-button-cancel pl-task-status">Opt out</button>
-        </div>
+
+            <div class="opt-in__button-container">
+                <button class="opt-button-cancel pl-task-status">Opt out</button>
+                <button th:onclick="|completePlaylist(${playlist.getId()})|" th:if="${playlist.isCompleted()}">Next playlist!</button>
+            </div>
+        </th:block>
     </div>
 
     <div layout:fragment="first-time" id="playlist-ft">
