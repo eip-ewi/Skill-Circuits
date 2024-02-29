@@ -147,7 +147,7 @@ public class PlaylistController {
 
 	@DeleteMapping("/{playlistId}")
 	@Transactional
-	@PreAuthorize("@researchParticipantService.canCreatePlaylist(#person)")
+	@PreAuthorize("@researchParticipantService.canEditPlaylist(#person, #playlistId)")
 	public ResponseEntity<Void> deletePlaylist(@AuthenticatedPerson Person person,
 			@PathVariable Long playlistId) {
 
@@ -164,6 +164,25 @@ public class PlaylistController {
 		}
 		return ResponseEntity.notFound().build();
 	}
+
+	@PatchMapping("/{playlistId}")
+	@Transactional
+	@PreAuthorize("@researchParticipantService.canEditPlaylist(#person, #playlistId)")
+	public ResponseEntity<Void> completePlaylist(@AuthenticatedPerson Person person,
+											   @PathVariable Long playlistId,
+												 @RequestBody HashMap<String, Boolean> data) {
+
+		if(!data.get("completed")){
+			return ResponseEntity.badRequest().build();
+		}
+		Playlist playlist = playlistRepository.findByIdOrThrow(playlistId);
+
+		playlist.setActive(false);
+		playlist.setState(PlaylistState.COMPLETED);
+		playlist.setDeleted(LocalDateTime.now());
+		return ResponseEntity.ok().build();
+	}
+
 
 	@PatchMapping("/{playlistId}/times")
 	@Transactional

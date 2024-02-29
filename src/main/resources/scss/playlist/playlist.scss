@@ -19,12 +19,11 @@
     float: right;
     opacity: 0.9;
     background-color: var(--secondary-green);
-    width: 80%;
+    width: 20%;
     padding: 0 1em 1em 1em;
-    left: 50%;
-    transform: translate(-50%, -10%);
+    right: 10%;
     display: none;
-    position: absolute;
+    position: fixed;
     overflow-y: auto;
     font-size: 0.7em;
     z-index: 1;

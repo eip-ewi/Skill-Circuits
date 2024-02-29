@@ -361,7 +361,7 @@
 
         // Completing playlist
         function completePlaylist(playlistId){
-        data = {completed: true};
+        const data = {completed: true};
 
             $.ajax({
                 url: "/playlist/" + playlistId,
@@ -369,6 +369,11 @@
                 contentType: "application/json",
                 data: JSON.stringify(data),
             });
+            uploadTimes();
+            localStorage.removeItem("plData");
+            sessionStorage.setItem("openPlDialog", "true");
+            location.reload();
+
         }
 
         // Event listeners

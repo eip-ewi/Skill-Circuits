@@ -48,8 +48,8 @@
             <span class="fa-solid fa-question hasTooltip"></span>
             <div class="tooltip">
                 <p>
-                    <strong>No timers can be reset</strong>
-                    , only paused. This means you have to remember to pause the playlist if you
+                    <strong>No timers can be reset</strong>, only paused.
+                    This means you have to remember to pause the playlist if you
                     decide to do other things while an ACC page is open. When you create a new
                     playlist with tasks you included in a previous playlist and have already worked
                     on, the task's individual timer will continue. The progress you already made on
@@ -120,11 +120,12 @@
                     automatically stops the task's timer for you. It then asks you to confirm if the
                     timed
                     <s>play</s>
-                    study duration is correct.
+                    study duration is correct. <br/>
+                    At the moment you also need to refresh the page when completing the last task to be able to
+                    complete the playlist.
                 </p>
             </div>
-
-
+            <hr/>
             <div class="opt-in__button-container">
                 <button class="opt-button-cancel pl-task-status">Opt out</button>
                 <button th:onclick="|completePlaylist(${playlist.getId()})|" th:if="${playlist.isCompleted()}">Next playlist!</button>
