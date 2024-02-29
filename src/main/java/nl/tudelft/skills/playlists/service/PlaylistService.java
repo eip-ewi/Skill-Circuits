@@ -22,7 +22,6 @@ import java.util.*;
 
 import javax.transaction.Transactional;
 
-import nl.tudelft.skills.playlists.model.PlaylistVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +34,7 @@ import nl.tudelft.skills.playlists.dto.PlaylistTaskViewDTO;
 import nl.tudelft.skills.playlists.dto.PlaylistViewDTO;
 import nl.tudelft.skills.playlists.model.Playlist;
 import nl.tudelft.skills.playlists.model.PlaylistTask;
+import nl.tudelft.skills.playlists.model.PlaylistVersion;
 import nl.tudelft.skills.playlists.model.ResearchParticipant;
 import nl.tudelft.skills.playlists.repository.PlaylistRepository;
 import nl.tudelft.skills.playlists.repository.PlaylistTaskRepository;
@@ -127,7 +127,7 @@ public class PlaylistService {
 				.tasks(tasks).build();
 	}
 
-	private boolean playlistCompleted(PlaylistVersion version){
+	private boolean playlistCompleted(PlaylistVersion version) {
 		return version.getTasks().stream().allMatch(PlaylistTask::getCompleted);
 
 	}

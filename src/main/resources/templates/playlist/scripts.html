@@ -102,11 +102,13 @@
         //     Code for the timers in the playlist
         let timer;
         let plData;
+        let justPaused = false;
         function toggleTimer() {
             if (plData["state"] === "paused") {
                 document.getElementById("playlist-state").innerText = "playing";
                 updateTaskStates("playing");
                 plData["state"] = "playing";
+                justPaused = true;
                 timer = setInterval(updateTimer, 1000);
                 document.getElementById("playlist-play-pause").firstElementChild.className =
                     "fa-solid fa-pause-circle";
@@ -147,11 +149,25 @@
             }
         }
         function updateTimer(playing = true) {
+            let corrected = false;
             if (playing) {
+                // Check if the browser paused or throttled the timer
+                if (plData["updated"]) {
+                    const timePassed = Date.now() - new Date(plData["updated"]);
+                    if (!justPaused && timePassed > 2000) {
+                        Object.keys(plData["timers"]).forEach(timer => {
+                            plData["timers"][timer] += Math.floor(timePassed / 1000);
+                        });
+                        corrected = true;
+                    }
+                }
                 plData["updated"] = Date.now();
-                Object.keys(plData["timers"]).forEach(timer => {
-                    plData["timers"][timer]++;
-                });
+                if (!corrected) {
+                    justPaused = false;
+                    Object.keys(plData["timers"]).forEach(timer => {
+                        plData["timers"][timer]++;
+                    });
+                }
             }
             let hours = Math.floor(plData["timers"]["main"] / 60 / 60);
             let minutes = Math.floor((plData["timers"]["main"] / 60) % 60);
@@ -225,6 +241,7 @@
             if (plData["state"] === "paused") {
                 updateTimer(false);
                 document.getElementById("playlist-state").innerText = "paused";
+                justPaused = true;
             } else if (plData["state"] === "playing") {
                 plData["state"] = "paused"; //so it gets toggled to playing
                 toggleTimer();
@@ -286,7 +303,7 @@
                             if (lastUpdatedLocal > lastUpdatedServer) {
                                 uploadTimes();
                             } else {
-                                plData["updated"] = new Date(data["elapsedTimeUpdated"]);
+                                plData["updated"] = Date.now();
                                 for (const taskGroup of ["timers", "paused"]) {
                                     for (const [taskId, time] of Object.entries(
                                         plData[taskGroup]
@@ -360,8 +377,8 @@
         }
 
         // Completing playlist
-        function completePlaylist(playlistId){
-        const data = {completed: true};
+        function completePlaylist(playlistId) {
+            const data = { completed: true };
 
             $.ajax({
                 url: "/playlist/" + playlistId,
@@ -373,7 +390,6 @@
             localStorage.removeItem("plData");
             sessionStorage.setItem("openPlDialog", "true");
             location.reload();
-
         }
 
         // Event listeners

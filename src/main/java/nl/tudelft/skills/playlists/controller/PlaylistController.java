@@ -169,10 +169,10 @@ public class PlaylistController {
 	@Transactional
 	@PreAuthorize("@researchParticipantService.canEditPlaylist(#person, #playlistId)")
 	public ResponseEntity<Void> completePlaylist(@AuthenticatedPerson Person person,
-											   @PathVariable Long playlistId,
-												 @RequestBody HashMap<String, Boolean> data) {
+			@PathVariable Long playlistId,
+			@RequestBody HashMap<String, Boolean> data) {
 
-		if(!data.get("completed")){
+		if (!data.get("completed")) {
 			return ResponseEntity.badRequest().build();
 		}
 		Playlist playlist = playlistRepository.findByIdOrThrow(playlistId);
@@ -182,7 +182,6 @@ public class PlaylistController {
 		playlist.setDeleted(LocalDateTime.now());
 		return ResponseEntity.ok().build();
 	}
-
 
 	@PatchMapping("/{playlistId}/times")
 	@Transactional
