@@ -89,7 +89,7 @@ public class ModuleController {
 		moduleService.configureModuleModel(person, id, model, session);
 
 		//		Playlist feature
-		long accId = 2L;
+		long accId = 643L;
 		if (moduleRepository.findByIdOrThrow(id).getEdition().getId() == accId
 				& !authorisationService.canEditEdition(accId)) {
 			researchParticipantService.addRPInfoToModel(person, model);

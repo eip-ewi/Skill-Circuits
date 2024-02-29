@@ -77,7 +77,7 @@ public class EditionController {
 		editionService.configureEditionModel(id, model, session);
 
 		//		Playlist feature
-		long accId = 2L;
+		long accId = 643L;
 		if (id == accId & !authorisationService.canEditEdition(accId)) {
 			researchParticipantService.addRPInfoToModel(authorisationService.getAuthPerson(), model);
 
