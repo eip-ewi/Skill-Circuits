@@ -215,8 +215,8 @@
                                 <span th:class="'fa-solid fa-' + ${task.getType().icon}"></span>
                                 <span th:text="${task.getTaskName()}"></span>
                                 <span
-                                    style="font-style: italic"
-                                    th:text="${task.getEstTime()} + ' minutes'"></span>
+                                    class="tldr"
+                                    th:text="|(${task.getEstTime()}minutes)|"></span>
                             </li>
                         </ul>
                     </li>
