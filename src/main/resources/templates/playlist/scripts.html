@@ -378,6 +378,7 @@
 
         // Completing playlist
         function completePlaylist(playlistId) {
+            uploadTimes();
             const data = { completed: true };
 
             $.ajax({
@@ -386,7 +387,6 @@
                 contentType: "application/json",
                 data: JSON.stringify(data),
             });
-            uploadTimes();
             localStorage.removeItem("plData");
             sessionStorage.setItem("openPlDialog", "true");
             location.reload();
