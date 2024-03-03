@@ -65,6 +65,10 @@ public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitV
 	private List<CheckpointViewDTO> remainingCheckpointsInEdition;
 
 	@NotNull
+	@PostApply
+	private List<CheckpointViewDTO> usedCheckpointsInEdition;
+
+	@NotNull
 	private List<PathViewDTO> paths;
 
 	@NotNull
@@ -101,6 +105,9 @@ public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitV
 				.map(checkpoint -> View.convert(checkpoint, CheckpointViewDTO.class)).toList();
 		this.remainingCheckpointsInEdition = checkpointsInEdition.stream()
 				.filter(checkpoint -> !checkpoints.contains(checkpoint)).toList();
+		// get all used checkpoints in edition
+		this.usedCheckpointsInEdition = checkpointsInEdition.stream()
+				.filter(c -> !remainingCheckpointsInEdition.contains(c)).collect(Collectors.toList());
 		// get all paths in this edition
 		this.paths = data.getEdition().getPaths().stream().map(p -> View.convert(p, PathViewDTO.class))
 				.toList();
