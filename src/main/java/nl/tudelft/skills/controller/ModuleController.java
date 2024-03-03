@@ -198,7 +198,7 @@ public class ModuleController {
 	}
 
 	/**
-	 * Gets the skills of a module.
+	 * Gets the skills of a module sorted in alphabetic order.
 	 *
 	 * @param  id The id of the module
 	 * @return    The list of skills

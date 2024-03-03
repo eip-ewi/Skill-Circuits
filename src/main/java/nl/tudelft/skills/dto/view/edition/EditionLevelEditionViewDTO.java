@@ -59,16 +59,29 @@ public class EditionLevelEditionViewDTO extends View<SCEdition> implements Circu
 	@NotNull
 	private Set<PathViewDTO> paths;
 
+	/**
+	 * Gets the modules of an edition sorted in alphabetic order.
+	 *
+	 * @return The list of modules
+	 */
 	public List<EditionLevelModuleViewDTO> getModules() {
 		return modules.stream()
 				.sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList();
 	}
 
+	/**
+	 * Gets the modules of an edition sorted in alphabetic order.
+	 *
+	 * @return The list of modules
+	 */
 	@Override
 	public List<? extends GroupView> getGroups() {
 		return modules.stream().sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList();
 	}
 
+	/**
+	 * Orders the checkpoints in increasing deadline order.
+	 */
 	@Override
 	public void postApply() {
 		super.postApply();

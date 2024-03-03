@@ -71,11 +71,19 @@ public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitV
 	@PostApply
 	private List<ModuleLevelExternalSkillViewDTO> externalSkillList;
 
+	/**
+	 * Gets the submodules of a module sorted in alphabetic order.
+	 *
+	 * @return The list of submodules
+	 */
 	@Override
 	public List<? extends GroupView> getGroups() {
 		return submodules.stream().sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList();
 	}
 
+	/**
+	 * Orders the checkpoints in increasing deadline order.
+	 */
 	@Override
 	public void postApply() {
 		super.postApply();
