@@ -134,7 +134,7 @@ public class PlaylistService {
 
 	public String getDefaultPathForEdition(Long personId) {
 		Optional<PathPreference> pathPref = personService.getPathForEdition(personId, ACCId);
-		if (pathPref.isPresent()) {
+		if (pathPref.isPresent() && pathPref.get().getPath() != null) {
 			return pathPref.get().getPath().getName();
 		} else {
 			return "Path not selected";
