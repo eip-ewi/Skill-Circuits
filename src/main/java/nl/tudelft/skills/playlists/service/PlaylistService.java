@@ -306,7 +306,7 @@ public class PlaylistService {
 	 */
 	public List<PlaylistCheckpointDTO> getCheckpointDTOs(Long personId) {
 		SCPerson person = personRepository.findByIdOrThrow(personId);
-		SCEdition edition = editionRepository.findByIdOrThrow(2L);
+		SCEdition edition = editionRepository.findByIdOrThrow(ACCId);
 
 		//		Sort checkpoint according to their deadline
 		List<Checkpoint> checkpoints = edition.getCheckpoints().stream()
