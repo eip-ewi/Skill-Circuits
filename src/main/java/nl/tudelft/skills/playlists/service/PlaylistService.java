@@ -85,6 +85,12 @@ public class PlaylistService {
 		this.skillRepository = skillRepository;
 	}
 
+	/**
+	 * Gets the active playlist for a given ResearchParticipant
+	 *
+	 * @param  personId person that should be ResearchParticipant
+	 * @return          a PlaylistViewDTO for the found active playlist
+	 */
 	public PlaylistViewDTO getPlaylist(Long personId) {
 		SCPerson person = personRepository.findByIdOrThrow(personId);
 		ResearchParticipant participant = researchParticipantRepository
@@ -129,11 +135,23 @@ public class PlaylistService {
 				.tasks(tasks).build();
 	}
 
+	/**
+	 * Returns whether a playlist's version is completed
+	 *
+	 * @param  version The playlist version to check
+	 * @return         true if the playlist version is completed, else false
+	 */
 	private boolean playlistCompleted(PlaylistVersion version) {
 		return version.getTasks().stream().allMatch(PlaylistTask::getCompleted);
 
 	}
 
+	/**
+	 * Gets the ResearchParticipant's selected path for the ACC edition
+	 *
+	 * @param  personId person that is a ResearchParticipant
+	 * @return          the name of the selected path or a default string if not set
+	 */
 	public String getDefaultPathForEdition(Long personId) {
 		Optional<PathPreference> pathPref = personService.getPathForEdition(personId, ACCId);
 		if (pathPref.isPresent() && pathPref.get().getPath() != null) {
@@ -143,11 +161,24 @@ public class PlaylistService {
 		}
 	}
 
+	/**
+	 * Get the moduleId of a task
+	 *
+	 * @param  taskId id of the task
+	 * @return        Module id
+	 */
 	public Long getModuleId(Long taskId) {
 		Task task = taskRepository.findByIdOrThrow(taskId);
 		return task.getSkill().getSubmodule().getModule().getId();
 	}
 
+	/**
+	 * Order a list of skill IDs based on their row in the skill circuit. The higher the row number, the
+	 * higher the skill's position in the list
+	 *
+	 * @param  skillIds a list of skill IDs
+	 * @return          the given list skill IDs ordered
+	 */
 	private List<Long> getSkillOrder(List<Long> skillIds) {
 		//		Does not take into account module order
 		List<Skill> skills = skillIds.stream().map(skillRepository::findByIdOrThrow)
@@ -156,6 +187,13 @@ public class PlaylistService {
 
 	}
 
+	/**
+	 * Get PlaylistTaskViewDTOs for each uncompleted task of a skill
+	 *
+	 * @param  taskCompletions list of TaskCompletions for a ResearchParticipant
+	 * @param  skill           the skill to retrieve uncompleted tasks from
+	 * @return                 a list of PlaylistTaskViewDTOs for each uncompleted task
+	 */
 	public List<PlaylistTaskViewDTO> getTaskDTOs(Set<TaskCompletion> taskCompletions, Skill skill) {
 		List<PlaylistTaskViewDTO> tasks = new LinkedList<>();
 
@@ -179,6 +217,13 @@ public class PlaylistService {
 		return tasks;
 	}
 
+	/**
+	 * Update the completion status of a Task's playlist counterpart
+	 *
+	 * @param person    person that is a ResearchParticipant
+	 * @param task      the Task that is updated
+	 * @param completed boolean representing whether the task has been completed (true) or not (false)
+	 */
 	@Transactional
 	public void setPlTaskCompleted(SCPerson person, Task task, boolean completed) {
 		ResearchParticipant participant = researchParticipantRepository.findByPerson(person);
@@ -192,6 +237,12 @@ public class PlaylistService {
 		}
 	}
 
+	/**
+	 * Get a list of PlaylistTaskViewDTOs for a list of Task IDs
+	 *
+	 * @param  taskIds a list of Task IDs
+	 * @return         list of PlaylistTaskViewDTOs
+	 */
 	public List<PlaylistTaskViewDTO> getTaskDTOs(List<Long> taskIds) {
 		List<PlaylistTaskViewDTO> tasks = new LinkedList<>();
 		log.trace("Transforming tasks to playlistTaskDTOs");
@@ -206,26 +257,13 @@ public class PlaylistService {
 		return tasks;
 	}
 
-	public Map<PlaylistSkillViewDTO, List<PlaylistTaskViewDTO>> getSkills(Long personId, Long checkpointId) {
-		SCPerson person = personRepository.findByIdOrThrow(personId);
-		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(checkpointId);
-		//		TODO: filter out skills not revealed yet
-		List<Skill> skills = checkpoint.getSkills().stream().toList();
-		Map<PlaylistSkillViewDTO, List<PlaylistTaskViewDTO>> items = new HashMap<>();
-
-		Set<TaskCompletion> taskCompletions = person.getTaskCompletions();
-		List<Long> complTaskIds = taskCompletions.stream().map(TaskCompletion::getTask).map(Task::getId)
-				.toList();
-		for (Skill skill : skills) {
-			int remainingTime = getSkillRemainingTasks(skill, complTaskIds).stream()
-					.map(taskRepository::findByIdOrThrow).map(Task::getTime).reduce(0, Integer::sum);
-			PlaylistSkillViewDTO view = View.convert(skill, PlaylistSkillViewDTO.class);
-			view.setTotalTime(remainingTime);
-			items.put(view, getTaskDTOs(taskCompletions, skill));
-		}
-		return items;
-	}
-
+	/**
+	 * Get the uncompleted skills of a given checkpoint as a list of PlaylistSkillViewDTOs
+	 *
+	 * @param  checkpoint   Checkpoint to retrieve uncompleted skills of
+	 * @param  complTaskIds TaskCompletions of ResearchParticipant
+	 * @return              a list of PlaylistSkillViewDTOs
+	 */
 	private List<PlaylistSkillViewDTO> getCheckpointRemainingSkills(Checkpoint checkpoint,
 			List<Long> complTaskIds) {
 		log.trace("Getting uncompleted skills for checkpoint:" + checkpoint.getName());
@@ -245,6 +283,13 @@ public class PlaylistService {
 		return Collections.unmodifiableList(skills);
 	}
 
+	/**
+	 * Get the remaining uncompleted Tasks of a given Skill
+	 *
+	 * @param  skill        Skill to retrieve uncompleted Tasks from
+	 * @param  complTaskIds A list of IDs for all the tasks completed by a ResearchParticipant
+	 * @return              a list containing the IDs for each uncompleted task of the given Skill
+	 */
 	private List<Long> getSkillRemainingTasks(Skill skill, List<Long> complTaskIds) {
 		log.trace("Getting uncompleted tasks for skill: " + skill.getName());
 		log.trace("Skill '" + skill.getName() + "' has " + skill.getTasks().size() + " tasks in total");
@@ -252,6 +297,13 @@ public class PlaylistService {
 
 	}
 
+	/**
+	 * Retrieve the PlaylistCheckpointDTOs for each checkpoint in the ACC edition that has uncompleted skills
+	 * for the given ResearchParticipant
+	 *
+	 * @param  personId person that is a ResearchParticipant
+	 * @return          a list of PlaylistCheckpointDTOs
+	 */
 	public List<PlaylistCheckpointDTO> getCheckpointDTOs(Long personId) {
 		SCPerson person = personRepository.findByIdOrThrow(personId);
 		SCEdition edition = editionRepository.findByIdOrThrow(2L);
@@ -279,6 +331,11 @@ public class PlaylistService {
 		return Collections.unmodifiableList(checkpointDTOs);
 	}
 
+	/**
+	 * Deactivate the currently active playlist of a ResearchParticipant
+	 *
+	 * @param participant ResearchParticipant
+	 */
 	@Transactional
 	public void deactivateActivePlaylist(ResearchParticipant participant) {
 		Playlist playlist = playlistRepository.findByParticipantAndActive(participant, true);
