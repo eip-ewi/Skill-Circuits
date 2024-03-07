@@ -25,6 +25,7 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
@@ -46,6 +47,7 @@ import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.PersonService;
 
+@Slf4j
 @Service
 public class PlaylistService {
 	private PlaylistRepository playlistRepository;
@@ -185,12 +187,14 @@ public class PlaylistService {
 					.findByParticipantAndTaskId(participant, task.getId());
 			if (plTask != null) {
 				plTask.setCompleted(completed);
+				log.trace("Succesfully completed a playlist task");
 			}
 		}
 	}
 
 	public List<PlaylistTaskViewDTO> getTaskDTOs(List<Long> taskIds) {
 		List<PlaylistTaskViewDTO> tasks = new LinkedList<>();
+		log.trace("Transforming tasks to playlistTaskDTOs");
 		for (Long id : taskIds) {
 			Task t = taskRepository.findByIdOrThrow(id);
 			//			Using existing task id for now
@@ -224,20 +228,26 @@ public class PlaylistService {
 
 	private List<PlaylistSkillViewDTO> getCheckpointRemainingSkills(Checkpoint checkpoint,
 			List<Long> complTaskIds) {
+		log.trace("Getting uncompleted skills for checkpoint:" + checkpoint.getName());
 		List<PlaylistSkillViewDTO> skills = new LinkedList<>();
 		for (Skill s : checkpoint.getSkills()) {
 			//	Filter out skills that are still hidden for the participant
 			if (!complTaskIds.containsAll(s.getRequiredTasks().stream().map(Task::getId).toList())) {
+				log.trace("Filtered out a hidden skill");
 				continue;
 			}
 			PlaylistSkillViewDTO skillDTO = View.convert(s, PlaylistSkillViewDTO.class);
 			skillDTO.postApply(taskRepository, getTaskDTOs(getSkillRemainingTasks(s, complTaskIds)));
 			skills.add(skillDTO);
+			log.debug("Skill '" + s.getName() + "' has " + skillDTO.getTasks().size() + "uncompleted tasks");
 		}
+		log.debug("Checkpoint '" + checkpoint.getName() + "' has " + skills.size() + " uncompleted skills");
 		return Collections.unmodifiableList(skills);
 	}
 
 	private List<Long> getSkillRemainingTasks(Skill skill, List<Long> complTaskIds) {
+		log.trace("Getting uncompleted tasks for skill: " + skill.getName());
+		log.trace("Skill '" + skill.getName() + "' has " + skill.getTasks().size() + " tasks in total");
 		return skill.getTasks().stream().map(Task::getId).filter(t -> !complTaskIds.contains(t)).toList();
 
 	}
@@ -249,7 +259,7 @@ public class PlaylistService {
 		//		Sort checkpoint according to their deadline
 		List<Checkpoint> checkpoints = edition.getCheckpoints().stream()
 				.sorted(Comparator.comparing(Checkpoint::getDeadline)).toList();
-
+		log.trace("Found " + checkpoints.size() + "checkpoints");
 		//		Get all taskcompletions for a student
 		List<Long> complTaskIds = person.getTaskCompletions().stream().map(TaskCompletion::getTask)
 				.map(Task::getId).toList();
@@ -257,7 +267,7 @@ public class PlaylistService {
 
 		//		For each checkpoint, get uncompleted skills
 		for (Checkpoint cp : checkpoints) {
-
+			log.trace("Checkpoint '" + cp.getName() + "' has in total " + cp.getSkills().size() + " skills");
 			List<PlaylistSkillViewDTO> remainingSkills = getCheckpointRemainingSkills(cp, complTaskIds);
 			if (!remainingSkills.isEmpty()) {
 				PlaylistCheckpointDTO cpDTO = View.convert(cp, PlaylistCheckpointDTO.class);
