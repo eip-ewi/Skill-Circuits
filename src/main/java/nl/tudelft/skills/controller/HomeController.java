@@ -351,8 +351,6 @@ public class HomeController {
 	 */
 	public Map<Long, Boolean> getCompletedTaskInCourse(List<CourseSummaryDTO> courses, SCPerson scperson,
 			Map<Long, Long> courseToEditionMap) {
-		// TODO currently, this will not consider paths. Is this correct?
-
 		Map<Long, Boolean> completedTaskInCourse = new HashMap<>();
 		for (CourseSummaryDTO course : courses) {
 			Long courseId = course.getId();

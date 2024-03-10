@@ -99,7 +99,7 @@ public class CourseServiceTest {
 				Collections.emptySet(), null);
 		editionRepository.save(edition);
 
-		assertThat(courseService.hasAtLeastOneEditionVisibleToStudents(1L));
+		assertThat(courseService.hasAtLeastOneEditionVisibleToStudents(1L)).isTrue();
 	}
 
 	@Test
@@ -107,7 +107,7 @@ public class CourseServiceTest {
 		when(courseApi.getCourseById(anyLong()))
 				.thenReturn(Mono.just(new CourseDetailsDTO().editions(Collections.emptyList())));
 
-		assertThat(!courseService.hasAtLeastOneEditionVisibleToStudents(1L));
+		assertThat(courseService.hasAtLeastOneEditionVisibleToStudents(1L)).isFalse();
 	}
 
 	@Test
@@ -124,9 +124,7 @@ public class CourseServiceTest {
 		SCEdition edition = new SCEdition();
 		edition.setVisible(true);
 
-		//		when(editionRepository.findById(anyLong())).thenReturn(Optional.of(edition));
-
-		assertThat(courseService.getLastEditionForCourse(3L)).isEqualTo(2L);
+		assertThat(courseService.getLastEditionForCourse(courseDetailsDTO)).isEqualTo(2L);
 	}
 
 	@Test
@@ -226,6 +224,6 @@ public class CourseServiceTest {
 		Long courseId = 0L;
 		when(editionApi.getAllEditionsByCourse(anyLong()))
 				.thenReturn(Flux.just(new EditionDetailsDTO().id(1L)));
-		assertThat(courseService.getNumberOfEditions(courseId) == 1);
+		assertThat(courseService.getNumberOfEditions(courseId)).isEqualTo(1);
 	}
 }

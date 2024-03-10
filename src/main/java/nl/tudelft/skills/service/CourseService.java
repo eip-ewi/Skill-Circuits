@@ -62,6 +62,7 @@ public class CourseService {
 	 * @param  id Course id.
 	 * @return    CourseViewDTO for course with id.
 	 */
+	@Transactional
 	public CourseLevelCourseViewDTO getCourseView(Long id) {
 		CourseDetailsDTO course = courseApi.getCourseById(id).block();
 
@@ -79,15 +80,12 @@ public class CourseService {
 	}
 
 	/**
-	 * Returns the most recent edition that is visible for a course with id.
+	 * Returns the most recent edition that is visible for a course with given DTO.
 	 *
-	 * @param  id Id of the course.
-	 * @return    The most recent edition for the course.
+	 * @param  course The CourseDetailsDTO for the course.
+	 * @return        The most recent edition for the course.
 	 */
-	public Long getLastEditionForCourse(Long id) {
-		// TODO can this parameter be passed to minimize requests?
-		CourseDetailsDTO course = courseApi.getCourseById(id).block();
-
+	public Long getLastEditionForCourse(CourseDetailsDTO course) {
 		return course.getEditions().stream()
 				.filter(e -> editionRepository.findById(e.getId()).map(SCEdition::isVisible).orElse(false))
 				.max(Comparator.comparing(EditionSummaryDTO::getStartDate))
@@ -116,7 +114,7 @@ public class CourseService {
 				})
 				.max(Comparator.comparing(EditionSummaryDTO::getStartDate))
 				.map(EditionSummaryDTO::getId)
-				.orElseGet(() -> getLastEditionForCourse(id));
+				.orElseGet(() -> getLastEditionForCourse(course));
 	}
 
 	/**
