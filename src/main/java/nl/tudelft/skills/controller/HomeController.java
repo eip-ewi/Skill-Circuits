@@ -125,8 +125,8 @@ public class HomeController {
 		if (person != null) {
 			SCPerson scperson = personRepository.findByIdOrThrow(person.getId());
 
-			completedSkillsPerCourse = getCompletedSkillsPerCourse(courses, scperson, courseToEditionMap);
-			completedTaskInCourse = getCompletedTaskInCourse(courses, scperson, courseToEditionMap);
+			completedSkillsPerCourse = getCompletedSkillsPerCourse(scperson, courseToEditionMap);
+			completedTaskInCourse = getCompletedTaskInCourse(scperson, courseToEditionMap);
 		}
 
 		// Check if any skill has been completed
@@ -140,8 +140,7 @@ public class HomeController {
 		Map<Long, EditionDetailsDTO> editionMap = visibleOrManagedEditions.stream()
 				.collect(Collectors.toMap(EditionDetailsDTO::getId,
 						Function.identity()));
-		Set<Long> activeCourses = getActiveCourses(courses, editionMap, visible, teacherIds,
-				courseToEditionMap);
+		Set<Long> activeCourses = getActiveCourses(editionMap, visible, teacherIds, courseToEditionMap);
 
 		// Get course groups and add them to the model
 		Map<String, List<CourseSummaryDTO>> courseGroups = getCourseGroups(person, courses, activeCourses,
@@ -155,8 +154,8 @@ public class HomeController {
 
 	/**
 	 * Creates a map for courses to their default edition ids (latest edition or last student edition). If
-	 * there is no published edition for the course, i.e., such an id would be null, the course is not added
-	 * to the map.
+	 * there is no published edition for the course, the id is null. The pair is still added to the map, so
+	 * that the key set corresponds to all visible or managed courses.
 	 *
 	 * @param  courses The course summaries.
 	 * @return         Map of courses to the default edition ids (latest edition or last student edition).
@@ -166,9 +165,7 @@ public class HomeController {
 		for (CourseSummaryDTO course : courses) {
 			Long editionId = courseService.getLastStudentEditionForCourseOrLast(course.getId());
 
-			if (editionId != null) {
-				courseToEditionMap.put(course.getId(), editionId);
-			}
+			courseToEditionMap.put(course.getId(), editionId);
 		}
 		return courseToEditionMap;
 	}
@@ -259,7 +256,6 @@ public class HomeController {
 	 * edition the user was a student in, is active 2. the user is not a student in any edition, and the
 	 * latest edition is active
 	 *
-	 * @param  courses            List of the course summaries.
 	 * @param  editions           Map of edition ids to the corresponding edition.
 	 * @param  visible            The ids of the visible editions.
 	 * @param  teacherIds         The ids of the editions in which the user is a teacher.
@@ -268,16 +264,17 @@ public class HomeController {
 	 * @return                    Ids of courses in which there is an active edition, following the above
 	 *                            criteria.
 	 */
-	public Set<Long> getActiveCourses(List<CourseSummaryDTO> courses, Map<Long, EditionDetailsDTO> editions,
-			Set<Long> visible, Set<Long> teacherIds, Map<Long, Long> courseToEditionMap) {
+	public Set<Long> getActiveCourses(Map<Long, EditionDetailsDTO> editions, Set<Long> visible,
+			Set<Long> teacherIds,
+			Map<Long, Long> courseToEditionMap) {
 		Set<Long> activeCourses = new HashSet<>();
 
-		for (CourseSummaryDTO course : courses) {
-			// Get the id of either the latest student edition or the last edition, if no student edition exists
-			Long editionId = courseToEditionMap.get(course.getId());
+		for (Map.Entry<Long, Long> courseToEdition : courseToEditionMap.entrySet()) {
+			Long courseId = courseToEdition.getKey();
+			Long editionId = courseToEdition.getValue();
 
 			// Skip if the user is neither a teacher for this edition, nor it is visible
-			if (!visible.contains(editionId) && !teacherIds.contains(editionId)) {
+			if (editionId == null || (!visible.contains(editionId) && !teacherIds.contains(editionId))) {
 				continue;
 			}
 
@@ -288,7 +285,7 @@ public class HomeController {
 			boolean beforeEndIncl = edition.getEndDate().isAfter(LocalDateTime.now()) ||
 					edition.getEndDate().equals(LocalDateTime.now());
 			if (afterStartIncl && beforeEndIncl) {
-				activeCourses.add(course.getId());
+				activeCourses.add(courseId);
 			}
 		}
 
@@ -298,20 +295,20 @@ public class HomeController {
 	/**
 	 * Returns a map of courses and the number of skills completed in a respective edition in that course.
 	 *
-	 * @param  courses            List of courses
 	 * @param  scperson           person
 	 * @param  courseToEditionMap Map of courses to the default edition ids (latest edition or last student
 	 *                            edition).
 	 * @return                    Map containing number of completed skills per course.
 	 */
-	public Map<Long, Integer> getCompletedSkillsPerCourse(List<CourseSummaryDTO> courses, SCPerson scperson,
+	public Map<Long, Integer> getCompletedSkillsPerCourse(SCPerson scperson,
 			Map<Long, Long> courseToEditionMap) {
 		Map<Long, Integer> completedSkillsPerCourse = new HashMap<>();
 
-		for (var course : courses) {
-			Long courseId = course.getId();
+		for (Map.Entry<Long, Long> courseToEdition : courseToEditionMap.entrySet()) {
+			Long courseId = courseToEdition.getKey();
+			Long editionId = courseToEdition.getValue();
+
 			int skillsDoneCount = 0;
-			Long editionId = courseToEditionMap.get(courseId);
 
 			if (editionId != null) {
 				Set<Skill> ownSkillsWithTask = skillService.getOwnSkillsWithTask(scperson, editionId);
@@ -343,21 +340,19 @@ public class HomeController {
 	/**
 	 * Returns a map of courses and whether a task has been completed in a respective edition in that course.
 	 *
-	 * @param  courses            List of courses
 	 * @param  scperson           person
 	 * @param  courseToEditionMap Map of courses to the default edition ids (latest edition or last student
 	 *                            edition).
 	 * @return                    Map containing whether the person has a completed a task in each course.
 	 */
-	public Map<Long, Boolean> getCompletedTaskInCourse(List<CourseSummaryDTO> courses, SCPerson scperson,
+	public Map<Long, Boolean> getCompletedTaskInCourse(SCPerson scperson,
 			Map<Long, Long> courseToEditionMap) {
 		Map<Long, Boolean> completedTaskInCourse = new HashMap<>();
-		for (CourseSummaryDTO course : courses) {
-			Long courseId = course.getId();
+		for (Map.Entry<Long, Long> courseToEdition : courseToEditionMap.entrySet()) {
+			Long courseId = courseToEdition.getKey();
+			Long editionId = courseToEdition.getValue();
 
 			boolean completedTask = false;
-			Long editionId = courseToEditionMap.get(courseId);
-
 			if (editionId != null) {
 				List<Task> tasksDone = scperson.getTaskCompletions().stream().map(TaskCompletion::getTask)
 						.toList();

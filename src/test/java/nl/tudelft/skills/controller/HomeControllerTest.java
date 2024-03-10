@@ -215,8 +215,6 @@ public class HomeControllerTest extends ControllerTest {
 
 	@Test
 	void getCompletedSkillsFalse() {
-		List<CourseSummaryDTO> courses = new ArrayList<>(
-				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
 		SCPerson person = new SCPerson();
 		TaskCompletion completion = TaskCompletion.builder().id(1L)
 				.person(person).task(db.getTaskRead12()).build();
@@ -225,8 +223,8 @@ public class HomeControllerTest extends ControllerTest {
 		Map<Long, Long> courseToEditionMap = Map.of(db.getCourseRL().getId(), db.getEditionRL().getId());
 
 		// There are no completed skills in the course
-		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
-				person, courseToEditionMap);
+		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(person,
+				courseToEditionMap);
 
 		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
 		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(3);
@@ -234,8 +232,6 @@ public class HomeControllerTest extends ControllerTest {
 
 	@Test
 	void getCompletedSkillsTrue() {
-		List<CourseSummaryDTO> courses = new ArrayList<>(
-				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
 		SCPerson person = new SCPerson();
 		TaskCompletion completion1 = TaskCompletion.builder().id(1L)
 				.person(person).task(db.getTaskRead12()).build();
@@ -246,8 +242,8 @@ public class HomeControllerTest extends ControllerTest {
 		Map<Long, Long> courseToEditionMap = Map.of(db.getCourseRL().getId(), db.getEditionRL().getId());
 
 		// There is one completed skill in the course
-		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
-				person, courseToEditionMap);
+		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(person,
+				courseToEditionMap);
 		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
 		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(7);
 	}
@@ -365,15 +361,9 @@ public class HomeControllerTest extends ControllerTest {
 
 		Set<Long> visible = Set.of(2L, 4L, 5L, 7L, 8L, 10L);
 		Set<Long> teacherIds = Set.of(3L, 4L, 6L, 7L, 9L, 10L);
+		// TODO add null value as well
 		Map<Long, Long> courseToEditionMap = Map.of(1L, 1L, 2L, 2L, 3L, 3L, 4L, 4L, 5L, 5L, 6L, 6L, 7L, 7L,
 				8L, 8L, 9L, 9L, 10L, 10L);
-
-		// Make each course contain exactly one edition with the same id as the course
-		List<CourseSummaryDTO> courseSummaries = new ArrayList<>();
-		for (long i = 1L; i <= 10L; i++) {
-			courseSummaries.add(new CourseSummaryDTO().id(i));
-			editionRepository.save(SCEdition.builder().id(i).build());
-		}
 
 		Map<Long, EditionDetailsDTO> editions = new HashMap<>();
 		LocalDateTime beforeNow = LocalDateTime.now().minusYears(1);
@@ -397,8 +387,7 @@ public class HomeControllerTest extends ControllerTest {
 
 		// Should only contain 8, 9, 10 as active courses (for all others there are different reasons as to why they
 		// are not active)
-		assertThat(homeController.getActiveCourses(courseSummaries, editions, visible, teacherIds,
-				courseToEditionMap))
+		assertThat(homeController.getActiveCourses(editions, visible, teacherIds, courseToEditionMap))
 				.containsExactlyInAnyOrder(8L, 9L, 10L);
 	}
 
@@ -420,9 +409,7 @@ public class HomeControllerTest extends ControllerTest {
 
 		// Has completed more than one task in the edition previously saved in the db, none in the first saved edition
 		// and exactly one in the second saved edition
-		List<CourseSummaryDTO> courses = List.of(new CourseSummaryDTO().id(1L), new CourseSummaryDTO().id(2L),
-				new CourseSummaryDTO().id(3L));
-		Map<Long, Boolean> completedTask = homeController.getCompletedTaskInCourse(courses, db.getPerson(),
+		Map<Long, Boolean> completedTask = homeController.getCompletedTaskInCourse(db.getPerson(),
 				courseToEditionMap);
 		assertThat(completedTask.keySet()).containsExactlyInAnyOrder(1L, 2L, 3L);
 		assertThat(completedTask.get(1L)).isTrue();
@@ -446,8 +433,6 @@ public class HomeControllerTest extends ControllerTest {
 
 	@Test
 	void getCompletedSkillsAllCompleted() {
-		List<CourseSummaryDTO> courses = new ArrayList<>(
-				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
 		SCPerson person = new SCPerson();
 		TaskCompletion completion1 = TaskCompletion.builder().id(1L)
 				.person(person).task(db.getTaskRead12()).build();
@@ -467,8 +452,8 @@ public class HomeControllerTest extends ControllerTest {
 		Map<Long, Long> courseToEditionMap = Map.of(db.getCourseRL().getId(), db.getEditionRL().getId());
 
 		// All the skills are completed in the course
-		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
-				person, courseToEditionMap);
+		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(person,
+				courseToEditionMap);
 		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
 		assertThat(courseCompletedSkills.get(db.getCourseRL().getId()))
 				.isEqualTo(skillRepository.findAll().size());
@@ -476,23 +461,19 @@ public class HomeControllerTest extends ControllerTest {
 
 	@Test
 	void getCompletedSkillsCustomizedEmpty() {
-		List<CourseSummaryDTO> courses = new ArrayList<>(
-				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
 		SCPerson person = new SCPerson();
 		person.setSkillsModified(new HashSet<>(Arrays.asList(db.getSkillImplication())));
 
 		Map<Long, Long> courseToEditionMap = Map.of(db.getCourseRL().getId(), db.getEditionRL().getId());
 
-		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
-				person, courseToEditionMap);
+		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(person,
+				courseToEditionMap);
 		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
 		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(7);
 	}
 
 	@Test
 	void getCompletedSkillsCustomizedCompleted() {
-		List<CourseSummaryDTO> courses = new ArrayList<>(
-				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
 		SCPerson person = new SCPerson();
 		person.setSkillsModified(new HashSet<>(Arrays.asList(db.getSkillNegation())));
 		person.setTasksAdded(new HashSet<>(Arrays.asList(db.getTaskRead11())));
@@ -504,16 +485,14 @@ public class HomeControllerTest extends ControllerTest {
 
 		Map<Long, Long> courseToEditionMap = Map.of(db.getCourseRL().getId(), db.getEditionRL().getId());
 
-		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
-				person, courseToEditionMap);
+		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(person,
+				courseToEditionMap);
 		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
 		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(5);
 	}
 
 	@Test
 	void getCompletedSkillsPathFinderPath() {
-		List<CourseSummaryDTO> courses = new ArrayList<>(
-				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
 		SCPerson person = new SCPerson();
 		PathPreference pathPreference = PathPreference.builder().path(db.getPathFinderPath())
 				.edition(db.getEditionRL()).person(person).build();
@@ -521,16 +500,14 @@ public class HomeControllerTest extends ControllerTest {
 
 		Map<Long, Long> courseToEditionMap = Map.of(db.getCourseRL().getId(), db.getEditionRL().getId());
 
-		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
-				person, courseToEditionMap);
+		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(person,
+				courseToEditionMap);
 		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
 		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(6);
 	}
 
 	@Test
 	void getCompletedSkillsCustomizedEmptyNotCompleted() {
-		List<CourseSummaryDTO> courses = new ArrayList<>(
-				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
 		SCPerson person = new SCPerson();
 		Task t = Task.builder().name("Task").time(3).build();
 		db.getSkillAssumption().setTasks(Arrays.asList(t));
@@ -538,8 +515,8 @@ public class HomeControllerTest extends ControllerTest {
 
 		Map<Long, Long> courseToEditionMap = Map.of(db.getCourseRL().getId(), db.getEditionRL().getId());
 
-		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
-				person, courseToEditionMap);
+		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(person,
+				courseToEditionMap);
 		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
 		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(3);
 	}
