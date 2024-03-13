@@ -85,7 +85,8 @@ public class PersonControllerTest extends ControllerTest {
 		this.personRepository = personRepository;
 		this.playlistService = playlistService;
 		this.personController = new PersonController(taskRepository, personRepository, taskCompletionService,
-				skillRepository, pathRepository, authorisationService, roleApi, playlistService, personService);
+				skillRepository, pathRepository, authorisationService, roleApi, playlistService,
+				personService);
 		this.taskRepository = taskRepository;
 		this.taskCompletionService = taskCompletionService;
 		this.pathPreferenceRepository = pathPreferenceRepository;

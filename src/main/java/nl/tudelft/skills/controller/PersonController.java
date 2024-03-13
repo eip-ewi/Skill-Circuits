@@ -18,10 +18,7 @@
 package nl.tudelft.skills.controller;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
@@ -94,8 +91,11 @@ public class PersonController {
 			List<Skill> revealedSkills = task.getRequiredFor().stream()
 					.filter(s -> new HashSet<>(completedTasks).containsAll(s.getRequiredTasks())).toList();
 
-			// Store unlocked skills in authPerson.tasksRevealed
-			revealedSkills.forEach(s -> personService.addRevealedSkill(authPerson.getId(), s));
+			// Store newly unlocked skills in authPerson.tasksRevealed
+			Set<Skill> prefRevealed = personService.getOrCreateSCPerson(authPerson.getId())
+					.getSkillsRevealed();
+			revealedSkills.stream().filter(s -> !prefRevealed.contains(s))
+					.forEach(s -> personService.addRevealedSkill(authPerson.getId(), s));
 			return new TaskCompletedDTO(revealedSkills.stream().map(Skill::getId).toList());
 
 		} else {
