@@ -1073,7 +1073,7 @@ databaseChangeLog:
             referencedColumnNames: id
             referencedTableName: scperson
             validate: true
-#  Playlist feature Q3 2023-2024
+#  Playlist feature Q3 2023-2024, 0.0
   - changeSet:
       id: 1707577509701-1
       author: rngla (generated)
@@ -1123,6 +1123,410 @@ databaseChangeLog:
             onUpdate: RESTRICT
             referencedColumnNames: id
             referencedTableName: scperson
+            validate: true
+#  Playlist feature Q3 2023-2024, 1.0
+  - changeSet:
+      id: 1709215030386-1
+      author: rngla (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_7
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: active
+                  type: BOOLEAN
+              - column:
+                  constraints:
+                    nullable: false
+                  name: created
+                  type: TIMESTAMP
+              - column:
+                  name: deleted
+                  type: TIMESTAMP
+              - column:
+                  name: state
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: latest_version_id
+                  type: BIGINT
+              - column:
+                  name: participant_id
+                  type: BIGINT
+            tableName: playlist
+  - changeSet:
+      id: 1709215030386-2
+      author: rngla (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_67
+                  name: id
+                  type: BIGINT
+            tableName: playlist_checkpoint
+  - changeSet:
+      id: 1709215030386-3
+      author: rngla (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_30A
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: completed
+                  type: BOOLEAN
+              - column:
+                  name: completion_time
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: idx
+                  type: INT
+              - column:
+                  name: started
+                  type: TIMESTAMP
+              - column:
+                  constraints:
+                    nullable: false
+                  name: task_id
+                  type: BIGINT
+              - column:
+                  name: participant_id
+                  type: BIGINT
+            tableName: playlist_task
+  - changeSet:
+      id: 1709215030386-4
+      author: rngla (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_C7
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: elapsed_time
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: elapsed_time_updated
+                  type: TIMESTAMP
+              - column:
+                  constraints:
+                    nullable: false
+                  name: estimated_time
+                  type: INT
+              - column:
+                  name: playlist_id
+                  type: BIGINT
+            tableName: playlist_version
+  - changeSet:
+      id: 1709215030386-5
+      author: rngla (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_47
+                  name: playlist_version_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_47
+                  name: tasks_id
+                  type: BIGINT
+            tableName: playlist_version_tasks
+  - changeSet:
+      id: 1709215030386-6
+      author: rngla (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_C81
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: rating
+                  type: INT
+              - column:
+                  name: time_stamp
+                  type: TIMESTAMP
+              - column:
+                  name: person_id
+                  type: BIGINT
+            tableName: rating
+  - changeSet:
+      id: 1709215030386-7
+      author: rngla (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_97
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: interaction
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: time_stamp
+                  type: TIMESTAMP
+              - column:
+                  name: person_id
+                  type: BIGINT
+            tableName: usage_data
+  - changeSet:
+      id: 1709215030386-8
+      author: rngla (generated)
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: clear_data
+                  type: BOOLEAN
+            tableName: research_participant
+  - changeSet:
+      id: 1709215030386-9
+      author: rngla (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: playlist_id
+            indexName: FK4w6jaqt7cvu7iwny8g9m4nkmt_INDEX_C
+            tableName: playlist_version
+  - changeSet:
+      id: 1709215030386-10
+      author: rngla (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: participant_id
+            indexName: FKf2v7empym2b0ihs0pbgwsaacy_INDEX_7
+            tableName: playlist
+  - changeSet:
+      id: 1709215030386-11
+      author: rngla (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: playlist_version_id
+            indexName: FKg86mm73xna9i47a9xgslj2wt7_INDEX_4
+            tableName: playlist_version_tasks
+  - changeSet:
+      id: 1709215030386-12
+      author: rngla (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: person_id
+            indexName: FKkikh18arv5eujtv2f26ykhndp_INDEX_9
+            tableName: usage_data
+  - changeSet:
+      id: 1709215030386-13
+      author: rngla (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: latest_version_id
+            indexName: FKlieu928p8mfbqm4uktqgq8sm0_INDEX_7
+            tableName: playlist
+  - changeSet:
+      id: 1709215030386-14
+      author: rngla (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: tasks_id
+            indexName: FKqpn919ahm5gx28u94dgm87d0p_INDEX_4
+            tableName: playlist_version_tasks
+  - changeSet:
+      id: 1709215030386-15
+      author: rngla (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: person_id
+            indexName: FKry4lvm3c8fwioeum2fm5y0x3j_INDEX_C
+            tableName: rating
+  - changeSet:
+      id: 1709215030386-16
+      author: rngla (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: participant_id
+            indexName: FKsnvc6w8exgm3r5tc5dh3us6jf_INDEX_3
+            tableName: playlist_task
+  - changeSet:
+      id: 1709215030386-17
+      author: rngla (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: playlist_id
+            baseTableName: playlist_version
+            constraintName: FK4w6jaqt7cvu7iwny8g9m4nkmt
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: playlist
+            validate: true
+  - changeSet:
+      id: 1709215030386-18
+      author: rngla (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: participant_id
+            baseTableName: playlist
+            constraintName: FKf2v7empym2b0ihs0pbgwsaacy
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: research_participant
+            validate: true
+  - changeSet:
+      id: 1709215030386-19
+      author: rngla (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: playlist_version_id
+            baseTableName: playlist_version_tasks
+            constraintName: FKg86mm73xna9i47a9xgslj2wt7
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: playlist_version
+            validate: true
+  - changeSet:
+      id: 1709215030386-20
+      author: rngla (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: person_id
+            baseTableName: usage_data
+            constraintName: FKkikh18arv5eujtv2f26ykhndp
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: research_participant
+            validate: true
+  - changeSet:
+      id: 1709215030386-21
+      author: rngla (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: latest_version_id
+            baseTableName: playlist
+            constraintName: FKlieu928p8mfbqm4uktqgq8sm0
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: playlist_version
+            validate: true
+  - changeSet:
+      id: 1709215030386-22
+      author: rngla (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: tasks_id
+            baseTableName: playlist_version_tasks
+            constraintName: FKqpn919ahm5gx28u94dgm87d0p
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: playlist_task
+            validate: true
+  - changeSet:
+      id: 1709215030386-23
+      author: rngla (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: person_id
+            baseTableName: rating
+            constraintName: FKry4lvm3c8fwioeum2fm5y0x3j
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: research_participant
+            validate: true
+  - changeSet:
+      id: 1709215030386-24
+      author: rngla (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: participant_id
+            baseTableName: playlist_task
+            constraintName: FKsnvc6w8exgm3r5tc5dh3us6jf
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: research_participant
             validate: true
 # Store a student's revealed skills
   - changeSet:

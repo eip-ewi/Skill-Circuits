@@ -29,6 +29,8 @@ import javax.transaction.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.AllArgsConstructor;
+import nl.tudelft.labracore.api.RoleControllerApi;
+import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.dto.view.TaskCompletedDTO;
@@ -37,10 +39,12 @@ import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskCompletion;
 import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.playlists.service.PlaylistService;
 import nl.tudelft.skills.repository.PathRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.PersonService;
 import nl.tudelft.skills.service.TaskCompletionService;
 
@@ -54,6 +58,9 @@ public class PersonController {
 	private final TaskCompletionService taskCompletionService;
 	private final SkillRepository skillRepository;
 	private final PathRepository pathRepository;
+	private final AuthorisationService authorisationService;
+	private final RoleControllerApi roleControllerApi;
+	private final PlaylistService playlistService;
 	private final PersonService personService;
 
 	/**
@@ -72,6 +79,14 @@ public class PersonController {
 		Task task = taskRepository.findByIdOrThrow(taskId);
 		if (completed) {
 			taskCompletionService.addTaskCompletion(person, task);
+
+			//			Playlist feature
+			playlistService.setPlTaskCompleted(person, task, true);
+
+			// If a user with default student role has no role, set it to be a student role
+			ifNoStudentRoleSetStudentRole(authPerson.getId(), task.getSkill().getSubmodule().getModule()
+					.getEdition().getId());
+
 			List<Task> completedTasks = person.getTaskCompletions().stream()
 					.map(TaskCompletion::getTask).toList();
 
@@ -84,8 +99,30 @@ public class PersonController {
 
 		} else {
 			taskCompletionService.deleteTaskCompletion(person, task);
+
+			//			Playlist feature
+			playlistService.setPlTaskCompleted(person, task, false);
 		}
 		return new TaskCompletedDTO(Collections.emptyList());
+	}
+
+	/**
+	 * If the user has a default student role but no role assigned in the edition, set them to have the
+	 * student role.
+	 *
+	 * @param personId  The Labracore id of the authenticated user.
+	 * @param editionId The id of the edition to change the role in.
+	 */
+	void ifNoStudentRoleSetStudentRole(Long personId, Long editionId) {
+		// If the user has a role, or is not a student by default, do not do anything
+		RoleDetailsDTO.TypeEnum type = authorisationService.getRoleInEdition(editionId);
+		if (type != null || !authorisationService.isStudent()) {
+			return;
+		}
+
+		RoleCreateDTO roleCreateDTO = new RoleCreateDTO().person(new PersonIdDTO().id(personId))
+				.edition(new EditionIdDTO().id(editionId)).type(RoleCreateDTO.TypeEnum.STUDENT);
+		roleControllerApi.addRole(roleCreateDTO).block();
 	}
 
 	/**
@@ -102,6 +139,9 @@ public class PersonController {
 
 		List<Task> tasks = taskRepository.findAllById(completedTasks);
 		tasks.forEach(task -> taskCompletionService.addTaskCompletion(person, task));
+
+		//		Playlist feature
+		tasks.forEach(task -> playlistService.setPlTaskCompleted(person, task, true));
 	}
 
 	/**

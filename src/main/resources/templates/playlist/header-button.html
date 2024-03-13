@@ -28,8 +28,11 @@
             <h2>You already opted in!</h2>
             <p>
                 Thank you so much for joining this research! The first testing iteration will start
-                in week 3.2. Feel free to contact the master student in the meantime if you have any
-                questions.
+                in week
+                <span style="text-decoration: line-through">3.2</span>
+                <strong>3.3</strong>
+                . Feel free to contact the master student in the meantime if you have any questions.
+                Please note this can not yet be done anonymously and only via email.
                 <br />
                 If you wish to opt-out already, you can do so below.
             </p>
@@ -44,7 +47,9 @@
                 <br />
                 Throughout this academic quarter different functionalities of
                 <em>Playlist</em>
-                will be tested, starting with a basic implementation in week 3.2.
+                will be tested, starting with a basic implementation in
+                <strong>week 3.3</strong>
+                .
                 <br />
                 The different iterations of
                 <em>Playlist</em>
@@ -64,9 +69,14 @@
                 r.n.glans@student.tudelft.nl
             </p>
             <div class="checkbox__container">
-                <label for="opt-out-checkbox" style="font-size: 0">opt-in</label>
+                <label for="opt-out-checkbox" style="font-size: 0">opt-out</label>
                 <input type="checkbox" id="opt-out-checkbox" />
                 <span>I would like to opt-out of this research.</span>
+                <label for="opt-out-clear-data-checkbox" style="font-size: 0">
+                    opt-out and clear data
+                </label>
+                <input type="checkbox" id="opt-out-clear-data-checkbox" />
+                <span>I would like any data collected during my usage to be deleted.</span>
             </div>
             <div class="opt-in__button-container">
                 <button class="opt-button-cancel">Cancel</button>
@@ -94,7 +104,9 @@
                 <br />
                 Throughout this academic quarter different functionalities of
                 <em>Playlist</em>
-                will be tested, starting with a basic implementation in week 3.2.
+                will be tested, starting with a basic implementation in
+                <b>week 3.3</b>
+                .
                 <br />
                 The different iterations of
                 <em>Playlist</em>
@@ -174,6 +186,8 @@
     </dialog>
     <script th:inline="javascript" layout:fragment="script">
 
+        const studentOptedIn = [[${studentOptedIn.isPresent() ? studentOptedIn.get() : null}]];
+
         function toggleOptDialog() {
             toggleOverlay("opt-in__dialog");
             document.getElementById("opt-in__dialog").scrollTop = 0;
@@ -185,13 +199,12 @@
         }
         document.addEventListener("DOMContentLoaded", function () {
 
-            let playlistButton = document.getElementById("playlist-button-m");
-            if (playlistButton === null){
-                playlistButton = document.getElementById("playlist-button-c");
+            if(!studentOptedIn){
+                document.getElementById("playlist-button-c").addEventListener("click", toggleOptDialog);
             }
+
             const cancelButtons = document.getElementsByClassName("opt-button-cancel");
 
-            playlistButton.addEventListener("click", toggleOptDialog);
             for (let i = 0; i < cancelButtons.length; i++) {
                 cancelButtons[i].addEventListener("click", toggleOptDialog);
             }
@@ -201,7 +214,7 @@
             // Enable or disable the button based on the checkbox state
             button.disabled = !checkbox.checked;
         }
-        const studentOptedIn = [[${studentOptedIn.isPresent() ? studentOptedIn.get() : null}]];
+
         <!--        TODO: refactor duplicate code -->
         if(studentOptedIn === null){
             const checkbox = document.getElementById("opt-in-checkbox");
@@ -217,7 +230,8 @@
                         type: "POST",
                         url: "/playlist/optIn",
                         success: () => {
-                            location.reload(true);
+                            sessionStorage.setItem("openPlDialog", "true");
+                            location.reload();
                         },
                     });
                 });
@@ -241,7 +255,8 @@
                     type: "PATCH",
                     url: "/playlist/optIn",
                     success: () => {
-                        location.reload(true);
+                        sessionStorage.setItem("openPlDialog", "true");
+                        location.reload();
                     },
                 });
             }
@@ -262,11 +277,18 @@
 
             function toggleOpt(){
                 // Once they've opted in once, they can toggle in and out again
+                const checkboxData = document.getElementById("opt-out-clear-data-checkbox");
+                const data = {};
+                data.clear_data = !!checkboxData.checked;
+
                 $.ajax({
                     type: "PATCH",
                     url: "/playlist/optIn",
+                    contentType: "application/json",
+                    data: JSON.stringify(data),
                     success: () => {
-                        location.reload(true);
+                        sessionStorage.setItem("openPlDialog", "true");
+                        location.reload();
                     },
                 });
             }
@@ -277,5 +299,12 @@
 
             });
         }
+
+        window.addEventListener("load", function (){
+            if(sessionStorage.getItem("openPlDialog") === "true"){
+                $("#playlist-button-c").trigger("focus");
+                sessionStorage.setItem("openPlDialog","false");
+            }
+        })
     </script>
 </html>

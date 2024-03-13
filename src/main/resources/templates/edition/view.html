@@ -72,8 +72,13 @@
                         <span class="fa-solid fa-circle-play"></span>
                         Playlist
                     </button>
+                    <th:block th:if="${studentOptedIn.isPresent() && studentOptedIn.get()}">
+                        <div
+                            layout:replace="~{playlist/playlist :: playlistView(step=${playlistStep.getStep()})}"></div>
+                    </th:block>
                     <div layout:replace="~{playlist/header-button :: opt-in-dialog}"></div>
                 </div>
+
                 <div layout:replace="~{edition_setup/view :: setup-overlay}"></div>
             </div>
 
@@ -122,10 +127,13 @@
                     const itemType = "skill";
                 </script>
                 <div layout:replace="~{circuit/view :: script}"></div>
-
-                <!--        Playlist feature-->
-                <th:block th:if="${studentOptedIn != null}">
-                    <div layout:replace="~{playlist/header-button :: script}"></div>
+            </th:block>
+            <!--        Playlist feature-->
+            <th:block th:if="${studentOptedIn != null}">
+                <div layout:replace="~{playlist/header-button :: script}"></div>
+                <th:block th:if="${studentOptedIn.isPresent() && studentOptedIn.get()}">
+                    <div
+                        layout:replace="~{playlist/playlist :: script(step=${playlistStep.getStep()})}"></div>
                 </th:block>
             </th:block>
         </div>

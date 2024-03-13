@@ -117,6 +117,17 @@ public class AuthorisationService {
 	}
 
 	/**
+	 * Gets whether the authenticated user is a student by default.
+	 *
+	 * @return True iff the authenticated user is a student by default.
+	 */
+	public boolean isStudent() {
+		if (!isAuthenticated())
+			return false;
+		return getAuthPerson().getDefaultRole() == DefaultRole.STUDENT;
+	}
+
+	/**
 	 * Gets whether the authenticated user can view all the editions of a course.
 	 *
 	 * @param  courseId The id of the course.
@@ -565,6 +576,16 @@ public class AuthorisationService {
 		}
 		var role = getRoleInEdition(editionId);
 		return role == TEACHER || role == HEAD_TA;
+	}
+
+	/**
+	 * Checks whether the authenticated user is a head TA in an edition.
+	 *
+	 * @param  editionId The id of the edition
+	 * @return           True iff the user is a head TA in the edition
+	 */
+	public boolean isHeadTAInEdition(Long editionId) {
+		return getRoleInEdition(editionId) == HEAD_TA;
 	}
 
 	/**

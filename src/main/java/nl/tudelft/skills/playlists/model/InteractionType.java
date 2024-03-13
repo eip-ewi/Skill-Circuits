@@ -15,19 +15,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.playlists;
+package nl.tudelft.skills.playlists.model;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
-
-import nl.tudelft.skills.model.labracore.SCPerson;
-
-public interface ResearchParticipantRepository extends JpaRepository<ResearchParticipant, Long> {
-	default ResearchParticipant findByIdOrThrow(Long id) {
-		return findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("ResearchParticipant was not found: " + id));
-	}
-
-	ResearchParticipant findByPerson(SCPerson person);
+public enum InteractionType {
+	LOGIN,
+	LOGOUT,
+	PL_PLAY,
+	PL_PAUSE,
+	PL_ADD,
+	PL_REMOVE,
+	PL_SKIP,
 
 }
