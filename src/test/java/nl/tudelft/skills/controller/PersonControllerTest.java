@@ -23,9 +23,11 @@ import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import nl.tudelft.skills.model.Skill;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -139,15 +141,23 @@ public class PersonControllerTest extends ControllerTest {
 				.map(TaskCompletion::getTask).toList();
 		assertThat(tasksCompleted).doesNotContain(db.getTaskDo10a());
 
+		Set<Skill> skillsRevealed = db.getPerson().getSkillsRevealed();
+		assertThat(skillsRevealed).doesNotContain(db.getSkillVariablesHidden());
+
 		Person person = new Person();
 		person.setId(db.getPerson().getId());
+		personController.updateTaskCompletedForPerson(person, db.getTaskRead10().getId(), true);
 		TaskCompletedDTO taskCompletedDTO = personController.updateTaskCompletedForPerson(person,
 				db.getTaskDo10a().getId(), true);
 
 		List<Task> tasksCompletedAfter = db.getPerson().getTaskCompletions().stream()
 				.map(TaskCompletion::getTask).toList();
 		assertThat(tasksCompletedAfter).contains(db.getTaskDo10a());
-		assertThat(taskCompletedDTO.getShowSkills()).hasSize(0);
+		assertThat(taskCompletedDTO.getShowSkills()).hasSize(1);
+
+
+		Set<Skill> skillsRevealedAfter = db.getPerson().getSkillsRevealed();
+		assertThat(skillsRevealedAfter).contains(db.getSkillVariablesHidden());
 
 		// Assert that a role was added or that no role was added
 		if (addRole) {
@@ -156,7 +166,7 @@ public class PersonControllerTest extends ControllerTest {
 					.edition(new EditionIdDTO().id(db.getEditionRL().getId()))
 					.type(RoleCreateDTO.TypeEnum.STUDENT);
 
-			verify(roleApi).addRole(roleCreateDTO);
+			verify(roleApi, times(2)).addRole(roleCreateDTO);
 		} else {
 			verify(roleApi, never()).addRole(any());
 		}

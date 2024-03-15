@@ -133,6 +133,8 @@ public class TestDatabaseLoader {
 			.row(3).column(0).build();
 	private Skill skillInductionPractice = Skill.builder().name("Induction Practice")
 			.row(6).column(2).build();
+	private Skill skillVariablesHidden = Skill.builder().name("Variables extra")
+			.hidden(true).row(2).column(4).build();
 
 	private Task taskRead12 = Task.builder().name("Read chapter 1.2").time(1)
 			.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build();
@@ -142,6 +144,7 @@ public class TestDatabaseLoader {
 	private Task taskRead10 = Task.builder().name("Read chapter 1.0").time(13).build();
 	private Task taskDo10a = Task.builder().name("Do exercise 1.0a").time(20).build();
 
+	private Task taskWatchVar = Task.builder().name("Watch extra video").time(4).build();
 	private Badge badge1 = Badge.builder().name("Badge 1").build();
 	private Badge badge2 = Badge.builder().name("Badge 2").build();
 
@@ -265,6 +268,7 @@ public class TestDatabaseLoader {
 		return skillRepository.findByIdOrThrow(skillInductionPractice.getId());
 	}
 
+	public Skill getSkillVariablesHidden() {return skillRepository.findByIdOrThrow(skillVariablesHidden.getId()); }
 	public Task getTaskRead12() {
 		return taskRepository.findByIdOrThrow(taskRead12.getId());
 	}
@@ -429,6 +433,10 @@ public class TestDatabaseLoader {
 		skillInductionPractice
 				.setParents(Set.of(skillTransitiveProperty, skillProofOutline, skillDividingIntoCases));
 		skillInductionPractice = skillRepository.save(skillInductionPractice);
+		skillVariablesHidden.setSubmodule(submoduleLogicBasics);
+		skillVariablesHidden.setCheckpoint(checkpointLectureTwo);
+		skillVariablesHidden.setParents(Set.of(skillVariables));
+		skillVariablesHidden = skillRepository.save(skillVariablesHidden);
 
 		checkpointLectureOne = checkpointRepository.save(checkpointLectureOne);
 		checkpointLectureTwo = checkpointRepository.save(checkpointLectureTwo);
@@ -446,7 +454,9 @@ public class TestDatabaseLoader {
 		taskDo11ad = taskRepository.save(taskDo11ad);
 
 		taskRead10.setSkill(skillVariables);
+		taskRead10.setRequiredFor(Set.of(skillVariablesHidden));
 		taskDo10a.setSkill(skillVariables);
+		taskDo10a.setRequiredFor(Set.of(skillVariablesHidden));
 		taskRead10 = taskRepository.save(taskRead10);
 		taskDo10a = taskRepository.save(taskDo10a);
 	}
