@@ -144,7 +144,6 @@ public class TestDatabaseLoader {
 	private Task taskRead10 = Task.builder().name("Read chapter 1.0").time(13).build();
 	private Task taskDo10a = Task.builder().name("Do exercise 1.0a").time(20).build();
 
-	private Task taskWatchVar = Task.builder().name("Watch extra video").time(4).build();
 	private Badge badge1 = Badge.builder().name("Badge 1").build();
 	private Badge badge2 = Badge.builder().name("Badge 2").build();
 
@@ -462,6 +461,7 @@ public class TestDatabaseLoader {
 		taskDo10a.setRequiredFor(Set.of(skillVariablesHidden));
 		taskRead10 = taskRepository.save(taskRead10);
 		taskDo10a = taskRepository.save(taskDo10a);
+
 	}
 
 	private void initPerson() {
