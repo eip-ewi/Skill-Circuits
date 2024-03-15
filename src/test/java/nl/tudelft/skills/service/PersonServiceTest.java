@@ -77,6 +77,9 @@ public class PersonServiceTest {
 		personService.addRevealedSkill(person.getId(), skill);
 
 		assertThat(person.getSkillsRevealed()).contains(skill);
+		personService.addRevealedSkill(person.getId(), skill);
+		assertThat(person.getSkillsRevealed().size()).isEqualTo(1);
+
 	}
 
 }
