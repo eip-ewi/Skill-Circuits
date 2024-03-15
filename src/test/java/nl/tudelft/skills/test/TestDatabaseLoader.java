@@ -268,7 +268,10 @@ public class TestDatabaseLoader {
 		return skillRepository.findByIdOrThrow(skillInductionPractice.getId());
 	}
 
-	public Skill getSkillVariablesHidden() {return skillRepository.findByIdOrThrow(skillVariablesHidden.getId()); }
+	public Skill getSkillVariablesHidden() {
+		return skillRepository.findByIdOrThrow(skillVariablesHidden.getId());
+	}
+
 	public Task getTaskRead12() {
 		return taskRepository.findByIdOrThrow(taskRead12.getId());
 	}

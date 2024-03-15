@@ -69,9 +69,23 @@ public class PersonServiceTest {
 	}
 
 	@Test
-	public void testAddRevealedSkill() {
+	public void testAddRevealedSkillHiddenFalse() {
 		SCPerson person = db.getPerson();
 		Skill skill = db.getSkillNegation();
+
+		assertThat(person.getSkillsRevealed()).doesNotContain(skill);
+		personService.addRevealedSkill(person.getId(), skill);
+
+		assertThat(person.getSkillsRevealed()).doesNotContain(skill);
+		personService.addRevealedSkill(person.getId(), skill);
+		assertThat(person.getSkillsRevealed().size()).isEqualTo(0);
+
+	}
+
+	@Test
+	public void testAddRevealedSkillHiddenTrue() {
+		SCPerson person = db.getPerson();
+		Skill skill = db.getSkillVariablesHidden();
 
 		assertThat(person.getSkillsRevealed()).doesNotContain(skill);
 		personService.addRevealedSkill(person.getId(), skill);
@@ -81,5 +95,4 @@ public class PersonServiceTest {
 		assertThat(person.getSkillsRevealed().size()).isEqualTo(1);
 
 	}
-
 }

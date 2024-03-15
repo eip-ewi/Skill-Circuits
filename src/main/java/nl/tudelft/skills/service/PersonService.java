@@ -71,7 +71,9 @@ public class PersonService {
 	 */
 	@Transactional
 	public void addRevealedSkill(Long personId, Skill skill) {
-		SCPerson scPerson = personRepository.findByIdOrThrow(personId);
-		scPerson.getSkillsRevealed().add(skill);
+		if (skill.isHidden()) {
+			SCPerson scPerson = personRepository.findByIdOrThrow(personId);
+			scPerson.getSkillsRevealed().add(skill);
+		}
 	}
 }

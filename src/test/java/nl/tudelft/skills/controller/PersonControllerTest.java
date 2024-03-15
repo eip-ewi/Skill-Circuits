@@ -27,7 +27,6 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
-import nl.tudelft.skills.model.Skill;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -45,6 +44,7 @@ import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.TaskCompletedDTO;
 import nl.tudelft.skills.model.PathPreference;
+import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskCompletion;
 import nl.tudelft.skills.model.labracore.SCPerson;
@@ -154,7 +154,6 @@ public class PersonControllerTest extends ControllerTest {
 				.map(TaskCompletion::getTask).toList();
 		assertThat(tasksCompletedAfter).contains(db.getTaskDo10a());
 		assertThat(taskCompletedDTO.getShowSkills()).hasSize(1);
-
 
 		Set<Skill> skillsRevealedAfter = db.getPerson().getSkillsRevealed();
 		assertThat(skillsRevealedAfter).contains(db.getSkillVariablesHidden());
