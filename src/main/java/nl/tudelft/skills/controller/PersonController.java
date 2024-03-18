@@ -89,13 +89,14 @@ public class PersonController {
 					.map(TaskCompletion::getTask).toList();
 
 			List<Skill> revealedSkills = task.getRequiredFor().stream()
-					.filter(s -> new HashSet<>(completedTasks).containsAll(s.getRequiredTasks())).toList();
+					.filter(s -> new HashSet<>(completedTasks).containsAll(s.getRequiredTasks()))
+					.collect(Collectors.toCollection(ArrayList::new));
 
-			// Store newly unlocked skills in authPerson.tasksRevealed
+			// Store newly revealed skills in authPerson.tasksRevealed
 			Set<Skill> prefRevealed = personService.getOrCreateSCPerson(authPerson.getId())
 					.getSkillsRevealed();
-			revealedSkills.stream().filter(s -> !prefRevealed.contains(s))
-					.forEach(s -> personService.addRevealedSkill(authPerson.getId(), s));
+			revealedSkills.removeAll(prefRevealed);
+			revealedSkills.forEach(s -> personService.addRevealedSkill(authPerson.getId(), s));
 			return new TaskCompletedDTO(revealedSkills.stream().map(Skill::getId).toList());
 
 		} else {
