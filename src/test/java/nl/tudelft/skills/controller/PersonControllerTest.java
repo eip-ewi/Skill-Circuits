@@ -153,7 +153,7 @@ public class PersonControllerTest extends ControllerTest {
 		List<Task> tasksCompletedAfter = db.getPerson().getTaskCompletions().stream()
 				.map(TaskCompletion::getTask).toList();
 		assertThat(tasksCompletedAfter).contains(db.getTaskDo10a());
-		assertThat(taskCompletedDTO.getShowSkills()).hasSize(1);
+		assertThat(taskCompletedDTO.getShowSkills()).containsExactly(db.getSkillVariablesHidden().getId());
 
 		Set<Skill> skillsRevealedAfter = db.getPerson().getSkillsRevealed();
 		assertThat(skillsRevealedAfter).contains(db.getSkillVariablesHidden());
