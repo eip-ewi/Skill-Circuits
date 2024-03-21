@@ -104,6 +104,16 @@
                     toggleOverlay(`${openBlock.substring(1)}-expanded-overlay`);
                 }
             });
+
+            // Playlist feature
+            window.addEventListener("hashchange", function () {
+                // Open skill overlay if url has location information
+                let openBlock = window.location.hash;
+                console.log("New hash:", openBlock);
+                if (openBlock !== "" && /^#block-[0-9]+$/.test(openBlock)) {
+                    toggleOverlay(`${openBlock.substring(1)}-expanded-overlay`);
+                }
+            });
         </script>
     </th:block>
 </html>

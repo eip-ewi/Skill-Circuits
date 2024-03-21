@@ -23,6 +23,13 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <script layout:fragment="script" th:inline="javascript">
+        //Playlist feature
+        const ACCID = 643;
+        /*<![CDATA[*/
+        const canEdit = /*[[${canEdit}]]*/ null;
+        const edition = /*[[${module.edition.id}]]*/ null;
+        /*]]>*/
+
         addEventListener("DOMContentLoaded", function () {
             let toUpdate = null;
 
@@ -80,6 +87,15 @@
                 contentType: "application/json",
                 success: skills => {},
             });
+
+            // Playlist feature
+            // If the clicked link belongs to a task in the playlist, we update the playlist
+            if (!canEdit && edition === ACCID) {
+                const plTask = document.getElementById("pl-task-status-" + taskId);
+                if (plTask != null) {
+                    plTask.click();
+                }
+            }
         }
 
         function toggleCompleted(taskId) {
@@ -137,6 +153,25 @@
                             })
                         );
                         reloadInfobox();
+
+                        //     Playlist feature
+                        //     If this is a student and ACC edition, prompt to ask how much time they needed to complete the task
+                        if (canEdit != null && !canEdit && edition === ACCID) {
+                            const plTask = document.getElementById("pl-task-status-" + taskId);
+                            if (plTask != null) {
+                                if (completed) {
+                                    plTask.dataset.completed = "true";
+
+                                    // Get the time spent on the task for the student
+                                    promptCompletionTime(taskId);
+                                    // Check if this task is in the playlist
+                                } else {
+                                    document.getElementById(
+                                        "pl-task-name-" + taskId
+                                    ).style.textDecoration = "none";
+                                }
+                            }
+                        } //End Playlist feature
                     },
                 });
             } else {
