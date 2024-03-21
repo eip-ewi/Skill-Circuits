@@ -140,12 +140,13 @@
                                 const skill = $($("<div/>").append(html).children()[0]);
                                 $("#circuit").append(skill);
 
-                                // Add necessary event listeners
-                                addClickSkillEventListener(skill[0]);
-                                skill
-                                    .find(".path-toggle__control")
-                                    .toArray()
-                                    .forEach(togglePathDropdownSetup);
+                                // Update the completion status of the skill
+                                updateBlockState(s);
+
+                                // Usually, hidden blocks should be not essential, so the children would also not
+                                // be updated. The following ensures that they are still updated if the block is
+                                // essential nonetheless.
+                                [...skill.data("children")].forEach(id => updateBlockState(id));
 
                                 // Recalculate the connections
                                 recalculateConnections();
