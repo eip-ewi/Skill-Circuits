@@ -98,6 +98,8 @@ gradle_integration_test:
   needs:
     - gradle_build
   script:
+    - npm install
+    - echo base-url=https://skills-dev.ewi.tudelft.nl/>src/test/resources/integration.properties
     - gradle --build-cache integrationTest
   rules:
     - if: $CI_COMMIT_BRANCH == "development"
