@@ -39,6 +39,7 @@ import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskCompletion;
 import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.playlists.service.PlaylistService;
 import nl.tudelft.skills.repository.PathRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskRepository;
@@ -58,6 +59,7 @@ public class PersonController {
 	private final PathRepository pathRepository;
 	private final AuthorisationService authorisationService;
 	private final RoleControllerApi roleControllerApi;
+	private final PlaylistService playlistService;
 
 	/**
 	 * Marks a certain task as completed or uncompleted for a certain person.
@@ -76,6 +78,9 @@ public class PersonController {
 		if (completed) {
 			taskCompletionService.addTaskCompletion(person, task);
 
+			//			Playlist feature
+			playlistService.setPlTaskCompleted(person, task, true);
+
 			// If a user with default student role has no role, set it to be a student role
 			ifNoStudentRoleSetStudentRole(authPerson.getId(), task.getSkill().getSubmodule().getModule()
 					.getEdition().getId());
@@ -89,6 +94,9 @@ public class PersonController {
 					.map(Skill::getId).toList());
 		} else {
 			taskCompletionService.deleteTaskCompletion(person, task);
+
+			//			Playlist feature
+			playlistService.setPlTaskCompleted(person, task, false);
 		}
 		return new TaskCompletedDTO(Collections.emptyList());
 	}
@@ -126,6 +134,9 @@ public class PersonController {
 
 		List<Task> tasks = taskRepository.findAllById(completedTasks);
 		tasks.forEach(task -> taskCompletionService.addTaskCompletion(person, task));
+
+		//		Playlist feature
+		tasks.forEach(task -> playlistService.setPlTaskCompleted(person, task, true));
 	}
 
 	/**

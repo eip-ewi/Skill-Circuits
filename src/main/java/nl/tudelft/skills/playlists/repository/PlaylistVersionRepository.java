@@ -15,20 +15,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.integration;
+package nl.tudelft.skills.playlists.repository;
 
-import java.nio.file.Paths;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
-import org.junit.jupiter.api.Test;
+import nl.tudelft.skills.playlists.model.PlaylistVersion;
 
-import com.microsoft.playwright.Page;
-
-public class ExampleIntegrationTest extends IntegrationTest {
-
-	@Test
-	void test() {
-		page.navigate("https://google.com/");
-		page.screenshot(new Page.ScreenshotOptions().setPath(Paths.get("screenshot.png")));
+public interface PlaylistVersionRepository extends JpaRepository<PlaylistVersion, Long> {
+	default PlaylistVersion findByIdOrThrow(Long id) {
+		return findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Playlist version was not found: " + id));
 	}
-
 }

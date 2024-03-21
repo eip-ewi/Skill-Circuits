@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Moving the last skill from a checkpoint makes the checkpoint disappear (@ffiedrich)
 - Redundant ghost checkpoint at bottom of page is removed (@ffiedrich)
 - After dragging a checkpoint, the menu disappears unless it is hovered (@ffiedrich)
+- Path toggle listeners are added to hidden skills on first reveal (@ffiedrich)
 
 ## [2.2.6]
 

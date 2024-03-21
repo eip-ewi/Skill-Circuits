@@ -1,0 +1,234 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2022 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div layout:fragment="playlist" id="playlist-list">
+        <th:block
+            th:with="playlist =  ${@playlistService.getPlaylist(@authorisationService.getAuthPerson().getId())}">
+            <h1 th:text="'Study session ' + ${playlist.getCreated()}"></h1>
+            <span id="playlist-state" style="font-style: italic; font-size: 80%"></span>
+            <h3>
+                <span class="fa-solid fa-clock"></span>
+                <span th:text="${playlist.getEstTime()}"></span>
+                <a
+                    class="fa-solid fa-message"
+                    style="float: right"
+                    th:href="|https://tudelft.fra1.qualtrics.com/jfe/form/SV_2nRHlGSDGTRcBzU?participant=${participantId}|"
+                    target="_blank"></a>
+            </h3>
+            <h3>
+                <span class="fa-solid fa-music"></span>
+                <span id="pl-timer-h">00</span>
+                <span>:</span>
+                <span id="pl-timer-min">00</span>
+                <span>:</span>
+                <span id="pl-timer-sec">00</span>
+            </h3>
+
+            <span class="fa-solid fa-question hasTooltip"></span>
+            <div class="tooltip">
+                <p>
+                    <strong>No timers can be reset</strong>
+                    , only paused. This means you have to remember to pause the playlist if you
+                    decide to do other things while an ACC page is open. When you create a new
+                    playlist with tasks you included in a previous playlist and have already worked
+                    on, the task's individual timer will continue. The progress you already made on
+                    that task was precious time, after all!
+                </p>
+            </div>
+            <hr />
+            <div class="opt-in__button-container">
+                <button id="playlist-play-pause">
+                    <span class="fa-solid fa-play-circle"></span>
+                </button>
+                <button th:id="|playlist-delete-${playlist.getId()}|">
+                    <span class="fa-solid fa-trash-can"></span>
+                </button>
+            </div>
+            <span class="fa-solid fa-question hasTooltip"></span>
+            <div class="tooltip">
+                <p>
+                    <strong>Play/pause button</strong>
+                    : Starts and pauses the playlist's main timer. This helps you track you playing
+                    through the list! The main timer should be running to be able to start a timer
+                    for individual tasks. When the main timer is paused, the task timers are paused
+                    as well. The playlist timer only runs when you are on an ACC page on Skill
+                    Circuit.
+                </p>
+                <p>
+                    <strong>Trash can</strong>
+                    : lets you yeet this playlist and start a new one.
+                </p>
+            </div>
+            <hr />
+            <h2>Tasks:</h2>
+            <ul th:id="|playlist-${playlist.getId()}-tasks|" class="playlist-items">
+                <li th:each="task : ${playlist.getTasks()}" th:id="|pl-task-${task.getTaskId()}|">
+                    <a
+                        th:href="@{'/module/' + ${task.getModuleId()} +
+                                '#block-' + ${task.getSkillId()}}">
+                        <span th:class="'fa-solid fa-'+ ${task.getType().icon}"></span>
+                        <!--Strikethrough the text if the task has already been done -->
+                        <span
+                            th:id="|pl-task-name-${task.getTaskId()}|"
+                            th:style="${task.getCompleted() ? 'text-decoration: line-through;' : ''}"
+                            th:text="${task.getTaskName()}"></span>
+                    </a>
+                    <button
+                        th:attr="data-completed=${task.getCompleted()}"
+                        th:id="|pl-task-status-${task.getTaskId()}|"
+                        class="pl-task-status"
+                        th:text="${!task.getCompleted() ? 'queued' :
+                            (task.getCompletionTime() !=null ? #numbers.formatDecimal(task.getCompletionTime() / 60, 0) + 'min' : '' )}"></button>
+                </li>
+            </ul>
+            <span class="fa-solid fa-question hasTooltip"></span>
+            <div class="tooltip">
+                <p>
+                    <b>Clicking a task's name</b>
+                    opens its associated skill. Clicking on the task's redirect link in the skill,
+                    sets the task to playing. This starts the task's timer.
+                    <br />
+                    If the task does not have an associated link, you can manually start it by
+                    clicking the task's status in the playlist. Clicking the status when the task's
+                    timer is running (
+                    <i>playing</i>
+                    ) pauses the task's timer.
+                </p>
+                <p>
+                    <b>Completing a task</b>
+                    automatically stops the task's timer for you. It then asks you to confirm if the
+                    timed
+                    <s>play</s>
+                    study duration is correct.
+                    <br />
+                    At the moment you also need to refresh the page when completing the last task to
+                    be able to complete the playlist.
+                </p>
+            </div>
+            <hr />
+            <div class="opt-in__button-container">
+                <button class="opt-button-cancel pl-task-status">Opt out</button>
+                <button
+                    th:onclick="|completePlaylist(${playlist.getId()})|"
+                    th:if="${playlist.isCompleted()}">
+                    Next playlist!
+                </button>
+            </div>
+        </th:block>
+    </div>
+
+    <div layout:fragment="first-time" id="playlist-ft">
+        <div>
+            <h1>Playlist 1.0</h1>
+            <h3>A basic playthrough</h3>
+            <hr />
+            <h2>Welcome!</h2>
+            <p>
+                And, thank you for choosing to join this design journey towards an educational tool.
+                First up, is a basic version of the Playlist feature. When you click the button
+                below you will be able to create a playlist that can consist of different tasks
+                found in the ACC Skill Circuit.
+            </p>
+            <p>
+                Determine the amount of time you want to be busy studying and fill the playlist with
+                tasks
+                <i>estimated</i>
+                to fit that timeframe. During studying the playlist will help you keep track of time
+                passed and adjust the playlist accordingly.
+                <br />
+            </p>
+            <p>
+                We cannot guarantee this feature is bug-free, so please bear with us. Any feedback
+                you have is of course highly appreciated, but as this is part of a research we must
+                collect that anonymously. A way to provide anonymous feedback can be done by
+                clicking on
+                <a
+                    class="fa-solid fa-message"
+                    th:href="|https://tudelft.fra1.qualtrics.com/jfe/form/SV_2nRHlGSDGTRcBzU?participant=${participantId}|"
+                    target="_blank"></a>
+                .
+            </p>
+
+            <div class="opt-in__button-container">
+                <button class="opt-button-cancel">Opt out</button>
+                <button id="playlist-ft-ok">
+                    <span class="fa-solid fa-play-circle"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div layout:fragment="create" id="playlist-cr" class="playlist-content">
+        <div>
+            <h1>Playlist creation</h1>
+            <h2>
+                <span class="fa-solid fa-road"></span>
+                <span
+                    th:text="${@playlistService.getDefaultPathForEdition(@authorisationService.getAuthPerson().getId())}"></span>
+            </h2>
+            <h3>
+                <span class="fa-solid fa-clock"></span>
+                <span>Estimated time:</span>
+                <span id="total-est-time-cr">0</span>
+                <a
+                    class="fa-solid fa-message"
+                    style="float: right"
+                    th:href="|https://tudelft.fra1.qualtrics.com/jfe/form/SV_2nRHlGSDGTRcBzU?participant=${participantId}|"
+                    target="_blank"></a>
+            </h3>
+            <hr />
+        </div>
+        <div id="playlist-cr-adding-tasks">
+            <h2>Choose the tasks to add</h2>
+
+            <th:block
+                th:with="checkpoints = ${@playlistService.getCheckpointDTOs(@authorisationService.getAuthPerson().getId())}">
+                <ul th:each="cp : ${checkpoints}" class="playlist-items">
+                    <li>
+                        <h3 th:text="'To be completed for: ' + ${cp.getName()}"></h3>
+                    </li>
+                    <li th:each="skill : ${cp.getSkills()}">
+                        <span style="font-weight: bold" th:text="${skill.getName()}"></span>
+                        <ul class="playlist-items">
+                            <li th:each="task : ${skill.getTasks()}">
+                                <input
+                                    type="checkbox"
+                                    th:id="'add-task-' + ${task.getTaskId()}"
+                                    th:attr="est-time=${task.getEstTime()}, idx=${task.getIdx()}"
+                                    th:aria-label="'Add task ' + ${task.getTaskName()} + ' to playlist'" />
+                                <span th:class="'fa-solid fa-' + ${task.getType().icon}"></span>
+                                <span th:text="${task.getTaskName()}"></span>
+                                <span class="tldr" th:text="|(${task.getEstTime()}minutes)|"></span>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </th:block>
+        </div>
+        <div class="opt-in__button-container">
+            <button class="opt-button-cancel">Opt out</button>
+            <button id="create-playlist">Create playlist!</button>
+        </div>
+    </div>
+</html>

@@ -15,35 +15,49 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.playlists;
+package nl.tudelft.skills.playlists.model;
 
 import java.time.LocalDateTime;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
-import nl.tudelft.skills.model.labracore.SCPerson;
 
 @Data
 @Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResearchParticipant {
+public class PlaylistTask {
+
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@ManyToOne
+	private ResearchParticipant participant;
+
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
 	@NotNull
-	@OneToOne
-	@JoinColumn(unique = true)
-	private SCPerson person;
+	private Long taskId;
 
 	@NotNull
 	@Builder.Default
-	private LocalDateTime optIn = LocalDateTime.now();
+	private Integer idx = 0;
 
-	private LocalDateTime optOut;
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	private LocalDateTime started;
 
+	@Builder.Default
+	private Boolean completed = false;
+
+	@Min(0)
+	@Builder.Default
+	private Integer completionTime = 0;
 }
