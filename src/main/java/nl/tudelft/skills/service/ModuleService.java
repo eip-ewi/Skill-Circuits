@@ -38,11 +38,7 @@ import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSubmoduleViewDTO;
-import nl.tudelft.skills.dto.view.module.TaskViewDTO;
-import nl.tudelft.skills.model.Path;
-import nl.tudelft.skills.model.PathPreference;
 import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 

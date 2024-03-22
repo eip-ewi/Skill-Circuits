@@ -138,7 +138,6 @@ public class PersonService {
 				.flatMap(p -> pathRepository.findById(p.getPath().getId())).orElse(null);
 	}
 
-
 	/**
 	 * Stores a revealed skill for a given person id.
 	 *
