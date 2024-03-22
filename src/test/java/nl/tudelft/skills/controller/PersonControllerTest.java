@@ -188,6 +188,36 @@ public class PersonControllerTest extends ControllerTest {
 		assertThat(taskCompletedDTO.getShowSkills()).hasSize(0);
 	}
 
+	/**
+	 * Test to ensure a previously revealed skill is not sent to the front-end as it will result in a
+	 * duplicated skill block
+	 */
+	@WithUserDetails("username")
+	@Test
+	void prevRevealedSkill() {
+		mockRole(roleApi, "STUDENT");
+		List<Task> tasksCompleted = db.getPerson().getTaskCompletions().stream()
+				.map(TaskCompletion::getTask).toList();
+		assertThat(tasksCompleted).doesNotContain(db.getTaskDo10a());
+
+		db.getPerson().getSkillsRevealed().add(db.getSkillVariablesHidden());
+		personRepository.save(db.getPerson());
+
+		Set<Skill> skillsRevealed = db.getPerson().getSkillsRevealed();
+		assertThat(skillsRevealed).contains(db.getSkillVariablesHidden());
+
+		Person person = new Person();
+		person.setId(db.getPerson().getId());
+		personController.updateTaskCompletedForPerson(person, db.getTaskRead10().getId(), true);
+
+		TaskCompletedDTO taskCompletedDTO = personController.updateTaskCompletedForPerson(person,
+				db.getTaskDo10a().getId(), true);
+		assertThat(taskCompletedDTO.getShowSkills()).isEqualTo(List.of());
+
+		Set<Skill> skillsRevealedAfter = db.getPerson().getSkillsRevealed();
+		assertThat(skillsRevealedAfter).containsExactly(db.getSkillVariablesHidden());
+	}
+
 	@Test
 	void addAllTaskFromCurrentPath() {
 		SCPerson person = db.getPerson();
