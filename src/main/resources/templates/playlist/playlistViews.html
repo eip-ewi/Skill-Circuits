@@ -99,7 +99,7 @@
                         th:id="|pl-task-status-${task.getTaskId()}|"
                         class="pl-task-status"
                         th:text="${!task.getCompleted() ? 'queued' :
-                            (task.getCompletionTime() !=null ? #numbers.formatDecimal(task.getCompletionTime() / 60, 0) + 'min' : '' )}"></button>
+                            (task.getCompletionTime() !=null ? task.getCompletionTime() div 60 + 'min' : '' )}"></button>
                 </li>
             </ul>
             <span class="fa-solid fa-question hasTooltip"></span>
