@@ -292,8 +292,8 @@ dev-deploy:
     - ssh-keyscan skills.eiptest.ewi.tudelft.nl >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
-    - scp skill_circuits.jar deploy@skills.eiptest.ewi.tudelft.nl:/var/www/skills/skills.jar
-    - ssh deploy@skills.eiptest.ewi.tudelft.nl sudo /bin/systemctl restart skills
+    - scp skill_circuits.jar deployer-tam@eiptest.ewi.tudelft.nl:/var/www/skills/skills.jar
+    - ssh deployer-tam@eiptest.ewi.tudelft.nl sudo /bin/systemctl restart skills
   environment:
     name: test
     url: https://skills.eiptest.ewi.tudelft.nl
