@@ -99,7 +99,7 @@ gradle_integration_test:
     - gradle_build
   script:
     - npm install
-    - echo base-url=https://skills-dev.ewi.tudelft.nl/>src/test/resources/integration.properties
+    - echo base-url=https://skills.eiptest.ewi.tudelft.nl/>src/test/resources/integration.properties
     - gradle --build-cache integrationTest
   rules:
     - if: $CI_COMMIT_BRANCH == "development"
@@ -193,7 +193,7 @@ include:
   - template: Dependency-Scanning.gitlab-ci.yml
   - template: Jobs/Code-Quality.gitlab-ci.yml
   - template: Security/DAST.gitlab-ci.yml
-#  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
   - template: Security/Secret-Detection.gitlab-ci.yml
   - template: Verify/Accessibility.gitlab-ci.yml
     #  - template: Verify/Browser-Performance.gitlab-ci.yml
@@ -210,24 +210,7 @@ code_quality:
         $CI_MERGE_REQUEST_ID
 
 # Runs the SAST reporter manually
-# (there was a problem with running this from the template with Java 11,
-#  even though it should have been configured)
-#sast:
-#  extends:
-#    - .build_cached
-#    - .gitlab_reporter
-#  stage: gitlab reports
-#  rules:
-#    - if: $CI_COMMIT_BRANCH == "master" ||
-#        $CI_COMMIT_BRANCH == "development" ||
-#        $CI_MERGE_REQUEST_ID
-#      when: manual
-#  allow_failure: true
-
-
-# Run the DAST security checks and reporter.
-# Currently set to manual as it requires a test environment to be up and running.
-dast:
+sast:
   extends:
     - .build_cached
     - .gitlab_reporter
@@ -236,25 +219,38 @@ dast:
     - if: $CI_COMMIT_BRANCH == "master" ||
         $CI_COMMIT_BRANCH == "development" ||
         $CI_MERGE_REQUEST_ID
+  allow_failure: true
+
+
+# Run the DAST security checks and reporter.
+# Currently set to manual as it requires a test environment to be up and running.
+dast:
+  extends:
+    - .build_cached
+    - .gitlab_reporter
+  stage: test2
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" ||
+        $CI_COMMIT_BRANCH == "development" ||
+        $CI_MERGE_REQUEST_ID
       when: manual
   variables:
     DAST_VERSION: latest
 
-# TODO CONFIGURE
 # Accessibility testing
-#a11y:
-#  extends:
-#    - .gitlab_reporter
-#  rules:
-#    - if: $CI_PIPELINE_SOURCE == "trigger" ||
-#        $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
-#      when: never
-#    - if: $CI_COMMIT_BRANCH == "master" ||
-#        $CI_COMMIT_BRANCH == "development"
-#      when: manual
-#  stage: gitlab reports
-#  variables:
-#    ally_urls: "https://skills.ewi.tudelft.nl"
+a11y:
+  extends:
+    - .gitlab_reporter
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "trigger" ||
+        $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
+      when: never
+    - if: $CI_COMMIT_BRANCH == "master" ||
+        $CI_COMMIT_BRANCH == "development"
+      when: manual
+  stage: test2
+  variables:
+    a11y_urls: "https://skills.eiptest.ewi.tudelft.nl"
 
 # Dependency scanning reporter for checking dependencies of Queue.
 #dependency_scanning:
@@ -290,17 +286,17 @@ dev-deploy:
     ## without extra base64 encoding.
     ## https://gitlab.com/gitlab-examples/ssh-private-key/issues/1#note_48526556
     ##
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - echo "$SSH_PRIVATE_KEY_STAGING" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - ssh-keyscan skills-dev.ewi.tudelft.nl >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
-    - scp skill_circuits.jar deploy@skills-dev.ewi.tudelft.nl:/var/www/skills/skills.jar
-    - ssh deploy@skills-dev.ewi.tudelft.nl sudo /bin/systemctl restart skills
+    - scp skill_circuits.jar deploy@skills.eiptest.ewi.tudelft.nl:/var/www/skills/skills.jar
+    - ssh deploy@skills.eiptest.ewi.tudelft.nl sudo /bin/systemctl restart skills
   environment:
     name: test
-    url: https://skills-dev.tudelft.nl
+    url: https://skills.eiptest.ewi.tudelft.nl
   rules:
     - if: $CI_PIPELINE_SOURCE == "trigger" ||
         $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
