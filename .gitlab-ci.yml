@@ -289,7 +289,7 @@ dev-deploy:
     - echo "$SSH_PRIVATE_KEY_STAGING" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    - ssh-keyscan skills.eiptest.ewi.tudelft.nl >> ~/.ssh/known_hosts
+    - ssh-keyscan eiptest.ewi.tudelft.nl >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
     - scp skill_circuits.jar deployer-tam@eiptest.ewi.tudelft.nl:/var/www/skills/skills.jar
