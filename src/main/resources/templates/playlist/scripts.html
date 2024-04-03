@@ -73,6 +73,25 @@
             return data;
         }
 
+        // Signal that the feature has been updated
+        function signalUpdate() {
+            if (localStorage.getItem("plUpdated") === null) {
+                const plButton = document.getElementById("playlist-button-c");
+                plButton.addEventListener("focus", function () {
+                    // Prevent the signal after the Playlist feature has been clicked once
+                    localStorage.setItem("plUpdated", "true");
+                });
+                const newSpan = document.createElement("span");
+                newSpan.className = "fa-solid fa-exclamation";
+                plButton.className = "playlist-button-new";
+                plButton.appendChild(newSpan);
+                setTimeout(function () {
+                    plButton.className = "playlist-button";
+                    plButton.removeChild(newSpan);
+                }, 1000);
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
             $("#create-playlist")
                 .off("click")
@@ -95,6 +114,7 @@
                 $("#playlist-button-c").trigger("focus");
                 sessionStorage.setItem("openPlDialog", "false");
             }
+            signalUpdate();
         });
     </script>
 
@@ -403,6 +423,26 @@
             location.reload();
         }
 
+        // Signal that the feature has been updated
+        function signalUpdate() {
+            if (localStorage.getItem("plUpdated") === null) {
+                const plButton = document.getElementById("playlist-button-c");
+                plButton.addEventListener("focus", function () {
+                    // Prevent the signal after the Playlist feature has been clicked once
+                    localStorage.setItem("plUpdated", "true");
+                });
+
+                const newSpan = document.createElement("span");
+                newSpan.className = "fa-solid fa-exclamation";
+                plButton.className = "playlist-button-new";
+                plButton.appendChild(newSpan);
+                setTimeout(function () {
+                    plButton.className = "playlist-button";
+                    plButton.removeChild(newSpan);
+                }, 1000);
+            }
+        }
+
         // Event listeners
         addEventListener("DOMContentLoaded", function () {
             document.getElementById("playlist-play-pause").addEventListener("click", toggleTimer);
@@ -424,6 +464,7 @@
                 $("#playlist-button-c").trigger("focus");
                 sessionStorage.setItem("openPlDialog", "false");
             }
+            signalUpdate();
         });
     </script>
 </html>
