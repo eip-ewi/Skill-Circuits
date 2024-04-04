@@ -164,11 +164,9 @@
 
                                     // Get the time spent on the task for the student
                                     promptCompletionTime(taskId);
-                                    // Check if this task is in the playlist
                                 } else {
-                                    document.getElementById(
-                                        "pl-task-name-" + taskId
-                                    ).style.textDecoration = "none";
+                                    plTask.dataset.completed = "false";
+                                    uncompleteTask(taskId);
                                 }
                             }
                         } //End Playlist feature
