@@ -97,6 +97,11 @@
 .playlist-button {
     @extend .circuit__button;
 }
+
+.playlist-button-new {
+    @extend .circuit__button;
+    background-color: #0091ca;
+}
 .pl-task-status {
     @extend .tldr;
     background: none;

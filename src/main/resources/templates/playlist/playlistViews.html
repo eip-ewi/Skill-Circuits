@@ -57,6 +57,15 @@
                 </p>
             </div>
             <hr />
+            <div>
+                <a
+                    th:href="|https://tudelft.fra1.qualtrics.com/jfe/form/SV_033tZRlCCQvr4do?participant=${participantId}|"
+                    target="_blank">
+                    <span class="fa-solid fa-circle-exclamation"></span>
+                    Final feedback form
+                </a>
+            </div>
+            <hr />
             <div class="opt-in__button-container">
                 <button id="playlist-play-pause">
                     <span class="fa-solid fa-play-circle"></span>
@@ -99,7 +108,7 @@
                         th:id="|pl-task-status-${task.getTaskId()}|"
                         class="pl-task-status"
                         th:text="${!task.getCompleted() ? 'queued' :
-                            (task.getCompletionTime() !=null ? #numbers.formatDecimal(task.getCompletionTime() / 60, 0) + 'min' : '' )}"></button>
+                            (task.getCompletionTime() !=null ? task.getCompletionTime() div 60 + 'min' : '' )}"></button>
                 </li>
             </ul>
             <span class="fa-solid fa-question hasTooltip"></span>
@@ -197,6 +206,15 @@
                     th:href="|https://tudelft.fra1.qualtrics.com/jfe/form/SV_2nRHlGSDGTRcBzU?participant=${participantId}|"
                     target="_blank"></a>
             </h3>
+            <hr />
+            <div>
+                <a
+                    th:href="|https://tudelft.fra1.qualtrics.com/jfe/form/SV_033tZRlCCQvr4do?participant=${participantId}|"
+                    target="_blank">
+                    <span class="fa-solid fa-circle-exclamation"></span>
+                    Final feedback form
+                </a>
+            </div>
             <hr />
         </div>
         <div id="playlist-cr-adding-tasks">

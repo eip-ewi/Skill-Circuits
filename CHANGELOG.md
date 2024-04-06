@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Added
 ## Changed
 ## Fixed
+- Path toggle listeners are added to hidden skills on first reveal (@ffiedrich)
+- Completion status of revealed hidden skills is updated without page reload (@ffiedrich)
 
 ## [2.2.6]
 

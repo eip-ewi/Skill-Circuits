@@ -18,30 +18,65 @@
 package nl.tudelft.skills.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.ExtendedModelMap;
+import org.springframework.ui.Model;
 
+import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
+import nl.tudelft.skills.dto.view.module.TaskViewDTO;
+import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.test.TestDatabaseLoader;
 
 @Transactional
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
 public class PersonServiceTest {
 
-	private PersonRepository personRepository;
+	private final PersonRepository personRepository;
+	private final EditionRepository editionRepository;
 
-	private PersonService personService;
+	private final PersonService personService;
+	private final SkillRepository skillRepository;
+	private final TaskRepository taskRepository;
+	private final PathPreferenceRepository pathPreferenceRepository;
+
+	private final TestDatabaseLoader db;
+	protected Model model;
 
 	@Autowired
-	public PersonServiceTest(PersonRepository personRepository) {
+	public PersonServiceTest(PersonRepository personRepository, PathRepository pathRepository,
+			EditionRepository editionRepository, SkillRepository skillRepository,
+			TaskRepository taskRepository,
+			PathPreferenceRepository pathPreferenceRepository, EditionService editionService,
+			TestDatabaseLoader db) {
 		this.personRepository = personRepository;
-		personService = new PersonService(personRepository);
+		this.skillRepository = skillRepository;
+		this.taskRepository = taskRepository;
+		this.editionRepository = editionRepository;
+		this.pathPreferenceRepository = pathPreferenceRepository;
+		this.db = db;
+
+		personService = new PersonService(personRepository, pathRepository, editionService);
+	}
+
+	@BeforeEach
+	void initFields() {
+		model = new ExtendedModelMap();
 	}
 
 	@Test
@@ -50,7 +85,9 @@ public class PersonServiceTest {
 		assertThat(personRepository.findById(personId)).isNotPresent();
 
 		SCPerson person = personService.getOrCreateSCPerson(personId);
-		assertThat(personRepository.findById(personId)).isPresent();
+		Optional<SCPerson> retrieval = personRepository.findById(personId);
+		assertThat(retrieval).isPresent();
+		assertThat(retrieval.get()).isEqualTo(person);
 	}
 
 	@Test
@@ -61,6 +98,185 @@ public class PersonServiceTest {
 
 		assertThat(personService.getPathForEdition(person.getId(), editionId)).isNotPresent();
 
+	}
+
+	@Test
+	void getDefaultOrPreferredPathNull() {
+		Path path = personService.getDefaultOrPreferredPath(db.getPerson().getId(),
+				db.getEditionRL().getId());
+
+		// displayed path is null if there is no default and no path preference set
+		assertNull(path);
+	}
+
+	@Test
+	void getDefaultOrPreferredPathDefault() {
+		// Set default path
+		SCEdition edition = db.getEditionRL();
+		edition.setDefaultPath(db.getPathFinderPath());
+		editionRepository.save(edition);
+
+		Path path = personService.getDefaultOrPreferredPath(db.getPerson().getId(),
+				db.getEditionRL().getId());
+
+		// displayed path is default path of the course if there is no path preference set
+		assertEquals(db.getPathFinderPath(), path);
+	}
+
+	@Test
+	void getDefaultOrPreferredPathPreferred() {
+		// Set preference
+		PathPreference pathPreference = PathPreference.builder().path(db.getPathFinderPath())
+				.edition(db.getEditionRL()).person(db.getPerson()).build();
+		SCPerson person = db.getPerson();
+		person.getPathPreferences().add(pathPreference);
+		pathPreferenceRepository.save(pathPreference);
+		personRepository.save(person);
+
+		Path path = personService.getDefaultOrPreferredPath(db.getPerson().getId(),
+				db.getEditionRL().getId());
+
+		// displayed path is set by path preference
+		assertEquals(db.getPathFinderPath(), path);
+	}
+
+	@Transactional
+	void addTaskAndSkillModifications() {
+		SCPerson person = db.getPerson();
+		Skill skillA = db.getSkillVariables();
+		Skill skillB = db.getSkillImplication();
+		Task task = db.getTaskDo10a();
+
+		person.getSkillsModified().add(skillA);
+		skillA.getPersonModifiedSkill().add(person);
+		person.getSkillsModified().add(skillB);
+		skillB.getPersonModifiedSkill().add(person);
+
+		// skillImplication no tasks in it with the modification
+		// taskDo10a is in skillVariables
+		person.getTasksAdded().add(task);
+		task.getPersonsThatAddedTask().add(person);
+	}
+
+	@Test
+	void setPersonalPathAttributesPathAndSkillNull() {
+		// Path: null, skill: null, tasksAdded: contains a task, skillsModified: contains some skills
+
+		addTaskAndSkillModifications();
+		Optional<Set<Long>> taskIds = personService.setPersonalPathAttributes(db.getPerson().getId(), model,
+				db.getEditionRL().getId(), null);
+
+		assertThat(taskIds).isEmpty();
+		assertThat(model.getAttribute("selectedPathId")).isNull();
+		assertThat(model.getAttribute("tasksAdded"))
+				.isEqualTo(Set.of(View.convert(db.getTaskDo10a(), TaskViewDTO.class)));
+		assertThat(model.getAttribute("skillsModified")).isEqualTo(
+				Set.of(View.convert(db.getSkillVariables(), ModuleLevelSkillViewDTO.class),
+						View.convert(db.getSkillImplication(), ModuleLevelSkillViewDTO.class)));
+	}
+
+	@Test
+	void setPersonalPathAttributesPathSetAndSkillNull() {
+		// Path: non-null, skill: null, tasksAdded: contains a task, skillsModified: contains some skills
+
+		// Set default path and task/skill modifications
+		SCEdition edition = db.getEditionRL();
+		edition.setDefaultPath(db.getPathFinderPath());
+		editionRepository.save(edition);
+		addTaskAndSkillModifications();
+
+		Optional<Set<Long>> taskIds = personService.setPersonalPathAttributes(db.getPerson().getId(), model,
+				db.getEditionRL().getId(), null);
+
+		assertThat(taskIds).isNotEmpty();
+		assertThat(taskIds.get()).containsExactly(db.getTaskRead12().getId());
+		assertThat(model.getAttribute("selectedPathId")).isEqualTo(db.getPathFinderPath().getId());
+		assertThat(model.getAttribute("tasksAdded"))
+				.isEqualTo(Set.of(View.convert(db.getTaskDo10a(), TaskViewDTO.class)));
+		assertThat(model.getAttribute("skillsModified")).isEqualTo(
+				Set.of(View.convert(db.getSkillVariables(), ModuleLevelSkillViewDTO.class),
+						View.convert(db.getSkillImplication(), ModuleLevelSkillViewDTO.class)));
+	}
+
+	@Test
+	void setPersonalPathAttributesPathSetSkillSetAndModified() {
+		// Path: non-null, skill: non-null, tasksAdded: contains a task from skill, skillsModified: contains skill
+
+		// Set default path
+		SCEdition edition = db.getEditionRL();
+		edition.setDefaultPath(db.getPathFinderPath());
+		editionRepository.save(edition);
+
+		// Set task/skill modifications
+		addTaskAndSkillModifications();
+		SCPerson person = db.getPerson();
+		Task task = db.getTaskRead12();
+		person.getTasksAdded().add(task);
+		task.getPersonsThatAddedTask().add(person);
+		personRepository.save(person);
+		taskRepository.save(task);
+
+		Optional<Set<Long>> taskIds = personService.setPersonalPathAttributes(db.getPerson().getId(), model,
+				db.getEditionRL().getId(), db.getSkillVariables());
+
+		assertThat(taskIds).isNotEmpty();
+		assertThat(taskIds.get()).containsExactly(db.getTaskRead12().getId());
+		assertThat(model.getAttribute("selectedPathId")).isEqualTo(db.getPathFinderPath().getId());
+		assertThat(model.getAttribute("tasksAdded"))
+				.isEqualTo(Set.of(View.convert(db.getTaskDo10a(), TaskViewDTO.class)));
+		assertThat(model.getAttribute("skillsModified")).isEqualTo(
+				Set.of(View.convert(db.getSkillVariables(), ModuleLevelSkillViewDTO.class)));
+	}
+
+	@Test
+	void setPersonalPathAttributesPathSetSkillSetAndUnmodified() {
+		// Path: non-null, skill: non-null, tasksAdded: contains tasks only not from skill, skillsModified: contains
+		// only other skills
+
+		// Set default path
+		SCEdition edition = db.getEditionRL();
+		edition.setDefaultPath(db.getPathFinderPath());
+		editionRepository.save(edition);
+
+		// Set task/skill modifications
+		SCPerson person = db.getPerson();
+		Skill skill = db.getSkillImplication();
+		Task task = db.getTaskRead12();
+		person.getTasksAdded().add(task);
+		task.getPersonsThatAddedTask().add(person);
+		person.getSkillsModified().add(skill);
+		skill.getPersonModifiedSkill().add(person);
+		personRepository.save(person);
+		taskRepository.save(task);
+		skillRepository.save(skill);
+
+		Optional<Set<Long>> taskIds = personService.setPersonalPathAttributes(db.getPerson().getId(), model,
+				db.getEditionRL().getId(), db.getSkillVariables());
+
+		assertThat(taskIds).isNotEmpty();
+		assertThat(taskIds.get()).containsExactly(db.getTaskRead12().getId());
+		assertThat(model.getAttribute("selectedPathId")).isEqualTo(db.getPathFinderPath().getId());
+		assertThat(model.getAttribute("tasksAdded")).isEqualTo(Set.of());
+		assertThat(model.getAttribute("skillsModified")).isEqualTo(Set.of());
+	}
+
+	@Test
+	void setPersonalPathAttributesPathSetAndSkillNullNoModifications() {
+		// Path: non-null, skill: null, tasksAdded: empty, skillsModified: empty
+
+		// Set default path and task/skill modifications
+		SCEdition edition = db.getEditionRL();
+		edition.setDefaultPath(db.getPathFinderPath());
+		editionRepository.save(edition);
+
+		Optional<Set<Long>> taskIds = personService.setPersonalPathAttributes(db.getPerson().getId(), model,
+				db.getEditionRL().getId(), null);
+
+		assertThat(taskIds).isNotEmpty();
+		assertThat(taskIds.get()).containsExactly(db.getTaskRead12().getId());
+		assertThat(model.getAttribute("selectedPathId")).isEqualTo(db.getPathFinderPath().getId());
+		assertThat(model.getAttribute("tasksAdded")).isEqualTo(Set.of());
+		assertThat(model.getAttribute("skillsModified")).isEqualTo(Set.of());
 	}
 
 }
