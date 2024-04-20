@@ -101,13 +101,16 @@ public class PlaylistService {
 		Map<Long, List<PlaylistTaskViewDTO>> skills = new HashMap<>();
 		for (PlaylistTask task : playlist.getLatestVersion().getTasks()) {
 			Task t = taskRepository.findByIdOrThrow(task.getTaskId());
-
+			int cTime = playlistTaskRepository.findByParticipantAndTaskId(participant, t.getId())
+					.getCompletionTime();
 			//			Using existing task id for now
 			PlaylistTaskViewDTO taskViewDTO = PlaylistTaskViewDTO.builder().taskId(t.getId())
 					.type(t.getType()).idx(t.getIdx())
 					.estTime(t.getTime()).completed(task.getCompleted())
 					.moduleId(getModuleId(t.getId())).skillId(t.getSkill().getId())
-					.taskName(t.getName()).build();
+					.taskName(t.getName())
+					.completionTime(cTime)
+					.build();
 			if (skills.containsKey(t.getSkill().getId())) {
 				skills.get(t.getSkill().getId()).add(taskViewDTO);
 			} else {
