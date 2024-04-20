@@ -198,12 +198,13 @@ public class CourseServiceTest {
 		assertThat(courseService.getDefaultHomepageEditionCourse(3L)).isEqualTo(2L);
 	}
 
-	@Test
-	public void getDefaultHomepageEditionCourseReturnsLastHeadTAEdition() {
-		// Goal: Test scenario in which head TA edition is picked, and it is not visible
+	@ParameterizedTest
+	@CsvSource({ "TEACHER", "TEACHER_RO", "ADMIN" })
+	public void getDefaultHomepageEditionCourseReturnsLastManagedEdition(String role) {
+		// Goal: Test scenario in which the managed edition is picked, and it is not visible
 		// Setup:
 		// - Editions (sorted by start date): 1 - visible, 2 - visible, 3 - not visible
-		// - Roles per edition: 1 - student, 2 - TA, 3 - head TA
+		// - Roles per edition: 1 - student, 2 - TA, 3 - (role parameter)
 		// Should return: edition 3
 
 		CourseDetailsDTO courseDetailsDTO = new CourseDetailsDTO().editions(
@@ -214,7 +215,7 @@ public class CourseServiceTest {
 
 		when(authorisationService.getRoleInEdition(1L)).thenReturn(RoleDetailsDTO.TypeEnum.STUDENT);
 		when(authorisationService.getRoleInEdition(2L)).thenReturn(RoleDetailsDTO.TypeEnum.TA);
-		when(authorisationService.getRoleInEdition(3L)).thenReturn(RoleDetailsDTO.TypeEnum.HEAD_TA);
+		when(authorisationService.getRoleInEdition(3L)).thenReturn(RoleDetailsDTO.TypeEnum.fromValue(role));
 
 		editionRepository.save(new SCEdition(1L, true, null, null, null, null));
 		editionRepository.save(new SCEdition(2L, true, null, null, null, null));
@@ -246,33 +247,6 @@ public class CourseServiceTest {
 		editionRepository.save(new SCEdition(3L, true, null, null, null, null));
 
 		assertThat(courseService.getDefaultHomepageEditionCourse(3L)).isEqualTo(3L);
-	}
-
-	@ParameterizedTest
-	@CsvSource({ "null", "TEACHER", "TEACHER_RO", "ADMIN" })
-	public void getDefaultHomepageEditionCourseReturnsStudentInsteadOfOther(String role) {
-		// Goal: Test scenarios in which the last edition has an "invalid" role, and the previous one should be returned
-		// Setup:
-		// - Editions (sorted by start date): 1, 2, 3 - all visible
-		// - Roles per edition: 1 - student, 2 - student, 3 - (role parameter)
-		// Should return: edition 2
-
-		CourseDetailsDTO courseDetailsDTO = new CourseDetailsDTO().editions(
-				List.of(new EditionSummaryDTO().id(1L).startDate(localDateTime),
-						new EditionSummaryDTO().id(2L).startDate(localDateTime.plusMinutes(1)),
-						new EditionSummaryDTO().id(3L).startDate(localDateTime.plusMinutes(2))));
-		when(courseApi.getCourseById(anyLong())).thenReturn(Mono.just(courseDetailsDTO));
-
-		when(authorisationService.getRoleInEdition(1L)).thenReturn(RoleDetailsDTO.TypeEnum.STUDENT);
-		when(authorisationService.getRoleInEdition(2L)).thenReturn(RoleDetailsDTO.TypeEnum.STUDENT);
-		when(authorisationService.getRoleInEdition(3L))
-				.thenReturn(role.equals("null") ? null : RoleDetailsDTO.TypeEnum.fromValue(role));
-
-		editionRepository.save(new SCEdition(1L, true, null, null, null, null));
-		editionRepository.save(new SCEdition(2L, true, null, null, null, null));
-		editionRepository.save(new SCEdition(3L, true, null, null, null, null));
-
-		assertThat(courseService.getDefaultHomepageEditionCourse(3L)).isEqualTo(2L);
 	}
 
 	@Test

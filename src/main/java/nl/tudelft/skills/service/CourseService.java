@@ -17,6 +17,9 @@
  */
 package nl.tudelft.skills.service;
 
+import static nl.tudelft.labracore.api.dto.RoleDetailsDTO.TypeEnum.*;
+import static nl.tudelft.labracore.api.dto.RoleDetailsDTO.TypeEnum.ADMIN;
+
 import java.util.Comparator;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,25 +120,33 @@ public class CourseService {
 			return null;
 		}
 
+		boolean userIsAdmin = authorisationService.isAdmin();
+
 		// Filter the editions by the condition (in comments), and then consider the maximum (by starting date).
 		// Otherwise, calls getLastEditionForCourse to get the last edition (by starting date).
 		return course.getEditions().stream()
 				.filter(edition -> {
 					RoleDetailsDTO.TypeEnum role = authorisationService.getRoleInEdition(edition.getId());
 
-					// For head TAs the visibility does not matter
-					if (role == RoleDetailsDTO.TypeEnum.HEAD_TA) {
+					// Discard, if the role is null
+					if (role == null) {
+						return false;
+					}
+
+					// If the user is at least a head TA (including teacher read-only), the edition
+					// does not have to be visible
+					if (userIsAdmin || role == HEAD_TA || role == TEACHER || role == TEACHER_RO
+							|| role == ADMIN) {
 						return true;
 					}
 
 					// For TAs and students, the edition needs to be visible
-					if (role == RoleDetailsDTO.TypeEnum.STUDENT || role == RoleDetailsDTO.TypeEnum.TA) {
+					if (role == STUDENT || role == TA) {
 						return editionRepository.findById(edition.getId()).map(SCEdition::isVisible)
 								.orElse(false);
 					}
 
-					// Otherwise, the role is null or user is a teacher/higher role. These editions are sorted
-					// differently on the homepage, and therefore discarded here.
+					// Otherwise, the user has an invalid role, so discard (here only BLOCKED)
 					return false;
 				})
 				.max(Comparator.comparing(EditionSummaryDTO::getStartDate))

@@ -169,6 +169,10 @@ public class HomeController {
 
 			if (person != null && authorisationService.canViewCourse(course.getId())) {
 				// managed: The user can see the course, so manages it
+
+				// Note: This needs to be the first check, otherwise it may be incorrectly added to a different
+				// list.
+
 				managed.add(course);
 			} else if (person != null && hasActiveEdition && isOwnEdition) {
 				// ownActive: The user has completed at least one skill, and the course has an active edition
