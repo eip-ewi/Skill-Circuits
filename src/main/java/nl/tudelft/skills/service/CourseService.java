@@ -27,6 +27,7 @@ import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
 import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
+import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.course.CourseLevelCourseViewDTO;
 import nl.tudelft.skills.dto.view.course.CourseLevelEditionViewDTO;
@@ -39,11 +40,11 @@ import nl.tudelft.skills.security.AuthorisationService;
 @Service
 public class CourseService {
 
-	private CourseControllerApi courseApi;
-	private EditionControllerApi editionApi;
-	private CourseRepository courseRepository;
-	private EditionRepository editionRepository;
-	private AuthorisationService authorisationService;
+	private final CourseControllerApi courseApi;
+	private final EditionControllerApi editionApi;
+	private final CourseRepository courseRepository;
+	private final EditionRepository editionRepository;
+	private final AuthorisationService authorisationService;
 
 	@Autowired
 	public CourseService(CourseControllerApi courseApi, EditionControllerApi editionApi,
@@ -83,9 +84,14 @@ public class CourseService {
 	 * Returns the most recent edition that is visible for a course with given DTO.
 	 *
 	 * @param  course The CourseDetailsDTO for the course.
-	 * @return        The most recent edition for the course.
+	 * @return        The id of the most recent edition for the course.
 	 */
 	public Long getLastEditionForCourse(CourseDetailsDTO course) {
+		// Safety check, should never occur
+		if (course.getEditions() == null) {
+			return null;
+		}
+
 		return course.getEditions().stream()
 				.filter(e -> editionRepository.findById(e.getId()).map(SCEdition::isVisible).orElse(false))
 				.max(Comparator.comparing(EditionSummaryDTO::getStartDate))
@@ -94,23 +100,43 @@ public class CourseService {
 	}
 
 	/**
-	 * Returns the most recent edition in a course that a student is enrolled in. If none is found the most
-	 * recent edition is returned.
+	 * This method is used to get the default edition per course on the homepage. The course editions in the
+	 * given map are filtered as follows: - Kept, if the user is a head TA in the edition. - Kept, if the user
+	 * is a student/TA in the edition, and it is visible. - Discarded, otherwise. Returns: - If an edition
+	 * remains, the id of the latest of the filtered editions (by start date). - Otherwise: the id of the last
+	 * visible edition (by start date), or if there is none, null.
 	 *
-	 * @param  id Id of the course.
-	 * @return    The most recent edition in a course in which a student is enrolled.
+	 * @param  id The id of the course.
+	 * @return    The edition id by the above rules, or null if no edition meets the criteria.
 	 */
-	public Long getLastStudentEditionForCourseOrLast(Long id) {
+	public Long getDefaultHomepageEditionCourse(Long id) {
 		CourseDetailsDTO course = courseApi.getCourseById(id).block();
 
+		// Safety check
+		if (course == null || course.getEditions() == null) {
+			return null;
+		}
+
+		// Filter the editions by the condition (in comments), and then consider the maximum (by starting date).
+		// Otherwise, calls getLastEditionForCourse to get the last edition (by starting date).
 		return course.getEditions().stream()
-				.filter(e -> {
-					if (!authorisationService.isHeadTAInEdition(e.getId())) {
-						return editionRepository.findById(e.getId()).map(SCEdition::isVisible).orElse(false)
-								&&
-								authorisationService.isStudentInEdition(e.getId());
+				.filter(edition -> {
+					RoleDetailsDTO.TypeEnum role = authorisationService.getRoleInEdition(edition.getId());
+
+					// For head TAs the visibility does not matter
+					if (role == RoleDetailsDTO.TypeEnum.HEAD_TA) {
+						return true;
 					}
-					return true;
+
+					// For TAs and students, the edition needs to be visible
+					if (role == RoleDetailsDTO.TypeEnum.STUDENT || role == RoleDetailsDTO.TypeEnum.TA) {
+						return editionRepository.findById(edition.getId()).map(SCEdition::isVisible)
+								.orElse(false);
+					}
+
+					// Otherwise, the role is null or user is a teacher/higher role. These editions are sorted
+					// differently on the homepage, and therefore discarded here.
+					return false;
 				})
 				.max(Comparator.comparing(EditionSummaryDTO::getStartDate))
 				.map(EditionSummaryDTO::getId)

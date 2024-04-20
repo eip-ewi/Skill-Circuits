@@ -45,7 +45,6 @@ import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.model.PathPreference;
 import nl.tudelft.skills.model.SCEdition;
-import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskCompletion;
 import nl.tudelft.skills.model.labracore.SCPerson;
@@ -53,7 +52,6 @@ import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.CourseService;
-import nl.tudelft.skills.service.EditionService;
 import nl.tudelft.skills.service.SkillService;
 import nl.tudelft.skills.service.TaskCompletionService;
 import reactor.core.publisher.Flux;
@@ -69,42 +67,25 @@ public class HomeControllerTest extends ControllerTest {
 	private final RoleControllerApi roleApi;
 	private final PersonControllerApi personApi;
 	private final SkillRepository skillRepository;
-	private final TaskRepository taskRepository;
 	private final CourseControllerApi courseApi;
 	private final EditionRepository editionRepository;
-	private final PersonRepository personRepository;
-	private final EditionService editionService;
 	private final CourseService courseService;
-	private final PathPreferenceRepository pathPreferenceRepository;
-	private final SkillService skillService;
-	private final TaskCompletionService taskCompletionService;
 
 	@Autowired
-	public HomeControllerTest(EditionControllerApi editionApi, RoleControllerApi roleApi,
-			PersonControllerApi personApi,
-			EditionRepository editionRepository, ModuleRepository moduleRepository,
-			SkillRepository skillRepository, TaskRepository taskRepository, PersonRepository personRepository,
-			EditionService editionService,
-			PathPreferenceRepository pathPreferenceRepository, SkillService skillService,
-			TaskCompletionService taskCompletionService, CourseControllerApi courseApi,
-			AuthorisationService authorisationService) {
+	public HomeControllerTest(EditionControllerApi editionApi,
+			PersonControllerApi personApi, EditionRepository editionRepository,
+			PersonRepository personRepository, SkillService skillService,
+			TaskCompletionService taskCompletionService, AuthorisationService authorisationService,
+			SkillRepository skillRepository, RoleControllerApi roleApi, CourseControllerApi courseApi) {
 		this.editionApi = editionApi;
-		this.roleApi = roleApi;
-		this.courseApi = courseApi;
 		this.personApi = personApi;
 		this.editionRepository = editionRepository;
-		this.skillRepository = skillRepository;
-		this.taskRepository = taskRepository;
-		this.personRepository = personRepository;
-		this.editionService = editionService;
-		this.skillService = skillService;
-		this.taskCompletionService = taskCompletionService;
 		this.courseService = mock(CourseService.class);
-		this.pathPreferenceRepository = pathPreferenceRepository;
-		this.homeController = new HomeController(editionApi, personApi, editionRepository, moduleRepository,
-				personRepository, skillRepository, taskRepository, editionService, courseService,
-				skillService, taskCompletionService,
-				pathPreferenceRepository, authorisationService);
+		this.skillRepository = skillRepository;
+		this.roleApi = roleApi;
+		this.courseApi = courseApi;
+		this.homeController = new HomeController(editionApi, personApi, editionRepository,
+				personRepository, courseService, skillService, taskCompletionService, authorisationService);
 	}
 
 	@Test
@@ -129,7 +110,7 @@ public class HomeControllerTest extends ControllerTest {
 						.startDate(localDateTime.minusYears(1)).endDate(localDateTime.plusYears(1))
 						.course(course)));
 
-		when(courseService.getLastStudentEditionForCourseOrLast(course.getId())).thenReturn(edition.getId());
+		when(courseService.getDefaultHomepageEditionCourse(course.getId())).thenReturn(edition.getId());
 
 		homeController.getHomePage(null, model);
 
@@ -175,10 +156,9 @@ public class HomeControllerTest extends ControllerTest {
 		when(editionApi.getEditionsById(List.of(edition1.getId(), edition2.getId(), edition3.getId())))
 				.thenReturn(Flux.fromIterable(editions));
 
-		when(courseService.getLastStudentEditionForCourseOrLast(1L)).thenReturn(edition1.getId());
-		when(courseService.getLastStudentEditionForCourseOrLast(2L)).thenReturn(edition2.getId());
-		when(courseService.getLastStudentEditionForCourseOrLast(3L)).thenReturn(edition3.getId());
-
+		when(courseService.getDefaultHomepageEditionCourse(1L)).thenReturn(edition1.getId());
+		when(courseService.getDefaultHomepageEditionCourse(2L)).thenReturn(edition2.getId());
+		when(courseService.getDefaultHomepageEditionCourse(3L)).thenReturn(edition3.getId());
 		when(courseApi.getCourseById(1L)).thenReturn(Mono.just(new CourseDetailsDTO()
 				.editions(List.of(new EditionSummaryDTO().id(edition1.getId())))));
 		when(courseApi.getCourseById(2L)).thenReturn(Mono.just(new CourseDetailsDTO()
@@ -205,11 +185,10 @@ public class HomeControllerTest extends ControllerTest {
 
 		homeController.getHomePage(person, model);
 
-		assertThat((List<CourseSummaryDTO>) model.getAttribute("ownFinished")).isEmpty();
+		assertThat((List<CourseSummaryDTO>) model.getAttribute("ownFinished")).containsExactly(course2);
 		assertThat((List<CourseSummaryDTO>) model.getAttribute("availableActive")).isEmpty();
 		assertThat((List<CourseSummaryDTO>) model.getAttribute("ownActive")).containsExactly(course1);
-		assertThat((List<CourseSummaryDTO>) model.getAttribute("availableFinished"))
-				.containsExactly(course2);
+		assertThat((List<CourseSummaryDTO>) model.getAttribute("availableFinished")).isEmpty();
 		assertThat((List<CourseSummaryDTO>) model.getAttribute("managed")).containsExactly(course3);
 	}
 
@@ -253,9 +232,9 @@ public class HomeControllerTest extends ControllerTest {
 		List<CourseSummaryDTO> courses = List.of(new CourseSummaryDTO().id(1L), new CourseSummaryDTO().id(2L),
 				new CourseSummaryDTO().id(3L));
 		Set<Long> activeCourses = Set.of(1L);
-		Map<Long, Boolean> completedTaskInCourse = Map.of(1L, false, 2L, false, 3L, false);
+		Set<Long> ownCourses = Set.of();
 		Map<String, List<CourseSummaryDTO>> courseGroups = homeController.getCourseGroups(null, courses,
-				activeCourses, completedTaskInCourse);
+				activeCourses, ownCourses);
 
 		assertThat(courseGroups.keySet()).containsExactlyInAnyOrder("availableActive", "availableFinished",
 				"ownActive", "ownFinished", "managed");
@@ -271,9 +250,9 @@ public class HomeControllerTest extends ControllerTest {
 	public void getCourseGroupsPersonNullMalformedCompletedTask() {
 		List<CourseSummaryDTO> courses = List.of(new CourseSummaryDTO().id(1L));
 		Set<Long> activeCourses = Set.of(1L);
-		Map<Long, Boolean> completedTaskInCourse = Map.of(1L, true);
+		Set<Long> ownCourses = Set.of(1L);
 		Map<String, List<CourseSummaryDTO>> courseGroups = homeController.getCourseGroups(null, courses,
-				activeCourses, completedTaskInCourse);
+				activeCourses, ownCourses);
 
 		assertThat(courseGroups.keySet()).containsExactlyInAnyOrder("availableActive", "availableFinished",
 				"ownActive", "ownFinished", "managed");
@@ -290,8 +269,7 @@ public class HomeControllerTest extends ControllerTest {
 		List<CourseSummaryDTO> courses = List.of(new CourseSummaryDTO().id(1L), new CourseSummaryDTO().id(2L),
 				new CourseSummaryDTO().id(3L), new CourseSummaryDTO().id(4L), new CourseSummaryDTO().id(5L));
 		Set<Long> activeCourses = Set.of(4L, 5L);
-		Map<Long, Boolean> completedTaskInCourse = Map.of(1L, false, 2L, true, 3L, false,
-				4L, true, 5L, false);
+		Set<Long> ownCourses = Set.of(2L, 4L);
 
 		// Mock roles
 		when(courseApi.getCourseById(1L)).thenReturn(Mono.just(new CourseDetailsDTO()
@@ -303,7 +281,7 @@ public class HomeControllerTest extends ControllerTest {
 
 		Person person = new Person();
 		Map<String, List<CourseSummaryDTO>> courseGroups = homeController.getCourseGroups(person, courses,
-				activeCourses, completedTaskInCourse);
+				activeCourses, ownCourses);
 
 		assertThat(courseGroups.keySet()).containsExactlyInAnyOrder("availableActive", "availableFinished",
 				"ownActive", "ownFinished", "managed");
@@ -365,56 +343,29 @@ public class HomeControllerTest extends ControllerTest {
 		Map<Long, Long> courseToEditionMap = Map.of(1L, 1L, 2L, 2L, 3L, 3L, 4L, 4L, 5L, 5L, 6L, 6L, 7L, 7L,
 				8L, 8L, 9L, 9L, 10L, 10L);
 
-		Map<Long, EditionDetailsDTO> editions = new HashMap<>();
+		List<EditionDetailsDTO> editions = new ArrayList<>();
 		LocalDateTime beforeNow = LocalDateTime.now().minusYears(1);
 		LocalDateTime afterNow = LocalDateTime.now().plusYears(1);
 
 		// Start -- End -- Now => Not active
 		for (long i = 2L; i <= 4L; i++) {
-			editions.put(i,
-					new EditionDetailsDTO().id(i).startDate(beforeNow).endDate(beforeNow.plusDays(1)));
+			editions.add(new EditionDetailsDTO().id(i).startDate(beforeNow).endDate(beforeNow.plusDays(1)));
 		}
 
 		// Now -- Start -- End => Not active
 		for (long i = 5L; i <= 7L; i++) {
-			editions.put(i, new EditionDetailsDTO().id(i).startDate(afterNow).endDate(afterNow.plusYears(1)));
+			editions.add(new EditionDetailsDTO().id(i).startDate(afterNow).endDate(afterNow.plusYears(1)));
 		}
 
 		// Start -- Now -- End => Not active
 		for (long i = 8L; i <= 10L; i++) {
-			editions.put(i, new EditionDetailsDTO().id(i).startDate(beforeNow).endDate(afterNow));
+			editions.add(new EditionDetailsDTO().id(i).startDate(beforeNow).endDate(afterNow));
 		}
 
 		// Should only contain 8, 9, 10 as active courses (for all others there are different reasons as to why they
 		// are not active)
 		assertThat(homeController.getActiveCourses(editions, visible, teacherIds, courseToEditionMap))
 				.containsExactlyInAnyOrder(8L, 9L, 10L);
-	}
-
-	@Test
-	public void testGetCompletedTaskInCourse() {
-		Long usedEditionId = db.getEditionRL().getId();
-
-		// Mock latest or last edition values
-		Map<Long, Long> courseToEditionMap = Map.of(1L, usedEditionId, 2L, usedEditionId + 1, 3L,
-				usedEditionId + 2);
-
-		// Save new editions and add a task completion to the second edition
-		editionRepository.save(SCEdition.builder().id(usedEditionId + 1).build());
-		Skill skill = db.createSkillInEditionHelper(usedEditionId + 2, true);
-		Task task = Task.builder().name("Task").time(1).skill(skill).build();
-		skill.getTasks().add(task);
-		TaskCompletion completion = TaskCompletion.builder().task(task).person(db.getPerson()).build();
-		db.getPerson().getTaskCompletions().add(completion);
-
-		// Has completed more than one task in the edition previously saved in the db, none in the first saved edition
-		// and exactly one in the second saved edition
-		Map<Long, Boolean> completedTask = homeController.getCompletedTaskInCourse(db.getPerson(),
-				courseToEditionMap);
-		assertThat(completedTask.keySet()).containsExactlyInAnyOrder(1L, 2L, 3L);
-		assertThat(completedTask.get(1L)).isTrue();
-		assertThat(completedTask.get(2L)).isFalse();
-		assertThat(completedTask.get(3L)).isTrue();
 	}
 
 	/**

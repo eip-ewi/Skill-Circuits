@@ -36,6 +36,7 @@ import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
+import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.course.CourseLevelCourseViewDTO;
 import nl.tudelft.skills.model.SCCourse;
@@ -43,7 +44,6 @@ import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.CourseRepository;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.security.AuthorisationService;
-import nl.tudelft.skills.test.TestDatabaseLoader;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -51,14 +51,12 @@ import reactor.core.publisher.Mono;
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
 public class CourseServiceTest {
 
-	private CourseControllerApi courseApi;
-	private EditionControllerApi editionApi;
+	private final CourseControllerApi courseApi;
+	private final EditionControllerApi editionApi;
 
-	private TestDatabaseLoader db;
-
-	private CourseRepository courseRepository;
-	private EditionRepository editionRepository;
-	private CourseService courseService;
+	private final CourseRepository courseRepository;
+	private final EditionRepository editionRepository;
+	private final CourseService courseService;
 
 	private final AuthorisationService authorisationService;
 
@@ -66,12 +64,11 @@ public class CourseServiceTest {
 
 	@Autowired
 	public CourseServiceTest(CourseRepository courseRepository, EditionRepository editionRepository,
-			CourseControllerApi courseApi, EditionControllerApi editionApi, TestDatabaseLoader db) {
+			CourseControllerApi courseApi, EditionControllerApi editionApi) {
 		this.courseApi = courseApi;
 		this.editionApi = editionApi;
 		this.courseRepository = courseRepository;
 		this.editionRepository = editionRepository;
-		this.db = db;
 		authorisationService = mock(AuthorisationService.class);
 		courseService = new CourseService(courseApi, editionApi, courseRepository, editionRepository,
 				authorisationService);
@@ -139,7 +136,7 @@ public class CourseServiceTest {
 		editionRepository.save(new SCEdition(2L, true, null, null, null, null));
 
 		// if student is not in any edition, then most recent edition is returned
-		assertThat(courseService.getLastStudentEditionForCourseOrLast(3L)).isEqualTo(2L);
+		assertThat(courseService.getDefaultHomepageEditionCourse(3L)).isEqualTo(2L);
 	}
 
 	@Test
@@ -150,19 +147,16 @@ public class CourseServiceTest {
 						new EditionSummaryDTO().id(3L).startDate(localDateTime.plusMinutes(2))));
 		when(courseApi.getCourseById(anyLong())).thenReturn(Mono.just(courseDetailsDTO));
 
-		when(authorisationService.isStudentInEdition(1L)).thenReturn(true);
-		when(authorisationService.isHeadTAInEdition(1L)).thenReturn(false);
-		when(authorisationService.isStudentInEdition(2L)).thenReturn(true);
-		when(authorisationService.isHeadTAInEdition(2L)).thenReturn(false);
-		when(authorisationService.isStudentInEdition(3L)).thenReturn(false);
-		when(authorisationService.isHeadTAInEdition(3L)).thenReturn(false);
+		when(authorisationService.getRoleInEdition(1L)).thenReturn(RoleDetailsDTO.TypeEnum.STUDENT);
+		when(authorisationService.getRoleInEdition(2L)).thenReturn(RoleDetailsDTO.TypeEnum.STUDENT);
+		when(authorisationService.getRoleInEdition(3L)).thenReturn(null);
 
 		editionRepository.save(new SCEdition(1L, true, null, null, null, null));
 		editionRepository.save(new SCEdition(2L, true, null, null, null, null));
 		editionRepository.save(new SCEdition(3L, true, null, null, null, null));
 
 		// if student is at least in one edition, then most recent active edition is returned
-		assertThat(courseService.getLastStudentEditionForCourseOrLast(3L)).isEqualTo(2L);
+		assertThat(courseService.getDefaultHomepageEditionCourse(3L)).isEqualTo(2L);
 	}
 
 	@Test
@@ -173,18 +167,15 @@ public class CourseServiceTest {
 						new EditionSummaryDTO().id(3L).startDate(localDateTime.plusMinutes(2))));
 		when(courseApi.getCourseById(anyLong())).thenReturn(Mono.just(courseDetailsDTO));
 
-		when(authorisationService.isStudentInEdition(1L)).thenReturn(true);
-		when(authorisationService.isHeadTAInEdition(1L)).thenReturn(false);
-		when(authorisationService.isStudentInEdition(2L)).thenReturn(true);
-		when(authorisationService.isHeadTAInEdition(2L)).thenReturn(false);
-		when(authorisationService.isStudentInEdition(3L)).thenReturn(false);
-		when(authorisationService.isHeadTAInEdition(3L)).thenReturn(true);
+		when(authorisationService.getRoleInEdition(1L)).thenReturn(RoleDetailsDTO.TypeEnum.STUDENT);
+		when(authorisationService.getRoleInEdition(2L)).thenReturn(RoleDetailsDTO.TypeEnum.STUDENT);
+		when(authorisationService.getRoleInEdition(3L)).thenReturn(RoleDetailsDTO.TypeEnum.HEAD_TA);
 
 		editionRepository.save(new SCEdition(1L, true, null, null, null, null));
 		editionRepository.save(new SCEdition(2L, true, null, null, null, null));
 		editionRepository.save(new SCEdition(3L, false, null, null, null, null));
 
-		assertThat(courseService.getLastStudentEditionForCourseOrLast(3L)).isEqualTo(3L);
+		assertThat(courseService.getDefaultHomepageEditionCourse(3L)).isEqualTo(3L);
 	}
 
 	@Test
@@ -206,7 +197,7 @@ public class CourseServiceTest {
 		editionRepository.save(new SCEdition(2L, true, null, null, null, null));
 		editionRepository.save(new SCEdition(3L, true, null, null, null, null));
 
-		assertThat(courseService.getLastStudentEditionForCourseOrLast(3L)).isEqualTo(3L);
+		assertThat(courseService.getDefaultHomepageEditionCourse(3L)).isEqualTo(3L);
 	}
 
 	@Test
