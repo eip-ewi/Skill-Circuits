@@ -27,6 +27,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -110,8 +112,8 @@ public class CourseServiceTest {
 	@Test
 	public void getLastEditionForCourse() {
 		CourseDetailsDTO courseDetailsDTO = new CourseDetailsDTO().editions(
-				List.of(new EditionSummaryDTO().id(1L).startDate(localDateTime),
-						new EditionSummaryDTO().id(2L).startDate(localDateTime.plusMinutes(1))));
+				List.of(new EditionSummaryDTO().id(1L).startDate(localDateTime.plusMinutes(1)),
+						new EditionSummaryDTO().id(2L).startDate(localDateTime)));
 
 		editionRepository.save(new SCEdition(1L, true, null, null, null, null));
 		editionRepository.save(new SCEdition(2L, true, null, null, null, null));
@@ -121,46 +123,89 @@ public class CourseServiceTest {
 		SCEdition edition = new SCEdition();
 		edition.setVisible(true);
 
-		assertThat(courseService.getLastEditionForCourse(courseDetailsDTO)).isEqualTo(2L);
+		assertThat(courseService.getLastEditionForCourse(courseDetailsDTO)).isEqualTo(1L);
 	}
 
 	@Test
-	public void getLastStudentEditionForCourseOrLastReturnsMostRecent() {
+	public void getLastEditionForCourseReturnsNull() {
+		// No editions
+		assertThat(courseService.getLastEditionForCourse(new CourseDetailsDTO().editions(List.of())))
+				.isNull();
+
+		// Edition is not visible
+		CourseDetailsDTO courseDetailsDTO = new CourseDetailsDTO().editions(
+				List.of(new EditionSummaryDTO().id(1L).startDate(localDateTime)));
+		editionRepository.save(new SCEdition(1L, false, null, null, null, null));
+		assertThat(courseService.getLastEditionForCourse(courseDetailsDTO)).isNull();
+	}
+
+	@Test
+	public void getLastEditionForCoursePassNull() {
+		assertThat(courseService.getLastEditionForCourse(null)).isNull();
+		assertThat(courseService.getLastEditionForCourse(new CourseDetailsDTO().editions(null))).isNull();
+	}
+
+	@Test
+	public void getDefaultHomepageEditionCourseReturnsMostRecent() {
+		// Goal: Test scenario in which getLastEditionForCourse should be called
+		// Setup:
+		// - Editions (sorted by start date): 1 - visible, 2 - not visible
+		// - Roles per edition: 1, 2 - all null
+		// Should return: edition 1
+
 		CourseDetailsDTO courseDetailsDTO = new CourseDetailsDTO().editions(
 				List.of(new EditionSummaryDTO().id(1L).startDate(localDateTime),
 						new EditionSummaryDTO().id(2L).startDate(localDateTime.plusMinutes(1))));
 		when(courseApi.getCourseById(anyLong())).thenReturn(Mono.just(courseDetailsDTO));
-		when(authorisationService.isStudentInEdition(anyLong())).thenReturn(false);
+		when(authorisationService.getRoleInEdition(anyLong())).thenReturn(null);
 
 		editionRepository.save(new SCEdition(1L, true, null, null, null, null));
-		editionRepository.save(new SCEdition(2L, true, null, null, null, null));
+		editionRepository.save(new SCEdition(2L, false, null, null, null, null));
 
 		// if student is not in any edition, then most recent edition is returned
-		assertThat(courseService.getDefaultHomepageEditionCourse(3L)).isEqualTo(2L);
+		assertThat(courseService.getDefaultHomepageEditionCourse(3L)).isEqualTo(1L);
 	}
 
 	@Test
-	public void getLastStudentEditionForCourseOrLastReturnsLast() {
+	public void getDefaultHomepageEditionReturnsLastEditionWithRole() {
+		// Goal: Test scenarios in which last edition with a student/TA role should be returned
+		// Setup:
+		// - Editions (sorted by start date): 1, 2, 3 - all visible
+		// - Roles per edition: First: 1 - student, 2 - TA, 3 - null; Second: 1 - TA, 2 - student, 3 - null
+		// Should return: edition 2
+
 		CourseDetailsDTO courseDetailsDTO = new CourseDetailsDTO().editions(
 				List.of(new EditionSummaryDTO().id(1L).startDate(localDateTime),
 						new EditionSummaryDTO().id(2L).startDate(localDateTime.plusMinutes(1)),
 						new EditionSummaryDTO().id(3L).startDate(localDateTime.plusMinutes(2))));
 		when(courseApi.getCourseById(anyLong())).thenReturn(Mono.just(courseDetailsDTO));
-
-		when(authorisationService.getRoleInEdition(1L)).thenReturn(RoleDetailsDTO.TypeEnum.STUDENT);
-		when(authorisationService.getRoleInEdition(2L)).thenReturn(RoleDetailsDTO.TypeEnum.STUDENT);
-		when(authorisationService.getRoleInEdition(3L)).thenReturn(null);
 
 		editionRepository.save(new SCEdition(1L, true, null, null, null, null));
 		editionRepository.save(new SCEdition(2L, true, null, null, null, null));
 		editionRepository.save(new SCEdition(3L, true, null, null, null, null));
 
-		// if student is at least in one edition, then most recent active edition is returned
+		// First setup: 1 - student, 2 - TA, 3 - null
+		when(authorisationService.getRoleInEdition(1L)).thenReturn(RoleDetailsDTO.TypeEnum.STUDENT);
+		when(authorisationService.getRoleInEdition(2L)).thenReturn(RoleDetailsDTO.TypeEnum.TA);
+		when(authorisationService.getRoleInEdition(3L)).thenReturn(null);
+
+		assertThat(courseService.getDefaultHomepageEditionCourse(3L)).isEqualTo(2L);
+
+		// Second setup: 1 - TA, 2 - student, 3 - null
+		when(authorisationService.getRoleInEdition(1L)).thenReturn(RoleDetailsDTO.TypeEnum.TA);
+		when(authorisationService.getRoleInEdition(2L)).thenReturn(RoleDetailsDTO.TypeEnum.STUDENT);
+
 		assertThat(courseService.getDefaultHomepageEditionCourse(3L)).isEqualTo(2L);
 	}
 
 	@Test
-	public void getLastStudentEditionForCourseOrLastReturnsLastHeadTAEdition() {
+	public void getDefaultHomepageEditionCourseReturnsLastHeadTAEdition() {
+		// Goal: Test scenario in which head TA edition is picked, and it is not visible
+		// Setup:
+		// - Editions (sorted by start date): 1 - visible, 2 - visible, 3 - not visible
+		// - Roles per edition: 1 - student, 2 - TA, 3 - head TA
+		// Should return: edition 3
+
 		CourseDetailsDTO courseDetailsDTO = new CourseDetailsDTO().editions(
 				List.of(new EditionSummaryDTO().id(1L).startDate(localDateTime),
 						new EditionSummaryDTO().id(2L).startDate(localDateTime.plusMinutes(1)),
@@ -168,7 +213,7 @@ public class CourseServiceTest {
 		when(courseApi.getCourseById(anyLong())).thenReturn(Mono.just(courseDetailsDTO));
 
 		when(authorisationService.getRoleInEdition(1L)).thenReturn(RoleDetailsDTO.TypeEnum.STUDENT);
-		when(authorisationService.getRoleInEdition(2L)).thenReturn(RoleDetailsDTO.TypeEnum.STUDENT);
+		when(authorisationService.getRoleInEdition(2L)).thenReturn(RoleDetailsDTO.TypeEnum.TA);
 		when(authorisationService.getRoleInEdition(3L)).thenReturn(RoleDetailsDTO.TypeEnum.HEAD_TA);
 
 		editionRepository.save(new SCEdition(1L, true, null, null, null, null));
@@ -179,25 +224,94 @@ public class CourseServiceTest {
 	}
 
 	@Test
-	public void getLastStudentEditionForCourseOrLastReturnsLastStudentEdition() {
+	public void getDefaultHomepageEditionCourseNewestStudentOverwritesHeadTA() {
+		// Goal: Test scenario in which there is a head TA edition, but the newer student edition is returned
+		// Setup:
+		// - Editions (sorted by start date): 1, 2, 3 - all visible
+		// - Roles per edition: 1 - TA, 2 - head TA, 3 - student
+		// Should return: edition 3
+
 		CourseDetailsDTO courseDetailsDTO = new CourseDetailsDTO().editions(
 				List.of(new EditionSummaryDTO().id(1L).startDate(localDateTime),
 						new EditionSummaryDTO().id(2L).startDate(localDateTime.plusMinutes(1)),
 						new EditionSummaryDTO().id(3L).startDate(localDateTime.plusMinutes(2))));
 		when(courseApi.getCourseById(anyLong())).thenReturn(Mono.just(courseDetailsDTO));
 
-		when(authorisationService.isStudentInEdition(1L)).thenReturn(true);
-		when(authorisationService.isHeadTAInEdition(1L)).thenReturn(false);
-		when(authorisationService.isStudentInEdition(2L)).thenReturn(false);
-		when(authorisationService.isHeadTAInEdition(2L)).thenReturn(true);
-		when(authorisationService.isStudentInEdition(3L)).thenReturn(true);
-		when(authorisationService.isHeadTAInEdition(3L)).thenReturn(false);
+		when(authorisationService.getRoleInEdition(1L)).thenReturn(RoleDetailsDTO.TypeEnum.TA);
+		when(authorisationService.getRoleInEdition(2L)).thenReturn(RoleDetailsDTO.TypeEnum.HEAD_TA);
+		when(authorisationService.getRoleInEdition(3L)).thenReturn(RoleDetailsDTO.TypeEnum.STUDENT);
 
 		editionRepository.save(new SCEdition(1L, true, null, null, null, null));
 		editionRepository.save(new SCEdition(2L, true, null, null, null, null));
 		editionRepository.save(new SCEdition(3L, true, null, null, null, null));
 
 		assertThat(courseService.getDefaultHomepageEditionCourse(3L)).isEqualTo(3L);
+	}
+
+	@ParameterizedTest
+	@CsvSource({ "null", "TEACHER", "TEACHER_RO", "ADMIN" })
+	public void getDefaultHomepageEditionCourseReturnsStudentInsteadOfOther(String role) {
+		// Goal: Test scenarios in which the last edition has an "invalid" role, and the previous one should be returned
+		// Setup:
+		// - Editions (sorted by start date): 1, 2, 3 - all visible
+		// - Roles per edition: 1 - student, 2 - student, 3 - (role parameter)
+		// Should return: edition 2
+
+		CourseDetailsDTO courseDetailsDTO = new CourseDetailsDTO().editions(
+				List.of(new EditionSummaryDTO().id(1L).startDate(localDateTime),
+						new EditionSummaryDTO().id(2L).startDate(localDateTime.plusMinutes(1)),
+						new EditionSummaryDTO().id(3L).startDate(localDateTime.plusMinutes(2))));
+		when(courseApi.getCourseById(anyLong())).thenReturn(Mono.just(courseDetailsDTO));
+
+		when(authorisationService.getRoleInEdition(1L)).thenReturn(RoleDetailsDTO.TypeEnum.STUDENT);
+		when(authorisationService.getRoleInEdition(2L)).thenReturn(RoleDetailsDTO.TypeEnum.STUDENT);
+		when(authorisationService.getRoleInEdition(3L))
+				.thenReturn(role.equals("null") ? null : RoleDetailsDTO.TypeEnum.fromValue(role));
+
+		editionRepository.save(new SCEdition(1L, true, null, null, null, null));
+		editionRepository.save(new SCEdition(2L, true, null, null, null, null));
+		editionRepository.save(new SCEdition(3L, true, null, null, null, null));
+
+		assertThat(courseService.getDefaultHomepageEditionCourse(3L)).isEqualTo(2L);
+	}
+
+	@Test
+	public void getDefaultHomepageEditionCourseReturnsStudentIfTAIsHidden() {
+		// Goal: Test scenario in which the latest edition is a TA edition, but not visible. It should return the
+		// previous visible student edition
+		// Setup:
+		// - Editions (sorted by start date): 1 - visible, 2 - visible, 3 - not visible
+		// - Roles per edition: 1 - student, 2 - student, 3 - TA
+		// Should return: edition 2
+
+		CourseDetailsDTO courseDetailsDTO = new CourseDetailsDTO().editions(
+				List.of(new EditionSummaryDTO().id(1L).startDate(localDateTime),
+						new EditionSummaryDTO().id(2L).startDate(localDateTime.plusMinutes(1)),
+						new EditionSummaryDTO().id(3L).startDate(localDateTime.plusMinutes(2))));
+		when(courseApi.getCourseById(anyLong())).thenReturn(Mono.just(courseDetailsDTO));
+
+		when(authorisationService.getRoleInEdition(1L)).thenReturn(RoleDetailsDTO.TypeEnum.STUDENT);
+		when(authorisationService.getRoleInEdition(2L)).thenReturn(RoleDetailsDTO.TypeEnum.STUDENT);
+		when(authorisationService.getRoleInEdition(3L)).thenReturn(RoleDetailsDTO.TypeEnum.TA);
+
+		editionRepository.save(new SCEdition(1L, true, null, null, null, null));
+		editionRepository.save(new SCEdition(2L, true, null, null, null, null));
+		editionRepository.save(new SCEdition(3L, false, null, null, null, null));
+
+		assertThat(courseService.getDefaultHomepageEditionCourse(3L)).isEqualTo(2L);
+	}
+
+	@Test
+	public void getDefaultHomepageEditionCoursePassNull() {
+		// Goal: Test scenario in which course or edition list is null
+		// Should return: null
+
+		when(courseApi.getCourseById(anyLong())).thenReturn(Mono.empty());
+		assertThat(courseService.getDefaultHomepageEditionCourse(3L)).isNull();
+
+		CourseDetailsDTO courseDetailsDTO = new CourseDetailsDTO().editions(null);
+		when(courseApi.getCourseById(anyLong())).thenReturn(Mono.just(courseDetailsDTO));
+		assertThat(courseService.getDefaultHomepageEditionCourse(3L)).isNull();
 	}
 
 	@Test

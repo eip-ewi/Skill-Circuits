@@ -88,7 +88,7 @@ public class CourseService {
 	 */
 	public Long getLastEditionForCourse(CourseDetailsDTO course) {
 		// Safety check, should never occur
-		if (course.getEditions() == null) {
+		if (course == null || course.getEditions() == null) {
 			return null;
 		}
 
