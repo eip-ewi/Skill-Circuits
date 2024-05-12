@@ -129,6 +129,8 @@ public class HomeControllerTest extends ControllerTest {
 		// One course is not active and has also not been worked in (course2), one course is active
 		// and has been worked in (course1), and one course is managed as teacher (course3)
 
+		// TODO either integrate a head TA in this test, or make a separate test.
+
 		SCEdition edition1 = db.getEditionRL();
 		edition1.setVisible(true);
 		editionRepository.saveAndFlush(edition1);
@@ -210,6 +212,24 @@ public class HomeControllerTest extends ControllerTest {
 	}
 
 	@Test
+	void getCompletedSkillsNullInMap() {
+		SCPerson person = new SCPerson();
+		TaskCompletion completion = TaskCompletion.builder().id(1L)
+				.person(person).task(db.getTaskRead12()).build();
+		person.setTaskCompletions(Set.of(completion));
+
+		Map<Long, Long> courseToEditionMap = new HashMap<>();
+		courseToEditionMap.put(db.getCourseRL().getId(), null);
+
+		// There are no completed skills in the course
+		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(person,
+				courseToEditionMap);
+
+		assertTrue(courseCompletedSkills.entrySet().stream().noneMatch(e -> e.getValue() > 0));
+		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(0);
+	}
+
+	@Test
 	void getCompletedSkillsTrue() {
 		SCPerson person = new SCPerson();
 		TaskCompletion completion1 = TaskCompletion.builder().id(1L)
@@ -265,6 +285,7 @@ public class HomeControllerTest extends ControllerTest {
 
 	@Test
 	@WithUserDetails("username")
+	// TODO test with a head TA
 	public void getCourseGroups() {
 		List<CourseSummaryDTO> courses = List.of(new CourseSummaryDTO().id(1L), new CourseSummaryDTO().id(2L),
 				new CourseSummaryDTO().id(3L), new CourseSummaryDTO().id(4L), new CourseSummaryDTO().id(5L));
@@ -339,7 +360,7 @@ public class HomeControllerTest extends ControllerTest {
 
 		Set<Long> visible = Set.of(2L, 4L, 5L, 7L, 8L, 10L);
 		Set<Long> teacherIds = Set.of(3L, 4L, 6L, 7L, 9L, 10L);
-		// TODO add null value as well
+		// TODO add null value as well, or in a separate test
 		Map<Long, Long> courseToEditionMap = Map.of(1L, 1L, 2L, 2L, 3L, 3L, 4L, 4L, 5L, 5L, 6L, 6L, 7L, 7L,
 				8L, 8L, 9L, 9L, 10L, 10L);
 
@@ -366,6 +387,56 @@ public class HomeControllerTest extends ControllerTest {
 		// are not active)
 		assertThat(homeController.getActiveCourses(editions, visible, teacherIds, courseToEditionMap))
 				.containsExactlyInAnyOrder(8L, 9L, 10L);
+	}
+
+	@Test
+	public void testGetCourseToEditionMap() {
+		// Contains a course with a default edition, and a course without (mocked response)
+
+		List<CourseSummaryDTO> courses = List.of(new CourseSummaryDTO().id(1L),
+				new CourseSummaryDTO().id(2L));
+		when(courseService.getDefaultHomepageEditionCourse(1L)).thenReturn(11L);
+		when(courseService.getDefaultHomepageEditionCourse(2L)).thenReturn(null);
+
+		Map<Long, Long> courseToEditionMap = homeController.getCourseToEditionMap(courses);
+		Map<Long, Long> expected = new HashMap<>();
+		expected.put(1L, 11L);
+		expected.put(2L, null);
+
+		assertThat(courseToEditionMap).isEqualTo(expected);
+	}
+
+	@Test
+	public void testGetOwnCoursesNotLoggedIn() {
+		assertThat(homeController.getOwnCourses(null, Map.of(1L, 2L, 3L, 4L))).isEmpty();
+	}
+
+	@Test
+	@WithUserDetails("username")
+	public void testGetOwnCourses() {
+		// Test setup:
+		// - Map contains courses with a default edition, and a course without (null as value in map)
+		// - User has different roles in some courses with editions
+		// - User has no role in one of the courses with edition
+
+		Map<Long, Long> courseToEditionMap = new HashMap<>();
+		courseToEditionMap.put(1L, 11L);
+		courseToEditionMap.put(2L, 12L);
+		courseToEditionMap.put(3L, 13L);
+		courseToEditionMap.put(4L, 14L);
+		courseToEditionMap.put(5L, 15L);
+		courseToEditionMap.put(6L, null);
+		Person person = new Person();
+
+		// Mock roles of user (check most important roles - role should not matter)
+		mockRoleForEdition(roleApi, "STUDENT", 11L);
+		mockRoleForEdition(roleApi, "TEACHER", 12L);
+		mockRoleForEdition(roleApi, "TA", 13L);
+		mockRoleForEdition(roleApi, "HEAD_TA", 14L);
+		mockRoleForEdition(roleApi, null, 15L);
+
+		assertThat(homeController.getOwnCourses(person, courseToEditionMap))
+				.containsExactlyInAnyOrder(1L, 2L, 3L, 4L);
 	}
 
 	/**

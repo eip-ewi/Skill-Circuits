@@ -285,8 +285,15 @@ public class HomeController {
 		}
 
 		for (Long course : courseToEditionMap.keySet()) {
+			Long editionId = courseToEditionMap.get(course);
+			// Safety check: the edition id is null if there is no valid edition for the user
+			// to access -> in this case, skip
+			if (editionId == null) {
+				continue;
+			}
+
 			RoleDetailsDTO.TypeEnum role = authorisationService
-					.getRoleInEdition(courseToEditionMap.get(course));
+					.getRoleInEdition(editionId);
 
 			// If the user has any role in the edition, add it to own courses
 			if (role != null) {
