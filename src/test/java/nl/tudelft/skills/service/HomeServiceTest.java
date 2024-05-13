@@ -29,9 +29,12 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -169,10 +172,12 @@ public class HomeServiceTest {
 		assertThat(courseGroups.get("managed")).isEmpty();
 	}
 
-	@Test
+	@ParameterizedTest
 	@WithUserDetails("username")
-	// TODO test with a head TA
-	public void getCourseGroups() {
+	@CsvSource({ "HEAD_TA", "TA", "STUDENT" })
+	public void getCourseGroups(String role) {
+		// In terms of course groupings, students, TAs and head TAs should be handled the same way
+
 		List<CourseSummaryDTO> courses = List.of(new CourseSummaryDTO().id(1L), new CourseSummaryDTO().id(2L),
 				new CourseSummaryDTO().id(3L), new CourseSummaryDTO().id(4L), new CourseSummaryDTO().id(5L));
 		Set<Long> activeCourses = Set.of(4L, 5L);
@@ -184,7 +189,7 @@ public class HomeServiceTest {
 		when(courseApi.getCourseById(not(eq(1L)))).thenReturn(Mono.just(new CourseDetailsDTO()
 				.editions(List.of(new EditionSummaryDTO().id(2L)))));
 		mockRoleForEdition(roleApi, "TEACHER", 1L);
-		mockRoleForEdition(roleApi, "STUDENT", 2L);
+		mockRoleForEdition(roleApi, role, 2L);
 
 		Person person = new Person();
 		Map<String, List<CourseSummaryDTO>> courseGroups = homeService.getCourseGroups(person, courses,
@@ -243,12 +248,10 @@ public class HomeServiceTest {
 		// 8, 9, 10 -> current time is after start and before end => active
 		// For all groups of 3, there is one where the edition is visible (2, 5, 8), one where the user is a teacher
 		// (3, 6, 9) and one where both are true (4, 7, 10).
+		// Additionally, there is a course (11) for which there is no default edition => inactive
 
 		Set<Long> visible = Set.of(2L, 4L, 5L, 7L, 8L, 10L);
 		Set<Long> teacherIds = Set.of(3L, 4L, 6L, 7L, 9L, 10L);
-		// TODO add null value as well, or in a separate test
-		Map<Long, Long> courseToEditionMap = Map.of(1L, 1L, 2L, 2L, 3L, 3L, 4L, 4L, 5L, 5L, 6L, 6L, 7L, 7L,
-				8L, 8L, 9L, 9L, 10L, 10L);
 
 		List<EditionDetailsDTO> editions = new ArrayList<>();
 		LocalDateTime beforeNow = LocalDateTime.now().minusYears(1);
@@ -268,6 +271,14 @@ public class HomeServiceTest {
 		for (long i = 8L; i <= 10L; i++) {
 			editions.add(new EditionDetailsDTO().id(i).startDate(beforeNow).endDate(afterNow));
 		}
+
+		// Create courseToEditionMap
+		Map<Long, Long> courseToEditionMap = new HashMap<>();
+		for (long i = 1L; i <= 10L; i++) {
+			courseToEditionMap.put(i, i);
+		}
+		// Add a course that does not have any default edition (e.g., all editions are not visible and user is student)
+		courseToEditionMap.put(11L, null);
 
 		// Should only contain 8, 9, 10 as active courses (for all others there are different reasons as to why they
 		// are not active)
@@ -294,6 +305,7 @@ public class HomeServiceTest {
 	}
 
 	@Test
+	@WithAnonymousUser
 	public void testGetOwnCoursesNotLoggedIn() {
 		assertThat(homeService.getOwnCourses(null, Map.of(1L, 2L, 3L, 4L))).isEmpty();
 	}
