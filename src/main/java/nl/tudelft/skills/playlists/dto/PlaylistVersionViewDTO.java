@@ -19,6 +19,7 @@ package nl.tudelft.skills.playlists.dto;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
@@ -46,8 +47,13 @@ public class PlaylistVersionViewDTO extends View<PlaylistVersion> {
 	@NotNull
 	private Map<Long, Integer> taskTimes;
 
+	@NotNull
+	private Set<Long> completedTasks;
+
 	@Override
 	public void postApply() {
+		this.completedTasks = data.getTasks().stream().filter(PlaylistTask::getCompleted)
+				.map(PlaylistTask::getTaskId).collect(Collectors.toSet());
 		this.taskTimes = data.getTasks().stream()
 				.collect(Collectors.toMap(PlaylistTask::getTaskId, PlaylistTask::getCompletionTime));
 	}
