@@ -167,12 +167,11 @@ public class HomeController {
 			boolean hasActiveEdition = activeCourses.contains(course.getId());
 			boolean isOwnEdition = ownCourses.contains(course.getId());
 
+			// Note: "Managed" needs to be the first check, otherwise a course may be incorrectly added to a different
+			// list (the course may be added to active editions / own editions, since teachers are not considered
+			// as a special case there).
 			if (person != null && authorisationService.canViewCourse(course.getId())) {
 				// managed: The user can see the course, so manages it
-
-				// Note: This needs to be the first check, otherwise it may be incorrectly added to a different
-				// list.
-
 				managed.add(course);
 			} else if (person != null && hasActiveEdition && isOwnEdition) {
 				// ownActive: The user has completed at least one skill, and the course has an active edition
