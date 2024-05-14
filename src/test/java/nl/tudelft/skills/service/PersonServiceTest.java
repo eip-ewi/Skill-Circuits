@@ -279,4 +279,29 @@ public class PersonServiceTest {
 		assertThat(model.getAttribute("skillsModified")).isEqualTo(Set.of());
 	}
 
+	@Test
+	public void testAddRevealedSkillHiddenFalse() {
+		SCPerson person = db.getPerson();
+		Skill skill = db.getSkillNegation();
+
+		assertThat(person.getSkillsRevealed()).doesNotContain(skill);
+		personService.addRevealedSkill(person.getId(), skill);
+
+		assertThat(person.getSkillsRevealed()).doesNotContain(skill);
+
+	}
+
+	@Test
+	public void testAddRevealedSkillHiddenTrue() {
+		SCPerson person = db.getPerson();
+		Skill skill = db.getSkillVariablesHidden();
+
+		assertThat(person.getSkillsRevealed()).doesNotContain(skill);
+		personService.addRevealedSkill(person.getId(), skill);
+
+		assertThat(person.getSkillsRevealed()).contains(skill);
+		personService.addRevealedSkill(person.getId(), skill);
+		assertThat(person.getSkillsRevealed().size()).isEqualTo(1);
+
+	}
 }
