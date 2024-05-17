@@ -27,6 +27,8 @@ import java.util.*;
 import javax.transaction.Transactional;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -109,21 +111,27 @@ public class HomeControllerTest extends ControllerTest {
 				.isEqualTo(Map.of(course.getId(), edition.getId()));
 	}
 
-	@Test
+	@ParameterizedTest
 	@SuppressWarnings("unchecked")
 	@WithUserDetails("username")
-	void getHomePageExampleLoggedIn() {
+	@CsvSource({ "STUDENT,own,available", "TA,own,available", "HEAD_TA,own,available", "null,available,own" })
+	void getHomePageExampleDifferentRoles(String role, String grouping, String emptyGrouping) {
 		// Test setup:
-		// - Course/edition one: Active, student
-		// - Course/edition two: Not active, student
+		// - Course one:
+		// ---- Edition one: Newer, active, role parameter (student, TA, head TA, no role)
+		// ---- Edition two: Older, not active, role parameter (student, TA, head TA, no role)
+		// - Course/edition two: Not active, role parameter (student, TA, head TA, no role)
 		// Desired result:
-		// => Course two in "ownFinished", course one in "ownActive"
+		// => Course two in "grouping parameter + "Finished"", course one in "grouping parameter + "Active""
+		// => Meaning, in "own" if a role is assigned, and in "available" if none is assigned
 
 		Long usedEditionId = db.getEditionRL().getId();
 		SCEdition edition1 = SCEdition.builder().id(usedEditionId + 1L).isVisible(true).build();
 		editionRepository.saveAndFlush(edition1);
 		SCEdition edition2 = SCEdition.builder().id(usedEditionId + 2L).isVisible(true).build();
 		editionRepository.saveAndFlush(edition2);
+		SCEdition edition3 = SCEdition.builder().id(usedEditionId + 3L).isVisible(true).build();
+		editionRepository.saveAndFlush(edition3);
 
 		CourseSummaryDTO course1 = new CourseSummaryDTO().id(1L);
 		CourseSummaryDTO course2 = new CourseSummaryDTO().id(2L);
@@ -136,23 +144,38 @@ public class HomeControllerTest extends ControllerTest {
 						.course(course1),
 				new EditionDetailsDTO().id(edition2.getId())
 						.startDate(localDateTime.minusYears(2)).endDate(localDateTime.minusYears(1))
+						.course(course1),
+				new EditionDetailsDTO().id(edition3.getId())
+						.startDate(localDateTime.minusYears(2)).endDate(localDateTime.minusYears(1))
 						.course(course2));
 		Person person = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
 				.getPrincipal()).getUser();
 
+		// Setup for roles
+		Map<SCEdition, String> roleMap = new HashMap<>();
+		if (role.equals("null")) {
+			roleMap.put(edition1, null);
+			roleMap.put(edition2, null);
+			roleMap.put(edition3, null);
+		} else {
+			roleMap = Map.of(edition1, role, edition2, role, edition3, role);
+		}
+
 		mockCourseEditionProperties(
 				editions,
-				Map.of(1L, Set.of(editions.get(0)), 2L, Set.of(editions.get(1))),
-				Map.of(edition1, "STUDENT", edition2, "STUDENT"),
+				Map.of(1L, Set.of(editions.get(0), editions.get(1)), 2L, Set.of(editions.get(2))),
+				roleMap,
 				person.getId());
 
 		homeController.getHomePage(person, model);
 
-		assertThat((List<CourseSummaryDTO>) model.getAttribute("ownFinished")).containsExactly(course2);
-		assertThat((List<CourseSummaryDTO>) model.getAttribute("ownActive")).containsExactly(course1);
-		assertModelAttributesEmpty(Set.of("availableActive", "availableFinished", "managed"));
+		assertThat((List<CourseSummaryDTO>) model.getAttribute(grouping + "Finished"))
+				.containsExactly(course2);
+		assertThat((List<CourseSummaryDTO>) model.getAttribute(grouping + "Active"))
+				.containsExactly(course1);
+		assertModelAttributesEmpty(Set.of(emptyGrouping + "Active", emptyGrouping + "Finished", "managed"));
 		assertThat((Map<Long, Long>) model.getAttribute("editionPerCourse"))
-				.isEqualTo(Map.of(1L, edition1.getId(), 2L, edition2.getId()));
+				.isEqualTo(Map.of(1L, edition1.getId(), 2L, edition3.getId()));
 	}
 
 	@Test
@@ -270,9 +293,9 @@ public class HomeControllerTest extends ControllerTest {
 
 		// Mock editions properties of courses
 		when(editionApi.getEditionsById(editionIds)).thenReturn(Flux.fromIterable(editions));
-		for (Long courseId : courseToEditions.keySet()) {
-			when(courseApi.getCourseById(courseId)).thenReturn(Mono.just(new CourseDetailsDTO()
-					.editions(courseToEditions.get(courseId).stream()
+		for (Map.Entry<Long, Set<EditionDetailsDTO>> entry : courseToEditions.entrySet()) {
+			when(courseApi.getCourseById(entry.getKey())).thenReturn(Mono.just(new CourseDetailsDTO()
+					.editions(entry.getValue().stream()
 							.map(ed -> new EditionSummaryDTO().id(ed.getId()).startDate(ed.getStartDate())
 									.endDate(ed.getEndDate()))
 							.toList())));
@@ -281,13 +304,15 @@ public class HomeControllerTest extends ControllerTest {
 		// Mock roles of user
 		Set<RoleDetailsDTO> roles = new HashSet<>();
 		Map<Long, String> editionIdToRole = new HashMap<>();
-		for (SCEdition edition : editionToRole.keySet()) {
-			Long editionId = edition.getId();
-			String role = editionToRole.get(edition);
-			editionIdToRole.put(editionId, role);
+		for (Map.Entry<SCEdition, String> entry : editionToRole.entrySet()) {
+			Long editionId = entry.getKey().getId();
+			editionIdToRole.put(editionId, entry.getValue());
 
-			mockRoleForEdition(roleApi, role, editionId);
-			roles.add(getRoleDetails(editionId, RoleDetailsDTO.TypeEnum.valueOf(role)));
+			mockRoleForEdition(roleApi, entry.getValue(), editionId);
+
+			if (entry.getValue() != null) {
+				roles.add(getRoleDetails(editionId, RoleDetailsDTO.TypeEnum.valueOf(entry.getValue())));
+			}
 		}
 		when(roleApi.getRolesById(eq(new HashSet<>(editionIds)), anySet()))
 				.thenReturn(Flux.fromIterable(roles));
@@ -309,12 +334,14 @@ public class HomeControllerTest extends ControllerTest {
 	}
 
 	void mockRolesForEditions(Map<Long, String> roles, Long personId) {
-		List<RoleEditionDetailsDTO> roleDTOS = roles
-				.entrySet().stream().map(entry -> new RoleEditionDetailsDTO()
-						.id(new Id().editionId(entry.getKey())
-								.personId(db.getPerson().getId()))
-						.type(RoleEditionDetailsDTO.TypeEnum.valueOf(entry.getValue())))
-				.toList();
+		List<RoleEditionDetailsDTO> roleDTOS = new ArrayList<>();
+		for (Map.Entry<Long, String> entry : roles.entrySet()) {
+			if (entry.getValue() != null) {
+				roleDTOS.add(new RoleEditionDetailsDTO()
+						.id(new Id().editionId(entry.getKey()).personId(db.getPerson().getId()))
+						.type(RoleEditionDetailsDTO.TypeEnum.valueOf(entry.getValue())));
+			}
+		}
 		when(personApi.getRolesForPerson(eq(personId))).thenReturn(Flux.fromIterable(roleDTOS));
 	}
 

@@ -213,20 +213,19 @@ public class HomeService {
 			return ownCourses;
 		}
 
-		for (Long course : courseToEditionMap.keySet()) {
-			Long editionId = courseToEditionMap.get(course);
+		for (Map.Entry<Long, Long> entry : courseToEditionMap.entrySet()) {
 			// Safety check: the edition id is null if there is no valid edition for the user
 			// to access -> in this case, skip
-			if (editionId == null) {
+			if (entry.getValue() == null) {
 				continue;
 			}
 
 			RoleDetailsDTO.TypeEnum role = authorisationService
-					.getRoleInEdition(editionId);
+					.getRoleInEdition(entry.getValue());
 
 			// If the user has any role in the edition, add it to own courses
 			if (role != null) {
-				ownCourses.add(course);
+				ownCourses.add(entry.getKey());
 			}
 		}
 		return ownCourses;
