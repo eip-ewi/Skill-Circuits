@@ -278,6 +278,12 @@ public class HomeControllerTest extends ControllerTest {
 				.isEqualTo(Map.of(courseId, editionHeadTA.getId()));
 	}
 
+	/**
+	 * Checks whether each of the given course grouping attributes is empty in the model.
+	 *
+	 * @param attributes A set of the course grouping attributes to check. They should each be of type
+	 *                   List<CourseSummaryDTO>.
+	 */
 	@SuppressWarnings("unchecked")
 	void assertModelAttributesEmpty(Set<String> attributes) {
 		for (String attribute : attributes) {
@@ -285,6 +291,17 @@ public class HomeControllerTest extends ControllerTest {
 		}
 	}
 
+	/**
+	 * Mocks necessary responses from the edition/course/role APIs with the specified parameters. The
+	 * responses are: All the editions, the course details per course, the roles of the user per edition.
+	 *
+	 * @param editions         List of the edition detail DTOs.
+	 * @param courseToEditions A map of each course id to the editions in the course, given as edition detail
+	 *                         DTOs.
+	 * @param editionToRole    A map of each edition as SCEdition to the role of the user in the edition. The
+	 *                         role may be null, in which case the user has no role in the edition.
+	 * @param personId         The id of the user.
+	 */
 	void mockCourseEditionProperties(List<EditionDetailsDTO> editions,
 			Map<Long, Set<EditionDetailsDTO>> courseToEditions,
 			Map<SCEdition, String> editionToRole,
@@ -333,6 +350,13 @@ public class HomeControllerTest extends ControllerTest {
 				.type(role);
 	}
 
+	/**
+	 * Mock response from person API for retrieving all the roles of one person.
+	 *
+	 * @param roles    A map of edition id to the role in that edition. The role in the map may be null, in
+	 *                 which case the user has no role in that edition.
+	 * @param personId The id of the user.
+	 */
 	void mockRolesForEditions(Map<Long, String> roles, Long personId) {
 		List<RoleEditionDetailsDTO> roleDTOS = new ArrayList<>();
 		for (Map.Entry<Long, String> entry : roles.entrySet()) {

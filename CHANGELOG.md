@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 ## Changed
+- A course is added to "Your courses" if the user has a role, instead of if they completed a task (@ffiedrich)
+- TAs are handled similarly to students in the selection of a default edition for the homepage (@ffiedrich)
 ## Fixed
 - Path toggle listeners are added to hidden skills on first reveal (@ffiedrich)
 - Completion status of revealed hidden skills is updated without page reload (@ffiedrich)

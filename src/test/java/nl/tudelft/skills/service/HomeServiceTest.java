@@ -462,6 +462,13 @@ public class HomeServiceTest {
 		}
 	}
 
+	/**
+	 * Mock response from person API for retrieving all the roles of one person.
+	 *
+	 * @param roles    A map of edition id to the role in that edition. The role in the map may be null, in
+	 *                 which case the user has no role in that edition.
+	 * @param personId The id of the user.
+	 */
 	void mockRolesForEditions(Map<Long, String> roles, Long personId) {
 		List<RoleEditionDetailsDTO> roleDTOS = roles
 				.entrySet().stream().map(entry -> new RoleEditionDetailsDTO()
