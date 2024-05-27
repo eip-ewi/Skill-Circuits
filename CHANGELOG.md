@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## Added
+- Mention email address on the home page(@bbakos)
 ## Changed
 ## Fixed
 - Path toggle listeners are added to hidden skills on first reveal (@ffiedrich)
