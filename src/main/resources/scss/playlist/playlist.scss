@@ -4,10 +4,115 @@
 @import "../_mixins";
 @import "../circuit";
 
+//Info
+
+.hasTooltip {
+    font-size: 0.7em;
+    float: right;
+    vertical-align: bottom;
+    &:hover + .tooltip {
+        display: block;
+    }
+}
+.tooltip {
+    border: none;
+    float: right;
+    opacity: 0.9;
+    background-color: var(--secondary-green);
+    width: 20%;
+    padding: 0 1em 1em 1em;
+    right: 10%;
+    display: none;
+    position: fixed;
+    overflow-y: auto;
+    font-size: 0.7em;
+    z-index: 1;
+}
+
+//Playlist
+#playlist-button-c {
+    &:focus ~ #playlist {
+        right: 0;
+        display: flex;
+    }
+}
+
+#playlist {
+    background-color: var(--background-colour);
+    justify-content: space-between;
+    z-index: 100;
+    top: 0;
+    right: -20%;
+    width: 20%;
+    flex-direction: column;
+    position: absolute;
+    border: 2px solid var(--primary-dark);
+    padding: 0.5rem 1rem;
+    display: none;
+    overflow-y: auto;
+    height: 80vh;
+
+    &:hover,
+    &:focus-within {
+        right: 0;
+        display: flex;
+    }
+
+    & > ul {
+        padding-top: 1.5rem;
+    }
+
+    p {
+        padding-top: 1rem;
+    }
+
+    h2 {
+        padding-top: 1rem;
+    }
+}
+
+#playlist-ft {
+    position: absolute;
+    background-color: var(--background-colour);
+    height: 100%;
+}
+.playlist-content {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+#playlist-cr-adding-tasks {
+    //height: 0.75 * 80vh;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+.playlist-items {
+    @extend #playlist-cr-adding-tasks;
+    list-style: none;
+    padding-bottom: 1rem;
+}
+
 .playlist-button {
     @extend .circuit__button;
 }
 
+.playlist-button-new {
+    @extend .circuit__button;
+    background-color: #0091ca;
+}
+.pl-task-status {
+    @extend .tldr;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    color: var(--primary-green);
+}
+
+//Opt in
 #opt-in__dialog {
     @extend .overlay;
     border: 1px solid var(--primary-dark);
@@ -21,6 +126,7 @@
 
 .opt-in__content {
     @extend #update_text;
+    flex: 1;
     padding-right: 3rem;
     & > a {
         color: var(--primary-green);
@@ -62,6 +168,12 @@
     }
 }
 
+.opt-in__button-container_single {
+    @extend .opt-in__button-container;
+    bottom: 0;
+    justify-content: center;
+}
+
 .checkbox__container {
     display: flex;
     align-items: flex-start;
@@ -76,4 +188,9 @@
         font-style: italic;
         font-weight: bold;
     }
+}
+
+//Prompt for task duration
+#pl-tc-prompt {
+    @extend .overlay;
 }

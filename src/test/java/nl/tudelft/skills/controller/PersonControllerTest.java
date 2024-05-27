@@ -23,6 +23,7 @@ import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -43,15 +44,18 @@ import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.TaskCompletedDTO;
 import nl.tudelft.skills.model.PathPreference;
+import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskCompletion;
 import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.playlists.service.PlaylistService;
 import nl.tudelft.skills.repository.PathPreferenceRepository;
 import nl.tudelft.skills.repository.PathRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.security.AuthorisationService;
+import nl.tudelft.skills.service.PersonService;
 import nl.tudelft.skills.service.TaskCompletionService;
 import reactor.core.publisher.Mono;
 
@@ -67,6 +71,8 @@ public class PersonControllerTest extends ControllerTest {
 	private final PathPreferenceRepository pathPreferenceRepository;
 	private final AuthorisationService authorisationService;
 	private final RoleControllerApi roleApi;
+	private final PlaylistService playlistService;
+	private final PersonService personService;
 
 	@Autowired
 	public PersonControllerTest(PersonRepository personRepository, TaskRepository taskRepository,
@@ -75,13 +81,18 @@ public class PersonControllerTest extends ControllerTest {
 			SkillRepository skillRepository,
 			PathRepository pathRepository,
 			AuthorisationService authorisationService,
-			RoleControllerApi roleApi) {
+			RoleControllerApi roleApi,
+			PlaylistService playlistService,
+			PersonService personService) {
 		this.personRepository = personRepository;
+		this.playlistService = playlistService;
 		this.personController = new PersonController(taskRepository, personRepository, taskCompletionService,
-				skillRepository, pathRepository, authorisationService, roleApi);
+				skillRepository, pathRepository, authorisationService, roleApi, playlistService,
+				personService);
 		this.taskRepository = taskRepository;
 		this.taskCompletionService = taskCompletionService;
 		this.pathPreferenceRepository = pathPreferenceRepository;
+		this.personService = personService;
 		this.authorisationService = authorisationService;
 		this.roleApi = roleApi;
 	}
@@ -130,15 +141,22 @@ public class PersonControllerTest extends ControllerTest {
 				.map(TaskCompletion::getTask).toList();
 		assertThat(tasksCompleted).doesNotContain(db.getTaskDo10a());
 
+		Set<Skill> skillsRevealed = db.getPerson().getSkillsRevealed();
+		assertThat(skillsRevealed).doesNotContain(db.getSkillVariablesHidden());
+
 		Person person = new Person();
 		person.setId(db.getPerson().getId());
+		personController.updateTaskCompletedForPerson(person, db.getTaskRead10().getId(), true);
 		TaskCompletedDTO taskCompletedDTO = personController.updateTaskCompletedForPerson(person,
 				db.getTaskDo10a().getId(), true);
 
 		List<Task> tasksCompletedAfter = db.getPerson().getTaskCompletions().stream()
 				.map(TaskCompletion::getTask).toList();
 		assertThat(tasksCompletedAfter).contains(db.getTaskDo10a());
-		assertThat(taskCompletedDTO.getShowSkills()).hasSize(0);
+		assertThat(taskCompletedDTO.getShowSkills()).containsExactly(db.getSkillVariablesHidden().getId());
+
+		Set<Skill> skillsRevealedAfter = db.getPerson().getSkillsRevealed();
+		assertThat(skillsRevealedAfter).contains(db.getSkillVariablesHidden());
 
 		// Assert that a role was added or that no role was added
 		if (addRole) {
@@ -147,7 +165,7 @@ public class PersonControllerTest extends ControllerTest {
 					.edition(new EditionIdDTO().id(db.getEditionRL().getId()))
 					.type(RoleCreateDTO.TypeEnum.STUDENT);
 
-			verify(roleApi).addRole(roleCreateDTO);
+			verify(roleApi, times(2)).addRole(roleCreateDTO);
 		} else {
 			verify(roleApi, never()).addRole(any());
 		}
@@ -168,6 +186,36 @@ public class PersonControllerTest extends ControllerTest {
 				.map(TaskCompletion::getTask).toList();
 		assertThat(tasksCompletedAfter).doesNotContain(db.getTaskDo11ad());
 		assertThat(taskCompletedDTO.getShowSkills()).hasSize(0);
+	}
+
+	/**
+	 * Test to ensure a previously revealed skill is not sent to the front-end as it will result in a
+	 * duplicated skill block
+	 */
+	@WithUserDetails("username")
+	@Test
+	void prevRevealedSkill() {
+		mockRole(roleApi, "STUDENT");
+		List<Task> tasksCompleted = db.getPerson().getTaskCompletions().stream()
+				.map(TaskCompletion::getTask).toList();
+		assertThat(tasksCompleted).doesNotContain(db.getTaskDo10a());
+
+		db.getPerson().getSkillsRevealed().add(db.getSkillVariablesHidden());
+		personRepository.save(db.getPerson());
+
+		Set<Skill> skillsRevealed = db.getPerson().getSkillsRevealed();
+		assertThat(skillsRevealed).contains(db.getSkillVariablesHidden());
+
+		Person person = new Person();
+		person.setId(db.getPerson().getId());
+		personController.updateTaskCompletedForPerson(person, db.getTaskRead10().getId(), true);
+
+		TaskCompletedDTO taskCompletedDTO = personController.updateTaskCompletedForPerson(person,
+				db.getTaskDo10a().getId(), true);
+		assertThat(taskCompletedDTO.getShowSkills()).isEqualTo(List.of());
+
+		Set<Skill> skillsRevealedAfter = db.getPerson().getSkillsRevealed();
+		assertThat(skillsRevealedAfter).containsExactly(db.getSkillVariablesHidden());
 	}
 
 	@Test

@@ -81,28 +81,35 @@
 
         <script>
             /**
-             * Adds an event listener to the given block that opens the expanded skill overlay on click.
+             * Opens the expanded skill overlay for a given block and click event.
              *
-             * @param block The block to add the event listener to.
+             * @param event The click event.
+             * @param block The block that was clicked.
              */
-            function addClickSkillEventListener(block) {
-                block.addEventListener("click", () => {
-                    if (!event.target.closest(".expanded-skill")) {
-                        toggleOverlay(`${block.id}-expanded-overlay`);
-                        history.pushState(
-                            "",
-                            document.title,
-                            window.location.pathname + window.location.search
-                        );
-                    }
-                });
+            function openExpandedSkillOverlay(event, block) {
+                if (!event.target.closest(".expanded-skill")) {
+                    toggleOverlay(`block-${block.dataset.id}-expanded-overlay`);
+                    history.pushState(
+                        "",
+                        document.title,
+                        window.location.pathname + window.location.search
+                    );
+                }
             }
 
             document.addEventListener("DOMContentLoaded", function () {
-                document.querySelectorAll(".block").forEach(addClickSkillEventListener);
-
                 // Open skill overlay if url has location information
                 let openBlock = window.location.hash;
+                if (openBlock !== "" && /^#block-[0-9]+$/.test(openBlock)) {
+                    toggleOverlay(`${openBlock.substring(1)}-expanded-overlay`);
+                }
+            });
+
+            // Playlist feature
+            window.addEventListener("hashchange", function () {
+                // Open skill overlay if url has location information
+                let openBlock = window.location.hash;
+                console.log("New hash:", openBlock);
                 if (openBlock !== "" && /^#block-[0-9]+$/.test(openBlock)) {
                     toggleOverlay(`${openBlock.substring(1)}-expanded-overlay`);
                 }

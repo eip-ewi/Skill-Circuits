@@ -38,7 +38,10 @@
         th:data-essential="${level == 'module'} ? ${block.essential} : ${null}"
         th:data-hidden="${level == 'module'} ? ${canEdit and block.hidden} : ${null}"
         th:data-checkpoint="${level == 'module'} ? ${block.checkpoint.id} : ${null}"
-        th:if="${level != 'module'} or ${block.completedRequiredTasks or canEdit or not block.hidden}"
+        th:onclick="${level == 'module'} ? 'openExpandedSkillOverlay(event, this)' : ${null}"
+        th:if="${level != 'module'} or
+            ${block.completedRequiredTasks or canEdit or not block.hidden} or
+                ${#sets.contains(skillsRevealedIds, block.id)}"
         layout:fragment="block">
         <div th:unless="${create}" th:id="|block-${block.id}-header|" class="block__header">
             <p
@@ -87,7 +90,8 @@
                         th:if="${level == 'module' and !canEdit}"
                         th:with="skillModified = ${skillsModified == null ? false : #sets.contains(skillsModified.![id], block.id)}">
                         <li
-                            th:classappend="${(item.visible and not skillModified) or (skillModified and #sets.contains(tasksAdded.![id], item.id))}? '' : 'hidden'"
+                            th:classappend="${(item.visible and not skillModified) or (skillModified and #sets.contains(tasksAdded.
+                                ![id], item.id))}? '' : 'hidden'"
                             style="display: inline"
                             layout:insert="~{task/preview :: item}"></li>
                     </th:block>

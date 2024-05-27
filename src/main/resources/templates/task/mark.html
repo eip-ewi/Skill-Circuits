@@ -23,6 +23,13 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <script layout:fragment="script" th:inline="javascript">
+        //Playlist feature
+        const ACCID = 643;
+        /*<![CDATA[*/
+        const canEdit = /*[[${canEdit}]]*/ null;
+        const edition = /*[[${module.edition.id}]]*/ null;
+        /*]]>*/
+
         addEventListener("DOMContentLoaded", function () {
             let toUpdate = null;
 
@@ -80,6 +87,15 @@
                 contentType: "application/json",
                 success: skills => {},
             });
+
+            // Playlist feature
+            // If the clicked link belongs to a task in the playlist, we update the playlist
+            if (!canEdit && edition === ACCID) {
+                const plTask = document.getElementById("pl-task-status-" + taskId);
+                if (plTask != null) {
+                    plTask.click();
+                }
+            }
         }
 
         function toggleCompleted(taskId) {
@@ -124,18 +140,36 @@
                                 const skill = $($("<div/>").append(html).children()[0]);
                                 $("#circuit").append(skill);
 
-                                // Add necessary event listeners
-                                addClickSkillEventListener(skill[0]);
-                                skill
-                                    .find(".path-toggle__control")
-                                    .toArray()
-                                    .forEach(addTogglePathDropdownEventListener);
+                                // Update the completion status of the skill
+                                updateBlockState(s);
+
+                                // Usually, hidden blocks should be not essential, so the children would also not
+                                // be updated. The following ensures that they are still updated if the block is
+                                // essential nonetheless.
+                                [...skill.data("children")].forEach(id => updateBlockState(id));
 
                                 // Recalculate the connections
                                 recalculateConnections();
                             })
                         );
                         reloadInfobox();
+
+                        //     Playlist feature
+                        //     If this is a student and ACC edition, prompt to ask how much time they needed to complete the task
+                        if (canEdit != null && !canEdit && edition === ACCID) {
+                            const plTask = document.getElementById("pl-task-status-" + taskId);
+                            if (plTask != null) {
+                                if (completed) {
+                                    plTask.dataset.completed = "true";
+
+                                    // Get the time spent on the task for the student
+                                    promptCompletionTime(taskId);
+                                } else {
+                                    plTask.dataset.completed = "false";
+                                    uncompleteTask(taskId);
+                                }
+                            }
+                        } //End Playlist feature
                     },
                 });
             } else {
