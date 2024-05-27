@@ -195,28 +195,23 @@
             block
                 .find("input[type='checkbox']")
                 .each((i, checkbox) => $(checkbox).prop("checked", $(checkbox).data("initial")));
-            block.find("[name='requiredTaskIds']").each((i, requiredTasks) => {
-                const initialTasks = JSON.parse(`[${$(requiredTasks).data("initial")}]`);
-                $(requiredTasks).val(initialTasks);
-                if (initialTasks.length >= 1) {
-                    let number = initialTasks.length ? "task" : "tasks";
-                    $(requiredTasks)
-                        .siblings("[name='select-tasks']")
-                        .text(`${initialTasks.length} ${number} selected`);
-                } else {
-                    $(requiredTasks).siblings("[name='select-tasks']").text("Select tasks");
-                }
-            });
+
+            if (block.data("hidden") === true) {
+                block.find("[name='requiredTaskIds']").each((i, requiredTasks) => {
+                    const initialTasks = JSON.parse(`[${$(requiredTasks).data("initial")}]`);
+                    $(requiredTasks).val(initialTasks);
+                    if (initialTasks.length >= 1) {
+                        let number = initialTasks.length ? "task" : "tasks";
+                        $(requiredTasks)
+                            .siblings("[name='select-tasks']")
+                            .text(`${initialTasks.length} ${number} selected`);
+                    } else {
+                        $(requiredTasks).siblings("[name='select-tasks']").text("Select tasks");
+                    }
+                });
+            }
 
             block.find(".item > a").append(block.find("a + .item__content"));
-
-            const items = block.find(".item");
-            items.each((i, item) => {
-                block
-                    .find(".items")
-                    .append(block.find(`.item[data-index-initial="${items.length - i - 1}"]`));
-                $(item).data("index", $(item).data("index-initial"));
-            });
         }
         function saveEditOrCreate() {
             const block = $(this).parent().parent();
