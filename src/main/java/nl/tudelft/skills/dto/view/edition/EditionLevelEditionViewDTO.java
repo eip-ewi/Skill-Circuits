@@ -91,7 +91,8 @@ public class EditionLevelEditionViewDTO extends View<SCEdition> implements Circu
 				CheckpointViewDTO.class);
 		this.checkpointsInEdition = this.checkpointsInEdition.stream()
 				.sorted(Comparator.comparing(CheckpointViewDTO::getDeadline, Comparator.nullsLast(
-						Comparator.naturalOrder()))).toList();
+						Comparator.naturalOrder())))
+				.toList();
 	}
 
 	@Override

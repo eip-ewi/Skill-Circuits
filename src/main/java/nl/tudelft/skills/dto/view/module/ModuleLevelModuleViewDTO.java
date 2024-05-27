@@ -95,7 +95,8 @@ public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitV
 		this.checkpointsInEdition = data.getEdition().getCheckpoints().stream()
 				.map(cp -> View.convert(cp, CheckpointViewDTO.class))
 				.sorted(Comparator.comparing(CheckpointViewDTO::getDeadline, Comparator.nullsLast(
-						Comparator.naturalOrder()))).toList();
+						Comparator.naturalOrder())))
+				.toList();
 		// get all checkpoints that contain a skill that is in this module
 		Set<Long> skillIdsInModule = data.getSubmodules().stream()
 				.flatMap(sub -> sub.getSkills().stream().map(AbstractSkill::getId))
