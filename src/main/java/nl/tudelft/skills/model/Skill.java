@@ -98,6 +98,12 @@ public class Skill extends AbstractSkill {
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
+	@ManyToMany(mappedBy = "skillsRevealed")
+	private Set<SCPerson> personRevealedSkill = new HashSet<>();
+
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
 	@ManyToMany(mappedBy = "skillsModified")
 	private Set<SCPerson> personModifiedSkill = new HashSet<>();
 

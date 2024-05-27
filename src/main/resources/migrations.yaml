@@ -1528,4 +1528,76 @@ databaseChangeLog:
             referencedColumnNames: id
             referencedTableName: research_participant
             validate: true
+# Store a student's revealed skills
+  - changeSet:
+      id: 1705055255520-1
+      author: rngla (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_37
+                  name: person_revealed_skill_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_37
+                  name: skills_revealed_id
+                  type: BIGINT
+            tableName: scperson_skills_revealed
+  - changeSet:
+      id: 1705055255520-2
+      author: rngla (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: person_revealed_skill_id
+            indexName: FKp7gdtsvvdi338qlau7nik7fma_INDEX_3
+            tableName: scperson_skills_revealed
+  - changeSet:
+      id: 1705055255520-3
+      author: rngla (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: skills_revealed_id
+            indexName: FKsex8nmu8xkxti3oaa367ldp_INDEX_3
+            tableName: scperson_skills_revealed
+  - changeSet:
+      id: 1705055255520-4
+      author: rngla (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: person_revealed_skill_id
+            baseTableName: scperson_skills_revealed
+            constraintName: FKp7gdtsvvdi338qlau7nik7fma
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: scperson
+            validate: true
+  - changeSet:
+      id: 1705055255520-5
+      author: rngla (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: skills_revealed_id
+            baseTableName: scperson_skills_revealed
+            constraintName: FKsex8nmu8xkxti3oaa367ldp
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: skill
+            validate: true
 

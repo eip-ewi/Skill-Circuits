@@ -138,4 +138,17 @@ public class PersonService {
 				.flatMap(p -> pathRepository.findById(p.getPath().getId())).orElse(null);
 	}
 
+	/**
+	 * Stores a revealed skill for a given person id.
+	 *
+	 * @param personId The id of the person
+	 * @param skill    The skill that has been revealed
+	 */
+	@Transactional
+	public void addRevealedSkill(Long personId, Skill skill) {
+		if (skill.isHidden()) {
+			SCPerson scPerson = personRepository.findByIdOrThrow(personId);
+			scPerson.getSkillsRevealed().add(skill);
+		}
+	}
 }
