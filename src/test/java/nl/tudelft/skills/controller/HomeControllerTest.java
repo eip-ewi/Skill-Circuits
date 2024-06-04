@@ -84,37 +84,48 @@ public class HomeControllerTest extends ControllerTest {
 	void getHomePageExampleNotLoggedIn() {
 		// Test setup:
 		// - Course one:
-		// --- Edition one: Currently active, visible
+		// --- Edition one: Older, visible
+		// --- Edition two: Currently active, visible
 		// - User is not logged in
 		// Desired result:
-		// => Course is in "availableActive", with the edition as default edition
+		// => Course is in "availableActive", with the newest edition as default edition
 
-		SCEdition edition = db.getEditionRL();
-		edition.setVisible(true);
-		editionRepository.saveAndFlush(edition);
+		Long usedEditionId = db.getEditionRL().getId();
+		SCEdition edition1 = SCEdition.builder().id(usedEditionId + 1L).isVisible(true).build();
+		editionRepository.saveAndFlush(edition1);
+		SCEdition edition2 = SCEdition.builder().id(usedEditionId + 2L).isVisible(true).build();
+		editionRepository.saveAndFlush(edition2);
 
 		CourseSummaryDTO course = new CourseSummaryDTO().id(randomId());
 
 		LocalDateTime localDateTime = LocalDateTime.now();
-		when(editionApi.getEditionsById(eq(List.of(edition.getId()))))
-				.thenReturn(Flux.just(new EditionDetailsDTO().id(edition.getId())
-						.startDate(localDateTime.minusYears(1)).endDate(localDateTime.plusYears(1))
-						.course(course)));
+		when(editionApi.getEditionsById(eq(List.of(edition1.getId(), edition2.getId()))))
+				.thenReturn(Flux.just(
+						new EditionDetailsDTO().id(edition1.getId())
+								.startDate(localDateTime.minusYears(2)).endDate(localDateTime.minusYears(1))
+								.course(course),
+						new EditionDetailsDTO().id(edition2.getId())
+								.startDate(localDateTime.minusYears(1)).endDate(localDateTime.plusYears(1))
+								.course(course)));
 		when(courseApi.getCourseById(course.getId())).thenReturn(Mono.just(new CourseDetailsDTO()
-				.editions(List.of(new EditionSummaryDTO().id(edition.getId())))));
+				.editions(List.of(
+						new EditionSummaryDTO().id(edition1.getId()).startDate(localDateTime.minusYears(2))
+								.endDate(localDateTime.minusYears(1)),
+						new EditionSummaryDTO().id(edition2.getId()).startDate(localDateTime.minusYears(1))
+								.endDate(localDateTime.plusYears(1))))));
 
 		homeController.getHomePage(null, model);
 
 		assertModelAttributesEmpty(Set.of("availableFinished", "ownActive", "ownFinished", "managed"));
 		assertThat((List<CourseSummaryDTO>) model.getAttribute("availableActive")).containsExactly(course);
 		assertThat((Map<Long, Long>) model.getAttribute("editionPerCourse"))
-				.isEqualTo(Map.of(course.getId(), edition.getId()));
+				.isEqualTo(Map.of(course.getId(), edition2.getId()));
 	}
 
 	@ParameterizedTest
 	@SuppressWarnings("unchecked")
 	@WithUserDetails("username")
-	@CsvSource({ "STUDENT,own,available", "TA,own,available", "HEAD_TA,own,available", "null,available,own" })
+	@CsvSource({ "STUDENT,own,available", "TA,own,available", "HEAD_TA,own,available", ",available,own" })
 	void getHomePageExampleDifferentRoles(String role, String grouping, String emptyGrouping) {
 		// Test setup:
 		// - Course one:
@@ -152,14 +163,10 @@ public class HomeControllerTest extends ControllerTest {
 				.getPrincipal()).getUser();
 
 		// Setup for roles
-		Map<SCEdition, String> roleMap = new HashMap<>();
-		if (role.equals("null")) {
-			roleMap.put(edition1, null);
-			roleMap.put(edition2, null);
-			roleMap.put(edition3, null);
-		} else {
-			roleMap = Map.of(edition1, role, edition2, role, edition3, role);
-		}
+		Map<Long, String> roleMap = new HashMap<>();
+		roleMap.put(edition1.getId(), role);
+		roleMap.put(edition2.getId(), role);
+		roleMap.put(edition3.getId(), role);
 
 		mockCourseEditionProperties(
 				editions,
@@ -214,7 +221,7 @@ public class HomeControllerTest extends ControllerTest {
 		mockCourseEditionProperties(
 				editions,
 				Map.of(courseId, Set.of(editions.get(0), editions.get(1))),
-				Map.of(edition1, "STUDENT", edition2, "TEACHER"),
+				Map.of(edition1.getId(), "STUDENT", edition2.getId(), "TEACHER"),
 				person.getId());
 
 		homeController.getHomePage(person, model);
@@ -267,7 +274,7 @@ public class HomeControllerTest extends ControllerTest {
 		mockCourseEditionProperties(
 				editions,
 				Map.of(courseId, Set.of(editions.get(0), editions.get(1))),
-				Map.of(editionStudent, "STUDENT", editionHeadTA, "HEAD_TA"),
+				Map.of(editionStudent.getId(), "STUDENT", editionHeadTA.getId(), "HEAD_TA"),
 				person.getId());
 
 		homeController.getHomePage(person, model);
@@ -276,6 +283,97 @@ public class HomeControllerTest extends ControllerTest {
 		assertModelAttributesEmpty(Set.of("ownFinished", "availableActive", "availableFinished", "managed"));
 		assertThat((Map<Long, Long>) model.getAttribute("editionPerCourse"))
 				.isEqualTo(Map.of(courseId, editionHeadTA.getId()));
+	}
+
+	@ParameterizedTest
+	@SuppressWarnings("unchecked")
+	@WithUserDetails("username")
+	@CsvSource(value = { "STUDENT", "TA", "null" }, nullValues = { "null" })
+	void getHomePageCheckInvisibleIsNotAccessible(String role) {
+		// Test setup:
+		// - Course one:
+		// ---- Edition one: Active, not visible
+		// Desired result:
+		// => No course is accessible since it is not visible and the user is not head TA or higher
+
+		Long usedEditionId = db.getEditionRL().getId();
+		SCEdition edition1 = SCEdition.builder().id(usedEditionId + 1L).isVisible(false).build();
+		editionRepository.saveAndFlush(edition1);
+
+		CourseSummaryDTO course1 = new CourseSummaryDTO().id(1L);
+
+		// Mock responses for editions and courses
+		LocalDateTime localDateTime = LocalDateTime.now();
+		List<EditionDetailsDTO> editions = List.of(
+				new EditionDetailsDTO().id(edition1.getId())
+						.startDate(localDateTime.minusYears(1)).endDate(localDateTime.plusYears(1))
+						.course(course1));
+		Person person = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal()).getUser();
+
+		// Setup for roles
+		Map<Long, String> roleMap = new HashMap<>();
+		roleMap.put(edition1.getId(), role);
+
+		mockCourseEditionProperties(
+				editions,
+				Map.of(1L, Set.of(editions.get(0))),
+				roleMap,
+				person.getId());
+
+		homeController.getHomePage(person, model);
+
+		assertModelAttributesEmpty(
+				Set.of("ownActive", "ownFinished", "availableActive", "availableFinished", "managed"));
+		assertThat((Map<Long, Long>) model.getAttribute("editionPerCourse")).isEqualTo(Map.of());
+	}
+
+	@ParameterizedTest
+	@SuppressWarnings("unchecked")
+	@WithUserDetails("username")
+	@CsvSource({ "STUDENT,", "TA,", "HEAD_TA,ownActive", "TEACHER,managed", "," })
+	void getHomePageEditionUnknownToSC(String role, String grouping) {
+		// Test setup:
+		// - Course one:
+		// ---- Edition one: Active, however not saved on Skill Circuits side (only known to LabraCore)
+		// Desired result:
+		// => If the user is a head TA or higher, they should be able to see the course/edition, otherwise
+		// it should not be visible.
+
+		// Do not save the edition to Skill Circuits
+		Long usedEditionId = db.getEditionRL().getId();
+		CourseSummaryDTO course = new CourseSummaryDTO().id(1L);
+
+		// Mock responses for editions and courses
+		LocalDateTime localDateTime = LocalDateTime.now();
+		List<EditionDetailsDTO> editions = List.of(
+				new EditionDetailsDTO().id(usedEditionId + 1L)
+						.startDate(localDateTime.minusYears(1)).endDate(localDateTime.plusYears(1))
+						.course(course));
+		Person person = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal()).getUser();
+
+		// Setup for roles
+		Map<Long, String> roleMap = new HashMap<>();
+		roleMap.put(usedEditionId + 1L, role);
+
+		mockCourseEditionProperties(
+				editions,
+				Map.of(1L, Set.of(editions.get(0))),
+				roleMap,
+				person.getId());
+
+		homeController.getHomePage(person, model);
+
+		Set<String> groupingAttributes = new HashSet<>(
+				Set.of("availableFinished", "availableActive", "ownActive",
+						"ownFinished", "managed"));
+		groupingAttributes.remove(grouping);
+		assertModelAttributesEmpty(groupingAttributes);
+		if (grouping != null) {
+			assertThat((List<CourseSummaryDTO>) model.getAttribute(grouping))
+					.containsExactly(course);
+		}
 	}
 
 	/**
@@ -304,7 +402,7 @@ public class HomeControllerTest extends ControllerTest {
 	 */
 	void mockCourseEditionProperties(List<EditionDetailsDTO> editions,
 			Map<Long, Set<EditionDetailsDTO>> courseToEditions,
-			Map<SCEdition, String> editionToRole,
+			Map<Long, String> editionToRole,
 			Long personId) {
 		List<Long> editionIds = editions.stream().map(EditionDetailsDTO::getId).toList();
 
@@ -321,8 +419,8 @@ public class HomeControllerTest extends ControllerTest {
 		// Mock roles of user
 		Set<RoleDetailsDTO> roles = new HashSet<>();
 		Map<Long, String> editionIdToRole = new HashMap<>();
-		for (Map.Entry<SCEdition, String> entry : editionToRole.entrySet()) {
-			Long editionId = entry.getKey().getId();
+		for (Map.Entry<Long, String> entry : editionToRole.entrySet()) {
+			Long editionId = entry.getKey();
 			editionIdToRole.put(editionId, entry.getValue());
 
 			mockRoleForEdition(roleApi, entry.getValue(), editionId);
