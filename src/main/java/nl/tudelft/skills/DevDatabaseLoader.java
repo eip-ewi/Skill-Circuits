@@ -128,6 +128,8 @@ public class DevDatabaseLoader {
 	private Skill skillSimpleE;
 	private Skill skillSimpleF;
 
+	private Task implicationTask;
+
 	private Inventory inventory;
 
 	private Checkpoint checkpointLectureOne;
@@ -327,13 +329,18 @@ public class DevDatabaseLoader {
 				.parents(Set.of(skillGeneralisationPractice, skillNegation))
 				.build());
 
+		implicationTask = Task.builder().name("Read chapter 1.2").skill(skillImplication).time(7)
+				.type(TaskType.READING).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build();
 		skillTransitiveProperty = skillRepository.save(Skill.builder()
 				.name("Transitive Property")
 				.submodule(submoduleInduction)
 				.row(3).column(0)
 				.checkpoint(checkpointLectureTwo)
 				.parents(Set.of(skillImplication))
+				.hidden(true)
+				.requiredTasks(Set.of(implicationTask))
 				.build());
+		implicationTask.setRequiredFor(Set.of(skillTransitiveProperty));
 
 		skillNegateImplications = skillRepository.save(Skill.builder()
 				.name("Negate Implications")
@@ -402,8 +409,7 @@ public class DevDatabaseLoader {
 	}
 
 	private void initTasks() {
-		taskRepository.save(Task.builder().name("Read chapter 1.2").skill(skillImplication).time(7)
-				.type(TaskType.READING).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
+		taskRepository.save(implicationTask);
 		taskRepository.save(Task.builder().name("Do exercise 1.2a-e").skill(skillImplication).time(10)
 				.type(TaskType.EXERCISE).paths(new HashSet<>(Arrays.asList(pathFinderPath))).build());
 		taskRepository.save(Task.builder().name("Read chapter 1.1").skill(skillNegation).time(10)
