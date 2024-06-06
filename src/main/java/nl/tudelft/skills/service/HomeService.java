@@ -30,6 +30,7 @@ import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
 import nl.tudelft.labracore.api.dto.RoleEditionDetailsDTO;
+import nl.tudelft.labracore.lib.security.user.DefaultRole;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.labracore.SCPerson;
@@ -146,10 +147,14 @@ public class HomeService {
 		// Retrieve the roles of the logged-in user
 		List<RoleEditionDetailsDTO> roles = personApi.getRolesForPerson(person.getId()).collectList().block();
 
+		// An admin is able to manage any edition they have a role in
+		if (person.getDefaultRole() == DefaultRole.ADMIN) {
+			return roles.stream().map(role -> role.getId().getEditionId()).collect(Collectors.toSet());
+		}
+
 		// The user needs to be at least a head TA to manage the edition
 		return roles.stream()
-				.filter(role -> role.getType().equals(RoleEditionDetailsDTO.TypeEnum.ADMIN)
-						|| role.getType().equals(RoleEditionDetailsDTO.TypeEnum.TEACHER)
+				.filter(role -> role.getType().equals(RoleEditionDetailsDTO.TypeEnum.TEACHER)
 						|| role.getType().equals(RoleEditionDetailsDTO.TypeEnum.HEAD_TA))
 				.map(role -> role.getId().getEditionId())
 				.collect(Collectors.toSet());

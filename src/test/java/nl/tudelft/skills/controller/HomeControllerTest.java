@@ -376,6 +376,99 @@ public class HomeControllerTest extends ControllerTest {
 		}
 	}
 
+	@ParameterizedTest
+	@SuppressWarnings("unchecked")
+	@WithUserDetails("admin")
+	@CsvSource({ "STUDENT,true", "TA,true", "HEAD_TA,true", "TEACHER,true", ",false" })
+	void getHomePageAdmin(String role, boolean isVisible) {
+		// Test setup:
+		// - Course one:
+		// ---- Edition one: Active, not visible
+		// Desired result:
+		// => The user is an admin. Any course in which they have a role, should be accessible to them under
+		// "managed". In case they do not have a role, it should not be accessible.
+
+		Long usedEditionId = db.getEditionRL().getId();
+		SCEdition edition1 = SCEdition.builder().id(usedEditionId + 1L).isVisible(false).build();
+		editionRepository.saveAndFlush(edition1);
+
+		CourseSummaryDTO course1 = new CourseSummaryDTO().id(1L);
+
+		// Mock responses for editions and courses
+		LocalDateTime localDateTime = LocalDateTime.now();
+		List<EditionDetailsDTO> editions = List.of(
+				new EditionDetailsDTO().id(edition1.getId())
+						.startDate(localDateTime.minusYears(1)).endDate(localDateTime.plusYears(1))
+						.course(course1));
+		Person person = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal()).getUser();
+
+		// Setup for roles
+		Map<Long, String> roleMap = new HashMap<>();
+		roleMap.put(edition1.getId(), role);
+
+		mockCourseEditionProperties(
+				editions,
+				Map.of(1L, Set.of(editions.get(0))),
+				roleMap,
+				person.getId());
+
+		homeController.getHomePage(person, model);
+
+		if (isVisible) {
+			assertModelAttributesEmpty(
+					Set.of("ownFinished", "availableActive", "availableFinished", "ownActive"));
+			assertThat((List<CourseSummaryDTO>) model.getAttribute("managed")).containsExactly(course1);
+			assertThat((Map<Long, Long>) model.getAttribute("editionPerCourse"))
+					.isEqualTo(Map.of(course1.getId(), edition1.getId()));
+		} else {
+			assertModelAttributesEmpty(
+					Set.of("ownActive", "ownFinished", "availableActive", "availableFinished", "managed"));
+			assertThat((Map<Long, Long>) model.getAttribute("editionPerCourse")).isEqualTo(Map.of());
+		}
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	@WithUserDetails("admin")
+	void getHomePageEditionUnknownToSCAdmin() {
+		// Test setup:
+		// - Course one:
+		// ---- Edition one: Active, however not saved on Skill Circuits side (only known to LabraCore)
+		// Desired result:
+		// => The user is an admin, and has a role assigned in the edition LabraCore side. Therefore, the edition
+		// should be visible to them under "managed".
+
+		// Do not save the edition to Skill Circuits
+		Long usedEditionId = db.getEditionRL().getId();
+		CourseSummaryDTO course = new CourseSummaryDTO().id(1L);
+
+		// Mock responses for editions and courses
+		LocalDateTime localDateTime = LocalDateTime.now();
+		List<EditionDetailsDTO> editions = List.of(
+				new EditionDetailsDTO().id(usedEditionId + 1L)
+						.startDate(localDateTime.minusYears(1)).endDate(localDateTime.plusYears(1))
+						.course(course));
+		Person person = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal()).getUser();
+
+		// Setup for roles
+		Map<Long, String> roleMap = new HashMap<>();
+		roleMap.put(usedEditionId + 1L, "TEACHER");
+
+		mockCourseEditionProperties(
+				editions,
+				Map.of(1L, Set.of(editions.get(0))),
+				roleMap,
+				person.getId());
+
+		homeController.getHomePage(person, model);
+
+		assertModelAttributesEmpty(Set.of("availableFinished", "availableActive", "ownActive",
+				"ownFinished"));
+		assertThat((List<CourseSummaryDTO>) model.getAttribute("managed")).containsExactly(course);
+	}
+
 	/**
 	 * Checks whether each of the given course grouping attributes is empty in the model.
 	 *

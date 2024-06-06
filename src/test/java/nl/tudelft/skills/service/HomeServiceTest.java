@@ -32,8 +32,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,7 +39,7 @@ import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.PersonControllerApi;
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.*;
-import nl.tudelft.labracore.lib.security.LabradorUserDetails;
+import nl.tudelft.labracore.lib.security.user.DefaultRole;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.model.PathPreference;
@@ -155,7 +153,11 @@ public class HomeServiceTest {
 	}
 
 	@Test
-	public void getCourseGroupsPersonNullMalformedCompletedTask() {
+	public void getCourseGroupsPersonNullMalformed() {
+		// Malformed, since the person is null but the course is categorized as "own course"
+		// With the current implementation, no error is raised, and the course should be categorized as
+		// "available" (not "own")
+
 		List<CourseSummaryDTO> courses = List.of(new CourseSummaryDTO().id(1L));
 		Set<Long> activeCourses = Set.of(1L);
 		Set<Long> ownCourses = Set.of(1L);
@@ -204,12 +206,30 @@ public class HomeServiceTest {
 	}
 
 	@Test
+	@WithUserDetails("admin")
+	public void getCourseGroupsAsAdmin() {
+		// Regardless of the active/"own" status of courses, an admin has the course under "managed"
+
+		List<CourseSummaryDTO> courses = List.of(new CourseSummaryDTO().id(1L), new CourseSummaryDTO().id(2L),
+				new CourseSummaryDTO().id(3L), new CourseSummaryDTO().id(4L));
+		Set<Long> activeCourses = Set.of(3L, 4L);
+		Set<Long> ownCourses = Set.of(2L, 3L);
+
+		Person person = new Person();
+		Map<String, List<CourseSummaryDTO>> courseGroups = homeService.getCourseGroups(person, courses,
+				activeCourses, ownCourses);
+
+		assertThat(courseGroups.keySet()).containsExactlyInAnyOrder("availableActive", "availableFinished",
+				"ownActive", "ownFinished", "managed");
+		assertThat(courseGroups.get("managed")).containsExactlyInAnyOrderElementsOf(courses);
+	}
+
+	@Test
 	public void testGetTeacherIdsPersonNull() {
 		assertThat(homeService.getTeacherIds(null)).isEmpty();
 	}
 
 	@Test
-	@WithUserDetails("username")
 	public void testGetTeacherIdsNotTeacher() {
 		Set<RoleDetailsDTO> roles = Set.of(getRoleDetails(1L, RoleDetailsDTO.TypeEnum.STUDENT),
 				getRoleDetails(2L, RoleDetailsDTO.TypeEnum.TA),
@@ -224,18 +244,17 @@ public class HomeServiceTest {
 	}
 
 	@Test
-	@WithUserDetails("username")
 	public void testGetTeacherIds() {
-		Long userId = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
-				.getPrincipal())
-				.getUser().getId();
-
+		Person person = Person.builder().id(1L).build();
 		Map<Long, String> roleMap = Map.of(1L, "STUDENT", 2L, "HEAD_TA", 3L, "TEACHER",
-				4L, "ADMIN", 5L, "TA");
-		mockRolesForEditions(roleMap, userId);
+				4L, "TA");
+		mockRolesForEditions(roleMap, 1L);
 
-		Person person = Person.builder().id(userId).build();
-		assertThat(homeService.getTeacherIds(person)).containsExactlyInAnyOrder(2L, 3L, 4L);
+		assertThat(homeService.getTeacherIds(person)).containsExactlyInAnyOrder(2L, 3L);
+
+		// Admin should have access to all editions they have a role in
+		person = Person.builder().id(1L).defaultRole(DefaultRole.ADMIN).build();
+		assertThat(homeService.getTeacherIds(person)).containsExactlyInAnyOrder(1L, 2L, 3L, 4L);
 	}
 
 	@Test
@@ -304,7 +323,6 @@ public class HomeServiceTest {
 	}
 
 	@Test
-	@WithAnonymousUser
 	public void testGetOwnCoursesNotLoggedIn() {
 		assertThat(homeService.getOwnCourses(null, Map.of(1L, 2L, 3L, 4L))).isEmpty();
 	}
