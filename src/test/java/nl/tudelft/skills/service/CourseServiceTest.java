@@ -199,7 +199,7 @@ public class CourseServiceTest {
 	}
 
 	@ParameterizedTest
-	@CsvSource({ "TEACHER", "ADMIN" })
+	@CsvSource({ "TEACHER", "HEAD_TA" })
 	public void getDefaultHomepageEditionCourseReturnsLastManagedEdition(String role) {
 		// Goal: Test scenario in which the managed edition is picked, and it is not visible
 		// Setup:

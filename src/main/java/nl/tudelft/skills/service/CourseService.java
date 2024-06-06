@@ -18,7 +18,6 @@
 package nl.tudelft.skills.service;
 
 import static nl.tudelft.labracore.api.dto.RoleDetailsDTO.TypeEnum.*;
-import static nl.tudelft.labracore.api.dto.RoleDetailsDTO.TypeEnum.ADMIN;
 
 import java.util.Comparator;
 
@@ -134,8 +133,7 @@ public class CourseService {
 					}
 
 					// If the user is at least a head TA, the edition does not have to be visible
-					if (userIsAdmin || role == HEAD_TA || role == TEACHER
-							|| role == ADMIN) {
+					if (userIsAdmin || role == HEAD_TA || role == TEACHER) {
 						return true;
 					}
 
