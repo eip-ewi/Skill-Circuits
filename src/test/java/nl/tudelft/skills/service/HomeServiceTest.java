@@ -175,9 +175,9 @@ public class HomeServiceTest {
 
 	@ParameterizedTest
 	@WithUserDetails("username")
-	@CsvSource({ "HEAD_TA", "TA", "STUDENT" })
+	@CsvSource({ "HEAD_TA", "TA", "STUDENT", "TEACHER_RO" })
 	public void getCourseGroups(String role) {
-		// In terms of course groupings, students, TAs and head TAs should be handled the same way
+		// In terms of course groupings, students, TAs, teacher read-only and head TAs should be handled the same way
 
 		List<CourseSummaryDTO> courses = List.of(new CourseSummaryDTO().id(1L), new CourseSummaryDTO().id(2L),
 				new CourseSummaryDTO().id(3L), new CourseSummaryDTO().id(4L), new CourseSummaryDTO().id(5L));
@@ -230,31 +230,17 @@ public class HomeServiceTest {
 	}
 
 	@Test
-	public void testGetTeacherIdsNotTeacher() {
-		Set<RoleDetailsDTO> roles = Set.of(getRoleDetails(1L, RoleDetailsDTO.TypeEnum.STUDENT),
-				getRoleDetails(2L, RoleDetailsDTO.TypeEnum.TA),
-				getRoleDetails(3L, RoleDetailsDTO.TypeEnum.HEAD_TA));
-		when(roleApi.getRolesById(eq(Set.of(1L, 2L, 3L)), anySet()))
-				.thenReturn(Flux.fromIterable(roles));
-
-		Person person = Person.builder().id(db.getPerson().getId()).build();
-		Map<Long, String> roleMap = Map.of(1L, "STUDENT", 2L, "STUDENT", 3L, "STUDENT");
-		mockRolesForEditions(roleMap, person.getId());
-		assertThat(homeService.getTeacherIds(person)).isEmpty();
-	}
-
-	@Test
 	public void testGetTeacherIds() {
 		Person person = Person.builder().id(1L).build();
 		Map<Long, String> roleMap = Map.of(1L, "STUDENT", 2L, "HEAD_TA", 3L, "TEACHER",
-				4L, "TA");
+				4L, "TA", 5L, "TEACHER_RO");
 		mockRolesForEditions(roleMap, 1L);
 
-		assertThat(homeService.getTeacherIds(person)).containsExactlyInAnyOrder(2L, 3L);
+		assertThat(homeService.getTeacherIds(person)).containsExactlyInAnyOrder(2L, 3L, 5L);
 
 		// Admin should have access to all editions they have a role in
 		person = Person.builder().id(1L).defaultRole(DefaultRole.ADMIN).build();
-		assertThat(homeService.getTeacherIds(person)).containsExactlyInAnyOrder(1L, 2L, 3L, 4L);
+		assertThat(homeService.getTeacherIds(person)).containsExactlyInAnyOrder(1L, 2L, 3L, 4L, 5L);
 	}
 
 	@Test

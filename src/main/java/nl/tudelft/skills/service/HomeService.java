@@ -133,7 +133,7 @@ public class HomeService {
 	}
 
 	/**
-	 * Returns the ids of the editions in which the user is a teacher or a head TA.
+	 * Returns the ids of the editions in which the user is a teacher, teacher read-only or a head TA.
 	 *
 	 * @param  person The logged-in person, if it exists, otherwise null.
 	 * @return        The ids of the editions in which the person is a teacher. Returns an empty set if the
@@ -155,7 +155,8 @@ public class HomeService {
 		// The user needs to be at least a head TA to manage the edition
 		return roles.stream()
 				.filter(role -> role.getType().equals(RoleEditionDetailsDTO.TypeEnum.TEACHER)
-						|| role.getType().equals(RoleEditionDetailsDTO.TypeEnum.HEAD_TA))
+						|| role.getType().equals(RoleEditionDetailsDTO.TypeEnum.HEAD_TA)
+						|| role.getType().equals(RoleEditionDetailsDTO.TypeEnum.TEACHER_RO))
 				.map(role -> role.getId().getEditionId())
 				.collect(Collectors.toSet());
 	}

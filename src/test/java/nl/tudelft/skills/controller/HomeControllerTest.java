@@ -234,26 +234,26 @@ public class HomeControllerTest extends ControllerTest {
 				.isEqualTo(Map.of(courseId, edition2.getId()));
 	}
 
-	@Test
+	@ParameterizedTest
 	@SuppressWarnings("unchecked")
 	@WithUserDetails("username")
-	void getHomePageExampleHeadTA() {
+	@CsvSource({ "HEAD_TA", "TEACHER_RO" })
+	void getHomePageExampleHeadTATeacherRO(String role) {
 		// Test setup:
 		// - Course one:
 		// --- Edition one: Older, student, visible, has task completions
-		// --- Edition two: Newer, head TA, not visible, no task completions
+		// --- Edition two: Newer, head TA/teacher read-only, not visible, no task completions
 		// Desired result:
-		// => Course should be categorized as "ownActive" with the head TA edition as default. The task completions
-		// should not matter in the categorization, only the role.
+		// => Course should be categorized as "ownActive" with the head TA/teacher read-only edition as default.
 
 		// There are task completions in this edition
 		SCEdition editionStudent = db.getEditionRL();
 		editionStudent.setVisible(true);
 		editionRepository.saveAndFlush(editionStudent);
 
-		SCEdition editionHeadTA = SCEdition.builder().id(db.getEditionRL().getId() + 1L).isVisible(false)
+		SCEdition edition = SCEdition.builder().id(db.getEditionRL().getId() + 1L).isVisible(false)
 				.build();
-		editionRepository.saveAndFlush(editionHeadTA);
+		editionRepository.saveAndFlush(edition);
 
 		Long courseId = db.getCourseRL().getId();
 		CourseSummaryDTO course = new CourseSummaryDTO().id(courseId);
@@ -264,7 +264,7 @@ public class HomeControllerTest extends ControllerTest {
 				new EditionDetailsDTO().id(editionStudent.getId())
 						.startDate(localDateTime.minusYears(3)).endDate(localDateTime.minusYears(2))
 						.course(course),
-				new EditionDetailsDTO().id(editionHeadTA.getId())
+				new EditionDetailsDTO().id(edition.getId())
 						.startDate(localDateTime.minusYears(1)).endDate(localDateTime.plusYears(1))
 						.course(course));
 
@@ -274,7 +274,7 @@ public class HomeControllerTest extends ControllerTest {
 		mockCourseEditionProperties(
 				editions,
 				Map.of(courseId, Set.of(editions.get(0), editions.get(1))),
-				Map.of(editionStudent.getId(), "STUDENT", editionHeadTA.getId(), "HEAD_TA"),
+				Map.of(editionStudent.getId(), "STUDENT", edition.getId(), role),
 				person.getId());
 
 		homeController.getHomePage(person, model);
@@ -282,7 +282,7 @@ public class HomeControllerTest extends ControllerTest {
 		assertThat((List<CourseSummaryDTO>) model.getAttribute("ownActive")).containsExactly(course);
 		assertModelAttributesEmpty(Set.of("ownFinished", "availableActive", "availableFinished", "managed"));
 		assertThat((Map<Long, Long>) model.getAttribute("editionPerCourse"))
-				.isEqualTo(Map.of(courseId, editionHeadTA.getId()));
+				.isEqualTo(Map.of(courseId, edition.getId()));
 	}
 
 	@ParameterizedTest
