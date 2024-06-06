@@ -155,8 +155,7 @@ public class HomeService {
 		// The user needs to be at least a head TA to manage the edition
 		return roles.stream()
 				.filter(role -> role.getType().equals(RoleEditionDetailsDTO.TypeEnum.TEACHER)
-						|| role.getType().equals(RoleEditionDetailsDTO.TypeEnum.HEAD_TA)
-						|| role.getType().equals(RoleEditionDetailsDTO.TypeEnum.TEACHER_RO))
+						|| role.getType().equals(RoleEditionDetailsDTO.TypeEnum.HEAD_TA))
 				.map(role -> role.getId().getEditionId())
 				.collect(Collectors.toSet());
 	}

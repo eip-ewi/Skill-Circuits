@@ -133,9 +133,8 @@ public class CourseService {
 						return false;
 					}
 
-					// If the user is at least a head TA (including teacher read-only), the edition
-					// does not have to be visible
-					if (userIsAdmin || role == HEAD_TA || role == TEACHER || role == TEACHER_RO
+					// If the user is at least a head TA, the edition does not have to be visible
+					if (userIsAdmin || role == HEAD_TA || role == TEACHER
 							|| role == ADMIN) {
 						return true;
 					}

@@ -234,17 +234,16 @@ public class HomeControllerTest extends ControllerTest {
 				.isEqualTo(Map.of(courseId, edition2.getId()));
 	}
 
-	@ParameterizedTest
+	@Test
 	@SuppressWarnings("unchecked")
 	@WithUserDetails("username")
-	@CsvSource({ "HEAD_TA", "TEACHER_RO" })
-	void getHomePageExampleHeadTATeacherRO(String role) {
+	void getHomePageExampleHeadTA() {
 		// Test setup:
 		// - Course one:
 		// --- Edition one: Older, student, visible, has task completions
-		// --- Edition two: Newer, head TA/teacher read-only, not visible, no task completions
+		// --- Edition two: Newer, head TA, not visible, no task completions
 		// Desired result:
-		// => Course should be categorized as "ownActive" with the head TA/teacher read-only edition as default.
+		// => Course should be categorized as "ownActive" with the head TA edition as default.
 
 		// There are task completions in this edition
 		SCEdition editionStudent = db.getEditionRL();
@@ -274,7 +273,7 @@ public class HomeControllerTest extends ControllerTest {
 		mockCourseEditionProperties(
 				editions,
 				Map.of(courseId, Set.of(editions.get(0), editions.get(1))),
-				Map.of(editionStudent.getId(), "STUDENT", edition.getId(), role),
+				Map.of(editionStudent.getId(), "STUDENT", edition.getId(), "HEAD_TA"),
 				person.getId());
 
 		homeController.getHomePage(person, model);
