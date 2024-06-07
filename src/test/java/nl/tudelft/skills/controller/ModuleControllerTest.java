@@ -222,7 +222,8 @@ public class ModuleControllerTest extends ControllerTest {
 								db.getSkillContradictionPractice(),
 								db.getSkillAssumption(),
 								db.getSkillGeneralisationPractice(), db.getSkillProofOutline(),
-								db.getSkillTransitiveProperty(), db.getSkillInductionPractice())
+								db.getSkillTransitiveProperty(), db.getSkillInductionPractice(),
+								db.getSkillVariablesHidden())
 						.map(s -> mapper.map(s, SkillSummaryDTO.class)).toList()
 						.toArray(new SkillSummaryDTO[0]));
 	}

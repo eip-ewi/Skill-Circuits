@@ -198,7 +198,8 @@ public class TaskCompletionServiceTest {
 				db.getSkillGeneralisationPractice(), db.getSkillDividingIntoCases(),
 				db.getSkillCasesPractice(), db.getSkillContradictionPractice(),
 				db.getSkillNegateImplications(), db.getSkillContrapositivePractice(),
-				db.getSkillTransitiveProperty(), db.getSkillInductionPractice())), skillsDone);
+				db.getSkillTransitiveProperty(), db.getSkillInductionPractice(),
+				db.getSkillVariablesHidden())), skillsDone);
 	}
 
 	@Test

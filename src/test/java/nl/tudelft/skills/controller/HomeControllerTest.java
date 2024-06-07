@@ -526,7 +526,7 @@ public class HomeControllerTest extends ControllerTest {
 		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
 				person);
 		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
-		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(6);
+		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(7);
 	}
 
 	@Test

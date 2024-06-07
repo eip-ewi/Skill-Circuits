@@ -73,6 +73,25 @@
             return data;
         }
 
+        // Signal that the feature has been updated
+        function signalUpdate() {
+            if (localStorage.getItem("plUpdated") === null) {
+                const plButton = document.getElementById("playlist-button-c");
+                plButton.addEventListener("focus", function () {
+                    // Prevent the signal after the Playlist feature has been clicked once
+                    localStorage.setItem("plUpdated", "true");
+                });
+                const newSpan = document.createElement("span");
+                newSpan.className = "fa-solid fa-exclamation";
+                plButton.className = "playlist-button-new";
+                plButton.appendChild(newSpan);
+                setTimeout(function () {
+                    plButton.className = "playlist-button";
+                    plButton.removeChild(newSpan);
+                }, 1000);
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
             $("#create-playlist")
                 .off("click")
@@ -95,6 +114,7 @@
                 $("#playlist-button-c").trigger("focus");
                 sessionStorage.setItem("openPlDialog", "false");
             }
+            signalUpdate();
         });
     </script>
 
@@ -207,7 +227,6 @@
                     data["taskTimes"].push({ taskId: taskId, completionTime: time });
                 }
             }
-            plData["completed"] = {};
             const playlist = document.querySelector('[id^="playlist-"][id$="-tasks"]');
             if (playlist) {
                 const playlistId = playlist.id.match(/playlist-(\d+)-tasks/)[1];
@@ -221,6 +240,7 @@
         }
 
         function getSavedTimer() {
+            console.log("Getting saved timer");
             if (localStorage.getItem("plData")) {
                 plData = JSON.parse(localStorage.getItem("plData"));
                 // Check times on the server every 25 min
@@ -239,7 +259,7 @@
             }
 
             if (plData["state"] === "paused") {
-                updateTimer(false);
+                updateTimer(false); //display stored times
                 document.getElementById("playlist-state").innerText = "paused";
                 justPaused = true;
             } else if (plData["state"] === "playing") {
@@ -266,6 +286,7 @@
         }
 
         function downloadTimes(localData) {
+            console.log("Downloading");
             const playlist = document.querySelector('[id^="playlist-"][id$="-tasks"]');
             if (playlist) {
                 const playlistId = playlist.id.match(/playlist-(\d+)-tasks/)[1];
@@ -273,46 +294,47 @@
                     url: "/playlist/" + playlistId + "/times",
                     type: "GET",
                     success: data => {
-                        if (!localData) {
-                            if (data["elapsedTime"] === 0) {
-                                plData = {
-                                    updated: Date.now(),
-                                    state: "paused",
-                                    timers: { main: 0 },
-                                    paused: {},
-                                    completed: {},
-                                };
-                            } else {
-                                plData = {
-                                    updated: new Date(data["elapsedTimeUpdated"]),
-                                    state: "paused",
-                                    timers: { main: data["elapsedTime"] },
-                                    paused: {},
-                                    completed: {},
-                                };
-                                for (const [taskId, time] of Object.entries(data["taskTimes"])) {
-                                    if (time > 0) {
-                                        plData["paused"][taskId] = time;
-                                    }
-                                }
-                            }
-                        } else {
+                        const completedTasks = data["completedTasks"];
+
+                        if (localData) {
                             const lastUpdatedServer = new Date(data["elapsedTimeUpdated"]);
                             const lastUpdatedLocal = new Date(plData["updated"]);
 
                             if (lastUpdatedLocal > lastUpdatedServer) {
                                 uploadTimes();
-                            } else {
-                                plData["updated"] = Date.now();
-                                for (const taskGroup of ["timers", "paused"]) {
-                                    for (const [taskId, time] of Object.entries(
-                                        plData[taskGroup]
-                                    )) {
-                                        if (taskId === "main") {
-                                            plData[taskGroup][taskId] = data["elapsedTime"];
-                                            continue;
-                                        }
-                                        plData[taskGroup][taskId] = time;
+                                if (
+                                    completedTasks.size !== 0 &&
+                                    Object.keys(plData["completed"]).length === 0
+                                ) {
+                                    for (const taskId of completedTasks) {
+                                        plData["completed"][taskId] = data["taskTimes"][taskId];
+                                    }
+                                }
+                            }
+                        } else if (!localData && data["elapsedTime"] === 0) {
+                            plData = {
+                                updated: Date.now(),
+                                state: "paused",
+                                timers: { main: 0 },
+                                paused: {},
+                                completed: {},
+                            };
+                        } else {
+                            plData = {
+                                updated: new Date(data["elapsedTimeUpdated"]),
+                                state: "paused",
+                                timers: { main: data["elapsedTime"] },
+                                paused: {},
+                                completed: {},
+                            };
+                            console.log(data["taskTimes"]);
+                            console.log(completedTasks);
+                            for (const [taskId, time] of Object.entries(data["taskTimes"])) {
+                                if (time > 0) {
+                                    if (completedTasks.includes(Number(taskId))) {
+                                        plData["completed"][taskId] = time;
+                                    } else {
+                                        plData["paused"][taskId] = time;
                                     }
                                 }
                             }
@@ -364,7 +386,7 @@
             const plTask = document.getElementById("pl-task-status-" + taskId);
             const userNumber = document.getElementById("pl-tc-user").value;
             if (userNumber) {
-                plData["completed"][taskId] = userNumber;
+                plData["completed"][taskId] = userNumber * 60;
                 delete plData["timers"][taskId];
                 delete plData["paused"][taskId];
                 plTask.innerText = userNumber + "min";
@@ -374,6 +396,15 @@
             uploadTimes();
             document.getElementById("pl-task-name-" + taskId).style.textDecoration = "line-through";
             document.getElementById("pl-tc-prompt").close();
+        }
+
+        function uncompleteTask(taskId) {
+            plData["paused"][taskId] = plData["completed"][taskId];
+            delete plData["completed"][taskId];
+
+            // Set appropriate styling in playlist
+            document.getElementById("pl-task-name-" + taskId).style.textDecoration = "none";
+            document.getElementById("pl-task-status-" + taskId).innerText = "paused";
         }
 
         // Completing playlist
@@ -390,6 +421,26 @@
             localStorage.removeItem("plData");
             sessionStorage.setItem("openPlDialog", "true");
             location.reload();
+        }
+
+        // Signal that the feature has been updated
+        function signalUpdate() {
+            if (localStorage.getItem("plUpdated") === null) {
+                const plButton = document.getElementById("playlist-button-c");
+                plButton.addEventListener("focus", function () {
+                    // Prevent the signal after the Playlist feature has been clicked once
+                    localStorage.setItem("plUpdated", "true");
+                });
+
+                const newSpan = document.createElement("span");
+                newSpan.className = "fa-solid fa-exclamation";
+                plButton.className = "playlist-button-new";
+                plButton.appendChild(newSpan);
+                setTimeout(function () {
+                    plButton.className = "playlist-button";
+                    plButton.removeChild(newSpan);
+                }, 1000);
+            }
         }
 
         // Event listeners
@@ -413,6 +464,7 @@
                 $("#playlist-button-c").trigger("focus");
                 sessionStorage.setItem("openPlDialog", "false");
             }
+            signalUpdate();
         });
     </script>
 </html>

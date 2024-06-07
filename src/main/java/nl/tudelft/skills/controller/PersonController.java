@@ -18,9 +18,7 @@
 package nl.tudelft.skills.controller;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
@@ -45,6 +43,7 @@ import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.security.AuthorisationService;
+import nl.tudelft.skills.service.PersonService;
 import nl.tudelft.skills.service.TaskCompletionService;
 
 @RestController
@@ -60,6 +59,7 @@ public class PersonController {
 	private final AuthorisationService authorisationService;
 	private final RoleControllerApi roleControllerApi;
 	private final PlaylistService playlistService;
+	private final PersonService personService;
 
 	/**
 	 * Marks a certain task as completed or uncompleted for a certain person.
@@ -88,10 +88,17 @@ public class PersonController {
 			List<Task> completedTasks = person.getTaskCompletions().stream()
 					.map(TaskCompletion::getTask).toList();
 
-			// TODO skill remains visible (see issue #90)
-			return new TaskCompletedDTO(task.getRequiredFor().stream()
-					.filter(s -> completedTasks.containsAll(s.getRequiredTasks()))
-					.map(Skill::getId).toList());
+			List<Skill> revealedSkills = task.getRequiredFor().stream()
+					.filter(s -> new HashSet<>(completedTasks).containsAll(s.getRequiredTasks()))
+					.collect(Collectors.toCollection(ArrayList::new));
+
+			// Store newly revealed skills in authPerson.tasksRevealed
+			Set<Skill> prefRevealed = personService.getOrCreateSCPerson(authPerson.getId())
+					.getSkillsRevealed();
+			revealedSkills.removeAll(prefRevealed);
+			revealedSkills.forEach(s -> personService.addRevealedSkill(authPerson.getId(), s));
+			return new TaskCompletedDTO(revealedSkills.stream().map(Skill::getId).toList());
+
 		} else {
 			taskCompletionService.deleteTaskCompletion(person, task);
 

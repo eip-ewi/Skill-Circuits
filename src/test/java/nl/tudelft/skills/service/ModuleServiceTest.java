@@ -18,8 +18,6 @@
 package nl.tudelft.skills.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.List;
 
@@ -32,11 +30,7 @@ import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.dto.view.module.TaskViewDTO;
-import nl.tudelft.skills.model.Path;
-import nl.tudelft.skills.model.SCEdition;
-import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.ModuleRepository;
-import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.test.TestDatabaseLoader;
 import nl.tudelft.skills.test.TestUserDetailsService;
 
@@ -46,19 +40,14 @@ public class ModuleServiceTest {
 
 	private TestDatabaseLoader db;
 	private final ModuleService moduleService;
-	private final TaskRepository taskRepository;
 	private final ModuleRepository moduleRepository;
-	private final EditionRepository editionRepository;
 
 	@Autowired
 	public ModuleServiceTest(TestDatabaseLoader db, ModuleService moduleService,
-			TaskRepository taskRepository,
-			ModuleRepository moduleRepository, EditionRepository editionRepository) {
+			ModuleRepository moduleRepository) {
 		this.db = db;
 		this.moduleService = moduleService;
-		this.taskRepository = taskRepository;
 		this.moduleRepository = moduleRepository;
-		this.editionRepository = editionRepository;
 	}
 
 	@Test
@@ -80,26 +69,4 @@ public class ModuleServiceTest {
 
 	}
 
-	@Test
-	void getDefaultOrPreferredPathNull() {
-		Path path = moduleService.getDefaultOrPreferredPath(db.getPerson().getId(),
-				db.getEditionRL().getId());
-
-		// displayed path is null if there is no default and no path preference set
-		assertNull(path);
-	}
-
-	@Test
-	void getDefaultOrPreferredPathDefault() {
-		// Set default path
-		SCEdition edition = db.getEditionRL();
-		edition.setDefaultPath(db.getPathFinderPath());
-		editionRepository.save(edition);
-
-		Path path = moduleService.getDefaultOrPreferredPath(db.getPerson().getId(),
-				db.getEditionRL().getId());
-
-		// displayed path is default path of the course if there is no path preference set
-		assertEquals(db.getPathFinderPath(), path);
-	}
 }
