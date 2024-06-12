@@ -63,9 +63,14 @@ public class CheckpointService {
 			return Optional.empty();
 		}
 
-		return Optional
-				.of(sortedSkills.stream().filter(s -> !s.getCheckpoint().equals(checkpoint)).findFirst()
-						.get().getCheckpoint());
+		// Get last row of the checkpoint, if any
+		Optional<Integer> lastRowOfCheckpoint = sortedSkills.stream()
+				.filter(s -> s.getCheckpoint().equals(checkpoint))
+				.map(Skill::getRow).findFirst();
+
+		// Find the checkpoint belonging to a skill with the smallest row after the last row, if any
+		return lastRowOfCheckpoint.flatMap(lastRow -> sortedSkills.stream().filter(s -> s.getRow() > lastRow)
+				.reduce((fst, lst) -> lst).map(Skill::getCheckpoint));
 	}
 
 	/**
@@ -93,7 +98,6 @@ public class CheckpointService {
 		});
 		checkpoint.getSkills().removeAll(skills);
 
-		// TODO Check if this still is desired behavior.
 		// If checkpoint has no skills left, delete it
 		if (checkpoint.getSkills().isEmpty()) {
 			checkpointRepository.delete(checkpoint);

@@ -69,7 +69,7 @@ public class CheckpointServiceTest {
 	}
 
 	@Test
-	public void testFindNextCheckpointInModuleNoSkills() {
+	public void testFindNextCheckpointInModuleNoSkillsInModule() {
 		SCModule module = SCModule.builder().name("Module").build();
 		Optional<Checkpoint> nextCheckpoint = checkpointService.findNextCheckpointInModule(
 				db.getCheckpointLectureTwo(),
@@ -78,16 +78,17 @@ public class CheckpointServiceTest {
 	}
 
 	@Test
-	public void testFindNextCheckpointInModuleNonEmptyConnection() {
+	public void testFindNextCheckpointInModuleNoSkillsInCheckpoint() {
+		Checkpoint emptyCheckpoint = Checkpoint.builder().name("Empty").build();
+		checkpointRepository.save(emptyCheckpoint);
 		Optional<Checkpoint> nextCheckpoint = checkpointService.findNextCheckpointInModule(
-				db.getCheckpointLectureOne(),
+				emptyCheckpoint,
 				db.getModuleProofTechniques());
-		assertThat(nextCheckpoint).isNotEmpty();
-		assertThat(nextCheckpoint).hasValue(db.getCheckpointLectureTwo());
+		assertThat(nextCheckpoint).isEmpty();
 	}
 
 	@Test
-	public void testFindNextCheckpointInModuleNonEmptyNoConnection() {
+	public void testFindNextCheckpointInModuleNonEmpty() {
 		// Create a "disconnected" skill in the lowest row, with new checkpoint
 		Checkpoint checkpoint = Checkpoint.builder().edition(db.getEditionRL()).name("Checkpoint")
 				.deadline(LocalDateTime.now()).build();
@@ -100,11 +101,20 @@ public class CheckpointServiceTest {
 		checkpointRepository.save(checkpoint);
 		submoduleRepository.save(db.getSubmoduleCases());
 
-		Optional<Checkpoint> nextCheckpoint = checkpointService.findNextCheckpointInModule(
+		// Even with no skill connection, the next checkpoint after lecture 2 should be the new one
+		Optional<Checkpoint> lastCheckpoint = checkpointService.findNextCheckpointInModule(
 				db.getCheckpointLectureTwo(),
 				db.getModuleProofTechniques());
-		assertThat(nextCheckpoint).isNotEmpty();
-		assertThat(nextCheckpoint).hasValue(checkpoint);
+		assertThat(lastCheckpoint).isNotEmpty();
+		assertThat(lastCheckpoint).hasValue(checkpoint);
+
+		// Even with three checkpoints, the next checkpoint after lecture 1 should be lecture 2
+		// This also checks that the connection of skills does not play a role
+		Optional<Checkpoint> middleCheckpoint = checkpointService.findNextCheckpointInModule(
+				db.getCheckpointLectureOne(),
+				db.getModuleProofTechniques());
+		assertThat(middleCheckpoint).isNotEmpty();
+		assertThat(middleCheckpoint).hasValue(db.getCheckpointLectureTwo());
 	}
 
 	@Test

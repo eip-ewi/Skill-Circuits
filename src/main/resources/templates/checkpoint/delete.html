@@ -55,7 +55,6 @@
     <script th:if="${canEdit}" layout:fragment="script">
         function deleteCheckpoint() {
             toggleOverlay("delete-checkpoint-overlay");
-            // TODO check if this should be refactored
             let checkpointId = $(this).data("checkpoint");
             $("#delete-checkpoint-id").val(checkpointId);
             $("#delete-checkpoint-module").val($("#circuit").data("id"));
