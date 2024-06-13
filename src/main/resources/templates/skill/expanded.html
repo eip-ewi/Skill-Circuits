@@ -81,19 +81,19 @@
 
         <script>
             /**
-             * Opens the expanded skill overlay for a given block and click event.
+             * Toggles the expanded skill overlay for a given block and click event.
              *
              * @param event The click event.
              * @param block The block that was clicked.
              */
-            function openExpandedSkillOverlay(event, block) {
+            function toggleExpandedSkillOverlay(event, block) {
                 if (!event.target.closest(".expanded-skill")) {
-                    toggleOverlay(`block-${block.dataset.id}-expanded-overlay`);
-                    history.pushState(
-                        "",
-                        document.title,
-                        window.location.pathname + window.location.search
-                    );
+                    const id = `block-${block.dataset.id}-expanded-overlay`;
+                    const state = document.getElementById(id).open
+                        ? window.location.pathname
+                        : window.location.pathname + `#block-${block.dataset.id}`;
+                    history.pushState("", document.title, state);
+                    toggleOverlay(id);
                 }
             }
 
@@ -105,13 +105,24 @@
                 }
             });
 
-            // Playlist feature
             window.addEventListener("hashchange", function () {
                 // Open skill overlay if url has location information
-                let openBlock = window.location.hash;
-                console.log("New hash:", openBlock);
+
+                const openBlock = window.location.hash;
+                const overlayId = `${openBlock.substring(1)}-expanded-overlay`;
                 if (openBlock !== "" && /^#block-[0-9]+$/.test(openBlock)) {
-                    toggleOverlay(`${openBlock.substring(1)}-expanded-overlay`);
+                    // If it is not yet open, open the corresponding skill overlay
+                    if (!document.getElementById(overlayId).open) {
+                        toggleOverlay(overlayId);
+                    }
+                } else {
+                    // Close all skill overlays (there should be one open at most)
+                    $(".expanded-skill").each((i, skill) => {
+                        const parentId = skill.parentElement.id;
+                        if (document.getElementById(parentId).open) {
+                            toggleOverlay(parentId);
+                        }
+                    });
                 }
             });
         </script>
