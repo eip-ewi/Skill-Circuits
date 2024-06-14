@@ -112,16 +112,11 @@
                 const overlayId = `${openBlock.substring(1)}-expanded-overlay`;
                 if (openBlock !== "" && /^#block-[0-9]+$/.test(openBlock)) {
                     // If it is not yet open, open the corresponding skill overlay
-                    if (!document.getElementById(overlayId).open) {
-                        toggleOverlay(overlayId);
-                    }
+                    setOverlayState(overlayId, true);
                 } else {
                     // Close all skill overlays (there should be one open at most)
                     $(".expanded-skill").each((i, skill) => {
-                        const parentId = skill.parentElement.id;
-                        if (document.getElementById(parentId).open) {
-                            toggleOverlay(parentId);
-                        }
+                        setOverlayState(skill.parentElement.id, false);
                     });
                 }
             });
