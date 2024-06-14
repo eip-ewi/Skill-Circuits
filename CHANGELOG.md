@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Path toggle listeners are added to hidden skills on first reveal (@ffiedrich)
 - Completion status of revealed hidden skills is updated without page reload (@ffiedrich)
 - Revealed skills are not hidden again when required tasks are marked as uncomplete (@rglans)
+- Back button navigates to previously expanded skills instead of navigating to the same page (@ffiedrich)
 
 ## [2.2.6]
 
