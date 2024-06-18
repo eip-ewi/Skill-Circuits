@@ -19,7 +19,7 @@ package nl.tudelft.skills.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.dto.patch.PathPatchDTO;
+import nl.tudelft.skills.dto.patch.PathTasksPatchDTO;
 import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.test.TestDatabaseLoader;
 
@@ -47,8 +47,8 @@ public class PathServiceTest {
 	@Test
 	void updateTasksInPathManyToMany() {
 		Path path = db.getPathFinderPath();
-		PathPatchDTO patchDTO = PathPatchDTO.builder().name("pathfinder").id(path.getId())
-				.taskIds(List.of(db.getTaskRead11().getId())).build();
+		PathTasksPatchDTO patchDTO = PathTasksPatchDTO.builder().id(path.getId())
+				.taskIds(Set.of(db.getTaskRead11().getId())).build();
 		pathService.updateTasksInPathManyToMany(patchDTO, path);
 
 		assertThat(db.getTaskRead11().getPaths())
@@ -59,5 +59,7 @@ public class PathServiceTest {
 		assertThat(db.getPathFinderPath().getTasks()).contains(db.getTaskRead11());
 		assertThat(db.getPathFinderPath().getTasks()).doesNotContain(db.getTaskRead12());
 	}
+
+	// TODO test path name change
 
 }

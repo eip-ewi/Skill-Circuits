@@ -17,8 +17,6 @@
  */
 package nl.tudelft.skills.dto.patch;
 
-import java.util.*;
-
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
@@ -30,16 +28,11 @@ import nl.tudelft.skills.model.Path;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class PathPatchDTO extends Patch<Path> {
+public class PathNamePatchDTO extends Patch<Path> {
 	@NotNull
 	private Long id;
 
 	private String name;
-
-	@Builder.Default
-	private List<Long> taskIds = new ArrayList<>();
-
-	private Long moduleId;
 
 	@Override
 	protected void applyOneToOne() {

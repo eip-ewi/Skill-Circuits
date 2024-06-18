@@ -44,7 +44,7 @@ import org.springframework.ui.Model;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.create.PathCreateDTO;
 import nl.tudelft.skills.dto.id.SCEditionIdDTO;
-import nl.tudelft.skills.dto.patch.PathPatchDTO;
+import nl.tudelft.skills.dto.patch.PathNamePatchDTO;
 import nl.tudelft.skills.model.PathPreference;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.Task;
@@ -181,33 +181,32 @@ public class PathControllerTest extends ControllerTest {
 		assertTrue(db.getTaskRead12().getPaths().stream().anyMatch(p -> p.getName().equals("PathName")));
 	}
 
+	// TODO adjust tests and add tests
+
 	@Test
 	@WithUserDetails("admin")
 	void patchPathChangeName() {
-		var dto = PathPatchDTO.builder()
+		var dto = PathNamePatchDTO.builder()
 				.id(db.getPathFinderPath().getId())
 				.name("Pathfinder2")
-				.taskIds(List.of(db.getTaskRead11().getId()))
 				.build();
 
 		assertEquals(Set.of(db.getPathFinderPath()), db.getTaskRead12().getPaths());
 		assertTrue(db.getTaskRead12().getPaths().stream().anyMatch(p -> p.getName().equals("Pathfinder")));
 
-		pathController.patchPath(dto);
+		pathController.renamePath(dto);
 		// Path is updated in task
 		assertFalse(db.getTaskRead12().getPaths().stream().anyMatch(p -> p.getName().equals("Pathfinder")));
 
-		assertFalse(db.getTaskRead12().getPaths().stream().anyMatch(p -> p.getName().equals("Pathfinder2")));
-		assertTrue(db.getTaskRead11().getPaths().stream().anyMatch(p -> p.getName().equals("Pathfinder2")));
+		assertTrue(db.getTaskRead12().getPaths().stream().anyMatch(p -> p.getName().equals("Pathfinder2")));
 	}
 
 	@Test
 	@WithUserDetails("admin")
 	void patchPathChangeDefaultPath() {
-		var dto = PathPatchDTO.builder()
+		var dto = PathNamePatchDTO.builder()
 				.id(db.getPathFinderPath().getId())
 				.name("Pathfinder2")
-				.taskIds(List.of(db.getTaskRead11().getId()))
 				.build();
 
 		// Set Pathfinder as default path in edition
@@ -216,7 +215,7 @@ public class PathControllerTest extends ControllerTest {
 		editionRepository.save(edition);
 		assertEquals("Pathfinder", db.getEditionRL().getDefaultPath().getName());
 
-		pathController.patchPath(dto);
+		pathController.renamePath(dto);
 
 		// Default path in edition was updated
 		assertEquals("Pathfinder2", db.getEditionRL().getDefaultPath().getName());
