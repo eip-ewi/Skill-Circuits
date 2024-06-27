@@ -71,7 +71,6 @@ public class PersonControllerTest extends ControllerTest {
 	private final PathPreferenceRepository pathPreferenceRepository;
 	private final AuthorisationService authorisationService;
 	private final RoleControllerApi roleApi;
-	private final PlaylistService playlistService;
 	private final PersonService personService;
 
 	@Autowired
@@ -82,12 +81,10 @@ public class PersonControllerTest extends ControllerTest {
 			PathRepository pathRepository,
 			AuthorisationService authorisationService,
 			RoleControllerApi roleApi,
-			PlaylistService playlistService,
 			PersonService personService) {
 		this.personRepository = personRepository;
-		this.playlistService = playlistService;
 		this.personController = new PersonController(taskRepository, personRepository, taskCompletionService,
-				skillRepository, pathRepository, authorisationService, roleApi, playlistService,
+				skillRepository, pathRepository, authorisationService, roleApi,
 				personService);
 		this.taskRepository = taskRepository;
 		this.taskCompletionService = taskCompletionService;

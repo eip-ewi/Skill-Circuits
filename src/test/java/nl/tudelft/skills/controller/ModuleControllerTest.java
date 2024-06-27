@@ -51,11 +51,9 @@ import nl.tudelft.skills.dto.id.SCEditionIdDTO;
 import nl.tudelft.skills.dto.patch.SCModulePatchDTO;
 import nl.tudelft.skills.dto.view.SkillSummaryDTO;
 import nl.tudelft.skills.model.SCModule;
-import nl.tudelft.skills.playlists.service.ResearchParticipantService;
 import nl.tudelft.skills.repository.ClickedLinkRepository;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
-import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.ClickedLinkService;
 import nl.tudelft.skills.service.ModuleService;
 import nl.tudelft.skills.service.TaskCompletionService;
@@ -76,17 +74,12 @@ public class ModuleControllerTest extends ControllerTest {
 	private final ClickedLinkService clickedLinkService;
 	private final ClickedLinkRepository clickedLinkRepository;
 
-	//	Playlist feature
-	private final ResearchParticipantService researchParticipantService;
-	private final AuthorisationService authorisationService;
 
 	@Autowired
 	public ModuleControllerTest(ModuleController moduleController, RoleControllerApi roleControllerApi,
 			ModuleRepository moduleRepository, TaskCompletionService taskCompletionService,
 			TaskCompletionRepository taskCompletionRepository, ClickedLinkService clickedLinkService,
-			ClickedLinkRepository clickedLinkRepository,
-			ResearchParticipantService researchParticipantService,
-			AuthorisationService authorisationService) {
+			ClickedLinkRepository clickedLinkRepository) {
 		this.moduleController = moduleController;
 		this.roleControllerApi = roleControllerApi;
 		this.moduleRepository = moduleRepository;
@@ -94,8 +87,6 @@ public class ModuleControllerTest extends ControllerTest {
 		this.taskCompletionService = taskCompletionService;
 		this.clickedLinkService = clickedLinkService;
 		this.clickedLinkRepository = clickedLinkRepository;
-		this.researchParticipantService = researchParticipantService;
-		this.authorisationService = authorisationService;
 		this.session = mock(HttpSession.class);
 	}
 
@@ -121,8 +112,7 @@ public class ModuleControllerTest extends ControllerTest {
 	@Test
 	void createModuleSetup() throws Exception {
 		new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionService, clickedLinkService, researchParticipantService,
-				authorisationService)
+				session, taskCompletionService, clickedLinkService)
 				.createModuleInEditionSetup(
 						SCModuleCreateDTO.builder()
 								.name("Module").edition(new SCEditionIdDTO(db.getEditionRL().getId()))
@@ -146,8 +136,7 @@ public class ModuleControllerTest extends ControllerTest {
 		assertThat(moduleRepository.existsById(moduleId)).isTrue();
 
 		new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionService, clickedLinkService, researchParticipantService,
-				authorisationService)
+				session, taskCompletionService, clickedLinkService)
 				.deleteModule(moduleId);
 
 		assertThat(moduleRepository.existsById(moduleId)).isFalse();
@@ -162,8 +151,7 @@ public class ModuleControllerTest extends ControllerTest {
 		assertThat(moduleRepository.existsById(moduleId)).isTrue();
 
 		new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionService, clickedLinkService, researchParticipantService,
-				authorisationService)
+				session, taskCompletionService, clickedLinkService)
 				.deleteModuleSetup(moduleId);
 
 		assertThat(moduleRepository.existsById(moduleId)).isFalse();
@@ -174,8 +162,7 @@ public class ModuleControllerTest extends ControllerTest {
 	@Test
 	void patchModule() {
 		new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionService, clickedLinkService, researchParticipantService,
-				authorisationService).patchModule(
+				session, taskCompletionService, clickedLinkService).patchModule(
 						SCModulePatchDTO.builder()
 								.id(db.getModuleProofTechniques().getId())
 								.name("Module 2.0")
@@ -191,8 +178,7 @@ public class ModuleControllerTest extends ControllerTest {
 	@Test
 	void toggleStudentMode() {
 		ModuleController moduleController = new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionService, clickedLinkService, researchParticipantService,
-				authorisationService);
+				session, taskCompletionService, clickedLinkService);
 		when(session.getAttribute("student-mode-" + db.getEditionRL().getId()))
 				.thenReturn(null)
 				.thenReturn(true)
@@ -208,8 +194,7 @@ public class ModuleControllerTest extends ControllerTest {
 	@Test
 	void getSkillsOfModule() {
 		ModuleController moduleController = new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionService, clickedLinkService, researchParticipantService,
-				authorisationService);
+				session, taskCompletionService, clickedLinkService);
 		assertThat(moduleController.getSkillsOfModule(db.getModuleProofTechniques().getId()))
 				.containsExactly(Stream
 						.of(
