@@ -23,11 +23,6 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <script layout:fragment="script" th:inline="javascript">
-        /*<![CDATA[*/
-        const canEdit = /*[[${canEdit}]]*/ null;
-        const edition = /*[[${module.edition.id}]]*/ null;
-        /*]]>*/
-
         addEventListener("DOMContentLoaded", function () {
             let toUpdate = null;
 
