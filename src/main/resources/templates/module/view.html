@@ -39,18 +39,6 @@
                 </div>
 
                 <div class="circuit__header__group">
-                    <!--                    Playlist Feature -->
-                    <div class="circuit__header__group" th:if="${studentOptedIn != null}">
-                        <button class="playlist-button" id="playlist-button-c">
-                            <span class="fa-solid fa-circle-play"></span>
-                            Playlist
-                        </button>
-                        <th:block th:if="${studentOptedIn.isPresent() && studentOptedIn.get()}">
-                            <div
-                                layout:replace="~{playlist/playlist :: playlistView(step=${playlistStep.getStep()})}"></div>
-                        </th:block>
-                        <div layout:replace="~{playlist/header-button :: opt-in-dialog}"></div>
-                    </div>
 
                     <select
                         th:if="${@editionService.getPaths(module.edition.id).size() > 0}"
@@ -159,14 +147,6 @@
                 <div layout:replace="~{checkpoint/delete :: script}"></div>
             </th:block>
 
-            <!--        Playlist feature-->
-            <th:block th:if="${studentOptedIn != null}">
-                <div layout:replace="~{playlist/header-button :: script}"></div>
-                <th:block th:if="${studentOptedIn.isPresent() && studentOptedIn.get()}">
-                    <div
-                        layout:replace="~{playlist/playlist :: script(step=${playlistStep.getStep()})}"></div>
-                </th:block>
-            </th:block>
         </div>
     </body>
 </html>
