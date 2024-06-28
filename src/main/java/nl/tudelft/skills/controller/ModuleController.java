@@ -53,7 +53,6 @@ public class ModuleController {
 	private final TaskCompletionService taskCompletionService;
 	private final ClickedLinkService clickedLinkService;
 
-
 	@Autowired
 	public ModuleController(ModuleRepository moduleRepository, ModuleService moduleService,
 			HttpSession session, TaskCompletionService taskCompletionService,

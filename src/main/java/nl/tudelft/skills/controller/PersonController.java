@@ -76,7 +76,6 @@ public class PersonController {
 		if (completed) {
 			taskCompletionService.addTaskCompletion(person, task);
 
-
 			// If a user with default student role has no role, set it to be a student role
 			ifNoStudentRoleSetStudentRole(authPerson.getId(), task.getSkill().getSubmodule().getModule()
 					.getEdition().getId());

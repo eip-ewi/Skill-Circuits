@@ -48,7 +48,6 @@ import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskCompletion;
 import nl.tudelft.skills.model.labracore.SCPerson;
-import nl.tudelft.skills.playlists.service.PlaylistService;
 import nl.tudelft.skills.repository.PathPreferenceRepository;
 import nl.tudelft.skills.repository.PathRepository;
 import nl.tudelft.skills.repository.SkillRepository;

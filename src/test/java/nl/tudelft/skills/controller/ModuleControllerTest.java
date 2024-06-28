@@ -74,7 +74,6 @@ public class ModuleControllerTest extends ControllerTest {
 	private final ClickedLinkService clickedLinkService;
 	private final ClickedLinkRepository clickedLinkRepository;
 
-
 	@Autowired
 	public ModuleControllerTest(ModuleController moduleController, RoleControllerApi roleControllerApi,
 			ModuleRepository moduleRepository, TaskCompletionService taskCompletionService,
