@@ -209,6 +209,15 @@
                     }
                 });
             }
+            const items = block.find(".item");
+            items.each((i, item) => {
+                block
+                    .find(".items")[1]
+                    .appendChild(
+                        block.find(`.item[data-index-initial="${items.length - i - 1}"]`)[0]
+                    );
+                $(item).data("index", $(item).data("index-initial"));
+            });
 
             block.find(".item > a").append(block.find("a + .item__content"));
         }
