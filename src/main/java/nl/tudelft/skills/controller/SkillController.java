@@ -224,6 +224,8 @@ public class SkillController {
 		model.addAttribute("circuit", buildCircuitFromSkill(skill));
 		model.addAttribute("canEdit", true);
 		model.addAttribute("canDelete", true);
+		Boolean studentMode = (Boolean) session.getAttribute("student-mode-" + skill.getSubmodule().getModule().getEdition().getId());
+		model.addAttribute("studentMode", studentMode != null && studentMode);
 
 		return "block/view";
 	}
