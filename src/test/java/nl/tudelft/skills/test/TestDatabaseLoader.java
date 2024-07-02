@@ -89,6 +89,9 @@ public class TestDatabaseLoader {
 	private SCModule moduleProofTechniques = SCModule.builder().name("Proof Techniques")
 			.build();
 
+	private SCModule module = SCModule.builder().name("Module")
+			.build();
+
 	private Submodule submoduleLogicBasics = Submodule.builder().name("Logic Basics")
 			.row(0).column(0).build();
 	private Submodule submoduleGeneralisation = Submodule.builder()
@@ -181,6 +184,10 @@ public class TestDatabaseLoader {
 
 	public SCModule getModuleProofTechniques() {
 		return moduleRepository.findByIdOrThrow(moduleProofTechniques.getId());
+	}
+
+	public SCModule getModule() {
+		return moduleRepository.findByIdOrThrow(module.getId());
 	}
 
 	public Submodule getSubmoduleLogicBasics() {
@@ -360,6 +367,8 @@ public class TestDatabaseLoader {
 	private void initModule() {
 		moduleProofTechniques.setEdition(editionRL2021);
 		moduleProofTechniques = moduleRepository.save(moduleProofTechniques);
+		module.setEdition(editionRL2021);
+		module = moduleRepository.save(module);
 	}
 
 	private void initSubmodule() {
@@ -378,11 +387,12 @@ public class TestDatabaseLoader {
 	}
 
 	private void initCheckpoint() {
+		checkpointLectureTwo.setEdition(this.getEditionRL());
+		checkpointLectureTwo = checkpointRepository.save(checkpointLectureTwo);
+
 		checkpointLectureOne.setEdition(this.getEditionRL());
 		checkpointLectureOne = checkpointRepository.save(checkpointLectureOne);
 
-		checkpointLectureTwo.setEdition(this.getEditionRL());
-		checkpointLectureTwo = checkpointRepository.save(checkpointLectureTwo);
 	}
 
 	private void initSkill() {

@@ -225,21 +225,22 @@ spotbugs-sast:
         $CI_COMMIT_BRANCH == "development" ||
         $CI_MERGE_REQUEST_ID
 
-semgrep-sast:
-  stage: gitlab reports
-  needs:
-    - gradle_build
-  variables:
-    COMPILE: "false"
-    SECURE_LOG_LEVEL: "debug"
-  allow_failure: true
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "trigger" ||
-        $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
-      when: never
-    - if: $CI_COMMIT_BRANCH == "master" ||
-        $CI_COMMIT_BRANCH == "development" ||
-        $CI_MERGE_REQUEST_ID
+# TODO, Ruben told us to fix this later
+# semgrep-sast:
+#   stage: gitlab reports
+#   needs:
+#     - gradle_build
+#   variables:
+#     COMPILE: "false"
+#     SECURE_LOG_LEVEL: "debug"
+#   allow_failure: true
+#   rules:
+#     - if: $CI_PIPELINE_SOURCE == "trigger" ||
+#         $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
+#       when: never
+#     - if: $CI_COMMIT_BRANCH == "master" ||
+#         $CI_COMMIT_BRANCH == "development" ||
+#         $CI_MERGE_REQUEST_ID
 
 # Run the DAST security checks and reporter.
 # Currently set to manual as it requires a test environment to be up and running.

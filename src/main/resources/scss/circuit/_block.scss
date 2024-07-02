@@ -24,7 +24,14 @@
     &[data-hidden="true"] {
         border-style: dashed;
     }
-
+    &__expanded_optional {
+        background-color: var(--primary-light);
+        border: 1px solid var(--primary-dark);
+        padding: 0.25rem 0.5rem;
+        position: absolute;
+        right: 0.8rem;
+        top: 0.8rem;
+    }
     &__info {
         background-color: var(--primary-light);
         border: 1px solid var(--primary-dark);
