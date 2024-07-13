@@ -69,7 +69,7 @@ public class CourseController {
 	}
 
 	/**
-	 * Gets the editions of a course.
+	 * Gets the editions of a course sorted in alphabetic order.
 	 *
 	 * @param  id The id of the course
 	 * @return    The list of course editions
@@ -78,7 +78,8 @@ public class CourseController {
 	@PreAuthorize("@authorisationService.canGetEditionsOfCourse(#id)")
 	public @ResponseBody List<EditionSummaryDTO> getEditionsOfCourse(@PathVariable Long id) {
 		return courseApi.getCourseById(id).block().getEditions().stream()
-				.filter(e -> editionRepository.existsById(e.getId())).toList();
+				.filter(e -> editionRepository.existsById(e.getId()))
+				.sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList();
 	}
 
 }
