@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.dto.view.module;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -64,23 +65,38 @@ public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitV
 	private List<CheckpointViewDTO> remainingCheckpointsInEdition;
 
 	@NotNull
+	@PostApply
+	private List<CheckpointViewDTO> usedCheckpointsInEdition;
+
+	@NotNull
 	private List<PathViewDTO> paths;
 
 	@NotNull
 	@PostApply
 	private List<ModuleLevelExternalSkillViewDTO> externalSkillList;
 
+	/**
+	 * Gets the submodules of a module sorted in alphabetic order.
+	 *
+	 * @return The list of submodules
+	 */
 	@Override
 	public List<? extends GroupView> getGroups() {
-		return submodules;
+		return submodules.stream().sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList();
 	}
 
+	/**
+	 * Orders the checkpoints in increasing deadline order.
+	 */
 	@Override
 	public void postApply() {
 		super.postApply();
 		// get all checkpoints in this edition
 		this.checkpointsInEdition = data.getEdition().getCheckpoints().stream()
-				.map(cp -> View.convert(cp, CheckpointViewDTO.class)).toList();
+				.map(cp -> View.convert(cp, CheckpointViewDTO.class))
+				.sorted(Comparator.comparing(CheckpointViewDTO::getDeadline, Comparator.nullsLast(
+						Comparator.naturalOrder())))
+				.toList();
 		// get all checkpoints that contain a skill that is in this module
 		Set<Long> skillIdsInModule = data.getSubmodules().stream()
 				.flatMap(sub -> sub.getSkills().stream().map(AbstractSkill::getId))
@@ -91,6 +107,9 @@ public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitV
 				.map(checkpoint -> View.convert(checkpoint, CheckpointViewDTO.class)).toList();
 		this.remainingCheckpointsInEdition = checkpointsInEdition.stream()
 				.filter(checkpoint -> !checkpoints.contains(checkpoint)).toList();
+		// get all used checkpoints in edition
+		this.usedCheckpointsInEdition = checkpointsInEdition.stream()
+				.filter(c -> !remainingCheckpointsInEdition.contains(c)).collect(Collectors.toList());
 		// get all paths in this edition
 		this.paths = data.getEdition().getPaths().stream().map(p -> View.convert(p, PathViewDTO.class))
 				.toList();
