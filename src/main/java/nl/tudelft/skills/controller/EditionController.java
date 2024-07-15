@@ -164,7 +164,8 @@ public class EditionController {
 	@GetMapping("{id}/modules")
 	@PreAuthorize("@authorisationService.canGetModulesOfEdition(#id)")
 	public @ResponseBody List<SCModuleSummaryDTO> getModulesOfEdition(@PathVariable Long id) {
-		return View.convert(new ArrayList<>(editionRepository.findByIdOrThrow(id).getModules()),
+		return View.convert(new ArrayList<>(editionRepository.findByIdOrThrow(id).getModules()).stream()
+				.sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList(),
 				SCModuleSummaryDTO.class);
 	}
 

@@ -214,7 +214,7 @@ public class ModuleController {
 	}
 
 	/**
-	 * Gets the skills of a module.
+	 * Gets the skills of a module sorted in alphabetic order.
 	 *
 	 * @param  id The id of the module
 	 * @return    The list of skills
@@ -223,7 +223,9 @@ public class ModuleController {
 	@PreAuthorize("@authorisationService.canGetSkillsOfModule(#id)")
 	public @ResponseBody List<SkillSummaryDTO> getSkillsOfModule(@PathVariable Long id) {
 		return View.convert(moduleRepository.findByIdOrThrow(id).getSubmodules().stream()
-				.flatMap(s -> s.getSkills().stream()).toList(), SkillSummaryDTO.class);
+				.flatMap(s -> s.getSkills().stream())
+				.sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList(),
+				SkillSummaryDTO.class);
 	}
 
 }
