@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Completion status of revealed hidden skills is updated without page reload (@ffiedrich)
 - Revealed skills are not hidden again when required tasks are marked as uncomplete (@rglans)
 - Moving "Optional" box inside the expanded skill (@bbakos)
+- Renaming a path does not remove all tasks in path (@ffiedrich)
 
 ## [2.2.6]
 

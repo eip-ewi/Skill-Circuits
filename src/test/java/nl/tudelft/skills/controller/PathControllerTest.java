@@ -17,8 +17,9 @@
  */
 package nl.tudelft.skills.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -45,6 +46,8 @@ import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.create.PathCreateDTO;
 import nl.tudelft.skills.dto.id.SCEditionIdDTO;
 import nl.tudelft.skills.dto.patch.PathNamePatchDTO;
+import nl.tudelft.skills.dto.patch.PathTasksPatchDTO;
+import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.PathPreference;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.Task;
@@ -65,6 +68,8 @@ public class PathControllerTest extends ControllerTest {
 	private final EditionRepository editionRepository;
 	private final TaskRepository taskRepository;
 	private final PathPreferenceRepository pathPreferenceRepository;
+	private final PersonRepository personRepository;
+	private final PersonService personService;
 
 	@Autowired
 	public PathControllerTest(PathRepository pathRepository, PersonRepository personRepository,
@@ -75,6 +80,8 @@ public class PathControllerTest extends ControllerTest {
 		this.pathPreferenceRepository = pathPreferenceRepository;
 		this.editionRepository = editionRepository;
 		this.taskRepository = taskRepository;
+		this.personRepository = personRepository;
+		this.personService = personService;
 		pathController = new PathController(pathRepository, personRepository, editionRepository,
 				taskRepository, pathPreferenceRepository, personService, pathService);
 	}
@@ -181,30 +188,34 @@ public class PathControllerTest extends ControllerTest {
 		assertTrue(db.getTaskRead12().getPaths().stream().anyMatch(p -> p.getName().equals("PathName")));
 	}
 
-	// TODO adjust tests and add tests
-
 	@Test
 	@WithUserDetails("admin")
 	void patchPathChangeName() {
-		var dto = PathNamePatchDTO.builder()
-				.id(db.getPathFinderPath().getId())
+		Long pathId = db.getPathFinderPath().getId();
+		PathNamePatchDTO dto = PathNamePatchDTO.builder()
+				.id(pathId)
 				.name("Pathfinder2")
 				.build();
 
+		// Assert that task read 12 is only in the pathfinder path
 		assertEquals(Set.of(db.getPathFinderPath()), db.getTaskRead12().getPaths());
 		assertTrue(db.getTaskRead12().getPaths().stream().anyMatch(p -> p.getName().equals("Pathfinder")));
 
+		// Rename the path
 		pathController.renamePath(dto);
-		// Path is updated in task
-		assertFalse(db.getTaskRead12().getPaths().stream().anyMatch(p -> p.getName().equals("Pathfinder")));
 
+		// Assert on path name change
+		assertFalse(db.getTaskRead12().getPaths().stream().anyMatch(p -> p.getName().equals("Pathfinder")));
 		assertTrue(db.getTaskRead12().getPaths().stream().anyMatch(p -> p.getName().equals("Pathfinder2")));
+
+		Path pathAfter = pathRepository.findByIdOrThrow(pathId);
+		assertThat(pathAfter.getName()).isEqualTo("Pathfinder2");
 	}
 
 	@Test
 	@WithUserDetails("admin")
-	void patchPathChangeDefaultPath() {
-		var dto = PathNamePatchDTO.builder()
+	void patchPathChangeNameOfDefaultPath() {
+		PathNamePatchDTO dto = PathNamePatchDTO.builder()
 				.id(db.getPathFinderPath().getId())
 				.name("Pathfinder2")
 				.build();
@@ -215,10 +226,57 @@ public class PathControllerTest extends ControllerTest {
 		editionRepository.save(edition);
 		assertEquals("Pathfinder", db.getEditionRL().getDefaultPath().getName());
 
+		// Rename the path
 		pathController.renamePath(dto);
 
 		// Default path in edition was updated
 		assertEquals("Pathfinder2", db.getEditionRL().getDefaultPath().getName());
+	}
+
+	@Test
+	@WithUserDetails("admin")
+	void patchPathChangeTasksWithoutModuleId() {
+		// No module id, so the tasks should be reset
+		Long pathId = db.getPathFinderPath().getId();
+		PathTasksPatchDTO dto = PathTasksPatchDTO.builder()
+				.id(pathId)
+				.taskIds(Set.of(db.getTaskRead11().getId()))
+				.build();
+
+		// Assert that task read 12 is the only task in the pathfinder path
+		assertThat(db.getTaskRead12().getPaths()).containsExactly(db.getPathFinderPath());
+		assertThat(db.getPathFinderPath().getTasks()).containsExactly(db.getTaskRead12());
+		assertThat(db.getTaskRead11().getPaths()).isEmpty();
+
+		// Patch the path tasks
+		pathController.patchPathTasks(dto);
+
+		// Assert that task read 11 is the only task in the pathfinder path
+		Path pathAfter = pathRepository.findByIdOrThrow(pathId);
+		assertThat(db.getTaskRead11().getPaths()).containsExactly(pathAfter);
+		assertThat(pathAfter.getTasks()).containsExactly(db.getTaskRead11());
+		assertThat(db.getTaskRead12().getPaths()).isEmpty();
+	}
+
+	@Test
+	@WithUserDetails("admin")
+	void patchPathChangeTasksAssertCallToMethod() {
+		// Since a further case of the path patching is tested for the service, the call to the
+		// service method is tested additionally
+
+		// Create mock service and new controller
+		PathService pathService = mock(PathService.class);
+		PathController pathControllerInner = new PathController(pathRepository, personRepository,
+				editionRepository,
+				taskRepository, pathPreferenceRepository, personService, pathService);
+
+		// Verify method call
+		PathTasksPatchDTO dto = PathTasksPatchDTO.builder()
+				.id(db.getPathFinderPath().getId())
+				.taskIds(Set.of())
+				.build();
+		pathControllerInner.patchPathTasks(dto);
+		verify(pathService, times(1)).updateTasksInPathManyToMany(dto, db.getPathFinderPath());
 	}
 
 }
