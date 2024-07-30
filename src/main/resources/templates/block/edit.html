@@ -164,10 +164,13 @@
             block.find(".item > a").each((i, link) => {
                 $(link).after($(link).children());
             });
+
+            block.find(".task").attr("draggable", true);
         }
 
         function cancelEditOrCreateBlock() {
             const block = $(this).parent().parent();
+            block.find(".task").attr("draggable", false);
             if (block.data("create")) {
                 cancelCreateBlock(block);
             } else {
@@ -220,6 +223,7 @@
         }
         function saveEditOrCreate() {
             const block = $(this).parent().parent();
+            block.find(".task").attr("draggable", false);
             if (block.data("create")) {
                 createBlock(block);
             } else {

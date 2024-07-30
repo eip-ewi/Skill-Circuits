@@ -31,17 +31,13 @@
         th:data-path-ids="${level == 'module'} ? ${item.pathIds} : ${null}"
         th:data-index="${iter == null} ? 0 : ${iter.size - iter.count}"
         th:data-index-initial="${iter == null} ? 0 : ${iter.size - iter.count}"
-        th:classappend="${level == 'module'} ? ${item.completed ? 'completed' : ''} : ${''}"
+        th:classappend="${level == 'module'} ? ${item.completed ? 'completed task' : 'task'} : ${''}"
         layout:fragment="item">
         <input th:if="${canEdit}" name="id" type="hidden" th:value="${item.id}" />
         <th:block layout:fragment="item-decoration"></th:block>
         <th:block layout:fragment="item-content-element">
             <th:block layout:fragment="item-content">
-                <div
-                    style="flex-grow: 1"
-                    data-edit="always"
-                    th:id="|${id}-content|"
-                    class="item__content">
+                <div data-edit="always" th:id="|${id}-content|" class="item__content">
                     <th:block layout:fragment="item-before-content"></th:block>
                     <th:block layout:fragment="item-name">
                         <span
@@ -70,22 +66,11 @@
                 </div>
             </th:block>
         </th:block>
-        <th:block layout:fragment="item-after-content"></th:block>
-
-        <div class="item__buttons" th:id="|${id}-buttons|" data-edit="only">
-            <th:block layout:fragment="item-buttons">
-                <th:block th:if="${canEdit}">
-                    <button
-                        class="fa-solid fa-chevron-up item__up always_visible"
-                        data-edit="only"></button>
-                    <button
-                        class="fa-solid fa-chevron-down item__down always_visible"
-                        data-edit="only"></button>
-                    <button
-                        class="fa-solid fa-trash item__delete always_visible"
-                        data-edit="only"></button>
-                </th:block>
-            </th:block>
-        </div>
+        <th:block layout:fragment="item-after-content">
+            <button
+                th:if="${canEdit}"
+                class="fa-solid fa-trash item__delete always_visible"
+                data-edit="only"></button>
+        </th:block>
     </li>
 </html>

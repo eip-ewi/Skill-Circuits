@@ -24,8 +24,9 @@
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <script th:if="${canEdit}" layout:fragment="script">
         function deleteItem() {
-            const item = $(this).parent().parent();
+            const item = $(this).parent();
             if (item.data("new")) {
+                item.next(".item__separation").remove();
                 item.remove();
             } else {
                 const del = item.data("delete") !== true;
