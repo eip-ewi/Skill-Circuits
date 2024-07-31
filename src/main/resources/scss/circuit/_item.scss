@@ -138,7 +138,7 @@
         }
     }
 
-    .circuit[data-moving="item"] &__separation {
+    .circuit[data-moving="task"] &__separation {
         background-color: var(--grey-700);
     }
 }

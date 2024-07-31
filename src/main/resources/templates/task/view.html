@@ -23,7 +23,7 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <th:block layout:fragment="item">
-        <hr data-edit="only" class="item__separation" />
+        <hr th:if="${canEdit}" data-edit="only" class="item__separation" />
         <th:block layout:replace="~{item/view :: item}">
             <th:block layout:fragment="item-content-element">
                 <a
@@ -109,6 +109,6 @@
         <hr
             class="item__separation"
             data-edit="only"
-            th:if="${iter == null} or ${iter.size - iter.count} == 0" />
+            th:if="${canEdit} and (${iter == null} or ${iter.size - iter.count} == 0)" />
     </th:block>
 </html>

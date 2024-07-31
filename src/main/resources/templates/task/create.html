@@ -97,43 +97,5 @@
         <hr id="task-separation" data-edit="only" class="hidden item__separation" />
     </th:block>
 
-    <script th:if="${canEdit}" layout:fragment="script">
-        function createItem() {
-            const button = $(this);
-            const elem = $("#create-task").clone(true);
-            const separation = $("#task-separation").clone(true);
-            const blockId = button.data("block");
-            elem.removeAttr("id");
-            separation.removeAttr("id");
-            elem.removeClass("hidden");
-            separation.removeClass("hidden");
-            elem.children("input[type='hidden']").val(blockId);
-
-            const taskList = button.closest("ul").find("ul").first();
-            const index = taskList.children(".task").length;
-            elem.attr("data-index", index);
-            elem.data("index", index);
-
-            // TODO Is there a better workaround for unique ids?
-            // Create a unique temporary id for the new task for event handling
-            let idSuffix = 0;
-            taskList.children(".task[data-new=true]").each(function () {
-                const split = this.id.split("-");
-                const num = Number(split[split.length - 1]);
-                if (num >= idSuffix) {
-                    idSuffix = num + 1;
-                }
-            });
-            elem.attr("id", `new-task-${blockId}-${idSuffix}`);
-
-            // As the <ul> has flex-direction: column-reverse we prepend the new task to have it at the end of the list
-            taskList.prepend(elem);
-            taskList.prepend(separation);
-            elem.find("input[name='time']").focus();
-        }
-
-        document.addEventListener("DOMContentLoaded", function () {
-            $(".item__create").click(createItem);
-        });
-    </script>
+    <script th:if="${canEdit}" layout:fragment="script" th:src="@{/js/createItem.js}"></script>
 </html>
