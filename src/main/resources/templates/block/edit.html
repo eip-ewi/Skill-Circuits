@@ -214,11 +214,10 @@
             block.find(".item > a").append(block.find("a + .item__content"));
 
             const items = block.find(".item");
-            items.each((i, item) => {
+            items.each((i, _) => {
                 block
                     .find(".items")
                     .append(block.find(`.item[data-index-initial="${items.length - i - 1}"]`));
-                $(item).data("index", $(item).data("index-initial"));
             });
         }
         function saveEditOrCreate() {
@@ -258,7 +257,7 @@
             return data;
         }
         function serialiseBlockItems(block) {
-            function serialiseItem(item) {
+            function serialiseItem(item, notDeletedItems) {
                 const data = {};
                 item.find("input, select").each((i, input) => {
                     const name = $(input).attr("name");
@@ -268,17 +267,19 @@
                         data[name.split(".")[0]][name.split(".")[1]] = value;
                     } else data[name] = value;
                 });
-                data["index"] = item.data("index");
+                // Reverse the item order and get item index
+                data["index"] = notDeletedItems.length - 1 - notDeletedItems.index(item);
+
                 data["new"] = item.data("new") === true;
                 data["delete"] = item.data("delete") === true;
                 return data;
             }
 
-            return block
-                .children(".items")
-                .find(".item")
-                .map((i, item) => serialiseItem($(item)))
-                .toArray();
+            const items = block.children(".items").find(".item");
+            const notDeletedItems = items.filter(function () {
+                return !$(this).data("delete");
+            });
+            return items.map((i, item) => serialiseItem($(item), notDeletedItems)).toArray();
         }
 
         function configureBlockEvents(block) {
@@ -303,8 +304,6 @@
                 block.find("input[name='hidden']").click(toggleRequiredTasksButton);
                 block.find("button[name='select-tasks']").click(selectRequiredTasks);
             }
-            block.find(".item__up").click(moveItemUp);
-            block.find(".item__down").click(moveItemDown);
             block.find(".item__delete").click(deleteItem);
         }
 

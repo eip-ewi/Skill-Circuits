@@ -101,31 +101,19 @@ function handleTaskDrop(event: DragEvent): void {
     ) {
         event.preventDefault();
 
-        const task = $(`#${event.dataTransfer.getData("text/plain")}`);
-        const sepBeforeTask = task.next(".item__separation");
+        // Move task and one task separation element
+        const id = event.dataTransfer.getData("text/plain");
+        const task = $(`#${id}`);
         const targetSep = $(event.target);
-        const taskBeforeTarget = targetSep.next(".task");
-
-        const idxPrev: number = task.data("index");
-        const idxUpd: number =
-            taskBeforeTarget.length === 0 ? 0 : taskBeforeTarget.data("index") + 1;
-
-        if (idxPrev !== idxUpd) {
-            // Move task and one task separation element
+        // If it is a neighboring separator do not move anything
+        if (
+            targetSep.next(".task").attr("id") !== id &&
+            targetSep.prev(".task").attr("id") !== id
+        ) {
+            // Move a task separation with the task
+            const sepBeforeTask = task.next(".item__separation");
             targetSep.before(task);
             task.before(sepBeforeTask);
-
-            // Update indices
-            const lowerIdx: number = idxPrev < idxUpd ? idxPrev : idxUpd;
-            const upperIdx: number = idxPrev < idxUpd ? idxUpd : idxPrev;
-            const addOrSubtract: 1 | -1 = idxPrev < idxUpd ? -1 : 1;
-            task.data("index", idxUpd);
-            task.siblings(".task").each(function () {
-                const idx = $(this).data("index");
-                if (idx >= lowerIdx && idx <= upperIdx) {
-                    $(this).data("index", idx + addOrSubtract);
-                }
-            });
         }
 
         // Reset styling

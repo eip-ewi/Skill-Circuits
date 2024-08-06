@@ -29,7 +29,6 @@
         th:id="${id}"
         th:data-item="${item.id}"
         th:data-path-ids="${level == 'module'} ? ${item.pathIds} : ${null}"
-        th:data-index="${iter == null} ? 0 : ${iter.size - iter.count}"
         th:data-index-initial="${iter == null} ? 0 : ${iter.size - iter.count}"
         th:classappend="${level == 'module'} ? ${item.completed ? 'completed task' : 'task'} : ${''}"
         layout:fragment="item">

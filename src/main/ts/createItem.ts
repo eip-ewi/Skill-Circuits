@@ -34,13 +34,8 @@ function createItem(): void {
     separation.removeAttr("id");
     separation.removeClass("hidden");
 
-    // Set index of new task
-    const taskList = button.closest("ul").find("ul").first();
-    const index = taskList.children(".task").length;
-    elem.attr("data-index", index);
-    elem.data("index", index);
-
     // Create a unique id for the new task element for event handling
+    const taskList = button.closest("ul").find("ul").first();
     elem.attr("id", createUniqueNewTaskId(blockId, taskList));
 
     // Add the task and separation to the task list
