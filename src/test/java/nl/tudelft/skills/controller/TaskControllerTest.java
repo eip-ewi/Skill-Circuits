@@ -39,6 +39,7 @@ import nl.tudelft.skills.dto.view.EditLinkDTO;
 import nl.tudelft.skills.dto.view.module.TaskViewDTO;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.security.AuthorisationService;
 
 @Transactional
 @AutoConfigureMockMvc
@@ -48,12 +49,15 @@ public class TaskControllerTest extends ControllerTest {
 	private final TaskController taskController;
 	private final TaskRepository taskRepository;
 	private final RoleControllerApi roleApi;
+	private AuthorisationService authorisationService;
 
 	@Autowired
-	public TaskControllerTest(TaskRepository taskRepository, RoleControllerApi roleApi) {
+	public TaskControllerTest(TaskRepository taskRepository, RoleControllerApi roleApi,
+			AuthorisationService authorisationService) {
 		this.taskRepository = taskRepository;
 		this.roleApi = roleApi;
-		this.taskController = new TaskController(taskRepository);
+		this.authorisationService = authorisationService;
+		this.taskController = new TaskController(taskRepository, authorisationService);
 	}
 
 	private String createBody() throws JsonProcessingException {
