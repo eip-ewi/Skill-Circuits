@@ -73,7 +73,9 @@ function createItemEventListeners(): void {
     $(".item__create").on("click", createItem);
 }
 
-if (typeof module === "undefined" || typeof module.exports === "undefined") {
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports.createUniqueNewTaskId = createUniqueNewTaskId;
+} else {
     // For the browser view, add the event listeners
     document.addEventListener("DOMContentLoaded", function () {
         createItemEventListeners();
