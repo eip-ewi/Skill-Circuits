@@ -18,6 +18,7 @@
 package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -26,9 +27,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -113,7 +116,9 @@ public class TaskControllerTest extends ControllerTest {
 	}
 
 	@Test
-	void getTask() {
+	@WithUserDetails("teacher")
+	void getTaskTeacher() {
+		mockRole(roleApi, "TEACHER");
 		taskController.getTask(db.getTaskRead12().getId(), model);
 		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
 
@@ -122,11 +127,46 @@ public class TaskControllerTest extends ControllerTest {
 	}
 
 	@Test
-	void getTaskForCustomPath() {
+	@WithUserDetails("student")
+	void getTaskStudentPublished() {
+		mockRole(roleApi, "STUDENT");
+		Task task = db.getTaskRead12();
+		task.getSkill().getSubmodule().getModule().getEdition().setVisible(true);
+
+		taskController.getTask(task.getId(), model);
+		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
+
+		assertThat(((TaskViewDTO) model.getAttribute("item")).getPathIds())
+				.containsExactly(db.getPathFinderPath().getId());
+	}
+
+	@Test
+	@WithUserDetails("student")
+	void getTaskStudent() {
+		mockRole(roleApi, "STUDENT");
+		ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+				() -> taskController.getTask(db.getTaskRead12().getId(), model));
+		assertThat(exception.getMessage()).isEqualTo(HttpStatus.FORBIDDEN.toString());
+
+	}
+
+	@Test
+	@WithUserDetails("teacher")
+	void getTaskForCustomPathTeacher() {
+		mockRole(roleApi, "TEACHER");
 		taskController.getTaskForCustomPath(db.getTaskRead12().getId(), model);
 		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
 
 		assertThat(((TaskViewDTO) model.getAttribute("item")).getPathIds())
 				.containsExactly(db.getPathFinderPath().getId());
+	}
+
+	@Test
+	@WithUserDetails("student")
+	void getTaskForCustomPathStudent() {
+		mockRole(roleApi, "STUDENT");
+		ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+				() -> taskController.getTaskForCustomPath(db.getTaskRead12().getId(), model));
+		assertThat(exception.getMessage()).isEqualTo(HttpStatus.FORBIDDEN.toString());
 	}
 }
