@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mention email address on the home page (@bbakos)
 ## Changed
 - Teacher view: Sorting modules, submodules and checkpoints at selection dropdowns (@bbakos)
+- Teacher view: Task order can be changed via drag and drop (@ffiedrich)
 ## Fixed
 - Path toggle listeners are added to hidden skills on first reveal (@ffiedrich)
 - Completion status of revealed hidden skills is updated without page reload (@ffiedrich)
