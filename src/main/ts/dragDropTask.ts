@@ -22,7 +22,7 @@
  * @param event The dragstart DragEvent.
  */
 function handleTaskDragStart(event: DragEvent): void {
-    if (event.target instanceof Element && event.target.classList.contains("task")) {
+    if (event.target instanceof HTMLElement && event.target.classList.contains("task")) {
         event.dataTransfer.dropEffect = "move";
         $(event.target).css("opacity", "0.5");
         $("#circuit").attr("data-moving", "task");
@@ -36,9 +36,10 @@ function handleTaskDragStart(event: DragEvent): void {
  * @param event The dragend DragEvent.
  */
 function handleTaskDragEnd(event: DragEvent): void {
-    if (event.target instanceof Element && event.target.classList.contains("task")) {
+    if (event.target instanceof HTMLElement && event.target.classList.contains("task")) {
         $(event.target).css("opacity", "");
         $("#circuit").removeAttr("data-moving");
+        event.target.draggable = false;
     }
 }
 
@@ -49,7 +50,7 @@ function handleTaskDragEnd(event: DragEvent): void {
  */
 function handleTaskDragEnter(event: DragEvent): void {
     if (
-        event.target instanceof Element &&
+        event.target instanceof HTMLElement &&
         event.target.classList.contains("item__separation") &&
         $("#circuit").attr("data-moving") === "task"
     ) {
@@ -64,7 +65,7 @@ function handleTaskDragEnter(event: DragEvent): void {
  */
 function handleTaskDragLeave(event: DragEvent): void {
     if (
-        event.target instanceof Element &&
+        event.target instanceof HTMLElement &&
         event.target.classList.contains("item__separation") &&
         $("#circuit").attr("data-moving") === "task"
     ) {
@@ -79,7 +80,7 @@ function handleTaskDragLeave(event: DragEvent): void {
  */
 function handleTaskDragOver(event: DragEvent): void {
     if (
-        event.target instanceof Element &&
+        event.target instanceof HTMLElement &&
         event.target.classList.contains("item__separation") &&
         $("#circuit").attr("data-moving") === "task"
     ) {
@@ -95,7 +96,7 @@ function handleTaskDragOver(event: DragEvent): void {
  */
 function handleTaskDrop(event: DragEvent): void {
     if (
-        event.target instanceof Element &&
+        event.target instanceof HTMLElement &&
         event.target.classList.contains("item__separation") &&
         $("#circuit").attr("data-moving") === "task"
     ) {
@@ -120,6 +121,29 @@ function handleTaskDrop(event: DragEvent): void {
         task.css("opacity", "1");
         targetSep.removeClass("drag_over");
         $("#circuit").removeAttr("data-moving");
+        task.attr("draggable", "false");
+    }
+}
+
+/**
+ * Handles the mousedown event for dragging and dropping tasks, so that tasks are only draggable from the drag handle.
+ *
+ * @param event The mousedown event.
+ */
+function handleTaskMouseDown(event: Event): void {
+    if (event.target instanceof HTMLElement && event.target.classList.contains("item__move")) {
+        event.target.parentElement.draggable = true;
+    }
+}
+
+/**
+ * Handles the mouseup event for dragging and dropping tasks, so that tasks are only draggable from the drag handle.
+ *
+ * @param event The mouseup event.
+ */
+function handleTaskMouseUp(event: Event): void {
+    if (event.target instanceof HTMLElement && event.target.classList.contains("item__move")) {
+        event.target.parentElement.draggable = false;
     }
 }
 
@@ -133,6 +157,8 @@ function dragDropTaskEventListeners(): void {
     document.addEventListener("dragleave", handleTaskDragLeave, false);
     document.addEventListener("dragover", handleTaskDragOver, false);
     document.addEventListener("drop", handleTaskDrop, false);
+    document.addEventListener("mousedown", handleTaskMouseDown, false);
+    document.addEventListener("mouseup", handleTaskMouseUp, false);
 }
 
 if (typeof module === "undefined" || typeof module.exports === "undefined") {
