@@ -217,9 +217,12 @@
                         block.find(`.item[data-index-initial="${items.length - i - 1}"]`)[0]
                     );
                 $(item).data("index", $(item).data("index-initial"));
+                
+                let link = item.querySelector("a");
+                if (link != null) {
+                    link.appendChild(item.querySelector("a + .item__content"));
+                }
             });
-
-            block.find(".item > a").append(block.find("a + .item__content"));
         }
         function saveEditOrCreate() {
             const block = $(this).parent().parent();
