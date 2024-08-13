@@ -72,6 +72,13 @@
                             $("#edit-module-name").val()
                         );
                         cancelEditModule();
+                        $("*").unbind();
+                        window.document.dispatchEvent(
+                            new Event("DOMContentLoaded", {
+                                bubbles: true,
+                                cancelable: true,
+                            })
+                        );
                     },
                 });
             });
