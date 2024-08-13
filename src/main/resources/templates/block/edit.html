@@ -217,7 +217,7 @@
                         block.find(`.item[data-index-initial="${items.length - i - 1}"]`)[0]
                     );
                 $(item).data("index", $(item).data("index-initial"));
-                
+
                 let link = item.querySelector("a");
                 if (link != null) {
                     link.appendChild(item.querySelector("a + .item__content"));
