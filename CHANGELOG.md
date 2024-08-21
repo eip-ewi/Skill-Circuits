@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 - Teacher view: Sorting modules, submodules and checkpoints at selection dropdowns (@bbakos)
 ## Fixed
+- The correct checkpoint is considered as the last checkpoint (@ffiedrich)
+- Checkpoint deletion makes the correct next checkpoint be used instead (@ffiedrich)
+- Moving the last skill from a checkpoint makes the checkpoint disappear (@ffiedrich)
+- Redundant ghost checkpoint at bottom of page is removed (@ffiedrich)
+- After dragging a checkpoint, the menu disappears unless it is hovered (@ffiedrich)
 - Path toggle listeners are added to hidden skills on first reveal (@ffiedrich)
 - Completion status of revealed hidden skills is updated without page reload (@ffiedrich)
 - Revealed skills are not hidden again when required tasks are marked as uncomplete (@rglans)
