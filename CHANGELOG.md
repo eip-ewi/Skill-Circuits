@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Path toggle listeners are added to hidden skills on first reveal (@ffiedrich)
 - Completion status of revealed hidden skills is updated without page reload (@ffiedrich)
 - Revealed skills are not hidden again when required tasks are marked as uncomplete (@rglans)
+- Skills do not duplicate after the cancellation of the editing (@bbakos)
 - Moving "Optional" box inside the expanded skill (@bbakos)
 - Submodules are editable after editing modules in the setup page (@bbakos)
 
