@@ -79,7 +79,7 @@ public class HomeService {
 	 * by the user (courses which the user can see).
 	 *
 	 * @param  person        The logged-in person, if it exists, otherwise null.
-	 * @param  courses       The course summaries to group, mapped to if they
+	 * @param  courses       The course summaries to group.
 	 * @param  activeCourses The ids of courses which should be considered as "active".
 	 * @param  ownCourses    The ids of courses which should be considered as "owned" by the user (appear
 	 *                       under "your courses").
