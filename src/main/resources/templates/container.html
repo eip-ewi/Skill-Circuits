@@ -100,6 +100,11 @@
                     });
 
                     $("#ok_button").click(updateSeenVersion);
+
+                    // Ensure the dropdown button in the circuit header works in Safari
+                    $("#dropdown-button").on("click", () => {
+                        $(this).trigger("focus");
+                    });
                 });
             </script>
         </div>
