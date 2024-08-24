@@ -81,6 +81,7 @@
                 if (event.target.classList.contains("checkpoint")) {
                     draggingCheckpoint = false;
                     $("#circuit").removeAttr("data-moving");
+                    $(event.target).children(".checkpoint__body").trigger("blur");
                 }
             },
             false
