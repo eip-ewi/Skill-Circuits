@@ -17,6 +17,16 @@
  */
 
 /**
+ * Creates a new task separation, cloned from the reference element.
+ */
+function createTaskSeparation(): JQuery {
+    const separation = $("#task-separation").clone(true);
+    separation.removeAttr("id");
+    separation.removeClass("hidden");
+    return separation;
+}
+
+/**
  * Creates a new item.
  */
 function createItem(): void {
@@ -28,20 +38,19 @@ function createItem(): void {
     elem.removeClass("hidden");
     elem.children("input[type='hidden']").val(blockId);
 
-    // Create a task separation
-    // Creating a task is always in edit mode, so the separation is necessary for drag and drop handling
-    const separation = $("#task-separation").clone(true);
-    separation.removeAttr("id");
-    separation.removeClass("hidden");
-
     // Create a unique id for the new task element for event handling
     const taskList = button.closest("ul").find("ul").first();
     elem.attr("id", createUniqueNewTaskId(blockId, taskList));
 
     // Add the task and separation to the task list
+    // Creating a task is always in edit mode, so the separation is necessary for drag and drop handling
+    // If it is the first task, two separations need to be added
+    if (taskList.find(".item").length === 0) {
+        taskList.prepend(createTaskSeparation());
+    }
     // As the <ul> has flex-direction: column-reverse we prepend the new task to have it at the end of the list
     taskList.prepend(elem);
-    taskList.prepend(separation);
+    taskList.prepend(createTaskSeparation());
     elem.find("input[name='time']").trigger("focus");
 }
 

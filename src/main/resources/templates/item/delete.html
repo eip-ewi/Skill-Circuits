@@ -27,6 +27,10 @@
             const item = $(this).parent();
             if (item.data("new")) {
                 item.next(".item__separation").remove();
+                // If it is the last item, remove the last separation as well
+                if (item.siblings(".item").length === 0) {
+                    item.prev(".item__separation").remove();
+                }
                 item.remove();
             } else {
                 const del = item.data("delete") !== true;
