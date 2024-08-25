@@ -21,16 +21,14 @@
     lang="en"
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-    <th:block layout:fragment="course(id, code, name, showSkills)">
-        <a
-            class="block"
-            th:href="@{|/edition/${@courseService.getLastStudentEditionForCourseOrLast(id)}|}">
+    <th:block layout:fragment="course(id, code, name, showSkills, editionId)">
+        <a class="block" th:href="@{|/edition/${editionId}|}">
             <h2 th:text="${code}"></h2>
             <h2 th:text="${name}"></h2>
             <h3
                 th:if="${showSkills}"
                 style="font-size: 0.8rem"
-                th:text="|${completedSkillsPerCourse.get(id)} / ${@skillRepository.countBySubmoduleModuleEditionId(@courseService.getLastStudentEditionForCourseOrLast(id))} skills completed|"></h3>
+                th:text="|${completedSkillsPerCourse.get(id)} / ${@skillRepository.countBySubmoduleModuleEditionId(editionId)} skills completed|"></h3>
         </a>
     </th:block>
 </html>

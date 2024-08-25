@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mention email address on the home page (@bbakos)
 ## Changed
 - Teacher view: Sorting modules, submodules and checkpoints at selection dropdowns (@bbakos)
+- A course is added to "Your courses" if the user has a role, instead of if they completed a task (@ffiedrich)
+- TAs are handled similarly to students in the selection of a default edition for the homepage (@ffiedrich)
 ## Fixed
 - The correct checkpoint is considered as the last checkpoint (@ffiedrich)
 - Checkpoint deletion makes the correct next checkpoint be used instead (@ffiedrich)
