@@ -97,7 +97,9 @@
                             $(
                                 "#delete-checkpoint-form > .confirmation__buttons > button[type=submit]"
                             ).addClass("disabled");
-                            $("#delete-checkpoint-error").removeClass("hidden");
+                            let errorText = $("#delete-checkpoint-error");
+                            errorText.text(res.responseText);
+                            errorText.removeClass("hidden");
                         }
                     },
                 });

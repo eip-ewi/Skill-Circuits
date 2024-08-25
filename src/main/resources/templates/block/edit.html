@@ -179,11 +179,9 @@
             block.attr("data-editing", false);
             block.attr("draggable", true);
 
-            block.find(".item[data-new='true']").remove();
             const deleted = block.find(".item[data-delete='true']");
             deleted.attr("data-delete", false);
             deleted.data("delete", false);
-            block.find(".item[data-delete='true']").attr("data-delete", false);
             block.find("input").prop("disabled", false);
             block.find("select").attr("data-disabled", false);
             $(`#${block.attr("id")} input:not([type="hidden"])`).each((i, field) =>
@@ -195,26 +193,53 @@
             block
                 .find("input[type='checkbox']")
                 .each((i, checkbox) => $(checkbox).prop("checked", $(checkbox).data("initial")));
-            block.find("[name='requiredTaskIds']").each((i, requiredTasks) => {
-                const initialTasks = JSON.parse(`[${$(requiredTasks).data("initial")}]`);
-                $(requiredTasks).val(initialTasks);
-                if (initialTasks.length >= 1) {
-                    let number = initialTasks.length ? "task" : "tasks";
-                    $(requiredTasks)
-                        .siblings("[name='select-tasks']")
-                        .text(`${initialTasks.length} ${number} selected`);
-                } else {
-                    $(requiredTasks).siblings("[name='select-tasks']").text("Select tasks");
-                }
-            });
 
-            block.find(".item > a").append(block.find("a + .item__content"));
+            if (block.data("hidden") === true) {
+                block.find("[name='requiredTaskIds']").each((i, requiredTasks) => {
+                    const initialTasks = JSON.parse(`[${$(requiredTasks).data("initial")}]`);
+                    $(requiredTasks).val(initialTasks);
+                    if (initialTasks.length >= 1) {
+                        let number = initialTasks.length ? "task" : "tasks";
+                        $(requiredTasks)
+                            .siblings("[name='select-tasks']")
+                            .text(`${initialTasks.length} ${number} selected`);
+                    } else {
+                        $(requiredTasks).siblings("[name='select-tasks']").text("Select tasks");
+                    }
+                });
+            }
+
+            // Remove the new items
+            const numNewItems = block.find(".item[data-new='true']").length;
+            block.find(".item[data-new='true']").remove();
+
+            // Remove redundant item separations
+            block.find(".item__separation").slice(0, numNewItems).remove();
 
             const items = block.find(".item");
-            items.each((i, _) => {
+            const separations = block.find(".item__separation");
+
+            // First, append an item separation, if there is one
+            if (separations.length > 0) {
+                block.find(".items")[1].appendChild(separations[0]);
+            }
+
+            // Re-order the items and item separations
+            items.each((i, item) => {
                 block
-                    .find(".items")
-                    .append(block.find(`.item[data-index-initial="${items.length - i - 1}"]`));
+                    .find(".items")[1]
+                    .appendChild(
+                        block.find(`.item[data-index-initial="${items.length - i - 1}"]`)[0]
+                    );
+
+                // Append an item separation, there should always be (number of tasks) + 1 separations,
+                // if there is at least one task
+                block.find(".items")[1].appendChild(separations[i + 1]);
+
+                let link = item.querySelector("a");
+                if (link != null) {
+                    link.appendChild(item.querySelector("a + .item__content"));
+                }
             });
         }
         function saveEditOrCreate() {
