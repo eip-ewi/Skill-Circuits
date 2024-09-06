@@ -598,4 +598,32 @@ public class TestDatabaseLoader {
 		checkpointB.getSkills().add(skillB);
 		checkpointRepository.saveAll(Set.of(checkpointA, checkpointB));
 	}
+
+	/**
+	 * Creates a task in a new module (in edition editionRL2021) for testing purposes. Adds a new module,
+	 * submodule and skill.
+	 *
+	 * @return The created task.
+	 */
+	public Task createTaskInNewModule() {
+		SCModule module = moduleRepository.save(SCModule.builder().edition(editionRL2021)
+				.name("New module").build());
+		editionRL2021.getModules().add(module);
+		editionRepository.save(editionRL2021);
+		Submodule submodule = Submodule.builder().module(module)
+				.name("New submodule").column(0).row(0).build();
+		submodule = submoduleRepository.save(submodule);
+		module.getSubmodules().add(submodule);
+		Skill skill = Skill.builder().submodule(submodule).checkpoint(getCheckpointLectureOne())
+				.name("New skill").column(0).row(0).build();
+		skill = skillRepository.save(skill);
+		getCheckpointLectureOne().getSkills().add(skill);
+		submodule.getSkills().add(skill);
+		submoduleRepository.save(submodule);
+		checkpointRepository.save(getCheckpointLectureOne());
+		Task task = taskRepository.save(Task.builder().name("New task").skill(skill).build());
+		skill.getTasks().add(task);
+		skillRepository.save(skill);
+		return task;
+	}
 }

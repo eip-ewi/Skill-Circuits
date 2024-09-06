@@ -64,7 +64,7 @@
                 e.preventDefault();
                 $.ajax({
                     type: "PATCH",
-                    url: `/path`,
+                    url: `/path/name`,
                     data: $("#edit-path-form").serialize(),
                     success: () => {
                         let pathId = $("#edit-path-id").val();
