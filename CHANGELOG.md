@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 - Teacher view: Sorting modules, submodules and checkpoints at selection dropdowns (@bbakos)
 - Teacher view: Task order can be changed via drag and drop (@ffiedrich)
+- A course is added to "Your courses" if the user has a role, instead of if they completed a task (@ffiedrich)
+- TAs are handled similarly to students in the selection of a default edition for the homepage (@ffiedrich)
 ## Fixed
 - The correct checkpoint is considered as the last checkpoint (@ffiedrich)
 - Checkpoint deletion makes the correct next checkpoint be used instead (@ffiedrich)
@@ -28,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Skills do not duplicate after the cancellation of the editing (@bbakos)
 - Moving "Optional" box inside the expanded skill (@bbakos)
 - Submodules are editable after editing modules in the setup page (@bbakos)
+- Renaming a path does not remove all tasks in path (@ffiedrich)
 
 ## [2.2.6]
 
