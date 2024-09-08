@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.patch.PathPatchDTO;
+import nl.tudelft.skills.dto.patch.PathTasksPatchDTO;
 import nl.tudelft.skills.dto.view.edition.PathViewDTO;
 import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.Task;
@@ -53,7 +53,7 @@ public class PathService {
 	 * @param path  New path.
 	 */
 	@Transactional
-	public void updateTasksInPathManyToMany(PathPatchDTO patch, Path path) {
+	public void updateTasksInPathManyToMany(PathTasksPatchDTO patch, Path path) {
 		List<Task> oldTasks = taskRepository
 				.findAllByIdIn(path.getTasks().stream().map(Task::getId).toList());
 

@@ -73,13 +73,14 @@
                 th:aria-hidden="${displayOwn} ? '' : 'true'"
                 th:style="${displayOwn} ? '' : 'display: none'">
                 <span th:if="not ${displayOwn} and ${@authorisationService.isAuthenticated()}">
-                    You have
-                    <b>not completed a task</b>
-                    in any course.
+                    You are
+                    <!-- spotless:off -->
+                    <b>not part of any course</b>.
+                    <!-- spotless:on -->
                 </span>
                 <span th:if="not ${displayOwn} and not ${@authorisationService.isAuthenticated()}">
                     <b>Log in</b>
-                    to display courses in which you have completed a task.
+                    to display your courses.
                 </span>
 
                 <div th:if="${displayOwn}">
@@ -91,7 +92,7 @@
                         <th:block th:each="course : ${ownActive}">
                             <th:block
                                 layout:replace="~{course/block :: course(${course.id}, ${course.code},
-                                ${course.name}, true)}" />
+                                ${course.name}, true, ${editionPerCourse.get(course.id)})}" />
                         </th:block>
                     </div>
 
@@ -102,7 +103,7 @@
                         <th:block th:each="course : ${ownFinished}">
                             <th:block
                                 layout:replace="~{course/block :: course(${course.id}, ${course.code},
-                                ${course.name}, true)}" />
+                                ${course.name}, true, ${editionPerCourse.get(course.id)})}" />
                         </th:block>
                     </div>
 
@@ -146,7 +147,7 @@
                         <th:block th:each="course : ${availableActive}">
                             <th:block
                                 layout:replace="~{course/block :: course(${course.id}, ${course.code},
-                                ${course.name}, false)}" />
+                                ${course.name}, false, ${editionPerCourse.get(course.id)})}" />
                         </th:block>
                     </div>
 
@@ -157,7 +158,7 @@
                         <th:block th:each="course : ${availableFinished}">
                             <th:block
                                 layout:replace="~{course/block :: course(${course.id}, ${course.code},
-                                ${course.name}, false)}" />
+                                ${course.name}, false, ${editionPerCourse.get(course.id)})}" />
                         </th:block>
                     </div>
                 </div>

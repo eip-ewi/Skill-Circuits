@@ -30,7 +30,8 @@ import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.PathCreateDTO;
-import nl.tudelft.skills.dto.patch.PathPatchDTO;
+import nl.tudelft.skills.dto.patch.PathNamePatchDTO;
+import nl.tudelft.skills.dto.patch.PathTasksPatchDTO;
 import nl.tudelft.skills.dto.view.edition.PathViewDTO;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
@@ -46,14 +47,14 @@ import nl.tudelft.skills.service.PersonService;
 @RequestMapping("path")
 public class PathController {
 
-	private PathRepository pathRepository;
-	private PersonRepository personRepository;
-	private EditionRepository editionRepository;
-	private TaskRepository taskRepository;
-	private PathPreferenceRepository pathPreferenceRepository;
-	private PathService pathService;
+	private final PathRepository pathRepository;
+	private final PersonRepository personRepository;
+	private final EditionRepository editionRepository;
+	private final TaskRepository taskRepository;
+	private final PathPreferenceRepository pathPreferenceRepository;
+	private final PathService pathService;
 
-	private PersonService personService;
+	private final PersonService personService;
 
 	@Autowired
 	public PathController(PathRepository pathRepository, PersonRepository personRepository,
@@ -176,23 +177,20 @@ public class PathController {
 	}
 
 	@Transactional
-	@PatchMapping
+	@PatchMapping("name")
 	@PreAuthorize("@authorisationService.canEditPath(#patch.id)")
-	public ResponseEntity<Void> patchPath(PathPatchDTO patch) {
+	public ResponseEntity<Void> renamePath(PathNamePatchDTO patch) {
 		Path oldPath = pathRepository.findByIdOrThrow(patch.getId());
+		pathRepository.save(patch.apply(oldPath));
+		return ResponseEntity.ok().build();
+	}
 
-		// apply only updates name of path
-		Path path = pathRepository.save(patch.apply(oldPath));
-
+	@Transactional
+	@PatchMapping("tasks")
+	@PreAuthorize("@authorisationService.canEditPath(#patch.id)")
+	public ResponseEntity<Void> patchPathTasks(PathTasksPatchDTO patch) {
+		Path path = pathRepository.findByIdOrThrow(patch.getId());
 		pathService.updateTasksInPathManyToMany(patch, path);
-
-		// Update  default path in edition
-		SCEdition edition = editionRepository.findById(oldPath.getEdition().getId()).get();
-		if (edition.getDefaultPath() != null && edition.getDefaultPath().equals(oldPath)) {
-			edition.setDefaultPath(path);
-			editionRepository.save(edition);
-		}
-
 		return ResponseEntity.ok().build();
 	}
 
