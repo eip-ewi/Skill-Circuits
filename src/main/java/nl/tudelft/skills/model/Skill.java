@@ -58,7 +58,7 @@ public class Skill extends AbstractSkill {
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@ManyToMany(mappedBy = "requiredFor")
-	private Set<Task> requiredTasks = new HashSet<>();
+	private Set<AbstractTask> requiredTasks = new HashSet<>();
 
 	@NotNull
 	@Builder.Default
@@ -67,7 +67,7 @@ public class Skill extends AbstractSkill {
 	@OrderBy("idx")
 	@Cascade(CascadeType.DELETE)
 	@OneToMany(mappedBy = "skill")
-	private List<Task> tasks = new ArrayList<>();
+	private List<AbstractTask> tasks = new ArrayList<>();
 
 	@NotNull
 	@ToString.Exclude
@@ -107,7 +107,8 @@ public class Skill extends AbstractSkill {
 	@ManyToMany(mappedBy = "skillsModified")
 	private Set<SCPerson> personModifiedSkill = new HashSet<>();
 
-	public void setTasks(List<Task> tasks) {
+	// TODO: might need additional functionality for ChoiceTasks here
+	public void setTasks(List<AbstractTask> tasks) {
 		this.tasks = tasks;
 		for (int i = 0; i < tasks.size(); i++) {
 			tasks.get(i).setIdx(i);

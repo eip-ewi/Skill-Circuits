@@ -65,7 +65,7 @@ public class AuthorisationServiceTest {
 	private final ModuleRepository moduleRepository;
 	private final SubmoduleRepository submoduleRepository;
 	private final SkillRepository skillRepository;
-	private final TaskRepository taskRepository;
+	private final AbstractTaskRepository abstractTaskRepository;
 	private final CheckpointRepository checkpointRepository;
 	private final PathRepository pathRepository;
 	private final AbstractSkillRepository abstractSkillRepository;
@@ -80,7 +80,7 @@ public class AuthorisationServiceTest {
 			ModuleRepository moduleRepository,
 			SubmoduleRepository submoduleRepository,
 			SkillRepository skillRepository,
-			TaskRepository taskRepository, CheckpointRepository checkpointRepository,
+			AbstractTaskRepository abstractTaskRepository, CheckpointRepository checkpointRepository,
 			PathRepository pathRepository,
 			AbstractSkillRepository abstractSkillRepository,
 			ExternalSkillRepository externalSkillRepository,
@@ -93,7 +93,7 @@ public class AuthorisationServiceTest {
 		this.moduleRepository = moduleRepository;
 		this.submoduleRepository = submoduleRepository;
 		this.skillRepository = skillRepository;
-		this.taskRepository = taskRepository;
+		this.abstractTaskRepository = abstractTaskRepository;
 		this.checkpointRepository = checkpointRepository;
 		this.pathRepository = pathRepository;
 		this.abstractSkillRepository = abstractSkillRepository;
@@ -186,7 +186,8 @@ public class AuthorisationServiceTest {
 		mockRole(role);
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
-				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
+				editionRepository, moduleRepository, submoduleRepository, skillRepository,
+				abstractTaskRepository,
 				checkpointRepository, pathRepository,
 				abstractSkillRepository,
 				courseApi, personApi);
@@ -204,7 +205,8 @@ public class AuthorisationServiceTest {
 		mockRole(role);
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
-				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
+				editionRepository, moduleRepository, submoduleRepository, skillRepository,
+				abstractTaskRepository,
 				checkpointRepository, pathRepository, abstractSkillRepository,
 				courseApi, personApi);
 
@@ -218,7 +220,8 @@ public class AuthorisationServiceTest {
 		mockRole(role);
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
-				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
+				editionRepository, moduleRepository, submoduleRepository, skillRepository,
+				abstractTaskRepository,
 				checkpointRepository, pathRepository, abstractSkillRepository,
 				courseApi, personApi);
 
@@ -510,7 +513,7 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canEditTask(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canEditTask(db.getTaskDo10a().getId())).isEqualTo(expected);
+		assertThat(authorisationService.canEditAbstractTask(db.getTaskDo10a().getId())).isEqualTo(expected);
 	}
 
 	@Transactional
@@ -519,7 +522,7 @@ public class AuthorisationServiceTest {
 	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canDeleteTask(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canDeleteTask(db.getTaskDo10a().getId())).isEqualTo(expected);
+		assertThat(authorisationService.canDeleteAbstractTask(db.getTaskDo10a().getId())).isEqualTo(expected);
 	}
 
 	@Transactional
@@ -625,7 +628,8 @@ public class AuthorisationServiceTest {
 		mockRole(role);
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
-				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
+				editionRepository, moduleRepository, submoduleRepository, skillRepository,
+				abstractTaskRepository,
 				checkpointRepository, pathRepository, abstractSkillRepository,
 				courseApi, personApi);
 

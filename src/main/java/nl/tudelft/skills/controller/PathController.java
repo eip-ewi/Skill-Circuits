@@ -35,10 +35,7 @@ import nl.tudelft.skills.dto.patch.PathTasksPatchDTO;
 import nl.tudelft.skills.dto.view.edition.PathViewDTO;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
-import nl.tudelft.skills.repository.EditionRepository;
-import nl.tudelft.skills.repository.PathPreferenceRepository;
-import nl.tudelft.skills.repository.PathRepository;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.PathService;
 import nl.tudelft.skills.service.PersonService;
@@ -50,7 +47,7 @@ public class PathController {
 	private final PathRepository pathRepository;
 	private final PersonRepository personRepository;
 	private final EditionRepository editionRepository;
-	private final TaskRepository taskRepository;
+	private final AbstractTaskRepository abstractTaskRepository;
 	private final PathPreferenceRepository pathPreferenceRepository;
 	private final PathService pathService;
 
@@ -58,13 +55,13 @@ public class PathController {
 
 	@Autowired
 	public PathController(PathRepository pathRepository, PersonRepository personRepository,
-			EditionRepository editionRepository, TaskRepository taskRepository,
+			EditionRepository editionRepository, AbstractTaskRepository abstractTaskRepository,
 			PathPreferenceRepository pathPreferenceRepository, PersonService personService,
 			PathService pathService) {
 		this.pathRepository = pathRepository;
 		this.personRepository = personRepository;
 		this.editionRepository = editionRepository;
-		this.taskRepository = taskRepository;
+		this.abstractTaskRepository = abstractTaskRepository;
 		this.pathPreferenceRepository = pathPreferenceRepository;
 		this.personService = personService;
 		this.pathService = pathService;
@@ -129,7 +126,7 @@ public class PathController {
 		// Remove path from tasks
 		path.getTasks().forEach(task -> {
 			task.getPaths().remove(path);
-			taskRepository.save(task);
+			abstractTaskRepository.save(task);
 		});
 
 		// Remove path from edition default
@@ -166,10 +163,11 @@ public class PathController {
 		Path path = pathRepository.saveAndFlush(dto.apply());
 
 		// By default, all tasks are added to a new path
-		taskRepository.findAllBySkillSubmoduleModuleEditionId(path.getEdition().getId()).forEach(t -> {
-			t.getPaths().add(path);
-			taskRepository.save(t);
-		});
+		abstractTaskRepository.findAllBySkillSubmoduleModuleEditionId(path.getEdition().getId())
+				.forEach(t -> {
+					t.getPaths().add(path);
+					abstractTaskRepository.save(t);
+				});
 
 		model.addAttribute("path", View.convert(path, PathViewDTO.class));
 		return "edition_setup/path";

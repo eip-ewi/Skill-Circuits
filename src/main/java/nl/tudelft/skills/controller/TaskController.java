@@ -49,7 +49,7 @@ public class TaskController {
 	 */
 	@Transactional
 	@PatchMapping("change-link")
-	@PreAuthorize("@authorisationService.canEditTask(#editLinkDTO.taskId)")
+	@PreAuthorize("@authorisationService.canEditAbstractTask(#editLinkDTO.taskId)")
 	public ResponseEntity<Void> updateTaskLink(@RequestBody EditLinkDTO editLinkDTO) {
 		Task task = taskRepository.findByIdOrThrow(editLinkDTO.getTaskId());
 		task.setLink(editLinkDTO.getNewLink());
@@ -57,6 +57,8 @@ public class TaskController {
 
 		return ResponseEntity.ok().build();
 	}
+
+	// TODO: getting a choice task
 
 	/**
 	 * Returns a task view for a custom path.
@@ -74,8 +76,10 @@ public class TaskController {
 		return "task/view";
 	}
 
+	// TODO: getting a choice task in an exploded skill
+
 	/**
-	 * Returns task view paths overview in a exploded skill.
+	 * Returns task view paths overview in an exploded skill.
 	 *
 	 * @param  taskId The id of the task.
 	 * @param  model  The model to configure.

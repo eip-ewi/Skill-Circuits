@@ -74,6 +74,7 @@ public class SkillControllerTest extends ControllerTest {
 	private final SubmoduleRepository submoduleRepository;
 	private final ExternalSkillRepository externalSkillRepository;
 	private final TaskRepository taskRepository;
+	private final AbstractTaskRepository abstractTaskRepository;
 	private final CheckpointRepository checkpointRepository;
 	private final PathRepository pathRepository;
 	private final SkillService skillService;
@@ -90,6 +91,7 @@ public class SkillControllerTest extends ControllerTest {
 
 	@Autowired
 	public SkillControllerTest(SkillRepository skillRepository, TaskRepository taskRepository,
+			AbstractTaskRepository abstractTaskRepository,
 			SkillService skillService, SubmoduleRepository submoduleRepository,
 			ExternalSkillRepository externalSkillRepository,
 			AbstractSkillRepository abstractSkillRepository, CheckpointRepository checkpointRepository,
@@ -103,6 +105,7 @@ public class SkillControllerTest extends ControllerTest {
 		this.moduleService = mock(ModuleService.class);
 		this.externalSkillRepository = externalSkillRepository;
 		this.taskRepository = taskRepository;
+		this.abstractTaskRepository = abstractTaskRepository;
 		this.clickedLinkService = clickedLinkService;
 		this.clickedLinkRepository = clickedLinkRepository;
 		this.checkpointRepository = checkpointRepository;
@@ -119,7 +122,8 @@ public class SkillControllerTest extends ControllerTest {
 		this.roleApi = roleApi;
 
 		this.skillController = new SkillController(skillRepository, externalSkillRepository,
-				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
+				abstractSkillRepository, abstractTaskRepository, taskRepository, submoduleRepository,
+				checkpointRepository,
 				pathRepository,
 				personRepository, skillService, moduleService, taskCompletionService, clickedLinkService,
 				personService, session);
@@ -183,7 +187,7 @@ public class SkillControllerTest extends ControllerTest {
 		// This fixes flaky tests by ensuring the right beans are used.
 		SkillController skc = new SkillController(SpringContext.getBean(SkillRepository.class),
 				externalSkillRepository,
-				abstractSkillRepository, taskRepository, submoduleRepository,
+				abstractSkillRepository, abstractTaskRepository, taskRepository, submoduleRepository,
 				SpringContext.getBean(CheckpointRepository.class), pathRepository,
 				personRepository, skillService, moduleService, taskCompletionService, clickedLinkService,
 				personService, session);
@@ -253,11 +257,13 @@ public class SkillControllerTest extends ControllerTest {
 	@Test
 	void patchSkillDeletesTask() {
 		Long taskId = db.getTaskRead11().getId();
+		Set<Long> taskIdSet = new HashSet<>();
+		taskIdSet.add(taskId);
 
 		skillController.patchSkill(SkillPatchDTO.builder()
 				.id(db.getSkillNegation().getId())
 				.name("Updated")
-				.removedItems(Set.of(taskId))
+				.removedItems(taskIdSet)
 				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
 				.build(), model);
 
@@ -323,8 +329,8 @@ public class SkillControllerTest extends ControllerTest {
 		// of the recentActiveEditionForSkillOrLatest method
 		SkillService mockSkillService = mock(SkillService.class);
 		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
-				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
-				pathRepository,
+				abstractSkillRepository, abstractTaskRepository, taskRepository,
+				submoduleRepository, checkpointRepository, pathRepository,
 				personRepository, mockSkillService, moduleService, taskCompletionService, clickedLinkService,
 				personService, session);
 
@@ -359,8 +365,8 @@ public class SkillControllerTest extends ControllerTest {
 		// of the recentActiveEditionForSkillOrLatest method
 		SkillService mockSkillService = mock(SkillService.class);
 		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
-				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
-				pathRepository,
+				abstractSkillRepository, abstractTaskRepository, taskRepository,
+				submoduleRepository, checkpointRepository, pathRepository,
 				personRepository, mockSkillService, moduleService, taskCompletionService, clickedLinkService,
 				personService, session);
 
@@ -521,8 +527,8 @@ public class SkillControllerTest extends ControllerTest {
 		// of the recentActiveEditionForSkillOrLatest method
 		SkillService mockSkillService = mock(SkillService.class);
 		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
-				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
-				pathRepository,
+				abstractSkillRepository, abstractTaskRepository, taskRepository,
+				submoduleRepository, checkpointRepository, pathRepository,
 				personRepository, mockSkillService, moduleService, taskCompletionService, clickedLinkService,
 				personService, session);
 

@@ -26,25 +26,15 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
-import nl.tudelft.skills.model.labracore.SCPerson;
+import lombok.experimental.SuperBuilder;
 
 @Data
 @Entity
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Task {
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private Long id;
-
-	@NotNull
-	@ManyToOne
-	@EqualsAndHashCode.Exclude
-	@ToString.Exclude
-	private Skill skill;
-
+@EqualsAndHashCode(callSuper = true)
+public class Task extends AbstractTask {
 	@NotBlank
 	private String name;
 
@@ -60,40 +50,11 @@ public class Task {
 
 	@NotNull
 	@Builder.Default
-	private Integer idx = 0;
-
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany(mappedBy = "tasks")
-	private Set<Achievement> achievements = new HashSet<>();
-
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany
-	private Set<Path> paths = new HashSet<>();
-
-	@NotNull
-	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@OneToMany(mappedBy = "task")
 	private Set<TaskCompletion> completedBy = new HashSet<>();
 
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany
-	private Set<Skill> requiredFor = new HashSet<>();
-
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany(mappedBy = "tasksAdded")
-	private Set<SCPerson> personsThatAddedTask = new HashSet<>();
+	@ManyToOne
+	private ChoiceTask choiceTask;
 }

@@ -607,7 +607,8 @@ public class EditionServiceTest {
 				editionDb.getSkillFromB(), editionDb.getSkillToB());
 		Map<Path, Path> pathCopies = Map.of(editionDb.getPathFromA(), editionDb.getPathToA(),
 				editionDb.getPathFromB(), editionDb.getPathToB());
-		Map<Task, Task> copies = editionService.copyAndLinkEditionTasks(skillCopies, pathCopies);
+		Map<AbstractTask, AbstractTask> copies = editionService.copyAndLinkEditionTasks(skillCopies,
+				pathCopies);
 		assertThat(copies.keySet()).containsExactlyInAnyOrder(editionDb.getTaskFromA(),
 				editionDb.getTaskFromB());
 		assertThat(taskRepository.findAll()).hasSize(amountBefore + 2);
@@ -638,13 +639,16 @@ public class EditionServiceTest {
 		assertThat(editionDb.getPathToB().getTasks()).isEmpty();
 	}
 
-	private void testTaskEqualityHelper(Task initial, Task copy, Skill skillTo) {
+	private void testTaskEqualityHelper(AbstractTask initial, AbstractTask copy, Skill skillTo) {
 		assertThat(copy).isNotNull();
 		assertThat(taskRepository.findByIdOrThrow(copy.getId())).isEqualTo(copy);
-		assertThat(copy.getName()).isEqualTo(initial.getName());
-		assertThat(copy.getType()).isEqualTo(initial.getType());
-		assertThat(copy.getTime()).isEqualTo(initial.getTime());
-		assertThat(copy.getLink()).isEqualTo(initial.getLink());
+		// TODO This requires more adjustments.
+		if (initial instanceof Task && copy instanceof Task) {
+			assertThat(((Task) copy).getName()).isEqualTo(((Task) initial).getName());
+			assertThat(((Task) copy).getType()).isEqualTo(((Task) initial).getType());
+			assertThat(((Task) copy).getTime()).isEqualTo(((Task) initial).getTime());
+			assertThat(((Task) copy).getLink()).isEqualTo(((Task) initial).getLink());
+		}
 		assertThat(copy.getIdx()).isEqualTo(initial.getIdx());
 		assertThat(skillTo.getTasks()).containsExactly(copy);
 

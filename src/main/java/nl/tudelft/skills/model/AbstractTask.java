@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.model.labracore;
+package nl.tudelft.skills.model;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -24,53 +24,55 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
-import nl.tudelft.skills.model.*;
+import lombok.experimental.SuperBuilder;
+import nl.tudelft.skills.model.labracore.SCPerson;
 
 @Data
 @Entity
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SCPerson {
-
+@Inheritance(strategy = InheritanceType.JOINED)
+public abstract class AbstractTask {
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
 
-	@Builder.Default
-	@ToString.Exclude
+	@NotNull
+	@ManyToOne
 	@EqualsAndHashCode.Exclude
-	@OneToMany(mappedBy = "person")
-	private Set<TaskCompletion> taskCompletions = new HashSet<>();
+	@ToString.Exclude
+	private Skill skill;
 
 	@NotNull
-	@OneToOne(cascade = CascadeType.ALL)
-	private Inventory inventory;
+	@Builder.Default
+	private Integer idx = 0;
 
+	@NotNull
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@OneToMany(mappedBy = "person")
-	private Set<PathPreference> pathPreferences = new HashSet<>();
+	@ManyToMany(mappedBy = "tasks")
+	private Set<Achievement> achievements = new HashSet<>();
 
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany
-	// For configuring a skill with any task in any path
-	private Set<AbstractTask> tasksAdded = new HashSet<>();
-
+	@NotNull
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@ManyToMany
-	// To remember which skills have already been revealed
-	private Set<Skill> skillsRevealed = new HashSet<>();
+	private Set<Path> paths = new HashSet<>();
 
+	@NotNull
+	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@ManyToMany
-	@Builder.Default
-	// For configuring a skill with any task in any path
-	private Set<Skill> skillsModified = new HashSet<>();
+	private Set<Skill> requiredFor = new HashSet<>();
 
+	@NotNull
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@ManyToMany(mappedBy = "tasksAdded")
+	private Set<SCPerson> personsThatAddedTask = new HashSet<>();
 }

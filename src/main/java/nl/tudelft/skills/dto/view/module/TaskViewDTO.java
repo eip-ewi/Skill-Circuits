@@ -37,7 +37,7 @@ import nl.tudelft.skills.model.TaskType;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class TaskViewDTO extends View<Task> implements ItemView {
-
+	// TODO: ability to view choice task, for now only tasks
 	@NotNull
 	private Long id;
 	@NotBlank

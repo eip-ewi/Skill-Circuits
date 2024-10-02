@@ -15,24 +15,36 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.repository;
+package nl.tudelft.skills.model;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
-import nl.tudelft.skills.model.Task;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
-public interface TaskRepository extends JpaRepository<Task, Long> {
+@Data
+@Entity
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+public class ChoiceTask extends AbstractTask {
+	private String name;
 
-	default Task findByIdOrThrow(Long id) {
-		return findById(id).orElseThrow(() -> new ResourceNotFoundException("Task was not found: " + id));
-	}
+	@Builder.Default
+	@Min(1)
+	private Integer minTasks = 1;
 
-	List<Task> findAllByIdIn(Collection<Long> id);
-
-	void deleteAllByIdIn(Collection<Long> id);
-
+	@NotNull
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@OneToMany(mappedBy = "choiceTask")
+	private List<Task> tasks = new ArrayList<>();
 }

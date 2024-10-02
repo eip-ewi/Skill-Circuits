@@ -28,8 +28,8 @@ import nl.tudelft.skills.dto.view.BlockView;
 import nl.tudelft.skills.dto.view.ItemView;
 import nl.tudelft.skills.dto.view.checkpoint.CheckpointViewDTO;
 import nl.tudelft.skills.model.AbstractSkill;
+import nl.tudelft.skills.model.AbstractTask;
 import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Task;
 
 @Data
 @Builder
@@ -73,7 +73,7 @@ public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
 		super.postApply();
 		this.parentIds = data.getParents().stream().map(AbstractSkill::getId).toList();
 		this.childIds = data.getChildren().stream().map(AbstractSkill::getId).toList();
-		this.requiredTaskIds = data.getRequiredTasks().stream().map(Task::getId).toList();
+		this.requiredTaskIds = data.getRequiredTasks().stream().map(AbstractTask::getId).toList();
 	}
 
 	@Override

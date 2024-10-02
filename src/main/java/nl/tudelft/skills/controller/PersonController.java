@@ -32,12 +32,10 @@ import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.dto.view.TaskCompletedDTO;
-import nl.tudelft.skills.model.Path;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.model.TaskCompletion;
+import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.playlists.service.PlaylistService;
+import nl.tudelft.skills.repository.AbstractTaskRepository;
 import nl.tudelft.skills.repository.PathRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskRepository;
@@ -52,6 +50,7 @@ import nl.tudelft.skills.service.TaskCompletionService;
 public class PersonController {
 
 	private final TaskRepository taskRepository;
+	private final AbstractTaskRepository abstractTaskRepository;
 	private final PersonRepository scPersonRepository;
 	private final TaskCompletionService taskCompletionService;
 	private final SkillRepository skillRepository;
@@ -156,7 +155,7 @@ public class PersonController {
 	@Transactional
 	public void addTaskToOwnPath(@AuthenticatedPerson Person authPerson, @PathVariable Long taskId) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
-		Task task = taskRepository.findByIdOrThrow(taskId);
+		AbstractTask task = abstractTaskRepository.findByIdOrThrow(taskId);
 
 		// if first time modifying skill, put all tasks from current path in own path
 
@@ -218,10 +217,10 @@ public class PersonController {
 	/**
 	 * Takes all tasks from a skill on current path and adds them to the set of modified tasks.
 	 *
-	 * @param person
-	 * @param task
+	 * @param person The person for which the tasks will be added
+	 * @param task   The abstract task for which the skill is considered
 	 */
-	void addAllTaskFromCurrentPath(SCPerson person, Task task) {
+	void addAllTaskFromCurrentPath(SCPerson person, AbstractTask task) {
 		Optional<Long> currentPathId = person.getPathPreferences().stream()
 				.filter(p -> p.getEdition().equals(task.getSkill().getSubmodule().getModule().getEdition()))
 				.filter(p -> p.getPath() != null)

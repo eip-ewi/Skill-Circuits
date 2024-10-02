@@ -18,7 +18,6 @@
 package nl.tudelft.skills.service;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,20 +28,20 @@ import org.springframework.transaction.annotation.Transactional;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.patch.PathTasksPatchDTO;
 import nl.tudelft.skills.dto.view.edition.PathViewDTO;
+import nl.tudelft.skills.model.AbstractTask;
 import nl.tudelft.skills.model.Path;
-import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.repository.AbstractTaskRepository;
 import nl.tudelft.skills.repository.PathRepository;
-import nl.tudelft.skills.repository.TaskRepository;
 
 @Service
 public class PathService {
 
-	private final TaskRepository taskRepository;
+	private final AbstractTaskRepository abstractTaskRepository;
 	private final PathRepository pathRepository;
 
 	@Autowired
-	public PathService(TaskRepository taskRepository, PathRepository pathRepository) {
-		this.taskRepository = taskRepository;
+	public PathService(AbstractTaskRepository abstractTaskRepository, PathRepository pathRepository) {
+		this.abstractTaskRepository = abstractTaskRepository;
 		this.pathRepository = pathRepository;
 	}
 
@@ -54,27 +53,28 @@ public class PathService {
 	 */
 	@Transactional
 	public void updateTasksInPathManyToMany(PathTasksPatchDTO patch, Path path) {
-		List<Task> oldTasks = taskRepository
-				.findAllByIdIn(path.getTasks().stream().map(Task::getId).toList());
+		Set<AbstractTask> oldTasks = abstractTaskRepository
+				.findAllByIdIn(path.getTasks().stream().map(AbstractTask::getId).toList());
 
-		Set<Task> selectedTasks = new HashSet<>(taskRepository.findAllByIdIn(patch.getTaskIds()));
+		Set<AbstractTask> selectedTasks = new HashSet<>(
+				abstractTaskRepository.findAllByIdIn(patch.getTaskIds()));
 
 		// remove tasks that are not in path
 		// if the patch has a moduleId, remove only tasks that are in this module
-		Set<Task> removedTasks = oldTasks.stream().filter(t -> !patch.getTaskIds().contains(t.getId())
+		Set<AbstractTask> removedTasks = oldTasks.stream().filter(t -> !patch.getTaskIds().contains(t.getId())
 				&& (patch.getModuleId() == null
 						|| t.getSkill().getSubmodule().getModule().getId().equals(patch.getModuleId())))
 				.collect(Collectors.toSet());
 		removedTasks
 				.forEach(t -> t.setPaths(t.getPaths().stream().filter(p -> !p.getId().equals(path.getId()))
 						.collect(Collectors.toSet())));
-		taskRepository.saveAllAndFlush(oldTasks);
+		abstractTaskRepository.saveAllAndFlush(oldTasks);
 
 		// add tasks that were not previously in path
 		selectedTasks.forEach(t -> t.getPaths().add(path));
-		taskRepository.saveAllAndFlush(selectedTasks);
+		abstractTaskRepository.saveAllAndFlush(selectedTasks);
 
-		Set<Task> newTasks = new HashSet<>(oldTasks);
+		Set<AbstractTask> newTasks = new HashSet<>(oldTasks);
 		newTasks.removeAll(removedTasks);
 		newTasks.addAll(selectedTasks);
 		path.setTasks(newTasks);
@@ -90,7 +90,7 @@ public class PathService {
 	 */
 	public boolean isTaskInPath(Long taskId, Long pathId) {
 		return pathRepository.findByIdOrThrow(pathId).getTasks().stream()
-				.map(Task::getId)
+				.map(AbstractTask::getId)
 				.anyMatch(taskId::equals);
 	}
 

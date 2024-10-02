@@ -19,6 +19,7 @@ package nl.tudelft.skills.playlists.service;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
@@ -200,8 +201,11 @@ public class PlaylistService {
 	public List<PlaylistTaskViewDTO> getTaskDTOs(Set<TaskCompletion> taskCompletions, Skill skill) {
 		List<PlaylistTaskViewDTO> tasks = new LinkedList<>();
 
+		// TODO: Only temporary solution for compiling. This does not handle tasks correctly.
+
 		//		For each task, get the module it belongs to and whether the student has already completed it
-		for (Task t : skill.getTasks()) {
+		for (Task t : skill.getTasks().stream().filter(t -> t instanceof Task).map(t -> (Task) t)
+				.collect(Collectors.toList())) {
 			boolean completed = taskCompletions.stream()
 					.anyMatch(tC -> tC.getTask().getId().equals(t.getId()));
 			if (completed) {
@@ -272,8 +276,9 @@ public class PlaylistService {
 		log.trace("Getting uncompleted skills for checkpoint:" + checkpoint.getName());
 		List<PlaylistSkillViewDTO> skills = new LinkedList<>();
 		for (Skill s : checkpoint.getSkills()) {
+			// TODO: Only temporary solution for compiling. This does not handle tasks correctly.
 			//	Filter out skills that are still hidden for the participant
-			if (!complTaskIds.containsAll(s.getRequiredTasks().stream().map(Task::getId).toList())) {
+			if (!complTaskIds.containsAll(s.getRequiredTasks().stream().map(AbstractTask::getId).toList())) {
 				log.trace("Filtered out a hidden skill");
 				continue;
 			}
@@ -294,9 +299,11 @@ public class PlaylistService {
 	 * @return              a list containing the IDs for each uncompleted task of the given Skill
 	 */
 	private List<Long> getSkillRemainingTasks(Skill skill, List<Long> complTaskIds) {
+		// TODO: Only temporary solution for compiling. This does not handle tasks correctly.
 		log.trace("Getting uncompleted tasks for skill: " + skill.getName());
 		log.trace("Skill '" + skill.getName() + "' has " + skill.getTasks().size() + " tasks in total");
-		return skill.getTasks().stream().map(Task::getId).filter(t -> !complTaskIds.contains(t)).toList();
+		return skill.getTasks().stream().map(AbstractTask::getId).filter(t -> !complTaskIds.contains(t))
+				.toList();
 
 	}
 

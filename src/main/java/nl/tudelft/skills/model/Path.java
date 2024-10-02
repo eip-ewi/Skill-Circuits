@@ -50,6 +50,6 @@ public class Path {
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@ManyToMany(mappedBy = "paths")
-	private Set<Task> tasks = new HashSet<>();
+	private Set<AbstractTask> tasks = new HashSet<>();
 
 }

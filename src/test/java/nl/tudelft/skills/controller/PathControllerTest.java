@@ -51,10 +51,7 @@ import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.PathPreference;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.repository.EditionRepository;
-import nl.tudelft.skills.repository.PathPreferenceRepository;
-import nl.tudelft.skills.repository.PathRepository;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.PathService;
 import nl.tudelft.skills.service.PersonService;
@@ -66,7 +63,7 @@ public class PathControllerTest extends ControllerTest {
 	private final PathController pathController;
 	private final PathRepository pathRepository;
 	private final EditionRepository editionRepository;
-	private final TaskRepository taskRepository;
+	private final AbstractTaskRepository abstractTaskRepository;
 	private final PathPreferenceRepository pathPreferenceRepository;
 	private final PersonRepository personRepository;
 	private final PersonService personService;
@@ -74,16 +71,16 @@ public class PathControllerTest extends ControllerTest {
 	@Autowired
 	public PathControllerTest(PathRepository pathRepository, PersonRepository personRepository,
 			PersonService personService, EditionRepository editionRepository,
-			PathPreferenceRepository pathPreferenceRepository, TaskRepository taskRepository,
+			PathPreferenceRepository pathPreferenceRepository, AbstractTaskRepository abstractTaskRepository,
 			PathService pathService) {
 		this.pathRepository = pathRepository;
 		this.pathPreferenceRepository = pathPreferenceRepository;
 		this.editionRepository = editionRepository;
-		this.taskRepository = taskRepository;
+		this.abstractTaskRepository = abstractTaskRepository;
 		this.personRepository = personRepository;
 		this.personService = personService;
 		pathController = new PathController(pathRepository, personRepository, editionRepository,
-				taskRepository, pathPreferenceRepository, personService, pathService);
+				abstractTaskRepository, pathPreferenceRepository, personService, pathService);
 	}
 
 	@Test
@@ -146,7 +143,7 @@ public class PathControllerTest extends ControllerTest {
 		// Setup task with path
 		Task task = db.getTaskRead12();
 		task.setPaths(new HashSet<>(Arrays.asList(db.getPathFinderPath())));
-		taskRepository.save(task);
+		abstractTaskRepository.save(task);
 		assertEquals(1, db.getTaskRead12().getPaths().size());
 
 		pathController.deletePath(pathId);
@@ -268,7 +265,7 @@ public class PathControllerTest extends ControllerTest {
 		PathService pathService = mock(PathService.class);
 		PathController pathControllerInner = new PathController(pathRepository, personRepository,
 				editionRepository,
-				taskRepository, pathPreferenceRepository, personService, pathService);
+				abstractTaskRepository, pathPreferenceRepository, personService, pathService);
 
 		// Verify method call
 		PathTasksPatchDTO dto = PathTasksPatchDTO.builder()

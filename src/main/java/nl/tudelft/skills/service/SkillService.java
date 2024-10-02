@@ -30,10 +30,7 @@ import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
 import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
-import nl.tudelft.skills.model.AbstractSkill;
-import nl.tudelft.skills.model.ExternalSkill;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.AbstractSkillRepository;
@@ -52,6 +49,7 @@ public class SkillService {
 	private final ClickedLinkService clickedLinkService;
 	private final PersonRepository personRepository;
 	private final TaskRepository taskRepository;
+	private final AbstractTaskRepository abstractTaskRepository;
 
 	/**
 	 * Deletes a skill.
@@ -64,9 +62,14 @@ public class SkillService {
 		AbstractSkill skill = abstractSkillRepository.findByIdOrThrow(id);
 		skill.getChildren().forEach(c -> c.getParents().remove(skill));
 		if (skill instanceof Skill s) {
-			s.getTasks().forEach(t -> taskCompletionRepository.deleteAll(t.getCompletedBy()));
+			s.getTasks().forEach(t -> {
+				if (t instanceof Task) {
+					taskCompletionRepository.deleteAll(((Task) t).getCompletedBy());
+				}
+			});
 
-			clickedLinkService.deleteClickedLinksForTasks(s.getTasks());
+			clickedLinkService.deleteClickedLinksForTasks(s.getTasks().stream().filter(t -> t instanceof Task)
+					.map(t -> (Task) t).collect(Collectors.toList()));
 
 			s.getFutureEditionSkills().forEach(innerSkill -> innerSkill.setPreviousEditionSkill(null));
 			if (s.getPreviousEditionSkill() != null) {
@@ -88,7 +91,7 @@ public class SkillService {
 
 			s.getRequiredTasks().forEach(t -> {
 				t.getRequiredFor().remove(s);
-				taskRepository.save(t);
+				abstractTaskRepository.save(t);
 			});
 		}
 		abstractSkillRepository.delete(skill);
@@ -187,7 +190,7 @@ public class SkillService {
 	 * @return           The set of customized skills
 	 */
 	public Set<Skill> getOwnSkillsWithTask(SCPerson scperson, long editionId) {
-		return scperson.getTasksAdded().stream().map(Task::getSkill)
+		return scperson.getTasksAdded().stream().map(AbstractTask::getSkill)
 				.filter(s -> Objects.equals(s.getSubmodule().getModule().getEdition().getId(),
 						editionId))
 				.collect(Collectors.toSet());

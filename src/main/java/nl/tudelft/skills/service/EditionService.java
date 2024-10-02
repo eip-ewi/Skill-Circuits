@@ -434,42 +434,48 @@ public class EditionService {
 	 * @param  pathMap  The map of paths, from previous paths to the new paths.
 	 * @return          The map of tasks, from previous tasks to the new tasks.
 	 */
-	Map<Task, Task> copyAndLinkEditionTasks(Map<Skill, Skill> skillMap, Map<Path, Path> pathMap) {
-		Map<Task, Task> taskMap = new HashMap<>();
+	Map<AbstractTask, AbstractTask> copyAndLinkEditionTasks(Map<Skill, Skill> skillMap,
+			Map<Path, Path> pathMap) {
+		Map<AbstractTask, AbstractTask> taskMap = new HashMap<>();
 
 		skillMap.forEach((prev, copy) -> prev.getTasks().forEach(t -> {
-			Task task = taskRepository.save(
-					Task.builder()
-							.skill(copy)
-							.name(t.getName())
-							.type(t.getType())
-							.time(t.getTime())
-							.link(t.getLink())
-							.idx(t.getIdx())
-							.build());
+			// TODO copying of choice tasks. Needs more adjustments since they contain tasks (dependency).
+			// 	Below is only temporary solution for tasks!
 
-			copy.getTasks().add(task);
-			taskMap.put(t, task);
+			if (t instanceof Task) {
+				Task task = taskRepository.save(
+						Task.builder()
+								.skill(copy)
+								.name(((Task) t).getName())
+								.type(((Task) t).getType())
+								.time(((Task) t).getTime())
+								.link(((Task) t).getLink())
+								.idx(t.getIdx())
+								.build());
 
-			t.getPaths().forEach(p -> {
-				Path copiedPath = pathMap.get(p);
-				if (copiedPath != null) {
-					// This should hold for any correctly formed edition
+				copy.getTasks().add(task);
+				taskMap.put(t, task);
 
-					task.getPaths().add(copiedPath);
-					copiedPath.getTasks().add(task);
-				}
-			});
+				t.getPaths().forEach(p -> {
+					Path copiedPath = pathMap.get(p);
+					if (copiedPath != null) {
+						// This should hold for any correctly formed edition
 
-			t.getRequiredFor().forEach(req -> {
-				Skill copyRequiredFor = skillMap.get(req);
-				if (copyRequiredFor != null) {
-					// This should hold for any correctly formed edition
+						task.getPaths().add(copiedPath);
+						copiedPath.getTasks().add(task);
+					}
+				});
 
-					task.getRequiredFor().add(copyRequiredFor);
-					copyRequiredFor.getRequiredTasks().add(task);
-				}
-			});
+				t.getRequiredFor().forEach(req -> {
+					Skill copyRequiredFor = skillMap.get(req);
+					if (copyRequiredFor != null) {
+						// This should hold for any correctly formed edition
+
+						task.getRequiredFor().add(copyRequiredFor);
+						copyRequiredFor.getRequiredTasks().add(task);
+					}
+				});
+			}
 		}));
 
 		return taskMap;

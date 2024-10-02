@@ -33,6 +33,7 @@ import nl.tudelft.skills.model.TaskType;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class TaskCreateDTO extends Create<Task> {
+	// TODO: ability to create choice task, for now only tasks
 
 	@NotBlank
 	private String name;

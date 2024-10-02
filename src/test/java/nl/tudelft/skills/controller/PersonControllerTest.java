@@ -49,10 +49,7 @@ import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskCompletion;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.playlists.service.PlaylistService;
-import nl.tudelft.skills.repository.PathPreferenceRepository;
-import nl.tudelft.skills.repository.PathRepository;
-import nl.tudelft.skills.repository.SkillRepository;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.PersonService;
@@ -76,6 +73,7 @@ public class PersonControllerTest extends ControllerTest {
 
 	@Autowired
 	public PersonControllerTest(PersonRepository personRepository, TaskRepository taskRepository,
+			AbstractTaskRepository abstractTaskRepository,
 			TaskCompletionService taskCompletionService,
 			PathPreferenceRepository pathPreferenceRepository,
 			SkillRepository skillRepository,
@@ -86,8 +84,9 @@ public class PersonControllerTest extends ControllerTest {
 			PersonService personService) {
 		this.personRepository = personRepository;
 		this.playlistService = playlistService;
-		this.personController = new PersonController(taskRepository, personRepository, taskCompletionService,
-				skillRepository, pathRepository, authorisationService, roleApi, playlistService,
+		this.personController = new PersonController(taskRepository, abstractTaskRepository, personRepository,
+				taskCompletionService, skillRepository, pathRepository, authorisationService, roleApi,
+				playlistService,
 				personService);
 		this.taskRepository = taskRepository;
 		this.taskCompletionService = taskCompletionService;

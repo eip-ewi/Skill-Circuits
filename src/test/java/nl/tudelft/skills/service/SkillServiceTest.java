@@ -57,6 +57,7 @@ public class SkillServiceTest {
 	private final TaskCompletionRepository taskCompletionRepository;
 	private final EditionRepository editionRepository;
 	private final TaskRepository taskRepository;
+	private final AbstractTaskRepository abstractTaskRepository;
 	private final ModuleRepository moduleRepository;
 	private final SkillService skillService;
 	private final SkillRepository skillRepository;
@@ -76,6 +77,7 @@ public class SkillServiceTest {
 
 	@Autowired
 	public SkillServiceTest(AbstractSkillRepository abstractSkillRepository, TaskRepository taskRepository,
+			AbstractTaskRepository abstractTaskRepository,
 			TestDatabaseLoader db, TaskCompletionRepository taskCompletionRepository,
 			EditionControllerApi editionApi, CourseControllerApi courseApi,
 			SkillRepository skillRepository, ModuleRepository moduleRepository,
@@ -89,6 +91,7 @@ public class SkillServiceTest {
 		this.editionRepository = editionRepository;
 		this.moduleRepository = moduleRepository;
 		this.taskRepository = taskRepository;
+		this.abstractTaskRepository = abstractTaskRepository;
 		this.skillRepository = skillRepository;
 		this.clickedLinkService = clickedLinkService;
 		this.clickedLinkRepository = clickedLinkRepository;
@@ -106,7 +109,8 @@ public class SkillServiceTest {
 		this.editionApi = editionApi;
 
 		this.skillService = new SkillService(abstractSkillRepository, taskCompletionRepository, courseApi,
-				authorisationService, clickedLinkService, personRepository, taskRepository);
+				authorisationService, clickedLinkService, personRepository, taskRepository,
+				abstractTaskRepository);
 	}
 
 	@Test

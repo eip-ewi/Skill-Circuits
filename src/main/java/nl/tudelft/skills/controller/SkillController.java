@@ -55,6 +55,7 @@ public class SkillController {
 	private final SkillRepository skillRepository;
 	private final ExternalSkillRepository externalSkillRepository;
 	private final AbstractSkillRepository abstractSkillRepository;
+	private final AbstractTaskRepository abstractTaskRepository;
 	private final TaskRepository taskRepository;
 	private final SubmoduleRepository submoduleRepository;
 	private final CheckpointRepository checkpointRepository;
@@ -119,15 +120,18 @@ public class SkillController {
 					checkpointRepository.saveAndFlush(create.getCheckpointCreate().apply()).getId()));
 		}
 		Skill skill = skillRepository.saveAndFlush(create.apply());
-		List<Task> tasks = create.getNewItems().stream()
+
+		// TODO: ability to create choice tasks
+
+		List<AbstractTask> tasks = create.getNewItems().stream()
 				.sorted(Comparator.comparingInt(TaskCreateDTO::getIndex).reversed()).map(dto -> {
 					dto.setSkill(SkillIdDTO.builder().id(skill.getId()).build());
 					return dto.apply();
-				}).toList();
-		for (Task task : tasks) {
+				}).map(t -> (AbstractTask) t).collect(Collectors.toList());
+		for (AbstractTask task : tasks) {
 			task.setSkill(skill);
 		}
-		skill.setTasks(taskRepository.saveAll(tasks));
+		skill.setTasks(abstractTaskRepository.saveAll(tasks));
 
 		checkpointRepository.findBySkillsContains(skill).getSkills().add(skill);
 
@@ -137,7 +141,7 @@ public class SkillController {
 		Set<Path> paths = new HashSet<>(pathRepository.findAllByEditionId(edition.getId()));
 		tasks.forEach(t -> {
 			t.setPaths(paths);
-			taskRepository.save(t);
+			abstractTaskRepository.save(t);
 		});
 
 		moduleService.configureModuleModel(person, skill.getSubmodule().getModule().getId(), model, session);
@@ -189,8 +193,12 @@ public class SkillController {
 	@PreAuthorize("@authorisationService.canEditSkill(#patch.id)")
 	public String patchSkill(@Valid @RequestBody SkillPatchDTO patch, Model model) {
 		Skill skill = skillRepository.findByIdOrThrow(patch.getId());
-		List<Task> oldTasks = skill.getTasks();
-		skillRepository.save(patch.apply(skill));
+
+		// TODO: the ability to patch ChoiceTasks
+
+		List<AbstractTask> oldTasks = skill.getTasks();
+		var test = patch.apply(skill);
+		skillRepository.save(test);
 
 		// Remove selected tasks from custom skill in person
 		skill.getPersonModifiedSkill().forEach(p -> {
@@ -204,7 +212,7 @@ public class SkillController {
 		clickedLinkService.deleteClickedLinksForTasks(taskRepository.findAllByIdIn(patch.getRemovedItems()));
 
 		taskRepository.deleteAllByIdIn(patch.getRemovedItems());
-		taskRepository.saveAll(skill.getRequiredTasks());
+		abstractTaskRepository.saveAll(skill.getRequiredTasks());
 
 		// New tasks will be included in all paths by default
 		SCEdition edition = skill.getSubmodule().getModule().getEdition();
@@ -214,7 +222,7 @@ public class SkillController {
 				.forEach(t -> {
 					t.setPaths(paths);
 					t.setSkill(skill);
-					taskRepository.save(t);
+					abstractTaskRepository.save(t);
 				});
 
 		model.addAttribute("level", "module");

@@ -163,6 +163,8 @@ public class TaskCompletionService {
 				.collect(Collectors.toSet());
 	}
 
+	// TODO consider completion of choice tasks below
+
 	/**
 	 * Collects the completed skills based on the given path preference and customized skills
 	 *

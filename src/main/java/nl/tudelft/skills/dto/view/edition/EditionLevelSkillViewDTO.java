@@ -41,6 +41,7 @@ public class EditionLevelSkillViewDTO extends View<Skill> implements ItemView {
 	private String name;
 	@NotNull
 	private Boolean hidden;
+	// TODO: ability to view choice task, for now only tasks
 	@NotNull
 	private List<TaskViewDTO> tasks;
 

@@ -36,6 +36,7 @@ import nl.tudelft.skills.model.TaskType;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class TaskPatchDTO extends Patch<Task> {
+	// TODO: ability to patch choice task, for now only tasks
 
 	@NotNull
 	private Long id;
