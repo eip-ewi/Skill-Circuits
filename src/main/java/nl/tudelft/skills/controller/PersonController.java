@@ -178,7 +178,8 @@ public class PersonController {
 	 */
 	@PutMapping("remove/{taskId}")
 	@Transactional
-	public void removeTaskFromOwnPath(@AuthenticatedPerson Person authPerson, @PathVariable Long taskId) {
+	public List<String> removeTaskFromOwnPath(@AuthenticatedPerson Person authPerson,
+			@PathVariable Long taskId) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
 		Task task = taskRepository.findByIdOrThrow(taskId);
 
@@ -189,6 +190,8 @@ public class PersonController {
 		}
 
 		person.getTasksAdded().remove(task);
+
+		return task.getSkill().getTasks().stream().map(Task::getName).collect(Collectors.toList());
 	}
 
 	/**

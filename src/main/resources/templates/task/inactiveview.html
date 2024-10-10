@@ -197,7 +197,7 @@
                 url: "/person/remove/" + taskId,
                 processData: false,
                 contentType: "application/json",
-                success: async () => {
+                success: async order => {
                     // Remove task from left side
                     document.getElementById(`item-${taskId}`).remove();
 
@@ -212,12 +212,41 @@
                         .catch(() => {
                             alert("Failed to add task");
                         });
+                    const taskLoc = order.indexOf(task.querySelector(".item__name").innerHTML);
+
                     [...rightSide.querySelectorAll(".path-toggle")]
                         .filter(path => paths.includes(path.dataset.id))
                         .forEach(path => {
-                            path.querySelector(".path-toggle__content").appendChild(
-                                task.cloneNode(true)
-                            );
+                            const items = path.querySelectorAll(".item");
+                            if (items.length === 0) {
+                                path.querySelector(".path-toggle__content").prepend(
+                                    task.cloneNode(true)
+                                );
+                            } else if (
+                                taskLoc >=
+                                order.indexOf(
+                                    items[items.length - 1].querySelector(".item__name").innerHTML
+                                )
+                            ) {
+                                path.querySelector(".path-toggle__content").appendChild(
+                                    task.cloneNode(true)
+                                );
+                            } else {
+                                for (let i = 0; i < items.length; i++) {
+                                    if (
+                                        order.indexOf(
+                                            items[i].querySelector(".item__name").innerHTML
+                                        ) >= taskLoc
+                                    ) {
+                                        items[i].insertAdjacentElement(
+                                            "beforebegin",
+                                            task.cloneNode(true)
+                                        );
+                                        break;
+                                    }
+                                }
+                            }
+
                             // Make path toggle enabled if it was the first task
                             // Note: When CSS "has" is safely usable, this functionality can be moved to CSS
                             if (path.getAttribute("aria-disabled") === "true") {
