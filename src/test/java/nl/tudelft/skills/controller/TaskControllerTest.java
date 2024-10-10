@@ -24,6 +24,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -150,10 +152,11 @@ public class TaskControllerTest extends ControllerTest {
 
 	}
 
-	@Test
-	@WithUserDetails("teacher")
-	void getTaskForCustomPathTeacher() {
-		mockRole(roleApi, "TEACHER");
+	@ParameterizedTest
+	@WithUserDetails("admin")
+	@CsvSource({ "TEACHER", "HEAD_TA", "ADMIN"})
+	void getTaskForCustomPathAtLeastHeadTA(String role) {
+		mockRole(roleApi, role);
 		taskController.getTaskForCustomPath(db.getTaskRead12().getId(), model);
 		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
 
@@ -168,5 +171,19 @@ public class TaskControllerTest extends ControllerTest {
 		ResponseStatusException exception = assertThrows(ResponseStatusException.class,
 				() -> taskController.getTaskForCustomPath(db.getTaskRead12().getId(), model));
 		assertThat(exception.getMessage()).isEqualTo(HttpStatus.FORBIDDEN.toString());
+	}
+
+	@Test
+	@WithUserDetails("student")
+	void getTaskForCustomPathStudentPublished() {
+		mockRole(roleApi, "STUDENT");
+		Task task = db.getTaskRead12();
+		task.getSkill().getSubmodule().getModule().getEdition().setVisible(true);
+
+		taskController.getTaskForCustomPath(task.getId(), model);
+		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
+
+		assertThat(((TaskViewDTO) model.getAttribute("item")).getPathIds())
+				.containsExactly(db.getPathFinderPath().getId());
 	}
 }
