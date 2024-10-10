@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Moving "Optional" box inside the expanded skill (@bbakos)
 - Submodules are editable after editing modules in the setup page (@bbakos)
 - Renaming a path does not remove all tasks in path (@ffiedrich)
+- Adding and removing a task on the custom path results in the teacher determined order (@bbakos)
 
 ## [2.2.6]
 
