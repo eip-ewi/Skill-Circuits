@@ -154,7 +154,7 @@ public class TaskControllerTest extends ControllerTest {
 
 	@ParameterizedTest
 	@WithUserDetails("admin")
-	@CsvSource({ "TEACHER", "HEAD_TA", "ADMIN"})
+	@CsvSource({ "TEACHER", "HEAD_TA", "ADMIN" })
 	void getTaskForCustomPathAtLeastHeadTA(String role) {
 		mockRole(roleApi, role);
 		taskController.getTaskForCustomPath(db.getTaskRead12().getId(), model);
