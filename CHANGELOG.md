@@ -15,12 +15,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mention email address on the home page (@bbakos)
 ## Changed
 - Teacher view: Sorting modules, submodules and checkpoints at selection dropdowns (@bbakos)
+- A course is added to "Your courses" if the user has a role, instead of if they completed a task (@ffiedrich)
+- TAs are handled similarly to students in the selection of a default edition for the homepage (@ffiedrich)
 ## Fixed
+- The correct checkpoint is considered as the last checkpoint (@ffiedrich)
+- Checkpoint deletion makes the correct next checkpoint be used instead (@ffiedrich)
+- Moving the last skill from a checkpoint makes the checkpoint disappear (@ffiedrich)
+- Redundant ghost checkpoint at bottom of page is removed (@ffiedrich)
+- After dragging a checkpoint, the menu disappears unless it is hovered (@ffiedrich)
 - Path toggle listeners are added to hidden skills on first reveal (@ffiedrich)
 - Completion status of revealed hidden skills is updated without page reload (@ffiedrich)
 - Revealed skills are not hidden again when required tasks are marked as uncomplete (@rglans)
+- Skills do not duplicate after the cancellation of the editing (@bbakos)
 - Moving "Optional" box inside the expanded skill (@bbakos)
 - Only authorized people can access tasks (@bbakos)
+- Submodules are editable after editing modules in the setup page (@bbakos)
+- Renaming a path does not remove all tasks in path (@ffiedrich)
 
 ## [2.2.6]
 

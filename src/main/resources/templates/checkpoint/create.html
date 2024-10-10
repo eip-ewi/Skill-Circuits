@@ -73,6 +73,23 @@
     </div>
 
     <script th:if="${canEdit}" layout:fragment="script">
+        /**
+         * Add a ghost checkpoint to a given row in the grid.
+         *
+         * @param row The row to which the ghost checkpoint should be added.
+         */
+        function addGhostCheckpoint(row) {
+            const cp = $("<div>")
+                .addClass("checkpoint ghost_checkpoint")
+                .css("grid-row", row)
+                .append(
+                    $("<div>")
+                        .addClass("checkpoint__body")
+                        .append($("<button>").addClass("checkpoint__create fa-solid fa-plus"))
+                );
+            $("#circuit").append(cp);
+        }
+
         function updateGhostCheckpoints() {
             const circuit = $("#circuit");
             const rowsInGrid = [...Array(parseInt(circuit.css("--rows"))).keys()];
@@ -80,21 +97,8 @@
                 getRow(cp)
             );
             $(".ghost_checkpoint").remove();
-            rowsInGrid
-                .filter(r => !rowsWithCheckpoints.includes(r))
-                .forEach(row => {
-                    const cp = $("<div>")
-                        .addClass("checkpoint ghost_checkpoint")
-                        .css("grid-row", row)
-                        .append(
-                            $("<div>")
-                                .addClass("checkpoint__body")
-                                .append(
-                                    $("<button>").addClass("checkpoint__create fa-solid fa-plus")
-                                )
-                        );
-                    circuit.append(cp);
-                });
+            rowsInGrid.shift();
+            rowsInGrid.filter(r => !rowsWithCheckpoints.includes(r)).forEach(addGhostCheckpoint);
         }
 
         function getSkillsInCheckpoint(checkpointRow) {

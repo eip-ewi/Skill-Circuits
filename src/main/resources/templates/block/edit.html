@@ -183,7 +183,6 @@
             const deleted = block.find(".item[data-delete='true']");
             deleted.attr("data-delete", false);
             deleted.data("delete", false);
-            block.find(".item[data-delete='true']").attr("data-delete", false);
             block.find("input").prop("disabled", false);
             block.find("select").attr("data-disabled", false);
             $(`#${block.attr("id")} input:not([type="hidden"])`).each((i, field) =>
@@ -195,27 +194,34 @@
             block
                 .find("input[type='checkbox']")
                 .each((i, checkbox) => $(checkbox).prop("checked", $(checkbox).data("initial")));
-            block.find("[name='requiredTaskIds']").each((i, requiredTasks) => {
-                const initialTasks = JSON.parse(`[${$(requiredTasks).data("initial")}]`);
-                $(requiredTasks).val(initialTasks);
-                if (initialTasks.length >= 1) {
-                    let number = initialTasks.length ? "task" : "tasks";
-                    $(requiredTasks)
-                        .siblings("[name='select-tasks']")
-                        .text(`${initialTasks.length} ${number} selected`);
-                } else {
-                    $(requiredTasks).siblings("[name='select-tasks']").text("Select tasks");
-                }
-            });
 
-            block.find(".item > a").append(block.find("a + .item__content"));
-
+            if (block.data("hidden") === true) {
+                block.find("[name='requiredTaskIds']").each((i, requiredTasks) => {
+                    const initialTasks = JSON.parse(`[${$(requiredTasks).data("initial")}]`);
+                    $(requiredTasks).val(initialTasks);
+                    if (initialTasks.length >= 1) {
+                        let number = initialTasks.length ? "task" : "tasks";
+                        $(requiredTasks)
+                            .siblings("[name='select-tasks']")
+                            .text(`${initialTasks.length} ${number} selected`);
+                    } else {
+                        $(requiredTasks).siblings("[name='select-tasks']").text("Select tasks");
+                    }
+                });
+            }
             const items = block.find(".item");
             items.each((i, item) => {
                 block
-                    .find(".items")
-                    .append(block.find(`.item[data-index-initial="${items.length - i - 1}"]`));
+                    .find(".items")[1]
+                    .appendChild(
+                        block.find(`.item[data-index-initial="${items.length - i - 1}"]`)[0]
+                    );
                 $(item).data("index", $(item).data("index-initial"));
+
+                let link = item.querySelector("a");
+                if (link != null) {
+                    link.appendChild(item.querySelector("a + .item__content"));
+                }
             });
         }
         function saveEditOrCreate() {

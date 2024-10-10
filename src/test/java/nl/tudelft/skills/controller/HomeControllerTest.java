@@ -18,8 +18,6 @@
 package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
 
@@ -29,10 +27,13 @@ import java.util.*;
 import javax.transaction.Transactional;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 
 import nl.tudelft.labracore.api.CourseControllerApi;
@@ -43,19 +44,8 @@ import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.labracore.lib.security.LabradorUserDetails;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.model.PathPreference;
 import nl.tudelft.skills.model.SCEdition;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.model.TaskCompletion;
-import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.*;
-import nl.tudelft.skills.repository.labracore.PersonRepository;
-import nl.tudelft.skills.security.AuthorisationService;
-import nl.tudelft.skills.service.CourseService;
-import nl.tudelft.skills.service.EditionService;
-import nl.tudelft.skills.service.SkillService;
-import nl.tudelft.skills.service.TaskCompletionService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -64,47 +54,23 @@ import reactor.core.publisher.Mono;
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
 public class HomeControllerTest extends ControllerTest {
 
-	private final HomeController homeController;
 	private final EditionControllerApi editionApi;
 	private final RoleControllerApi roleApi;
 	private final PersonControllerApi personApi;
-	private final SkillRepository skillRepository;
-	private final TaskRepository taskRepository;
 	private final CourseControllerApi courseApi;
 	private final EditionRepository editionRepository;
-	private final PersonRepository personRepository;
-	private final EditionService editionService;
-	private final CourseService courseService;
-	private final PathPreferenceRepository pathPreferenceRepository;
-	private final SkillService skillService;
-	private final TaskCompletionService taskCompletionService;
+	private final HomeController homeController;
 
 	@Autowired
-	public HomeControllerTest(EditionControllerApi editionApi, RoleControllerApi roleApi,
-			PersonControllerApi personApi,
-			EditionRepository editionRepository, ModuleRepository moduleRepository,
-			SkillRepository skillRepository, TaskRepository taskRepository, PersonRepository personRepository,
-			EditionService editionService,
-			PathPreferenceRepository pathPreferenceRepository, SkillService skillService,
-			TaskCompletionService taskCompletionService, CourseControllerApi courseApi,
-			AuthorisationService authorisationService) {
+	public HomeControllerTest(EditionControllerApi editionApi, PersonControllerApi personApi,
+			EditionRepository editionRepository, RoleControllerApi roleApi,
+			CourseControllerApi courseApi, HomeController homeController) {
 		this.editionApi = editionApi;
-		this.roleApi = roleApi;
-		this.courseApi = courseApi;
 		this.personApi = personApi;
 		this.editionRepository = editionRepository;
-		this.skillRepository = skillRepository;
-		this.taskRepository = taskRepository;
-		this.personRepository = personRepository;
-		this.editionService = editionService;
-		this.skillService = skillService;
-		this.taskCompletionService = taskCompletionService;
-		this.courseService = mock(CourseService.class);
-		this.pathPreferenceRepository = pathPreferenceRepository;
-		this.homeController = new HomeController(editionApi, personApi, editionRepository, moduleRepository,
-				personRepository, skillRepository, taskRepository, editionService, courseService,
-				skillService, taskCompletionService,
-				pathPreferenceRepository, authorisationService);
+		this.roleApi = roleApi;
+		this.courseApi = courseApi;
+		this.homeController = homeController;
 	}
 
 	@Test
@@ -114,318 +80,450 @@ public class HomeControllerTest extends ControllerTest {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	void getHomePageExampleUserNull() {
-		// Exactly one edition which is currently active and visible, the user being null
+	@WithAnonymousUser
+	void getHomePageExampleNotLoggedIn() {
+		// Test setup:
+		// - Course one:
+		// --- Edition one: Older, visible
+		// --- Edition two: Currently active, visible
+		// - User is not logged in
+		// Desired result:
+		// => Course is in "availableActive", with the newest edition as default edition
 
-		SCEdition edition = db.getEditionRL();
-		edition.setVisible(true);
-		editionRepository.saveAndFlush(edition);
+		Long usedEditionId = db.getEditionRL().getId();
+		SCEdition edition1 = SCEdition.builder().id(usedEditionId + 1L).isVisible(true).build();
+		editionRepository.saveAndFlush(edition1);
+		SCEdition edition2 = SCEdition.builder().id(usedEditionId + 2L).isVisible(true).build();
+		editionRepository.saveAndFlush(edition2);
 
 		CourseSummaryDTO course = new CourseSummaryDTO().id(randomId());
 
 		LocalDateTime localDateTime = LocalDateTime.now();
-		when(editionApi.getEditionsById(eq(List.of(edition.getId()))))
-				.thenReturn(Flux.just(new EditionDetailsDTO().id(edition.getId())
-						.startDate(localDateTime.minusYears(1)).endDate(localDateTime.plusYears(1))
-						.course(course)));
+		when(editionApi.getEditionsById(eq(List.of(edition1.getId(), edition2.getId()))))
+				.thenReturn(Flux.just(
+						new EditionDetailsDTO().id(edition1.getId())
+								.startDate(localDateTime.minusYears(2)).endDate(localDateTime.minusYears(1))
+								.course(course),
+						new EditionDetailsDTO().id(edition2.getId())
+								.startDate(localDateTime.minusYears(1)).endDate(localDateTime.plusYears(1))
+								.course(course)));
+		when(courseApi.getCourseById(course.getId())).thenReturn(Mono.just(new CourseDetailsDTO()
+				.editions(List.of(
+						new EditionSummaryDTO().id(edition1.getId()).startDate(localDateTime.minusYears(2))
+								.endDate(localDateTime.minusYears(1)),
+						new EditionSummaryDTO().id(edition2.getId()).startDate(localDateTime.minusYears(1))
+								.endDate(localDateTime.plusYears(1))))));
 
 		homeController.getHomePage(null, model);
 
-		Set<String> attributes = Set.of("availableFinished", "ownActive", "ownFinished", "managed");
-		for (String attribute : attributes) {
-			assertThat((List<CourseSummaryDTO>) model.getAttribute(attribute)).isEmpty();
-		}
-
+		assertModelAttributesEmpty(Set.of("availableFinished", "ownActive", "ownFinished", "managed"));
 		assertThat((List<CourseSummaryDTO>) model.getAttribute("availableActive")).containsExactly(course);
+		assertThat((Map<Long, Long>) model.getAttribute("editionPerCourse"))
+				.isEqualTo(Map.of(course.getId(), edition2.getId()));
 	}
 
-	@Test
+	@ParameterizedTest
 	@SuppressWarnings("unchecked")
 	@WithUserDetails("username")
-	void getHomePageExampleLoggedIn() {
-		// One course is not active and has also not been worked in (course2), one course is active
-		// and has been worked in (course1), and one course is managed as teacher (course3)
+	@CsvSource({ "STUDENT,own,available", "TA,own,available", "HEAD_TA,own,available", ",available,own" })
+	void getHomePageExampleDifferentRoles(String role, String grouping, String emptyGrouping) {
+		// Test setup:
+		// - Course one:
+		// ---- Edition one: Newer, active, role parameter (student, TA, head TA, no role)
+		// ---- Edition two: Older, not active, role parameter (student, TA, head TA, no role)
+		// - Course/edition two: Not active, role parameter (student, TA, head TA, no role)
+		// Desired result:
+		// => Course two in "grouping parameter + "Finished"", course one in "grouping parameter + "Active""
+		// => Meaning, in "own" if a role is assigned, and in "available" if none is assigned
 
-		SCEdition edition1 = db.getEditionRL();
-		edition1.setVisible(true);
+		Long usedEditionId = db.getEditionRL().getId();
+		SCEdition edition1 = SCEdition.builder().id(usedEditionId + 1L).isVisible(true).build();
 		editionRepository.saveAndFlush(edition1);
-		SCEdition edition2 = SCEdition.builder().id(db.getEditionRL().getId() + 1L).isVisible(true).build();
+		SCEdition edition2 = SCEdition.builder().id(usedEditionId + 2L).isVisible(true).build();
 		editionRepository.saveAndFlush(edition2);
-		SCEdition edition3 = SCEdition.builder().id(db.getEditionRL().getId() + 2L).isVisible(false).build();
+		SCEdition edition3 = SCEdition.builder().id(usedEditionId + 3L).isVisible(true).build();
 		editionRepository.saveAndFlush(edition3);
 
 		CourseSummaryDTO course1 = new CourseSummaryDTO().id(1L);
 		CourseSummaryDTO course2 = new CourseSummaryDTO().id(2L);
-		CourseSummaryDTO course3 = new CourseSummaryDTO().id(3L);
 
 		// Mock responses for editions and courses
 		LocalDateTime localDateTime = LocalDateTime.now();
-		Set<EditionDetailsDTO> editions = Set.of(
+		List<EditionDetailsDTO> editions = List.of(
 				new EditionDetailsDTO().id(edition1.getId())
 						.startDate(localDateTime.minusYears(1)).endDate(localDateTime.plusYears(1))
 						.course(course1),
 				new EditionDetailsDTO().id(edition2.getId())
 						.startDate(localDateTime.minusYears(2)).endDate(localDateTime.minusYears(1))
-						.course(course2),
+						.course(course1),
 				new EditionDetailsDTO().id(edition3.getId())
-						.startDate(localDateTime.minusYears(2)).endDate(localDateTime.plusYears(1))
-						.course(course3));
-		when(editionApi.getEditionsById(List.of(edition1.getId(), edition2.getId(), edition3.getId())))
-				.thenReturn(Flux.fromIterable(editions));
-
-		when(courseService.getLastStudentEditionForCourseOrLast(1L)).thenReturn(edition1.getId());
-		when(courseService.getLastStudentEditionForCourseOrLast(2L)).thenReturn(edition2.getId());
-		when(courseService.getLastStudentEditionForCourseOrLast(3L)).thenReturn(edition3.getId());
-
-		when(courseApi.getCourseById(1L)).thenReturn(Mono.just(new CourseDetailsDTO()
-				.editions(List.of(new EditionSummaryDTO().id(edition1.getId())))));
-		when(courseApi.getCourseById(2L)).thenReturn(Mono.just(new CourseDetailsDTO()
-				.editions(List.of(new EditionSummaryDTO().id(edition2.getId())))));
-		when(courseApi.getCourseById(3L)).thenReturn(Mono.just(new CourseDetailsDTO()
-				.editions(List.of(new EditionSummaryDTO().id(edition3.getId())))));
-
-		// Mock roles of user
-		mockRoleForEdition(roleApi, "STUDENT", db.getEditionRL().getId());
-		mockRoleForEdition(roleApi, "STUDENT", db.getEditionRL().getId() + 1L);
-		mockRoleForEdition(roleApi, "TEACHER", db.getEditionRL().getId() + 2L);
-		Set<RoleDetailsDTO> roles = Set.of(
-				getRoleDetails(db.getEditionRL().getId(), RoleDetailsDTO.TypeEnum.STUDENT),
-				getRoleDetails(db.getEditionRL().getId() + 1L, RoleDetailsDTO.TypeEnum.STUDENT),
-				getRoleDetails(db.getEditionRL().getId() + 2L, RoleDetailsDTO.TypeEnum.TEACHER));
-		when(roleApi.getRolesById(eq(Set.of(db.getEditionRL().getId(), db.getEditionRL().getId() + 1L,
-				db.getEditionRL().getId() + 2L)), anySet())).thenReturn(Flux.fromIterable(roles));
-
+						.startDate(localDateTime.minusYears(2)).endDate(localDateTime.minusYears(1))
+						.course(course2));
 		Person person = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
 				.getPrincipal()).getUser();
-		Map<Long, String> roleMap = Map.of(db.getEditionRL().getId(), "STUDENT",
-				db.getEditionRL().getId() + 1L, "STUDENT", db.getEditionRL().getId() + 2L, "TEACHER");
-		mockRolesForEditions(roleMap, person.getId());
+
+		// Setup for roles
+		Map<Long, String> roleMap = new HashMap<>();
+		roleMap.put(edition1.getId(), role);
+		roleMap.put(edition2.getId(), role);
+		roleMap.put(edition3.getId(), role);
+
+		mockCourseEditionProperties(
+				editions,
+				Map.of(1L, Set.of(editions.get(0), editions.get(1)), 2L, Set.of(editions.get(2))),
+				roleMap,
+				person.getId());
 
 		homeController.getHomePage(person, model);
 
-		assertThat((List<CourseSummaryDTO>) model.getAttribute("ownFinished")).isEmpty();
-		assertThat((List<CourseSummaryDTO>) model.getAttribute("availableActive")).isEmpty();
-		assertThat((List<CourseSummaryDTO>) model.getAttribute("ownActive")).containsExactly(course1);
-		assertThat((List<CourseSummaryDTO>) model.getAttribute("availableFinished"))
+		assertThat((List<CourseSummaryDTO>) model.getAttribute(grouping + "Finished"))
 				.containsExactly(course2);
-		assertThat((List<CourseSummaryDTO>) model.getAttribute("managed")).containsExactly(course3);
+		assertThat((List<CourseSummaryDTO>) model.getAttribute(grouping + "Active"))
+				.containsExactly(course1);
+		assertModelAttributesEmpty(Set.of(emptyGrouping + "Active", emptyGrouping + "Finished", "managed"));
+		assertThat((Map<Long, Long>) model.getAttribute("editionPerCourse"))
+				.isEqualTo(Map.of(1L, edition1.getId(), 2L, edition3.getId()));
 	}
 
 	@Test
-	void getCompletedSkillsFalse() {
-		List<CourseSummaryDTO> courses = new ArrayList<>(
-				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
-		SCPerson person = new SCPerson();
-		TaskCompletion completion = TaskCompletion.builder().id(1L)
-				.person(person).task(db.getTaskRead12()).build();
-		person.setTaskCompletions(Set.of(completion));
-
-		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
-				.thenReturn(db.getEditionRL().getId());
-
-		// There are no completed skills in the course
-		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
-				person);
-
-		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
-		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(3);
-	}
-
-	@Test
-	void getCompletedSkillsTrue() {
-		List<CourseSummaryDTO> courses = new ArrayList<>(
-				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
-		SCPerson person = new SCPerson();
-		TaskCompletion completion1 = TaskCompletion.builder().id(1L)
-				.person(person).task(db.getTaskRead12()).build();
-		TaskCompletion completion2 = TaskCompletion.builder().id(2L)
-				.person(person).task(db.getTaskDo12ae()).build();
-		person.setTaskCompletions(Set.of(completion1, completion2));
-
-		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
-				.thenReturn(db.getEditionRL().getId());
-
-		// There is one completed skill in the course
-		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
-				person);
-		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
-		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(7);
-	}
-
-	@Test
-	public void getCourseGroupsPersonNull() {
-		List<CourseSummaryDTO> courses = List.of(new CourseSummaryDTO().id(1L), new CourseSummaryDTO().id(2L),
-				new CourseSummaryDTO().id(3L));
-		Set<Long> activeCourses = Set.of(1L);
-		Map<Long, Boolean> completedTaskInCourse = Map.of(1L, false, 2L, false, 3L, false);
-		Map<String, List<CourseSummaryDTO>> courseGroups = homeController.getCourseGroups(null, courses,
-				activeCourses, completedTaskInCourse);
-
-		assertThat(courseGroups.keySet()).containsExactlyInAnyOrder("availableActive", "availableFinished",
-				"ownActive", "ownFinished", "managed");
-		assertThat(courseGroups.get("availableActive")).containsExactly(new CourseSummaryDTO().id(1L));
-		assertThat(courseGroups.get("availableFinished")).containsExactly(new CourseSummaryDTO().id(2L),
-				new CourseSummaryDTO().id(3L));
-		assertThat(courseGroups.get("ownActive")).isEmpty();
-		assertThat(courseGroups.get("ownFinished")).isEmpty();
-		assertThat(courseGroups.get("managed")).isEmpty();
-	}
-
-	@Test
-	public void getCourseGroupsPersonNullMalformedCompletedTask() {
-		List<CourseSummaryDTO> courses = List.of(new CourseSummaryDTO().id(1L));
-		Set<Long> activeCourses = Set.of(1L);
-		Map<Long, Boolean> completedTaskInCourse = Map.of(1L, true);
-		Map<String, List<CourseSummaryDTO>> courseGroups = homeController.getCourseGroups(null, courses,
-				activeCourses, completedTaskInCourse);
-
-		assertThat(courseGroups.keySet()).containsExactlyInAnyOrder("availableActive", "availableFinished",
-				"ownActive", "ownFinished", "managed");
-		assertThat(courseGroups.get("availableActive")).containsExactly(new CourseSummaryDTO().id(1L));
-		assertThat(courseGroups.get("availableFinished")).isEmpty();
-		assertThat(courseGroups.get("ownActive")).isEmpty();
-		assertThat(courseGroups.get("ownFinished")).isEmpty();
-		assertThat(courseGroups.get("managed")).isEmpty();
-	}
-
-	@Test
+	@SuppressWarnings("unchecked")
 	@WithUserDetails("username")
-	public void getCourseGroups() {
-		List<CourseSummaryDTO> courses = List.of(new CourseSummaryDTO().id(1L), new CourseSummaryDTO().id(2L),
-				new CourseSummaryDTO().id(3L), new CourseSummaryDTO().id(4L), new CourseSummaryDTO().id(5L));
-		Set<Long> activeCourses = Set.of(4L, 5L);
-		Map<Long, Boolean> completedTaskInCourse = Map.of(1L, false, 2L, true, 3L, false,
-				4L, true, 5L, false);
+	void getHomePageExampleManaged() {
+		// Test setup:
+		// - Course one:
+		// --- Edition one: Older, student
+		// --- Edition two: Newer, teacher
+		// Desired result:
+		// => The course should be added to managed courses. The default edition does not matter here, but with the
+		// current implementation it is edition two since it is newer.
 
-		// Mock roles
-		when(courseApi.getCourseById(1L)).thenReturn(Mono.just(new CourseDetailsDTO()
-				.editions(List.of(new EditionSummaryDTO().id(1L)))));
-		when(courseApi.getCourseById(not(eq(1L)))).thenReturn(Mono.just(new CourseDetailsDTO()
-				.editions(List.of(new EditionSummaryDTO().id(2L)))));
-		mockRoleForEdition(roleApi, "TEACHER", 1L);
-		mockRoleForEdition(roleApi, "STUDENT", 2L);
-
-		Person person = new Person();
-		Map<String, List<CourseSummaryDTO>> courseGroups = homeController.getCourseGroups(person, courses,
-				activeCourses, completedTaskInCourse);
-
-		assertThat(courseGroups.keySet()).containsExactlyInAnyOrder("availableActive", "availableFinished",
-				"ownActive", "ownFinished", "managed");
-		assertThat(courseGroups.get("availableActive")).containsExactly(new CourseSummaryDTO().id(5L));
-		assertThat(courseGroups.get("availableFinished")).containsExactly(new CourseSummaryDTO().id(3L));
-		assertThat(courseGroups.get("ownActive")).containsExactly(new CourseSummaryDTO().id(4L));
-		assertThat(courseGroups.get("ownFinished")).containsExactly(new CourseSummaryDTO().id(2L));
-		assertThat(courseGroups.get("managed")).containsExactly(new CourseSummaryDTO().id(1L));
-	}
-
-	@Test
-	public void testGetTeacherIdsPersonNull() {
-		assertThat(homeController.getTeacherIds(null)).isEmpty();
-	}
-
-	@Test
-	@WithUserDetails("username")
-	public void testGetTeacherIdsNotTeacher() {
-		Set<RoleDetailsDTO> roles = Set.of(getRoleDetails(1L, RoleDetailsDTO.TypeEnum.STUDENT),
-				getRoleDetails(2L, RoleDetailsDTO.TypeEnum.TA),
-				getRoleDetails(3L, RoleDetailsDTO.TypeEnum.HEAD_TA));
-		when(roleApi.getRolesById(eq(Set.of(1L, 2L, 3L)), anySet()))
-				.thenReturn(Flux.fromIterable(roles));
-
-		Person person = Person.builder().id(db.getPerson().getId()).build();
-		Map<Long, String> roleMap = Map.of(1L, "STUDENT", 2L, "STUDENT", 3L, "STUDENT");
-		mockRolesForEditions(roleMap, person.getId());
-		assertThat(homeController.getTeacherIds(person)).isEmpty();
-	}
-
-	@Test
-	@WithUserDetails("username")
-	public void testGetTeacherIds() {
-		Long userId = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
-				.getPrincipal())
-				.getUser().getId();
-
-		Map<Long, String> roleMap = Map.of(1L, "STUDENT", 2L, "HEAD_TA", 3L, "TEACHER",
-				4L, "ADMIN", 5L, "TA");
-		mockRolesForEditions(roleMap, userId);
-
-		Person person = Person.builder().id(userId).build();
-		assertThat(homeController.getTeacherIds(person)).containsExactlyInAnyOrder(2L, 3L, 4L);
-	}
-
-	@Test
-	public void testGetActiveCourses() {
-		// Test different groupings of courses/editions:
-		// 1 -> not visible, not a teacher => inactive
-		// 2, 3, 4 -> current time is after start and after end => inactive
-		// 5, 6, 7 -> current time is before start and before end => inactive
-		// 8, 9, 10 -> current time is after start and before end => active
-		// For all groups of 3, there is one where the edition is visible (2, 5, 8), one where the user is a teacher
-		// (3, 6, 9) and one where both are true (4, 7, 10).
-
-		Set<Long> visible = Set.of(2L, 4L, 5L, 7L, 8L, 10L);
-		Set<Long> teacherIds = Set.of(3L, 4L, 6L, 7L, 9L, 10L);
-
-		// Make each course contain exactly one edition with the same id as the course
-		List<CourseSummaryDTO> courseSummaries = new ArrayList<>();
-		for (long i = 1L; i <= 10L; i++) {
-			courseSummaries.add(new CourseSummaryDTO().id(i));
-			when(courseService.getLastStudentEditionForCourseOrLast(i)).thenReturn(i);
-			editionRepository.save(SCEdition.builder().id(i).build());
-		}
-
-		Map<Long, EditionDetailsDTO> editions = new HashMap<>();
-		LocalDateTime beforeNow = LocalDateTime.now().minusYears(1);
-		LocalDateTime afterNow = LocalDateTime.now().plusYears(1);
-
-		// Start -- End -- Now => Not active
-		for (long i = 2L; i <= 4L; i++) {
-			editions.put(i,
-					new EditionDetailsDTO().id(i).startDate(beforeNow).endDate(beforeNow.plusDays(1)));
-		}
-
-		// Now -- Start -- End => Not active
-		for (long i = 5L; i <= 7L; i++) {
-			editions.put(i, new EditionDetailsDTO().id(i).startDate(afterNow).endDate(afterNow.plusYears(1)));
-		}
-
-		// Start -- Now -- End => Not active
-		for (long i = 8L; i <= 10L; i++) {
-			editions.put(i, new EditionDetailsDTO().id(i).startDate(beforeNow).endDate(afterNow));
-		}
-
-		// Should only contain 8, 9, 10 as active courses (for all others there are different reasons as to why they
-		// are not active)
-		assertThat(homeController.getActiveCourses(courseSummaries, editions, visible, teacherIds))
-				.containsExactlyInAnyOrder(8L, 9L, 10L);
-	}
-
-	@Test
-	public void testGetCompletedTaskInCourse() {
 		Long usedEditionId = db.getEditionRL().getId();
+		SCEdition edition1 = SCEdition.builder().id(usedEditionId + 1L).isVisible(true).build();
+		editionRepository.saveAndFlush(edition1);
+		SCEdition edition2 = SCEdition.builder().id(usedEditionId + 2L).isVisible(true).build();
+		editionRepository.saveAndFlush(edition2);
 
-		// Mock latest or last edition values
-		when(courseService.getLastStudentEditionForCourseOrLast(1L)).thenReturn(usedEditionId);
-		when(courseService.getLastStudentEditionForCourseOrLast(2L)).thenReturn(usedEditionId + 1);
-		when(courseService.getLastStudentEditionForCourseOrLast(3L)).thenReturn(usedEditionId + 2);
+		Long courseId = db.getCourseRL().getId();
+		CourseSummaryDTO course = new CourseSummaryDTO().id(courseId);
 
-		// Save new editions and add a task completion to the second edition
-		editionRepository.save(SCEdition.builder().id(usedEditionId + 1).build());
-		Skill skill = db.createSkillInEditionHelper(usedEditionId + 2, true);
-		Task task = Task.builder().name("Task").time(1).skill(skill).build();
-		skill.getTasks().add(task);
-		TaskCompletion completion = TaskCompletion.builder().task(task).person(db.getPerson()).build();
-		db.getPerson().getTaskCompletions().add(completion);
+		// Mock responses for editions and courses
+		LocalDateTime localDateTime = LocalDateTime.now();
+		List<EditionDetailsDTO> editions = List.of(
+				new EditionDetailsDTO().id(edition1.getId())
+						.startDate(localDateTime.minusYears(1)).endDate(localDateTime.plusYears(1))
+						.course(course),
+				new EditionDetailsDTO().id(edition2.getId())
+						.startDate(localDateTime.plusYears(1)).endDate(localDateTime.plusYears(2))
+						.course(course));
+		Person person = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal()).getUser();
 
-		// Has completed more than one task in the edition previously saved in the db, none in the first saved edition
-		// and exactly one in the second saved edition
-		List<CourseSummaryDTO> courses = List.of(new CourseSummaryDTO().id(1L), new CourseSummaryDTO().id(2L),
-				new CourseSummaryDTO().id(3L));
-		Map<Long, Boolean> completedTask = homeController.getCompletedTaskInCourse(courses, db.getPerson());
-		assertThat(completedTask.keySet()).containsExactlyInAnyOrder(1L, 2L, 3L);
-		assertThat(completedTask.get(1L)).isTrue();
-		assertThat(completedTask.get(2L)).isFalse();
-		assertThat(completedTask.get(3L)).isTrue();
+		mockCourseEditionProperties(
+				editions,
+				Map.of(courseId, Set.of(editions.get(0), editions.get(1))),
+				Map.of(edition1.getId(), "STUDENT", edition2.getId(), "TEACHER"),
+				person.getId());
+
+		homeController.getHomePage(person, model);
+
+		assertThat((List<CourseSummaryDTO>) model.getAttribute("managed")).containsExactly(course);
+		assertModelAttributesEmpty(
+				Set.of("ownFinished", "availableActive", "ownActive", "availableFinished"));
+		// The default edition should not be used in the frontend, since it is a managed edition
+		assertThat((Map<Long, Long>) model.getAttribute("editionPerCourse"))
+				.isEqualTo(Map.of(courseId, edition2.getId()));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	@WithUserDetails("username")
+	void getHomePageExampleHeadTA() {
+		// Test setup:
+		// - Course one:
+		// --- Edition one: Older, student, visible, has task completions
+		// --- Edition two: Newer, head TA, not visible, no task completions
+		// Desired result:
+		// => Course should be categorized as "ownActive" with the head TA edition as default.
+
+		// There are task completions in this edition
+		SCEdition editionStudent = db.getEditionRL();
+		editionStudent.setVisible(true);
+		editionRepository.saveAndFlush(editionStudent);
+
+		SCEdition edition = SCEdition.builder().id(db.getEditionRL().getId() + 1L).isVisible(false)
+				.build();
+		editionRepository.saveAndFlush(edition);
+
+		Long courseId = db.getCourseRL().getId();
+		CourseSummaryDTO course = new CourseSummaryDTO().id(courseId);
+
+		// Mock responses for editions and courses
+		LocalDateTime localDateTime = LocalDateTime.now();
+		List<EditionDetailsDTO> editions = List.of(
+				new EditionDetailsDTO().id(editionStudent.getId())
+						.startDate(localDateTime.minusYears(3)).endDate(localDateTime.minusYears(2))
+						.course(course),
+				new EditionDetailsDTO().id(edition.getId())
+						.startDate(localDateTime.minusYears(1)).endDate(localDateTime.plusYears(1))
+						.course(course));
+
+		Person person = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal()).getUser();
+
+		mockCourseEditionProperties(
+				editions,
+				Map.of(courseId, Set.of(editions.get(0), editions.get(1))),
+				Map.of(editionStudent.getId(), "STUDENT", edition.getId(), "HEAD_TA"),
+				person.getId());
+
+		homeController.getHomePage(person, model);
+
+		assertThat((List<CourseSummaryDTO>) model.getAttribute("ownActive")).containsExactly(course);
+		assertModelAttributesEmpty(Set.of("ownFinished", "availableActive", "availableFinished", "managed"));
+		assertThat((Map<Long, Long>) model.getAttribute("editionPerCourse"))
+				.isEqualTo(Map.of(courseId, edition.getId()));
+	}
+
+	@ParameterizedTest
+	@SuppressWarnings("unchecked")
+	@WithUserDetails("username")
+	@CsvSource(value = { "STUDENT", "TA", "null" }, nullValues = { "null" })
+	void getHomePageCheckInvisibleIsNotAccessible(String role) {
+		// Test setup:
+		// - Course one:
+		// ---- Edition one: Active, not visible
+		// Desired result:
+		// => No course is accessible since it is not visible and the user is not head TA or higher
+
+		Long usedEditionId = db.getEditionRL().getId();
+		SCEdition edition1 = SCEdition.builder().id(usedEditionId + 1L).isVisible(false).build();
+		editionRepository.saveAndFlush(edition1);
+
+		CourseSummaryDTO course1 = new CourseSummaryDTO().id(1L);
+
+		// Mock responses for editions and courses
+		LocalDateTime localDateTime = LocalDateTime.now();
+		List<EditionDetailsDTO> editions = List.of(
+				new EditionDetailsDTO().id(edition1.getId())
+						.startDate(localDateTime.minusYears(1)).endDate(localDateTime.plusYears(1))
+						.course(course1));
+		Person person = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal()).getUser();
+
+		// Setup for roles
+		Map<Long, String> roleMap = new HashMap<>();
+		roleMap.put(edition1.getId(), role);
+
+		mockCourseEditionProperties(
+				editions,
+				Map.of(1L, Set.of(editions.get(0))),
+				roleMap,
+				person.getId());
+
+		homeController.getHomePage(person, model);
+
+		assertModelAttributesEmpty(
+				Set.of("ownActive", "ownFinished", "availableActive", "availableFinished", "managed"));
+		assertThat((Map<Long, Long>) model.getAttribute("editionPerCourse")).isEqualTo(Map.of());
+	}
+
+	@ParameterizedTest
+	@SuppressWarnings("unchecked")
+	@WithUserDetails("username")
+	@CsvSource({ "STUDENT,", "TA,", "HEAD_TA,ownActive", "TEACHER,managed", "," })
+	void getHomePageEditionUnknownToSC(String role, String grouping) {
+		// Test setup:
+		// - Course one:
+		// ---- Edition one: Active, however not saved on Skill Circuits side (only known to LabraCore)
+		// Desired result:
+		// => If the user is a head TA or higher, they should be able to see the course/edition, otherwise
+		// it should not be visible.
+
+		// Do not save the edition to Skill Circuits
+		Long usedEditionId = db.getEditionRL().getId();
+		CourseSummaryDTO course = new CourseSummaryDTO().id(1L);
+
+		// Mock responses for editions and courses
+		LocalDateTime localDateTime = LocalDateTime.now();
+		List<EditionDetailsDTO> editions = List.of(
+				new EditionDetailsDTO().id(usedEditionId + 1L)
+						.startDate(localDateTime.minusYears(1)).endDate(localDateTime.plusYears(1))
+						.course(course));
+		Person person = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal()).getUser();
+
+		// Setup for roles
+		Map<Long, String> roleMap = new HashMap<>();
+		roleMap.put(usedEditionId + 1L, role);
+
+		mockCourseEditionProperties(
+				editions,
+				Map.of(1L, Set.of(editions.get(0))),
+				roleMap,
+				person.getId());
+
+		homeController.getHomePage(person, model);
+
+		Set<String> groupingAttributes = new HashSet<>(
+				Set.of("availableFinished", "availableActive", "ownActive",
+						"ownFinished", "managed"));
+		groupingAttributes.remove(grouping);
+		assertModelAttributesEmpty(groupingAttributes);
+		if (grouping != null) {
+			assertThat((List<CourseSummaryDTO>) model.getAttribute(grouping))
+					.containsExactly(course);
+		}
+	}
+
+	@ParameterizedTest
+	@SuppressWarnings("unchecked")
+	@WithUserDetails("admin")
+	@CsvSource({ "STUDENT,true", "TA,true", "HEAD_TA,true", "TEACHER,true", ",false" })
+	void getHomePageAdmin(String role, boolean isVisible) {
+		// Test setup:
+		// - Course one:
+		// ---- Edition one: Active, not visible
+		// Desired result:
+		// => The user is an admin. Any course in which they have a role, should be accessible to them under
+		// "managed". In case they do not have a role, it should not be accessible.
+
+		Long usedEditionId = db.getEditionRL().getId();
+		SCEdition edition1 = SCEdition.builder().id(usedEditionId + 1L).isVisible(false).build();
+		editionRepository.saveAndFlush(edition1);
+
+		CourseSummaryDTO course1 = new CourseSummaryDTO().id(1L);
+
+		// Mock responses for editions and courses
+		LocalDateTime localDateTime = LocalDateTime.now();
+		List<EditionDetailsDTO> editions = List.of(
+				new EditionDetailsDTO().id(edition1.getId())
+						.startDate(localDateTime.minusYears(1)).endDate(localDateTime.plusYears(1))
+						.course(course1));
+		Person person = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal()).getUser();
+
+		// Setup for roles
+		Map<Long, String> roleMap = new HashMap<>();
+		roleMap.put(edition1.getId(), role);
+
+		mockCourseEditionProperties(
+				editions,
+				Map.of(1L, Set.of(editions.get(0))),
+				roleMap,
+				person.getId());
+
+		homeController.getHomePage(person, model);
+
+		if (isVisible) {
+			assertModelAttributesEmpty(
+					Set.of("ownFinished", "availableActive", "availableFinished", "ownActive"));
+			assertThat((List<CourseSummaryDTO>) model.getAttribute("managed")).containsExactly(course1);
+			assertThat((Map<Long, Long>) model.getAttribute("editionPerCourse"))
+					.isEqualTo(Map.of(course1.getId(), edition1.getId()));
+		} else {
+			assertModelAttributesEmpty(
+					Set.of("ownActive", "ownFinished", "availableActive", "availableFinished", "managed"));
+			assertThat((Map<Long, Long>) model.getAttribute("editionPerCourse")).isEqualTo(Map.of());
+		}
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	@WithUserDetails("admin")
+	void getHomePageEditionUnknownToSCAdmin() {
+		// Test setup:
+		// - Course one:
+		// ---- Edition one: Active, however not saved on Skill Circuits side (only known to LabraCore)
+		// Desired result:
+		// => The user is an admin, and has a role assigned in the edition LabraCore side. Therefore, the edition
+		// should be visible to them under "managed".
+
+		// Do not save the edition to Skill Circuits
+		Long usedEditionId = db.getEditionRL().getId();
+		CourseSummaryDTO course = new CourseSummaryDTO().id(1L);
+
+		// Mock responses for editions and courses
+		LocalDateTime localDateTime = LocalDateTime.now();
+		List<EditionDetailsDTO> editions = List.of(
+				new EditionDetailsDTO().id(usedEditionId + 1L)
+						.startDate(localDateTime.minusYears(1)).endDate(localDateTime.plusYears(1))
+						.course(course));
+		Person person = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal()).getUser();
+
+		// Setup for roles
+		Map<Long, String> roleMap = new HashMap<>();
+		roleMap.put(usedEditionId + 1L, "TEACHER");
+
+		mockCourseEditionProperties(
+				editions,
+				Map.of(1L, Set.of(editions.get(0))),
+				roleMap,
+				person.getId());
+
+		homeController.getHomePage(person, model);
+
+		assertModelAttributesEmpty(Set.of("availableFinished", "availableActive", "ownActive",
+				"ownFinished"));
+		assertThat((List<CourseSummaryDTO>) model.getAttribute("managed")).containsExactly(course);
+	}
+
+	/**
+	 * Checks whether each of the given course grouping attributes is empty in the model.
+	 *
+	 * @param attributes A set of the course grouping attributes to check. They should each be of type
+	 *                   List<CourseSummaryDTO>.
+	 */
+	@SuppressWarnings("unchecked")
+	void assertModelAttributesEmpty(Set<String> attributes) {
+		for (String attribute : attributes) {
+			assertThat((List<CourseSummaryDTO>) model.getAttribute(attribute)).isEmpty();
+		}
+	}
+
+	/**
+	 * Mocks necessary responses from the edition/course/role APIs with the specified parameters. The
+	 * responses are: All the editions, the course details per course, the roles of the user per edition.
+	 *
+	 * @param editions         List of the edition detail DTOs.
+	 * @param courseToEditions A map of each course id to the editions in the course, given as edition detail
+	 *                         DTOs.
+	 * @param editionToRole    A map of each edition as SCEdition to the role of the user in the edition. The
+	 *                         role may be null, in which case the user has no role in the edition.
+	 * @param personId         The id of the user.
+	 */
+	void mockCourseEditionProperties(List<EditionDetailsDTO> editions,
+			Map<Long, Set<EditionDetailsDTO>> courseToEditions,
+			Map<Long, String> editionToRole,
+			Long personId) {
+		List<Long> editionIds = editions.stream().map(EditionDetailsDTO::getId).toList();
+
+		// Mock editions properties of courses
+		when(editionApi.getEditionsById(editionIds)).thenReturn(Flux.fromIterable(editions));
+		for (Map.Entry<Long, Set<EditionDetailsDTO>> entry : courseToEditions.entrySet()) {
+			when(courseApi.getCourseById(entry.getKey())).thenReturn(Mono.just(new CourseDetailsDTO()
+					.editions(entry.getValue().stream()
+							.map(ed -> new EditionSummaryDTO().id(ed.getId()).startDate(ed.getStartDate())
+									.endDate(ed.getEndDate()))
+							.toList())));
+		}
+
+		// Mock roles of user
+		Set<RoleDetailsDTO> roles = new HashSet<>();
+		Map<Long, String> editionIdToRole = new HashMap<>();
+		for (Map.Entry<Long, String> entry : editionToRole.entrySet()) {
+			Long editionId = entry.getKey();
+			editionIdToRole.put(editionId, entry.getValue());
+
+			mockRoleForEdition(roleApi, entry.getValue(), editionId);
+
+			if (entry.getValue() != null) {
+				roles.add(getRoleDetails(editionId, RoleDetailsDTO.TypeEnum.valueOf(entry.getValue())));
+			}
+		}
+		when(roleApi.getRolesById(eq(new HashSet<>(editionIds)), anySet()))
+				.thenReturn(Flux.fromIterable(roles));
+		mockRolesForEditions(editionIdToRole, personId);
 	}
 
 	/**
@@ -442,119 +540,22 @@ public class HomeControllerTest extends ControllerTest {
 				.type(role);
 	}
 
-	@Test
-	void getCompletedSkillsAllCompleted() {
-		List<CourseSummaryDTO> courses = new ArrayList<>(
-				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
-		SCPerson person = new SCPerson();
-		TaskCompletion completion1 = TaskCompletion.builder().id(1L)
-				.person(person).task(db.getTaskRead12()).build();
-		TaskCompletion completion2 = TaskCompletion.builder().id(2L)
-				.person(person).task(db.getTaskDo12ae()).build();
-		TaskCompletion completion3 = TaskCompletion.builder().id(3L)
-				.person(person).task(db.getTaskRead11()).build();
-		TaskCompletion completion4 = TaskCompletion.builder().id(4L)
-				.person(person).task(db.getTaskDo11ad()).build();
-		TaskCompletion completion5 = TaskCompletion.builder().id(5L)
-				.person(person).task(db.getTaskRead10()).build();
-		TaskCompletion completion6 = TaskCompletion.builder().id(6L)
-				.person(person).task(db.getTaskDo10a()).build();
-		person.setTaskCompletions(
-				Set.of(completion1, completion2, completion3, completion4, completion5, completion6));
-
-		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
-				.thenReturn(db.getEditionRL().getId());
-
-		// All the skills are completed in the course
-		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
-				person);
-		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
-		assertThat(courseCompletedSkills.get(db.getCourseRL().getId()))
-				.isEqualTo(skillRepository.findAll().size());
-	}
-
-	@Test
-	void getCompletedSkillsCustomizedEmpty() {
-		List<CourseSummaryDTO> courses = new ArrayList<>(
-				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
-		SCPerson person = new SCPerson();
-		person.setSkillsModified(new HashSet<>(Arrays.asList(db.getSkillImplication())));
-
-		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
-				.thenReturn(db.getEditionRL().getId());
-
-		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
-				person);
-		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
-		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(7);
-	}
-
-	@Test
-	void getCompletedSkillsCustomizedCompleted() {
-		List<CourseSummaryDTO> courses = new ArrayList<>(
-				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
-		SCPerson person = new SCPerson();
-		person.setSkillsModified(new HashSet<>(Arrays.asList(db.getSkillNegation())));
-		person.setTasksAdded(new HashSet<>(Arrays.asList(db.getTaskRead11())));
-
-		TaskCompletion completion1 = TaskCompletion.builder().id(1L)
-				.person(person).task(db.getTaskRead11()).build();
-
-		person.setTaskCompletions(Set.of(completion1));
-
-		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
-				.thenReturn(db.getEditionRL().getId());
-
-		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
-				person);
-		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
-		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(5);
-	}
-
-	@Test
-	void getCompletedSkillsPathFinderPath() {
-		List<CourseSummaryDTO> courses = new ArrayList<>(
-				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
-		SCPerson person = new SCPerson();
-		PathPreference pathPreference = PathPreference.builder().path(db.getPathFinderPath())
-				.edition(db.getEditionRL()).person(person).build();
-		person.setPathPreferences(new HashSet<>(Arrays.asList(pathPreference)));
-
-		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
-				.thenReturn(db.getEditionRL().getId());
-
-		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
-				person);
-		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
-		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(7);
-	}
-
-	@Test
-	void getCompletedSkillsCustomizedEmptyNotCompleted() {
-		List<CourseSummaryDTO> courses = new ArrayList<>(
-				Arrays.asList(new CourseSummaryDTO().id(db.getCourseRL().getId())));
-		SCPerson person = new SCPerson();
-		Task t = Task.builder().name("Task").time(3).build();
-		db.getSkillAssumption().setTasks(Arrays.asList(t));
-		person.setSkillsModified(new HashSet<>(Arrays.asList(db.getSkillAssumption())));
-
-		when(courseService.getLastStudentEditionForCourseOrLast(anyLong()))
-				.thenReturn(db.getEditionRL().getId());
-
-		Map<Long, Integer> courseCompletedSkills = homeController.getCompletedSkillsPerCourse(courses,
-				person);
-		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
-		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(3);
-	}
-
+	/**
+	 * Mock response from person API for retrieving all the roles of one person.
+	 *
+	 * @param roles    A map of edition id to the role in that edition. The role in the map may be null, in
+	 *                 which case the user has no role in that edition.
+	 * @param personId The id of the user.
+	 */
 	void mockRolesForEditions(Map<Long, String> roles, Long personId) {
-		// TODO set edition summary?
-		List<RoleEditionDetailsDTO> roleDTOS = roles
-				.entrySet().stream().map(entry -> new RoleEditionDetailsDTO()
-						.id(new Id().editionId(entry.getKey())
-								.personId(db.getPerson().getId()))
-						.type(RoleEditionDetailsDTO.TypeEnum.valueOf(entry.getValue())))
-				.toList();
+		List<RoleEditionDetailsDTO> roleDTOS = new ArrayList<>();
+		for (Map.Entry<Long, String> entry : roles.entrySet()) {
+			if (entry.getValue() != null) {
+				roleDTOS.add(new RoleEditionDetailsDTO()
+						.id(new Id().editionId(entry.getKey()).personId(db.getPerson().getId()))
+						.type(RoleEditionDetailsDTO.TypeEnum.valueOf(entry.getValue())));
+			}
+		}
 		when(personApi.getRolesForPerson(eq(personId))).thenReturn(Flux.fromIterable(roleDTOS));
 	}
 

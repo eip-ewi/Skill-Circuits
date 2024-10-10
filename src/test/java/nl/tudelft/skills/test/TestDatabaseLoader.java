@@ -568,4 +568,62 @@ public class TestDatabaseLoader {
 		taskRead11.setCompletedBy(new HashSet<>());
 		taskCompletionRepository.deleteAll();
 	}
+
+	/**
+	 * Helper method for database setup. Creates a new module with 2 skills, 2 checkpoints (given as
+	 * parameters) and 1 submodule.
+	 *
+	 * @param checkpointA The first checkpoint.
+	 * @param checkpointB The last checkpoint.
+	 */
+	public void createSkillsInNewModuleHelper(Checkpoint checkpointA, Checkpoint checkpointB) {
+		SCModule module = SCModule.builder().name("Module").edition(getEditionRL()).build();
+		Submodule submodule = Submodule.builder().name("Submodule").module(module).row(0).column(0).build();
+		getEditionRL().getModules().add(module);
+		moduleRepository.save(module);
+		editionRepository.save(getEditionRL());
+		submoduleRepository.save(submodule);
+		module.getSubmodules().add(submodule);
+		moduleRepository.save(module);
+		Skill skillA = Skill.builder().name("Skill A").row(0).column(0).checkpoint(checkpointA)
+				.submodule(submodule)
+				.build();
+		Skill skillB = Skill.builder().name("Skill B").row(1).column(0).checkpoint(checkpointB)
+				.submodule(submodule)
+				.build();
+		submodule.getSkills().addAll(Set.of(skillA, skillB));
+		skillRepository.saveAll(Set.of(skillA, skillB));
+		submoduleRepository.save(submodule);
+		checkpointA.getSkills().add(skillA);
+		checkpointB.getSkills().add(skillB);
+		checkpointRepository.saveAll(Set.of(checkpointA, checkpointB));
+	}
+
+	/**
+	 * Creates a task in a new module (in edition editionRL2021) for testing purposes. Adds a new module,
+	 * submodule and skill.
+	 *
+	 * @return The created task.
+	 */
+	public Task createTaskInNewModule() {
+		SCModule module = moduleRepository.save(SCModule.builder().edition(editionRL2021)
+				.name("New module").build());
+		editionRL2021.getModules().add(module);
+		editionRepository.save(editionRL2021);
+		Submodule submodule = Submodule.builder().module(module)
+				.name("New submodule").column(0).row(0).build();
+		submodule = submoduleRepository.save(submodule);
+		module.getSubmodules().add(submodule);
+		Skill skill = Skill.builder().submodule(submodule).checkpoint(getCheckpointLectureOne())
+				.name("New skill").column(0).row(0).build();
+		skill = skillRepository.save(skill);
+		getCheckpointLectureOne().getSkills().add(skill);
+		submodule.getSkills().add(skill);
+		submoduleRepository.save(submodule);
+		checkpointRepository.save(getCheckpointLectureOne());
+		Task task = taskRepository.save(Task.builder().name("New task").skill(skill).build());
+		skill.getTasks().add(task);
+		skillRepository.save(skill);
+		return task;
+	}
 }
