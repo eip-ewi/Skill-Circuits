@@ -77,6 +77,23 @@
     </th:block>
 
     <script layout:fragment="script" th:inline="javascript">
+        function insertTaskInOrder(order, taskList, taskLoc, items, task) {
+            if (items.length === 0) {
+                taskList.prepend(task);
+            } else if (
+                taskLoc >=
+                order.indexOf(items[items.length - 1].querySelector(".item__name").innerHTML)
+            ) {
+                taskList.appendChild(task);
+            } else {
+                for (let i = 0; i < items.length; i++) {
+                    if (order.indexOf(items[i].querySelector(".item__name").innerHTML) >= taskLoc) {
+                        items[i].insertAdjacentElement("beforebegin", task);
+                        break;
+                    }
+                }
+            }
+        }
         function addTaskToEditedSkill(button) {
             // Send custom path update if user is authenticated
 
@@ -114,28 +131,9 @@
                         });
 
                     const taskLoc = order.indexOf(task.querySelector(".item__name").innerHTML);
-
                     const items = leftSide.querySelectorAll(".item");
-                    if (items.length === 0) {
-                        leftSide.querySelector(".items").prepend(task);
-                    } else if (
-                        taskLoc >=
-                        order.indexOf(
-                            items[items.length - 1].querySelector(".item__name").innerHTML
-                        )
-                    ) {
-                        leftSide.querySelector(".items").appendChild(task);
-                    } else {
-                        for (let i = 0; i < items.length; i++) {
-                            if (
-                                order.indexOf(items[i].querySelector(".item__name").innerHTML) >=
-                                taskLoc
-                            ) {
-                                items[i].insertAdjacentElement("beforebegin", task);
-                                break;
-                            }
-                        }
-                    }
+                    const taskList = leftSide.querySelector(".items");
+                    insertTaskInOrder(order, taskList, taskLoc, items, task);
 
                     // Remove tasks from right side
                     rightSide.querySelectorAll(`.item[data-item="${taskId}"`).forEach(item => {
@@ -218,34 +216,14 @@
                         .filter(path => paths.includes(path.dataset.id))
                         .forEach(path => {
                             const items = path.querySelectorAll(".item");
-                            if (items.length === 0) {
-                                path.querySelector(".path-toggle__content").prepend(
-                                    task.cloneNode(true)
-                                );
-                            } else if (
-                                taskLoc >=
-                                order.indexOf(
-                                    items[items.length - 1].querySelector(".item__name").innerHTML
-                                )
-                            ) {
-                                path.querySelector(".path-toggle__content").appendChild(
-                                    task.cloneNode(true)
-                                );
-                            } else {
-                                for (let i = 0; i < items.length; i++) {
-                                    if (
-                                        order.indexOf(
-                                            items[i].querySelector(".item__name").innerHTML
-                                        ) >= taskLoc
-                                    ) {
-                                        items[i].insertAdjacentElement(
-                                            "beforebegin",
-                                            task.cloneNode(true)
-                                        );
-                                        break;
-                                    }
-                                }
-                            }
+                            const taskList = path.querySelector(".path-toggle__content");
+                            insertTaskInOrder(
+                                order,
+                                taskList,
+                                taskLoc,
+                                items,
+                                task.cloneNode(true)
+                            );
 
                             // Make path toggle enabled if it was the first task
                             // Note: When CSS "has" is safely usable, this functionality can be moved to CSS
