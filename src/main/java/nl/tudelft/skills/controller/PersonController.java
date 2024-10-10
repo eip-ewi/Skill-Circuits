@@ -154,7 +154,7 @@ public class PersonController {
 	 */
 	@PutMapping("add/{taskId}")
 	@Transactional
-	public void addTaskToOwnPath(@AuthenticatedPerson Person authPerson, @PathVariable Long taskId) {
+	public List<String> addTaskToOwnPath(@AuthenticatedPerson Person authPerson, @PathVariable Long taskId) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
 		Task task = taskRepository.findByIdOrThrow(taskId);
 
@@ -167,6 +167,7 @@ public class PersonController {
 
 		person.getTasksAdded().add(task);
 
+		return task.getSkill().getTasks().stream().map(Task::getName).collect(Collectors.toList());
 	}
 
 	/**

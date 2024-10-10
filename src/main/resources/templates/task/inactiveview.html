@@ -100,7 +100,7 @@
                 url: "/person/add/" + taskId,
                 processData: false,
                 contentType: "application/json",
-                success: async () => {
+                success: async order => {
                     // Add task to left side
                     const task = await fetch(`/task/${taskId}`)
                         .then(res => res.text())
@@ -112,7 +112,30 @@
                         .catch(() => {
                             alert("Failed to add task");
                         });
-                    leftSide.querySelector(".items").appendChild(task);
+
+                    const taskLoc = order.indexOf(task.querySelector(".item__name").innerHTML);
+
+                    const items = leftSide.querySelectorAll(".item");
+                    if (items.length === 0) {
+                        leftSide.querySelector(".items").prepend(task);
+                    } else if (
+                        taskLoc >=
+                        order.indexOf(
+                            items[items.length - 1].querySelector(".item__name").innerHTML
+                        )
+                    ) {
+                        leftSide.querySelector(".items").appendChild(task);
+                    } else {
+                        for (let i = 0; i < items.length; i++) {
+                            if (
+                                order.indexOf(items[i].querySelector(".item__name").innerHTML) >=
+                                taskLoc
+                            ) {
+                                items[i].insertAdjacentElement("beforebegin", task);
+                                break;
+                            }
+                        }
+                    }
 
                     // Remove tasks from right side
                     rightSide.querySelectorAll(`.item[data-item="${taskId}"`).forEach(item => {
