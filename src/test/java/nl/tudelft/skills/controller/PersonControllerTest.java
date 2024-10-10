@@ -281,7 +281,8 @@ public class PersonControllerTest extends ControllerTest {
 				.edition(db.getEditionRL()).person(db.getPerson()).build();
 		pathPreferenceRepository.save(pathPreference);
 
-		List<String> taskOrder = personController.removeTaskFromOwnPath(authPerson, db.getTaskRead12().getId());
+		List<String> taskOrder = personController.removeTaskFromOwnPath(authPerson,
+				db.getTaskRead12().getId());
 
 		assertThat(taskOrder).isEqualTo(List.of(db.getTaskRead12().getName(), db.getTaskDo12ae().getName()));
 		assertThat(db.getPerson().getTasksAdded()).doesNotContain(db.getTaskRead12());
