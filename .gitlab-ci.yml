@@ -321,7 +321,7 @@ dev-deploy:
     - if: $CI_PIPELINE_SOURCE == "trigger" ||
         $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
       when: never
-    - if: $CI_COMMIT_BRANCH == "development"
+    - if: $CI_COMMIT_BRANCH == "development" && $CI_PROJECT_NAMESPACE == "skill-circuits"
       when: on_success
 
 # TODO CONFIGURE
@@ -366,6 +366,6 @@ deploy:
     - if: $CI_PIPELINE_SOURCE == "trigger" ||
         $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
       when: never
-    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH == "master" && $CI_PROJECT_NAMESPACE == "skill-circuits"
       when: on_success
 
