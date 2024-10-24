@@ -59,7 +59,7 @@ public class TestDatabaseLoader {
 	@Autowired
 	private SkillRepository skillRepository;
 	@Autowired
-	private TaskRepository taskRepository;
+	private RegularTaskRepository regularTaskRepository;
 	@Autowired
 	private ClickedLinkRepository clickedLinkRepository;
 	@Autowired
@@ -139,13 +139,13 @@ public class TestDatabaseLoader {
 	private Skill skillVariablesHidden = Skill.builder().name("Variables extra")
 			.hidden(true).row(2).column(4).build();
 
-	private Task taskRead12 = Task.builder().name("Read chapter 1.2").time(1)
+	private RegularTask taskRead12 = RegularTask.builder().name("Read chapter 1.2").time(1)
 			.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build();
-	private Task taskDo12ae = Task.builder().name("Do exercise 1.2a-e").time(3).build();
-	private Task taskRead11 = Task.builder().name("Read chapter 1.1").time(5).build();
-	private Task taskDo11ad = Task.builder().name("Do exercise 1.1a-d").time(7).build();
-	private Task taskRead10 = Task.builder().name("Read chapter 1.0").time(13).build();
-	private Task taskDo10a = Task.builder().name("Do exercise 1.0a").time(20).build();
+	private RegularTask taskDo12ae = RegularTask.builder().name("Do exercise 1.2a-e").time(3).build();
+	private RegularTask taskRead11 = RegularTask.builder().name("Read chapter 1.1").time(5).build();
+	private RegularTask taskDo11ad = RegularTask.builder().name("Do exercise 1.1a-d").time(7).build();
+	private RegularTask taskRead10 = RegularTask.builder().name("Read chapter 1.0").time(13).build();
+	private RegularTask taskDo10a = RegularTask.builder().name("Do exercise 1.0a").time(20).build();
 
 	private Badge badge1 = Badge.builder().name("Badge 1").build();
 	private Badge badge2 = Badge.builder().name("Badge 2").build();
@@ -278,28 +278,28 @@ public class TestDatabaseLoader {
 		return skillRepository.findByIdOrThrow(skillVariablesHidden.getId());
 	}
 
-	public Task getTaskRead12() {
-		return taskRepository.findByIdOrThrow(taskRead12.getId());
+	public RegularTask getTaskRead12() {
+		return regularTaskRepository.findByIdOrThrow(taskRead12.getId());
 	}
 
-	public Task getTaskDo12ae() {
-		return taskRepository.findByIdOrThrow(taskDo12ae.getId());
+	public RegularTask getTaskDo12ae() {
+		return regularTaskRepository.findByIdOrThrow(taskDo12ae.getId());
 	}
 
-	public Task getTaskRead11() {
-		return taskRepository.findByIdOrThrow(taskRead11.getId());
+	public RegularTask getTaskRead11() {
+		return regularTaskRepository.findByIdOrThrow(taskRead11.getId());
 	}
 
-	public Task getTaskDo11ad() {
-		return taskRepository.findByIdOrThrow(taskDo11ad.getId());
+	public RegularTask getTaskDo11ad() {
+		return regularTaskRepository.findByIdOrThrow(taskDo11ad.getId());
 	}
 
-	public Task getTaskRead10() {
-		return taskRepository.findByIdOrThrow(taskRead10.getId());
+	public RegularTask getTaskRead10() {
+		return regularTaskRepository.findByIdOrThrow(taskRead10.getId());
 	}
 
-	public Task getTaskDo10a() {
-		return taskRepository.findByIdOrThrow(taskDo10a.getId());
+	public RegularTask getTaskDo10a() {
+		return regularTaskRepository.findByIdOrThrow(taskDo10a.getId());
 	}
 
 	public Badge getBadge1() {
@@ -457,20 +457,20 @@ public class TestDatabaseLoader {
 	private void initTask() {
 		taskRead12.setSkill(skillImplication);
 		taskDo12ae.setSkill(skillImplication);
-		taskRead12 = taskRepository.save(taskRead12);
-		taskDo12ae = taskRepository.save(taskDo12ae);
+		taskRead12 = regularTaskRepository.save(taskRead12);
+		taskDo12ae = regularTaskRepository.save(taskDo12ae);
 
 		taskRead11.setSkill(skillNegation);
 		taskDo11ad.setSkill(skillNegation);
-		taskRead11 = taskRepository.save(taskRead11);
-		taskDo11ad = taskRepository.save(taskDo11ad);
+		taskRead11 = regularTaskRepository.save(taskRead11);
+		taskDo11ad = regularTaskRepository.save(taskDo11ad);
 
 		taskRead10.setSkill(skillVariables);
 		taskRead10.setRequiredFor(Set.of(skillVariablesHidden));
 		taskDo10a.setSkill(skillVariables);
 		taskDo10a.setRequiredFor(Set.of(skillVariablesHidden));
-		taskRead10 = taskRepository.save(taskRead10);
-		taskDo10a = taskRepository.save(taskDo10a);
+		taskRead10 = regularTaskRepository.save(taskRead10);
+		taskDo10a = regularTaskRepository.save(taskDo10a);
 
 	}
 
@@ -605,7 +605,7 @@ public class TestDatabaseLoader {
 	 *
 	 * @return The created task.
 	 */
-	public Task createTaskInNewModule() {
+	public RegularTask createTaskInNewModule() {
 		SCModule module = moduleRepository.save(SCModule.builder().edition(editionRL2021)
 				.name("New module").build());
 		editionRL2021.getModules().add(module);
@@ -621,7 +621,8 @@ public class TestDatabaseLoader {
 		submodule.getSkills().add(skill);
 		submoduleRepository.save(submodule);
 		checkpointRepository.save(getCheckpointLectureOne());
-		Task task = taskRepository.save(Task.builder().name("New task").skill(skill).build());
+		RegularTask task = regularTaskRepository
+				.save(RegularTask.builder().name("New task").skill(skill).build());
 		skill.getTasks().add(task);
 		skillRepository.save(skill);
 		return task;

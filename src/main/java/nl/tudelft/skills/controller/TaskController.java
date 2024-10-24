@@ -28,17 +28,17 @@ import org.springframework.web.bind.annotation.*;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.EditLinkDTO;
 import nl.tudelft.skills.dto.view.module.TaskViewDTO;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.model.RegularTask;
+import nl.tudelft.skills.repository.RegularTaskRepository;
 
 @Controller
 @RequestMapping("task")
 public class TaskController {
-	private final TaskRepository taskRepository;
+	private final RegularTaskRepository regularTaskRepository;
 
 	@Autowired
-	public TaskController(TaskRepository taskRepository) {
-		this.taskRepository = taskRepository;
+	public TaskController(RegularTaskRepository regularTaskRepository) {
+		this.regularTaskRepository = regularTaskRepository;
 	}
 
 	/**
@@ -51,9 +51,9 @@ public class TaskController {
 	@PatchMapping("change-link")
 	@PreAuthorize("@authorisationService.canEditAbstractTask(#editLinkDTO.taskId)")
 	public ResponseEntity<Void> updateTaskLink(@RequestBody EditLinkDTO editLinkDTO) {
-		Task task = taskRepository.findByIdOrThrow(editLinkDTO.getTaskId());
+		RegularTask task = regularTaskRepository.findByIdOrThrow(editLinkDTO.getTaskId());
 		task.setLink(editLinkDTO.getNewLink());
-		taskRepository.save(task);
+		regularTaskRepository.save(task);
 
 		return ResponseEntity.ok().build();
 	}
@@ -69,7 +69,7 @@ public class TaskController {
 	 */
 	@GetMapping("{taskId}")
 	public String getTask(@PathVariable Long taskId, Model model) {
-		Task task = taskRepository.findByIdOrThrow(taskId);
+		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
 		model.addAttribute("item", View.convert(task, TaskViewDTO.class));
 		model.addAttribute("canEdit", false);
 		model.addAttribute("level", "module");
@@ -87,7 +87,7 @@ public class TaskController {
 	 */
 	@GetMapping("{taskId}/preview")
 	public String getTaskForCustomPath(@PathVariable Long taskId, Model model) {
-		Task task = taskRepository.findByIdOrThrow(taskId);
+		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
 		model.addAttribute("item", View.convert(task, TaskViewDTO.class));
 		model.addAttribute("canEdit", false);
 		return "task/inactiveview :: item";

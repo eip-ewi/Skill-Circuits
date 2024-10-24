@@ -48,8 +48,8 @@ public class SkillService {
 	private final AuthorisationService authorisationService;
 	private final ClickedLinkService clickedLinkService;
 	private final PersonRepository personRepository;
+	private final RegularTaskRepository regularTaskRepository;
 	private final TaskRepository taskRepository;
-	private final AbstractTaskRepository abstractTaskRepository;
 
 	/**
 	 * Deletes a skill.
@@ -63,13 +63,14 @@ public class SkillService {
 		skill.getChildren().forEach(c -> c.getParents().remove(skill));
 		if (skill instanceof Skill s) {
 			s.getTasks().forEach(t -> {
-				if (t instanceof Task) {
-					taskCompletionRepository.deleteAll(((Task) t).getCompletedBy());
+				if (t instanceof RegularTask) {
+					taskCompletionRepository.deleteAll(((RegularTask) t).getCompletedBy());
 				}
 			});
 
-			clickedLinkService.deleteClickedLinksForTasks(s.getTasks().stream().filter(t -> t instanceof Task)
-					.map(t -> (Task) t).collect(Collectors.toList()));
+			clickedLinkService
+					.deleteClickedLinksForTasks(s.getTasks().stream().filter(t -> t instanceof RegularTask)
+							.map(t -> (RegularTask) t).collect(Collectors.toList()));
 
 			s.getFutureEditionSkills().forEach(innerSkill -> innerSkill.setPreviousEditionSkill(null));
 			if (s.getPreviousEditionSkill() != null) {
@@ -91,7 +92,7 @@ public class SkillService {
 
 			s.getRequiredTasks().forEach(t -> {
 				t.getRequiredFor().remove(s);
-				abstractTaskRepository.save(t);
+				taskRepository.save(t);
 			});
 		}
 		abstractSkillRepository.delete(skill);
@@ -190,7 +191,7 @@ public class SkillService {
 	 * @return           The set of customized skills
 	 */
 	public Set<Skill> getOwnSkillsWithTask(SCPerson scperson, long editionId) {
-		return scperson.getTasksAdded().stream().map(AbstractTask::getSkill)
+		return scperson.getTasksAdded().stream().map(Task::getSkill)
 				.filter(s -> Objects.equals(s.getSubmodule().getModule().getEdition().getId(),
 						editionId))
 				.collect(Collectors.toSet());

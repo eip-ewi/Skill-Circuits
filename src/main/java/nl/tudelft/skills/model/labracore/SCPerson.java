@@ -57,7 +57,7 @@ public class SCPerson {
 	@EqualsAndHashCode.Exclude
 	@ManyToMany
 	// For configuring a skill with any task in any path
-	private Set<AbstractTask> tasksAdded = new HashSet<>();
+	private Set<Task> tasksAdded = new HashSet<>();
 
 	@Builder.Default
 	@ToString.Exclude

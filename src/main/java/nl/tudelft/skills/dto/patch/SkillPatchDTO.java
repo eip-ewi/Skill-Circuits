@@ -33,10 +33,10 @@ import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.patch.Patch;
 import nl.tudelft.skills.dto.create.TaskCreateDTO;
 import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
-import nl.tudelft.skills.model.AbstractTask;
+import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.repository.AbstractTaskRepository;
+import nl.tudelft.skills.repository.RegularTaskRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 
 @Data
@@ -82,19 +82,19 @@ public class SkillPatchDTO extends Patch<Skill> {
 	// TODO: the methods below need to be changed when ChoiceTasks are implemented
 	@Override
 	protected void applyOneToMany() {
-		Map<Long, Task> tasks = data.getTasks().stream()
-				.filter(t -> t instanceof Task)
-				.map(t -> (Task) t)
-				.collect(Collectors.toMap(Task::getId, Function.identity()));
-		List<Task> orderedTasks = new ArrayList<>(
+		Map<Long, RegularTask> tasks = data.getTasks().stream()
+				.filter(t -> t instanceof RegularTask)
+				.map(t -> (RegularTask) t)
+				.collect(Collectors.toMap(RegularTask::getId, Function.identity()));
+		List<RegularTask> orderedTasks = new ArrayList<>(
 				items.stream().map(p -> p.apply(tasks.get(p.getId()))).toList());
 
 		Map<Long, Integer> order = items.stream()
 				.collect(Collectors.toMap(TaskPatchDTO::getId, TaskPatchDTO::getIndex));
 
-		TaskRepository taskRepository = SpringContext.getBean(TaskRepository.class);
+		RegularTaskRepository regularTaskRepository = SpringContext.getBean(RegularTaskRepository.class);
 		orderedTasks.addAll(newItems.stream().map(c -> {
-			Task task = taskRepository.save(c.apply());
+			RegularTask task = regularTaskRepository.save(c.apply());
 			order.put(task.getId(), c.getIndex());
 			return task;
 		}).toList());
@@ -102,28 +102,28 @@ public class SkillPatchDTO extends Patch<Skill> {
 		data.getTasks().stream().filter(t -> removedItems.contains(t.getId())).toList()
 				.forEach(t -> data.getTasks().remove(t));
 
-		orderedTasks.sort(Comparator.<Task>comparingInt(t -> order.get(t.getId())).reversed());
-		data.setTasks(orderedTasks.stream().map(t -> (AbstractTask) t).collect(Collectors.toList()));
+		orderedTasks.sort(Comparator.<RegularTask>comparingInt(t -> order.get(t.getId())).reversed());
+		data.setTasks(orderedTasks.stream().map(t -> (Task) t).collect(Collectors.toList()));
 	}
 
 	@Override
 	protected void applyManyToManyMappedBy() {
 		if (hidden) {
-			Set<AbstractTask> requiredTasks = new HashSet<>(
-					SpringContext.getBean(AbstractTaskRepository.class).findAllByIdIn(requiredTaskIds));
+			Set<Task> requiredTasks = new HashSet<>(
+					SpringContext.getBean(TaskRepository.class).findAllByIdIn(requiredTaskIds));
 			updateManyToManyMappedBy(data, data.getRequiredTasks(), requiredTasks,
-					AbstractTask::getRequiredFor);
+					Task::getRequiredFor);
 			data.setRequiredTasks(requiredTasks);
 		} else {
 			updateManyToManyMappedByIds(data, data.getRequiredTasks(), Collections.emptyList(),
-					AbstractTask::getRequiredFor);
+					Task::getRequiredFor);
 			data.setRequiredTasks(Collections.emptySet());
 		}
 	}
 
 	@Override
 	protected void validate() {
-		Set<Long> taskIds = data.getTasks().stream().map(AbstractTask::getId).collect(Collectors.toSet());
+		Set<Long> taskIds = data.getTasks().stream().map(Task::getId).collect(Collectors.toSet());
 		if (!newItems.stream().allMatch(t -> Objects.equals(t.getSkill().getId(), id))) {
 			errors.rejectValue("newItems", "itemNotInSkill", "Item is not in skill");
 		}

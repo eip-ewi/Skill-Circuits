@@ -24,7 +24,7 @@ import javax.validation.constraints.NotNull;
 import lombok.*;
 import nl.tudelft.librador.dto.create.Create;
 import nl.tudelft.skills.dto.id.SkillIdDTO;
-import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.model.TaskType;
 
 @Data
@@ -32,7 +32,7 @@ import nl.tudelft.skills.model.TaskType;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class TaskCreateDTO extends Create<Task> {
+public class TaskCreateDTO extends Create<RegularTask> {
 	// TODO: ability to create choice task, for now only tasks
 
 	@NotBlank
@@ -49,15 +49,15 @@ public class TaskCreateDTO extends Create<Task> {
 	private Integer index;
 
 	@Override
-	protected void postApply(Task data) {
+	protected void postApply(RegularTask data) {
 		if (link != null && link.isBlank()) {
 			data.setLink(null);
 		}
 	}
 
 	@Override
-	public Class<Task> clazz() {
-		return Task.class;
+	public Class<RegularTask> clazz() {
+		return RegularTask.class;
 	}
 
 }

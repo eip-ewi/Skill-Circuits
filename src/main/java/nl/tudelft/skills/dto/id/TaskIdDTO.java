@@ -24,27 +24,27 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import nl.tudelft.librador.dto.id.IdDTO;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.model.RegularTask;
+import nl.tudelft.skills.repository.RegularTaskRepository;
 
 @Data
 @SuperBuilder
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class TaskIdDTO extends IdDTO<Task, Long> {
+public class TaskIdDTO extends IdDTO<RegularTask, Long> {
 
 	public TaskIdDTO(Long id) {
 		super(id);
 	}
 
 	@Override
-	public Class<? extends CrudRepository<Task, Long>> repositoryClass() {
-		return TaskRepository.class;
+	public Class<? extends CrudRepository<RegularTask, Long>> repositoryClass() {
+		return RegularTaskRepository.class;
 	}
 
 	@Override
-	public Class<? extends Task> targetClass() {
-		return Task.class;
+	public Class<? extends RegularTask> targetClass() {
+		return RegularTask.class;
 	}
 
 }

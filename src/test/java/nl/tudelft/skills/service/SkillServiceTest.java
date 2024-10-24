@@ -39,8 +39,8 @@ import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.AbstractSkillRepository;
+import nl.tudelft.skills.repository.RegularTaskRepository;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
-import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.test.TestDatabaseLoader;
@@ -56,8 +56,8 @@ public class SkillServiceTest {
 	private final ExternalSkillRepository externalSkillRepository;
 	private final TaskCompletionRepository taskCompletionRepository;
 	private final EditionRepository editionRepository;
+	private final RegularTaskRepository regularTaskRepository;
 	private final TaskRepository taskRepository;
-	private final AbstractTaskRepository abstractTaskRepository;
 	private final ModuleRepository moduleRepository;
 	private final SkillService skillService;
 	private final SkillRepository skillRepository;
@@ -76,8 +76,9 @@ public class SkillServiceTest {
 	private final ClickedLinkRepository clickedLinkRepository;
 
 	@Autowired
-	public SkillServiceTest(AbstractSkillRepository abstractSkillRepository, TaskRepository taskRepository,
-			AbstractTaskRepository abstractTaskRepository,
+	public SkillServiceTest(AbstractSkillRepository abstractSkillRepository,
+			RegularTaskRepository regularTaskRepository,
+			TaskRepository taskRepository,
 			TestDatabaseLoader db, TaskCompletionRepository taskCompletionRepository,
 			EditionControllerApi editionApi, CourseControllerApi courseApi,
 			SkillRepository skillRepository, ModuleRepository moduleRepository,
@@ -90,8 +91,8 @@ public class SkillServiceTest {
 		this.externalSkillRepository = externalSkillRepository;
 		this.editionRepository = editionRepository;
 		this.moduleRepository = moduleRepository;
+		this.regularTaskRepository = regularTaskRepository;
 		this.taskRepository = taskRepository;
-		this.abstractTaskRepository = abstractTaskRepository;
 		this.skillRepository = skillRepository;
 		this.clickedLinkService = clickedLinkService;
 		this.clickedLinkRepository = clickedLinkRepository;
@@ -109,8 +110,8 @@ public class SkillServiceTest {
 		this.editionApi = editionApi;
 
 		this.skillService = new SkillService(abstractSkillRepository, taskCompletionRepository, courseApi,
-				authorisationService, clickedLinkService, personRepository, taskRepository,
-				abstractTaskRepository);
+				authorisationService, clickedLinkService, personRepository, regularTaskRepository,
+				taskRepository);
 	}
 
 	@Test
@@ -137,12 +138,12 @@ public class SkillServiceTest {
 	public void deleteSkillRequiredForImpacted() {
 		// Make skill a hidden skill
 		Skill skill = db.getSkillNegation();
-		Task taskRequired = db.getTaskRead12();
+		RegularTask taskRequired = db.getTaskRead12();
 		skill.setHidden(true);
 		skill.getRequiredTasks().add(taskRequired);
 		taskRequired.getRequiredFor().add(skill);
 		abstractSkillRepository.save(skill);
-		taskRepository.save(taskRequired);
+		regularTaskRepository.save(taskRequired);
 
 		// Delete skill
 		Long id = skill.getId();
@@ -396,8 +397,8 @@ public class SkillServiceTest {
 		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionC);
 
 		// Set a task in skillEditionB to be completed by the person
-		Task task = Task.builder().skill(skillEditionB).name("Task").build();
-		task = taskRepository.save(task);
+		RegularTask task = RegularTask.builder().skill(skillEditionB).name("Task").build();
+		task = regularTaskRepository.save(task);
 		TaskCompletion taskCompletion = TaskCompletion.builder().task(task).person(db.getPerson()).build();
 		taskCompletion = taskCompletionRepository.save(taskCompletion);
 		task.getCompletedBy().add(taskCompletion);
@@ -450,8 +451,8 @@ public class SkillServiceTest {
 		skillEditionB.getFutureEditionSkills().add(skillEditionC);
 
 		// Set a task in skillEditionB to be completed by the person
-		Task task = Task.builder().skill(skillEditionB).name("Task").build();
-		task = taskRepository.save(task);
+		RegularTask task = RegularTask.builder().skill(skillEditionB).name("Task").build();
+		task = regularTaskRepository.save(task);
 		TaskCompletion taskCompletion = TaskCompletion.builder().task(task).person(db.getPerson()).build();
 		taskCompletion = taskCompletionRepository.save(taskCompletion);
 		task.getCompletedBy().add(taskCompletion);
@@ -544,8 +545,8 @@ public class SkillServiceTest {
 		db.getSkillAssumption().getFutureEditionSkills().add(skillEditionC);
 
 		// Set a task in skillEditionA to be completed by the person
-		Task task = Task.builder().skill(db.getSkillAssumption()).name("Task").build();
-		task = taskRepository.save(task);
+		RegularTask task = RegularTask.builder().skill(db.getSkillAssumption()).name("Task").build();
+		task = regularTaskRepository.save(task);
 		TaskCompletion taskCompletion = TaskCompletion.builder().task(task).person(db.getPerson()).build();
 		taskCompletion = taskCompletionRepository.save(taskCompletion);
 		task.getCompletedBy().add(taskCompletion);

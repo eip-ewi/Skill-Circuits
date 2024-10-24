@@ -55,8 +55,8 @@ public class SkillController {
 	private final SkillRepository skillRepository;
 	private final ExternalSkillRepository externalSkillRepository;
 	private final AbstractSkillRepository abstractSkillRepository;
-	private final AbstractTaskRepository abstractTaskRepository;
 	private final TaskRepository taskRepository;
+	private final RegularTaskRepository regularTaskRepository;
 	private final SubmoduleRepository submoduleRepository;
 	private final CheckpointRepository checkpointRepository;
 	private final PathRepository pathRepository;
@@ -123,15 +123,15 @@ public class SkillController {
 
 		// TODO: ability to create choice tasks
 
-		List<AbstractTask> tasks = create.getNewItems().stream()
+		List<Task> tasks = create.getNewItems().stream()
 				.sorted(Comparator.comparingInt(TaskCreateDTO::getIndex).reversed()).map(dto -> {
 					dto.setSkill(SkillIdDTO.builder().id(skill.getId()).build());
 					return dto.apply();
-				}).map(t -> (AbstractTask) t).collect(Collectors.toList());
-		for (AbstractTask task : tasks) {
+				}).map(t -> (Task) t).collect(Collectors.toList());
+		for (Task task : tasks) {
 			task.setSkill(skill);
 		}
-		skill.setTasks(abstractTaskRepository.saveAll(tasks));
+		skill.setTasks(taskRepository.saveAll(tasks));
 
 		checkpointRepository.findBySkillsContains(skill).getSkills().add(skill);
 
@@ -141,7 +141,7 @@ public class SkillController {
 		Set<Path> paths = new HashSet<>(pathRepository.findAllByEditionId(edition.getId()));
 		tasks.forEach(t -> {
 			t.setPaths(paths);
-			abstractTaskRepository.save(t);
+			taskRepository.save(t);
 		});
 
 		moduleService.configureModuleModel(person, skill.getSubmodule().getModule().getId(), model, session);
@@ -196,7 +196,7 @@ public class SkillController {
 
 		// TODO: the ability to patch ChoiceTasks
 
-		List<AbstractTask> oldTasks = skill.getTasks();
+		List<Task> oldTasks = skill.getTasks();
 		var test = patch.apply(skill);
 		skillRepository.save(test);
 
@@ -207,12 +207,13 @@ public class SkillController {
 			personRepository.save(p);
 		});
 
-		taskRepository.findAllByIdIn(patch.getRemovedItems())
+		regularTaskRepository.findAllByIdIn(patch.getRemovedItems())
 				.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
-		clickedLinkService.deleteClickedLinksForTasks(taskRepository.findAllByIdIn(patch.getRemovedItems()));
+		clickedLinkService
+				.deleteClickedLinksForTasks(regularTaskRepository.findAllByIdIn(patch.getRemovedItems()));
 
-		taskRepository.deleteAllByIdIn(patch.getRemovedItems());
-		abstractTaskRepository.saveAll(skill.getRequiredTasks());
+		regularTaskRepository.deleteAllByIdIn(patch.getRemovedItems());
+		taskRepository.saveAll(skill.getRequiredTasks());
 
 		// New tasks will be included in all paths by default
 		SCEdition edition = skill.getSubmodule().getModule().getEdition();
@@ -222,7 +223,7 @@ public class SkillController {
 				.forEach(t -> {
 					t.setPaths(paths);
 					t.setSkill(skill);
-					abstractTaskRepository.save(t);
+					taskRepository.save(t);
 				});
 
 		model.addAttribute("level", "module");

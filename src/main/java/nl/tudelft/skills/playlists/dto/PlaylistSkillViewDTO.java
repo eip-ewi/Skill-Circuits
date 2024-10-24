@@ -26,7 +26,7 @@ import javax.validation.constraints.NotNull;
 import lombok.*;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.repository.RegularTaskRepository;
 
 @Data
 @Builder
@@ -44,7 +44,7 @@ public class PlaylistSkillViewDTO extends View<Skill> {
 
 	private List<PlaylistTaskViewDTO> tasks;
 
-	public void postApply(TaskRepository taskRepository, List<PlaylistTaskViewDTO> tasks) {
+	public void postApply(RegularTaskRepository regularTaskRepository, List<PlaylistTaskViewDTO> tasks) {
 		this.tasks = tasks;
 		this.totalTime = tasks.stream().map(PlaylistTaskViewDTO::getEstTime).reduce(0, Integer::sum);
 		tasks.sort(Comparator.comparing(PlaylistTaskViewDTO::getIdx));

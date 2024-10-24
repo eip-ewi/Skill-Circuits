@@ -52,7 +52,7 @@ public class PersonServiceTest {
 
 	private final PersonService personService;
 	private final SkillRepository skillRepository;
-	private final TaskRepository taskRepository;
+	private final RegularTaskRepository regularTaskRepository;
 	private final PathPreferenceRepository pathPreferenceRepository;
 
 	private final TestDatabaseLoader db;
@@ -61,12 +61,12 @@ public class PersonServiceTest {
 	@Autowired
 	public PersonServiceTest(PersonRepository personRepository, PathRepository pathRepository,
 			EditionRepository editionRepository, SkillRepository skillRepository,
-			TaskRepository taskRepository,
+			RegularTaskRepository regularTaskRepository,
 			PathPreferenceRepository pathPreferenceRepository, EditionService editionService,
 			TestDatabaseLoader db) {
 		this.personRepository = personRepository;
 		this.skillRepository = skillRepository;
-		this.taskRepository = taskRepository;
+		this.regularTaskRepository = regularTaskRepository;
 		this.editionRepository = editionRepository;
 		this.pathPreferenceRepository = pathPreferenceRepository;
 		this.db = db;
@@ -145,7 +145,7 @@ public class PersonServiceTest {
 		SCPerson person = db.getPerson();
 		Skill skillA = db.getSkillVariables();
 		Skill skillB = db.getSkillImplication();
-		Task task = db.getTaskDo10a();
+		RegularTask task = db.getTaskDo10a();
 
 		person.getSkillsModified().add(skillA);
 		skillA.getPersonModifiedSkill().add(person);
@@ -210,11 +210,11 @@ public class PersonServiceTest {
 		// Set task/skill modifications
 		addTaskAndSkillModifications();
 		SCPerson person = db.getPerson();
-		Task task = db.getTaskRead12();
+		RegularTask task = db.getTaskRead12();
 		person.getTasksAdded().add(task);
 		task.getPersonsThatAddedTask().add(person);
 		personRepository.save(person);
-		taskRepository.save(task);
+		regularTaskRepository.save(task);
 
 		Optional<Set<Long>> taskIds = personService.setPersonalPathAttributes(db.getPerson().getId(), model,
 				db.getEditionRL().getId(), db.getSkillVariables());
@@ -241,13 +241,13 @@ public class PersonServiceTest {
 		// Set task/skill modifications
 		SCPerson person = db.getPerson();
 		Skill skill = db.getSkillImplication();
-		Task task = db.getTaskRead12();
+		RegularTask task = db.getTaskRead12();
 		person.getTasksAdded().add(task);
 		task.getPersonsThatAddedTask().add(person);
 		person.getSkillsModified().add(skill);
 		skill.getPersonModifiedSkill().add(person);
 		personRepository.save(person);
-		taskRepository.save(task);
+		regularTaskRepository.save(task);
 		skillRepository.save(skill);
 
 		Optional<Set<Long>> taskIds = personService.setPersonalPathAttributes(db.getPerson().getId(), model,

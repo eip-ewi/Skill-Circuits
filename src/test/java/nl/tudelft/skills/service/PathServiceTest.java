@@ -30,9 +30,9 @@ import org.springframework.transaction.annotation.Transactional;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.patch.PathTasksPatchDTO;
 import nl.tudelft.skills.model.Path;
-import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.repository.PathRepository;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.repository.RegularTaskRepository;
 import nl.tudelft.skills.test.TestDatabaseLoader;
 
 @Transactional
@@ -42,15 +42,15 @@ public class PathServiceTest {
 	private final TestDatabaseLoader db;
 	private final PathService pathService;
 	private final PathRepository pathRepository;
-	private final TaskRepository taskRepository;
+	private final RegularTaskRepository regularTaskRepository;
 
 	@Autowired
 	public PathServiceTest(TestDatabaseLoader db, PathService pathService, PathRepository pathRepository,
-			TaskRepository taskRepository) {
+			RegularTaskRepository regularTaskRepository) {
 		this.db = db;
 		this.pathService = pathService;
 		this.pathRepository = pathRepository;
-		this.taskRepository = taskRepository;
+		this.regularTaskRepository = regularTaskRepository;
 	}
 
 	@Test
@@ -81,14 +81,14 @@ public class PathServiceTest {
 	@WithUserDetails("admin")
 	void updateTasksInPathManyToManyWithModuleId() {
 		// Create a new module with a task
-		Task newTask = db.createTaskInNewModule();
+		RegularTask newTask = db.createTaskInNewModule();
 
 		// Add new task to path
 		Path path = db.getPathFinderPath();
 		path.getTasks().add(newTask);
 		newTask.getPaths().add(path);
 		pathRepository.save(path);
-		taskRepository.save(newTask);
+		regularTaskRepository.save(newTask);
 
 		// Set module to module of task read 12
 		PathTasksPatchDTO dto = PathTasksPatchDTO.builder()
@@ -109,8 +109,8 @@ public class PathServiceTest {
 		// Assert that the new task and task read 11 are the only tasks in the pathfinder path
 		// Module id was set to the path of task read 12 and 11 -> remove task read 12, add task read 11
 		Path pathAfter = pathRepository.findByIdOrThrow(path.getId());
-		Task taskNewAfter = taskRepository.findByIdOrThrow(newTask.getId());
-		Task taskRead11After = db.getTaskRead11();
+		RegularTask taskNewAfter = regularTaskRepository.findByIdOrThrow(newTask.getId());
+		RegularTask taskRead11After = db.getTaskRead11();
 		assertThat(taskNewAfter.getPaths()).containsExactly(pathAfter);
 		assertThat(taskRead11After.getPaths()).containsExactly(pathAfter);
 		assertThat(pathAfter.getTasks()).containsExactlyInAnyOrder(taskNewAfter, taskRead11After);

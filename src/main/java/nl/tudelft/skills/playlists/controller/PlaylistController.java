@@ -41,7 +41,7 @@ import nl.tudelft.skills.playlists.repository.PlaylistVersionRepository;
 import nl.tudelft.skills.playlists.repository.ResearchParticipantRepository;
 import nl.tudelft.skills.playlists.service.PlaylistService;
 import nl.tudelft.skills.playlists.service.ResearchParticipantService;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.repository.RegularTaskRepository;
 import nl.tudelft.skills.service.PersonService;
 
 @Controller
@@ -55,7 +55,7 @@ public class PlaylistController {
 	private PlaylistRepository playlistRepository;
 	private PlaylistTaskRepository playlistTaskRepository;
 	private PlaylistVersionRepository playlistVersionRepository;
-	private TaskRepository taskRepository;
+	private RegularTaskRepository regularTaskRepository;
 	public Long accEdition = 643L;
 
 	@Autowired
@@ -63,7 +63,8 @@ public class PlaylistController {
 			ResearchParticipantRepository researchParticipantRepository,
 			PersonService personService, PlaylistService playlistService,
 			PlaylistRepository playlistRepository, PlaylistTaskRepository playlistTaskRepository,
-			PlaylistVersionRepository playlistVersionRepository, TaskRepository taskRepository) {
+			PlaylistVersionRepository playlistVersionRepository,
+			RegularTaskRepository regularTaskRepository) {
 		this.researchParticipantService = researchParticipantService;
 		this.researchParticipantRepository = researchParticipantRepository;
 		this.personService = personService;
@@ -71,7 +72,7 @@ public class PlaylistController {
 		this.playlistRepository = playlistRepository;
 		this.playlistTaskRepository = playlistTaskRepository;
 		this.playlistVersionRepository = playlistVersionRepository;
-		this.taskRepository = taskRepository;
+		this.regularTaskRepository = regularTaskRepository;
 	}
 
 	@PostMapping

@@ -52,7 +52,7 @@ public class EditionService {
 	private final SubmoduleRepository submoduleRepository;
 	private final AbstractSkillRepository abstractSkillRepository;
 	private final SkillRepository skillRepository;
-	private final TaskRepository taskRepository;
+	private final RegularTaskRepository regularTaskRepository;
 
 	/**
 	 * Configures the model for the module circuit view.
@@ -208,7 +208,7 @@ public class EditionService {
 		submoduleRepository.flush();
 		abstractSkillRepository.flush();
 		skillRepository.flush();
-		taskRepository.flush();
+		regularTaskRepository.flush();
 
 		return editionTo;
 	}
@@ -434,22 +434,22 @@ public class EditionService {
 	 * @param  pathMap  The map of paths, from previous paths to the new paths.
 	 * @return          The map of tasks, from previous tasks to the new tasks.
 	 */
-	Map<AbstractTask, AbstractTask> copyAndLinkEditionTasks(Map<Skill, Skill> skillMap,
+	Map<Task, Task> copyAndLinkEditionTasks(Map<Skill, Skill> skillMap,
 			Map<Path, Path> pathMap) {
-		Map<AbstractTask, AbstractTask> taskMap = new HashMap<>();
+		Map<Task, Task> taskMap = new HashMap<>();
 
 		skillMap.forEach((prev, copy) -> prev.getTasks().forEach(t -> {
 			// TODO copying of choice tasks. Needs more adjustments since they contain tasks (dependency).
 			// 	Below is only temporary solution for tasks!
 
-			if (t instanceof Task) {
-				Task task = taskRepository.save(
-						Task.builder()
+			if (t instanceof RegularTask) {
+				RegularTask task = regularTaskRepository.save(
+						RegularTask.builder()
 								.skill(copy)
-								.name(((Task) t).getName())
-								.type(((Task) t).getType())
-								.time(((Task) t).getTime())
-								.link(((Task) t).getLink())
+								.name(((RegularTask) t).getName())
+								.type(((RegularTask) t).getType())
+								.time(((RegularTask) t).getTime())
+								.link(((RegularTask) t).getLink())
 								.idx(t.getIdx())
 								.build());
 

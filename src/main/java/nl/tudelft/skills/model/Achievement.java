@@ -45,6 +45,6 @@ public class Achievement {
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@ManyToMany
-	private Set<AbstractTask> tasks = new HashSet<>();
+	private Set<Task> tasks = new HashSet<>();
 
 }

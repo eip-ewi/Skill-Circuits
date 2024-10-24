@@ -59,7 +59,7 @@ public class EditionServiceTest {
 	private final SubmoduleRepository submoduleRepository;
 	private final AbstractSkillRepository abstractSkillRepository;
 	private final SkillRepository skillRepository;
-	private final TaskRepository taskRepository;
+	private final RegularTaskRepository regularTaskRepository;
 
 	private final TestDatabaseLoader db;
 	private final CopyEditionTestDatabaseLoader editionDb;
@@ -70,7 +70,8 @@ public class EditionServiceTest {
 			CircuitService circuitService, CheckpointRepository checkpointRepository,
 			PathRepository pathRepository, ModuleRepository moduleRepository,
 			SubmoduleRepository submoduleRepository, AbstractSkillRepository abstractSkillRepository,
-			SkillRepository skillRepository, TaskRepository taskRepository, TestDatabaseLoader db,
+			SkillRepository skillRepository, RegularTaskRepository regularTaskRepository,
+			TestDatabaseLoader db,
 			CopyEditionTestDatabaseLoader editionDb) {
 		this.editionApi = editionApi;
 		this.editionRepository = editionRepository;
@@ -80,14 +81,14 @@ public class EditionServiceTest {
 		this.submoduleRepository = submoduleRepository;
 		this.abstractSkillRepository = abstractSkillRepository;
 		this.skillRepository = skillRepository;
-		this.taskRepository = taskRepository;
+		this.regularTaskRepository = regularTaskRepository;
 
 		this.db = db;
 		this.editionDb = editionDb;
 		this.localDateTime = LocalDateTime.of(2023, 1, 10, 10, 10, 0);
 		editionService = new EditionService(editionApi, editionRepository, circuitService,
 				checkpointRepository, pathRepository, moduleRepository, submoduleRepository,
-				abstractSkillRepository, skillRepository, taskRepository);
+				abstractSkillRepository, skillRepository, regularTaskRepository);
 	}
 
 	@Test
@@ -602,16 +603,16 @@ public class EditionServiceTest {
 		editionDb.initExternalSkillSameEdition(false);
 		editionDb.initParentChild(false);
 
-		int amountBefore = taskRepository.findAll().size();
+		int amountBefore = regularTaskRepository.findAll().size();
 		Map<Skill, Skill> skillCopies = Map.of(editionDb.getSkillFromA(), editionDb.getSkillToA(),
 				editionDb.getSkillFromB(), editionDb.getSkillToB());
 		Map<Path, Path> pathCopies = Map.of(editionDb.getPathFromA(), editionDb.getPathToA(),
 				editionDb.getPathFromB(), editionDb.getPathToB());
-		Map<AbstractTask, AbstractTask> copies = editionService.copyAndLinkEditionTasks(skillCopies,
+		Map<Task, Task> copies = editionService.copyAndLinkEditionTasks(skillCopies,
 				pathCopies);
 		assertThat(copies.keySet()).containsExactlyInAnyOrder(editionDb.getTaskFromA(),
 				editionDb.getTaskFromB());
-		assertThat(taskRepository.findAll()).hasSize(amountBefore + 2);
+		assertThat(regularTaskRepository.findAll()).hasSize(amountBefore + 2);
 
 		// Safety check that the previous skills were not changed
 		Skill oldA = skillRepository.findByIdOrThrow(editionDb.getSkillFromA().getId());
@@ -639,20 +640,20 @@ public class EditionServiceTest {
 		assertThat(editionDb.getPathToB().getTasks()).isEmpty();
 	}
 
-	private void testTaskEqualityHelper(AbstractTask initial, AbstractTask copy, Skill skillTo) {
+	private void testTaskEqualityHelper(Task initial, Task copy, Skill skillTo) {
 		assertThat(copy).isNotNull();
-		assertThat(taskRepository.findByIdOrThrow(copy.getId())).isEqualTo(copy);
+		assertThat(regularTaskRepository.findByIdOrThrow(copy.getId())).isEqualTo(copy);
 		// TODO This requires more adjustments.
-		if (initial instanceof Task && copy instanceof Task) {
-			assertThat(((Task) copy).getName()).isEqualTo(((Task) initial).getName());
-			assertThat(((Task) copy).getType()).isEqualTo(((Task) initial).getType());
-			assertThat(((Task) copy).getTime()).isEqualTo(((Task) initial).getTime());
-			assertThat(((Task) copy).getLink()).isEqualTo(((Task) initial).getLink());
+		if (initial instanceof RegularTask && copy instanceof RegularTask) {
+			assertThat(((RegularTask) copy).getName()).isEqualTo(((RegularTask) initial).getName());
+			assertThat(((RegularTask) copy).getType()).isEqualTo(((RegularTask) initial).getType());
+			assertThat(((RegularTask) copy).getTime()).isEqualTo(((RegularTask) initial).getTime());
+			assertThat(((RegularTask) copy).getLink()).isEqualTo(((RegularTask) initial).getLink());
 		}
 		assertThat(copy.getIdx()).isEqualTo(initial.getIdx());
 		assertThat(skillTo.getTasks()).containsExactly(copy);
 
 		// Safety check that the previous task was not changed
-		assertThat(taskRepository.findByIdOrThrow(initial.getId())).isEqualTo(initial);
+		assertThat(regularTaskRepository.findByIdOrThrow(initial.getId())).isEqualTo(initial);
 	}
 }

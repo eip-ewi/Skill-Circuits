@@ -47,7 +47,7 @@ public class PathController {
 	private final PathRepository pathRepository;
 	private final PersonRepository personRepository;
 	private final EditionRepository editionRepository;
-	private final AbstractTaskRepository abstractTaskRepository;
+	private final TaskRepository taskRepository;
 	private final PathPreferenceRepository pathPreferenceRepository;
 	private final PathService pathService;
 
@@ -55,13 +55,13 @@ public class PathController {
 
 	@Autowired
 	public PathController(PathRepository pathRepository, PersonRepository personRepository,
-			EditionRepository editionRepository, AbstractTaskRepository abstractTaskRepository,
+			EditionRepository editionRepository, TaskRepository taskRepository,
 			PathPreferenceRepository pathPreferenceRepository, PersonService personService,
 			PathService pathService) {
 		this.pathRepository = pathRepository;
 		this.personRepository = personRepository;
 		this.editionRepository = editionRepository;
-		this.abstractTaskRepository = abstractTaskRepository;
+		this.taskRepository = taskRepository;
 		this.pathPreferenceRepository = pathPreferenceRepository;
 		this.personService = personService;
 		this.pathService = pathService;
@@ -126,7 +126,7 @@ public class PathController {
 		// Remove path from tasks
 		path.getTasks().forEach(task -> {
 			task.getPaths().remove(path);
-			abstractTaskRepository.save(task);
+			taskRepository.save(task);
 		});
 
 		// Remove path from edition default
@@ -163,10 +163,10 @@ public class PathController {
 		Path path = pathRepository.saveAndFlush(dto.apply());
 
 		// By default, all tasks are added to a new path
-		abstractTaskRepository.findAllBySkillSubmoduleModuleEditionId(path.getEdition().getId())
+		taskRepository.findAllBySkillSubmoduleModuleEditionId(path.getEdition().getId())
 				.forEach(t -> {
 					t.getPaths().add(path);
-					abstractTaskRepository.save(t);
+					taskRepository.save(t);
 				});
 
 		model.addAttribute("path", View.convert(path, PathViewDTO.class));

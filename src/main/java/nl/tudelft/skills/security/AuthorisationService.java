@@ -53,7 +53,7 @@ public class AuthorisationService {
 	private SubmoduleRepository submoduleRepository;
 	private SkillRepository skillRepository;
 
-	private AbstractTaskRepository abstractTaskRepository;
+	private TaskRepository taskRepository;
 	private CheckpointRepository checkpointRepository;
 	private PathRepository pathRepository;
 	private AbstractSkillRepository abstractSkillRepository;
@@ -399,7 +399,7 @@ public class AuthorisationService {
 	 * @return        True iff the user can edit the task
 	 */
 	public boolean canEditAbstractTask(Long taskId) {
-		return canEditSkill(abstractTaskRepository.findByIdOrThrow(taskId).getSkill().getId());
+		return canEditSkill(taskRepository.findByIdOrThrow(taskId).getSkill().getId());
 	}
 
 	/**
@@ -409,7 +409,7 @@ public class AuthorisationService {
 	 * @return        True iff the user can delete the task
 	 */
 	public boolean canDeleteAbstractTask(Long taskId) {
-		return canEditSkill(abstractTaskRepository.findByIdOrThrow(taskId).getSkill().getId());
+		return canEditSkill(taskRepository.findByIdOrThrow(taskId).getSkill().getId());
 	}
 
 	/**

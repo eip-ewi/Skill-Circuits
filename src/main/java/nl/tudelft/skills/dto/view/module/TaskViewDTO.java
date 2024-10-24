@@ -28,7 +28,7 @@ import lombok.*;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.ItemView;
 import nl.tudelft.skills.model.Path;
-import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.model.TaskType;
 
 @Data
@@ -36,7 +36,7 @@ import nl.tudelft.skills.model.TaskType;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class TaskViewDTO extends View<Task> implements ItemView {
+public class TaskViewDTO extends View<RegularTask> implements ItemView {
 	// TODO: ability to view choice task, for now only tasks
 	@NotNull
 	private Long id;

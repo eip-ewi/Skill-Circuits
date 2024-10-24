@@ -65,7 +65,7 @@ public class AuthorisationServiceTest {
 	private final ModuleRepository moduleRepository;
 	private final SubmoduleRepository submoduleRepository;
 	private final SkillRepository skillRepository;
-	private final AbstractTaskRepository abstractTaskRepository;
+	private final TaskRepository taskRepository;
 	private final CheckpointRepository checkpointRepository;
 	private final PathRepository pathRepository;
 	private final AbstractSkillRepository abstractSkillRepository;
@@ -80,7 +80,7 @@ public class AuthorisationServiceTest {
 			ModuleRepository moduleRepository,
 			SubmoduleRepository submoduleRepository,
 			SkillRepository skillRepository,
-			AbstractTaskRepository abstractTaskRepository, CheckpointRepository checkpointRepository,
+			TaskRepository taskRepository, CheckpointRepository checkpointRepository,
 			PathRepository pathRepository,
 			AbstractSkillRepository abstractSkillRepository,
 			ExternalSkillRepository externalSkillRepository,
@@ -93,7 +93,7 @@ public class AuthorisationServiceTest {
 		this.moduleRepository = moduleRepository;
 		this.submoduleRepository = submoduleRepository;
 		this.skillRepository = skillRepository;
-		this.abstractTaskRepository = abstractTaskRepository;
+		this.taskRepository = taskRepository;
 		this.checkpointRepository = checkpointRepository;
 		this.pathRepository = pathRepository;
 		this.abstractSkillRepository = abstractSkillRepository;
@@ -187,7 +187,7 @@ public class AuthorisationServiceTest {
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
 				editionRepository, moduleRepository, submoduleRepository, skillRepository,
-				abstractTaskRepository,
+				taskRepository,
 				checkpointRepository, pathRepository,
 				abstractSkillRepository,
 				courseApi, personApi);
@@ -206,7 +206,7 @@ public class AuthorisationServiceTest {
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
 				editionRepository, moduleRepository, submoduleRepository, skillRepository,
-				abstractTaskRepository,
+				taskRepository,
 				checkpointRepository, pathRepository, abstractSkillRepository,
 				courseApi, personApi);
 
@@ -221,7 +221,7 @@ public class AuthorisationServiceTest {
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
 				editionRepository, moduleRepository, submoduleRepository, skillRepository,
-				abstractTaskRepository,
+				taskRepository,
 				checkpointRepository, pathRepository, abstractSkillRepository,
 				courseApi, personApi);
 
@@ -629,7 +629,7 @@ public class AuthorisationServiceTest {
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
 				editionRepository, moduleRepository, submoduleRepository, skillRepository,
-				abstractTaskRepository,
+				taskRepository,
 				checkpointRepository, pathRepository, abstractSkillRepository,
 				courseApi, personApi);
 

@@ -38,8 +38,8 @@ import nl.tudelft.skills.dto.create.SCModuleCreateDTO;
 import nl.tudelft.skills.dto.patch.SCModulePatchDTO;
 import nl.tudelft.skills.dto.view.SkillSummaryDTO;
 import nl.tudelft.skills.dto.view.edition.EditionLevelModuleViewDTO;
+import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.model.SCModule;
-import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.playlists.service.ResearchParticipantService;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.security.AuthorisationService;
@@ -141,11 +141,11 @@ public class ModuleController {
 	@PreAuthorize("@authorisationService.canDeleteModule(#id)")
 	public String deleteModule(@RequestParam Long id) {
 		SCModule module = moduleRepository.findByIdOrThrow(id);
-		List<Task> tasks = module.getSubmodules().stream()
+		List<RegularTask> tasks = module.getSubmodules().stream()
 				.flatMap(s -> s.getSkills().stream())
 				.flatMap(s -> s.getTasks().stream())
-				.filter(t -> t instanceof Task)
-				.map(t -> (Task) t).collect(Collectors.toList());
+				.filter(t -> t instanceof RegularTask)
+				.map(t -> (RegularTask) t).collect(Collectors.toList());
 		tasks.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
 		clickedLinkService.deleteClickedLinksForTasks(tasks);
 		moduleRepository.delete(module);
@@ -163,11 +163,11 @@ public class ModuleController {
 	@PreAuthorize("@authorisationService.canDeleteModule(#id)")
 	public ResponseEntity<Void> deleteModuleSetup(@RequestParam Long id) {
 		SCModule module = moduleRepository.findByIdOrThrow(id);
-		List<Task> tasks = module.getSubmodules().stream()
+		List<RegularTask> tasks = module.getSubmodules().stream()
 				.flatMap(s -> s.getSkills().stream())
 				.flatMap(s -> s.getTasks().stream())
-				.filter(t -> t instanceof Task)
-				.map(t -> (Task) t).collect(Collectors.toList());
+				.filter(t -> t instanceof RegularTask)
+				.map(t -> (RegularTask) t).collect(Collectors.toList());
 		tasks.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
 		clickedLinkService.deleteClickedLinksForTasks(tasks);
 		moduleRepository.delete(module);

@@ -30,9 +30,9 @@ import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.create.Create;
 import nl.tudelft.skills.dto.id.CheckpointIdDTO;
 import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
-import nl.tudelft.skills.model.AbstractTask;
 import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.repository.AbstractTaskRepository;
+import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.repository.TaskRepository;
 
 @Data
 @Builder
@@ -72,9 +72,9 @@ public class SkillCreateDTO extends Create<Skill> {
 	@Override
 	protected void postApply(Skill data) {
 		if (hidden) {
-			AbstractTaskRepository abstractTaskRepository = SpringContext
-					.getBean(AbstractTaskRepository.class);
-			Set<AbstractTask> requiredTasks = abstractTaskRepository.findAllByIdIn(requiredTaskIds);
+			TaskRepository taskRepository = SpringContext
+					.getBean(TaskRepository.class);
+			Set<Task> requiredTasks = taskRepository.findAllByIdIn(requiredTaskIds);
 			requiredTasks.forEach(t -> t.getRequiredFor().add(data));
 			data.setRequiredTasks(new HashSet<>(requiredTasks));
 		}

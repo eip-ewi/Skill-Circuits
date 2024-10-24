@@ -18,7 +18,6 @@
 package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
@@ -44,8 +43,8 @@ import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.TaskCompletedDTO;
 import nl.tudelft.skills.model.PathPreference;
+import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskCompletion;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.playlists.service.PlaylistService;
@@ -63,7 +62,7 @@ public class PersonControllerTest extends ControllerTest {
 
 	private final PersonController personController;
 	private final PersonRepository personRepository;
-	private final TaskRepository taskRepository;
+	private final RegularTaskRepository regularTaskRepository;
 	private final TaskCompletionService taskCompletionService;
 	private final PathPreferenceRepository pathPreferenceRepository;
 	private final AuthorisationService authorisationService;
@@ -72,8 +71,9 @@ public class PersonControllerTest extends ControllerTest {
 	private final PersonService personService;
 
 	@Autowired
-	public PersonControllerTest(PersonRepository personRepository, TaskRepository taskRepository,
-			AbstractTaskRepository abstractTaskRepository,
+	public PersonControllerTest(PersonRepository personRepository,
+			RegularTaskRepository regularTaskRepository,
+			TaskRepository taskRepository,
 			TaskCompletionService taskCompletionService,
 			PathPreferenceRepository pathPreferenceRepository,
 			SkillRepository skillRepository,
@@ -84,11 +84,11 @@ public class PersonControllerTest extends ControllerTest {
 			PersonService personService) {
 		this.personRepository = personRepository;
 		this.playlistService = playlistService;
-		this.personController = new PersonController(taskRepository, abstractTaskRepository, personRepository,
+		this.personController = new PersonController(regularTaskRepository, taskRepository, personRepository,
 				taskCompletionService, skillRepository, pathRepository, authorisationService, roleApi,
 				playlistService,
 				personService);
-		this.taskRepository = taskRepository;
+		this.regularTaskRepository = regularTaskRepository;
 		this.taskCompletionService = taskCompletionService;
 		this.pathPreferenceRepository = pathPreferenceRepository;
 		this.personService = personService;
@@ -98,7 +98,7 @@ public class PersonControllerTest extends ControllerTest {
 
 	@Test
 	void setTasksCompletedForPerson() {
-		List<Task> tasksCompleted = db.getPerson().getTaskCompletions().stream()
+		List<RegularTask> tasksCompleted = db.getPerson().getTaskCompletions().stream()
 				.map(TaskCompletion::getTask).toList();
 		assertThat(tasksCompleted).doesNotContain(db.getTaskDo10a(), db.getTaskRead10());
 
@@ -107,7 +107,7 @@ public class PersonControllerTest extends ControllerTest {
 		personController.setTasksCompletedForPerson(person,
 				List.of(db.getTaskDo10a().getId(), db.getTaskRead10().getId()));
 
-		List<Task> tasksCompletedAfter = db.getPerson().getTaskCompletions().stream()
+		List<RegularTask> tasksCompletedAfter = db.getPerson().getTaskCompletions().stream()
 				.map(TaskCompletion::getTask).toList();
 		assertThat(tasksCompletedAfter).contains(db.getTaskDo10a(), db.getTaskRead10());
 	}
@@ -136,7 +136,7 @@ public class PersonControllerTest extends ControllerTest {
 		// Return value is not checked, only call on method
 		when(roleApi.addRole(any())).thenReturn(Mono.empty());
 
-		List<Task> tasksCompleted = db.getPerson().getTaskCompletions().stream()
+		List<RegularTask> tasksCompleted = db.getPerson().getTaskCompletions().stream()
 				.map(TaskCompletion::getTask).toList();
 		assertThat(tasksCompleted).doesNotContain(db.getTaskDo10a());
 
@@ -149,7 +149,7 @@ public class PersonControllerTest extends ControllerTest {
 		TaskCompletedDTO taskCompletedDTO = personController.updateTaskCompletedForPerson(person,
 				db.getTaskDo10a().getId(), true);
 
-		List<Task> tasksCompletedAfter = db.getPerson().getTaskCompletions().stream()
+		List<RegularTask> tasksCompletedAfter = db.getPerson().getTaskCompletions().stream()
 				.map(TaskCompletion::getTask).toList();
 		assertThat(tasksCompletedAfter).contains(db.getTaskDo10a());
 		assertThat(taskCompletedDTO.getShowSkills()).containsExactly(db.getSkillVariablesHidden().getId());
@@ -172,7 +172,7 @@ public class PersonControllerTest extends ControllerTest {
 
 	@Test
 	void updateTaskCompletedForPersonFalse() {
-		List<Task> tasksCompleted = db.getPerson().getTaskCompletions().stream()
+		List<RegularTask> tasksCompleted = db.getPerson().getTaskCompletions().stream()
 				.map(TaskCompletion::getTask).toList();
 		assertThat(tasksCompleted).contains(db.getTaskDo11ad());
 
@@ -181,7 +181,7 @@ public class PersonControllerTest extends ControllerTest {
 		TaskCompletedDTO taskCompletedDTO = personController.updateTaskCompletedForPerson(person,
 				db.getTaskDo11ad().getId(), false);
 
-		List<Task> tasksCompletedAfter = db.getPerson().getTaskCompletions().stream()
+		List<RegularTask> tasksCompletedAfter = db.getPerson().getTaskCompletions().stream()
 				.map(TaskCompletion::getTask).toList();
 		assertThat(tasksCompletedAfter).doesNotContain(db.getTaskDo11ad());
 		assertThat(taskCompletedDTO.getShowSkills()).hasSize(0);
@@ -195,7 +195,7 @@ public class PersonControllerTest extends ControllerTest {
 	@Test
 	void prevRevealedSkill() {
 		mockRole(roleApi, "STUDENT");
-		List<Task> tasksCompleted = db.getPerson().getTaskCompletions().stream()
+		List<RegularTask> tasksCompleted = db.getPerson().getTaskCompletions().stream()
 				.map(TaskCompletion::getTask).toList();
 		assertThat(tasksCompleted).doesNotContain(db.getTaskDo10a());
 
@@ -225,7 +225,7 @@ public class PersonControllerTest extends ControllerTest {
 				.edition(db.getEditionRL()).person(db.getPerson()).build();
 		pathPreferenceRepository.save(pathPreference);
 
-		Task task = db.getTaskDo12ae();
+		RegularTask task = db.getTaskDo12ae();
 		personController.addAllTaskFromCurrentPath(person, task);
 
 		assertThat(db.getPerson().getTasksAdded()).contains(db.getTaskRead12());

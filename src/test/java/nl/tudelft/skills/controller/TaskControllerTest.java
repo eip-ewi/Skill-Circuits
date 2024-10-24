@@ -37,8 +37,8 @@ import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.EditLinkDTO;
 import nl.tudelft.skills.dto.view.module.TaskViewDTO;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.model.RegularTask;
+import nl.tudelft.skills.repository.RegularTaskRepository;
 
 @Transactional
 @AutoConfigureMockMvc
@@ -46,14 +46,14 @@ import nl.tudelft.skills.repository.TaskRepository;
 public class TaskControllerTest extends ControllerTest {
 
 	private final TaskController taskController;
-	private final TaskRepository taskRepository;
+	private final RegularTaskRepository regularTaskRepository;
 	private final RoleControllerApi roleApi;
 
 	@Autowired
-	public TaskControllerTest(TaskRepository taskRepository, RoleControllerApi roleApi) {
-		this.taskRepository = taskRepository;
+	public TaskControllerTest(RegularTaskRepository regularTaskRepository, RoleControllerApi roleApi) {
+		this.regularTaskRepository = regularTaskRepository;
 		this.roleApi = roleApi;
-		this.taskController = new TaskController(taskRepository);
+		this.taskController = new TaskController(regularTaskRepository);
 	}
 
 	private String createBody() throws JsonProcessingException {
@@ -81,7 +81,7 @@ public class TaskControllerTest extends ControllerTest {
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
-		Task task = taskRepository.getById(db.getTaskDo10a().getId());
+		RegularTask task = regularTaskRepository.getById(db.getTaskDo10a().getId());
 		assertThat(task.getLink()).isEqualTo("www.test.com");
 	}
 

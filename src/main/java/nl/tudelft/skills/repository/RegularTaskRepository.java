@@ -19,22 +19,20 @@ package nl.tudelft.skills.repository;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
-import nl.tudelft.skills.model.AbstractTask;
+import nl.tudelft.skills.model.RegularTask;
 
-public interface AbstractTaskRepository extends JpaRepository<AbstractTask, Long> {
+public interface RegularTaskRepository extends JpaRepository<RegularTask, Long> {
 
-	default AbstractTask findByIdOrThrow(Long id) {
-		return findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("AbstractTask was not found: " + id));
+	default RegularTask findByIdOrThrow(Long id) {
+		return findById(id).orElseThrow(() -> new ResourceNotFoundException("Task was not found: " + id));
 	}
 
-	Set<AbstractTask> findAllByIdIn(Collection<Long> ids);
+	List<RegularTask> findAllByIdIn(Collection<Long> id);
 
-	List<AbstractTask> findAllBySkillSubmoduleModuleEditionId(Long editionId);
+	void deleteAllByIdIn(Collection<Long> id);
 
 }

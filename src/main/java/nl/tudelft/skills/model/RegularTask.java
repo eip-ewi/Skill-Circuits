@@ -21,58 +21,40 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import nl.tudelft.skills.model.labracore.SCPerson;
 
 @Data
 @Entity
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@Inheritance(strategy = InheritanceType.JOINED)
-public abstract class AbstractTask {
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private Long id;
+@EqualsAndHashCode(callSuper = true)
+public class RegularTask extends Task {
+	@NotBlank
+	private String name;
+
+	@Builder.Default
+	@NotNull
+	private TaskType type = TaskType.EXERCISE;
+
+	@Builder.Default
+	@Min(0)
+	private Integer time = 0;
+
+	private String link;
 
 	@NotNull
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@OneToMany(mappedBy = "task")
+	private Set<TaskCompletion> completedBy = new HashSet<>();
+
 	@ManyToOne
-	@EqualsAndHashCode.Exclude
-	@ToString.Exclude
-	private Skill skill;
-
-	@NotNull
-	@Builder.Default
-	private Integer idx = 0;
-
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany(mappedBy = "tasks")
-	private Set<Achievement> achievements = new HashSet<>();
-
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany
-	private Set<Path> paths = new HashSet<>();
-
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany
-	private Set<Skill> requiredFor = new HashSet<>();
-
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany(mappedBy = "tasksAdded")
-	private Set<SCPerson> personsThatAddedTask = new HashSet<>();
+	private ChoiceTask choiceTask;
 }

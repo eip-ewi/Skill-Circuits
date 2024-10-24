@@ -40,7 +40,7 @@ public class CopyEditionTestDatabaseLoader {
 	@Autowired
 	private SkillRepository skillRepository;
 	@Autowired
-	private TaskRepository taskRepository;
+	private RegularTaskRepository regularTaskRepository;
 	@Autowired
 	private PathRepository pathRepository;
 	@Autowired
@@ -81,8 +81,8 @@ public class CopyEditionTestDatabaseLoader {
 	private Skill skillToA;
 	private Skill skillToB;
 
-	private Task taskFromA;
-	private Task taskFromB;
+	private RegularTask taskFromA;
+	private RegularTask taskFromB;
 
 	public void initEditionFrom(Skill linkTo) {
 		initEditions();
@@ -241,12 +241,12 @@ public class CopyEditionTestDatabaseLoader {
 	}
 
 	public void initTasks() {
-		taskFromA = Task.builder().skill(skillFromA).name("Task A").paths(Set.of(pathFromA)).build();
-		taskFromA = taskRepository.save(taskFromA);
+		taskFromA = RegularTask.builder().skill(skillFromA).name("Task A").paths(Set.of(pathFromA)).build();
+		taskFromA = regularTaskRepository.save(taskFromA);
 		pathFromA.getTasks().add(taskFromA);
 		skillFromA.getTasks().add(taskFromA);
-		taskFromB = Task.builder().skill(skillFromB).name("Task B").build();
-		taskFromB = taskRepository.save(taskFromB);
+		taskFromB = RegularTask.builder().skill(skillFromB).name("Task B").build();
+		taskFromB = regularTaskRepository.save(taskFromB);
 		skillFromB.getTasks().add(taskFromB);
 		skillFromB.getRequiredTasks().add(taskFromA);
 		taskFromA.getRequiredFor().add(skillFromB);
@@ -356,11 +356,11 @@ public class CopyEditionTestDatabaseLoader {
 		return skillToB;
 	}
 
-	public Task getTaskFromA() {
+	public RegularTask getTaskFromA() {
 		return taskFromA;
 	}
 
-	public Task getTaskFromB() {
+	public RegularTask getTaskFromB() {
 		return taskFromB;
 	}
 

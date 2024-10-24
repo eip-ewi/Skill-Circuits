@@ -92,7 +92,7 @@ public class PersonService {
 		model.addAttribute("selectedPathId", path != null ? path.getId() : null);
 
 		SCPerson scPerson = personRepository.findByIdOrThrow(personId);
-		Set<AbstractTask> tasks = scPerson.getTasksAdded();
+		Set<Task> tasks = scPerson.getTasksAdded();
 		Set<Skill> skillsModified = scPerson.getSkillsModified();
 		// If the skill is null, the tasksAdded and skillsModified are all added tasks and modified skills. Otherwise,
 		// they are only added corresponding to the skill (tasks in the skill and the skill itself, if modified).
@@ -100,15 +100,16 @@ public class PersonService {
 		// TODO: handling of ChoiceTasks here (requires ViewDTO)
 		if (skill == null) {
 			model.addAttribute("tasksAdded",
-					tasks.stream().filter(t -> t instanceof Task)
-							.map(at -> View.convert((Task) at, TaskViewDTO.class))
+					tasks.stream().filter(t -> t instanceof RegularTask)
+							.map(at -> View.convert((RegularTask) at, TaskViewDTO.class))
 							.collect(Collectors.toSet()));
 			model.addAttribute("skillsModified", skillsModified.stream()
 					.map(at -> View.convert(at, ModuleLevelSkillViewDTO.class)).collect(Collectors.toSet()));
 		} else {
 			model.addAttribute("tasksAdded", tasks.stream()
-					.filter(t -> t instanceof Task && skill.getTasks().contains(t))
-					.map(at -> View.convert((Task) at, TaskViewDTO.class)).collect(Collectors.toSet()));
+					.filter(t -> t instanceof RegularTask && skill.getTasks().contains(t))
+					.map(at -> View.convert((RegularTask) at, TaskViewDTO.class))
+					.collect(Collectors.toSet()));
 			model.addAttribute("skillsModified",
 					skillsModified.contains(skill)
 							? Set.of(View.convert(skill, ModuleLevelSkillViewDTO.class))
@@ -117,7 +118,7 @@ public class PersonService {
 
 		// Returns an Optional of the tasks in the path if a path is selected, and an empty Optional otherwise.
 		return path == null ? Optional.empty()
-				: Optional.of(path.getTasks().stream().map(AbstractTask::getId).collect(Collectors.toSet()));
+				: Optional.of(path.getTasks().stream().map(Task::getId).collect(Collectors.toSet()));
 	}
 
 	/**

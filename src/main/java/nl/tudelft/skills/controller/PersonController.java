@@ -35,8 +35,8 @@ import nl.tudelft.skills.dto.view.TaskCompletedDTO;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.playlists.service.PlaylistService;
-import nl.tudelft.skills.repository.AbstractTaskRepository;
 import nl.tudelft.skills.repository.PathRepository;
+import nl.tudelft.skills.repository.RegularTaskRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
@@ -49,8 +49,8 @@ import nl.tudelft.skills.service.TaskCompletionService;
 @AllArgsConstructor
 public class PersonController {
 
+	private final RegularTaskRepository regularTaskRepository;
 	private final TaskRepository taskRepository;
-	private final AbstractTaskRepository abstractTaskRepository;
 	private final PersonRepository scPersonRepository;
 	private final TaskCompletionService taskCompletionService;
 	private final SkillRepository skillRepository;
@@ -73,7 +73,7 @@ public class PersonController {
 	public TaskCompletedDTO updateTaskCompletedForPerson(@AuthenticatedPerson Person authPerson,
 			@PathVariable Long taskId, @RequestBody boolean completed) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
-		Task task = taskRepository.findByIdOrThrow(taskId);
+		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
 		if (completed) {
 			taskCompletionService.addTaskCompletion(person, task);
 
@@ -84,7 +84,7 @@ public class PersonController {
 			ifNoStudentRoleSetStudentRole(authPerson.getId(), task.getSkill().getSubmodule().getModule()
 					.getEdition().getId());
 
-			List<Task> completedTasks = person.getTaskCompletions().stream()
+			List<RegularTask> completedTasks = person.getTaskCompletions().stream()
 					.map(TaskCompletion::getTask).toList();
 
 			List<Skill> revealedSkills = task.getRequiredFor().stream()
@@ -138,7 +138,7 @@ public class PersonController {
 			@RequestBody List<Long> completedTasks) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
 
-		List<Task> tasks = taskRepository.findAllById(completedTasks);
+		List<RegularTask> tasks = regularTaskRepository.findAllById(completedTasks);
 		tasks.forEach(task -> taskCompletionService.addTaskCompletion(person, task));
 
 		//		Playlist feature
@@ -155,7 +155,7 @@ public class PersonController {
 	@Transactional
 	public void addTaskToOwnPath(@AuthenticatedPerson Person authPerson, @PathVariable Long taskId) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
-		AbstractTask task = abstractTaskRepository.findByIdOrThrow(taskId);
+		Task task = taskRepository.findByIdOrThrow(taskId);
 
 		// if first time modifying skill, put all tasks from current path in own path
 
@@ -178,7 +178,7 @@ public class PersonController {
 	@Transactional
 	public void removeTaskFromOwnPath(@AuthenticatedPerson Person authPerson, @PathVariable Long taskId) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
-		Task task = taskRepository.findByIdOrThrow(taskId);
+		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
 
 		// if first time modifying skill, put all tasks from current path in own path
 		if (!person.getSkillsModified().contains(task.getSkill())) {
@@ -220,7 +220,7 @@ public class PersonController {
 	 * @param person The person for which the tasks will be added
 	 * @param task   The abstract task for which the skill is considered
 	 */
-	void addAllTaskFromCurrentPath(SCPerson person, AbstractTask task) {
+	void addAllTaskFromCurrentPath(SCPerson person, Task task) {
 		Optional<Long> currentPathId = person.getPathPreferences().stream()
 				.filter(p -> p.getEdition().equals(task.getSkill().getSubmodule().getModule().getEdition()))
 				.filter(p -> p.getPath() != null)

@@ -43,8 +43,8 @@ import nl.tudelft.skills.playlists.repository.PlaylistTaskRepository;
 import nl.tudelft.skills.playlists.repository.ResearchParticipantRepository;
 import nl.tudelft.skills.repository.CheckpointRepository;
 import nl.tudelft.skills.repository.EditionRepository;
+import nl.tudelft.skills.repository.RegularTaskRepository;
 import nl.tudelft.skills.repository.SkillRepository;
-import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.PersonService;
 
@@ -60,7 +60,7 @@ public class PlaylistService {
 	private EditionRepository editionRepository;
 
 	private PersonService personService;
-	private TaskRepository taskRepository;
+	private RegularTaskRepository regularTaskRepository;
 	private CheckpointRepository checkpointRepository;
 	private PersonRepository personRepository;
 	private SkillRepository skillRepository;
@@ -71,7 +71,8 @@ public class PlaylistService {
 			PlaylistTaskRepository playlistTaskRepository,
 			ResearchParticipantRepository researchParticipantRepository,
 			ResearchParticipantService researchParticipantService,
-			EditionRepository editionRepository, PersonService personService, TaskRepository taskRepository,
+			EditionRepository editionRepository, PersonService personService,
+			RegularTaskRepository regularTaskRepository,
 			CheckpointRepository checkpointRepository, PersonRepository personRepository,
 			SkillRepository skillRepository) {
 		this.playlistRepository = playlistRepository;
@@ -80,7 +81,7 @@ public class PlaylistService {
 		this.researchParticipantService = researchParticipantService;
 		this.editionRepository = editionRepository;
 		this.personService = personService;
-		this.taskRepository = taskRepository;
+		this.regularTaskRepository = regularTaskRepository;
 		this.checkpointRepository = checkpointRepository;
 		this.personRepository = personRepository;
 		this.skillRepository = skillRepository;
@@ -101,7 +102,7 @@ public class PlaylistService {
 		//		Group selected tasks based on the skill they belong to
 		Map<Long, List<PlaylistTaskViewDTO>> skills = new HashMap<>();
 		for (PlaylistTask task : playlist.getLatestVersion().getTasks()) {
-			Task t = taskRepository.findByIdOrThrow(task.getTaskId());
+			RegularTask t = regularTaskRepository.findByIdOrThrow(task.getTaskId());
 			int cTime = playlistTaskRepository.findByParticipantAndTaskId(participant, t.getId())
 					.getCompletionTime();
 			//			Using existing task id for now
@@ -172,7 +173,7 @@ public class PlaylistService {
 	 * @return        Module id
 	 */
 	public Long getModuleId(Long taskId) {
-		Task task = taskRepository.findByIdOrThrow(taskId);
+		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
 		return task.getSkill().getSubmodule().getModule().getId();
 	}
 
@@ -204,7 +205,8 @@ public class PlaylistService {
 		// TODO: Only temporary solution for compiling. This does not handle tasks correctly.
 
 		//		For each task, get the module it belongs to and whether the student has already completed it
-		for (Task t : skill.getTasks().stream().filter(t -> t instanceof Task).map(t -> (Task) t)
+		for (RegularTask t : skill.getTasks().stream().filter(t -> t instanceof RegularTask)
+				.map(t -> (RegularTask) t)
 				.collect(Collectors.toList())) {
 			boolean completed = taskCompletions.stream()
 					.anyMatch(tC -> tC.getTask().getId().equals(t.getId()));
@@ -232,7 +234,7 @@ public class PlaylistService {
 	 * @param completed boolean representing whether the task has been completed (true) or not (false)
 	 */
 	@Transactional
-	public void setPlTaskCompleted(SCPerson person, Task task, boolean completed) {
+	public void setPlTaskCompleted(SCPerson person, RegularTask task, boolean completed) {
 		ResearchParticipant participant = researchParticipantRepository.findByPerson(person);
 		if (participant != null) {
 			PlaylistTask plTask = playlistTaskRepository
@@ -254,7 +256,7 @@ public class PlaylistService {
 		List<PlaylistTaskViewDTO> tasks = new LinkedList<>();
 		log.trace("Transforming tasks to playlistTaskDTOs");
 		for (Long id : taskIds) {
-			Task t = taskRepository.findByIdOrThrow(id);
+			RegularTask t = regularTaskRepository.findByIdOrThrow(id);
 			//			Using existing task id for now
 			tasks.add(PlaylistTaskViewDTO.builder().taskId(t.getId()).type(t.getType()).idx(t.getIdx())
 					.estTime(t.getTime())
@@ -278,12 +280,12 @@ public class PlaylistService {
 		for (Skill s : checkpoint.getSkills()) {
 			// TODO: Only temporary solution for compiling. This does not handle tasks correctly.
 			//	Filter out skills that are still hidden for the participant
-			if (!complTaskIds.containsAll(s.getRequiredTasks().stream().map(AbstractTask::getId).toList())) {
+			if (!complTaskIds.containsAll(s.getRequiredTasks().stream().map(Task::getId).toList())) {
 				log.trace("Filtered out a hidden skill");
 				continue;
 			}
 			PlaylistSkillViewDTO skillDTO = View.convert(s, PlaylistSkillViewDTO.class);
-			skillDTO.postApply(taskRepository, getTaskDTOs(getSkillRemainingTasks(s, complTaskIds)));
+			skillDTO.postApply(regularTaskRepository, getTaskDTOs(getSkillRemainingTasks(s, complTaskIds)));
 			skills.add(skillDTO);
 			log.debug("Skill '" + s.getName() + "' has " + skillDTO.getTasks().size() + "uncompleted tasks");
 		}
@@ -302,7 +304,7 @@ public class PlaylistService {
 		// TODO: Only temporary solution for compiling. This does not handle tasks correctly.
 		log.trace("Getting uncompleted tasks for skill: " + skill.getName());
 		log.trace("Skill '" + skill.getName() + "' has " + skill.getTasks().size() + " tasks in total");
-		return skill.getTasks().stream().map(AbstractTask::getId).filter(t -> !complTaskIds.contains(t))
+		return skill.getTasks().stream().map(Task::getId).filter(t -> !complTaskIds.contains(t))
 				.toList();
 
 	}
@@ -324,7 +326,7 @@ public class PlaylistService {
 		log.trace("Found " + checkpoints.size() + "checkpoints");
 		//		Get all taskcompletions for a student
 		List<Long> complTaskIds = person.getTaskCompletions().stream().map(TaskCompletion::getTask)
-				.map(Task::getId).toList();
+				.map(RegularTask::getId).toList();
 		List<PlaylistCheckpointDTO> checkpointDTOs = new LinkedList<>();
 
 		//		For each checkpoint, get uncompleted skills
