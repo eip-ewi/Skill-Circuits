@@ -77,6 +77,23 @@
     </th:block>
 
     <script layout:fragment="script" th:inline="javascript">
+        function insertTaskInOrder(order, taskList, taskLoc, items, task) {
+            if (items.length === 0) {
+                taskList.prepend(task);
+            } else if (
+                taskLoc >=
+                order.indexOf(items[items.length - 1].querySelector(".item__name").innerHTML)
+            ) {
+                taskList.appendChild(task);
+            } else {
+                for (let i = 0; i < items.length; i++) {
+                    if (order.indexOf(items[i].querySelector(".item__name").innerHTML) >= taskLoc) {
+                        items[i].insertAdjacentElement("beforebegin", task);
+                        break;
+                    }
+                }
+            }
+        }
         function addTaskToEditedSkill(button) {
             // Send custom path update if user is authenticated
 
@@ -100,7 +117,7 @@
                 url: "/person/add/" + taskId,
                 processData: false,
                 contentType: "application/json",
-                success: async () => {
+                success: async order => {
                     // Add task to left side
                     const task = await fetch(`/task/${taskId}`)
                         .then(res => res.text())
@@ -112,7 +129,11 @@
                         .catch(() => {
                             alert("Failed to add task");
                         });
-                    leftSide.querySelector(".items").appendChild(task);
+
+                    const taskLoc = order.indexOf(task.querySelector(".item__name").innerHTML);
+                    const items = leftSide.querySelectorAll(".item");
+                    const taskList = leftSide.querySelector(".items");
+                    insertTaskInOrder(order, taskList, taskLoc, items, task);
 
                     // Remove tasks from right side
                     rightSide.querySelectorAll(`.item[data-item="${taskId}"`).forEach(item => {
@@ -174,7 +195,7 @@
                 url: "/person/remove/" + taskId,
                 processData: false,
                 contentType: "application/json",
-                success: async () => {
+                success: async order => {
                     // Remove task from left side
                     document.getElementById(`item-${taskId}`).remove();
 
@@ -189,12 +210,21 @@
                         .catch(() => {
                             alert("Failed to add task");
                         });
+                    const taskLoc = order.indexOf(task.querySelector(".item__name").innerHTML);
+
                     [...rightSide.querySelectorAll(".path-toggle")]
                         .filter(path => paths.includes(path.dataset.id))
                         .forEach(path => {
-                            path.querySelector(".path-toggle__content").appendChild(
+                            const items = path.querySelectorAll(".item");
+                            const taskList = path.querySelector(".path-toggle__content");
+                            insertTaskInOrder(
+                                order,
+                                taskList,
+                                taskLoc,
+                                items,
                                 task.cloneNode(true)
                             );
+
                             // Make path toggle enabled if it was the first task
                             // Note: When CSS "has" is safely usable, this functionality can be moved to CSS
                             if (path.getAttribute("aria-disabled") === "true") {
