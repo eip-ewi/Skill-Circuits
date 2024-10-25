@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Submodules are editable after editing modules in the setup page (@bbakos)
 - Back button navigates to previously expanded skills instead of navigating to the same page (@ffiedrich)
 - Renaming a path does not remove all tasks in path (@ffiedrich)
+- Restore previously edited checkpoint when editing a new checkpoint (@bbakos)
 
 ## [2.2.6]
 

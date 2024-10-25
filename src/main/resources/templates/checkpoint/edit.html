@@ -44,7 +44,21 @@
     </div>
 
     <script th:if="${canEdit}" layout:fragment="script">
+        function cancelEdit(checkpointId) {
+            $("#edit-checkpoint-wrapper").append($("#edit-checkpoint"));
+            $(`#checkpoint-${checkpointId}`).attr("draggable", true);
+            $(`#checkpoint-${checkpointId}-display`).removeClass("hidden");
+            $(`#checkpoint-${checkpointId}-buttons`).removeClass("hidden");
+        }
+
         function editCheckpoint() {
+            let prevEdit = $("#edit-checkpoint-id").val();
+
+            // if a previously edited checkpoint wasn't finished, cancel it first
+            if (prevEdit !== "") {
+                cancelEdit(prevEdit);
+            }
+
             const checkpointId = $(this).data("checkpoint");
             const checkpointDisplay = $(`#checkpoint-${checkpointId}-display`);
             const checkpointName = $(`#checkpoint-${checkpointId}`).data("name");
@@ -90,6 +104,7 @@
                         checkpoint.data("name", newName);
                         $(`#checkpoint-${checkpointId}-display`).removeClass("hidden");
                         $(`#checkpoint-${checkpointId}-buttons`).removeClass("hidden");
+                        $("#edit-checkpoint-id").val("");
                     },
                 });
             });
@@ -97,11 +112,9 @@
             $(".checkpoint__edit").click(editCheckpoint);
 
             $("#edit-checkpoint-cancel").click(function () {
-                let checkpointId = $("#edit-checkpoint-id").val();
-                $("#edit-checkpoint-wrapper").append($("#edit-checkpoint"));
-                $(`#checkpoint-${checkpointId}`).attr("draggable", true);
-                $(`#checkpoint-${checkpointId}-display`).removeClass("hidden");
-                $(`#checkpoint-${checkpointId}-buttons`).removeClass("hidden");
+                let checkpointId = $("#edit-checkpoint-id");
+                cancelEdit(checkpointId.val());
+                checkpointId.val("");
             });
         });
     </script>
