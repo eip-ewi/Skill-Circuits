@@ -22,102 +22,79 @@
     lang="en"
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-    <li
-        layout:fragment="form"
-        th:if="${canEdit}"
-        id="create-task"
-        class="hidden item"
-        data-edit="only"
-        data-new="true">
-        <input type="hidden" name="skill.id" />
-        <input
-            name="time"
-            aria-label="Task time"
-            class="item__button__edit"
-            required
-            type="number"
-            min="0"
+    <th:block layout:fragment="form">
+        <li
+            th:if="${canEdit}"
+            id="create-task"
+            class="hidden item task"
             data-edit="only"
-            value="0" />
-        <div class="item__content" data-edit="only">
-            <div class="select item__icon__edit" data-edit="only">
-                <span
-                    class="select__label fa-solid"
-                    th:classappend="|fa-${T(nl.tudelft.skills.model.TaskType).values()[0].icon}|"
-                    data-edit="only"></span>
-                <div class="select__items" data-edit="only">
-                    <ul data-edit="only">
-                        <li
-                            data-edit="only"
-                            th:each="type : ${T(nl.tudelft.skills.model.TaskType).values()}">
-                            <button data-edit="only" th:data-value="${type}" type="button">
-                                <span
-                                    data-edit="only"
-                                    class="fa-solid"
-                                    th:classappend="|fa-${type.icon}|"></span>
-                                <span
-                                    data-edit="only"
-                                    th:text="#{|task.type.${#strings.toLowerCase(type.name())}|}"></span>
-                            </button>
-                        </li>
-                    </ul>
-                    <select data-edit="only" name="type" aria-label="Task type" hidden required>
-                        <option
-                            data-edit="only"
-                            th:each="type : ${T(nl.tudelft.skills.model.TaskType).values()}"
-                            th:data-icon="${type.icon}"
-                            th:value="${type}"></option>
-                    </select>
-                </div>
-            </div>
+            data-new="true">
+            <input type="hidden" name="skill.id" />
+            <span
+                th:if="${canEdit}"
+                class="fa-solid fa-ellipsis-vertical item__move always_visible"
+                data-edit="only"></span>
             <input
-                type="text"
-                data-edit="only"
-                name="name"
+                name="time"
+                aria-label="Task time"
+                class="item__button__edit"
                 required
-                placeholder="Name"
-                aria-label="Name" />
-        </div>
-        <div class="hover_input" data-edit="only">
-            <input
-                placeholder="Task link"
+                type="number"
+                min="0"
                 data-edit="only"
-                aria-label="Task URL"
-                type="url"
-                name="link" />
-            <span data-edit="only" class="fa-solid fa-link always_visible"></span>
-        </div>
-        <div class="item__buttons" data-edit="only">
-            <button
-                class="fa-solid fa-chevron-up item__up always_visible"
-                data-edit="only"></button>
-            <button
-                class="fa-solid fa-chevron-down item__down always_visible"
-                data-edit="only"></button>
+                value="0" />
+            <div class="item__content" data-edit="only">
+                <div class="select item__icon__edit" data-edit="only">
+                    <span
+                        class="select__label fa-solid"
+                        th:classappend="|fa-${T(nl.tudelft.skills.model.TaskType).values()[0].icon}|"
+                        data-edit="only"></span>
+                    <div class="select__items" data-edit="only">
+                        <ul data-edit="only">
+                            <li
+                                data-edit="only"
+                                th:each="type : ${T(nl.tudelft.skills.model.TaskType).values()}">
+                                <button data-edit="only" th:data-value="${type}" type="button">
+                                    <span
+                                        data-edit="only"
+                                        class="fa-solid"
+                                        th:classappend="|fa-${type.icon}|"></span>
+                                    <span
+                                        data-edit="only"
+                                        th:text="#{|task.type.${#strings.toLowerCase(type.name())}|}"></span>
+                                </button>
+                            </li>
+                        </ul>
+                        <select data-edit="only" name="type" aria-label="Task type" hidden required>
+                            <option
+                                data-edit="only"
+                                th:each="type : ${T(nl.tudelft.skills.model.TaskType).values()}"
+                                th:data-icon="${type.icon}"
+                                th:value="${type}"></option>
+                        </select>
+                    </div>
+                </div>
+                <input
+                    type="text"
+                    data-edit="only"
+                    name="name"
+                    required
+                    placeholder="Name"
+                    aria-label="Name" />
+            </div>
+            <div class="hover_input" data-edit="only">
+                <input
+                    placeholder="Task link"
+                    data-edit="only"
+                    aria-label="Task URL"
+                    type="url"
+                    name="link" />
+                <span data-edit="only" class="fa-solid fa-link always_visible"></span>
+            </div>
             <button class="fa-solid fa-trash item__delete always_visible" data-edit="only"></button>
-        </div>
-    </li>
+        </li>
+        <hr id="task-separation" data-edit="only" class="hidden item__separation" />
+    </th:block>
 
-    <script th:if="${canEdit}" layout:fragment="script">
-        function createItem() {
-            const button = $(this);
-            const elem = $("#create-task").clone(true);
-            elem.removeAttr("id");
-            elem.removeClass("hidden");
-            elem.children("input[type='hidden']").val(button.data("block"));
-
-            const taskList = button.closest("ul").find("ul").first();
-            const index = taskList.children().length;
-            elem.attr("data-index", index);
-            elem.data("index", index);
-
-            // As the <ul> has flex-direction: column-reverse we prepend the new task to have it at the end of the list
-            taskList.prepend(elem);
-            elem.find("input[name='time']").focus();
-        }
-
-        document.addEventListener("DOMContentLoaded", function () {
-            $(".item__create").click(createItem);
-        });
-    </script>
+    <script th:if="${canEdit}" layout:fragment="script" th:src="@{/js/createItem.js}"></script>
 </html>

@@ -141,6 +141,12 @@
                 <div layout:replace="~{task/select :: script}"></div>
                 <div layout:replace="~{task/inactiveview :: script}"></div>
 
+                <!-- Script for drag and drop of tasks -->
+                <script
+                    layout:fragment="script"
+                    th:if="${canEdit}"
+                    th:src="@{/js/dragDropTask.js}"></script>
+
                 <div layout:replace="~{checkpoint/view :: script}"></div>
                 <div layout:replace="~{checkpoint/edit :: form}"></div>
                 <div layout:replace="~{checkpoint/edit :: script}"></div>
