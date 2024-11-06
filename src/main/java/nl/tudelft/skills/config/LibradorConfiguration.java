@@ -19,6 +19,8 @@ package nl.tudelft.skills.config;
 
 import static org.modelmapper.convention.MatchingStrategies.STRICT;
 
+import nl.tudelft.skills.dto.old.id.*;
+import nl.tudelft.skills.model.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,14 +28,6 @@ import org.springframework.context.annotation.Configuration;
 import nl.tudelft.librador.EnableLibrador;
 import nl.tudelft.librador.LibradorConfigAdapter;
 import nl.tudelft.librador.dto.id.IdMapperBuilder;
-import nl.tudelft.skills.dto.id.CheckpointIdDTO;
-import nl.tudelft.skills.dto.id.SCEditionIdDTO;
-import nl.tudelft.skills.dto.id.SCModuleIdDTO;
-import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
-import nl.tudelft.skills.model.Checkpoint;
-import nl.tudelft.skills.model.SCEdition;
-import nl.tudelft.skills.model.SCModule;
-import nl.tudelft.skills.model.Submodule;
 
 @Configuration
 @EnableLibrador
@@ -45,6 +39,8 @@ public class LibradorConfiguration extends LibradorConfigAdapter {
 		builder.register(SCModuleIdDTO.class, SCModule.class);
 		builder.register(SubmoduleIdDTO.class, Submodule.class);
 		builder.register(CheckpointIdDTO.class, Checkpoint.class);
+		builder.register(SkillIdDTO.class, Skill.class);
+		builder.register(TaskIdDTO.class, Task.class);
 	}
 
 	@Bean

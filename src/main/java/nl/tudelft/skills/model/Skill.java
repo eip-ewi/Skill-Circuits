@@ -28,7 +28,6 @@ import org.hibernate.annotations.CascadeType;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import nl.tudelft.skills.model.labracore.SCPerson;
 
 @Data
 @Entity

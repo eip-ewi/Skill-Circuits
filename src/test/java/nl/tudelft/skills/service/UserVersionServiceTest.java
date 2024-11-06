@@ -24,6 +24,8 @@ import static org.mockito.Mockito.when;
 import java.time.Instant;
 import java.util.List;
 
+import nl.tudelft.skills.service.old.GitLabClient;
+import nl.tudelft.skills.service.old.UserVersionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
@@ -35,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.dto.view.ReleaseDTO;
+import nl.tudelft.skills.dto.old.view.ReleaseDTO;
 import nl.tudelft.skills.model.UserVersion;
 import nl.tudelft.skills.repository.UserVersionRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;

@@ -143,51 +143,6 @@ val jacocoTestReport by tasks.getting(JacocoReport::class) {
     }
 }
 
-tasks.register("ensureDirectory") {
-    // Store target directory into a variable to avoid project reference in the configuration cache
-    val directory = file("src/main/resources/static/css")
-
-    doLast {
-        Files.createDirectories(directory.toPath())
-    }
-}
-
-task<Exec>("sassCompile") {
-    dependsOn.add(tasks.getByName("ensureDirectory"))
-    if (System.getProperty("os.name").contains("windows",true)) {
-        commandLine("cmd", "/c", "sass", "src/main/resources/scss:src/main/resources/static/css")
-    } else {
-        commandLine("echo", "Checking for sass or sassc...")
-        doLast {
-            val res = exec {
-                isIgnoreExitValue = true
-                executable = "bash"
-                args = listOf("-l", "-c", "sass --version")
-            }
-            if (res.exitValue == 0) {
-                exec { commandLine("sass", "src/main/resources/scss:src/main/resources/static/css") }
-            } else {
-                File("src/main/resources/scss").listFiles()!!.filter { it.extension == "scss" && !it.name.startsWith("_") }.forEach {
-                    exec { commandLine("sassc", "src/main/resources/scss/${it.name}", "src/main/resources/static/css/${it.                        nameWithoutExtension}.css") }
-                }
-            }
-        }
-    }
-}
-
-
-task<Exec>("tsCompile") {
-    if (System.getProperty("os.name").contains("windows",true)) {
-        commandLine("cmd", "/c", "npm", "run", "tsCompile")
-    } else {
-        commandLine("npm", "run", "tsCompile")
-    }
-}
-
-val processResources by tasks.getting(ProcessResources::class) {
-    dependsOn.add(tasks.getByName("sassCompile"))
-    dependsOn.add(tasks.getByName("tsCompile"))
-}
 
 val bootJar by tasks.getting(BootJar::class) {
     enabled = true

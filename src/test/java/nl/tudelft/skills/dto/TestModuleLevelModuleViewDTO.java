@@ -28,9 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.dto.view.checkpoint.CheckpointViewDTO;
-import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
-import nl.tudelft.skills.dto.view.module.ModuleLevelSubmoduleViewDTO;
+import nl.tudelft.skills.dto.old.view.checkpoint.CheckpointViewDTO;
+import nl.tudelft.skills.dto.old.view.module.ModuleLevelModuleViewDTO;
+import nl.tudelft.skills.dto.old.view.module.ModuleLevelSubmoduleViewDTO;
 import nl.tudelft.skills.test.TestDatabaseLoader;
 
 @Transactional

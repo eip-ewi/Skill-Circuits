@@ -20,7 +20,6 @@ package nl.tudelft.skills.model;
 import javax.persistence.*;
 
 import lombok.*;
-import nl.tudelft.skills.model.labracore.SCPerson;
 
 @Data
 @Entity

@@ -20,7 +20,7 @@ package nl.tudelft.skills.repository.labracore;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
-import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.model.SCPerson;
 
 public interface PersonRepository extends JpaRepository<SCPerson, Long> {
 

@@ -51,9 +51,9 @@ public class LoginSecurityConfigurerAdapter extends LabradorSecurityConfigurerAd
 		http
 				.authorizeRequests()
 				// authenticate for these urls
-				.antMatchers("/admin/**")
-				.authenticated()
-				.anyRequest().permitAll();
+				.antMatchers("/**/*.css", "/**/*.js").permitAll()
+				.antMatchers("/login").permitAll()
+				.anyRequest().authenticated();
 	}
 
 	@Bean

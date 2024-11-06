@@ -26,7 +26,7 @@ import io.sentry.protocol.User;
 import nl.tudelft.labracore.lib.security.LabradorUserHandler;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.model.Inventory;
-import nl.tudelft.skills.model.labracore.SCPerson;
+import nl.tudelft.skills.model.SCPerson;
 import nl.tudelft.skills.repository.InventoryRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 

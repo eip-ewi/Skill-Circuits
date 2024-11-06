@@ -1,0 +1,129 @@
+:root {
+  --primary-colour: hsl(220deg 100% 50%);
+  --secondary-colour: hsl(200deg 100% 50%);
+  --accept-colour: hsl(110deg 100% 50%);
+
+  --background-colour: color-mix(in oklab, var(--primary-colour) 15%, white);
+  --on-background-colour: color-mix(in oklab, var(--background-colour) 80%, black);
+  --on-background-highlight-colour: color-mix(in srgb, var(--secondary-colour) 15%, transparent);
+
+  --header-colour: color-mix(in srgb, white 60%, transparent);
+  --on-header-colour: color-mix(in oklab, var(--primary-colour) 40%, black);
+  --on-header-active-colour: color-mix(in oklab, var(--primary-colour) 90%, black);
+
+  --group-colour: color-mix(in oklab, var(--background-colour) 50%, white);
+  --on-group-colour: color-mix(in oklab, var(--group-colour) 80%, black);
+
+  --block-colour: hsl(0deg 0% 100%);
+  --completed-block-colour: color-mix(in oklab, var(--accept-colour) 30%, var(--block-colour));
+  --on-block-colour: hsl(0deg 0% 0%);
+  --on-block-faded-colour: color-mix(in oklab, var(--on-block-colour) 15%, var(--block-colour));
+  --on-block-divider-colour: color-mix(in oklab, var(--on-block-colour) 30%, var(--block-colour));
+
+  --checkbox-checked-colour: color-mix(in oklab, var(--accept-colour) 80%, black);
+  --on-checkbox-checked-colour: hsl(0deg 0% 100%);
+
+  --shadow-colour: hsl(0deg 0% 0%);
+
+  font-family: 'Roboto', system-ui, sans-serif;
+
+  background-color: var(--background-colour);
+}
+
+* {
+  padding: 0;
+  margin: 0;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: inherit;
+  font-size: inherit;
+}
+
+input, button, select {
+  font-size: inherit;
+}
+
+body {
+  height: 100vh;
+}
+
+.header {
+  align-items: center;
+  backdrop-filter: blur(.25rem);
+  background-color: var(--header-colour);
+  border-radius: 100vw;
+  bottom: 2rem;
+  display: flex;
+  font-size: 1rem;
+  gap: 24rem;
+  left: 50%;
+  position: fixed;
+  padding: .75rem 3rem;
+  transform: translateX(-50%);
+  z-index: 100;
+
+  button {
+    align-items: center;
+    background: none;
+    border: none;
+    color: var(--on-header-colour);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+    text-wrap: nowrap;
+
+    :first-child {
+      font-size: 1.5rem;
+      transition: transform ease-in 80ms;
+      transform-origin: bottom;
+    }
+    &:focus-visible, &:hover {
+      color: var(--on-header-active-colour);
+      :first-child {
+        transform: scale(1.1);
+      }
+    }
+  }
+}
+
+#circuit {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+  padding: 2rem 4rem 10rem 4rem;
+  overflow-y: scroll;
+}
+
+#circuit-grid {
+  display: grid;
+  row-gap: 8rem;
+  column-gap: 6rem;
+  position: relative;
+}
+
+#circuit-title {
+  color: var(--on-background-colour);
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+#circuit-background {
+  filter: drop-shadow(.75rem 1.25rem 1rem color-mix(in srgb, var(--shadow-colour) 20%, transparent));
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
+  z-index: 2;
+}
+
+
+
+

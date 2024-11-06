@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Set;
 
+import nl.tudelft.skills.service.old.PathService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,7 +29,7 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.dto.patch.PathTasksPatchDTO;
+import nl.tudelft.skills.dto.old.patch.PathTasksPatchDTO;
 import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.repository.PathRepository;

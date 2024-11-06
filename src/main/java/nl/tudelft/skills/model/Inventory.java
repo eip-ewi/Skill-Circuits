@@ -33,7 +33,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import nl.tudelft.skills.model.labracore.SCPerson;
 
 @Data
 @Entity

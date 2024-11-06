@@ -31,6 +31,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
+import nl.tudelft.skills.controller.old.SubmoduleController;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,15 +45,15 @@ import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.dto.create.SubmoduleCreateDTO;
-import nl.tudelft.skills.dto.id.SCModuleIdDTO;
-import nl.tudelft.skills.dto.patch.SubmodulePatchDTO;
-import nl.tudelft.skills.dto.patch.SubmodulePositionPatchDTO;
+import nl.tudelft.skills.dto.old.create.SubmoduleCreateDTO;
+import nl.tudelft.skills.dto.old.id.SCModuleIdDTO;
+import nl.tudelft.skills.dto.old.patch.SubmodulePatchDTO;
+import nl.tudelft.skills.dto.old.patch.SubmodulePositionPatchDTO;
 import nl.tudelft.skills.model.Submodule;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.SubmoduleRepository;
-import nl.tudelft.skills.service.EditionService;
-import nl.tudelft.skills.service.SkillService;
+import nl.tudelft.skills.service.old.EditionService;
+import nl.tudelft.skills.service.old.SkillService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
