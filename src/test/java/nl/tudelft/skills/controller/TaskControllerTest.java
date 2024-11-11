@@ -152,7 +152,7 @@ public class TaskControllerTest extends ControllerTest {
 
 	}
 
-	@ParameterizedTest
+	@Test
 	@WithUserDetails("admin")
 	void getTaskForCustomPathAdmin() {
 		mockRole(roleApi, "ADMIN");
