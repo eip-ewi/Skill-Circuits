@@ -83,13 +83,15 @@
             rotate: 180deg;
         }
         .path-toggle__content {
-            display: initial;
+            display: flex;
+            flex-direction: column-reverse;
         }
     }
 
     &[aria-expanded="true"]:not(:last-child) {
         .path-toggle__content {
-            display: initial;
+            display: flex;
+            flex-direction: column-reverse;
             padding-bottom: 0.5rem;
         }
     }

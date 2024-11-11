@@ -23,6 +23,7 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <th:block layout:fragment="item">
+        <hr th:if="${canEdit}" data-edit="only" class="item__separation" />
         <th:block layout:replace="~{item/view :: item}">
             <th:block layout:fragment="item-content-element">
                 <a
@@ -45,6 +46,10 @@
                     class="hidden"
                     type="checkbox"
                     th:value="${item.id}" />
+                <span
+                    th:if="${canEdit}"
+                    class="fa-solid fa-ellipsis-vertical item__move always_visible"
+                    data-edit="only"></span>
                 <button
                     class="item__button"
                     th:data-staff="${canEdit}"
@@ -95,7 +100,15 @@
                     style="margin-left: auto"
                     title="Remove task from your path"
                     onclick="removeTaskFromEditedSkill(this)"></button>
+                <button
+                    th:if="${canEdit}"
+                    class="fa-solid fa-trash item__delete always_visible"
+                    data-edit="only"></button>
             </th:block>
         </th:block>
+        <hr
+            class="item__separation"
+            data-edit="only"
+            th:if="${canEdit} and (${iter == null} or ${iter.size - iter.count} == 0)" />
     </th:block>
 </html>

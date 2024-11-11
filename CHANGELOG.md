@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mention email address on the home page (@bbakos)
 ## Changed
 - Teacher view: Sorting modules, submodules and checkpoints at selection dropdowns (@bbakos)
+- Teacher view: Task order can be changed via drag and drop (@ffiedrich)
 - A course is added to "Your courses" if the user has a role, instead of if they completed a task (@ffiedrich)
 - TAs are handled similarly to students in the selection of a default edition for the homepage (@ffiedrich)
 ## Fixed
@@ -32,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Back button navigates to previously expanded skills instead of navigating to the same page (@ffiedrich)
 - Renaming a path does not remove all tasks in path (@ffiedrich)
 - Restore previously edited checkpoint when editing a new checkpoint (@bbakos)
+- Adding and removing a task on the custom path results in the teacher determined order (@bbakos)
 
 ## [2.2.6]
 

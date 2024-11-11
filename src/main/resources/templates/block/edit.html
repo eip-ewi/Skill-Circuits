@@ -179,7 +179,6 @@
             block.attr("data-editing", false);
             block.attr("draggable", true);
 
-            block.find(".item[data-new='true']").remove();
             const deleted = block.find(".item[data-delete='true']");
             deleted.attr("data-delete", false);
             deleted.data("delete", false);
@@ -209,14 +208,33 @@
                     }
                 });
             }
+
+            // Remove the new items
+            const numNewItems = block.find(".item[data-new='true']").length;
+            block.find(".item[data-new='true']").remove();
+
+            // Remove redundant item separations
+            block.find(".item__separation").slice(0, numNewItems).remove();
+
             const items = block.find(".item");
+            const separations = block.find(".item__separation");
+
+            // First, append an item separation, if there is one
+            if (separations.length > 0) {
+                block.find(".items")[1].appendChild(separations[0]);
+            }
+
+            // Re-order the items and item separations
             items.each((i, item) => {
                 block
                     .find(".items")[1]
                     .appendChild(
                         block.find(`.item[data-index-initial="${items.length - i - 1}"]`)[0]
                     );
-                $(item).data("index", $(item).data("index-initial"));
+
+                // Append an item separation, there should always be (number of tasks) + 1 separations,
+                // if there is at least one task
+                block.find(".items")[1].appendChild(separations[i + 1]);
 
                 let link = item.querySelector("a");
                 if (link != null) {
@@ -226,6 +244,7 @@
         }
         function saveEditOrCreate() {
             const block = $(this).parent().parent();
+            block.find(".task").attr("draggable", false);
             if (block.data("create")) {
                 createBlock(block);
             } else {
@@ -260,7 +279,7 @@
             return data;
         }
         function serialiseBlockItems(block) {
-            function serialiseItem(item) {
+            function serialiseItem(item, notDeletedItems) {
                 const data = {};
                 item.find("input, select").each((i, input) => {
                     const name = $(input).attr("name");
@@ -270,17 +289,19 @@
                         data[name.split(".")[0]][name.split(".")[1]] = value;
                     } else data[name] = value;
                 });
-                data["index"] = item.data("index");
+                // Reverse the item order and get item index
+                data["index"] = notDeletedItems.length - 1 - notDeletedItems.index(item);
+
                 data["new"] = item.data("new") === true;
                 data["delete"] = item.data("delete") === true;
                 return data;
             }
 
-            return block
-                .children(".items")
-                .find(".item")
-                .map((i, item) => serialiseItem($(item)))
-                .toArray();
+            const items = block.children(".items").find(".item");
+            const notDeletedItems = items.filter(function () {
+                return !$(this).data("delete");
+            });
+            return items.map((i, item) => serialiseItem($(item), notDeletedItems)).toArray();
         }
 
         function configureBlockEvents(block) {
@@ -305,8 +326,6 @@
                 block.find("input[name='hidden']").click(toggleRequiredTasksButton);
                 block.find("button[name='select-tasks']").click(selectRequiredTasks);
             }
-            block.find(".item__up").click(moveItemUp);
-            block.find(".item__down").click(moveItemDown);
             block.find(".item__delete").click(deleteItem);
         }
 
