@@ -154,7 +154,18 @@ public class TaskControllerTest extends ControllerTest {
 
 	@ParameterizedTest
 	@WithUserDetails("admin")
-	@CsvSource({ "TEACHER", "HEAD_TA", "ADMIN" })
+	void getTaskForCustomPathAdmin() {
+		mockRole(roleApi, "ADMIN");
+		taskController.getTaskForCustomPath(db.getTaskRead12().getId(), model);
+		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
+
+		assertThat(((TaskViewDTO) model.getAttribute("item")).getPathIds())
+				.containsExactly(db.getPathFinderPath().getId());
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER", "HEAD_TA" })
 	void getTaskForCustomPathAtLeastHeadTA(String role) {
 		mockRole(roleApi, role);
 		taskController.getTaskForCustomPath(db.getTaskRead12().getId(), model);
