@@ -50,18 +50,6 @@
                         </button>
                     </form>
                 </div>
-                <!--                Playlist feature-->
-                <div class="circuit__header__group" th:if="${studentOptedIn != null}">
-                    <button class="playlist-button" id="playlist-button-c">
-                        <span class="fa-solid fa-circle-play"></span>
-                        Playlist
-                    </button>
-                    <th:block th:if="${studentOptedIn.isPresent() && studentOptedIn.get()}">
-                        <div
-                            layout:replace="~{playlist/playlist :: playlistView(step=${playlistStep.getStep()})}"></div>
-                    </th:block>
-                    <div layout:replace="~{playlist/header-button :: opt-in-dialog}"></div>
-                </div>
             </div>
             <form class="tabs" th:with="view = ${param?.view}">
                 <button
@@ -90,15 +78,6 @@
                     </a>
                 </th:block>
             </div>
-
-            <!--        Playlist feature-->
-            <th:block th:if="${studentOptedIn != null}">
-                <div layout:replace="~{playlist/header-button :: script}"></div>
-                <th:block th:if="${studentOptedIn.isPresent() && studentOptedIn.get()}">
-                    <div
-                        layout:replace="~{playlist/playlist :: script(step=${playlistStep.getStep()})}"></div>
-                </th:block>
-            </th:block>
         </div>
     </body>
 </html>
