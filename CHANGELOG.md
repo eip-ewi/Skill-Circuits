@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Revealed skills are not hidden again when required tasks are marked as uncomplete (@rglans)
 - Skills do not duplicate after the cancellation of the editing (@bbakos)
 - Moving "Optional" box inside the expanded skill (@bbakos)
+- Only authorized people can access tasks (@bbakos)
 - Submodules are editable after editing modules in the setup page (@bbakos)
 - Back button navigates to previously expanded skills instead of navigating to the same page (@ffiedrich)
 - Renaming a path does not remove all tasks in path (@ffiedrich)
