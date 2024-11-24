@@ -22,7 +22,6 @@ import javax.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import nl.tudelft.librador.dto.patch.Patch;
-import nl.tudelft.skills.dto.id.SkillIdDTO;
 import nl.tudelft.skills.model.RegularTask;
 
 @Data
@@ -37,8 +36,6 @@ public class TaskPatchDTO extends Patch<RegularTask> {
 	private Long id;
 	@NotNull
 	private Integer index;
-	@NotNull
-	private SkillIdDTO skill;
 	@NotNull
 	private TaskInfoPatchDTO taskInfo;
 

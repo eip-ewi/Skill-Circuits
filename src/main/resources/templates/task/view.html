@@ -60,7 +60,7 @@
                     class="item__button__edit"
                     th:data-initial="${item.time}"
                     required
-                    name="time"
+                    name="taskInfo.time"
                     type="number"
                     min="0"
                     data-edit="only"
@@ -88,7 +88,7 @@
                         data-edit="only"
                         aria-label="Task URL"
                         type="url"
-                        name="link"
+                        name="taskInfo.link"
                         th:value="${item.link}" />
                     <span data-edit="only" class="fa-solid fa-link always_visible"></span>
                 </div>

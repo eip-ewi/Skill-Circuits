@@ -323,8 +323,8 @@ public class SkillService {
 
 		return taskPatches.stream().map(patch -> {
 			RegularTask task = (RegularTask) idToTask.get(patch.getId());
-			var test = (Task) taskRepository.save(patch.apply(task));
-			return test;
+			task.setTaskInfo(patch.getTaskInfo().apply(task.getTaskInfo()));
+			return (Task) taskRepository.save(patch.apply(task));
 		}).collect(Collectors.toList());
 	}
 

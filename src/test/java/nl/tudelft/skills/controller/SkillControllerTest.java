@@ -217,6 +217,8 @@ public class SkillControllerTest extends ControllerTest {
 
 	@Test
 	void patchSkill() {
+		// TODO: add a test for changes in a patched task
+
 		Long skillId = db.getSkillVariables().getId();
 		RegularTask old = db.getTaskRead10();
 		TaskCreateDTO taskAdded = TaskCreateDTO.builder()
@@ -227,9 +229,8 @@ public class SkillControllerTest extends ControllerTest {
 				.build();
 		TaskPatchDTO oldTask = TaskPatchDTO.builder()
 				.taskInfo(TaskInfoPatchDTO.builder().name(old.getName())
-						.time(old.getTime()).build())
+						.time(old.getTime()).type(old.getType()).build())
 				.id(old.getId())
-				.skill(new SkillIdDTO(skillId))
 				.index(old.getIdx()).build();
 
 		// Add a task and remove a task
