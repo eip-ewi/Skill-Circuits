@@ -36,7 +36,7 @@ import org.springframework.ui.Model;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
-import nl.tudelft.skills.dto.view.module.TaskViewDTO;
+import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.*;
@@ -169,7 +169,7 @@ public class PersonServiceTest {
 		assertThat(taskIds).isEmpty();
 		assertThat(model.getAttribute("selectedPathId")).isNull();
 		assertThat(model.getAttribute("tasksAdded"))
-				.isEqualTo(Set.of(View.convert(db.getTaskDo10a(), TaskViewDTO.class)));
+				.isEqualTo(Set.of(View.convert(db.getTaskDo10a(), RegularTaskViewDTO.class)));
 		assertThat(model.getAttribute("skillsModified")).isEqualTo(
 				Set.of(View.convert(db.getSkillVariables(), ModuleLevelSkillViewDTO.class),
 						View.convert(db.getSkillImplication(), ModuleLevelSkillViewDTO.class)));
@@ -192,7 +192,7 @@ public class PersonServiceTest {
 		assertThat(taskIds.get()).containsExactly(db.getTaskRead12().getId());
 		assertThat(model.getAttribute("selectedPathId")).isEqualTo(db.getPathFinderPath().getId());
 		assertThat(model.getAttribute("tasksAdded"))
-				.isEqualTo(Set.of(View.convert(db.getTaskDo10a(), TaskViewDTO.class)));
+				.isEqualTo(Set.of(View.convert(db.getTaskDo10a(), RegularTaskViewDTO.class)));
 		assertThat(model.getAttribute("skillsModified")).isEqualTo(
 				Set.of(View.convert(db.getSkillVariables(), ModuleLevelSkillViewDTO.class),
 						View.convert(db.getSkillImplication(), ModuleLevelSkillViewDTO.class)));
@@ -223,7 +223,7 @@ public class PersonServiceTest {
 		assertThat(taskIds.get()).containsExactly(db.getTaskRead12().getId());
 		assertThat(model.getAttribute("selectedPathId")).isEqualTo(db.getPathFinderPath().getId());
 		assertThat(model.getAttribute("tasksAdded"))
-				.isEqualTo(Set.of(View.convert(db.getTaskDo10a(), TaskViewDTO.class)));
+				.isEqualTo(Set.of(View.convert(db.getTaskDo10a(), RegularTaskViewDTO.class)));
 		assertThat(model.getAttribute("skillsModified")).isEqualTo(
 				Set.of(View.convert(db.getSkillVariables(), ModuleLevelSkillViewDTO.class)));
 	}

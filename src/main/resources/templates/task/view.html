@@ -39,6 +39,9 @@
                 </th:block>
             </th:block>
             <th:block layout:fragment="item-decoration">
+                <input type="hidden" name="skill.id" th:value="${block.id}" />
+                <!-- TODO: this needs to be set to ChoiceTask for ChoiceTasks -->
+                <input type="hidden" name="type" value="RegularTask" />
                 <input
                     th:if="${canEdit}"
                     aria-label="Selected"

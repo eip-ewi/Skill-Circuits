@@ -19,28 +19,28 @@ package nl.tudelft.skills.dto.create;
 
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import nl.tudelft.librador.dto.create.Create;
 import nl.tudelft.skills.dto.id.SkillIdDTO;
-import nl.tudelft.skills.model.RegularTask;
+import nl.tudelft.skills.model.Task;
 
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class TaskCreateDTO extends Create<RegularTask> {
-	// TODO: ability to create choice task, for now only tasks
-
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
+@JsonSubTypes({
+		@JsonSubTypes.Type(value = RegularTaskCreateDTO.class, name = "RegularTask"),
+		@JsonSubTypes.Type(value = ChoiceTaskCreateDTO.class, name = "ChoiceTask")
+})
+public abstract class TaskCreateDTO<D extends Task> extends Create<D> {
 	@NotNull
 	private SkillIdDTO skill;
 	@NotNull
 	private Integer index;
-	@NotNull
-	private TaskInfoCreateDTO taskInfo;
-
-	@Override
-	public Class<RegularTask> clazz() {
-		return RegularTask.class;
-	}
 }

@@ -57,9 +57,8 @@ public class SkillCreateDTO extends Create<Skill> {
 	@NotNull
 	private Integer column;
 
-	// TODO: ability to create choice task, for now only tasks
 	@NotNull
-	private List<TaskCreateDTO> newItems;
+	private List<TaskCreateDTO<?>> newItems;
 	@NotNull
 	private List<Long> requiredTaskIds;
 

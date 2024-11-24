@@ -38,6 +38,7 @@ import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSubmoduleViewDTO;
+import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
@@ -132,7 +133,11 @@ public class ModuleService {
 				.forEach(skill -> {
 					skill.setCompletedRequiredTasks(completedTasks.containsAll(skill.getRequiredTaskIds()));
 					skill.getTasks()
-							.forEach(task -> task.setCompleted(completedTasks.contains(task.getId())));
+							.forEach(task -> {
+								if (task instanceof RegularTaskViewDTO view) {
+									view.setCompleted(completedTasks.contains(task.getId()));
+								}
+							});
 				});
 	}
 

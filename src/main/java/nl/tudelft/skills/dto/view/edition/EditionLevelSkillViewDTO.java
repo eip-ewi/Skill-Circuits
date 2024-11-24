@@ -25,7 +25,7 @@ import javax.validation.constraints.NotNull;
 import lombok.*;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.ItemView;
-import nl.tudelft.skills.dto.view.module.TaskViewDTO;
+import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
 import nl.tudelft.skills.model.Skill;
 
 @Data
@@ -43,6 +43,6 @@ public class EditionLevelSkillViewDTO extends View<Skill> implements ItemView {
 	private Boolean hidden;
 	// TODO: ability to view choice task, for now only tasks
 	@NotNull
-	private List<TaskViewDTO> tasks;
+	private List<RegularTaskViewDTO> tasks;
 
 }

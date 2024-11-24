@@ -29,7 +29,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.EditLinkDTO;
-import nl.tudelft.skills.dto.view.module.TaskViewDTO;
+import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
 import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.repository.RegularTaskRepository;
 import nl.tudelft.skills.security.AuthorisationService;
@@ -38,7 +38,7 @@ import nl.tudelft.skills.security.AuthorisationService;
 @RequestMapping("task")
 public class TaskController {
 	private final RegularTaskRepository regularTaskRepository;
-	private AuthorisationService authorisationService;
+	private final AuthorisationService authorisationService;
 
 	@Autowired
 	public TaskController(RegularTaskRepository regularTaskRepository,
@@ -79,7 +79,7 @@ public class TaskController {
 		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
 		if (task.getSkill().getSubmodule().getModule().getEdition().isVisible() || authorisationService
 				.isAtLeastHeadTAInEdition(task.getSkill().getSubmodule().getModule().getEdition().getId())) {
-			model.addAttribute("item", View.convert(task, TaskViewDTO.class));
+			model.addAttribute("item", View.convert(task, RegularTaskViewDTO.class));
 			model.addAttribute("canEdit", false);
 			model.addAttribute("level", "module");
 			return "task/view";
@@ -102,7 +102,7 @@ public class TaskController {
 		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
 		if (task.getSkill().getSubmodule().getModule().getEdition().isVisible() || authorisationService
 				.isAtLeastHeadTAInEdition(task.getSkill().getSubmodule().getModule().getEdition().getId())) {
-			model.addAttribute("item", View.convert(task, TaskViewDTO.class));
+			model.addAttribute("item", View.convert(task, RegularTaskViewDTO.class));
 			model.addAttribute("canEdit", false);
 			return "task/inactiveview :: item";
 		}

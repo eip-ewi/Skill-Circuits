@@ -15,36 +15,40 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.patch;
+package nl.tudelft.skills.dto.view.module;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import nl.tudelft.librador.dto.patch.Patch;
-import nl.tudelft.skills.dto.id.SkillIdDTO;
-import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.RegularTask;
+import nl.tudelft.skills.model.TaskType;
 
 @Data
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
-@JsonSubTypes({
-		@JsonSubTypes.Type(value = RegularTaskPatchDTO.class, name = "RegularTask"),
-		@JsonSubTypes.Type(value = ChoiceTaskPatchDTO.class, name = "ChoiceTask")
-})
-public abstract class TaskPatchDTO<D extends Task> extends Patch<D> {
+@EqualsAndHashCode(callSuper = true)
+public class RegularTaskViewDTO extends TaskViewDTO<RegularTask> {
+	// TODO SuperBuilder?
+	@NotBlank
+	private String name;
 	@NotNull
-	private Long id;
-	@NotNull
-	private Integer index;
-	@NotNull
-	private SkillIdDTO skill;
+	private TaskType type;
+	@Min(0)
+	private Integer time;
+	private String link;
+	@Builder.Default
+	private boolean completed = false;
 
-	// TODO: apply id and index?
+	@NotNull
+	private Integer completedCount;
+
+	@Override
+	public void postApply() {
+		super.postApply();
+		completedCount = data.getCompletedBy().size();
+	}
 }

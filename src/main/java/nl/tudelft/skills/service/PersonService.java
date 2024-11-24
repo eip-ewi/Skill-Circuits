@@ -28,7 +28,7 @@ import org.springframework.ui.Model;
 
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
-import nl.tudelft.skills.dto.view.module.TaskViewDTO;
+import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.PathRepository;
@@ -101,14 +101,14 @@ public class PersonService {
 		if (skill == null) {
 			model.addAttribute("tasksAdded",
 					tasks.stream().filter(t -> t instanceof RegularTask)
-							.map(at -> View.convert((RegularTask) at, TaskViewDTO.class))
+							.map(at -> View.convert((RegularTask) at, RegularTaskViewDTO.class))
 							.collect(Collectors.toSet()));
 			model.addAttribute("skillsModified", skillsModified.stream()
 					.map(at -> View.convert(at, ModuleLevelSkillViewDTO.class)).collect(Collectors.toSet()));
 		} else {
 			model.addAttribute("tasksAdded", tasks.stream()
 					.filter(t -> t instanceof RegularTask && skill.getTasks().contains(t))
-					.map(at -> View.convert((RegularTask) at, TaskViewDTO.class))
+					.map(at -> View.convert((RegularTask) at, RegularTaskViewDTO.class))
 					.collect(Collectors.toSet()));
 			model.addAttribute("skillsModified",
 					skillsModified.contains(skill)

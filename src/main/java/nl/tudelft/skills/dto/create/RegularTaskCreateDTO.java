@@ -15,36 +15,26 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.patch;
+package nl.tudelft.skills.dto.create;
 
 import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import nl.tudelft.librador.dto.patch.Patch;
-import nl.tudelft.skills.dto.id.SkillIdDTO;
-import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.RegularTask;
 
 @Data
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
-@JsonSubTypes({
-		@JsonSubTypes.Type(value = RegularTaskPatchDTO.class, name = "RegularTask"),
-		@JsonSubTypes.Type(value = ChoiceTaskPatchDTO.class, name = "ChoiceTask")
-})
-public abstract class TaskPatchDTO<D extends Task> extends Patch<D> {
+@EqualsAndHashCode(callSuper = true)
+public class RegularTaskCreateDTO extends TaskCreateDTO<RegularTask> {
+	// TODO SuperBuilder?
 	@NotNull
-	private Long id;
-	@NotNull
-	private Integer index;
-	@NotNull
-	private SkillIdDTO skill;
+	private TaskInfoCreateDTO taskInfo;
 
-	// TODO: apply id and index?
+	@Override
+	public Class<RegularTask> clazz() {
+		return RegularTask.class;
+	}
 }

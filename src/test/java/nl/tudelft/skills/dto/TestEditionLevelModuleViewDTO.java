@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.edition.EditionLevelModuleViewDTO;
-import nl.tudelft.skills.dto.view.module.TaskViewDTO;
+import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
 import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.repository.RegularTaskRepository;
 import nl.tudelft.skills.test.TestDatabaseLoader;
@@ -60,7 +60,7 @@ public class TestEditionLevelModuleViewDTO {
 
 		EditionLevelModuleViewDTO view = View.convert(db.getModuleProofTechniques(),
 				EditionLevelModuleViewDTO.class);
-		TaskViewDTO taskViewDTO = View.convert(task, TaskViewDTO.class);
-		assertThat(view.getTasksWithLinks()).containsExactly(taskViewDTO);
+		RegularTaskViewDTO regularTaskViewDTO = View.convert(task, RegularTaskViewDTO.class);
+		assertThat(view.getTasksWithLinks()).containsExactly(regularTaskViewDTO);
 	}
 }

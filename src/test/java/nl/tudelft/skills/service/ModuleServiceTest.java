@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
+import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
 import nl.tudelft.skills.dto.view.module.TaskViewDTO;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.test.TestDatabaseLoader;
@@ -59,7 +60,7 @@ public class ModuleServiceTest {
 		assertThat(module.getSubmodules().stream()
 				.flatMap(sub -> sub.getSkills().stream())
 				.flatMap(skill -> skill.getTasks().stream())
-				.filter(TaskViewDTO::isCompleted)
+				.filter(view -> view instanceof RegularTaskViewDTO v && v.isCompleted())
 				.map(TaskViewDTO::getId).toList())
 				.containsExactlyInAnyOrderElementsOf(
 						List.of(db.getTaskRead11().getId(),

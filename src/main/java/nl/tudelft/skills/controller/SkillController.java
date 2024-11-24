@@ -82,7 +82,11 @@ public class SkillController {
 		// Set completed tasks
 		Set<Long> completedTasks = personRepository.getById(person.getId()).getTaskCompletions().stream()
 				.map(tc -> tc.getTask().getId()).collect(Collectors.toSet());
-		view.getTasks().forEach(t -> t.setCompleted(completedTasks.contains(t.getId())));
+		view.getTasks().forEach(t -> {
+			if (t instanceof RegularTaskViewDTO regularTaskViewDTO) {
+				regularTaskViewDTO.setCompleted(completedTasks.contains(t.getId()));
+			}
+		});
 
 		// Add general model attributes
 		model.addAttribute("level", "module");

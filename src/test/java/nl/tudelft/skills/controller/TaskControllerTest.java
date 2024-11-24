@@ -41,6 +41,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.EditLinkDTO;
+import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
 import nl.tudelft.skills.dto.view.module.TaskViewDTO;
 import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.model.Task;
@@ -125,7 +126,7 @@ public class TaskControllerTest extends ControllerTest {
 		taskController.getTask(db.getTaskRead12().getId(), model);
 		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
 
-		assertThat(((TaskViewDTO) model.getAttribute("item")).getPathIds())
+		assertThat(((RegularTaskViewDTO) model.getAttribute("item")).getPathIds())
 				.containsExactly(db.getPathFinderPath().getId());
 	}
 
@@ -160,7 +161,7 @@ public class TaskControllerTest extends ControllerTest {
 		taskController.getTaskForCustomPath(db.getTaskRead12().getId(), model);
 		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
 
-		assertThat(((TaskViewDTO) model.getAttribute("item")).getPathIds())
+		assertThat(((RegularTaskViewDTO) model.getAttribute("item")).getPathIds())
 				.containsExactly(db.getPathFinderPath().getId());
 	}
 

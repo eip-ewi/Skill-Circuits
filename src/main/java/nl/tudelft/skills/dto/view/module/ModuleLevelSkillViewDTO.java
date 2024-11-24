@@ -51,10 +51,11 @@ public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
 	@NotNull
 	@EqualsAndHashCode.Exclude
 	private CheckpointViewDTO checkpoint;
-	@NotNull
-	@PostApply
+
+	// TODO check for correctness
 	@EqualsAndHashCode.Exclude
-	private List<TaskViewDTO> tasks;
+	private List<? extends TaskViewDTO<?>> tasks;
+
 	@NotNull
 	private List<Long> parentIds;
 	@NotNull
@@ -72,6 +73,13 @@ public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
 		this.parentIds = data.getParents().stream().map(AbstractSkill::getId).toList();
 		this.childIds = data.getChildren().stream().map(AbstractSkill::getId).toList();
 		this.requiredTaskIds = data.getRequiredTasks().stream().map(Task::getId).toList();
+		// TODO Use ModelMapper or View.convert instead of if-else
+		this.tasks = data.getTasks().stream().map(t -> {
+			if (t instanceof RegularTask) {
+				return View.convert((RegularTask) t, RegularTaskViewDTO.class);
+			}
+			return View.convert((ChoiceTask) t, ChoiceTaskViewDTO.class);
+		}).toList();
 	}
 
 	@Override

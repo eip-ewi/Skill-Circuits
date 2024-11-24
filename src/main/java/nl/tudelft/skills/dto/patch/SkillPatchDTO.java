@@ -52,14 +52,13 @@ public class SkillPatchDTO extends Patch<Skill> {
 	@Builder.Default
 	private Boolean hidden = false;
 	private SubmoduleIdDTO submodule;
-	@NotNull
-	@Builder.Default
-	private List<TaskPatchDTO> items = new ArrayList<>();
-	@NotNull
-	@Builder.Default
-	private List<TaskCreateDTO> newItems = new ArrayList<>();
 
-	// TODO: ability to patch choice task, for now only tasks
+	@NotNull
+	@Builder.Default
+	private List<TaskPatchDTO<?>> items = new ArrayList<>();
+	@NotNull
+	@Builder.Default
+	private List<TaskCreateDTO<?>> newItems = new ArrayList<>();
 
 	@NotNull
 	@Builder.Default
@@ -76,8 +75,8 @@ public class SkillPatchDTO extends Patch<Skill> {
 		updateNonNullId(submodule, data::setSubmodule);
 	}
 
-	// TODO: the methods below need to be changed when ChoiceTasks are implemented
 	// TODO: Maybe also map the required tasks externally
+
 	@Override
 	protected void applyManyToManyMappedBy() {
 		if (hidden) {

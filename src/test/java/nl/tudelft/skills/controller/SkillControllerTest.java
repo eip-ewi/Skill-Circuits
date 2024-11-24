@@ -48,12 +48,12 @@ import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.create.*;
 import nl.tudelft.skills.dto.id.*;
+import nl.tudelft.skills.dto.patch.RegularTaskPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
 import nl.tudelft.skills.dto.patch.TaskInfoPatchDTO;
-import nl.tudelft.skills.dto.patch.TaskPatchDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
-import nl.tudelft.skills.dto.view.module.TaskViewDTO;
+import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.*;
@@ -143,7 +143,7 @@ public class SkillControllerTest extends ControllerTest {
 
 	@Test
 	void createSkillWithTasks() {
-		TaskCreateDTO taskDto = TaskCreateDTO.builder()
+		RegularTaskCreateDTO taskDto = RegularTaskCreateDTO.builder()
 				.taskInfo(TaskInfoCreateDTO.builder().name("New Task").type(TaskType.EXERCISE)
 						.time(1).build())
 				.build();
@@ -221,16 +221,17 @@ public class SkillControllerTest extends ControllerTest {
 
 		Long skillId = db.getSkillVariables().getId();
 		RegularTask old = db.getTaskRead10();
-		TaskCreateDTO taskAdded = TaskCreateDTO.builder()
+		RegularTaskCreateDTO taskAdded = RegularTaskCreateDTO.builder()
 				.taskInfo(TaskInfoCreateDTO.builder().name("New Task").type(TaskType.EXERCISE)
 						.time(1).build())
 				.skill(new SkillIdDTO(skillId))
 				.index(1)
 				.build();
-		TaskPatchDTO oldTask = TaskPatchDTO.builder()
+		RegularTaskPatchDTO oldTask = RegularTaskPatchDTO.builder()
 				.taskInfo(TaskInfoPatchDTO.builder().name(old.getName())
 						.time(old.getTime()).type(old.getType()).build())
 				.id(old.getId())
+				.skill(new SkillIdDTO(skillId))
 				.index(old.getIdx()).build();
 
 		// Add a task and remove a task
@@ -511,16 +512,16 @@ public class SkillControllerTest extends ControllerTest {
 		ModuleLevelSkillViewDTO view = View.convert(skill, ModuleLevelSkillViewDTO.class);
 		view.getTasks().stream().filter(t -> t.getId().equals(taskRead.getId()))
 				.findFirst().get().setVisible(false);
-		TaskViewDTO taskView = view.getTasks().stream()
-				.filter(t -> t.getId().equals(taskDo.getId()))
-				.findFirst().get();
+		RegularTaskViewDTO taskView = view.getTasks().stream()
+				.filter(t -> t instanceof RegularTaskViewDTO && t.getId().equals(taskDo.getId()))
+				.findFirst().map(v -> (RegularTaskViewDTO) v).get();
 		taskView.setCompleted(true);
 		assertThat(model.getAttribute("block")).isEqualTo(view);
 
 		// Assert on added model attributes concerning paths and added tasks/modified skills
 		assertThat(model.getAttribute("selectedPathId")).isEqualTo(pathfinderPath.getId());
 		assertThat(model.getAttribute("tasksAdded")).isEqualTo(Set.of(
-				View.convert(taskDo, TaskViewDTO.class)));
+				View.convert(taskDo, RegularTaskViewDTO.class)));
 		assertThat(model.getAttribute("skillsModified")).isEqualTo(Set.of(view));
 	}
 

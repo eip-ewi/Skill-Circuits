@@ -15,45 +15,51 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.model;
+package nl.tudelft.skills.dto.create;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import nl.tudelft.skills.dto.view.module.ChoiceTaskViewDTO;
-import nl.tudelft.skills.dto.view.module.TaskViewDTO;
+import nl.tudelft.skills.model.ChoiceTask;
 
 @Data
-@Entity
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class ChoiceTask extends Task {
-	// Can be empty
+public class ChoiceTaskCreateDTO extends TaskCreateDTO<ChoiceTask> {
+	// TODO SuperBuilder?
 	private String name;
-
-	@Builder.Default
+	@NotNull
 	@Min(1)
-	private Integer minTasks = 1;
-
+	private Integer minTasks;
 	@NotNull
 	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@OneToMany
-	private List<TaskInfo> tasks = new ArrayList<>();
+	private List<RegularTaskCreateDTO> tasks = new ArrayList<>();
+	// TODO might need to add taskInfo here, since it is a Create class
 
 	@Override
-	public Class<? extends TaskViewDTO<?>> viewClass() {
-		return ChoiceTaskViewDTO.class;
+	protected void postApply(ChoiceTask data) {
+		if (name != null && name.isBlank()) {
+			data.setName(null);
+		}
 	}
 
+	@Override
+	public Class<ChoiceTask> clazz() {
+		return ChoiceTask.class;
+	}
+
+	@Override
+	public void validate() {
+		// Validate RegularTasks and this ChoiceTask to have same Skill
+		if (!tasks.stream().allMatch(t -> Objects.equals(t.getSkill().getId(), getSkill().getId()))) {
+			errors.rejectValue("tasks", "skillOfTasksNotMatching",
+					"RegularTask is not in same Skill as ChoiceTask");
+		}
+	}
 }

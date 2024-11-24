@@ -30,9 +30,13 @@ import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
 import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
+import nl.tudelft.skills.dto.create.ChoiceTaskCreateDTO;
+import nl.tudelft.skills.dto.create.RegularTaskCreateDTO;
 import nl.tudelft.skills.dto.create.SkillCreateDTO;
 import nl.tudelft.skills.dto.create.TaskCreateDTO;
 import nl.tudelft.skills.dto.id.SkillIdDTO;
+import nl.tudelft.skills.dto.patch.ChoiceTaskPatchDTO;
+import nl.tudelft.skills.dto.patch.RegularTaskPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.TaskPatchDTO;
 import nl.tudelft.skills.model.*;
@@ -238,13 +242,29 @@ public class SkillService {
 	 * @return             A list of the tasks that were created.
 	 */
 	@Transactional
-	public List<Task> saveNewTasks(Skill skill, List<TaskCreateDTO> newTaskDTOs) {
+	public List<Task> saveNewTasks(Skill skill, List<? extends TaskCreateDTO<?>> newTaskDTOs) {
+		// Create sub-lists for Task types
+		List<RegularTaskCreateDTO> newRegularTasks = newTaskDTOs.stream()
+				.filter(create -> create instanceof RegularTaskCreateDTO)
+				.map(create -> (RegularTaskCreateDTO) create)
+				.toList();
+		List<ChoiceTaskCreateDTO> newChoiceTasks = newTaskDTOs.stream()
+				.filter(create -> create instanceof ChoiceTaskCreateDTO)
+				.map(create -> (ChoiceTaskCreateDTO) create)
+				.toList();
+
 		// New tasks will be included in all paths by default
 		SCEdition edition = skill.getSubmodule().getModule().getEdition();
 		Set<Path> paths = new HashSet<>(pathRepository.findAllByEditionId(edition.getId()));
 
-		return newTaskDTOs.stream().map(dto -> (Task) saveTaskFromRegularTaskDto(dto, skill, paths))
+		// Set all task attributes and save to database
+		List<Task> newTasks = newChoiceTasks.stream()
+				.flatMap(dto -> saveTasksFromChoiceTaskDto(dto, skill, paths).stream())
 				.collect(Collectors.toList());
+		newTasks.addAll(
+				newRegularTasks.stream().map(dto -> saveTaskFromRegularTaskDto(dto, skill, paths)).toList());
+
+		return newTasks;
 	}
 
 	/**
@@ -262,10 +282,8 @@ public class SkillService {
 
 		List<Task> oldTasks = skill.getTasks();
 		skill = patch.apply(skill);
-
 		// Patch items
 		List<Task> allTasks = new ArrayList<>(patchTasks(skill, patch.getItems()));
-
 		// Save new items
 		allTasks.addAll(saveNewTasks(skill, patch.getNewItems()));
 
@@ -317,15 +335,34 @@ public class SkillService {
 	 * @return             A list of the tasks that were patched.
 	 */
 	@Transactional
-	public List<Task> patchTasks(Skill skill, List<TaskPatchDTO> taskPatches) {
+	public List<Task> patchTasks(Skill skill, List<? extends TaskPatchDTO<?>> taskPatches) {
 		Map<Long, Task> idToTask = skill.getTasks().stream()
 				.collect(Collectors.toMap(Task::getId, Function.identity()));
 
-		return taskPatches.stream().map(patch -> {
+		// Create sub-lists for Task types
+		List<RegularTaskPatchDTO> newRegularTasks = taskPatches.stream()
+				.filter(patch -> patch instanceof RegularTaskPatchDTO)
+				.map(patch -> (RegularTaskPatchDTO) patch)
+				.toList();
+		List<ChoiceTaskPatchDTO> newChoiceTasks = taskPatches.stream()
+				.filter(patch -> patch instanceof ChoiceTaskPatchDTO)
+				.map(patch -> (ChoiceTaskPatchDTO) patch)
+				.toList();
+
+		// Patch the Tasks
+		List<Task> allTasks = new ArrayList<>();
+		allTasks.addAll(newRegularTasks.stream().map(patch -> {
 			RegularTask task = (RegularTask) idToTask.get(patch.getId());
 			task.setTaskInfo(patch.getTaskInfo().apply(task.getTaskInfo()));
-			return (Task) taskRepository.save(patch.apply(task));
-		}).collect(Collectors.toList());
+			return taskRepository.save(patch.apply(task));
+		}).toList());
+		allTasks.addAll(newChoiceTasks.stream().map(patch -> {
+			// TODO: Patching ChoiceTasks correctly
+			ChoiceTask task = (ChoiceTask) idToTask.get(patch.getId());
+			return taskRepository.save(patch.apply(task));
+		}).toList());
+
+		return allTasks;
 	}
 
 	/**
@@ -340,15 +377,45 @@ public class SkillService {
 	}
 
 	/**
-	 * Saves the RegularTask specified by a TaskCreateDTO, and adds it to a given skill and paths.
+	 * Saves a ChoiceTask and the RegularTasks that are in the ChoiceTask, specified by a ChoiceTaskCreateDTO.
+	 * All new tasks are added to a given skill and paths.
 	 *
-	 * @param  regularTaskDTO The TaskCreateDTO for creating the RegularTask.
+	 * @param  choiceTaskDTO The ChoiceTaskCreateDTO for creating the ChoiceTask and the RegularTasks in it.
+	 * @param  skill         The skill to which the tasks should be added.
+	 * @param  paths         The paths to which the tasks should be added.
+	 * @return               A list of the created ChoiceTask and the RegularTasks in it.
+	 */
+	@Transactional
+	public List<Task> saveTasksFromChoiceTaskDto(ChoiceTaskCreateDTO choiceTaskDTO, Skill skill,
+			Set<Path> paths) {
+		choiceTaskDTO.setSkill(SkillIdDTO.builder().id(skill.getId()).build());
+		ChoiceTask choiceTask = choiceTaskDTO.apply();
+		choiceTask.setSkill(skill);
+		choiceTask.setPaths(paths);
+
+		List<RegularTask> choiceTaskTasks = choiceTaskDTO.getTasks().stream()
+				.map(taskDto -> saveTaskFromRegularTaskDto(taskDto, skill, paths))
+				.toList();
+
+		choiceTask.getTasks().addAll(choiceTaskTasks.stream().map(RegularTask::getTaskInfo).toList());
+		choiceTask = taskRepository.save(choiceTask);
+
+		List<Task> tasks = new ArrayList<>();
+		tasks.add(choiceTask);
+		tasks.addAll(choiceTaskTasks);
+		return tasks;
+	}
+
+	/**
+	 * Saves the RegularTask specified by a RegularTaskCreateDTO, and adds it to a given skill and paths.
+	 *
+	 * @param  regularTaskDTO The RegularTaskCreateDTO for creating the RegularTask.
 	 * @param  skill          The skill to which the task should be added.
 	 * @param  paths          The paths to which the task should be added.
 	 * @return                The created RegularTask.
 	 */
 	@Transactional
-	public RegularTask saveTaskFromRegularTaskDto(TaskCreateDTO regularTaskDTO, Skill skill,
+	public RegularTask saveTaskFromRegularTaskDto(RegularTaskCreateDTO regularTaskDTO, Skill skill,
 			Set<Path> paths) {
 		regularTaskDTO.setSkill(SkillIdDTO.builder().id(skill.getId()).build());
 		RegularTask task = regularTaskDTO.apply();

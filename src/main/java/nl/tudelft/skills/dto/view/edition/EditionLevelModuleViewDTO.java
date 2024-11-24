@@ -28,7 +28,7 @@ import lombok.*;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.BlockView;
 import nl.tudelft.skills.dto.view.GroupView;
-import nl.tudelft.skills.dto.view.module.TaskViewDTO;
+import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
 import nl.tudelft.skills.model.SCModule;
 
 @Data
@@ -47,7 +47,7 @@ public class EditionLevelModuleViewDTO extends View<SCModule> implements GroupVi
 	private List<EditionLevelSubmoduleViewDTO> submodules;
 	@NotNull
 	@PostApply
-	private Set<TaskViewDTO> tasksWithLinks;
+	private Set<RegularTaskViewDTO> tasksWithLinks;
 
 	@Override
 	public List<? extends BlockView> getBlocks() {
@@ -62,7 +62,7 @@ public class EditionLevelModuleViewDTO extends View<SCModule> implements GroupVi
 				.flatMap(skill -> skill.getTasks().stream())
 				.filter(task -> task.getLink() != null)
 				.collect(Collectors.toSet());
-		this.tasksWithLinks.forEach(TaskViewDTO::postApply);
+		this.tasksWithLinks.forEach(RegularTaskViewDTO::postApply);
 	}
 
 	public int getSkillsCount() {

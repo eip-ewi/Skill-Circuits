@@ -25,6 +25,7 @@ import javax.validation.constraints.NotNull;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import nl.tudelft.skills.dto.view.module.TaskViewDTO;
 import nl.tudelft.skills.model.labracore.SCPerson;
 
 @Data
@@ -76,4 +77,7 @@ public abstract class Task {
 	@EqualsAndHashCode.Exclude
 	@ManyToMany(mappedBy = "tasksAdded")
 	private Set<SCPerson> personsThatAddedTask = new HashSet<>();
+
+	public abstract Class<? extends TaskViewDTO<?>> viewClass();
+
 }

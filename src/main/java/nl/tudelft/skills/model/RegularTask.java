@@ -25,6 +25,8 @@ import javax.validation.constraints.NotNull;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
+import nl.tudelft.skills.dto.view.module.TaskViewDTO;
 
 @Data
 @Entity
@@ -44,6 +46,11 @@ public class RegularTask extends Task {
 	@EqualsAndHashCode.Exclude
 	@OneToMany(mappedBy = "task")
 	private Set<TaskCompletion> completedBy = new HashSet<>();
+
+	@Override
+	public Class<? extends TaskViewDTO<?>> viewClass() {
+		return RegularTaskViewDTO.class;
+	}
 
 	public String getName() {
 		return taskInfo.getName();
