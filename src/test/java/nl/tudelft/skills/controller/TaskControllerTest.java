@@ -43,6 +43,7 @@ import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.EditLinkDTO;
 import nl.tudelft.skills.dto.view.module.TaskViewDTO;
 import nl.tudelft.skills.model.RegularTask;
+import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.RegularTaskRepository;
 import nl.tudelft.skills.security.AuthorisationService;
 

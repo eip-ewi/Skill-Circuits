@@ -81,13 +81,12 @@
             if (items.length === 0) {
                 taskList.prepend(task);
             } else if (
-                taskLoc >=
-                order.indexOf(items[items.length - 1].querySelector(".item__name").innerHTML)
+                taskLoc >= order.indexOf(Number(items[items.length - 1].getAttribute("data-item")))
             ) {
                 taskList.appendChild(task);
             } else {
                 for (let i = 0; i < items.length; i++) {
-                    if (order.indexOf(items[i].querySelector(".item__name").innerHTML) >= taskLoc) {
+                    if (order.indexOf(Number(items[i].getAttribute("data-item"))) >= taskLoc) {
                         items[i].insertAdjacentElement("beforebegin", task);
                         break;
                     }
@@ -130,7 +129,7 @@
                             alert("Failed to add task");
                         });
 
-                    const taskLoc = order.indexOf(task.querySelector(".item__name").innerHTML);
+                    const taskLoc = order.indexOf(Number(task.getAttribute("data-item")));
                     const items = leftSide.querySelectorAll(".item");
                     const taskList = leftSide.querySelector(".items");
                     insertTaskInOrder(order, taskList, taskLoc, items, task);
@@ -210,7 +209,7 @@
                         .catch(() => {
                             alert("Failed to add task");
                         });
-                    const taskLoc = order.indexOf(task.querySelector(".item__name").innerHTML);
+                    const taskLoc = order.indexOf(Number(task.getAttribute("data-item")));
 
                     [...rightSide.querySelectorAll(".path-toggle")]
                         .filter(path => paths.includes(path.dataset.id))

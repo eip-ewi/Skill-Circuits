@@ -257,9 +257,9 @@ public class PersonControllerTest extends ControllerTest {
 				.edition(db.getEditionRL()).person(db.getPerson()).build();
 		pathPreferenceRepository.save(pathPreference);
 
-		List<String> taskOrder = personController.addTaskToOwnPath(authPerson, db.getTaskDo12ae().getId());
+		List<Long> taskOrder = personController.addTaskToOwnPath(authPerson, db.getTaskDo12ae().getId());
 
-		assertThat(taskOrder).isEqualTo(List.of(db.getTaskRead12().getName(), db.getTaskDo12ae().getName()));
+		assertThat(taskOrder).isEqualTo(List.of(db.getTaskRead12().getId(), db.getTaskDo12ae().getId()));
 		assertThat(db.getPerson().getTasksAdded()).contains(db.getTaskRead12());
 		assertThat(db.getPerson().getTasksAdded()).contains(db.getTaskDo12ae());
 		assertThat(db.getPerson().getSkillsModified()).contains(db.getSkillImplication());
@@ -275,10 +275,10 @@ public class PersonControllerTest extends ControllerTest {
 				.edition(db.getEditionRL()).person(db.getPerson()).build();
 		pathPreferenceRepository.save(pathPreference);
 
-		List<String> taskOrder = personController.removeTaskFromOwnPath(authPerson,
+		List<Long> taskOrder = personController.removeTaskFromOwnPath(authPerson,
 				db.getTaskRead12().getId());
 
-		assertThat(taskOrder).isEqualTo(List.of(db.getTaskRead12().getName(), db.getTaskDo12ae().getName()));
+		assertThat(taskOrder).isEqualTo(List.of(db.getTaskRead12().getId(), db.getTaskDo12ae().getId()));
 		assertThat(db.getPerson().getTasksAdded()).doesNotContain(db.getTaskRead12());
 		assertThat(db.getPerson().getSkillsModified()).contains(db.getSkillImplication());
 	}
