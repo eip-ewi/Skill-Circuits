@@ -34,7 +34,6 @@ import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.dto.view.TaskCompletedDTO;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
-import nl.tudelft.skills.playlists.service.PlaylistService;
 import nl.tudelft.skills.repository.PathRepository;
 import nl.tudelft.skills.repository.RegularTaskRepository;
 import nl.tudelft.skills.repository.SkillRepository;
@@ -57,7 +56,6 @@ public class PersonController {
 	private final PathRepository pathRepository;
 	private final AuthorisationService authorisationService;
 	private final RoleControllerApi roleControllerApi;
-	private final PlaylistService playlistService;
 	private final PersonService personService;
 
 	/**
@@ -76,9 +74,6 @@ public class PersonController {
 		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
 		if (completed) {
 			taskCompletionService.addTaskCompletion(person, task);
-
-			//			Playlist feature
-			playlistService.setPlTaskCompleted(person, task, true);
 
 			// If a user with default student role has no role, set it to be a student role
 			ifNoStudentRoleSetStudentRole(authPerson.getId(), task.getSkill().getSubmodule().getModule()
@@ -100,9 +95,6 @@ public class PersonController {
 
 		} else {
 			taskCompletionService.deleteTaskCompletion(person, task);
-
-			//			Playlist feature
-			playlistService.setPlTaskCompleted(person, task, false);
 		}
 		return new TaskCompletedDTO(Collections.emptyList());
 	}
@@ -140,9 +132,6 @@ public class PersonController {
 
 		List<RegularTask> tasks = regularTaskRepository.findAllById(completedTasks);
 		tasks.forEach(task -> taskCompletionService.addTaskCompletion(person, task));
-
-		//		Playlist feature
-		tasks.forEach(task -> playlistService.setPlTaskCompleted(person, task, true));
 	}
 
 	/**
@@ -153,7 +142,7 @@ public class PersonController {
 	 */
 	@PutMapping("add/{taskId}")
 	@Transactional
-	public void addTaskToOwnPath(@AuthenticatedPerson Person authPerson, @PathVariable Long taskId) {
+	public List<String> addTaskToOwnPath(@AuthenticatedPerson Person authPerson, @PathVariable Long taskId) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
 		Task task = taskRepository.findByIdOrThrow(taskId);
 
@@ -166,6 +155,7 @@ public class PersonController {
 
 		person.getTasksAdded().add(task);
 
+		return task.getSkill().getTasks().stream().map(Task::getName).collect(Collectors.toList());
 	}
 
 	/**
@@ -176,7 +166,8 @@ public class PersonController {
 	 */
 	@PutMapping("remove/{taskId}")
 	@Transactional
-	public void removeTaskFromOwnPath(@AuthenticatedPerson Person authPerson, @PathVariable Long taskId) {
+	public List<String> removeTaskFromOwnPath(@AuthenticatedPerson Person authPerson,
+			@PathVariable Long taskId) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
 		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
 
@@ -187,6 +178,8 @@ public class PersonController {
 		}
 
 		person.getTasksAdded().remove(task);
+
+		return task.getSkill().getTasks().stream().map(Task::getName).collect(Collectors.toList());
 	}
 
 	/**

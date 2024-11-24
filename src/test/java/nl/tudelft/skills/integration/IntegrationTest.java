@@ -238,8 +238,8 @@ public abstract class IntegrationTest {
 	}
 
 	/**
-	 * Makes an edition published, if it is not yet published, or unpublished if it is not yet unpublished.
-	 * This assumes that the user is logged in as a teacher for the edition.
+	 * Given a desired state, makes an edition published, if it is not yet published, or unpublished if it is
+	 * not yet unpublished. This assumes that the user is logged in as a teacher for the edition.
 	 *
 	 * @param publish    Whether to publish (true) or unpublish (false).
 	 * @param courseCode The code of the course to (un)publish an edition in.

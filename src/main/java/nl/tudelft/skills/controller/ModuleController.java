@@ -40,9 +40,7 @@ import nl.tudelft.skills.dto.view.SkillSummaryDTO;
 import nl.tudelft.skills.dto.view.edition.EditionLevelModuleViewDTO;
 import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.model.SCModule;
-import nl.tudelft.skills.playlists.service.ResearchParticipantService;
 import nl.tudelft.skills.repository.ModuleRepository;
-import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.ClickedLinkService;
 import nl.tudelft.skills.service.ModuleService;
 import nl.tudelft.skills.service.TaskCompletionService;
@@ -57,22 +55,15 @@ public class ModuleController {
 	private final TaskCompletionService taskCompletionService;
 	private final ClickedLinkService clickedLinkService;
 
-	//	Playlist feature
-	private ResearchParticipantService researchParticipantService;
-	private AuthorisationService authorisationService;
-
 	@Autowired
 	public ModuleController(ModuleRepository moduleRepository, ModuleService moduleService,
 			HttpSession session, TaskCompletionService taskCompletionService,
-			ClickedLinkService clickedLinkService, ResearchParticipantService researchParticipantService,
-			AuthorisationService authorisationService) {
+			ClickedLinkService clickedLinkService) {
 		this.moduleRepository = moduleRepository;
 		this.moduleService = moduleService;
 		this.session = session;
 		this.taskCompletionService = taskCompletionService;
 		this.clickedLinkService = clickedLinkService;
-		this.researchParticipantService = researchParticipantService;
-		this.authorisationService = authorisationService;
 	}
 
 	/**
@@ -90,12 +81,6 @@ public class ModuleController {
 			Model model) {
 		moduleService.configureModuleModel(person, id, model, session);
 
-		//		Playlist feature
-		long accId = 643L;
-		if (moduleRepository.findByIdOrThrow(id).getEdition().getId() == accId
-				& !authorisationService.canEditEdition(accId)) {
-			researchParticipantService.addRPInfoToModel(person, model);
-		}
 		return "module/view";
 	}
 

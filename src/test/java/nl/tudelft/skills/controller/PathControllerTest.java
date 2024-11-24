@@ -45,7 +45,6 @@ import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.create.PathCreateDTO;
 import nl.tudelft.skills.dto.id.SCEditionIdDTO;
 import nl.tudelft.skills.dto.patch.PathNamePatchDTO;
-import nl.tudelft.skills.dto.patch.PathTasksPatchDTO;
 import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.PathPreference;
 import nl.tudelft.skills.model.RegularTask;
@@ -227,52 +226,6 @@ public class PathControllerTest extends ControllerTest {
 
 		// Default path in edition was updated
 		assertEquals("Pathfinder2", db.getEditionRL().getDefaultPath().getName());
-	}
-
-	@Test
-	@WithUserDetails("admin")
-	void patchPathChangeTasksWithoutModuleId() {
-		// No module id, so the tasks should be reset
-		Long pathId = db.getPathFinderPath().getId();
-		PathTasksPatchDTO dto = PathTasksPatchDTO.builder()
-				.id(pathId)
-				.taskIds(Set.of(db.getTaskRead11().getId()))
-				.build();
-
-		// Assert that task read 12 is the only task in the pathfinder path
-		assertThat(db.getTaskRead12().getPaths()).containsExactly(db.getPathFinderPath());
-		assertThat(db.getPathFinderPath().getTasks()).containsExactly(db.getTaskRead12());
-		assertThat(db.getTaskRead11().getPaths()).isEmpty();
-
-		// Patch the path tasks
-		pathController.patchPathTasks(dto);
-
-		// Assert that task read 11 is the only task in the pathfinder path
-		Path pathAfter = pathRepository.findByIdOrThrow(pathId);
-		assertThat(db.getTaskRead11().getPaths()).containsExactly(pathAfter);
-		assertThat(pathAfter.getTasks()).containsExactly(db.getTaskRead11());
-		assertThat(db.getTaskRead12().getPaths()).isEmpty();
-	}
-
-	@Test
-	@WithUserDetails("admin")
-	void patchPathChangeTasksAssertCallToMethod() {
-		// Since a further case of the path patching is tested for the service, the call to the
-		// service method is tested additionally
-
-		// Create mock service and new controller
-		PathService pathService = mock(PathService.class);
-		PathController pathControllerInner = new PathController(pathRepository, personRepository,
-				editionRepository,
-				taskRepository, pathPreferenceRepository, personService, pathService);
-
-		// Verify method call
-		PathTasksPatchDTO dto = PathTasksPatchDTO.builder()
-				.id(db.getPathFinderPath().getId())
-				.taskIds(Set.of())
-				.build();
-		pathControllerInner.patchPathTasks(dto);
-		verify(pathService, times(1)).updateTasksInPathManyToMany(dto, db.getPathFinderPath());
 	}
 
 }

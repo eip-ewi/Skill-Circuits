@@ -47,7 +47,6 @@ import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.TaskCompletion;
 import nl.tudelft.skills.model.labracore.SCPerson;
-import nl.tudelft.skills.playlists.service.PlaylistService;
 import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.security.AuthorisationService;
@@ -67,7 +66,6 @@ public class PersonControllerTest extends ControllerTest {
 	private final PathPreferenceRepository pathPreferenceRepository;
 	private final AuthorisationService authorisationService;
 	private final RoleControllerApi roleApi;
-	private final PlaylistService playlistService;
 	private final PersonService personService;
 
 	@Autowired
@@ -80,13 +78,10 @@ public class PersonControllerTest extends ControllerTest {
 			PathRepository pathRepository,
 			AuthorisationService authorisationService,
 			RoleControllerApi roleApi,
-			PlaylistService playlistService,
 			PersonService personService) {
 		this.personRepository = personRepository;
-		this.playlistService = playlistService;
 		this.personController = new PersonController(regularTaskRepository, taskRepository, personRepository,
 				taskCompletionService, skillRepository, pathRepository, authorisationService, roleApi,
-				playlistService,
 				personService);
 		this.regularTaskRepository = regularTaskRepository;
 		this.taskCompletionService = taskCompletionService;
@@ -262,8 +257,9 @@ public class PersonControllerTest extends ControllerTest {
 				.edition(db.getEditionRL()).person(db.getPerson()).build();
 		pathPreferenceRepository.save(pathPreference);
 
-		personController.addTaskToOwnPath(authPerson, db.getTaskDo12ae().getId());
+		List<String> taskOrder = personController.addTaskToOwnPath(authPerson, db.getTaskDo12ae().getId());
 
+		assertThat(taskOrder).isEqualTo(List.of(db.getTaskRead12().getName(), db.getTaskDo12ae().getName()));
 		assertThat(db.getPerson().getTasksAdded()).contains(db.getTaskRead12());
 		assertThat(db.getPerson().getTasksAdded()).contains(db.getTaskDo12ae());
 		assertThat(db.getPerson().getSkillsModified()).contains(db.getSkillImplication());
@@ -279,8 +275,10 @@ public class PersonControllerTest extends ControllerTest {
 				.edition(db.getEditionRL()).person(db.getPerson()).build();
 		pathPreferenceRepository.save(pathPreference);
 
-		personController.removeTaskFromOwnPath(authPerson, db.getTaskRead12().getId());
+		List<String> taskOrder = personController.removeTaskFromOwnPath(authPerson,
+				db.getTaskRead12().getId());
 
+		assertThat(taskOrder).isEqualTo(List.of(db.getTaskRead12().getName(), db.getTaskDo12ae().getName()));
 		assertThat(db.getPerson().getTasksAdded()).doesNotContain(db.getTaskRead12());
 		assertThat(db.getPerson().getSkillsModified()).contains(db.getSkillImplication());
 	}

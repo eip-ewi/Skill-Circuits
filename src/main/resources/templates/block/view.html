@@ -38,7 +38,7 @@
         th:data-essential="${level == 'module'} ? ${block.essential} : ${null}"
         th:data-hidden="${level == 'module'} ? ${canEdit and block.hidden} : ${null}"
         th:data-checkpoint="${level == 'module'} ? ${block.checkpoint.id} : ${null}"
-        th:onclick="${level == 'module' and (studentMode or @authorisationService.isStudent())} ? 'openExpandedSkillOverlay(event, this)' : ${null}"
+        th:onclick="${level == 'module' and (studentMode or @authorisationService.isStudent())} ? 'toggleExpandedSkillOverlay(event, this)' : ${null}"
         th:if="${level != 'module'} or
             ${block.completedRequiredTasks or canEdit or not block.hidden} or
                 ${#sets.contains(skillsRevealedIds, block.id)}"

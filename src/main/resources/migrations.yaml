@@ -1600,4 +1600,122 @@ databaseChangeLog:
             referencedColumnNames: id
             referencedTableName: skill
             validate: true
-
+# Removing Playlist feature tables
+  - changeSet:
+      id: 1725284460843-1
+      author: rngla (generated)
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: playlist_version
+            constraintName: FK4w6jaqt7cvu7iwny8g9m4nkmt
+  - changeSet:
+      id: 1725284460843-2
+      author: rngla (generated)
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: playlist
+            constraintName: FKf2v7empym2b0ihs0pbgwsaacy
+  - changeSet:
+      id: 1725284460843-3
+      author: rngla (generated)
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: playlist_version_tasks
+            constraintName: FKg86mm73xna9i47a9xgslj2wt7
+  - changeSet:
+      id: 1725284460843-4
+      author: rngla (generated)
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: usage_data
+            constraintName: FKkikh18arv5eujtv2f26ykhndp
+  - changeSet:
+      id: 1725284460843-5
+      author: rngla (generated)
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: playlist
+            constraintName: FKlieu928p8mfbqm4uktqgq8sm0
+  - changeSet:
+      id: 1725284460843-6
+      author: rngla (generated)
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: research_participant
+            constraintName: FKnoawfap41wy1l5xgop178dgfq
+  - changeSet:
+      id: 1725284460843-7
+      author: rngla (generated)
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: playlist_version_tasks
+            constraintName: FKqpn919ahm5gx28u94dgm87d0p
+  - changeSet:
+      id: 1725284460843-8
+      author: rngla (generated)
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: rating
+            constraintName: FKry4lvm3c8fwioeum2fm5y0x3j
+  - changeSet:
+      id: 1725284460843-9
+      author: rngla (generated)
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: playlist_task
+            constraintName: FKsnvc6w8exgm3r5tc5dh3us6jf
+  - changeSet:
+      id: 1725284460843-10
+      author: rngla (generated)
+      changes:
+        - dropUniqueConstraint:
+            constraintName: UK_64dt4vh7o4k7vbrfgmu5qrql3
+            tableName: research_participant
+  - changeSet:
+      id: 1725284460843-11
+      author: rngla (generated)
+      changes:
+        - dropTable:
+            tableName: playlist
+  - changeSet:
+      id: 1725284460843-12
+      author: rngla (generated)
+      changes:
+        - dropTable:
+            tableName: playlist_checkpoint
+  - changeSet:
+      id: 1725284460843-13
+      author: rngla (generated)
+      changes:
+        - dropTable:
+            tableName: playlist_task
+  - changeSet:
+      id: 1725284460843-14
+      author: rngla (generated)
+      changes:
+        - dropTable:
+            tableName: playlist_version
+  - changeSet:
+      id: 1725284460843-15
+      author: rngla (generated)
+      changes:
+        - dropTable:
+            tableName: playlist_version_tasks
+  - changeSet:
+      id: 1725284460843-16
+      author: rngla (generated)
+      changes:
+        - dropTable:
+            tableName: rating
+  - changeSet:
+      id: 1725284460843-17
+      author: rngla (generated)
+      changes:
+        - dropTable:
+            tableName: research_participant
+  - changeSet:
+      id: 1725284460843-18
+      author: rngla (generated)
+      changes:
+        - dropTable:
+            tableName: usage_data
