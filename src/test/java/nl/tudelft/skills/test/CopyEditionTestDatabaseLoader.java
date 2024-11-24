@@ -40,6 +40,8 @@ public class CopyEditionTestDatabaseLoader {
 	@Autowired
 	private SkillRepository skillRepository;
 	@Autowired
+	private TaskInfoRepository taskInfoRepository;
+	@Autowired
 	private RegularTaskRepository regularTaskRepository;
 	@Autowired
 	private PathRepository pathRepository;
@@ -241,11 +243,16 @@ public class CopyEditionTestDatabaseLoader {
 	}
 
 	public void initTasks() {
-		taskFromA = RegularTask.builder().skill(skillFromA).name("Task A").paths(Set.of(pathFromA)).build();
+		TaskInfo taskInfoFromA = TaskInfo.builder().name("Task A").build();
+		taskFromA = RegularTask.builder().skill(skillFromA).taskInfo(taskInfoFromA).paths(Set.of(pathFromA))
+				.build();
+		taskInfoFromA.setTask(taskFromA);
 		taskFromA = regularTaskRepository.save(taskFromA);
 		pathFromA.getTasks().add(taskFromA);
 		skillFromA.getTasks().add(taskFromA);
-		taskFromB = RegularTask.builder().skill(skillFromB).name("Task B").build();
+		TaskInfo taskInfoFromB = TaskInfo.builder().name("Task B").build();
+		taskFromB = RegularTask.builder().skill(skillFromB).taskInfo(taskInfoFromB).build();
+		taskInfoFromB.setTask(taskFromA);
 		taskFromB = regularTaskRepository.save(taskFromB);
 		skillFromB.getTasks().add(taskFromB);
 		skillFromB.getRequiredTasks().add(taskFromA);

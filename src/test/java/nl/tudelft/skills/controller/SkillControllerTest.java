@@ -46,13 +46,11 @@ import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.dto.create.CheckpointCreateDTO;
-import nl.tudelft.skills.dto.create.ExternalSkillCreateDTO;
-import nl.tudelft.skills.dto.create.SkillCreateDTO;
-import nl.tudelft.skills.dto.create.TaskCreateDTO;
+import nl.tudelft.skills.dto.create.*;
 import nl.tudelft.skills.dto.id.*;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
+import nl.tudelft.skills.dto.patch.TaskInfoPatchDTO;
 import nl.tudelft.skills.dto.patch.TaskPatchDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
 import nl.tudelft.skills.dto.view.module.TaskViewDTO;
@@ -145,16 +143,18 @@ public class SkillControllerTest extends ControllerTest {
 
 	@Test
 	void createSkillWithTasks() {
-		TaskCreateDTO taskDto = TaskCreateDTO.builder().name("New Task").type(TaskType.EXERCISE)
-				.skill(new SkillIdDTO())
-				.index(1).time(1).build();
+		TaskCreateDTO taskDto = TaskCreateDTO.builder()
+				.taskInfo(TaskInfoCreateDTO.builder().name("New Task").type(TaskType.EXERCISE)
+						.time(1).build())
+				.build();
+		taskDto.setSkill(new SkillIdDTO());
+		taskDto.setIndex(1);
 		var dto = SkillCreateDTO.builder()
 				.name("New Skill")
 				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
 				.checkpoint(new CheckpointIdDTO(db.getCheckpointLectureOne().getId()))
 				.requiredTaskIds(Collections.emptyList())
-				.column(10).row(11).newItems(new ArrayList<>()).build();
-		dto.setNewItems(List.of(taskDto));
+				.column(10).row(11).newItems(List.of(taskDto)).build();
 		skillController.createSkill(null, dto, mock(Model.class));
 
 		Optional<Skill> skill = skillRepository.findAll().stream()
@@ -219,10 +219,18 @@ public class SkillControllerTest extends ControllerTest {
 	void patchSkill() {
 		Long skillId = db.getSkillVariables().getId();
 		RegularTask old = db.getTaskRead10();
-		TaskCreateDTO taskAdded = TaskCreateDTO.builder().name("New Task").type(TaskType.EXERCISE)
-				.skill(new SkillIdDTO(skillId)).index(1).time(1).build();
-		TaskPatchDTO oldTask = TaskPatchDTO.builder().name(old.getName()).type(old.getType())
-				.id(old.getId()).index(old.getIdx()).time(old.getTime()).build();
+		TaskCreateDTO taskAdded = TaskCreateDTO.builder()
+				.taskInfo(TaskInfoCreateDTO.builder().name("New Task").type(TaskType.EXERCISE)
+						.time(1).build())
+				.skill(new SkillIdDTO(skillId))
+				.index(1)
+				.build();
+		TaskPatchDTO oldTask = TaskPatchDTO.builder()
+				.taskInfo(TaskInfoPatchDTO.builder().name(old.getName())
+						.time(old.getTime()).build())
+				.id(old.getId())
+				.skill(new SkillIdDTO(skillId))
+				.index(old.getIdx()).build();
 
 		// Add a task and remove a task
 		skillController.patchSkill(SkillPatchDTO.builder()
@@ -502,8 +510,10 @@ public class SkillControllerTest extends ControllerTest {
 		ModuleLevelSkillViewDTO view = View.convert(skill, ModuleLevelSkillViewDTO.class);
 		view.getTasks().stream().filter(t -> t.getId().equals(taskRead.getId()))
 				.findFirst().get().setVisible(false);
-		view.getTasks().stream().filter(t -> t.getId().equals(taskDo.getId()))
-				.findFirst().get().setCompleted(true);
+		TaskViewDTO taskView = view.getTasks().stream()
+				.filter(t -> t.getId().equals(taskDo.getId()))
+				.findFirst().get();
+		taskView.setCompleted(true);
 		assertThat(model.getAttribute("block")).isEqualTo(view);
 
 		// Assert on added model attributes concerning paths and added tasks/modified skills

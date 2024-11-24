@@ -45,6 +45,7 @@ import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.model.PathPreference;
 import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.model.TaskCompletion;
+import nl.tudelft.skills.model.TaskInfo;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.security.AuthorisationService;
@@ -419,7 +420,8 @@ public class HomeServiceTest {
 	@Test
 	void getCompletedSkillsCustomizedEmptyNotCompleted() {
 		SCPerson person = new SCPerson();
-		RegularTask t = RegularTask.builder().name("Task").time(3).build();
+		TaskInfo info = TaskInfo.builder().name("Task").time(3).build();
+		RegularTask t = RegularTask.builder().taskInfo(info).build();
 		db.getSkillAssumption().setTasks(Arrays.asList(t));
 		person.setSkillsModified(new HashSet<>(Arrays.asList(db.getSkillAssumption())));
 

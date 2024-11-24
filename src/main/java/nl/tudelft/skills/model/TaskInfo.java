@@ -17,10 +17,9 @@
  */
 package nl.tudelft.skills.model;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.persistence.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
@@ -31,50 +30,27 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class RegularTask extends Task {
-	@NotNull
-	@OneToOne(mappedBy = "task", cascade = CascadeType.ALL)
-	// TODO: share id between RegularTask and TaskInfo?
-	private TaskInfo taskInfo;
+public class TaskInfo {
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	private Long id;
 
-	@NotNull
+	@NotBlank
+	private String name;
+
 	@Builder.Default
+	@NotNull
+	private TaskType type = TaskType.EXERCISE;
+
+	@Builder.Default
+	@Min(0)
+	private Integer time = 0;
+
+	private String link;
+
+	@NotNull
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@EqualsAndHashCode.Exclude // TODO: check for correctness
 	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@OneToMany(mappedBy = "task")
-	private Set<TaskCompletion> completedBy = new HashSet<>();
-
-	public String getName() {
-		return taskInfo.getName();
-	}
-
-	public void setName(String name) {
-		taskInfo.setName(name);
-	}
-
-	public TaskType getType() {
-		return taskInfo.getType();
-	}
-
-	public void setType(TaskType type) {
-		taskInfo.setType(type);
-	}
-
-	public Integer getTime() {
-		return taskInfo.getTime();
-	}
-
-	public void setTime(Integer time) {
-		taskInfo.setTime(time);
-	}
-
-	public String getLink() {
-		return taskInfo.getLink();
-	}
-
-	public void setLink(String link) {
-		taskInfo.setLink(link);
-	}
-
+	private Task task;
 }

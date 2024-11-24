@@ -440,23 +440,25 @@ public class EditionService {
 
 		skillMap.forEach((prev, copy) -> prev.getTasks().forEach(t -> {
 			// TODO copying of choice tasks. Needs more adjustments since they contain tasks (dependency).
-			// 	Below is only temporary solution for tasks!
+			// 	Below is only temporary solution for (regular) tasks!
 
-			if (t instanceof RegularTask) {
-				RegularTask task = regularTaskRepository.save(
-						RegularTask.builder()
-								.skill(copy)
-								.name(((RegularTask) t).getName())
-								.type(((RegularTask) t).getType())
-								.time(((RegularTask) t).getTime())
-								.link(((RegularTask) t).getLink())
-								.idx(t.getIdx())
-								.build());
+			if (t instanceof RegularTask regularTask) {
+				TaskInfo taskInfo = TaskInfo.builder().name(regularTask.getName())
+						.type(regularTask.getType())
+						.time(regularTask.getTime())
+						.link(regularTask.getLink()).build();
+				RegularTask tempTask = RegularTask.builder()
+						.skill(copy)
+						.taskInfo(taskInfo)
+						.idx(regularTask.getIdx())
+						.build();
+				taskInfo.setTask(tempTask);
+				RegularTask task = regularTaskRepository.save(tempTask);
 
 				copy.getTasks().add(task);
-				taskMap.put(t, task);
+				taskMap.put(regularTask, task);
 
-				t.getPaths().forEach(p -> {
+				regularTask.getPaths().forEach(p -> {
 					Path copiedPath = pathMap.get(p);
 					if (copiedPath != null) {
 						// This should hold for any correctly formed edition
@@ -466,7 +468,7 @@ public class EditionService {
 					}
 				});
 
-				t.getRequiredFor().forEach(req -> {
+				regularTask.getRequiredFor().forEach(req -> {
 					Skill copyRequiredFor = skillMap.get(req);
 					if (copyRequiredFor != null) {
 						// This should hold for any correctly formed edition

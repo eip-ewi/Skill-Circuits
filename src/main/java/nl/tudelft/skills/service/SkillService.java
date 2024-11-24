@@ -30,6 +30,11 @@ import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
 import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
+import nl.tudelft.skills.dto.create.SkillCreateDTO;
+import nl.tudelft.skills.dto.create.TaskCreateDTO;
+import nl.tudelft.skills.dto.id.SkillIdDTO;
+import nl.tudelft.skills.dto.patch.SkillPatchDTO;
+import nl.tudelft.skills.dto.patch.TaskPatchDTO;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.*;
@@ -44,12 +49,17 @@ public class SkillService {
 
 	private final AbstractSkillRepository abstractSkillRepository;
 	private final TaskCompletionRepository taskCompletionRepository;
+	private final TaskCompletionService taskCompletionService;
 	private final CourseControllerApi courseApi;
 	private final AuthorisationService authorisationService;
 	private final ClickedLinkService clickedLinkService;
 	private final PersonRepository personRepository;
 	private final RegularTaskRepository regularTaskRepository;
 	private final TaskRepository taskRepository;
+	private final ChoiceTaskRepository choiceTaskRepository;
+	private final PathRepository pathRepository;
+	private final TaskInfoRepository taskInfoRepository;
+	private final SkillRepository skillRepository;
 
 	/**
 	 * Deletes a skill.
@@ -195,6 +205,160 @@ public class SkillService {
 				.filter(s -> Objects.equals(s.getSubmodule().getModule().getEdition().getId(),
 						editionId))
 				.collect(Collectors.toSet());
+	}
+
+	/**
+	 * Creates a skill from a given SkillCreateDTO.
+	 *
+	 * @param  create The SkillCreateDTO.
+	 * @return        The created skill.
+	 */
+	@Transactional
+	public Skill createSkill(SkillCreateDTO create) {
+		Skill skill = skillRepository.saveAndFlush(create.apply());
+
+		// Save new tasks
+		List<Task> allTasks = saveNewTasks(skill, create.getNewItems());
+
+		// Set the indices of the tasks
+		setIndices(allTasks);
+
+		// Set tasks of Skill
+		skill.setTasks(allTasks);
+
+		// Save Skill and return
+		return abstractSkillRepository.save(skill);
+	}
+
+	/**
+	 * Saves a list of new tasks and adds them to a given skill.
+	 *
+	 * @param  skill       The skill to which the new tasks belong.
+	 * @param  newTaskDTOs The TaskCreateDTOs for the new tasks.
+	 * @return             A list of the tasks that were created.
+	 */
+	@Transactional
+	public List<Task> saveNewTasks(Skill skill, List<TaskCreateDTO> newTaskDTOs) {
+		// New tasks will be included in all paths by default
+		SCEdition edition = skill.getSubmodule().getModule().getEdition();
+		Set<Path> paths = new HashSet<>(pathRepository.findAllByEditionId(edition.getId()));
+
+		return newTaskDTOs.stream().map(dto -> (Task) saveTaskFromRegularTaskDto(dto, skill, paths))
+				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Patches a skill from a given SkillPatchDTO.
+	 *
+	 * @param  patch The SkillPatchDTO.
+	 * @return       The patched skill.
+	 */
+	@Transactional
+	public Skill patchSkill(SkillPatchDTO patch) {
+		Skill skill = skillRepository.findByIdOrThrow(patch.getId());
+
+		// TODO refactoring this method into smaller parts
+		// TODO patching and saving tasks correctly
+
+		List<Task> oldTasks = skill.getTasks();
+		skill = patch.apply(skill);
+
+		// Patch items
+		List<Task> allTasks = new ArrayList<>(patchTasks(skill, patch.getItems()));
+
+		// Save new items
+		allTasks.addAll(saveNewTasks(skill, patch.getNewItems()));
+
+		// Set the indices of the tasks
+		setIndices(allTasks);
+
+		// Set tasks of Skill
+		skill.setTasks(allTasks);
+
+		skillRepository.save(skill);
+
+		// Remove selected tasks from custom skill in person
+		skill.getPersonModifiedSkill().forEach(p -> {
+			p.setTasksAdded(p.getTasksAdded().stream()
+					.filter(t -> !patch.getRemovedItems().contains(t.getId())).collect(Collectors.toSet()));
+			personRepository.save(p);
+		});
+
+		regularTaskRepository.findAllByIdIn(patch.getRemovedItems())
+				.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
+		clickedLinkService
+				.deleteClickedLinksForTasks(regularTaskRepository.findAllByIdIn(patch.getRemovedItems()));
+
+		// Remove items
+		// TODO: handling deletion of ChoiceTasks vs. RegularTasks
+		regularTaskRepository.deleteAllByIdIn(patch.getRemovedItems());
+		taskRepository.saveAll(skill.getRequiredTasks());
+
+		// New tasks will be included in all paths by default
+		SCEdition edition = skill.getSubmodule().getModule().getEdition();
+
+		Set<Path> paths = new HashSet<>(pathRepository.findAllByEditionId(edition.getId()));
+		Skill finalSkill = skill;
+		skillRepository.findByIdOrThrow(skill.getId()).getTasks().stream().filter(t -> !oldTasks.contains(t))
+				.forEach(t -> {
+					t.setPaths(paths);
+					t.setSkill(finalSkill);
+					taskRepository.save(t);
+				});
+
+		return skill;
+	}
+
+	/**
+	 * Patches a list of tasks belonging to a given skill.
+	 *
+	 * @param  skill       The skill to which the tasks belong.
+	 * @param  taskPatches The TaskPatchDTOs for the tasks that should be patched.
+	 * @return             A list of the tasks that were patched.
+	 */
+	@Transactional
+	public List<Task> patchTasks(Skill skill, List<TaskPatchDTO> taskPatches) {
+		Map<Long, Task> idToTask = skill.getTasks().stream()
+				.collect(Collectors.toMap(Task::getId, Function.identity()));
+
+		return taskPatches.stream().map(patch -> {
+			RegularTask task = (RegularTask) idToTask.get(patch.getId());
+			var test = (Task) taskRepository.save(patch.apply(task));
+			return test;
+		}).collect(Collectors.toList());
+	}
+
+	/**
+	 * Set the indices of a given list of tasks.
+	 *
+	 * @param tasks The list of tasks for which the indices should be set.
+	 */
+	@Transactional
+	public void setIndices(List<Task> tasks) {
+		// TODO index handling
+		// Old version: tasks.sort(Comparator.comparingInt(Task::getIdx).reversed());
+	}
+
+	/**
+	 * Saves the RegularTask specified by a TaskCreateDTO, and adds it to a given skill and paths.
+	 *
+	 * @param  regularTaskDTO The TaskCreateDTO for creating the RegularTask.
+	 * @param  skill          The skill to which the task should be added.
+	 * @param  paths          The paths to which the task should be added.
+	 * @return                The created RegularTask.
+	 */
+	@Transactional
+	public RegularTask saveTaskFromRegularTaskDto(TaskCreateDTO regularTaskDTO, Skill skill,
+			Set<Path> paths) {
+		regularTaskDTO.setSkill(SkillIdDTO.builder().id(skill.getId()).build());
+		RegularTask task = regularTaskDTO.apply();
+		task.setPaths(paths);
+		task.setSkill(skill);
+		TaskInfo taskInfo = regularTaskDTO.getTaskInfo().apply();
+		taskInfo.setTask(task);
+		task.setTaskInfo(taskInfo);
+		task = taskRepository.save(task);
+		return task;
 	}
 
 }

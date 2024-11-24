@@ -30,7 +30,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
 	default Task findByIdOrThrow(Long id) {
 		return findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("AbstractTask was not found: " + id));
+				.orElseThrow(() -> new ResourceNotFoundException("Task was not found: " + id));
 	}
 
 	Set<Task> findAllByIdIn(Collection<Long> ids);

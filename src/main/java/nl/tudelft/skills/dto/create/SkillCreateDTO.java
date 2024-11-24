@@ -40,7 +40,6 @@ import nl.tudelft.skills.repository.TaskRepository;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class SkillCreateDTO extends Create<Skill> {
-
 	@NotBlank
 	private String name;
 	@Builder.Default

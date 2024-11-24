@@ -15,34 +15,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.patch;
+package nl.tudelft.skills.repository;
 
-import javax.validation.constraints.NotNull;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
-import lombok.*;
-import lombok.experimental.SuperBuilder;
-import nl.tudelft.librador.dto.patch.Patch;
-import nl.tudelft.skills.dto.id.SkillIdDTO;
-import nl.tudelft.skills.model.RegularTask;
+import nl.tudelft.skills.model.ChoiceTask;
 
-@Data
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class TaskPatchDTO extends Patch<RegularTask> {
-	// TODO: ability to patch choice task, for now only tasks
+public interface ChoiceTaskRepository extends JpaRepository<ChoiceTask, Long> {
 
-	@NotNull
-	private Long id;
-	@NotNull
-	private Integer index;
-	@NotNull
-	private SkillIdDTO skill;
-	@NotNull
-	private TaskInfoPatchDTO taskInfo;
-
-	@Override
-	protected void validate() {
+	default ChoiceTask findByIdOrThrow(Long id) {
+		return findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("ChoiceTask was not found: " + id));
 	}
+
 }

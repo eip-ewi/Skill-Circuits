@@ -35,6 +35,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class ChoiceTask extends Task {
+	// Can be empty
 	private String name;
 
 	@Builder.Default
@@ -45,6 +46,7 @@ public class ChoiceTask extends Task {
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@OneToMany(mappedBy = "choiceTask")
-	private List<RegularTask> tasks = new ArrayList<>();
+	@OneToMany
+	private List<TaskInfo> tasks = new ArrayList<>();
+
 }

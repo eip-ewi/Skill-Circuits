@@ -20,7 +20,7 @@ package nl.tudelft.skills.test;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -60,6 +60,8 @@ public class TestDatabaseLoader {
 	private SkillRepository skillRepository;
 	@Autowired
 	private RegularTaskRepository regularTaskRepository;
+	@Autowired
+	private TaskInfoRepository taskInfoRepository;
 	@Autowired
 	private ClickedLinkRepository clickedLinkRepository;
 	@Autowired
@@ -139,13 +141,20 @@ public class TestDatabaseLoader {
 	private Skill skillVariablesHidden = Skill.builder().name("Variables extra")
 			.hidden(true).row(2).column(4).build();
 
-	private RegularTask taskRead12 = RegularTask.builder().name("Read chapter 1.2").time(1)
-			.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build();
-	private RegularTask taskDo12ae = RegularTask.builder().name("Do exercise 1.2a-e").time(3).build();
-	private RegularTask taskRead11 = RegularTask.builder().name("Read chapter 1.1").time(5).build();
-	private RegularTask taskDo11ad = RegularTask.builder().name("Do exercise 1.1a-d").time(7).build();
-	private RegularTask taskRead10 = RegularTask.builder().name("Read chapter 1.0").time(13).build();
-	private RegularTask taskDo10a = RegularTask.builder().name("Do exercise 1.0a").time(20).build();
+	private TaskInfo taskInfoRead12 = TaskInfo.builder().name("Read chapter 1.2").time(1).build();
+	private TaskInfo taskInfoDo12ae = TaskInfo.builder().name("Do exercise 1.2a-e").time(3).build();
+	private TaskInfo taskInfoRead11 = TaskInfo.builder().name("Read chapter 1.1").time(5).build();
+	private TaskInfo taskInfoDo11ad = TaskInfo.builder().name("Do exercise 1.1a-d").time(7).build();
+	private TaskInfo taskInfoRead10 = TaskInfo.builder().name("Read chapter 1.0").time(13).build();
+	private TaskInfo taskInfoDo10a = TaskInfo.builder().name("Do exercise 1.0a").time(20).build();
+
+	private RegularTask taskRead12 = RegularTask.builder()
+			.paths(new HashSet<>(Collections.singletonList(pathFinderPath))).taskInfo(taskInfoRead12).build();
+	private RegularTask taskDo12ae = RegularTask.builder().taskInfo(taskInfoDo12ae).build();
+	private RegularTask taskRead11 = RegularTask.builder().taskInfo(taskInfoRead11).build();
+	private RegularTask taskDo11ad = RegularTask.builder().taskInfo(taskInfoDo11ad).build();
+	private RegularTask taskRead10 = RegularTask.builder().taskInfo(taskInfoRead10).build();
+	private RegularTask taskDo10a = RegularTask.builder().taskInfo(taskInfoDo10a).build();
 
 	private Badge badge1 = Badge.builder().name("Badge 1").build();
 	private Badge badge2 = Badge.builder().name("Badge 2").build();
@@ -302,6 +311,30 @@ public class TestDatabaseLoader {
 		return regularTaskRepository.findByIdOrThrow(taskDo10a.getId());
 	}
 
+	public TaskInfo getTaskInfoRead12() {
+		return taskInfoRepository.findByIdOrThrow(taskInfoRead12.getId());
+	}
+
+	public TaskInfo getTaskInfoDo12ae() {
+		return taskInfoRepository.findByIdOrThrow(taskInfoDo12ae.getId());
+	}
+
+	public TaskInfo getTaskInfoRead11() {
+		return taskInfoRepository.findByIdOrThrow(taskInfoRead11.getId());
+	}
+
+	public TaskInfo getTaskInfoDo11ad() {
+		return taskInfoRepository.findByIdOrThrow(taskInfoDo11ad.getId());
+	}
+
+	public TaskInfo getTaskInfoRead10() {
+		return taskInfoRepository.findByIdOrThrow(taskInfoRead10.getId());
+	}
+
+	public TaskInfo getTaskInfoDo10a() {
+		return taskInfoRepository.findByIdOrThrow(taskInfoDo10a.getId());
+	}
+
 	public Badge getBadge1() {
 		return badgeRepository.findByIdOrThrow(badge1.getId());
 	}
@@ -456,22 +489,42 @@ public class TestDatabaseLoader {
 
 	private void initTask() {
 		taskRead12.setSkill(skillImplication);
-		taskDo12ae.setSkill(skillImplication);
+		taskRead12.setTaskInfo(taskInfoRead12);
+		taskInfoRead12.setTask(taskRead12);
 		taskRead12 = regularTaskRepository.save(taskRead12);
+		taskInfoRead12 = taskInfoRepository.save(taskInfoRead12);
+
+		taskDo12ae.setSkill(skillImplication);
+		taskDo12ae.setTaskInfo(taskInfoDo12ae);
+		taskInfoDo12ae.setTask(taskDo12ae);
 		taskDo12ae = regularTaskRepository.save(taskDo12ae);
+		taskInfoDo12ae = taskInfoRepository.save(taskInfoDo12ae);
 
 		taskRead11.setSkill(skillNegation);
-		taskDo11ad.setSkill(skillNegation);
+		taskRead11.setTaskInfo(taskInfoRead11);
+		taskInfoRead11.setTask(taskRead11);
 		taskRead11 = regularTaskRepository.save(taskRead11);
+		taskInfoRead11 = taskInfoRepository.save(taskInfoRead11);
+
+		taskDo11ad.setSkill(skillNegation);
+		taskDo11ad.setTaskInfo(taskInfoDo11ad);
+		taskInfoDo11ad.setTask(taskDo11ad);
 		taskDo11ad = regularTaskRepository.save(taskDo11ad);
+		taskInfoDo11ad = taskInfoRepository.save(taskInfoDo11ad);
 
 		taskRead10.setSkill(skillVariables);
+		taskRead10.setTaskInfo(taskInfoRead10);
 		taskRead10.setRequiredFor(Set.of(skillVariablesHidden));
-		taskDo10a.setSkill(skillVariables);
-		taskDo10a.setRequiredFor(Set.of(skillVariablesHidden));
+		taskInfoRead10.setTask(taskRead10);
 		taskRead10 = regularTaskRepository.save(taskRead10);
-		taskDo10a = regularTaskRepository.save(taskDo10a);
+		taskInfoRead10 = taskInfoRepository.save(taskInfoRead10);
 
+		taskDo10a.setSkill(skillVariables);
+		taskDo10a.setTaskInfo(taskInfoDo10a);
+		taskDo10a.setRequiredFor(Set.of(skillVariablesHidden));
+		taskInfoDo10a.setTask(taskDo10a);
+		taskDo10a = regularTaskRepository.save(taskDo10a);
+		taskInfoDo10a = taskInfoRepository.save(taskInfoDo10a);
 	}
 
 	private void initPerson() {
@@ -621,8 +674,29 @@ public class TestDatabaseLoader {
 		submodule.getSkills().add(skill);
 		submoduleRepository.save(submodule);
 		checkpointRepository.save(getCheckpointLectureOne());
-		RegularTask task = regularTaskRepository
-				.save(RegularTask.builder().name("New task").skill(skill).build());
+		TaskInfo taskInfo = TaskInfo.builder().name("New task").build();
+		RegularTask task = RegularTask.builder().taskInfo(taskInfo).skill(skill).build();
+		taskInfo.setTask(task);
+		taskInfoRepository.save(taskInfo);
+		regularTaskRepository.save(task);
+		skill.getTasks().add(task);
+		skillRepository.save(skill);
+		return task;
+	}
+
+	/**
+	 * Create and save a regular task by its Skill and name. The remainder of the fields are left at the
+	 * default values.
+	 *
+	 * @param  skill The Skill the Task should be added to.
+	 * @param  name  The name of the Task.
+	 * @return       The saved RegularTask.
+	 */
+	public RegularTask createTaskBySkillAndName(Skill skill, String name) {
+		TaskInfo taskInfo = TaskInfo.builder().name(name).build();
+		RegularTask task = RegularTask.builder().taskInfo(taskInfo).skill(skill).build();
+		taskInfo.setTask(task);
+		task = regularTaskRepository.save(task);
 		skill.getTasks().add(task);
 		skillRepository.save(skill);
 		return task;

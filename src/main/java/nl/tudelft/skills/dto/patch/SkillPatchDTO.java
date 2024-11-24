@@ -18,7 +18,6 @@
 package nl.tudelft.skills.dto.patch;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotBlank;
@@ -33,10 +32,8 @@ import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.patch.Patch;
 import nl.tudelft.skills.dto.create.TaskCreateDTO;
 import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
-import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.repository.RegularTaskRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 
 @Data
@@ -80,32 +77,7 @@ public class SkillPatchDTO extends Patch<Skill> {
 	}
 
 	// TODO: the methods below need to be changed when ChoiceTasks are implemented
-	@Override
-	protected void applyOneToMany() {
-		Map<Long, RegularTask> tasks = data.getTasks().stream()
-				.filter(t -> t instanceof RegularTask)
-				.map(t -> (RegularTask) t)
-				.collect(Collectors.toMap(RegularTask::getId, Function.identity()));
-		List<RegularTask> orderedTasks = new ArrayList<>(
-				items.stream().map(p -> p.apply(tasks.get(p.getId()))).toList());
-
-		Map<Long, Integer> order = items.stream()
-				.collect(Collectors.toMap(TaskPatchDTO::getId, TaskPatchDTO::getIndex));
-
-		RegularTaskRepository regularTaskRepository = SpringContext.getBean(RegularTaskRepository.class);
-		orderedTasks.addAll(newItems.stream().map(c -> {
-			RegularTask task = regularTaskRepository.save(c.apply());
-			order.put(task.getId(), c.getIndex());
-			return task;
-		}).toList());
-
-		data.getTasks().stream().filter(t -> removedItems.contains(t.getId())).toList()
-				.forEach(t -> data.getTasks().remove(t));
-
-		orderedTasks.sort(Comparator.<RegularTask>comparingInt(t -> order.get(t.getId())).reversed());
-		data.setTasks(orderedTasks.stream().map(t -> (Task) t).collect(Collectors.toList()));
-	}
-
+	// TODO: Maybe also map the required tasks externally
 	@Override
 	protected void applyManyToManyMappedBy() {
 		if (hidden) {

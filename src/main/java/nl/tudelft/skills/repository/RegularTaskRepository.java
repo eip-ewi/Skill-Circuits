@@ -28,7 +28,8 @@ import nl.tudelft.skills.model.RegularTask;
 public interface RegularTaskRepository extends JpaRepository<RegularTask, Long> {
 
 	default RegularTask findByIdOrThrow(Long id) {
-		return findById(id).orElseThrow(() -> new ResourceNotFoundException("Task was not found: " + id));
+		return findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("RegularTask was not found: " + id));
 	}
 
 	List<RegularTask> findAllByIdIn(Collection<Long> id);

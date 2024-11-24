@@ -27,9 +27,7 @@ import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.BlockView;
 import nl.tudelft.skills.dto.view.ItemView;
 import nl.tudelft.skills.dto.view.checkpoint.CheckpointViewDTO;
-import nl.tudelft.skills.model.AbstractSkill;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.*;
 
 @Data
 @Builder

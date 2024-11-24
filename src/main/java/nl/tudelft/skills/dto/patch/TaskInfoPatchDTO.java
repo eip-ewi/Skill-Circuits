@@ -17,32 +17,40 @@
  */
 package nl.tudelft.skills.dto.patch;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 import nl.tudelft.librador.dto.patch.Patch;
-import nl.tudelft.skills.dto.id.SkillIdDTO;
-import nl.tudelft.skills.model.RegularTask;
+import nl.tudelft.skills.model.TaskInfo;
+import nl.tudelft.skills.model.TaskType;
 
 @Data
-@SuperBuilder
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class TaskPatchDTO extends Patch<RegularTask> {
-	// TODO: ability to patch choice task, for now only tasks
+public class TaskInfoPatchDTO extends Patch<TaskInfo> {
+	@NotBlank
+	private String name;
+	@NotNull
+	@Min(0)
+	private Integer time;
+	@NotNull
+	private TaskType type;
+	private String link;
 
-	@NotNull
-	private Long id;
-	@NotNull
-	private Integer index;
-	@NotNull
-	private SkillIdDTO skill;
-	@NotNull
-	private TaskInfoPatchDTO taskInfo;
+	@Override
+	protected void applyOneToOne() {
+		updateNonNull(name, data::setName);
+		updateNonNull(time, data::setTime);
+		updateNonNull(type, data::setType);
+		data.setLink(link == null || link.isBlank() ? null : link);
+	}
 
 	@Override
 	protected void validate() {
+		// TODO: any validation?
 	}
 }

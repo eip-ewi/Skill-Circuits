@@ -17,15 +17,12 @@
  */
 package nl.tudelft.skills.dto.create;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
 import nl.tudelft.librador.dto.create.Create;
 import nl.tudelft.skills.dto.id.SkillIdDTO;
 import nl.tudelft.skills.model.RegularTask;
-import nl.tudelft.skills.model.TaskType;
 
 @Data
 @Builder
@@ -35,29 +32,15 @@ import nl.tudelft.skills.model.TaskType;
 public class TaskCreateDTO extends Create<RegularTask> {
 	// TODO: ability to create choice task, for now only tasks
 
-	@NotBlank
-	private String name;
 	@NotNull
 	private SkillIdDTO skill;
 	@NotNull
-	private TaskType type;
-	@NotNull
-	@Min(0)
-	private Integer time;
-	private String link;
-	@NotNull
 	private Integer index;
-
-	@Override
-	protected void postApply(RegularTask data) {
-		if (link != null && link.isBlank()) {
-			data.setLink(null);
-		}
-	}
+	@NotNull
+	private TaskInfoCreateDTO taskInfo;
 
 	@Override
 	public Class<RegularTask> clazz() {
 		return RegularTask.class;
 	}
-
 }
