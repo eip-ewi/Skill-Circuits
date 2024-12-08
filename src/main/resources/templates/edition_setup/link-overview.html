@@ -96,7 +96,7 @@
                             <i
                                 th:class="|fa-solid fa-${task.taskInfo.type.icon}|"
                                 th:id="'task-icon' + ${task.id}"></i>
-                            <span th:text="${task.name}"></span>
+                            <span th:text="${task.taskInfo.name}"></span>
                         </td>
                         <td th:text="${task.skillName}"></td>
                         <td th:text="${task.submoduleName}"></td>
