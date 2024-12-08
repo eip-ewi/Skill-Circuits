@@ -30,7 +30,7 @@
         th:data-item="${item.id}"
         th:data-path-ids="${level == 'module'} ? ${item.pathIds} : ${null}"
         th:data-index-initial="${iter == null} ? 0 : ${iter.size - iter.count}"
-        th:classappend="${level == 'module'} ? ${item.completed ? 'completed task' : 'task'} : ${''}"
+        th:classappend="${level == 'module'} ? ${item.taskInfo.completed ? 'completed task' : 'task'} : ${''}"
         layout:fragment="item">
         <input th:if="${canEdit}" name="id" type="hidden" th:value="${item.id}" />
         <th:block layout:fragment="item-decoration"></th:block>

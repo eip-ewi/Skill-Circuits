@@ -84,7 +84,7 @@ public class SkillController {
 				.map(tc -> tc.getTask().getId()).collect(Collectors.toSet());
 		view.getTasks().forEach(t -> {
 			if (t instanceof RegularTaskViewDTO regularTaskViewDTO) {
-				regularTaskViewDTO.setCompleted(completedTasks.contains(t.getId()));
+				regularTaskViewDTO.getTaskInfo().setCompleted(completedTasks.contains(t.getId()));
 			}
 		});
 

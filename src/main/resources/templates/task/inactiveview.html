@@ -26,13 +26,13 @@
         <th:block layout:replace="~{item/view :: item}">
             <th:block layout:fragment="item-content-element">
                 <a
-                    th:if="${item.link}"
-                    th:href="${item.link}"
+                    th:if="${item.taskInfo.link}"
+                    th:href="${item.taskInfo.link}"
                     target="_blank"
                     th:id="|item-${item.id}-link|">
                     <th:block layout:replace="~{item/view :: item-content}"></th:block>
                 </a>
-                <th:block th:unless="${item.link}">
+                <th:block th:unless="${item.taskInfo.link}">
                     <th:block layout:replace="~{item/view :: item-content}"></th:block>
                 </th:block>
             </th:block>
@@ -46,30 +46,30 @@
                     class="item__button"
                     data-staff="true"
                     disabled
-                    th:text="${item.time}"></button>
+                    th:text="${item.taskInfo.time}"></button>
             </th:block>
             <th:block layout:fragment="item-before-content">
                 <span
                     th:id="|item-${item.id}-icon|"
-                    th:class="|fa-solid fa-${item.type.icon} task-icon|"
-                    th:data-type="${item.type.icon}"></span>
+                    th:class="|fa-solid fa-${item.taskInfo.type.icon} task-icon|"
+                    th:data-type="${item.taskInfo.type.icon}"></span>
                 <th:block layout:replace="~{task/edit :: icon}"></th:block>
             </th:block>
             <th:block layout:fragment="item-after-content">
                 <span th:if="${canEdit}" th:text="|(${item.completedCount})|"></span>
                 <span
-                    th:if="${item.link}"
+                    th:if="${item.taskInfo.link}"
                     th:id="|item-${item.id}-link-icon|"
                     class="fa-solid fa-link always_visible"></span>
                 <div class="hover_input" data-edit="only">
                     <input
-                        th:data-initial="${item.link}"
+                        th:data-initial="${item.taskInfo.link}"
                         placeholder="Task link"
                         data-edit="only"
                         aria-label="Task URL"
                         type="url"
                         name="link"
-                        th:value="${item.link}" />
+                        th:value="${item.taskInfo.link}" />
                     <span data-edit="only" class="fa-solid fa-link always_visible"></span>
                 </div>
             </th:block>

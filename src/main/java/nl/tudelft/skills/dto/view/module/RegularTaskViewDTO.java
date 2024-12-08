@@ -17,14 +17,11 @@
  */
 package nl.tudelft.skills.dto.view.module;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import nl.tudelft.skills.model.RegularTask;
-import nl.tudelft.skills.model.TaskType;
 
 @Data
 @SuperBuilder
@@ -32,16 +29,12 @@ import nl.tudelft.skills.model.TaskType;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class RegularTaskViewDTO extends TaskViewDTO<RegularTask> {
-	// TODO SuperBuilder?
-	@NotBlank
-	private String name;
 	@NotNull
-	private TaskType type;
-	@Min(0)
-	private Integer time;
-	private String link;
-	@Builder.Default
-	private boolean completed = false;
+	private String name;
+
+	// TODO SuperBuilder?
+	@NotNull
+	private TaskInfoViewDTO taskInfo;
 
 	@NotNull
 	private Integer completedCount;

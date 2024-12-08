@@ -17,49 +17,27 @@
  */
 package nl.tudelft.skills.dto.view.module;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.ItemView;
-import nl.tudelft.skills.model.Path;
-import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.*;
 
 @Data
-@SuperBuilder
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public abstract class TaskViewDTO<D extends Task> extends View<D> implements ItemView {
+public class TaskInfoViewDTO extends View<TaskInfo> {
+	@NotBlank
+	private String name;
 	@NotNull
-	private Long id;
-	@NotNull
-	private String taskType;
-	@NotNull
-	private String submoduleName;
-	@NotNull
-	private String skillName;
-	@NotNull
-	private Set<Long> pathIds;
-
-	/**
-	 * Visibility of a task is set to true if it is part of the path currently displayed.
-	 */
+	private TaskType type;
+	@Min(0)
+	private Integer time;
+	private String link;
 	@Builder.Default
-	@NotNull
-	@EqualsAndHashCode.Exclude
-	private Boolean visible = true;
-
-	@Override
-	public void postApply() {
-		super.postApply();
-		taskType = data.getClass().getSimpleName();
-		skillName = data.getSkill().getName();
-		submoduleName = data.getSkill().getSubmodule().getName();
-		pathIds = data.getPaths().stream().map(Path::getId).collect(Collectors.toSet());
-	}
+	private boolean completed = false;
 }

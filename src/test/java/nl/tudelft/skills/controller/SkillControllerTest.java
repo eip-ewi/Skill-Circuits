@@ -515,7 +515,7 @@ public class SkillControllerTest extends ControllerTest {
 		RegularTaskViewDTO taskView = view.getTasks().stream()
 				.filter(t -> t instanceof RegularTaskViewDTO && t.getId().equals(taskDo.getId()))
 				.findFirst().map(v -> (RegularTaskViewDTO) v).get();
-		taskView.setCompleted(true);
+		taskView.getTaskInfo().setCompleted(true);
 		assertThat(model.getAttribute("block")).isEqualTo(view);
 
 		// Assert on added model attributes concerning paths and added tasks/modified skills

@@ -60,7 +60,7 @@ public class ModuleServiceTest {
 		assertThat(module.getSubmodules().stream()
 				.flatMap(sub -> sub.getSkills().stream())
 				.flatMap(skill -> skill.getTasks().stream())
-				.filter(view -> view instanceof RegularTaskViewDTO v && v.isCompleted())
+				.filter(view -> view instanceof RegularTaskViewDTO v && v.getTaskInfo().isCompleted())
 				.map(TaskViewDTO::getId).toList())
 				.containsExactlyInAnyOrderElementsOf(
 						List.of(db.getTaskRead11().getId(),

@@ -35,10 +35,7 @@ import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
-import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
-import nl.tudelft.skills.dto.view.module.ModuleLevelSubmoduleViewDTO;
-import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
+import nl.tudelft.skills.dto.view.module.*;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
@@ -64,7 +61,7 @@ public class ModuleService {
 		this.editionApi = editionApi;
 	}
 
-	// TODO: handling of choice tasks. Completion of choice tasks & their visibility
+	// TODO: Handling of choice tasks: Completions & their visibility
 
 	/**
 	 * Configures the model for the module circuit view.
@@ -135,7 +132,7 @@ public class ModuleService {
 					skill.getTasks()
 							.forEach(task -> {
 								if (task instanceof RegularTaskViewDTO view) {
-									view.setCompleted(completedTasks.contains(task.getId()));
+									view.getTaskInfo().setCompleted(completedTasks.contains(task.getId()));
 								}
 							});
 				});

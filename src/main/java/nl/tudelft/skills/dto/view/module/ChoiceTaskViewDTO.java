@@ -44,5 +44,8 @@ public class ChoiceTaskViewDTO extends TaskViewDTO<ChoiceTask> {
 	@EqualsAndHashCode.Exclude
 	private List<RegularTaskViewDTO> tasks;
 
+	@NotNull
+	private Integer completedTasks;
+
 	// TODO missing postApply super call?
 }
