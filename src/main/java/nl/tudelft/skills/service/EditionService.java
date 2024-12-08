@@ -439,7 +439,7 @@ public class EditionService {
 		Map<Task, Task> taskMap = new HashMap<>();
 
 		skillMap.forEach((prev, copy) -> prev.getTasks().forEach(t -> {
-			// TODO copying of choice tasks. Needs more adjustments since they contain tasks (dependency).
+			// TODO copying of ChoiceTasks. Needs more adjustments since they contain tasks (dependency).
 			// 	Below is only temporary solution for (regular) tasks!
 
 			if (t instanceof RegularTask regularTask) {

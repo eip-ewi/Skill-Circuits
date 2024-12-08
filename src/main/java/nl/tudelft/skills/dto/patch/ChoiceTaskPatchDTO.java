@@ -37,7 +37,6 @@ import nl.tudelft.skills.model.ChoiceTask;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class ChoiceTaskPatchDTO extends TaskPatchDTO<ChoiceTask> {
-	// TODO SuperBuilder?
 	private String name;
 	@NotNull
 	@Min(1)

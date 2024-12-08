@@ -32,7 +32,6 @@ import nl.tudelft.skills.model.ChoiceTask;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class ChoiceTaskViewDTO extends TaskViewDTO<ChoiceTask> {
-	// TODO SuperBuilder?
 	private String name;
 
 	@NotNull
@@ -46,6 +45,4 @@ public class ChoiceTaskViewDTO extends TaskViewDTO<ChoiceTask> {
 
 	@NotNull
 	private Integer completedTasks;
-
-	// TODO missing postApply super call?
 }

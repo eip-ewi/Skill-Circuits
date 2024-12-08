@@ -29,7 +29,6 @@ import nl.tudelft.skills.model.RegularTask;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class RegularTaskViewDTO extends TaskViewDTO<RegularTask> {
-	// TODO SuperBuilder?
 	@NotNull
 	private TaskInfoViewDTO taskInfo;
 

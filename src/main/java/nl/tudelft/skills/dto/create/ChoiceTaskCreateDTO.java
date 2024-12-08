@@ -32,7 +32,6 @@ import nl.tudelft.skills.model.ChoiceTask;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class ChoiceTaskCreateDTO extends TaskCreateDTO<ChoiceTask> {
-	// TODO SuperBuilder?
 	private String name;
 	@NotNull
 	@Min(1)
@@ -40,7 +39,7 @@ public class ChoiceTaskCreateDTO extends TaskCreateDTO<ChoiceTask> {
 	@NotNull
 	@Builder.Default
 	private List<RegularTaskCreateDTO> tasks = new ArrayList<>();
-	// TODO might need to add taskInfo here, since it is a Create class
+	// TODO: Might need to add TaskInfo here
 
 	@Override
 	protected void postApply(ChoiceTask data) {

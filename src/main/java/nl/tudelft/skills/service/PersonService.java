@@ -97,7 +97,7 @@ public class PersonService {
 		// If the skill is null, the tasksAdded and skillsModified are all added tasks and modified skills. Otherwise,
 		// they are only added corresponding to the skill (tasks in the skill and the skill itself, if modified).
 
-		// TODO: handling of ChoiceTasks here (requires ViewDTO)
+		// TODO handling of ChoiceTasks here
 		if (skill == null) {
 			model.addAttribute("tasksAdded",
 					tasks.stream().filter(t -> t instanceof RegularTask)

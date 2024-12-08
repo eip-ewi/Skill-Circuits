@@ -308,7 +308,7 @@ public class SkillService {
 				.deleteClickedLinksForTasks(regularTaskRepository.findAllByIdIn(patch.getRemovedItems()));
 
 		// Remove items
-		// TODO: handling deletion of ChoiceTasks vs. RegularTasks
+		// TODO handling deletion of ChoiceTasks vs. RegularTasks
 		regularTaskRepository.deleteAllByIdIn(patch.getRemovedItems());
 		taskRepository.saveAll(skill.getRequiredTasks());
 
@@ -357,7 +357,7 @@ public class SkillService {
 			return taskRepository.save(patch.apply(task));
 		}).toList());
 		allTasks.addAll(newChoiceTasks.stream().map(patch -> {
-			// TODO: Patching ChoiceTasks correctly
+			// TODO patching ChoiceTasks correctly
 			ChoiceTask task = (ChoiceTask) idToTask.get(patch.getId());
 			return taskRepository.save(patch.apply(task));
 		}).toList());

@@ -61,7 +61,7 @@ public class ModuleService {
 		this.editionApi = editionApi;
 	}
 
-	// TODO: Handling of choice tasks: Completions & their visibility
+	// TODO handling of choice tasks: completions & their visibility
 
 	/**
 	 * Configures the model for the module circuit view.
