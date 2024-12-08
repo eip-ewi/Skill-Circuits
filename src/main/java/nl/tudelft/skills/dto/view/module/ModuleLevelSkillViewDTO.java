@@ -52,7 +52,6 @@ public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
 	@EqualsAndHashCode.Exclude
 	private CheckpointViewDTO checkpoint;
 
-	// TODO check for correctness
 	@EqualsAndHashCode.Exclude
 	private List<? extends TaskViewDTO<?>> tasks;
 
@@ -73,15 +72,13 @@ public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
 		this.parentIds = data.getParents().stream().map(AbstractSkill::getId).toList();
 		this.childIds = data.getChildren().stream().map(AbstractSkill::getId).toList();
 		this.requiredTaskIds = data.getRequiredTasks().stream().map(Task::getId).toList();
-		// TODO: make sure each RegularTask is there only once, depending on if it is associated
-		//  to a ChoiceTask or not
 
-		// TODO Use ModelMapper or View.convert instead of if-else
+		// TODO: make sure each RegularTask is there only once, depending on if it is associated
+		//  to a ChoiceTask or not (Skill contains it "twice", once by association)
 		this.tasks = data.getTasks().stream().map(t -> {
-			if (t instanceof RegularTask) {
-				return View.convert((RegularTask) t, RegularTaskViewDTO.class);
-			}
-			return View.convert((ChoiceTask) t, ChoiceTaskViewDTO.class);
+			TaskViewDTO<?> dto = getMapper().map(t, t.viewClass());
+			dto.postApply();
+			return dto;
 		}).toList();
 	}
 

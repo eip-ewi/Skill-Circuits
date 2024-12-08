@@ -25,8 +25,6 @@ import javax.validation.constraints.NotNull;
 import lombok.*;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.ItemView;
-import nl.tudelft.skills.dto.view.module.ChoiceTaskViewDTO;
-import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
 import nl.tudelft.skills.dto.view.module.TaskViewDTO;
 import nl.tudelft.skills.model.*;
 
@@ -49,12 +47,10 @@ public class EditionLevelSkillViewDTO extends View<Skill> implements ItemView {
 	@Override
 	public void postApply() {
 		super.postApply();
-		// TODO Use ModelMapper or View.convert instead of if-else
 		this.tasks = data.getTasks().stream().map(t -> {
-			if (t instanceof RegularTask) {
-				return View.convert((RegularTask) t, RegularTaskViewDTO.class);
-			}
-			return View.convert((ChoiceTask) t, ChoiceTaskViewDTO.class);
+			TaskViewDTO<?> dto = getMapper().map(t, t.viewClass());
+			dto.postApply();
+			return dto;
 		}).toList();
 	}
 
