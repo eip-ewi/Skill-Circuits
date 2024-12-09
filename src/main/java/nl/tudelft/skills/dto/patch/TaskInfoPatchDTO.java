@@ -51,6 +51,5 @@ public class TaskInfoPatchDTO extends Patch<TaskInfo> {
 
 	@Override
 	protected void validate() {
-		// TODO: any validation?
 	}
 }

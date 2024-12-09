@@ -33,6 +33,11 @@ public class RegularTaskPatchDTO extends TaskPatchDTO<RegularTask> {
 	private TaskInfoPatchDTO taskInfo;
 
 	@Override
+	protected void applyOneToOne() {
+		data.setTaskInfo(taskInfo.apply(data.getTaskInfo()));
+	}
+
+	@Override
 	protected void validate() {
 	}
 }

@@ -109,5 +109,8 @@ public class Skill extends AbstractSkill {
 
 	public void setTasks(List<Task> tasks) {
 		this.tasks = tasks;
+		for (int i = 0; i < tasks.size(); i++) {
+			tasks.get(i).setIdx(i);
+		}
 	}
 }

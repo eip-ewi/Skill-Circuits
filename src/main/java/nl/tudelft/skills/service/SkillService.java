@@ -224,8 +224,8 @@ public class SkillService {
 		// Save new tasks
 		List<Task> allTasks = saveNewTasks(skill, create.getNewItems());
 
-		// Set the indices of the tasks
-		setIndices(allTasks);
+		// Reverse ordering of tasks
+		allTasks.sort(Comparator.comparingInt(Task::getIdx).reversed());
 
 		// Set tasks of Skill
 		skill.setTasks(allTasks);
@@ -287,8 +287,8 @@ public class SkillService {
 		// Save new items
 		allTasks.addAll(saveNewTasks(skill, patch.getNewItems()));
 
-		// Set the indices of the tasks
-		setIndices(allTasks);
+		// Reverse ordering of tasks
+		allTasks.sort(Comparator.comparingInt(Task::getIdx).reversed());
 
 		// Set tasks of Skill
 		skill.setTasks(allTasks);
@@ -351,11 +351,9 @@ public class SkillService {
 
 		// Patch the Tasks
 		List<Task> allTasks = new ArrayList<>();
-		allTasks.addAll(newRegularTasks.stream().map(patch -> {
-			RegularTask task = (RegularTask) idToTask.get(patch.getId());
-			task.setTaskInfo(patch.getTaskInfo().apply(task.getTaskInfo()));
-			return taskRepository.save(patch.apply(task));
-		}).toList());
+		allTasks.addAll(newRegularTasks.stream()
+				.map(patch -> taskRepository.save(patch.apply((RegularTask) idToTask.get(patch.getId()))))
+				.toList());
 		allTasks.addAll(newChoiceTasks.stream().map(patch -> {
 			// TODO patching ChoiceTasks correctly
 			ChoiceTask task = (ChoiceTask) idToTask.get(patch.getId());
@@ -363,17 +361,6 @@ public class SkillService {
 		}).toList());
 
 		return allTasks;
-	}
-
-	/**
-	 * Set the indices of a given list of tasks.
-	 *
-	 * @param tasks The list of tasks for which the indices should be set.
-	 */
-	@Transactional
-	public void setIndices(List<Task> tasks) {
-		// TODO index handling
-		// Old version: tasks.sort(Comparator.comparingInt(Task::getIdx).reversed());
 	}
 
 	/**

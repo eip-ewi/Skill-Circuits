@@ -48,7 +48,7 @@ public class ChoiceTaskPatchDTO extends TaskPatchDTO<ChoiceTask> {
 	@Builder.Default
 	private List<TaskCreateDTO<?>> newTasks = new ArrayList<>();
 
-	// TODO: might need to add taskInfo here, since it is a Patch class
+	// TODO: might need to add taskInfo here
 
 	@Override
 	protected void applyOneToOne() {

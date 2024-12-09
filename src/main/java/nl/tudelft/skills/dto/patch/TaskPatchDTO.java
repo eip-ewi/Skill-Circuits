@@ -46,5 +46,8 @@ public abstract class TaskPatchDTO<D extends Task> extends Patch<D> {
 	@NotNull
 	private SkillIdDTO skill;
 
-	// TODO: apply id and index?
+	@Override
+	protected void applyOneToOne() {
+		updateNonNull(index, data::setIdx);
+	}
 }
