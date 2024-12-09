@@ -33,7 +33,7 @@ import nl.tudelft.skills.model.Task;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "taskType")
 @JsonSubTypes({
 		@JsonSubTypes.Type(value = RegularTaskPatchDTO.class, name = "RegularTask"),
 		@JsonSubTypes.Type(value = ChoiceTaskPatchDTO.class, name = "ChoiceTask")

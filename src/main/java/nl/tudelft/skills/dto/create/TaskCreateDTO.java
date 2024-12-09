@@ -33,7 +33,7 @@ import nl.tudelft.skills.model.Task;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "taskType")
 @JsonSubTypes({
 		@JsonSubTypes.Type(value = RegularTaskCreateDTO.class, name = "RegularTask"),
 		@JsonSubTypes.Type(value = ChoiceTaskCreateDTO.class, name = "ChoiceTask")
@@ -43,4 +43,9 @@ public abstract class TaskCreateDTO<D extends Task> extends Create<D> {
 	private SkillIdDTO skill;
 	@NotNull
 	private Integer index;
+
+	@Override
+	protected void postApply(Task data) {
+		data.setIdx(index);
+	}
 }

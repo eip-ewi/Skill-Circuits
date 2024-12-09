@@ -104,6 +104,7 @@ public class TaskController {
 				.isAtLeastHeadTAInEdition(task.getSkill().getSubmodule().getModule().getEdition().getId())) {
 			model.addAttribute("item", View.convert(task, RegularTaskViewDTO.class));
 			model.addAttribute("canEdit", false);
+			model.addAttribute("level", "module");
 			return "task/inactiveview :: item";
 		}
 		throw new ResponseStatusException(HttpStatus.FORBIDDEN);

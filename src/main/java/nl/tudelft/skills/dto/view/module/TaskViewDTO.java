@@ -25,6 +25,7 @@ import javax.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.dto.id.SkillIdDTO;
 import nl.tudelft.skills.dto.view.ItemView;
 import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.Task;
@@ -41,6 +42,8 @@ public abstract class TaskViewDTO<D extends Task> extends View<D> implements Ite
 	private String taskType;
 	@NotNull
 	private String submoduleName;
+	@NotNull
+	private SkillIdDTO skill;
 	@NotNull
 	private String skillName;
 	@NotNull
