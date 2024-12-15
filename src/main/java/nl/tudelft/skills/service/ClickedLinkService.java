@@ -18,7 +18,6 @@
 package nl.tudelft.skills.service;
 
 import java.util.Collection;
-import java.util.List;
 
 import javax.transaction.Transactional;
 
