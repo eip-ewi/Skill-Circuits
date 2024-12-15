@@ -17,6 +17,8 @@
  */
 package nl.tudelft.skills.dto.id;
 
+import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.repository.TaskRepository;
 import org.springframework.data.repository.CrudRepository;
 
 import lombok.Data;
@@ -24,27 +26,25 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import nl.tudelft.librador.dto.id.IdDTO;
-import nl.tudelft.skills.model.RegularTask;
-import nl.tudelft.skills.repository.RegularTaskRepository;
 
 @Data
 @SuperBuilder
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class TaskIdDTO extends IdDTO<RegularTask, Long> {
+public class TaskIdDTO extends IdDTO<Task, Long> {
 
 	public TaskIdDTO(Long id) {
 		super(id);
 	}
 
 	@Override
-	public Class<? extends CrudRepository<RegularTask, Long>> repositoryClass() {
-		return RegularTaskRepository.class;
+	public Class<? extends CrudRepository<Task, Long>> repositoryClass() {
+		return TaskRepository.class;
 	}
 
 	@Override
-	public Class<? extends RegularTask> targetClass() {
-		return RegularTask.class;
+	public Class<? extends Task> targetClass() {
+		return Task.class;
 	}
 
 }
