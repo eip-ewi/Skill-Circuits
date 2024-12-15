@@ -511,18 +511,18 @@ public class AuthorisationServiceTest {
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
-	void canEditTask(String role, boolean expected) {
+	void canEditRegularTask(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canEditAbstractTask(db.getTaskDo10a().getId())).isEqualTo(expected);
+		assertThat(authorisationService.canEditRegularTask(db.getTaskDo10a().getId())).isEqualTo(expected);
 	}
 
 	@Transactional
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
-	void canDeleteTask(String role, boolean expected) {
+	void canDeleteRegularTask(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canDeleteAbstractTask(db.getTaskDo10a().getId())).isEqualTo(expected);
+		assertThat(authorisationService.canDeleteRegularTask(db.getTaskDo10a().getId())).isEqualTo(expected);
 	}
 
 	@Transactional

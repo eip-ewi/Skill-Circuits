@@ -55,7 +55,7 @@ public class TaskController {
 	 */
 	@Transactional
 	@PatchMapping("change-link")
-	@PreAuthorize("@authorisationService.canEditAbstractTask(#editLinkDTO.taskId)")
+	@PreAuthorize("@authorisationService.canEditRegularTask(#editLinkDTO.taskId)")
 	public ResponseEntity<Void> updateTaskLink(@RequestBody EditLinkDTO editLinkDTO) {
 		RegularTask task = regularTaskRepository.findByIdOrThrow(editLinkDTO.getTaskId());
 		task.setLink(editLinkDTO.getNewLink());
