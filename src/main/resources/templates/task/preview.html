@@ -23,6 +23,7 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <th:block layout:fragment="item">
+        <!-- TODO: handle ChoiceTasks here -->
         <span
             th:if="${item.taskType} == 'RegularTask'"
             th:id="|item-${item.id}-icon|"

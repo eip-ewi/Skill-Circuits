@@ -126,6 +126,9 @@ public class ModuleController {
 	@PreAuthorize("@authorisationService.canDeleteModule(#id)")
 	public String deleteModule(@RequestParam Long id) {
 		SCModule module = moduleRepository.findByIdOrThrow(id);
+
+		// Delete all task completions and links (only necessary for RegularTasks)
+		// TODO: it would be nicer to move this functionality to the corresponding services
 		List<RegularTask> tasks = module.getSubmodules().stream()
 				.flatMap(s -> s.getSkills().stream())
 				.flatMap(s -> s.getTasks().stream())
@@ -133,6 +136,7 @@ public class ModuleController {
 				.map(t -> (RegularTask) t).collect(Collectors.toList());
 		tasks.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
 		clickedLinkService.deleteClickedLinksForTasks(tasks);
+
 		moduleRepository.delete(module);
 		return "redirect:/edition/" + module.getEdition().getId();
 	}
@@ -148,6 +152,9 @@ public class ModuleController {
 	@PreAuthorize("@authorisationService.canDeleteModule(#id)")
 	public ResponseEntity<Void> deleteModuleSetup(@RequestParam Long id) {
 		SCModule module = moduleRepository.findByIdOrThrow(id);
+
+		// Delete all task completions and links (only necessary for RegularTasks)
+		// TODO: it would be nicer to move this functionality to the corresponding services
 		List<RegularTask> tasks = module.getSubmodules().stream()
 				.flatMap(s -> s.getSkills().stream())
 				.flatMap(s -> s.getTasks().stream())
@@ -155,6 +162,7 @@ public class ModuleController {
 				.map(t -> (RegularTask) t).collect(Collectors.toList());
 		tasks.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
 		clickedLinkService.deleteClickedLinksForTasks(tasks);
+
 		moduleRepository.delete(module);
 		return ResponseEntity.ok().build();
 	}

@@ -39,7 +39,8 @@ public class ChoiceTaskCreateDTO extends TaskCreateDTO<ChoiceTask> {
 	@NotNull
 	@Builder.Default
 	private List<RegularTaskCreateDTO> tasks = new ArrayList<>();
-	// TODO: Might need to add TaskInfo here
+
+	// TODO: might need to add TaskInfo here
 
 	@Override
 	protected void postApply(ChoiceTask data) {

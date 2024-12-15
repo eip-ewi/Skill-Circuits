@@ -57,6 +57,7 @@ public class EditionLevelModuleViewDTO extends View<SCModule> implements GroupVi
 	@Override
 	public void postApply() {
 		super.postApply();
+		// Only RegularTasks can have links
 		this.tasksWithLinks = this.getSubmodules().stream()
 				.flatMap(submodule -> submodule.getSkills().stream())
 				.flatMap(skill -> skill.getTasks().stream())

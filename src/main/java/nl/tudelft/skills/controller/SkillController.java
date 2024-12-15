@@ -83,6 +83,7 @@ public class SkillController {
 		Set<Long> completedTasks = personRepository.getById(person.getId()).getTaskCompletions().stream()
 				.map(tc -> tc.getTask().getId()).collect(Collectors.toSet());
 		view.getTasks().forEach(t -> {
+			// Only RegularTasks have a completion status
 			if (t instanceof RegularTaskViewDTO regularTaskViewDTO) {
 				regularTaskViewDTO.getTaskInfo().setCompleted(completedTasks.contains(t.getId()));
 			}

@@ -45,4 +45,6 @@ public class ChoiceTaskViewDTO extends TaskViewDTO<ChoiceTask> {
 
 	@NotNull
 	private Integer completedTasks;
+
+	// TODO: completion handling needs to be considered more concretely in the follow-up MR
 }

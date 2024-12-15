@@ -447,14 +447,16 @@ public class EditionService {
 						.type(regularTask.getType())
 						.time(regularTask.getTime())
 						.link(regularTask.getLink()).build();
+
+				// Temporary task is needed since variables need to be final
 				RegularTask tempTask = RegularTask.builder()
 						.skill(copy)
 						.taskInfo(taskInfo)
 						.idx(regularTask.getIdx())
 						.build();
 				taskInfo.setTask(tempTask);
-				RegularTask task = regularTaskRepository.save(tempTask);
 
+				RegularTask task = regularTaskRepository.save(tempTask);
 				copy.getTasks().add(task);
 				taskMap.put(regularTask, task);
 

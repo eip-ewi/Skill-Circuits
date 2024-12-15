@@ -75,10 +75,9 @@ public class SkillPatchDTO extends Patch<Skill> {
 		updateNonNullId(submodule, data::setSubmodule);
 	}
 
-	// TODO: Maybe also map the required tasks externally
-
 	@Override
 	protected void applyManyToManyMappedBy() {
+		// TODO: maybe also handle the required tasks externally (SkillService)
 		if (hidden) {
 			Set<Task> requiredTasks = new HashSet<>(
 					SpringContext.getBean(TaskRepository.class).findAllByIdIn(requiredTaskIds));

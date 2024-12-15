@@ -138,7 +138,8 @@ public class PersonController {
 	 * Adds a task to the user custom path.
 	 *
 	 * @param authPerson the currently authenticated person.
-	 * @param taskId     id of task to be added to custom path.
+	 * @param taskId id of task to be added to custom path.
+	 * @return List of task ids in the order they should appear in the skill.
 	 */
 	@PutMapping("add/{taskId}")
 	@Transactional
@@ -163,6 +164,7 @@ public class PersonController {
 	 *
 	 * @param authPerson the currently authenticated person.
 	 * @param taskId     id of task to be added to custom path.
+	 * @return List of task ids in the order they should appear in the skill.
 	 */
 	@PutMapping("remove/{taskId}")
 	@Transactional
