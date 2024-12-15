@@ -19,6 +19,7 @@ package nl.tudelft.skills.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -32,7 +33,7 @@ public interface RegularTaskRepository extends JpaRepository<RegularTask, Long> 
 				.orElseThrow(() -> new ResourceNotFoundException("RegularTask was not found: " + id));
 	}
 
-	List<RegularTask> findAllByIdIn(Collection<Long> id);
+	Set<RegularTask> findAllByIdIn(Collection<Long> id);
 
 	void deleteAllByIdIn(Collection<Long> id);
 

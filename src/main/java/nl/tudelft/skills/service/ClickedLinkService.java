@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.service;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.transaction.Transactional;
@@ -39,10 +40,10 @@ public class ClickedLinkService {
 	/**
 	 * Deletes the clicked links belonging to specific tasks
 	 *
-	 * @param tasks The list of tasks the clicked links should be deleted for
+	 * @param tasks The collection of tasks the clicked links should be deleted for
 	 */
 	@Transactional
-	public void deleteClickedLinksForTasks(List<RegularTask> tasks) {
+	public void deleteClickedLinksForTasks(Collection<RegularTask> tasks) {
 		var taskIds = tasks.stream().map(RegularTask::getId).toList();
 		clickedLinkRepository.deleteAllByTaskIdIn(taskIds);
 	}

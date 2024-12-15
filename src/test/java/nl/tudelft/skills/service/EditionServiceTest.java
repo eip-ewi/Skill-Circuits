@@ -643,12 +643,13 @@ public class EditionServiceTest {
 	private void testTaskEqualityHelper(Task initial, Task copy, Skill skillTo) {
 		assertThat(copy).isNotNull();
 		assertThat(regularTaskRepository.findByIdOrThrow(copy.getId())).isEqualTo(copy);
-		// TODO this requires more adjustments when ChoiceTasks are implemented
-		if (initial instanceof RegularTask && copy instanceof RegularTask) {
-			assertThat(((RegularTask) copy).getName()).isEqualTo(((RegularTask) initial).getName());
-			assertThat(((RegularTask) copy).getType()).isEqualTo(((RegularTask) initial).getType());
-			assertThat(((RegularTask) copy).getTime()).isEqualTo(((RegularTask) initial).getTime());
-			assertThat(((RegularTask) copy).getLink()).isEqualTo(((RegularTask) initial).getLink());
+		assertThat(initial).hasSameClassAs(copy);
+		// TODO this requires adjustments when ChoiceTasks are implemented
+		if (initial instanceof RegularTask regularInitial && copy instanceof RegularTask regularCopy) {
+			assertThat(regularCopy.getName()).isEqualTo(regularInitial.getName());
+			assertThat(regularCopy.getType()).isEqualTo(regularInitial.getType());
+			assertThat(regularCopy.getTime()).isEqualTo(regularInitial.getTime());
+			assertThat(regularCopy.getLink()).isEqualTo(regularInitial.getLink());
 		}
 		assertThat(copy.getIdx()).isEqualTo(initial.getIdx());
 		assertThat(skillTo.getTasks()).containsExactly(copy);

@@ -146,9 +146,9 @@ public class SkillControllerTest extends ControllerTest {
 		RegularTaskCreateDTO taskDto = RegularTaskCreateDTO.builder()
 				.taskInfo(TaskInfoCreateDTO.builder().name("New Task").type(TaskType.EXERCISE)
 						.time(1).build())
+				.skill(new SkillIdDTO())
+				.index(1)
 				.build();
-		taskDto.setSkill(new SkillIdDTO());
-		taskDto.setIndex(1);
 		var dto = SkillCreateDTO.builder()
 				.name("New Skill")
 				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
