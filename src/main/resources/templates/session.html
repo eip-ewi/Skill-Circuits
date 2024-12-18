@@ -42,7 +42,7 @@
 
         <th:block th:if="${@authorisationService.isAuthenticated()}">
             <script th:inline="javascript">
-                let timeout = 60;
+                const timeout = 60;
                 setTimeout(function () {
                     toggleOverlay("sessionExpiredModal");
                     document.getElementById("sessionExpiredLogin").focus();
