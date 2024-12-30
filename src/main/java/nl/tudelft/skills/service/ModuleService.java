@@ -18,6 +18,7 @@
 package nl.tudelft.skills.service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,6 +37,8 @@ import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.module.*;
+import nl.tudelft.skills.model.RegularTask;
+import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
@@ -47,16 +50,22 @@ public class ModuleService {
 	private final PersonRepository personRepository;
 	private final CircuitService circuitService;
 	private final PersonService personService;
+	private final TaskCompletionService taskCompletionService;
+	private final ClickedLinkService clickedLinkService;
 	private final CourseControllerApi courseApi;
 	private final EditionControllerApi editionApi;
 
 	public ModuleService(ModuleRepository moduleRepository, PersonRepository personRepository,
 			CircuitService circuitService, PersonService personService,
-			CourseControllerApi courseApi, EditionControllerApi editionApi) {
+			TaskCompletionService taskCompletionService,
+			ClickedLinkService clickedLinkService, CourseControllerApi courseApi,
+			EditionControllerApi editionApi) {
 		this.moduleRepository = moduleRepository;
 		this.personRepository = personRepository;
 		this.circuitService = circuitService;
 		this.personService = personService;
+		this.taskCompletionService = taskCompletionService;
+		this.clickedLinkService = clickedLinkService;
 		this.courseApi = courseApi;
 		this.editionApi = editionApi;
 	}
@@ -138,4 +147,26 @@ public class ModuleService {
 				});
 	}
 
+	/**
+	 * Deletes a given module by its id.
+	 *
+	 * @param  moduleId The id of the module to delete.
+	 * @return          The module that was deleted.
+	 */
+	@Transactional
+	public SCModule deleteModule(Long moduleId) {
+		SCModule module = moduleRepository.findByIdOrThrow(moduleId);
+
+		// Delete all task completions and links (only necessary for RegularTasks)
+		List<RegularTask> tasks = module.getSubmodules().stream()
+				.flatMap(s -> s.getSkills().stream())
+				.flatMap(s -> s.getTasks().stream())
+				.filter(t -> t instanceof RegularTask)
+				.map(t -> (RegularTask) t).collect(Collectors.toList());
+		tasks.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
+		clickedLinkService.deleteClickedLinksForTasks(tasks);
+
+		moduleRepository.delete(module);
+		return module;
+	}
 }

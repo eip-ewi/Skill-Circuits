@@ -18,7 +18,6 @@
 package nl.tudelft.skills.controller;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
 
@@ -38,12 +37,9 @@ import nl.tudelft.skills.dto.create.SCModuleCreateDTO;
 import nl.tudelft.skills.dto.patch.SCModulePatchDTO;
 import nl.tudelft.skills.dto.view.SkillSummaryDTO;
 import nl.tudelft.skills.dto.view.edition.EditionLevelModuleViewDTO;
-import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.model.SCModule;
 import nl.tudelft.skills.repository.ModuleRepository;
-import nl.tudelft.skills.service.ClickedLinkService;
 import nl.tudelft.skills.service.ModuleService;
-import nl.tudelft.skills.service.TaskCompletionService;
 
 @Controller
 @RequestMapping("module")
@@ -52,18 +48,13 @@ public class ModuleController {
 	private ModuleRepository moduleRepository;
 	private ModuleService moduleService;
 	private HttpSession session;
-	private final TaskCompletionService taskCompletionService;
-	private final ClickedLinkService clickedLinkService;
 
 	@Autowired
 	public ModuleController(ModuleRepository moduleRepository, ModuleService moduleService,
-			HttpSession session, TaskCompletionService taskCompletionService,
-			ClickedLinkService clickedLinkService) {
+			HttpSession session) {
 		this.moduleRepository = moduleRepository;
 		this.moduleService = moduleService;
 		this.session = session;
-		this.taskCompletionService = taskCompletionService;
-		this.clickedLinkService = clickedLinkService;
 	}
 
 	/**
@@ -125,19 +116,7 @@ public class ModuleController {
 	@Transactional
 	@PreAuthorize("@authorisationService.canDeleteModule(#id)")
 	public String deleteModule(@RequestParam Long id) {
-		SCModule module = moduleRepository.findByIdOrThrow(id);
-
-		// Delete all task completions and links (only necessary for RegularTasks)
-		// TODO: it would be nicer to move this functionality to the corresponding services
-		List<RegularTask> tasks = module.getSubmodules().stream()
-				.flatMap(s -> s.getSkills().stream())
-				.flatMap(s -> s.getTasks().stream())
-				.filter(t -> t instanceof RegularTask)
-				.map(t -> (RegularTask) t).collect(Collectors.toList());
-		tasks.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
-		clickedLinkService.deleteClickedLinksForTasks(tasks);
-
-		moduleRepository.delete(module);
+		SCModule module = moduleService.deleteModule(id);
 		return "redirect:/edition/" + module.getEdition().getId();
 	}
 
@@ -151,19 +130,7 @@ public class ModuleController {
 	@Transactional
 	@PreAuthorize("@authorisationService.canDeleteModule(#id)")
 	public ResponseEntity<Void> deleteModuleSetup(@RequestParam Long id) {
-		SCModule module = moduleRepository.findByIdOrThrow(id);
-
-		// Delete all task completions and links (only necessary for RegularTasks)
-		// TODO: it would be nicer to move this functionality to the corresponding services
-		List<RegularTask> tasks = module.getSubmodules().stream()
-				.flatMap(s -> s.getSkills().stream())
-				.flatMap(s -> s.getTasks().stream())
-				.filter(t -> t instanceof RegularTask)
-				.map(t -> (RegularTask) t).collect(Collectors.toList());
-		tasks.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
-		clickedLinkService.deleteClickedLinksForTasks(tasks);
-
-		moduleRepository.delete(module);
+		moduleService.deleteModule(id);
 		return ResponseEntity.ok().build();
 	}
 
