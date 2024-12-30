@@ -34,6 +34,7 @@ public class RegularTaskPatchDTO extends TaskPatchDTO<RegularTask> {
 
 	@Override
 	protected void applyOneToOne() {
+		super.applyOneToOne();
 		data.setTaskInfo(taskInfo.apply(data.getTaskInfo()));
 	}
 

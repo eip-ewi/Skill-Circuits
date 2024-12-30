@@ -227,10 +227,10 @@ public class SkillService {
 		// Reverse ordering of tasks
 		allTasks.sort(Comparator.comparingInt(Task::getIdx).reversed());
 
-		// Set tasks of Skill
+		// Set tasks of skill
 		skill.setTasks(allTasks);
 
-		// Save Skill and return
+		// Save skill and return
 		return abstractSkillRepository.save(skill);
 	}
 
@@ -243,7 +243,7 @@ public class SkillService {
 	 */
 	@Transactional
 	public List<Task> saveNewTasks(Skill skill, List<? extends TaskCreateDTO<?>> newTaskDTOs) {
-		// Create sub-lists for Task types
+		// Create sub-lists for task types
 		List<RegularTaskCreateDTO> newRegularTasks = newTaskDTOs.stream()
 				.filter(create -> create instanceof RegularTaskCreateDTO)
 				.map(create -> (RegularTaskCreateDTO) create)
@@ -275,56 +275,90 @@ public class SkillService {
 	 */
 	@Transactional
 	public Skill patchSkill(SkillPatchDTO patch) {
+		// Get skill and apply patch
 		Skill skill = skillRepository.findByIdOrThrow(patch.getId());
-
-		// TODO refactoring this method into smaller parts
-		// TODO patching and saving tasks correctly
-
-		List<Task> oldTasks = skill.getTasks();
 		skill = patch.apply(skill);
-		// Patch items
+
+		// Update required tasks for skill
+		skill = patchRequiredTasks(skill, skill.getRequiredTasks(),
+				taskRepository.findAllByIdIn(patch.getRequiredTaskIds()));
+
+		// Patch, save and remove tasks
 		List<Task> allTasks = new ArrayList<>(patchTasks(skill, patch.getItems()));
-		// Save new items
 		allTasks.addAll(saveNewTasks(skill, patch.getNewItems()));
+		removeTasks(skill, patch.getRemovedItems());
 
-		// Reverse ordering of tasks
+		// Reverse ordering of tasks by their index and set tasks
 		allTasks.sort(Comparator.comparingInt(Task::getIdx).reversed());
-
-		// Set tasks of Skill
 		skill.setTasks(allTasks);
 
-		skillRepository.save(skill);
+		// Save and return skill
+		return skillRepository.save(skill);
+	}
 
-		// Remove selected tasks from custom skill in person
+	/**
+	 * Patches the required tasks of a skill.
+	 *
+	 * @param  skill            The skill for which the required tasks should be patched.
+	 * @param  oldRequiredTasks The old required tasks.
+	 * @param  newRequiredTasks The new required tasks.
+	 * @return                  The updated skill with the patched required tasks.
+	 */
+	@Transactional
+	public Skill patchRequiredTasks(Skill skill, Set<Task> oldRequiredTasks, Set<Task> newRequiredTasks) {
+		// If the skill is not hidden, it should not have any required tasks
+		if (!skill.isHidden()) {
+			newRequiredTasks = new HashSet<>();
+		}
+
+		// Remove requirement for newly non-required tasks
+		for (Task task : oldRequiredTasks) {
+			if (!newRequiredTasks.contains(task)) {
+				task.getRequiredFor().remove(skill);
+				taskRepository.save(task);
+			}
+		}
+
+		// Add requirement for newly required tasks
+		Set<Task> patchedRequiredTasks = new HashSet<>();
+		for (Task task : newRequiredTasks) {
+			if (!oldRequiredTasks.contains(task)) {
+				task.getRequiredFor().add(skill);
+				task = taskRepository.save(task);
+			}
+			patchedRequiredTasks.add(task);
+		}
+
+		// Save to repository and return skill
+		skill.setRequiredTasks(patchedRequiredTasks);
+		return skillRepository.save(skill);
+	}
+
+	/**
+	 * Remove tasks by their ids from a given skill.
+	 *
+	 * @param skill        The skill that contains the tasks.
+	 * @param removedTasks The ids of the tasks that should be removed.
+	 */
+	@Transactional
+	public void removeTasks(Skill skill, Set<Long> removedTasks) {
+		// TODO handling deletion of ChoiceTasks
+		Set<RegularTask> regularTasks = regularTaskRepository.findAllByIdIn(removedTasks);
+
+		// Remove tasks from custom skills
 		skill.getPersonModifiedSkill().forEach(p -> {
 			p.setTasksAdded(p.getTasksAdded().stream()
-					.filter(t -> !patch.getRemovedItems().contains(t.getId())).collect(Collectors.toSet()));
+					.filter(t -> !removedTasks.contains(t.getId())).collect(Collectors.toSet()));
 			personRepository.save(p);
 		});
 
-		regularTaskRepository.findAllByIdIn(patch.getRemovedItems())
-				.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
-		clickedLinkService
-				.deleteClickedLinksForTasks(regularTaskRepository.findAllByIdIn(patch.getRemovedItems()));
+		// Remove task completions and clicked links
+		regularTasks.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
+		clickedLinkService.deleteClickedLinksForTasks(regularTasks);
 
-		// Remove items
-		// TODO handling deletion of ChoiceTasks vs. RegularTasks
-		regularTaskRepository.deleteAllByIdIn(patch.getRemovedItems());
-		taskRepository.saveAll(skill.getRequiredTasks());
-
-		// New tasks will be included in all paths by default
-		SCEdition edition = skill.getSubmodule().getModule().getEdition();
-
-		Set<Path> paths = new HashSet<>(pathRepository.findAllByEditionId(edition.getId()));
-		Skill finalSkill = skill;
-		skillRepository.findByIdOrThrow(skill.getId()).getTasks().stream().filter(t -> !oldTasks.contains(t))
-				.forEach(t -> {
-					t.setPaths(paths);
-					t.setSkill(finalSkill);
-					taskRepository.save(t);
-				});
-
-		return skill;
+		// Remove tasks
+		regularTaskRepository
+				.deleteAllByIdIn(regularTasks.stream().map(RegularTask::getId).collect(Collectors.toList()));
 	}
 
 	/**
@@ -339,7 +373,7 @@ public class SkillService {
 		Map<Long, Task> idToTask = skill.getTasks().stream()
 				.collect(Collectors.toMap(Task::getId, Function.identity()));
 
-		// Create sub-lists for Task types
+		// Create sub-lists for task types
 		List<RegularTaskPatchDTO> newRegularTasks = taskPatches.stream()
 				.filter(patch -> patch instanceof RegularTaskPatchDTO)
 				.map(patch -> (RegularTaskPatchDTO) patch)
@@ -349,13 +383,13 @@ public class SkillService {
 				.map(patch -> (ChoiceTaskPatchDTO) patch)
 				.toList();
 
-		// Patch the Tasks
+		// Patch the tasks
 		List<Task> allTasks = new ArrayList<>();
 		allTasks.addAll(newRegularTasks.stream()
 				.map(patch -> taskRepository.save(patch.apply((RegularTask) idToTask.get(patch.getId()))))
 				.toList());
+		// TODO patching ChoiceTasks correctly
 		allTasks.addAll(newChoiceTasks.stream().map(patch -> {
-			// TODO patching ChoiceTasks correctly
 			ChoiceTask task = (ChoiceTask) idToTask.get(patch.getId());
 			return taskRepository.save(patch.apply(task));
 		}).toList());
@@ -375,21 +409,25 @@ public class SkillService {
 	@Transactional
 	public List<Task> saveTasksFromChoiceTaskDto(ChoiceTaskCreateDTO choiceTaskDTO, Skill skill,
 			Set<Path> paths) {
+		// Apply task DTO and set attributes
 		choiceTaskDTO.setSkill(SkillIdDTO.builder().id(skill.getId()).build());
 		ChoiceTask choiceTask = choiceTaskDTO.apply();
 		choiceTask.setSkill(skill);
 		choiceTask.setPaths(paths);
 
-		List<RegularTask> choiceTaskTasks = choiceTaskDTO.getTasks().stream()
+		// Save all sub-tasks contained in the choice task
+		List<RegularTask> subTasks = choiceTaskDTO.getTasks().stream()
 				.map(taskDto -> saveTaskFromRegularTaskDto(taskDto, skill, paths))
 				.toList();
 
-		choiceTask.getTasks().addAll(choiceTaskTasks.stream().map(RegularTask::getTaskInfo).toList());
+		// Set the tasks of the choice task
+		choiceTask.getTasks().addAll(subTasks.stream().map(RegularTask::getTaskInfo).toList());
 		choiceTask = taskRepository.save(choiceTask);
 
+		// Return all tasks (choice task and sub-tasks)
 		List<Task> tasks = new ArrayList<>();
 		tasks.add(choiceTask);
-		tasks.addAll(choiceTaskTasks);
+		tasks.addAll(subTasks);
 		return tasks;
 	}
 
@@ -404,15 +442,19 @@ public class SkillService {
 	@Transactional
 	public RegularTask saveTaskFromRegularTaskDto(RegularTaskCreateDTO regularTaskDTO, Skill skill,
 			Set<Path> paths) {
+		// Apply task DTO and set attributes
 		regularTaskDTO.setSkill(SkillIdDTO.builder().id(skill.getId()).build());
 		RegularTask task = regularTaskDTO.apply();
 		task.setPaths(paths);
 		task.setSkill(skill);
+
+		// Apply taskInfo DTO and set attributes
 		TaskInfo taskInfo = regularTaskDTO.getTaskInfo().apply();
 		taskInfo.setTask(task);
 		task.setTaskInfo(taskInfo);
-		task = taskRepository.save(task);
-		return task;
+
+		// Save and return task
+		return taskRepository.save(task);
 	}
 
 }

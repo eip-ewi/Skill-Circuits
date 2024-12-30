@@ -28,13 +28,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.patch.Patch;
 import nl.tudelft.skills.dto.create.TaskCreateDTO;
 import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.repository.TaskRepository;
 
 @Data
 @Builder
@@ -73,22 +71,6 @@ public class SkillPatchDTO extends Patch<Skill> {
 		updateNonNull(essential, data::setEssential);
 		updateNonNull(hidden, data::setHidden);
 		updateNonNullId(submodule, data::setSubmodule);
-	}
-
-	@Override
-	protected void applyManyToManyMappedBy() {
-		// TODO: maybe also handle the required tasks externally (SkillService)
-		if (hidden) {
-			Set<Task> requiredTasks = new HashSet<>(
-					SpringContext.getBean(TaskRepository.class).findAllByIdIn(requiredTaskIds));
-			updateManyToManyMappedBy(data, data.getRequiredTasks(), requiredTasks,
-					Task::getRequiredFor);
-			data.setRequiredTasks(requiredTasks);
-		} else {
-			updateManyToManyMappedByIds(data, data.getRequiredTasks(), Collections.emptyList(),
-					Task::getRequiredFor);
-			data.setRequiredTasks(Collections.emptySet());
-		}
 	}
 
 	@Override

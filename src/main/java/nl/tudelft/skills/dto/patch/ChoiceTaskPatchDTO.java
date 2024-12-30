@@ -52,6 +52,7 @@ public class ChoiceTaskPatchDTO extends TaskPatchDTO<ChoiceTask> {
 
 	@Override
 	protected void applyOneToOne() {
+		super.applyOneToOne();
 		data.setName(name == null || name.isBlank() ? null : name);
 		updateNonNull(minTasks, data::setMinTasks);
 	}
