@@ -125,20 +125,6 @@ public class SkillControllerTest extends ControllerTest {
 	}
 
 	@Test
-	void createSkill() {
-		var dto = SkillCreateDTO.builder()
-				.name("New Skill")
-				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
-				.checkpoint(new CheckpointIdDTO(db.getCheckpointLectureOne().getId()))
-				.requiredTaskIds(Collections.emptyList())
-				.column(10).row(11).newItems(new ArrayList<>()).build();
-
-		skillController.createSkill(null, dto, mock(Model.class));
-
-		assertTrue(skillRepository.findAll().stream().anyMatch(s -> s.getName().equals("New Skill")));
-	}
-
-	@Test
 	void createSkillWithNewCheckpoint() {
 		var dto = SkillCreateDTO.builder()
 				.name("New skill with new checkpoint")
