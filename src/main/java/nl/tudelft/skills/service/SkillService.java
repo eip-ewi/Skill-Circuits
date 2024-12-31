@@ -263,6 +263,8 @@ public class SkillService {
 				.collect(Collectors.toList());
 		newTasks.addAll(
 				newRegularTasks.stream().map(dto -> saveTaskFromRegularTaskDto(dto, skill, paths)).toList());
+		skill.getTasks().addAll(newTasks);
+		skillRepository.save(skill);
 
 		return newTasks;
 	}
@@ -352,13 +354,21 @@ public class SkillService {
 			personRepository.save(p);
 		});
 
-		// Remove task completions and clicked links
-		regularTasks.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
+		// Remove task completions, clicked links and task requirements
+		regularTasks.forEach(t -> {
+			t.getRequiredFor().forEach(s -> {
+				s.getRequiredTasks().remove(t);
+				skillRepository.save(s);
+			});
+			taskCompletionService.deleteTaskCompletionsOfTask(t);
+		});
 		clickedLinkService.deleteClickedLinksForTasks(regularTasks);
 
 		// Remove tasks
 		regularTaskRepository
 				.deleteAllByIdIn(regularTasks.stream().map(RegularTask::getId).collect(Collectors.toList()));
+		skill.getTasks().removeAll(regularTasks);
+		skillRepository.save(skill);
 	}
 
 	/**
@@ -409,6 +419,8 @@ public class SkillService {
 	@Transactional
 	public List<Task> saveTasksFromChoiceTaskDto(ChoiceTaskCreateDTO choiceTaskDTO, Skill skill,
 			Set<Path> paths) {
+		// TODO tests for this method will be added when ChoiceTasks are fully implemented
+
 		// Apply task DTO and set attributes
 		choiceTaskDTO.setSkill(SkillIdDTO.builder().id(skill.getId()).build());
 		ChoiceTask choiceTask = choiceTaskDTO.apply();

@@ -48,10 +48,7 @@ import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.create.*;
 import nl.tudelft.skills.dto.id.*;
-import nl.tudelft.skills.dto.patch.RegularTaskPatchDTO;
-import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
-import nl.tudelft.skills.dto.patch.TaskInfoPatchDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
 import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
 import nl.tudelft.skills.model.*;
@@ -142,36 +139,6 @@ public class SkillControllerTest extends ControllerTest {
 	}
 
 	@Test
-	void createSkillWithTasks() {
-		RegularTaskCreateDTO taskDto = RegularTaskCreateDTO.builder()
-				.taskInfo(TaskInfoCreateDTO.builder().name("New Task").type(TaskType.EXERCISE)
-						.time(1).build())
-				.skill(new SkillIdDTO())
-				.index(1)
-				.build();
-		var dto = SkillCreateDTO.builder()
-				.name("New Skill")
-				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
-				.checkpoint(new CheckpointIdDTO(db.getCheckpointLectureOne().getId()))
-				.requiredTaskIds(Collections.emptyList())
-				.column(10).row(11).newItems(List.of(taskDto)).build();
-		skillController.createSkill(null, dto, mock(Model.class));
-
-		Optional<Skill> skill = skillRepository.findAll().stream()
-				.filter(s -> s.getName().equals("New Skill"))
-				.findFirst();
-		assertTrue(skill.isPresent());
-
-		Optional<RegularTask> task = regularTaskRepository.findAll().stream()
-				.filter(t -> t.getName().equals("New Task"))
-				.findFirst();
-		assertTrue(task.isPresent());
-
-		assertThat(task.get().getSkill()).isEqualTo(skill.get());
-		assertThat(skill.get().getTasks()).containsExactly(task.get());
-	}
-
-	@Test
 	void createSkillWithNewCheckpoint() {
 		var dto = SkillCreateDTO.builder()
 				.name("New skill with new checkpoint")
@@ -213,88 +180,6 @@ public class SkillControllerTest extends ControllerTest {
 
 		assertTrue(abstractSkillRepository.findAll().stream().anyMatch(s -> s instanceof ExternalSkill es
 				&& skillRepository.findByIdOrThrow(es.getSkill().getId()).getName().equals("Assumption")));
-	}
-
-	@Test
-	void patchSkill() {
-		// TODO: add a test for changes in a patched task
-
-		Long skillId = db.getSkillVariables().getId();
-		RegularTask old = db.getTaskRead10();
-		RegularTaskCreateDTO taskAdded = RegularTaskCreateDTO.builder()
-				.taskInfo(TaskInfoCreateDTO.builder().name("New Task").type(TaskType.EXERCISE)
-						.time(1).build())
-				.skill(new SkillIdDTO(skillId))
-				.index(1)
-				.build();
-		RegularTaskPatchDTO oldTask = RegularTaskPatchDTO.builder()
-				.taskInfo(TaskInfoPatchDTO.builder().name(old.getName())
-						.time(old.getTime()).type(old.getType()).build())
-				.id(old.getId())
-				.skill(new SkillIdDTO(skillId))
-				.index(old.getIdx()).build();
-
-		// Add a task and remove a task
-		skillController.patchSkill(SkillPatchDTO.builder()
-				.id(skillId)
-				.name("Updated")
-				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
-				.items(List.of(oldTask))
-				.newItems(List.of(taskAdded))
-				.removedItems(Set.of(db.getTaskDo10a().getId()))
-				.build(), model);
-
-		Skill skill = db.getSkillVariables();
-		assertThat(skill.getName()).isEqualTo("Updated");
-		assertThat(submoduleRepository.findByIdOrThrow(skill.getSubmodule().getId())).isEqualTo(
-				submoduleRepository.findByIdOrThrow(db.getSubmoduleCases().getId()));
-
-		// Check task related properties
-		Optional<RegularTask> task = regularTaskRepository.findAll().stream()
-				.filter(t -> t.getName().equals("New Task"))
-				.findFirst();
-		assertTrue(task.isPresent());
-		assertThat(skill.getTasks()).containsExactlyInAnyOrder(db.getTaskRead10(), task.get());
-		assertThat(task.get().getSkill()).isEqualTo(skill);
-
-		// Check that all TaskCompletion related information remains the same
-		assertThat(taskCompletionRepository.findAll()).hasSize(4);
-		assertThat(db.getPerson().getTaskCompletions()).hasSize(4);
-		assertThat(db.getTaskRead12().getCompletedBy()).hasSize(1);
-		assertThat(db.getTaskDo12ae().getCompletedBy()).hasSize(1);
-		assertThat(db.getTaskRead11().getCompletedBy()).hasSize(1);
-		assertThat(db.getTaskDo11ad().getCompletedBy()).hasSize(1);
-	}
-
-	@Test
-	void patchSkillDeletesTask() {
-		Long taskId = db.getTaskRead11().getId();
-		Set<Long> taskIdSet = new HashSet<>();
-		taskIdSet.add(taskId);
-
-		skillController.patchSkill(SkillPatchDTO.builder()
-				.id(db.getSkillNegation().getId())
-				.name("Updated")
-				.removedItems(taskIdSet)
-				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
-				.build(), model);
-
-		Skill skill = db.getSkillNegation();
-		assertThat(skill.getName()).isEqualTo("Updated");
-		assertThat(submoduleRepository.findByIdOrThrow(skill.getSubmodule().getId())).isEqualTo(
-				submoduleRepository.findByIdOrThrow(db.getSubmoduleCases().getId()));
-
-		// Check that the Task and its TaskCompletions were deleted
-		assertThat(regularTaskRepository.findById(taskId)).isEmpty();
-		assertThat(taskCompletionRepository.findAll()).hasSize(3);
-		assertThat(db.getPerson().getTaskCompletions()).hasSize(3);
-		assertThat(regularTaskRepository.findById(taskId)).isEmpty();
-		// Check that all other TaskCompletions remain the same
-		assertThat(db.getTaskRead12().getCompletedBy()).hasSize(1);
-		assertThat(db.getTaskDo12ae().getCompletedBy()).hasSize(1);
-		assertThat(db.getTaskDo11ad().getCompletedBy()).hasSize(1);
-		//Check that ClickedLinks are deleted
-		assertThat(clickedLinkRepository.findAll()).hasSize(1);
 	}
 
 	@Test

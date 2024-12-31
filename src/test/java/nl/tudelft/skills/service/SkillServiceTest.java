@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,17 @@ import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.dto.create.RegularTaskCreateDTO;
+import nl.tudelft.skills.dto.create.SkillCreateDTO;
+import nl.tudelft.skills.dto.create.TaskInfoCreateDTO;
+import nl.tudelft.skills.dto.id.CheckpointIdDTO;
+import nl.tudelft.skills.dto.id.SkillIdDTO;
+import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
+import nl.tudelft.skills.dto.patch.RegularTaskPatchDTO;
+import nl.tudelft.skills.dto.patch.SkillPatchDTO;
+import nl.tudelft.skills.dto.patch.TaskInfoPatchDTO;
 import nl.tudelft.skills.model.*;
+import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.AbstractSkillRepository;
 import nl.tudelft.skills.repository.RegularTaskRepository;
@@ -666,4 +676,352 @@ public class SkillServiceTest {
 				.containsExactlyInAnyOrder(db.getSkillAssumption(), skillEditionB, skillEditionC);
 	}
 
+	@Test
+	void createSkillTest() {
+		// TODO when implemented, add a ChoiceTask test
+		// Create a skill with two tasks
+		RegularTaskCreateDTO taskDtoA = RegularTaskCreateDTO.builder()
+				.taskInfo(TaskInfoCreateDTO.builder().name("Test Task A").type(TaskType.VIDEO).link("link")
+						.time(10).build())
+				.skill(new SkillIdDTO()).index(0).build();
+		RegularTaskCreateDTO taskDtoB = RegularTaskCreateDTO.builder()
+				.taskInfo(TaskInfoCreateDTO.builder().name("Test Task B").type(TaskType.VIDEO).link("link")
+						.time(10).build())
+				.skill(new SkillIdDTO()).index(1).build();
+		SkillCreateDTO skillCreateDTO = SkillCreateDTO.builder()
+				.name("Test Skill")
+				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
+				.checkpoint(new CheckpointIdDTO(db.getCheckpointLectureOne().getId()))
+				.requiredTaskIds(Collections.emptyList())
+				.column(10).row(11).newItems(List.of(taskDtoA, taskDtoB)).build();
+
+		skillService.createSkill(skillCreateDTO);
+
+		Optional<Skill> skill = skillRepository.findAll().stream()
+				.filter(s -> s.getName().equals("Test Skill"))
+				.findFirst();
+		Optional<RegularTask> taskA = regularTaskRepository.findAll().stream()
+				.filter(t -> t.getName().equals("Test Task A")).findFirst();
+		Optional<RegularTask> taskB = regularTaskRepository.findAll().stream()
+				.filter(t -> t.getName().equals("Test Task B")).findFirst();
+		assertThat(skill).isNotEmpty();
+		assertThat(taskA).isNotEmpty();
+		assertThat(taskB).isNotEmpty();
+
+		// Assert on tasks (ordering should be reversed)
+		assertOnRegularTaskAttributes(taskA.get(), "Test Task A", 1, skill.get(),
+				Set.of(db.getPathFinderPath()));
+		assertOnRegularTaskAttributes(taskB.get(), "Test Task B", 0, skill.get(),
+				Set.of(db.getPathFinderPath()));
+
+		// Assert on skill
+		assertThat(skill.get().getTasks()).containsExactly(taskB.get(), taskA.get());
+		assertThat(skill.get().getCheckpoint()).isEqualTo(db.getCheckpointLectureOne());
+		assertThat(db.getCheckpointLectureOne().getSkills()).contains(skill.get());
+		assertThat(skill.get().getSubmodule()).isEqualTo(db.getSubmoduleCases());
+		assertThat(db.getSubmoduleCases().getSkills()).contains(skill.get());
+		assertThat(skill.get().getRequiredTasks()).isEmpty();
+		assertThat(skill.get().getName()).isEqualTo("Test Skill");
+		assertThat(skill.get().getColumn()).isEqualTo(10);
+		assertThat(skill.get().getRow()).isEqualTo(11);
+	}
+
+	@Test
+	void patchSkillTest() {
+		// TODO when implemented, add a ChoiceTask test
+		// Changes made: Task removal, task addition, task patch, change task ordering,
+		// hide and rename skill, add required task
+
+		Skill oldSkill = db.getSkillVariables();
+		RegularTask oldTask = db.getTaskRead10();
+		RegularTask removedTask = db.getTaskDo10a();
+
+		// Set old task index to 0
+		oldTask.setIdx(0);
+		oldTask = taskRepository.save(oldTask);
+
+		// Create DTOs
+		RegularTaskCreateDTO newTaskDto = RegularTaskCreateDTO.builder()
+				.taskInfo(TaskInfoCreateDTO.builder().name("Test Task").type(TaskType.VIDEO).link("link")
+						.time(10).build())
+				.skill(new SkillIdDTO(oldSkill.getId())).index(1).build();
+		RegularTaskPatchDTO oldTaskPatchDto = RegularTaskPatchDTO.builder()
+				.taskInfo(TaskInfoPatchDTO.builder().name("Patched Task")
+						.time(10).type(TaskType.VIDEO).link("link").build())
+				.id(oldTask.getId()).skill(new SkillIdDTO(oldSkill.getId())).index(0).build();
+
+		// Patch skill
+		skillService.patchSkill(SkillPatchDTO.builder()
+				.id(oldSkill.getId())
+				.name("Patched Skill")
+				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
+				.items(List.of(oldTaskPatchDto))
+				.newItems(List.of(newTaskDto))
+				.removedItems(Set.of(removedTask.getId()))
+				.requiredTaskIds(List.of(db.getTaskRead12().getId()))
+				.hidden(true)
+				.build());
+
+		Skill newSkill = db.getSkillVariables();
+		Optional<RegularTask> addedTask = regularTaskRepository.findAll().stream()
+				.filter(t -> t.getName().equals("Test Task"))
+				.findFirst();
+		Optional<RegularTask> patchedTask = newSkill.getTasks().stream()
+				.filter(t -> t instanceof RegularTask r && r.getName().equals("Patched Task"))
+				.map(t -> (RegularTask) t)
+				.findFirst();
+
+		// Check task related properties (task ordering should be reversed)
+		assertThat(addedTask).isNotEmpty();
+		assertThat(patchedTask).isNotEmpty();
+		assertThat(taskRepository.findById(removedTask.getId())).isEmpty();
+		assertOnRegularTaskAttributes(addedTask.get(), "Test Task", 0, newSkill,
+				Set.of(db.getPathFinderPath()));
+		assertOnRegularTaskAttributes(patchedTask.get(), "Patched Task", 1, newSkill,
+				Set.of());
+		assertThat(db.getSkillVariablesHidden().getRequiredTasks()).doesNotContain(removedTask);
+
+		// Assert on skill attributes
+		assertThat(newSkill.getTasks()).containsExactly(addedTask.get(), patchedTask.get());
+		assertThat(newSkill.isHidden()).isTrue();
+		assertThat(newSkill.getRequiredTasks()).containsExactly(db.getTaskRead12());
+		assertThat(newSkill.getName()).isEqualTo("Patched Skill");
+		assertThat(newSkill.getColumn()).isEqualTo(oldSkill.getColumn());
+		assertThat(newSkill.getRow()).isEqualTo(oldSkill.getRow());
+
+		// Check that all TaskCompletion related information remains the same
+		assertThat(taskCompletionRepository.findAll()).hasSize(4);
+		assertThat(db.getPerson().getTaskCompletions()).hasSize(4);
+		assertThat(db.getTaskRead12().getCompletedBy()).hasSize(1);
+		assertThat(db.getTaskDo12ae().getCompletedBy()).hasSize(1);
+		assertThat(db.getTaskRead11().getCompletedBy()).hasSize(1);
+		assertThat(db.getTaskDo11ad().getCompletedBy()).hasSize(1);
+	}
+
+	@Test
+	void saveNewTasksTestRegularTask() {
+		// TODO when implemented, add a ChoiceTask test
+		Skill skill = db.getSkillImplication();
+		RegularTaskCreateDTO regularTaskDTO = RegularTaskCreateDTO.builder()
+				.taskInfo(TaskInfoCreateDTO.builder().name("Test Task").time(10).type(TaskType.VIDEO)
+						.link("link").build())
+				.skill(SkillIdDTO.builder().id(skill.getId()).build()).index(4).build();
+
+		// Save task
+		List<Task> tasks = skillService.saveNewTasks(skill, List.of(regularTaskDTO));
+
+		// Assert on the task attributes
+		assertThat(tasks).hasSize(1);
+		Optional<RegularTask> createdRegularTask = tasks.stream()
+				.filter(t -> t instanceof RegularTask regularTask
+						&& regularTask.getName().equals("Test Task"))
+				.map(t -> (RegularTask) t)
+				.findFirst();
+		assertThat(createdRegularTask).isNotEmpty();
+		assertOnRegularTaskAttributes(createdRegularTask.get(), "Test Task", 4, skill,
+				Set.of(db.getPathFinderPath()));
+	}
+
+	@Test
+	void saveTasksFromRegularTaskDtoTest() {
+		Skill skill = db.getSkillImplication();
+		RegularTaskCreateDTO regularTaskDTO = RegularTaskCreateDTO.builder()
+				.taskInfo(TaskInfoCreateDTO.builder().name("Test Task").time(10).type(TaskType.VIDEO)
+						.link("link").build())
+				.skill(SkillIdDTO.builder().id(skill.getId()).build()).index(4).build();
+
+		// Save task
+		RegularTask task = skillService.saveTaskFromRegularTaskDto(regularTaskDTO, skill,
+				Set.of(db.getPathFinderPath()));
+
+		// Assert on the task attributes
+		assertOnRegularTaskAttributes(task, "Test Task", 4, skill, Set.of(db.getPathFinderPath()));
+	}
+
+	@Test
+	void patchTasksTestRegularTask() {
+		// TODO when implemented, add a ChoiceTask test
+		Skill skill = db.getSkillImplication();
+		Long taskId = db.getTaskDo12ae().getId();
+		RegularTaskPatchDTO regularTaskDTO = RegularTaskPatchDTO.builder()
+				.id(taskId)
+				.taskInfo(TaskInfoPatchDTO.builder().name("Test Task").time(10).type(TaskType.VIDEO)
+						.link("link").build())
+				.skill(SkillIdDTO.builder().id(skill.getId()).build()).index(4).build();
+
+		// Patch task
+		List<Task> tasks = skillService.patchTasks(skill, List.of(regularTaskDTO));
+
+		// Assert on the task attributes
+		assertThat(tasks).hasSize(1);
+		Optional<RegularTask> createdRegularTask = tasks.stream()
+				.filter(t -> t instanceof RegularTask regularTask
+						&& regularTask.getName().equals("Test Task"))
+				.map(t -> (RegularTask) t)
+				.findFirst();
+		assertThat(createdRegularTask).isNotEmpty();
+		assertThat(regularTaskRepository.findByIdOrThrow(taskId)).isEqualTo(createdRegularTask.get());
+		assertOnRegularTaskAttributes(createdRegularTask.get(), "Test Task", 4, skill, Set.of());
+	}
+
+	@Test
+	void removeTasksTestModified() {
+		// TODO when implemented, add ChoiceTask tests
+		// Add a skill modification
+		Skill skill = db.getSkillImplication();
+		RegularTask task = db.getTaskRead12();
+		SCPerson person = db.getPerson();
+		person.getTasksAdded().add(task);
+		person.getSkillsModified().add(skill);
+		task.getPersonsThatAddedTask().add(person);
+		skill.getPersonModifiedSkill().add(person);
+		personRepository.save(person);
+		skill = skillRepository.save(skill);
+
+		// Assert on modification
+		RegularTask taskModified = taskRepository.save(task);
+		assertThat(taskModified.getPersonsThatAddedTask()).hasSize(1);
+		assertThat(skill.getPersonModifiedSkill()).hasSize(1);
+
+		// Remove task
+		skillService.removeTasks(skill, Set.of(task.getId()));
+
+		// Assert that modification was removed
+		assertThat(taskRepository.findById(task.getId())).isEmpty();
+		Set<SCPerson> addedTask = personRepository.findAll().stream()
+				.filter(p -> p.getTasksAdded().contains(taskModified)).collect(Collectors.toSet());
+		assertThat(addedTask).isEmpty();
+		assertThat(db.getSkillImplication().getTasks()).doesNotContain(task);
+	}
+
+	@Test
+	void removeTasksTestLinkAndCompletion() {
+		Skill skill = db.getSkillImplication();
+		RegularTask task = db.getTaskRead12();
+		assertThat(task.getCompletedBy()).hasSize(1);
+		Set<ClickedLink> clickedLinksBefore = clickedLinkRepository.findAll().stream()
+				.filter(c -> c.getTask().equals(task)).collect(Collectors.toSet());
+		assertThat(clickedLinksBefore).hasSize(1);
+
+		skillService.removeTasks(skill, Set.of(task.getId()));
+
+		assertThat(taskRepository.findById(task.getId())).isEmpty();
+		Set<TaskCompletion> completions = taskCompletionRepository.findAll().stream()
+				.filter(c -> c.getTask().equals(task)).collect(Collectors.toSet());
+		assertThat(completions).isEmpty();
+		Set<ClickedLink> clickedLinksAfter = clickedLinkRepository.findAll().stream()
+				.filter(c -> c.getTask().equals(task)).collect(Collectors.toSet());
+		assertThat(clickedLinksAfter).isEmpty();
+		assertThat(db.getSkillImplication().getTasks()).doesNotContain(task);
+	}
+
+	@Test
+	void removeTasksTestRequiredForHidden() {
+		Skill skill = db.getSkillVariables();
+		RegularTask task = db.getTaskRead10();
+		assertThat(task.getRequiredFor()).containsExactly(db.getSkillVariablesHidden());
+
+		skillService.removeTasks(skill, Set.of(task.getId()));
+
+		assertThat(taskRepository.findById(task.getId())).isEmpty();
+		Set<Skill> requiredFor = skillRepository.findAll().stream()
+				.filter(s -> s.getRequiredTasks().contains(task)).collect(Collectors.toSet());
+		assertThat(requiredFor).isEmpty();
+		assertThat(db.getSkillVariables().getTasks()).doesNotContain(task);
+	}
+
+	@Test
+	void removeTasksTestSimpleTasks() {
+		Skill skill = db.getSkillImplication();
+		RegularTask taskA = db.createTaskBySkillAndName(skill, "Task A");
+		RegularTask taskB = db.createTaskBySkillAndName(skill, "Task B");
+
+		skillService.removeTasks(skill, Set.of(taskA.getId(), taskB.getId()));
+
+		assertThat(taskRepository.findById(taskA.getId())).isEmpty();
+		assertThat(taskRepository.findById(taskB.getId())).isEmpty();
+		assertThat(db.getSkillImplication().getTasks()).doesNotContain(taskA, taskB);
+	}
+
+	@Test
+	void patchRequiredTasksTestNotHidden() {
+		// Pass one task as required task
+		skillService.patchRequiredTasks(db.getSkillVariables(), Set.of(), Set.of(db.getTaskRead12()));
+
+		// A non-hidden skill should not have any required tasks
+		assertThat(db.getSkillVariables().getRequiredTasks()).isEmpty();
+		assertThat(db.getTaskRead12().getRequiredFor()).isEmpty();
+	}
+
+	@Test
+	void patchRequiredTasksTestHiddenNoPreviousRequirement() {
+		// Hide skill
+		Skill skill = db.getSkillVariables();
+		skill.setHidden(true);
+		skill = skillRepository.save(skill);
+
+		// Pass one task as required task
+		skillService.patchRequiredTasks(skill, Set.of(), Set.of(db.getTaskRead12()));
+
+		// Assert that the task was added as requirement
+		Skill skillAfter = db.getSkillVariables();
+		Task taskAfter = db.getTaskRead12();
+		assertThat(skillAfter.getRequiredTasks()).containsExactly(taskAfter);
+		assertThat(taskAfter.getRequiredFor()).containsExactly(skillAfter);
+	}
+
+	@Test
+	void patchRequiredTasksTestHiddenSetToNoRequirement() {
+		Skill skill = db.getSkillVariablesHidden();
+		Task taskA = db.getTaskRead10();
+		Task taskB = db.getTaskDo10a();
+		assertThat(skill.getRequiredTasks()).containsExactlyInAnyOrder(taskA, taskB);
+
+		// Pass no required tasks
+		skillService.patchRequiredTasks(skill, Set.of(taskA, taskB), Set.of());
+
+		// Assert that there are no required tasks anymore
+		Skill skillAfter = db.getSkillVariablesHidden();
+		assertThat(skillAfter.getRequiredTasks()).isEmpty();
+		assertThat(db.getTaskRead10().getRequiredFor()).isEmpty();
+		assertThat(db.getTaskDo10a().getRequiredFor()).isEmpty();
+	}
+
+	@Test
+	void patchRequiredTasksTestHiddenOverlappingRequirement() {
+		Skill skill = db.getSkillVariablesHidden();
+		Task taskA = db.getTaskRead10();
+		Task taskB = db.getTaskDo10a();
+		assertThat(skill.getRequiredTasks()).containsExactlyInAnyOrder(taskA, taskB);
+
+		// Remove one task and add one task
+		skillService.patchRequiredTasks(skill, Set.of(taskA, taskB), Set.of(taskA, db.getTaskRead12()));
+
+		// Assert that the requirements are correct
+		Skill skillAfter = db.getSkillVariablesHidden();
+		assertThat(skillAfter.getRequiredTasks()).containsExactlyInAnyOrder(db.getTaskRead10(),
+				db.getTaskRead12());
+		assertThat(db.getTaskRead10().getRequiredFor()).containsExactly(skillAfter);
+		assertThat(db.getTaskRead12().getRequiredFor()).containsExactly(skillAfter);
+		assertThat(db.getTaskDo10a().getRequiredFor()).isEmpty();
+	}
+
+	/**
+	 * Helper method to assert on attributes of a created or patched regular task with pre-defined values.
+	 *
+	 * @param task  The task to assert on.
+	 * @param idx   The index the task should have.
+	 * @param name  The name the task should have.
+	 * @param skill The skill in which the task should be.
+	 * @param paths The paths in which the task should be.
+	 */
+	void assertOnRegularTaskAttributes(RegularTask task, String name, int idx, Skill skill, Set<Path> paths) {
+		assertThat(task.getName()).isEqualTo(name);
+		assertThat(task.getTime()).isEqualTo(10);
+		assertThat(task.getType()).isEqualTo(TaskType.VIDEO);
+		assertThat(task.getLink()).isEqualTo("link");
+		assertThat(task.getIdx()).isEqualTo(idx);
+		assertThat(task.getSkill()).isEqualTo(skill);
+		assertThat(task.getPaths()).containsExactlyInAnyOrderElementsOf(paths);
+	}
 }
