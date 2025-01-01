@@ -23,11 +23,10 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 @Data
 @Entity
-@SuperBuilder
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class TaskInfo {
@@ -49,8 +48,8 @@ public class TaskInfo {
 	private String link;
 
 	@NotNull
-	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@EqualsAndHashCode.Exclude // TODO: check for correctness
+	@OneToOne(cascade = CascadeType.ALL)
+	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
 	private Task task;
 }

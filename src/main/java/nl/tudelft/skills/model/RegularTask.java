@@ -36,8 +36,7 @@ import nl.tudelft.skills.dto.view.module.TaskViewDTO;
 @EqualsAndHashCode(callSuper = true)
 public class RegularTask extends Task {
 	@NotNull
-	@OneToOne(mappedBy = "task", cascade = CascadeType.ALL)
-	// TODO share id between RegularTask and TaskInfo?
+	@OneToOne(mappedBy = "task", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private TaskInfo taskInfo;
 
 	@NotNull

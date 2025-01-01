@@ -775,6 +775,7 @@ public class SkillServiceTest {
 		assertThat(addedTask).isNotEmpty();
 		assertThat(patchedTask).isNotEmpty();
 		assertThat(taskRepository.findById(removedTask.getId())).isEmpty();
+		assertThat(taskInfoRepository.findById(removedTask.getTaskInfo().getId())).isEmpty();
 		assertOnRegularTaskAttributes(addedTask.get(), "Test Task", 0, newSkill,
 				Set.of(db.getPathFinderPath()));
 		assertOnRegularTaskAttributes(patchedTask.get(), "Patched Task", 1, newSkill,
@@ -888,6 +889,7 @@ public class SkillServiceTest {
 
 		// Assert that modification was removed
 		assertThat(taskRepository.findById(task.getId())).isEmpty();
+		assertThat(taskInfoRepository.findById(task.getTaskInfo().getId())).isEmpty();
 		Set<SCPerson> addedTask = personRepository.findAll().stream()
 				.filter(p -> p.getTasksAdded().contains(taskModified)).collect(Collectors.toSet());
 		assertThat(addedTask).isEmpty();
@@ -906,6 +908,7 @@ public class SkillServiceTest {
 		skillService.removeTasks(skill, Set.of(task.getId()));
 
 		assertThat(taskRepository.findById(task.getId())).isEmpty();
+		assertThat(taskInfoRepository.findById(task.getTaskInfo().getId())).isEmpty();
 		Set<TaskCompletion> completions = taskCompletionRepository.findAll().stream()
 				.filter(c -> c.getTask().equals(task)).collect(Collectors.toSet());
 		assertThat(completions).isEmpty();
@@ -924,6 +927,7 @@ public class SkillServiceTest {
 		skillService.removeTasks(skill, Set.of(task.getId()));
 
 		assertThat(taskRepository.findById(task.getId())).isEmpty();
+		assertThat(taskInfoRepository.findById(task.getTaskInfo().getId())).isEmpty();
 		Set<Skill> requiredFor = skillRepository.findAll().stream()
 				.filter(s -> s.getRequiredTasks().contains(task)).collect(Collectors.toSet());
 		assertThat(requiredFor).isEmpty();
@@ -939,7 +943,9 @@ public class SkillServiceTest {
 		skillService.removeTasks(skill, Set.of(taskA.getId(), taskB.getId()));
 
 		assertThat(taskRepository.findById(taskA.getId())).isEmpty();
+		assertThat(taskInfoRepository.findById(taskA.getTaskInfo().getId())).isEmpty();
 		assertThat(taskRepository.findById(taskB.getId())).isEmpty();
+		assertThat(taskInfoRepository.findById(taskB.getTaskInfo().getId())).isEmpty();
 		assertThat(db.getSkillImplication().getTasks()).doesNotContain(taskA, taskB);
 	}
 

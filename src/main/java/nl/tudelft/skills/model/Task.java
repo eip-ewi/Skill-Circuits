@@ -37,7 +37,6 @@ import nl.tudelft.skills.model.labracore.SCPerson;
 public abstract class Task {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	@Column(name = "task_id")
 	private Long id;
 
 	@NotNull
