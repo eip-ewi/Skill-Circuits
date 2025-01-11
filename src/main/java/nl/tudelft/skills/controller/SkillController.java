@@ -125,6 +125,11 @@ public class SkillController {
 
 		Skill skill = skillService.createSkill(create);
 
+		// Add skill to checkpoint
+		Checkpoint checkpoint = checkpointRepository.findBySkillsContains(skill);
+		checkpoint.getSkills().add(skill);
+		checkpointRepository.save(checkpoint);
+
 		moduleService.configureModuleModel(person, skill.getSubmodule().getModule().getId(), model, session);
 		return "module/view";
 	}

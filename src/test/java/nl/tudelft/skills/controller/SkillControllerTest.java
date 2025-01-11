@@ -153,6 +153,9 @@ public class SkillControllerTest extends ControllerTest {
 		assertThat(skillRepository.findAll().stream()
 				.filter(s -> s.getName().equals("New skill with new checkpoint")).findFirst().get()
 				.getCheckpoint().getName()).isEqualTo("New Checkpoint");
+		assertThat(checkpointRepository.findAll().stream()
+				.filter(c -> c.getName().equals("New Checkpoint")).findFirst().get()
+				.getSkills()).anyMatch(s -> s.getName().equals("New skill with new checkpoint"));
 	}
 
 	@Test
