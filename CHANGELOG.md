@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renaming a path does not remove all tasks in path (@ffiedrich)
 - Restore previously edited checkpoint when editing a new checkpoint (@bbakos)
 - Adding and removing a task on the custom path results in the teacher determined order (@bbakos)
+- Task "drag and drop areas" are removed from default skill block after creation or cancellation (@ffiedrich)
 
 ## [2.2.6]
 
