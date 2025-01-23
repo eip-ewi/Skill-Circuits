@@ -143,8 +143,8 @@ public class SkillControllerTest extends ControllerTest {
 				externalSkillRepository,
 				abstractSkillRepository, taskRepository, regularTaskRepository, submoduleRepository,
 				SpringContext.getBean(CheckpointRepository.class), pathRepository,
-				personRepository, skillService, moduleService, taskCompletionService, clickedLinkService,
-				personService, session);
+				personRepository, SpringContext.getBean(SkillService.class), moduleService,
+				taskCompletionService, clickedLinkService, personService, session);
 
 		skc.createSkill(null, dto, mock(Model.class));
 
