@@ -258,11 +258,10 @@ public class SkillService {
 		Set<Path> paths = new HashSet<>(pathRepository.findAllByEditionId(edition.getId()));
 
 		// Set all task attributes and save to database
-		List<Task> newTasks = newChoiceTasks.stream()
-				.flatMap(dto -> saveTasksFromChoiceTaskDto(dto, skill, paths).stream())
-				.collect(Collectors.toList());
-		newTasks.addAll(
-				newRegularTasks.stream().map(dto -> saveTaskFromRegularTaskDto(dto, skill, paths)).toList());
+		// TODO handling of ChoiceTasks
+		List<Task> newTasks = new ArrayList<>();
+		newTasks.addAll(newRegularTasks.stream()
+				.map(dto -> (Task) saveTaskFromRegularTaskDto(dto, skill, paths)).toList());
 		skill.getTasks().addAll(newTasks);
 		skillRepository.save(skill);
 
@@ -398,11 +397,7 @@ public class SkillService {
 		allTasks.addAll(newRegularTasks.stream()
 				.map(patch -> taskRepository.save(patch.apply((RegularTask) idToTask.get(patch.getId()))))
 				.toList());
-		// TODO patching ChoiceTasks correctly
-		allTasks.addAll(newChoiceTasks.stream().map(patch -> {
-			ChoiceTask task = (ChoiceTask) idToTask.get(patch.getId());
-			return taskRepository.save(patch.apply(task));
-		}).toList());
+		// TODO patching ChoiceTasks
 
 		return allTasks;
 	}
