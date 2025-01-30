@@ -44,6 +44,7 @@ public class EditionLevelSubmoduleViewDTO extends View<Submodule> implements Blo
 	@NotNull
 	private Integer column;
 	@NotNull
+	@PostApply
 	private List<EditionLevelSkillViewDTO> skills;
 	@NotNull
 	private List<Long> parentIds;

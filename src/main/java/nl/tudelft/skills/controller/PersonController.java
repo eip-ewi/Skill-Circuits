@@ -32,12 +32,10 @@ import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.dto.view.TaskCompletedDTO;
-import nl.tudelft.skills.model.Path;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.model.TaskCompletion;
+import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.PathRepository;
+import nl.tudelft.skills.repository.RegularTaskRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
@@ -50,6 +48,7 @@ import nl.tudelft.skills.service.TaskCompletionService;
 @AllArgsConstructor
 public class PersonController {
 
+	private final RegularTaskRepository regularTaskRepository;
 	private final TaskRepository taskRepository;
 	private final PersonRepository scPersonRepository;
 	private final TaskCompletionService taskCompletionService;
@@ -72,7 +71,7 @@ public class PersonController {
 	public TaskCompletedDTO updateTaskCompletedForPerson(@AuthenticatedPerson Person authPerson,
 			@PathVariable Long taskId, @RequestBody boolean completed) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
-		Task task = taskRepository.findByIdOrThrow(taskId);
+		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
 		if (completed) {
 			taskCompletionService.addTaskCompletion(person, task);
 
@@ -80,7 +79,7 @@ public class PersonController {
 			ifNoStudentRoleSetStudentRole(authPerson.getId(), task.getSkill().getSubmodule().getModule()
 					.getEdition().getId());
 
-			List<Task> completedTasks = person.getTaskCompletions().stream()
+			List<RegularTask> completedTasks = person.getTaskCompletions().stream()
 					.map(TaskCompletion::getTask).toList();
 
 			List<Skill> revealedSkills = task.getRequiredFor().stream()
@@ -131,19 +130,20 @@ public class PersonController {
 			@RequestBody List<Long> completedTasks) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
 
-		List<Task> tasks = taskRepository.findAllById(completedTasks);
+		List<RegularTask> tasks = regularTaskRepository.findAllById(completedTasks);
 		tasks.forEach(task -> taskCompletionService.addTaskCompletion(person, task));
 	}
 
 	/**
 	 * Adds a task to the user custom path.
 	 *
-	 * @param authPerson the currently authenticated person.
-	 * @param taskId     id of task to be added to custom path.
+	 * @param  authPerson the currently authenticated person.
+	 * @param  taskId     id of task to be added to custom path.
+	 * @return            List of task ids in the order they should appear in the skill.
 	 */
 	@PutMapping("add/{taskId}")
 	@Transactional
-	public List<String> addTaskToOwnPath(@AuthenticatedPerson Person authPerson, @PathVariable Long taskId) {
+	public List<Long> addTaskToOwnPath(@AuthenticatedPerson Person authPerson, @PathVariable Long taskId) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
 		Task task = taskRepository.findByIdOrThrow(taskId);
 
@@ -156,21 +156,22 @@ public class PersonController {
 
 		person.getTasksAdded().add(task);
 
-		return task.getSkill().getTasks().stream().map(Task::getName).collect(Collectors.toList());
+		return task.getSkill().getTasks().stream().map(Task::getId).collect(Collectors.toList());
 	}
 
 	/**
 	 * Remove a task from the user custom path.
 	 *
-	 * @param authPerson the currently authenticated person.
-	 * @param taskId     id of task to be added to custom path.
+	 * @param  authPerson the currently authenticated person.
+	 * @param  taskId     id of task to be added to custom path.
+	 * @return            List of task ids in the order they should appear in the skill.
 	 */
 	@PutMapping("remove/{taskId}")
 	@Transactional
-	public List<String> removeTaskFromOwnPath(@AuthenticatedPerson Person authPerson,
+	public List<Long> removeTaskFromOwnPath(@AuthenticatedPerson Person authPerson,
 			@PathVariable Long taskId) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
-		Task task = taskRepository.findByIdOrThrow(taskId);
+		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
 
 		// if first time modifying skill, put all tasks from current path in own path
 		if (!person.getSkillsModified().contains(task.getSkill())) {
@@ -180,7 +181,7 @@ public class PersonController {
 
 		person.getTasksAdded().remove(task);
 
-		return task.getSkill().getTasks().stream().map(Task::getName).collect(Collectors.toList());
+		return task.getSkill().getTasks().stream().map(Task::getId).collect(Collectors.toList());
 	}
 
 	/**
@@ -211,8 +212,8 @@ public class PersonController {
 	/**
 	 * Takes all tasks from a skill on current path and adds them to the set of modified tasks.
 	 *
-	 * @param person
-	 * @param task
+	 * @param person The person for which the tasks will be added
+	 * @param task   The abstract task for which the skill is considered
 	 */
 	void addAllTaskFromCurrentPath(SCPerson person, Task task) {
 		Optional<Long> currentPathId = person.getPathPreferences().stream()

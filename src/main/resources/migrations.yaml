@@ -1719,3 +1719,202 @@ databaseChangeLog:
       changes:
         - dropTable:
             tableName: usage_data
+# Refactor tasks for introduction of choice tasks
+  - changeSet:
+      id: introduce-choice-tasks
+      author: Fanni Fiedrich
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  name: min_tasks
+                  type: INT
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_CHOICE_TASK_ID
+                  name: id
+                  type: BIGINT
+            tableName: choice_task
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: choice_task_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: tasks_id
+                  type: BIGINT
+            tableName: choice_task_tasks
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_REGULAR_TASK_ID
+                  name: id
+                  type: BIGINT
+            tableName: regular_task
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_TASK_INFO_ID
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: link
+                  type: VARCHAR(255)
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  name: time
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: type
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: task_id
+                  type: BIGINT
+            tableName: task_info
+        - addUniqueConstraint:
+            columnNames: tasks_id
+            constraintName: UK_b5x1p3iemd3y0hkt8mjwadutj
+            tableName: choice_task_tasks
+        - createIndex:
+            columns:
+              - column:
+                  name: choice_task_id
+            indexName: FK23ix52b2jn1gfm9skaoo2vuqn_INDEX_4
+            tableName: choice_task_tasks
+        - createIndex:
+            columns:
+              - column:
+                  name: task_id
+            indexName: FKer9mcdyqf63005umklqiv1kia_INDEX_A
+            tableName: task_info
+        - sql:
+            comment: Migrate tasks
+            sql: INSERT INTO regular_task SELECT id FROM task;
+        - sql:
+            dbms: mysql
+            comment: Add auto increment to ID of task_info
+            sql: ALTER TABLE task_info MODIFY COLUMN id BIGINT AUTO_INCREMENT;
+        - sql:
+            dbms: h2
+            comment: Add auto increment to ID of task_info
+            sql: ALTER TABLE task_info ALTER COLUMN id BIGINT AUTO_INCREMENT;
+        - sql:
+            comment: Migrate task infos
+            sql: INSERT INTO task_info (link, name, time, type, task_id) SELECT link, name, time, type, id FROM task;
+        - addForeignKeyConstraint:
+            baseColumnNames: choice_task_id
+            baseTableName: choice_task_tasks
+            constraintName: FK23ix52b2jn1gfm9skaoo2vuqn
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: choice_task
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: task_id
+            baseTableName: clicked_link
+            constraintName: FK6r0ixb6exd6dof00vqfpgeocw
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: regular_task
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: task_id
+            baseTableName: task_completion
+            constraintName: FKa6pqa4rvd2kxcrw2tfqeq9fwn
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: regular_task
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: task_id
+            baseTableName: task_info
+            constraintName: FKer9mcdyqf63005umklqiv1kia
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: task
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: tasks_id
+            baseTableName: choice_task_tasks
+            constraintName: FKeu3tpj1jlur65d5ov5ei8j343
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: task_info
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: id
+            baseTableName: regular_task
+            constraintName: FKh24gyn1h2ckorlayh66sjwk2b
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: task
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: id
+            baseTableName: choice_task
+            constraintName: FKhf21xrs4mfvuq5k8nnajh6rnw
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: task
+            validate: true
+        - dropForeignKeyConstraint:
+            baseTableName: task_completion
+            constraintName: FK2mq03rtqcy5jvlco1co1fco6a
+        - dropForeignKeyConstraint:
+            baseTableName: clicked_link
+            constraintName: FKjy82i90jv9tm04dy5lmdedv4t
+        - dropColumn:
+            columnName: link
+            tableName: task
+        - dropColumn:
+            columnName: name
+            tableName: task
+        - dropColumn:
+            columnName: time
+            tableName: task
+        - dropColumn:
+            columnName: type
+            tableName: task

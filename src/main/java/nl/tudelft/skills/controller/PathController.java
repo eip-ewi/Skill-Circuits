@@ -35,10 +35,7 @@ import nl.tudelft.skills.dto.patch.PathTasksPatchDTO;
 import nl.tudelft.skills.dto.view.edition.PathViewDTO;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
-import nl.tudelft.skills.repository.EditionRepository;
-import nl.tudelft.skills.repository.PathPreferenceRepository;
-import nl.tudelft.skills.repository.PathRepository;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.PathService;
 import nl.tudelft.skills.service.PersonService;
@@ -166,10 +163,11 @@ public class PathController {
 		Path path = pathRepository.saveAndFlush(dto.apply());
 
 		// By default, all tasks are added to a new path
-		taskRepository.findAllBySkillSubmoduleModuleEditionId(path.getEdition().getId()).forEach(t -> {
-			t.getPaths().add(path);
-			taskRepository.save(t);
-		});
+		taskRepository.findAllBySkillSubmoduleModuleEditionId(path.getEdition().getId())
+				.forEach(t -> {
+					t.getPaths().add(path);
+					taskRepository.save(t);
+				});
 
 		model.addAttribute("path", View.convert(path, PathViewDTO.class));
 		return "edition_setup/path";

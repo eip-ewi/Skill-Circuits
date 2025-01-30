@@ -30,7 +30,7 @@
         th:data-item="${item.id}"
         th:data-path-ids="${level == 'module'} ? ${item.pathIds} : ${null}"
         th:data-index-initial="${iter == null} ? 0 : ${iter.size - iter.count}"
-        th:classappend="${level == 'module'} ? ${item.completed ? 'completed task' : 'task'} : ${''}"
+        th:classappend="${level == 'module'} ? ${item.taskInfo.completed ? 'completed task' : 'task'} : ${''}"
         layout:fragment="item">
         <input th:if="${canEdit}" name="id" type="hidden" th:value="${item.id}" />
         <th:block layout:fragment="item-decoration"></th:block>
@@ -39,27 +39,22 @@
                 <div data-edit="always" th:id="|${id}-content|" class="item__content">
                     <th:block layout:fragment="item-before-content"></th:block>
                     <th:block layout:fragment="item-name">
+                        <!-- TODO the below needs adjustments for ChoiceTasks -->
                         <span
-                            th:if="not ${canEdit} and ((${level == 'module'}) or ${level != 'module'})"
                             th:id="|${id}-name|"
                             class="item__name"
-                            th:text="${item.name}"
-                            th:data-black="true"></span>
-                        <span
-                            th:if="${canEdit}"
-                            th:id="|${id}-name|"
-                            class="item__name"
-                            th:text="${item.name}"
-                            th:data-black="(${level == 'module'} and ${item.visible}) or ${level != 'module'}"></span>
+                            th:text="${level == 'module'} ? ${item.taskInfo.name} : ${item.name}"
+                            th:data-black="not ${canEdit} or ((${level == 'module'} and ${item.visible}) or ${level != 'module'})"></span>
                         <input
+                            th:if="${canEdit}"
                             type="text"
                             data-edit="only"
-                            name="name"
+                            th:name="${level == 'module'} ? 'taskInfo.name' : 'name'"
                             required
-                            th:data-initial="${item.name}"
+                            th:data-initial="${level == 'module'} ? ${item.taskInfo.name} : ${item.name}"
                             aria-label="Name"
                             placeholder="Name"
-                            th:value="${item.name}" />
+                            th:value="${level == 'module'} ? ${item.taskInfo.name} : ${item.name}" />
                     </th:block>
                     <th:block layout:fragment="item-end-content"></th:block>
                 </div>

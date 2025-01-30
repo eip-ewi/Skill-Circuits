@@ -24,11 +24,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
-import nl.tudelft.skills.model.Inventory;
-import nl.tudelft.skills.model.PathPreference;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.model.TaskCompletion;
+import nl.tudelft.skills.model.*;
 
 @Data
 @Entity

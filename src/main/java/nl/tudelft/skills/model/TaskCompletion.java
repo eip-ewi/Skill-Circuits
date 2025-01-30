@@ -44,7 +44,7 @@ public class TaskCompletion {
 
 	@NotNull
 	@ManyToOne
-	private Task task;
+	private RegularTask task;
 
 	// The timestamp can be null for the already stored completions without time indication
 	@Builder.Default

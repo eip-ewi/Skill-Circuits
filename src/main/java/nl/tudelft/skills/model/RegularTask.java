@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2025 - Delft University of Technology
+ * Copyright (C) 2022 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -25,58 +25,62 @@ import javax.validation.constraints.NotNull;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
 import nl.tudelft.skills.dto.view.module.TaskViewDTO;
-import nl.tudelft.skills.model.labracore.SCPerson;
 
 @Data
 @Entity
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@Inheritance(strategy = InheritanceType.JOINED)
-public abstract class Task {
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private Long id;
-
+@EqualsAndHashCode(callSuper = true)
+public class RegularTask extends Task {
 	@NotNull
-	@ManyToOne
-	@EqualsAndHashCode.Exclude
-	@ToString.Exclude
-	private Skill skill;
-
-	@NotNull
-	@Builder.Default
-	private Integer idx = 0;
+	@OneToOne(mappedBy = "task", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	private TaskInfo taskInfo;
 
 	@NotNull
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToMany(mappedBy = "tasks")
-	private Set<Achievement> achievements = new HashSet<>();
+	@OneToMany(mappedBy = "task")
+	private Set<TaskCompletion> completedBy = new HashSet<>();
 
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany
-	private Set<Path> paths = new HashSet<>();
+	@Override
+	public Class<? extends TaskViewDTO<?>> viewClass() {
+		return RegularTaskViewDTO.class;
+	}
 
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany
-	private Set<Skill> requiredFor = new HashSet<>();
+	public String getName() {
+		return taskInfo.getName();
+	}
 
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany(mappedBy = "tasksAdded")
-	private Set<SCPerson> personsThatAddedTask = new HashSet<>();
+	public void setName(String name) {
+		taskInfo.setName(name);
+	}
 
-	public abstract Class<? extends TaskViewDTO<?>> viewClass();
+	public TaskType getType() {
+		return taskInfo.getType();
+	}
+
+	public void setType(TaskType type) {
+		taskInfo.setType(type);
+	}
+
+	public Integer getTime() {
+		return taskInfo.getTime();
+	}
+
+	public void setTime(Integer time) {
+		taskInfo.setTime(time);
+	}
+
+	public String getLink() {
+		return taskInfo.getLink();
+	}
+
+	public void setLink(String link) {
+		taskInfo.setLink(link);
+	}
 
 }

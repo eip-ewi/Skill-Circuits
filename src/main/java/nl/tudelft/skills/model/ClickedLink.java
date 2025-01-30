@@ -37,7 +37,7 @@ public class ClickedLink {
 
 	@NotNull
 	@ManyToOne
-	private Task task;
+	private RegularTask task;
 
 	@NotNull
 	@ManyToOne

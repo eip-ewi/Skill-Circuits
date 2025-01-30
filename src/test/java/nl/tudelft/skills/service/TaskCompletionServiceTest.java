@@ -33,10 +33,10 @@ import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.model.SCCourse;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.model.TaskCompletion;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.SkillRepository;
@@ -105,7 +105,7 @@ public class TaskCompletionServiceTest {
 	public void testLatestTaskCompletionReturnsCompletion() {
 		// In the test database, the most recently completed task by the
 		// saved person is taskRead11
-		Task expectedLastTask = db.getTaskRead11();
+		RegularTask expectedLastTask = db.getTaskRead11();
 
 		// Assert that the latest task completion is the most recent one
 		Person person = Person.builder().id(db.getPerson().getId()).build();
@@ -114,7 +114,7 @@ public class TaskCompletionServiceTest {
 
 	@Test
 	public void testGetLocationString() {
-		Task task = db.getTaskDo10a();
+		RegularTask task = db.getTaskDo10a();
 		SCEdition dbEdition = db.getEditionRL();
 		SCCourse dbCourse = db.getCourseRL();
 		EditionDetailsDTO editionDetailsDTO = new EditionDetailsDTO().id(dbEdition.getId()).name("edition")

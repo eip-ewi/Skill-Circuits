@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2025 - Delft University of Technology
+ * Copyright (C) 2022 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,43 +15,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view.edition;
+package nl.tudelft.skills.dto.patch;
 
-import java.util.List;
-
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.ItemView;
-import nl.tudelft.skills.dto.view.module.TaskViewDTO;
-import nl.tudelft.skills.model.*;
+import lombok.experimental.SuperBuilder;
+import nl.tudelft.skills.model.RegularTask;
 
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class EditionLevelSkillViewDTO extends View<Skill> implements ItemView {
-
+@EqualsAndHashCode(callSuper = true)
+public class RegularTaskPatchDTO extends TaskPatchDTO<RegularTask> {
 	@NotNull
-	private Long id;
-	@NotBlank
-	private String name;
-	@NotNull
-	private Boolean hidden;
-	@NotNull
-	private List<? extends TaskViewDTO<?>> tasks;
+	private TaskInfoPatchDTO taskInfo;
 
 	@Override
-	public void postApply() {
-		super.postApply();
-		this.tasks = data.getTasks().stream().map(t -> {
-			TaskViewDTO<?> dto = getMapper().map(t, t.viewClass());
-			dto.postApply();
-			return dto;
-		}).toList();
+	protected void applyOneToOne() {
+		super.applyOneToOne();
+		data.setTaskInfo(taskInfo.apply(data.getTaskInfo()));
 	}
 
+	@Override
+	protected void validate() {
+	}
 }

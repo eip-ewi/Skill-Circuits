@@ -29,20 +29,21 @@ import org.springframework.web.server.ResponseStatusException;
 
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.EditLinkDTO;
-import nl.tudelft.skills.dto.view.module.TaskViewDTO;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
+import nl.tudelft.skills.model.RegularTask;
+import nl.tudelft.skills.repository.RegularTaskRepository;
 import nl.tudelft.skills.security.AuthorisationService;
 
 @Controller
 @RequestMapping("task")
 public class TaskController {
-	private final TaskRepository taskRepository;
-	private AuthorisationService authorisationService;
+	private final RegularTaskRepository regularTaskRepository;
+	private final AuthorisationService authorisationService;
 
 	@Autowired
-	public TaskController(TaskRepository taskRepository, AuthorisationService authorisationService) {
-		this.taskRepository = taskRepository;
+	public TaskController(RegularTaskRepository regularTaskRepository,
+			AuthorisationService authorisationService) {
+		this.regularTaskRepository = regularTaskRepository;
 		this.authorisationService = authorisationService;
 	}
 
@@ -54,14 +55,16 @@ public class TaskController {
 	 */
 	@Transactional
 	@PatchMapping("change-link")
-	@PreAuthorize("@authorisationService.canEditTask(#editLinkDTO.taskId)")
+	@PreAuthorize("@authorisationService.canEditRegularTask(#editLinkDTO.taskId)")
 	public ResponseEntity<Void> updateTaskLink(@RequestBody EditLinkDTO editLinkDTO) {
-		Task task = taskRepository.findByIdOrThrow(editLinkDTO.getTaskId());
+		RegularTask task = regularTaskRepository.findByIdOrThrow(editLinkDTO.getTaskId());
 		task.setLink(editLinkDTO.getNewLink());
-		taskRepository.save(task);
+		regularTaskRepository.save(task);
 
 		return ResponseEntity.ok().build();
 	}
+
+	// TODO: getting a choice task
 
 	/**
 	 * Returns a task view for a custom path.
@@ -73,10 +76,10 @@ public class TaskController {
 	@GetMapping("{taskId}")
 	@PreAuthorize("@authorisationService.isAuthenticated()")
 	public String getTask(@PathVariable Long taskId, Model model) {
-		Task task = taskRepository.findByIdOrThrow(taskId);
+		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
 		if (task.getSkill().getSubmodule().getModule().getEdition().isVisible() || authorisationService
 				.isAtLeastHeadTAInEdition(task.getSkill().getSubmodule().getModule().getEdition().getId())) {
-			model.addAttribute("item", View.convert(task, TaskViewDTO.class));
+			model.addAttribute("item", View.convert(task, RegularTaskViewDTO.class));
 			model.addAttribute("canEdit", false);
 			model.addAttribute("level", "module");
 			return "task/view";
@@ -84,8 +87,10 @@ public class TaskController {
 		throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 	}
 
+	// TODO: getting a choice task in an exploded skill
+
 	/**
-	 * Returns task view paths overview in a exploded skill.
+	 * Returns task view paths overview in an exploded skill.
 	 *
 	 * @param  taskId The id of the task.
 	 * @param  model  The model to configure.
@@ -94,11 +99,12 @@ public class TaskController {
 	@GetMapping("{taskId}/preview")
 	@PreAuthorize("@authorisationService.isAuthenticated()")
 	public String getTaskForCustomPath(@PathVariable Long taskId, Model model) {
-		Task task = taskRepository.findByIdOrThrow(taskId);
+		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
 		if (task.getSkill().getSubmodule().getModule().getEdition().isVisible() || authorisationService
 				.isAtLeastHeadTAInEdition(task.getSkill().getSubmodule().getModule().getEdition().getId())) {
-			model.addAttribute("item", View.convert(task, TaskViewDTO.class));
+			model.addAttribute("item", View.convert(task, RegularTaskViewDTO.class));
 			model.addAttribute("canEdit", false);
+			model.addAttribute("level", "module");
 			return "task/inactiveview :: item";
 		}
 		throw new ResponseStatusException(HttpStatus.FORBIDDEN);

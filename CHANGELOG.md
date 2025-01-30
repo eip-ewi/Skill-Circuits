@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 - Mention email address on the home page (@bbakos)
+- Show a popup when the user's session has expired (@bbakos)
 ## Changed
 - Teacher view: Sorting modules, submodules and checkpoints at selection dropdowns (@bbakos)
 - Teacher view: Task order can be changed via drag and drop (@ffiedrich)

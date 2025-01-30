@@ -17,48 +17,37 @@
  */
 package nl.tudelft.skills.dto.patch;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 import nl.tudelft.librador.dto.patch.Patch;
+import nl.tudelft.skills.dto.id.SkillIdDTO;
 import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.model.TaskType;
 
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class TaskPatchDTO extends Patch<Task> {
-
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "taskType")
+@JsonSubTypes({
+		@JsonSubTypes.Type(value = RegularTaskPatchDTO.class, name = "RegularTask"),
+		@JsonSubTypes.Type(value = ChoiceTaskPatchDTO.class, name = "ChoiceTask")
+})
+public abstract class TaskPatchDTO<D extends Task> extends Patch<D> {
 	@NotNull
 	private Long id;
-	@NotBlank
-	private String name;
-	@NotNull
-	@Min(0)
-	private Integer time;
-	@NotNull
-	private TaskType type;
-	private String link;
 	@NotNull
 	private Integer index;
+	@NotNull
+	private SkillIdDTO skill;
 
 	@Override
 	protected void applyOneToOne() {
-		updateNonNull(name, data::setName);
-		updateNonNull(time, data::setTime);
-		updateNonNull(type, data::setType);
-		data.setLink(link == null || link.isBlank() ? null : link);
-	}
-
-	@Override
-	protected void validate() {
+		updateNonNull(index, data::setIdx);
 	}
 }

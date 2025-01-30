@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2025 - Delft University of Technology
+ * Copyright (C) 2022 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,43 +15,41 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view.edition;
+package nl.tudelft.skills.model;
 
-import java.util.List;
-
+import javax.persistence.*;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.ItemView;
-import nl.tudelft.skills.dto.view.module.TaskViewDTO;
-import nl.tudelft.skills.model.*;
 
 @Data
+@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class EditionLevelSkillViewDTO extends View<Skill> implements ItemView {
-
-	@NotNull
+public class TaskInfo {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
 	@NotBlank
 	private String name;
-	@NotNull
-	private Boolean hidden;
-	@NotNull
-	private List<? extends TaskViewDTO<?>> tasks;
 
-	@Override
-	public void postApply() {
-		super.postApply();
-		this.tasks = data.getTasks().stream().map(t -> {
-			TaskViewDTO<?> dto = getMapper().map(t, t.viewClass());
-			dto.postApply();
-			return dto;
-		}).toList();
-	}
+	@Builder.Default
+	@NotNull
+	private TaskType type = TaskType.EXERCISE;
 
+	@Builder.Default
+	@Min(0)
+	private Integer time = 0;
+
+	private String link;
+
+	@NotNull
+	@OneToOne(cascade = CascadeType.ALL)
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
+	private Task task;
 }
