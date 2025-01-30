@@ -26,7 +26,7 @@
         <button
             data-edit="only"
             th:id="|item-${item.id}-icon|"
-            th:class="|select__label fa-solid fa-${item.type.icon}|"></button>
+            th:class="|select__label fa-solid fa-${item.taskInfo.type.icon}|"></button>
         <div class="select__items" data-edit="only">
             <ul data-edit="only">
                 <li
@@ -39,15 +39,15 @@
                             th:classappend="|fa-${type.icon}|"></span>
                         <span
                             data-edit="only"
-                            th:text="#{|task.type.${#strings.toLowerCase(type.name())}|}"></span>
+                            th:text="#{|task.taskInfo.type.${#strings.toLowerCase(type.name())}|}"></span>
                     </button>
                 </li>
             </ul>
             <select
                 data-edit="only"
                 th:id="|item-${item.id}-type|"
-                name="type"
-                th:data-initial="${item.type}"
+                name="taskInfo.type"
+                th:data-initial="${item.taskInfo.type}"
                 aria-label="Task type"
                 hidden
                 required>
@@ -55,7 +55,7 @@
                     data-edit="only"
                     th:each="type : ${T(nl.tudelft.skills.model.TaskType).values()}"
                     th:data-icon="${type.icon}"
-                    th:selected="${item.type == type}"
+                    th:selected="${item.taskInfo.type == type}"
                     th:value="${type}"></option>
             </select>
         </div>

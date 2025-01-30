@@ -41,9 +41,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.EditLinkDTO;
+import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
 import nl.tudelft.skills.dto.view.module.TaskViewDTO;
+import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.repository.RegularTaskRepository;
 import nl.tudelft.skills.security.AuthorisationService;
 
 @Transactional
@@ -52,17 +54,17 @@ import nl.tudelft.skills.security.AuthorisationService;
 public class TaskControllerTest extends ControllerTest {
 
 	private final TaskController taskController;
-	private final TaskRepository taskRepository;
+	private final RegularTaskRepository regularTaskRepository;
 	private final RoleControllerApi roleApi;
 	private AuthorisationService authorisationService;
 
 	@Autowired
-	public TaskControllerTest(TaskRepository taskRepository, RoleControllerApi roleApi,
+	public TaskControllerTest(RegularTaskRepository regularTaskRepository, RoleControllerApi roleApi,
 			AuthorisationService authorisationService) {
-		this.taskRepository = taskRepository;
+		this.regularTaskRepository = regularTaskRepository;
 		this.roleApi = roleApi;
 		this.authorisationService = authorisationService;
-		this.taskController = new TaskController(taskRepository, authorisationService);
+		this.taskController = new TaskController(regularTaskRepository, authorisationService);
 	}
 
 	private String createBody() throws JsonProcessingException {
@@ -90,7 +92,7 @@ public class TaskControllerTest extends ControllerTest {
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
-		Task task = taskRepository.getById(db.getTaskDo10a().getId());
+		RegularTask task = regularTaskRepository.getById(db.getTaskDo10a().getId());
 		assertThat(task.getLink()).isEqualTo("www.test.com");
 	}
 
@@ -124,7 +126,7 @@ public class TaskControllerTest extends ControllerTest {
 		taskController.getTask(db.getTaskRead12().getId(), model);
 		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
 
-		assertThat(((TaskViewDTO) model.getAttribute("item")).getPathIds())
+		assertThat(((RegularTaskViewDTO) model.getAttribute("item")).getPathIds())
 				.containsExactly(db.getPathFinderPath().getId());
 	}
 
@@ -159,7 +161,7 @@ public class TaskControllerTest extends ControllerTest {
 		taskController.getTaskForCustomPath(db.getTaskRead12().getId(), model);
 		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
 
-		assertThat(((TaskViewDTO) model.getAttribute("item")).getPathIds())
+		assertThat(((RegularTaskViewDTO) model.getAttribute("item")).getPathIds())
 				.containsExactly(db.getPathFinderPath().getId());
 	}
 

@@ -18,7 +18,6 @@
 package nl.tudelft.skills.service;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -54,10 +53,11 @@ public class PathService {
 	 */
 	@Transactional
 	public void updateTasksInPathManyToMany(PathTasksPatchDTO patch, Path path) {
-		List<Task> oldTasks = taskRepository
+		Set<Task> oldTasks = taskRepository
 				.findAllByIdIn(path.getTasks().stream().map(Task::getId).toList());
 
-		Set<Task> selectedTasks = new HashSet<>(taskRepository.findAllByIdIn(patch.getTaskIds()));
+		Set<Task> selectedTasks = new HashSet<>(
+				taskRepository.findAllByIdIn(patch.getTaskIds()));
 
 		// remove tasks that are not in path
 		// if the patch has a moduleId, remove only tasks that are in this module

@@ -15,39 +15,41 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.patch;
+package nl.tudelft.skills.dto.create;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
 import lombok.*;
-import lombok.experimental.SuperBuilder;
-import nl.tudelft.librador.dto.patch.Patch;
-import nl.tudelft.skills.dto.id.SkillIdDTO;
-import nl.tudelft.skills.model.Task;
+import nl.tudelft.librador.dto.create.Create;
+import nl.tudelft.skills.model.TaskInfo;
+import nl.tudelft.skills.model.TaskType;
 
 @Data
-@SuperBuilder
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "taskType")
-@JsonSubTypes({
-		@JsonSubTypes.Type(value = RegularTaskPatchDTO.class, name = "RegularTask"),
-		@JsonSubTypes.Type(value = ChoiceTaskPatchDTO.class, name = "ChoiceTask")
-})
-public abstract class TaskPatchDTO<D extends Task> extends Patch<D> {
+public class TaskInfoCreateDTO extends Create<TaskInfo> {
+	@NotBlank
+	private String name;
 	@NotNull
-	private Long id;
+	private TaskType type;
 	@NotNull
-	private Integer index;
-	@NotNull
-	private SkillIdDTO skill;
+	@Min(0)
+	private Integer time;
+	private String link;
 
 	@Override
-	protected void applyOneToOne() {
-		updateNonNull(index, data::setIdx);
+	protected void postApply(TaskInfo data) {
+		if (link != null && link.isBlank()) {
+			data.setLink(null);
+		}
+	}
+
+	@Override
+	public Class<TaskInfo> clazz() {
+		return TaskInfo.class;
 	}
 }

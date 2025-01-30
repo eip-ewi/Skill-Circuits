@@ -28,17 +28,20 @@
             <th:block layout:fragment="item-content-element">
                 <a
                     class="link"
-                    th:if="${item.link}"
-                    th:href="${item.link}"
+                    th:if="${item.taskInfo.link}"
+                    th:href="${item.taskInfo.link}"
                     target="_blank"
                     th:id="|item-${item.id}-link|">
                     <th:block layout:replace="~{item/view :: item-content}"></th:block>
                 </a>
-                <th:block th:unless="${item.link}">
+                <th:block th:unless="${item.taskInfo.link}">
                     <th:block layout:replace="~{item/view :: item-content}"></th:block>
                 </th:block>
             </th:block>
             <th:block layout:fragment="item-decoration">
+                <input type="hidden" name="skill.id" th:value="${item.skill.id}" />
+                <input type="hidden" name="taskType" value="RegularTask" />
+                <!-- TODO the above needs to be set to ChoiceTask for ChoiceTasks -->
                 <input
                     th:if="${canEdit}"
                     aria-label="Selected"
@@ -55,27 +58,27 @@
                     th:data-staff="${canEdit}"
                     th:disabled="${canEdit}"
                     th:onclick="|toggleCompleted(${item.id})|"
-                    th:text="${item.time}"></button>
+                    th:text="${item.taskInfo.time}"></button>
                 <input
                     class="item__button__edit"
-                    th:data-initial="${item.time}"
+                    th:data-initial="${item.taskInfo.time}"
                     required
-                    name="time"
+                    name="taskInfo.time"
                     type="number"
                     min="0"
                     data-edit="only"
-                    th:value="${item.time}" />
+                    th:value="${item.taskInfo.time}" />
             </th:block>
             <th:block layout:fragment="item-before-content">
                 <span
                     th:id="|item-${item.id}-icon|"
-                    th:class="|fa-solid fa-${item.type.icon} task-icon|"
-                    th:data-type="${item.type.icon}"></span>
+                    th:class="|fa-solid fa-${item.taskInfo.type.icon} task-icon|"
+                    th:data-type="${item.taskInfo.type.icon}"></span>
                 <th:block layout:replace="~{task/edit :: icon}"></th:block>
             </th:block>
             <th:block layout:fragment="item-end-content">
                 <span
-                    th:if="${item.link}"
+                    th:if="${item.taskInfo.link}"
                     th:id="|item-${item.id}-link-icon|"
                     class="fa-solid fa-link always_visible"></span>
             </th:block>
@@ -83,20 +86,20 @@
                 <span th:if="${canEdit}" th:text="|(${item.completedCount})|"></span>
                 <div class="hover_input" data-edit="only">
                     <input
-                        th:data-initial="${item.link}"
+                        th:data-initial="${item.taskInfo.link}"
                         placeholder="Task link"
                         data-edit="only"
                         aria-label="Task URL"
                         type="url"
-                        name="link"
-                        th:value="${item.link}" />
+                        name="taskInfo.link"
+                        th:value="${item.taskInfo.link}" />
                     <span data-edit="only" class="fa-solid fa-link always_visible"></span>
                 </div>
                 <button
                     th:if="${not canEdit}"
                     name="removeFromPath"
                     class="circuit__button__symbol fa-solid fa-trash"
-                    th:classappend="${item.completed} ? 'hidden' : ''"
+                    th:classappend="${item.taskInfo.completed} ? 'hidden' : ''"
                     style="margin-left: auto"
                     title="Remove task from your path"
                     onclick="removeTaskFromEditedSkill(this)"></button>

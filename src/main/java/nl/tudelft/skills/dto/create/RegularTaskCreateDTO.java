@@ -15,26 +15,25 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.repository;
+package nl.tudelft.skills.dto.create;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import javax.validation.constraints.NotNull;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import nl.tudelft.skills.model.RegularTask;
 
-import nl.tudelft.skills.model.Task;
+@Data
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+public class RegularTaskCreateDTO extends TaskCreateDTO<RegularTask> {
+	@NotNull
+	private TaskInfoCreateDTO taskInfo;
 
-public interface TaskRepository extends JpaRepository<Task, Long> {
-
-	default Task findByIdOrThrow(Long id) {
-		return findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Task was not found: " + id));
+	@Override
+	public Class<RegularTask> clazz() {
+		return RegularTask.class;
 	}
-
-	Set<Task> findAllByIdIn(Collection<Long> ids);
-
-	List<Task> findAllBySkillSubmoduleModuleEditionId(Long editionId);
-
 }

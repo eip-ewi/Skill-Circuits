@@ -36,9 +36,7 @@ import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.create.ExternalSkillCreateDTO;
 import nl.tudelft.skills.dto.create.SkillCreateDTO;
-import nl.tudelft.skills.dto.create.TaskCreateDTO;
 import nl.tudelft.skills.dto.id.CheckpointIdDTO;
-import nl.tudelft.skills.dto.id.SkillIdDTO;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
 import nl.tudelft.skills.dto.view.module.*;
@@ -56,6 +54,7 @@ public class SkillController {
 	private final ExternalSkillRepository externalSkillRepository;
 	private final AbstractSkillRepository abstractSkillRepository;
 	private final TaskRepository taskRepository;
+	private final RegularTaskRepository regularTaskRepository;
 	private final SubmoduleRepository submoduleRepository;
 	private final CheckpointRepository checkpointRepository;
 	private final PathRepository pathRepository;
@@ -83,7 +82,12 @@ public class SkillController {
 		// Set completed tasks
 		Set<Long> completedTasks = personRepository.getById(person.getId()).getTaskCompletions().stream()
 				.map(tc -> tc.getTask().getId()).collect(Collectors.toSet());
-		view.getTasks().forEach(t -> t.setCompleted(completedTasks.contains(t.getId())));
+		view.getTasks().forEach(t -> {
+			// Only RegularTasks have a completion status
+			if (t instanceof RegularTaskViewDTO regularTaskViewDTO) {
+				regularTaskViewDTO.getTaskInfo().setCompleted(completedTasks.contains(t.getId()));
+			}
+		});
 
 		// Add general model attributes
 		model.addAttribute("level", "module");
@@ -118,27 +122,13 @@ public class SkillController {
 			create.setCheckpoint(new CheckpointIdDTO(
 					checkpointRepository.saveAndFlush(create.getCheckpointCreate().apply()).getId()));
 		}
-		Skill skill = skillRepository.saveAndFlush(create.apply());
-		List<Task> tasks = create.getNewItems().stream()
-				.sorted(Comparator.comparingInt(TaskCreateDTO::getIndex).reversed()).map(dto -> {
-					dto.setSkill(SkillIdDTO.builder().id(skill.getId()).build());
-					return dto.apply();
-				}).toList();
-		for (Task task : tasks) {
-			task.setSkill(skill);
-		}
-		skill.setTasks(taskRepository.saveAll(tasks));
 
-		checkpointRepository.findBySkillsContains(skill).getSkills().add(skill);
+		Skill skill = skillService.createSkill(create);
 
-		// New tasks will be included in all paths by default
-		SCEdition edition = skill.getSubmodule().getModule().getEdition();
-
-		Set<Path> paths = new HashSet<>(pathRepository.findAllByEditionId(edition.getId()));
-		tasks.forEach(t -> {
-			t.setPaths(paths);
-			taskRepository.save(t);
-		});
+		// Add skill to checkpoint
+		Checkpoint checkpoint = checkpointRepository.findBySkillsContains(skill);
+		checkpoint.getSkills().add(skill);
+		checkpointRepository.save(checkpoint);
 
 		moduleService.configureModuleModel(person, skill.getSubmodule().getModule().getId(), model, session);
 		return "module/view";
@@ -188,34 +178,7 @@ public class SkillController {
 	@Transactional
 	@PreAuthorize("@authorisationService.canEditSkill(#patch.id)")
 	public String patchSkill(@Valid @RequestBody SkillPatchDTO patch, Model model) {
-		Skill skill = skillRepository.findByIdOrThrow(patch.getId());
-		List<Task> oldTasks = skill.getTasks();
-		skillRepository.save(patch.apply(skill));
-
-		// Remove selected tasks from custom skill in person
-		skill.getPersonModifiedSkill().forEach(p -> {
-			p.setTasksAdded(p.getTasksAdded().stream()
-					.filter(t -> !patch.getRemovedItems().contains(t.getId())).collect(Collectors.toSet()));
-			personRepository.save(p);
-		});
-
-		taskRepository.findAllByIdIn(patch.getRemovedItems())
-				.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
-		clickedLinkService.deleteClickedLinksForTasks(taskRepository.findAllByIdIn(patch.getRemovedItems()));
-
-		taskRepository.deleteAllByIdIn(patch.getRemovedItems());
-		taskRepository.saveAll(skill.getRequiredTasks());
-
-		// New tasks will be included in all paths by default
-		SCEdition edition = skill.getSubmodule().getModule().getEdition();
-
-		Set<Path> paths = new HashSet<>(pathRepository.findAllByEditionId(edition.getId()));
-		skillRepository.findByIdOrThrow(skill.getId()).getTasks().stream().filter(t -> !oldTasks.contains(t))
-				.forEach(t -> {
-					t.setPaths(paths);
-					t.setSkill(skill);
-					taskRepository.save(t);
-				});
+		Skill skill = skillService.patchSkill(patch);
 
 		model.addAttribute("level", "module");
 		model.addAttribute("groupType", "submodule");

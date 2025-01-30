@@ -17,24 +17,16 @@
  */
 package nl.tudelft.skills.repository;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
-import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.ChoiceTask;
 
-public interface TaskRepository extends JpaRepository<Task, Long> {
+public interface ChoiceTaskRepository extends JpaRepository<ChoiceTask, Long> {
 
-	default Task findByIdOrThrow(Long id) {
+	default ChoiceTask findByIdOrThrow(Long id) {
 		return findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Task was not found: " + id));
+				.orElseThrow(() -> new ResourceNotFoundException("ChoiceTask was not found: " + id));
 	}
-
-	Set<Task> findAllByIdIn(Collection<Long> ids);
-
-	List<Task> findAllBySkillSubmoduleModuleEditionId(Long editionId);
 
 }

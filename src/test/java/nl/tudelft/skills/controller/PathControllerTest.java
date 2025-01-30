@@ -24,7 +24,6 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.awt.*;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -48,12 +47,9 @@ import nl.tudelft.skills.dto.id.SCEditionIdDTO;
 import nl.tudelft.skills.dto.patch.PathNamePatchDTO;
 import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.PathPreference;
+import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.model.SCEdition;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.repository.EditionRepository;
-import nl.tudelft.skills.repository.PathPreferenceRepository;
-import nl.tudelft.skills.repository.PathRepository;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.PathService;
 import nl.tudelft.skills.service.PersonService;
@@ -143,7 +139,7 @@ public class PathControllerTest extends ControllerTest {
 		Long pathId = db.getPathFinderPath().getId();
 
 		// Setup task with path
-		Task task = db.getTaskRead12();
+		RegularTask task = db.getTaskRead12();
 		task.setPaths(new HashSet<>(Arrays.asList(db.getPathFinderPath())));
 		taskRepository.save(task);
 		assertEquals(1, db.getTaskRead12().getPaths().size());

@@ -186,7 +186,8 @@ public class AuthorisationServiceTest {
 		mockRole(role);
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
-				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
+				editionRepository, moduleRepository, submoduleRepository, skillRepository,
+				taskRepository,
 				checkpointRepository, pathRepository,
 				abstractSkillRepository,
 				courseApi, personApi);
@@ -204,7 +205,8 @@ public class AuthorisationServiceTest {
 		mockRole(role);
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
-				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
+				editionRepository, moduleRepository, submoduleRepository, skillRepository,
+				taskRepository,
 				checkpointRepository, pathRepository, abstractSkillRepository,
 				courseApi, personApi);
 
@@ -218,7 +220,8 @@ public class AuthorisationServiceTest {
 		mockRole(role);
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
-				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
+				editionRepository, moduleRepository, submoduleRepository, skillRepository,
+				taskRepository,
 				checkpointRepository, pathRepository, abstractSkillRepository,
 				courseApi, personApi);
 
@@ -508,18 +511,18 @@ public class AuthorisationServiceTest {
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
-	void canEditTask(String role, boolean expected) {
+	void canEditRegularTask(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canEditTask(db.getTaskDo10a().getId())).isEqualTo(expected);
+		assertThat(authorisationService.canEditRegularTask(db.getTaskDo10a().getId())).isEqualTo(expected);
 	}
 
 	@Transactional
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
-	void canDeleteTask(String role, boolean expected) {
+	void canDeleteRegularTask(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canDeleteTask(db.getTaskDo10a().getId())).isEqualTo(expected);
+		assertThat(authorisationService.canDeleteRegularTask(db.getTaskDo10a().getId())).isEqualTo(expected);
 	}
 
 	@Transactional
@@ -625,7 +628,8 @@ public class AuthorisationServiceTest {
 		mockRole(role);
 
 		AuthorisationService authorisationService = new AuthorisationService(roleCacheManager,
-				editionRepository, moduleRepository, submoduleRepository, skillRepository, taskRepository,
+				editionRepository, moduleRepository, submoduleRepository, skillRepository,
+				taskRepository,
 				checkpointRepository, pathRepository, abstractSkillRepository,
 				courseApi, personApi);
 

@@ -15,39 +15,45 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.patch;
+package nl.tudelft.skills.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import nl.tudelft.librador.dto.patch.Patch;
-import nl.tudelft.skills.dto.id.SkillIdDTO;
-import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.dto.view.module.ChoiceTaskViewDTO;
+import nl.tudelft.skills.dto.view.module.TaskViewDTO;
 
 @Data
+@Entity
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "taskType")
-@JsonSubTypes({
-		@JsonSubTypes.Type(value = RegularTaskPatchDTO.class, name = "RegularTask"),
-		@JsonSubTypes.Type(value = ChoiceTaskPatchDTO.class, name = "ChoiceTask")
-})
-public abstract class TaskPatchDTO<D extends Task> extends Patch<D> {
+@EqualsAndHashCode(callSuper = true)
+public class ChoiceTask extends Task {
+	// Can be empty
+	private String name;
+
+	@Builder.Default
+	@Min(1)
+	private Integer minTasks = 1;
+
 	@NotNull
-	private Long id;
-	@NotNull
-	private Integer index;
-	@NotNull
-	private SkillIdDTO skill;
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@OneToMany
+	private List<TaskInfo> tasks = new ArrayList<>();
 
 	@Override
-	protected void applyOneToOne() {
-		updateNonNull(index, data::setIdx);
+	public Class<? extends TaskViewDTO<?>> viewClass() {
+		return ChoiceTaskViewDTO.class;
 	}
+
 }

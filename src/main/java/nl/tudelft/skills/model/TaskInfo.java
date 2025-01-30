@@ -15,26 +15,41 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.repository;
+package nl.tudelft.skills.model;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import javax.persistence.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import lombok.*;
 
-import nl.tudelft.skills.model.Task;
+@Data
+@Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class TaskInfo {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-public interface TaskRepository extends JpaRepository<Task, Long> {
+	@NotBlank
+	private String name;
 
-	default Task findByIdOrThrow(Long id) {
-		return findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Task was not found: " + id));
-	}
+	@Builder.Default
+	@NotNull
+	private TaskType type = TaskType.EXERCISE;
 
-	Set<Task> findAllByIdIn(Collection<Long> ids);
+	@Builder.Default
+	@Min(0)
+	private Integer time = 0;
 
-	List<Task> findAllBySkillSubmoduleModuleEditionId(Long editionId);
+	private String link;
 
+	@NotNull
+	@OneToOne(cascade = CascadeType.ALL)
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
+	private Task task;
 }

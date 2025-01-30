@@ -15,26 +15,36 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.repository;
+package nl.tudelft.skills.dto.view.module;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
-import nl.tudelft.skills.model.Task;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import nl.tudelft.skills.model.ChoiceTask;
 
-public interface TaskRepository extends JpaRepository<Task, Long> {
+@Data
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+public class ChoiceTaskViewDTO extends TaskViewDTO<ChoiceTask> {
+	private String name;
 
-	default Task findByIdOrThrow(Long id) {
-		return findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Task was not found: " + id));
-	}
+	@NotNull
+	@Min(1)
+	private Integer minTasks;
 
-	Set<Task> findAllByIdIn(Collection<Long> ids);
+	@NotNull
+	@PostApply
+	@EqualsAndHashCode.Exclude
+	private List<RegularTaskViewDTO> tasks;
 
-	List<Task> findAllBySkillSubmoduleModuleEditionId(Long editionId);
+	@NotNull
+	private Integer completedTasks;
 
+	// TODO: completion handling needs to be considered more concretely in the follow-up MR
 }

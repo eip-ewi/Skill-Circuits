@@ -15,26 +15,29 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.repository;
+package nl.tudelft.skills.dto.view.module;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import lombok.*;
+import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.model.*;
 
-import nl.tudelft.skills.model.Task;
-
-public interface TaskRepository extends JpaRepository<Task, Long> {
-
-	default Task findByIdOrThrow(Long id) {
-		return findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Task was not found: " + id));
-	}
-
-	Set<Task> findAllByIdIn(Collection<Long> ids);
-
-	List<Task> findAllBySkillSubmoduleModuleEditionId(Long editionId);
-
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
+public class TaskInfoViewDTO extends View<TaskInfo> {
+	@NotBlank
+	private String name;
+	@NotNull
+	private TaskType type;
+	@Min(0)
+	private Integer time;
+	private String link;
+	@Builder.Default
+	private boolean completed = false;
 }

@@ -83,7 +83,10 @@
                 <th:block th:each="item, iter : ${block.items}">
                     <!-- Task view for teacher-->
                     <th:block th:if="${level == 'module' and canEdit}">
-                        <li layout:replace="~{task/view :: item}"></li>
+                        <li
+                            th:if="${item.taskType} == 'RegularTask'"
+                            layout:replace="~{task/view :: item}"></li>
+                        <!-- TODO add ChoiceTasks here -->
                     </th:block>
                     <!--  Task preview for student-->
                     <th:block

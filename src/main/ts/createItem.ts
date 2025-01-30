@@ -36,7 +36,7 @@ function createItem(): void {
     // Create a new task
     const elem = $("#create-task").clone(true);
     elem.removeClass("hidden");
-    elem.children("input[type='hidden']").val(blockId);
+    elem.children("input[name='skill.id']").val(blockId);
 
     // Create a unique id for the new task element for event handling
     const taskList = button.closest("ul").find("ul").first();

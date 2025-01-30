@@ -30,12 +30,14 @@
             data-edit="only"
             data-new="true">
             <input type="hidden" name="skill.id" />
+            <!-- TODO this needs to be set to ChoiceTask for ChoiceTasks -->
+            <input type="hidden" name="taskType" value="RegularTask" />
             <span
                 th:if="${canEdit}"
                 class="fa-solid fa-ellipsis-vertical item__move always_visible"
                 data-edit="only"></span>
             <input
-                name="time"
+                name="taskInfo.time"
                 aria-label="Task time"
                 class="item__button__edit"
                 required
@@ -61,11 +63,16 @@
                                         th:classappend="|fa-${type.icon}|"></span>
                                     <span
                                         data-edit="only"
-                                        th:text="#{|task.type.${#strings.toLowerCase(type.name())}|}"></span>
+                                        th:text="#{|task.taskInfo.type.${#strings.toLowerCase(type.name())}|}"></span>
                                 </button>
                             </li>
                         </ul>
-                        <select data-edit="only" name="type" aria-label="Task type" hidden required>
+                        <select
+                            data-edit="only"
+                            name="taskInfo.type"
+                            aria-label="Task type"
+                            hidden
+                            required>
                             <option
                                 data-edit="only"
                                 th:each="type : ${T(nl.tudelft.skills.model.TaskType).values()}"
@@ -77,7 +84,7 @@
                 <input
                     type="text"
                     data-edit="only"
-                    name="name"
+                    name="taskInfo.name"
                     required
                     placeholder="Name"
                     aria-label="Name" />
@@ -88,7 +95,7 @@
                     data-edit="only"
                     aria-label="Task URL"
                     type="url"
-                    name="link" />
+                    name="taskInfo.link" />
                 <span data-edit="only" class="fa-solid fa-link always_visible"></span>
             </div>
             <button class="fa-solid fa-trash item__delete always_visible" data-edit="only"></button>

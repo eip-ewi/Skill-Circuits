@@ -19,6 +19,7 @@ package nl.tudelft.skills.dto.create;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -39,7 +40,6 @@ import nl.tudelft.skills.repository.TaskRepository;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class SkillCreateDTO extends Create<Skill> {
-
 	@NotBlank
 	private String name;
 	@Builder.Default
@@ -56,8 +56,9 @@ public class SkillCreateDTO extends Create<Skill> {
 	@Min(0)
 	@NotNull
 	private Integer column;
+
 	@NotNull
-	private List<TaskCreateDTO> newItems;
+	private List<TaskCreateDTO<?>> newItems;
 	@NotNull
 	private List<Long> requiredTaskIds;
 
@@ -69,8 +70,9 @@ public class SkillCreateDTO extends Create<Skill> {
 	@Override
 	protected void postApply(Skill data) {
 		if (hidden) {
-			TaskRepository taskRepository = SpringContext.getBean(TaskRepository.class);
-			List<Task> requiredTasks = taskRepository.findAllByIdIn(requiredTaskIds);
+			TaskRepository taskRepository = SpringContext
+					.getBean(TaskRepository.class);
+			Set<Task> requiredTasks = taskRepository.findAllByIdIn(requiredTaskIds);
 			requiredTasks.forEach(t -> t.getRequiredFor().add(data));
 			data.setRequiredTasks(new HashSet<>(requiredTasks));
 		}
