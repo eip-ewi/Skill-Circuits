@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -40,7 +40,9 @@ public class CopyEditionTestDatabaseLoader {
 	@Autowired
 	private SkillRepository skillRepository;
 	@Autowired
-	private TaskRepository taskRepository;
+	private TaskInfoRepository taskInfoRepository;
+	@Autowired
+	private RegularTaskRepository regularTaskRepository;
 	@Autowired
 	private PathRepository pathRepository;
 	@Autowired
@@ -81,8 +83,8 @@ public class CopyEditionTestDatabaseLoader {
 	private Skill skillToA;
 	private Skill skillToB;
 
-	private Task taskFromA;
-	private Task taskFromB;
+	private RegularTask taskFromA;
+	private RegularTask taskFromB;
 
 	public void initEditionFrom(Skill linkTo) {
 		initEditions();
@@ -241,12 +243,17 @@ public class CopyEditionTestDatabaseLoader {
 	}
 
 	public void initTasks() {
-		taskFromA = Task.builder().skill(skillFromA).name("Task A").paths(Set.of(pathFromA)).build();
-		taskFromA = taskRepository.save(taskFromA);
+		TaskInfo taskInfoFromA = TaskInfo.builder().name("Task A").build();
+		taskFromA = RegularTask.builder().skill(skillFromA).taskInfo(taskInfoFromA).paths(Set.of(pathFromA))
+				.build();
+		taskInfoFromA.setTask(taskFromA);
+		taskFromA = regularTaskRepository.save(taskFromA);
 		pathFromA.getTasks().add(taskFromA);
 		skillFromA.getTasks().add(taskFromA);
-		taskFromB = Task.builder().skill(skillFromB).name("Task B").build();
-		taskFromB = taskRepository.save(taskFromB);
+		TaskInfo taskInfoFromB = TaskInfo.builder().name("Task B").build();
+		taskFromB = RegularTask.builder().skill(skillFromB).taskInfo(taskInfoFromB).build();
+		taskInfoFromB.setTask(taskFromA);
+		taskFromB = regularTaskRepository.save(taskFromB);
 		skillFromB.getTasks().add(taskFromB);
 		skillFromB.getRequiredTasks().add(taskFromA);
 		taskFromA.getRequiredFor().add(skillFromB);
@@ -356,11 +363,11 @@ public class CopyEditionTestDatabaseLoader {
 		return skillToB;
 	}
 
-	public Task getTaskFromA() {
+	public RegularTask getTaskFromA() {
 		return taskFromA;
 	}
 
-	public Task getTaskFromB() {
+	public RegularTask getTaskFromB() {
 		return taskFromB;
 	}
 

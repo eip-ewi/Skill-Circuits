@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -29,8 +29,11 @@ import org.springframework.transaction.annotation.Transactional;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
+import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
 import nl.tudelft.skills.dto.view.module.TaskViewDTO;
+import nl.tudelft.skills.repository.ClickedLinkRepository;
 import nl.tudelft.skills.repository.ModuleRepository;
+import nl.tudelft.skills.repository.TaskCompletionRepository;
 import nl.tudelft.skills.test.TestDatabaseLoader;
 import nl.tudelft.skills.test.TestUserDetailsService;
 
@@ -38,15 +41,20 @@ import nl.tudelft.skills.test.TestUserDetailsService;
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
 public class ModuleServiceTest {
 
-	private TestDatabaseLoader db;
+	private final TestDatabaseLoader db;
 	private final ModuleService moduleService;
+	private final TaskCompletionRepository taskCompletionRepository;
+	private final ClickedLinkRepository clickedLinkRepository;
 	private final ModuleRepository moduleRepository;
 
 	@Autowired
 	public ModuleServiceTest(TestDatabaseLoader db, ModuleService moduleService,
-			ModuleRepository moduleRepository) {
+			TaskCompletionRepository taskCompletionRepository,
+			ClickedLinkRepository clickedLinkRepository, ModuleRepository moduleRepository) {
 		this.db = db;
 		this.moduleService = moduleService;
+		this.taskCompletionRepository = taskCompletionRepository;
+		this.clickedLinkRepository = clickedLinkRepository;
 		this.moduleRepository = moduleRepository;
 	}
 
@@ -59,7 +67,7 @@ public class ModuleServiceTest {
 		assertThat(module.getSubmodules().stream()
 				.flatMap(sub -> sub.getSkills().stream())
 				.flatMap(skill -> skill.getTasks().stream())
-				.filter(TaskViewDTO::isCompleted)
+				.filter(view -> view instanceof RegularTaskViewDTO v && v.getTaskInfo().isCompleted())
 				.map(TaskViewDTO::getId).toList())
 				.containsExactlyInAnyOrderElementsOf(
 						List.of(db.getTaskRead11().getId(),
@@ -67,6 +75,16 @@ public class ModuleServiceTest {
 								db.getTaskRead12().getId(),
 								db.getTaskDo12ae().getId()));
 
+	}
+
+	@Test
+	void deleteModule() {
+		Long moduleId = db.getModuleProofTechniques().getId();
+		assertThat(moduleRepository.existsById(moduleId)).isTrue();
+		moduleService.deleteModule(moduleId);
+		assertThat(moduleRepository.existsById(moduleId)).isFalse();
+		assertThat(taskCompletionRepository.findAll()).hasSize(0);
+		assertThat(clickedLinkRepository.findAll()).hasSize(0);
 	}
 
 }

@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -29,22 +29,23 @@ import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.dto.view.ClickedLinkDTO;
 import nl.tudelft.skills.model.ClickedLink;
-import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.ClickedLinkRepository;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.repository.RegularTaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 @RestController
 @RequestMapping("/clicked_links")
 public class ClickedLinkController {
-	private final TaskRepository taskRepository;
+	private final RegularTaskRepository regularTaskRepository;
 	private final PersonRepository scPersonRepository;
 	private final ClickedLinkRepository clickedLinkRepository;
 
-	public ClickedLinkController(TaskRepository taskRepository, PersonRepository scPersonRepository,
+	public ClickedLinkController(RegularTaskRepository regularTaskRepository,
+			PersonRepository scPersonRepository,
 			ClickedLinkRepository clickedLinkRepository) {
-		this.taskRepository = taskRepository;
+		this.regularTaskRepository = regularTaskRepository;
 		this.scPersonRepository = scPersonRepository;
 		this.clickedLinkRepository = clickedLinkRepository;
 	}
@@ -60,7 +61,7 @@ public class ClickedLinkController {
 	public void logClickedLinkByPerson(@AuthenticatedPerson Person authPerson,
 			@PathVariable Long taskId) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
-		Task task = taskRepository.findByIdOrThrow(taskId);
+		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
 
 		clickedLinkRepository.save(ClickedLink.builder()
 				.task(task).person(person).build());

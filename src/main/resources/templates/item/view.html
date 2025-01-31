@@ -1,7 +1,7 @@
 <!--
 
     Skill Circuits
-    Copyright (C) 2022 - Delft University of Technology
+    Copyright (C) 2025 - Delft University of Technology
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -29,63 +29,42 @@
         th:id="${id}"
         th:data-item="${item.id}"
         th:data-path-ids="${level == 'module'} ? ${item.pathIds} : ${null}"
-        th:data-index="${iter == null} ? 0 : ${iter.size - iter.count}"
         th:data-index-initial="${iter == null} ? 0 : ${iter.size - iter.count}"
-        th:classappend="${level == 'module'} ? ${item.completed ? 'completed' : ''} : ${''}"
+        th:classappend="${level == 'module'} ? ${item.taskInfo.completed ? 'completed task' : 'task'} : ${''}"
         layout:fragment="item">
         <input th:if="${canEdit}" name="id" type="hidden" th:value="${item.id}" />
         <th:block layout:fragment="item-decoration"></th:block>
         <th:block layout:fragment="item-content-element">
             <th:block layout:fragment="item-content">
-                <div
-                    style="flex-grow: 1"
-                    data-edit="always"
-                    th:id="|${id}-content|"
-                    class="item__content">
+                <div data-edit="always" th:id="|${id}-content|" class="item__content">
                     <th:block layout:fragment="item-before-content"></th:block>
                     <th:block layout:fragment="item-name">
+                        <!-- TODO the below needs adjustments for ChoiceTasks -->
                         <span
-                            th:if="not ${canEdit} and ((${level == 'module'}) or ${level != 'module'})"
                             th:id="|${id}-name|"
                             class="item__name"
-                            th:text="${item.name}"
-                            th:data-black="true"></span>
-                        <span
-                            th:if="${canEdit}"
-                            th:id="|${id}-name|"
-                            class="item__name"
-                            th:text="${item.name}"
-                            th:data-black="(${level == 'module'} and ${item.visible}) or ${level != 'module'}"></span>
+                            th:text="${level == 'module'} ? ${item.taskInfo.name} : ${item.name}"
+                            th:data-black="not ${canEdit} or ((${level == 'module'} and ${item.visible}) or ${level != 'module'})"></span>
                         <input
+                            th:if="${canEdit}"
                             type="text"
                             data-edit="only"
-                            name="name"
+                            th:name="${level == 'module'} ? 'taskInfo.name' : 'name'"
                             required
-                            th:data-initial="${item.name}"
+                            th:data-initial="${level == 'module'} ? ${item.taskInfo.name} : ${item.name}"
                             aria-label="Name"
                             placeholder="Name"
-                            th:value="${item.name}" />
+                            th:value="${level == 'module'} ? ${item.taskInfo.name} : ${item.name}" />
                     </th:block>
                     <th:block layout:fragment="item-end-content"></th:block>
                 </div>
             </th:block>
         </th:block>
-        <th:block layout:fragment="item-after-content"></th:block>
-
-        <div class="item__buttons" th:id="|${id}-buttons|" data-edit="only">
-            <th:block layout:fragment="item-buttons">
-                <th:block th:if="${canEdit}">
-                    <button
-                        class="fa-solid fa-chevron-up item__up always_visible"
-                        data-edit="only"></button>
-                    <button
-                        class="fa-solid fa-chevron-down item__down always_visible"
-                        data-edit="only"></button>
-                    <button
-                        class="fa-solid fa-trash item__delete always_visible"
-                        data-edit="only"></button>
-                </th:block>
-            </th:block>
-        </div>
+        <th:block layout:fragment="item-after-content">
+            <button
+                th:if="${canEdit}"
+                class="fa-solid fa-trash item__delete always_visible"
+                data-edit="only"></button>
+        </th:block>
     </li>
 </html>

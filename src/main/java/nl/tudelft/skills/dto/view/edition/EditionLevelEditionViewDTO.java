@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.dto.view.edition;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -58,11 +59,29 @@ public class EditionLevelEditionViewDTO extends View<SCEdition> implements Circu
 	@NotNull
 	private Set<PathViewDTO> paths;
 
-	@Override
-	public List<? extends GroupView> getGroups() {
-		return modules;
+	/**
+	 * Gets the modules of an edition sorted in alphabetic order.
+	 *
+	 * @return The list of modules
+	 */
+	public List<EditionLevelModuleViewDTO> getModules() {
+		return modules.stream()
+				.sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList();
 	}
 
+	/**
+	 * Gets the modules of an edition sorted in alphabetic order.
+	 *
+	 * @return The list of modules
+	 */
+	@Override
+	public List<? extends GroupView> getGroups() {
+		return modules.stream().sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList();
+	}
+
+	/**
+	 * Orders the checkpoints in increasing deadline order.
+	 */
 	@Override
 	public void postApply() {
 		super.postApply();
@@ -70,6 +89,10 @@ public class EditionLevelEditionViewDTO extends View<SCEdition> implements Circu
 				SpringContext.getBean(CheckpointRepository.class)
 						.findAllById(this.data.getCheckpoints().stream().map(Checkpoint::getId).toList()),
 				CheckpointViewDTO.class);
+		this.checkpointsInEdition = this.checkpointsInEdition.stream()
+				.sorted(Comparator.comparing(CheckpointViewDTO::getDeadline, Comparator.nullsLast(
+						Comparator.naturalOrder())))
+				.toList();
 	}
 
 	@Override

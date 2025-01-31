@@ -1,7 +1,7 @@
 <!--
 
     Skill Circuits
-    Copyright (C) 2022 - Delft University of Technology
+    Copyright (C) 2025 - Delft University of Technology
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -24,8 +24,13 @@
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <script th:if="${canEdit}" layout:fragment="script">
         function deleteItem() {
-            const item = $(this).parent().parent();
+            const item = $(this).parent();
             if (item.data("new")) {
+                item.next(".item__separation").remove();
+                // If it is the last item, remove the last separation as well
+                if (item.siblings(".item").length === 0) {
+                    item.prev(".item__separation").remove();
+                }
                 item.remove();
             } else {
                 const del = item.data("delete") !== true;

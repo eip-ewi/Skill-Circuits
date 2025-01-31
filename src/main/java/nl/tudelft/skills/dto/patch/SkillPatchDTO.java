@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,7 +18,6 @@
 package nl.tudelft.skills.dto.patch;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotBlank;
@@ -29,13 +28,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.patch.Patch;
 import nl.tudelft.skills.dto.create.TaskCreateDTO;
 import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.repository.TaskRepository;
 
 @Data
 @Builder
@@ -53,12 +50,14 @@ public class SkillPatchDTO extends Patch<Skill> {
 	@Builder.Default
 	private Boolean hidden = false;
 	private SubmoduleIdDTO submodule;
+
 	@NotNull
 	@Builder.Default
-	private List<TaskPatchDTO> items = new ArrayList<>();
+	private List<TaskPatchDTO<?>> items = new ArrayList<>();
 	@NotNull
 	@Builder.Default
-	private List<TaskCreateDTO> newItems = new ArrayList<>();
+	private List<TaskCreateDTO<?>> newItems = new ArrayList<>();
+
 	@NotNull
 	@Builder.Default
 	private Set<Long> removedItems = new HashSet<>();
@@ -72,44 +71,6 @@ public class SkillPatchDTO extends Patch<Skill> {
 		updateNonNull(essential, data::setEssential);
 		updateNonNull(hidden, data::setHidden);
 		updateNonNullId(submodule, data::setSubmodule);
-	}
-
-	@Override
-	protected void applyOneToMany() {
-		Map<Long, Task> tasks = data.getTasks().stream()
-				.collect(Collectors.toMap(Task::getId, Function.identity()));
-		List<Task> orderedTasks = new ArrayList<>(
-				items.stream().map(p -> p.apply(tasks.get(p.getId()))).toList());
-
-		Map<Long, Integer> order = items.stream()
-				.collect(Collectors.toMap(TaskPatchDTO::getId, TaskPatchDTO::getIndex));
-
-		TaskRepository taskRepository = SpringContext.getBean(TaskRepository.class);
-		orderedTasks.addAll(newItems.stream().map(c -> {
-			Task task = taskRepository.save(c.apply());
-			order.put(task.getId(), c.getIndex());
-			return task;
-		}).toList());
-
-		data.getTasks().stream().filter(t -> removedItems.contains(t.getId())).toList()
-				.forEach(t -> data.getTasks().remove(t));
-
-		orderedTasks.sort(Comparator.<Task>comparingInt(t -> order.get(t.getId())).reversed());
-		data.setTasks(orderedTasks);
-	}
-
-	@Override
-	protected void applyManyToManyMappedBy() {
-		if (hidden) {
-			Set<Task> requiredTasks = new HashSet<>(
-					SpringContext.getBean(TaskRepository.class).findAllByIdIn(requiredTaskIds));
-			updateManyToManyMappedBy(data, data.getRequiredTasks(), requiredTasks, Task::getRequiredFor);
-			data.setRequiredTasks(requiredTasks);
-		} else {
-			updateManyToManyMappedByIds(data, data.getRequiredTasks(), Collections.emptyList(),
-					Task::getRequiredFor);
-			data.setRequiredTasks(Collections.emptySet());
-		}
 	}
 
 	@Override

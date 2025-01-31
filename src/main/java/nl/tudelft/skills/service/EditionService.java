@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -52,7 +52,7 @@ public class EditionService {
 	private final SubmoduleRepository submoduleRepository;
 	private final AbstractSkillRepository abstractSkillRepository;
 	private final SkillRepository skillRepository;
-	private final TaskRepository taskRepository;
+	private final RegularTaskRepository regularTaskRepository;
 
 	/**
 	 * Configures the model for the module circuit view.
@@ -208,7 +208,7 @@ public class EditionService {
 		submoduleRepository.flush();
 		abstractSkillRepository.flush();
 		skillRepository.flush();
-		taskRepository.flush();
+		regularTaskRepository.flush();
 
 		return editionTo;
 	}
@@ -434,42 +434,52 @@ public class EditionService {
 	 * @param  pathMap  The map of paths, from previous paths to the new paths.
 	 * @return          The map of tasks, from previous tasks to the new tasks.
 	 */
-	Map<Task, Task> copyAndLinkEditionTasks(Map<Skill, Skill> skillMap, Map<Path, Path> pathMap) {
+	Map<Task, Task> copyAndLinkEditionTasks(Map<Skill, Skill> skillMap,
+			Map<Path, Path> pathMap) {
 		Map<Task, Task> taskMap = new HashMap<>();
 
 		skillMap.forEach((prev, copy) -> prev.getTasks().forEach(t -> {
-			Task task = taskRepository.save(
-					Task.builder()
-							.skill(copy)
-							.name(t.getName())
-							.type(t.getType())
-							.time(t.getTime())
-							.link(t.getLink())
-							.idx(t.getIdx())
-							.build());
+			// TODO copying of ChoiceTasks. Needs more adjustments since they contain tasks (dependency).
+			// 	Below is only temporary solution for (regular) tasks!
 
-			copy.getTasks().add(task);
-			taskMap.put(t, task);
+			if (t instanceof RegularTask regularTask) {
+				TaskInfo taskInfo = TaskInfo.builder().name(regularTask.getName())
+						.type(regularTask.getType())
+						.time(regularTask.getTime())
+						.link(regularTask.getLink()).build();
 
-			t.getPaths().forEach(p -> {
-				Path copiedPath = pathMap.get(p);
-				if (copiedPath != null) {
-					// This should hold for any correctly formed edition
+				// Temporary task is needed since variables need to be final
+				RegularTask tempTask = RegularTask.builder()
+						.skill(copy)
+						.taskInfo(taskInfo)
+						.idx(regularTask.getIdx())
+						.build();
+				taskInfo.setTask(tempTask);
 
-					task.getPaths().add(copiedPath);
-					copiedPath.getTasks().add(task);
-				}
-			});
+				RegularTask task = regularTaskRepository.save(tempTask);
+				copy.getTasks().add(task);
+				taskMap.put(regularTask, task);
 
-			t.getRequiredFor().forEach(req -> {
-				Skill copyRequiredFor = skillMap.get(req);
-				if (copyRequiredFor != null) {
-					// This should hold for any correctly formed edition
+				regularTask.getPaths().forEach(p -> {
+					Path copiedPath = pathMap.get(p);
+					if (copiedPath != null) {
+						// This should hold for any correctly formed edition
 
-					task.getRequiredFor().add(copyRequiredFor);
-					copyRequiredFor.getRequiredTasks().add(task);
-				}
-			});
+						task.getPaths().add(copiedPath);
+						copiedPath.getTasks().add(task);
+					}
+				});
+
+				regularTask.getRequiredFor().forEach(req -> {
+					Skill copyRequiredFor = skillMap.get(req);
+					if (copyRequiredFor != null) {
+						// This should hold for any correctly formed edition
+
+						task.getRequiredFor().add(copyRequiredFor);
+						copyRequiredFor.getRequiredTasks().add(task);
+					}
+				});
+			}
 		}));
 
 		return taskMap;

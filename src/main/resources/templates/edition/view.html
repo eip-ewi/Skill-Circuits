@@ -1,7 +1,7 @@
 <!--
 
     Skill Circuits
-    Copyright (C) 2022 - Delft University of Technology
+    Copyright (C) 2025 - Delft University of Technology
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -66,19 +66,6 @@
                     </button>
                 </div>
 
-                <!--                Playlist feature-->
-                <div class="circuit__header__group" th:if="${studentOptedIn != null}">
-                    <button class="playlist-button" id="playlist-button-c">
-                        <span class="fa-solid fa-circle-play"></span>
-                        Playlist
-                    </button>
-                    <th:block th:if="${studentOptedIn.isPresent() && studentOptedIn.get()}">
-                        <div
-                            layout:replace="~{playlist/playlist :: playlistView(step=${playlistStep.getStep()})}"></div>
-                    </th:block>
-                    <div layout:replace="~{playlist/header-button :: opt-in-dialog}"></div>
-                </div>
-
                 <div layout:replace="~{edition_setup/view :: setup-overlay}"></div>
             </div>
 
@@ -127,14 +114,6 @@
                     const itemType = "skill";
                 </script>
                 <div layout:replace="~{circuit/view :: script}"></div>
-            </th:block>
-            <!--        Playlist feature-->
-            <th:block th:if="${studentOptedIn != null}">
-                <div layout:replace="~{playlist/header-button :: script}"></div>
-                <th:block th:if="${studentOptedIn.isPresent() && studentOptedIn.get()}">
-                    <div
-                        layout:replace="~{playlist/playlist :: script(step=${playlistStep.getStep()})}"></div>
-                </th:block>
             </th:block>
         </div>
     </body>

@@ -1,7 +1,7 @@
 <!--
 
     Skill Circuits
-    Copyright (C) 2022 - Delft University of Technology
+    Copyright (C) 2025 - Delft University of Technology
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -44,7 +44,13 @@
                     layout:replace="~{components/select_or_new :: select('create-checkpoint-name', 'name')}">
                     <th:block layout:fragment="select-options">
                         <option
-                            th:each="checkpoint: ${circuit.checkpointsInEdition}"
+                            th:each="checkpoint: ${circuit.remainingCheckpointsInEdition}"
+                            th:id="|create-checkpoint-name-option-${checkpoint.id}|"
+                            th:value="${checkpoint.id}"
+                            th:text="${checkpoint.name}"
+                            th:data-deadline="${checkpoint.deadline}"></option>
+                        <option
+                            th:each="checkpoint: ${circuit.usedCheckpointsInEdition}"
                             th:id="|create-checkpoint-name-option-${checkpoint.id}|"
                             th:value="${checkpoint.id}"
                             th:text="${checkpoint.name}"
@@ -67,6 +73,23 @@
     </div>
 
     <script th:if="${canEdit}" layout:fragment="script">
+        /**
+         * Add a ghost checkpoint to a given row in the grid.
+         *
+         * @param row The row to which the ghost checkpoint should be added.
+         */
+        function addGhostCheckpoint(row) {
+            const cp = $("<div>")
+                .addClass("checkpoint ghost_checkpoint")
+                .css("grid-row", row)
+                .append(
+                    $("<div>")
+                        .addClass("checkpoint__body")
+                        .append($("<button>").addClass("checkpoint__create fa-solid fa-plus"))
+                );
+            $("#circuit").append(cp);
+        }
+
         function updateGhostCheckpoints() {
             const circuit = $("#circuit");
             const rowsInGrid = [...Array(parseInt(circuit.css("--rows"))).keys()];
@@ -74,21 +97,8 @@
                 getRow(cp)
             );
             $(".ghost_checkpoint").remove();
-            rowsInGrid
-                .filter(r => !rowsWithCheckpoints.includes(r))
-                .forEach(row => {
-                    const cp = $("<div>")
-                        .addClass("checkpoint ghost_checkpoint")
-                        .css("grid-row", row)
-                        .append(
-                            $("<div>")
-                                .addClass("checkpoint__body")
-                                .append(
-                                    $("<button>").addClass("checkpoint__create fa-solid fa-plus")
-                                )
-                        );
-                    circuit.append(cp);
-                });
+            rowsInGrid.shift();
+            rowsInGrid.filter(r => !rowsWithCheckpoints.includes(r)).forEach(addGhostCheckpoint);
         }
 
         function getSkillsInCheckpoint(checkpointRow) {
@@ -124,15 +134,6 @@
                 if ($(`#checkpoint-${cp.attr("id").split("-").pop()}`).length !== 0) {
                     cp.prop("disabled", true);
                 }
-            });
-            // Sort active options, then new, then disabled options.
-            selectOptions.sort((a, b) => {
-                if (a.prop("disabled")) {
-                    return 1;
-                } else if (a.val() === "new") {
-                    return 0;
-                }
-                return -1;
             });
             select.html(selectOptions);
             select.val("new").change();

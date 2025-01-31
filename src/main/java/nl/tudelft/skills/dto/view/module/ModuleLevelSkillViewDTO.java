@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -27,9 +27,7 @@ import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.BlockView;
 import nl.tudelft.skills.dto.view.ItemView;
 import nl.tudelft.skills.dto.view.checkpoint.CheckpointViewDTO;
-import nl.tudelft.skills.model.AbstractSkill;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.*;
 
 @Data
 @Builder
@@ -53,10 +51,10 @@ public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
 	@NotNull
 	@EqualsAndHashCode.Exclude
 	private CheckpointViewDTO checkpoint;
-	@NotNull
-	@PostApply
+
 	@EqualsAndHashCode.Exclude
-	private List<TaskViewDTO> tasks;
+	private List<? extends TaskViewDTO<?>> tasks;
+
 	@NotNull
 	private List<Long> parentIds;
 	@NotNull
@@ -74,6 +72,14 @@ public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
 		this.parentIds = data.getParents().stream().map(AbstractSkill::getId).toList();
 		this.childIds = data.getChildren().stream().map(AbstractSkill::getId).toList();
 		this.requiredTaskIds = data.getRequiredTasks().stream().map(Task::getId).toList();
+
+		// TODO: make sure each RegularTask is there only once, depending on if it is associated
+		//  to a ChoiceTask or not (Skill contains it "twice", once by association)
+		this.tasks = data.getTasks().stream().map(t -> {
+			TaskViewDTO<?> dto = getMapper().map(t, t.viewClass());
+			dto.postApply();
+			return dto;
+		}).toList();
 	}
 
 	@Override

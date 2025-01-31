@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -58,7 +58,7 @@ public class TaskCompletionService {
 	 * @param  person The person to get the latest task completion for
 	 * @return        The latest task completion for the given person
 	 */
-	public Task latestTaskCompletion(Person person) {
+	public RegularTask latestTaskCompletion(Person person) {
 		if (person == null) {
 			return null;
 		}
@@ -79,7 +79,7 @@ public class TaskCompletionService {
 	 * @param  task The task to generate the string for
 	 * @return      A string indicating the location of the given task
 	 */
-	public String getLocationString(Task task) {
+	public String getLocationString(RegularTask task) {
 		Skill skill = task.getSkill();
 		Submodule submodule = skill.getSubmodule();
 		EditionDetailsDTO edition = editionApi.getEditionById(submodule.getModule().getEdition().getId())
@@ -102,7 +102,7 @@ public class TaskCompletionService {
 	 * @return        The saved TaskCompletion
 	 */
 	@Transactional
-	public TaskCompletion addTaskCompletion(SCPerson person, Task task) {
+	public TaskCompletion addTaskCompletion(SCPerson person, RegularTask task) {
 		TaskCompletion completion = taskCompletionRepository.save(TaskCompletion.builder()
 				.task(task).person(person).build());
 		person.getTaskCompletions().add(completion);
@@ -119,7 +119,7 @@ public class TaskCompletionService {
 	 * @return        The deleted TaskCompletion, or null if such a TaskCompletion does not exist.
 	 */
 	@Transactional
-	public TaskCompletion deleteTaskCompletion(SCPerson person, Task task) {
+	public TaskCompletion deleteTaskCompletion(SCPerson person, RegularTask task) {
 		Optional<TaskCompletion> completion = person.getTaskCompletions().stream()
 				.filter(c -> c.getPerson().equals(person) && c.getTask().equals(task)).findFirst();
 
@@ -139,7 +139,7 @@ public class TaskCompletionService {
 	 * @param task The Task for which the completions should be deleted
 	 */
 	@Transactional
-	public void deleteTaskCompletionsOfTask(Task task) {
+	public void deleteTaskCompletionsOfTask(RegularTask task) {
 		Set<TaskCompletion> taskCompletions = task.getCompletedBy();
 		// Remove from taskCompletionRepository
 		taskCompletionRepository.deleteAll(taskCompletions);
@@ -156,12 +156,14 @@ public class TaskCompletionService {
 	 * @param  editionId The edition
 	 * @return           The set of completed tasks
 	 */
-	private Set<Task> getTasksDone(SCPerson scperson, long editionId) {
+	private Set<RegularTask> getTasksDone(SCPerson scperson, long editionId) {
 		return scperson.getTaskCompletions().stream().map(TaskCompletion::getTask)
 				.filter(s -> Objects.equals(
 						s.getSkill().getSubmodule().getModule().getEdition().getId(), editionId))
 				.collect(Collectors.toSet());
 	}
+
+	// TODO consider completion of choice tasks below
 
 	/**
 	 * Collects the completed skills based on the given path preference and customized skills
@@ -174,7 +176,7 @@ public class TaskCompletionService {
 	 */
 	public Set<Skill> determineSkillsDone(Set<Skill> ownSkillsWithTask, SCPerson scPerson, long editionId,
 			List<PathPreference> personPathPreference) {
-		Set<Task> tasksDone = getTasksDone(scPerson, editionId);
+		Set<RegularTask> tasksDone = getTasksDone(scPerson, editionId);
 
 		// Completed skills from the customized skills
 		Set<Skill> ownSkillsDone = ownSkillsWithTask.stream()
@@ -186,14 +188,14 @@ public class TaskCompletionService {
 		Set<Skill> skillsDone;
 		if (personPathPreference.isEmpty() || personPathPreference.get(0).getPath() == null) {
 			skillsDone = tasksDone.stream()
-					.map(Task::getSkill)
+					.map(RegularTask::getSkill)
 					.filter(s -> !ownSkillsWithTask.contains(s) && tasksDone.containsAll(s.getTasks()))
 					.collect(Collectors.toSet());
 		} else {
 			Path personPath = personPathPreference.get(0).getPath();
 			skillsDone = tasksDone.stream()
 					.filter(t -> t.getPaths().contains(personPath))
-					.map(Task::getSkill)
+					.map(RegularTask::getSkill)
 					.filter(x -> !ownSkillsWithTask.contains(x) && tasksDone.containsAll(x.getTasks()
 							.stream().filter(y -> y.getPaths().contains(personPath)).toList()))
 					.collect(Collectors.toSet());

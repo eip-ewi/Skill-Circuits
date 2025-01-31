@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -28,11 +28,8 @@ import org.springframework.ui.Model;
 
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
-import nl.tudelft.skills.dto.view.module.TaskViewDTO;
-import nl.tudelft.skills.model.Path;
-import nl.tudelft.skills.model.PathPreference;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
+import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.PathRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
@@ -99,15 +96,20 @@ public class PersonService {
 		Set<Skill> skillsModified = scPerson.getSkillsModified();
 		// If the skill is null, the tasksAdded and skillsModified are all added tasks and modified skills. Otherwise,
 		// they are only added corresponding to the skill (tasks in the skill and the skill itself, if modified).
+
+		// TODO handling of ChoiceTasks here
 		if (skill == null) {
 			model.addAttribute("tasksAdded",
-					tasks.stream().map(at -> View.convert(at, TaskViewDTO.class))
+					tasks.stream().filter(t -> t instanceof RegularTask)
+							.map(at -> View.convert((RegularTask) at, RegularTaskViewDTO.class))
 							.collect(Collectors.toSet()));
 			model.addAttribute("skillsModified", skillsModified.stream()
 					.map(at -> View.convert(at, ModuleLevelSkillViewDTO.class)).collect(Collectors.toSet()));
 		} else {
-			model.addAttribute("tasksAdded", tasks.stream().filter(t -> skill.getTasks().contains(t))
-					.map(at -> View.convert(at, TaskViewDTO.class)).collect(Collectors.toSet()));
+			model.addAttribute("tasksAdded", tasks.stream()
+					.filter(t -> t instanceof RegularTask && skill.getTasks().contains(t))
+					.map(at -> View.convert((RegularTask) at, RegularTaskViewDTO.class))
+					.collect(Collectors.toSet()));
 			model.addAttribute("skillsModified",
 					skillsModified.contains(skill)
 							? Set.of(View.convert(skill, ModuleLevelSkillViewDTO.class))
@@ -138,4 +140,17 @@ public class PersonService {
 				.flatMap(p -> pathRepository.findById(p.getPath().getId())).orElse(null);
 	}
 
+	/**
+	 * Stores a revealed skill for a given person id.
+	 *
+	 * @param personId The id of the person
+	 * @param skill    The skill that has been revealed
+	 */
+	@Transactional
+	public void addRevealedSkill(Long personId, Skill skill) {
+		if (skill.isHidden()) {
+			SCPerson scPerson = personRepository.findByIdOrThrow(personId);
+			scPerson.getSkillsRevealed().add(skill);
+		}
+	}
 }

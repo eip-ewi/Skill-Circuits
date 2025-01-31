@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -21,20 +21,20 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.*;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+import nl.tudelft.skills.dto.view.module.TaskViewDTO;
 import nl.tudelft.skills.model.labracore.SCPerson;
 
 @Data
 @Entity
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Task {
-
+@Inheritance(strategy = InheritanceType.JOINED)
+public abstract class Task {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
@@ -44,19 +44,6 @@ public class Task {
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
 	private Skill skill;
-
-	@NotBlank
-	private String name;
-
-	@Builder.Default
-	@NotNull
-	private TaskType type = TaskType.EXERCISE;
-
-	@Builder.Default
-	@Min(0)
-	private Integer time = 0;
-
-	private String link;
 
 	@NotNull
 	@Builder.Default
@@ -80,13 +67,6 @@ public class Task {
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@OneToMany(mappedBy = "task")
-	private Set<TaskCompletion> completedBy = new HashSet<>();
-
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
 	@ManyToMany
 	private Set<Skill> requiredFor = new HashSet<>();
 
@@ -96,4 +76,7 @@ public class Task {
 	@EqualsAndHashCode.Exclude
 	@ManyToMany(mappedBy = "tasksAdded")
 	private Set<SCPerson> personsThatAddedTask = new HashSet<>();
+
+	public abstract Class<? extends TaskViewDTO<?>> viewClass();
+
 }

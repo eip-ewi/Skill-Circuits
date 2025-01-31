@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -24,11 +24,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
-import nl.tudelft.skills.model.Inventory;
-import nl.tudelft.skills.model.PathPreference;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.model.TaskCompletion;
+import nl.tudelft.skills.model.*;
 
 @Data
 @Entity
@@ -62,6 +58,13 @@ public class SCPerson {
 	@ManyToMany
 	// For configuring a skill with any task in any path
 	private Set<Task> tasksAdded = new HashSet<>();
+
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@ManyToMany
+	// To remember which skills have already been revealed
+	private Set<Skill> skillsRevealed = new HashSet<>();
 
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude

@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,13 +17,13 @@
  */
 package nl.tudelft.skills.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.awt.*;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -44,14 +44,12 @@ import org.springframework.ui.Model;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.create.PathCreateDTO;
 import nl.tudelft.skills.dto.id.SCEditionIdDTO;
-import nl.tudelft.skills.dto.patch.PathPatchDTO;
+import nl.tudelft.skills.dto.patch.PathNamePatchDTO;
+import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.PathPreference;
+import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.model.SCEdition;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.repository.EditionRepository;
-import nl.tudelft.skills.repository.PathPreferenceRepository;
-import nl.tudelft.skills.repository.PathRepository;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.service.PathService;
 import nl.tudelft.skills.service.PersonService;
@@ -65,6 +63,8 @@ public class PathControllerTest extends ControllerTest {
 	private final EditionRepository editionRepository;
 	private final TaskRepository taskRepository;
 	private final PathPreferenceRepository pathPreferenceRepository;
+	private final PersonRepository personRepository;
+	private final PersonService personService;
 
 	@Autowired
 	public PathControllerTest(PathRepository pathRepository, PersonRepository personRepository,
@@ -75,6 +75,8 @@ public class PathControllerTest extends ControllerTest {
 		this.pathPreferenceRepository = pathPreferenceRepository;
 		this.editionRepository = editionRepository;
 		this.taskRepository = taskRepository;
+		this.personRepository = personRepository;
+		this.personService = personService;
 		pathController = new PathController(pathRepository, personRepository, editionRepository,
 				taskRepository, pathPreferenceRepository, personService, pathService);
 	}
@@ -137,7 +139,7 @@ public class PathControllerTest extends ControllerTest {
 		Long pathId = db.getPathFinderPath().getId();
 
 		// Setup task with path
-		Task task = db.getTaskRead12();
+		RegularTask task = db.getTaskRead12();
 		task.setPaths(new HashSet<>(Arrays.asList(db.getPathFinderPath())));
 		taskRepository.save(task);
 		assertEquals(1, db.getTaskRead12().getPaths().size());
@@ -184,30 +186,33 @@ public class PathControllerTest extends ControllerTest {
 	@Test
 	@WithUserDetails("admin")
 	void patchPathChangeName() {
-		var dto = PathPatchDTO.builder()
-				.id(db.getPathFinderPath().getId())
+		Long pathId = db.getPathFinderPath().getId();
+		PathNamePatchDTO dto = PathNamePatchDTO.builder()
+				.id(pathId)
 				.name("Pathfinder2")
-				.taskIds(List.of(db.getTaskRead11().getId()))
 				.build();
 
+		// Assert that task read 12 is only in the pathfinder path
 		assertEquals(Set.of(db.getPathFinderPath()), db.getTaskRead12().getPaths());
 		assertTrue(db.getTaskRead12().getPaths().stream().anyMatch(p -> p.getName().equals("Pathfinder")));
 
-		pathController.patchPath(dto);
-		// Path is updated in task
-		assertFalse(db.getTaskRead12().getPaths().stream().anyMatch(p -> p.getName().equals("Pathfinder")));
+		// Rename the path
+		pathController.renamePath(dto);
 
-		assertFalse(db.getTaskRead12().getPaths().stream().anyMatch(p -> p.getName().equals("Pathfinder2")));
-		assertTrue(db.getTaskRead11().getPaths().stream().anyMatch(p -> p.getName().equals("Pathfinder2")));
+		// Assert on path name change
+		assertFalse(db.getTaskRead12().getPaths().stream().anyMatch(p -> p.getName().equals("Pathfinder")));
+		assertTrue(db.getTaskRead12().getPaths().stream().anyMatch(p -> p.getName().equals("Pathfinder2")));
+
+		Path pathAfter = pathRepository.findByIdOrThrow(pathId);
+		assertThat(pathAfter.getName()).isEqualTo("Pathfinder2");
 	}
 
 	@Test
 	@WithUserDetails("admin")
-	void patchPathChangeDefaultPath() {
-		var dto = PathPatchDTO.builder()
+	void patchPathChangeNameOfDefaultPath() {
+		PathNamePatchDTO dto = PathNamePatchDTO.builder()
 				.id(db.getPathFinderPath().getId())
 				.name("Pathfinder2")
-				.taskIds(List.of(db.getTaskRead11().getId()))
 				.build();
 
 		// Set Pathfinder as default path in edition
@@ -216,7 +221,8 @@ public class PathControllerTest extends ControllerTest {
 		editionRepository.save(edition);
 		assertEquals("Pathfinder", db.getEditionRL().getDefaultPath().getName());
 
-		pathController.patchPath(dto);
+		// Rename the path
+		pathController.renamePath(dto);
 
 		// Default path in edition was updated
 		assertEquals("Pathfinder2", db.getEditionRL().getDefaultPath().getName());

@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -30,6 +30,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
@@ -51,12 +52,8 @@ import nl.tudelft.labracore.api.dto.Id;
 import nl.tudelft.labracore.api.dto.PersonSummaryDTO;
 import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.model.Checkpoint;
-import nl.tudelft.skills.model.SCEdition;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.repository.CheckpointRepository;
-import nl.tudelft.skills.repository.EditionRepository;
-import nl.tudelft.skills.repository.SkillRepository;
+import nl.tudelft.skills.model.*;
+import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.test.TestUserDetailsService;
 import reactor.core.publisher.Flux;
 
@@ -68,16 +65,21 @@ public class CheckpointControllerTest extends ControllerTest {
 	private final CheckpointRepository checkpointRepository;
 	private final CheckpointController checkpointController;
 	private final SkillRepository skillRepository;
+	private final ModuleRepository moduleRepository;
+	private final SubmoduleRepository submoduleRepository;
 	private final EditionRepository editionRepository;
 	private final RoleControllerApi roleApi;
 
 	@Autowired
 	public CheckpointControllerTest(CheckpointRepository checkpointRepository,
 			CheckpointController checkpointController, SkillRepository skillRepository,
+			ModuleRepository moduleRepository, SubmoduleRepository submoduleRepository,
 			EditionRepository editionRepository, RoleControllerApi roleApi) {
 		this.checkpointRepository = checkpointRepository;
 		this.checkpointController = checkpointController;
 		this.skillRepository = skillRepository;
+		this.moduleRepository = moduleRepository;
+		this.submoduleRepository = submoduleRepository;
 		this.editionRepository = editionRepository;
 		this.roleApi = roleApi;
 	}
@@ -376,6 +378,53 @@ public class CheckpointControllerTest extends ControllerTest {
 				.isEqualTo(db.getCheckpointLectureTwo());
 		Checkpoint checkpoint = db.getCheckpointLectureTwo();
 		assertThat(checkpoint.getSkills()).contains(db.getSkillImplication());
+	}
+
+	@Test
+	@WithUserDetails("admin")
+	public void deleteSkillsFromDifferentModulesForbidden() {
+		Checkpoint checkpointA = db.getCheckpointLectureOne();
+		Checkpoint checkpointB = db.getCheckpointLectureTwo();
+
+		db.createSkillsInNewModuleHelper(checkpointA, checkpointB);
+
+		var res = checkpointController.deleteSkillsFromCheckpoint(db.getCheckpointLectureOne().getId(),
+				checkpointA.getSkills().stream().map(Skill::getId).collect(Collectors.toList()));
+
+		assertThat(res).isEqualTo(new ResponseEntity<>("Skills need to be in the same module",
+				HttpStatus.CONFLICT));
+
+		Optional<Checkpoint> checkpoint = checkpointRepository.findById(checkpointA.getId());
+		assertThat(checkpoint).isNotEmpty();
+		assertThat(checkpoint.get().getSkills()).containsAll(checkpointA.getSkills());
+	}
+
+	@Test
+	@WithUserDetails("admin")
+	public void deleteSkillsFromLastCheckpointForbidden() {
+		Set<Skill> skillsBefore = db.getCheckpointLectureTwo().getSkills();
+		var res = checkpointController.deleteSkillsFromCheckpoint(db.getCheckpointLectureTwo().getId(),
+				List.of(db.getSkillInductionPractice().getId()));
+
+		assertThat(res).isEqualTo(new ResponseEntity<>("Cannot delete last checkpoint", HttpStatus.CONFLICT));
+
+		Optional<Checkpoint> checkpoint = checkpointRepository.findById(db.getCheckpointLectureTwo().getId());
+		assertThat(checkpoint).isNotEmpty();
+		assertThat(checkpoint.get().getSkills()).containsAll(skillsBefore);
+	}
+
+	@Test
+	@WithUserDetails("admin")
+	public void deleteEmptyListSkillsFromCheckpoint() {
+		Set<Skill> skillsBefore = db.getCheckpointLectureTwo().getSkills();
+		var res = checkpointController.deleteSkillsFromCheckpoint(db.getCheckpointLectureTwo().getId(),
+				List.of());
+
+		assertThat(res).isEqualTo(new ResponseEntity<>(HttpStatus.OK));
+
+		Optional<Checkpoint> checkpoint = checkpointRepository.findById(db.getCheckpointLectureTwo().getId());
+		assertThat(checkpoint).isNotEmpty();
+		assertThat(checkpoint.get().getSkills()).containsAll(skillsBefore);
 	}
 
 	@Test

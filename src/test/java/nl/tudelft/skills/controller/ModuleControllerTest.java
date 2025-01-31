@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -51,14 +51,8 @@ import nl.tudelft.skills.dto.id.SCEditionIdDTO;
 import nl.tudelft.skills.dto.patch.SCModulePatchDTO;
 import nl.tudelft.skills.dto.view.SkillSummaryDTO;
 import nl.tudelft.skills.model.SCModule;
-import nl.tudelft.skills.playlists.service.ResearchParticipantService;
-import nl.tudelft.skills.repository.ClickedLinkRepository;
 import nl.tudelft.skills.repository.ModuleRepository;
-import nl.tudelft.skills.repository.TaskCompletionRepository;
-import nl.tudelft.skills.security.AuthorisationService;
-import nl.tudelft.skills.service.ClickedLinkService;
 import nl.tudelft.skills.service.ModuleService;
-import nl.tudelft.skills.service.TaskCompletionService;
 
 @Transactional
 @AutoConfigureMockMvc
@@ -67,35 +61,17 @@ public class ModuleControllerTest extends ControllerTest {
 
 	@MockBean
 	private ModuleService moduleService;
-	private final TaskCompletionService taskCompletionService;
-	private final TaskCompletionRepository taskCompletionRepository;
 	private final ModuleController moduleController;
 	private final RoleControllerApi roleControllerApi;
 	private final ModuleRepository moduleRepository;
 	private final HttpSession session;
-	private final ClickedLinkService clickedLinkService;
-	private final ClickedLinkRepository clickedLinkRepository;
-
-	//	Playlist feature
-	private final ResearchParticipantService researchParticipantService;
-	private final AuthorisationService authorisationService;
 
 	@Autowired
 	public ModuleControllerTest(ModuleController moduleController, RoleControllerApi roleControllerApi,
-			ModuleRepository moduleRepository, TaskCompletionService taskCompletionService,
-			TaskCompletionRepository taskCompletionRepository, ClickedLinkService clickedLinkService,
-			ClickedLinkRepository clickedLinkRepository,
-			ResearchParticipantService researchParticipantService,
-			AuthorisationService authorisationService) {
+			ModuleRepository moduleRepository) {
 		this.moduleController = moduleController;
 		this.roleControllerApi = roleControllerApi;
 		this.moduleRepository = moduleRepository;
-		this.taskCompletionRepository = taskCompletionRepository;
-		this.taskCompletionService = taskCompletionService;
-		this.clickedLinkService = clickedLinkService;
-		this.clickedLinkRepository = clickedLinkRepository;
-		this.researchParticipantService = researchParticipantService;
-		this.authorisationService = authorisationService;
 		this.session = mock(HttpSession.class);
 	}
 
@@ -120,9 +96,7 @@ public class ModuleControllerTest extends ControllerTest {
 
 	@Test
 	void createModuleSetup() throws Exception {
-		new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionService, clickedLinkService, researchParticipantService,
-				authorisationService)
+		new ModuleController(moduleRepository, moduleService, session)
 				.createModuleInEditionSetup(
 						SCModuleCreateDTO.builder()
 								.name("Module").edition(new SCEditionIdDTO(db.getEditionRL().getId()))
@@ -140,48 +114,14 @@ public class ModuleControllerTest extends ControllerTest {
 	}
 
 	@Test
-	void deleteModule() {
-		Long moduleId = db.getModuleProofTechniques().getId();
-
-		assertThat(moduleRepository.existsById(moduleId)).isTrue();
-
-		new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionService, clickedLinkService, researchParticipantService,
-				authorisationService)
-				.deleteModule(moduleId);
-
-		assertThat(moduleRepository.existsById(moduleId)).isFalse();
-		assertThat(taskCompletionRepository.findAll()).hasSize(0);
-		assertThat(clickedLinkRepository.findAll()).hasSize(0);
-	}
-
-	@Test
-	void deleteModuleSetup() {
-		Long moduleId = db.getModuleProofTechniques().getId();
-
-		assertThat(moduleRepository.existsById(moduleId)).isTrue();
-
-		new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionService, clickedLinkService, researchParticipantService,
-				authorisationService)
-				.deleteModuleSetup(moduleId);
-
-		assertThat(moduleRepository.existsById(moduleId)).isFalse();
-		assertThat(taskCompletionRepository.findAll()).hasSize(0);
-		assertThat(clickedLinkRepository.findAll()).hasSize(0);
-	}
-
-	@Test
 	void patchModule() {
-		new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionService, clickedLinkService, researchParticipantService,
-				authorisationService).patchModule(
-						SCModulePatchDTO.builder()
-								.id(db.getModuleProofTechniques().getId())
-								.name("Module 2.0")
-								.edition(new SCEditionIdDTO(
-										db.getModuleProofTechniques().getEdition().getId()))
-								.build());
+		new ModuleController(moduleRepository, moduleService, session).patchModule(
+				SCModulePatchDTO.builder()
+						.id(db.getModuleProofTechniques().getId())
+						.name("Module 2.0")
+						.edition(new SCEditionIdDTO(
+								db.getModuleProofTechniques().getEdition().getId()))
+						.build());
 
 		SCModule module = moduleRepository.findByIdOrThrow(db.getModuleProofTechniques().getId());
 
@@ -190,9 +130,7 @@ public class ModuleControllerTest extends ControllerTest {
 
 	@Test
 	void toggleStudentMode() {
-		ModuleController moduleController = new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionService, clickedLinkService, researchParticipantService,
-				authorisationService);
+		ModuleController moduleController = new ModuleController(moduleRepository, moduleService, session);
 		when(session.getAttribute("student-mode-" + db.getEditionRL().getId()))
 				.thenReturn(null)
 				.thenReturn(true)
@@ -207,22 +145,24 @@ public class ModuleControllerTest extends ControllerTest {
 
 	@Test
 	void getSkillsOfModule() {
-		ModuleController moduleController = new ModuleController(moduleRepository, moduleService,
-				session, taskCompletionService, clickedLinkService, researchParticipantService,
-				authorisationService);
+		ModuleController moduleController = new ModuleController(moduleRepository, moduleService, session);
 		assertThat(moduleController.getSkillsOfModule(db.getModuleProofTechniques().getId()))
-				.containsExactlyInAnyOrder(Stream
+				.containsExactly(Stream
 						.of(
-								db.getSkillVariables(),
-								db.getSkillNegation(),
-								db.getSkillImplication(),
-								db.getSkillNegateImplications(),
-								db.getSkillContrapositivePractice(),
-								db.getSkillDividingIntoCases(), db.getSkillCasesPractice(),
-								db.getSkillContradictionPractice(),
 								db.getSkillAssumption(),
-								db.getSkillGeneralisationPractice(), db.getSkillProofOutline(),
-								db.getSkillTransitiveProperty(), db.getSkillInductionPractice())
+								db.getSkillCasesPractice(),
+								db.getSkillContradictionPractice(),
+								db.getSkillContrapositivePractice(),
+								db.getSkillDividingIntoCases(),
+								db.getSkillGeneralisationPractice(),
+								db.getSkillImplication(),
+								db.getSkillInductionPractice(),
+								db.getSkillNegateImplications(),
+								db.getSkillNegation(),
+								db.getSkillProofOutline(),
+								db.getSkillTransitiveProperty(),
+								db.getSkillVariables(),
+								db.getSkillVariablesHidden())
 						.map(s -> mapper.map(s, SkillSummaryDTO.class)).toList()
 						.toArray(new SkillSummaryDTO[0]));
 	}

@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -27,9 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.edition.EditionLevelModuleViewDTO;
-import nl.tudelft.skills.dto.view.module.TaskViewDTO;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
+import nl.tudelft.skills.model.RegularTask;
+import nl.tudelft.skills.repository.RegularTaskRepository;
 import nl.tudelft.skills.test.TestDatabaseLoader;
 
 @Transactional
@@ -37,12 +37,12 @@ import nl.tudelft.skills.test.TestDatabaseLoader;
 public class TestEditionLevelModuleViewDTO {
 	private final TestDatabaseLoader db;
 
-	private final TaskRepository taskRepository;
+	private final RegularTaskRepository regularTaskRepository;
 
 	@Autowired
-	public TestEditionLevelModuleViewDTO(TestDatabaseLoader db, TaskRepository taskRepository) {
+	public TestEditionLevelModuleViewDTO(TestDatabaseLoader db, RegularTaskRepository regularTaskRepository) {
 		this.db = db;
-		this.taskRepository = taskRepository;
+		this.regularTaskRepository = regularTaskRepository;
 	}
 
 	@Test
@@ -54,13 +54,13 @@ public class TestEditionLevelModuleViewDTO {
 
 	@Test
 	public void testTasksWithLinks() {
-		Task task = db.getTaskDo10a();
+		RegularTask task = db.getTaskDo10a();
 		task.setLink("www.test.com");
-		taskRepository.save(task);
+		regularTaskRepository.save(task);
 
 		EditionLevelModuleViewDTO view = View.convert(db.getModuleProofTechniques(),
 				EditionLevelModuleViewDTO.class);
-		TaskViewDTO taskViewDTO = View.convert(task, TaskViewDTO.class);
-		assertThat(view.getTasksWithLinks()).containsExactly(taskViewDTO);
+		RegularTaskViewDTO regularTaskViewDTO = View.convert(task, RegularTaskViewDTO.class);
+		assertThat(view.getTasksWithLinks()).containsExactly(regularTaskViewDTO);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -32,7 +32,7 @@ import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.ClickedLinkDTO;
 import nl.tudelft.skills.repository.ClickedLinkRepository;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.repository.RegularTaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 @Transactional
@@ -42,16 +42,16 @@ class ClickedLinkControllerTest extends ControllerTest {
 
 	private final ClickedLinkController clickedLinkController;
 	private final PersonRepository personRepository;
-	private final TaskRepository taskRepository;
+	private final RegularTaskRepository regularTaskRepository;
 	private final ClickedLinkRepository clickedLinkRepository;
 
 	@Autowired
 	public ClickedLinkControllerTest(ClickedLinkController clickedLinkController,
-			PersonRepository personRepository, TaskRepository taskRepository,
+			PersonRepository personRepository, RegularTaskRepository regularTaskRepository,
 			ClickedLinkRepository clickedLinkRepository) {
 		this.clickedLinkController = clickedLinkController;
 		this.personRepository = personRepository;
-		this.taskRepository = taskRepository;
+		this.regularTaskRepository = regularTaskRepository;
 		this.clickedLinkRepository = clickedLinkRepository;
 	}
 

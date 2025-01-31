@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -98,9 +98,9 @@ public class CourseControllerTest extends ControllerTest {
 
 	@Test
 	void getEditionsOfCourse() {
-		EditionSummaryDTO edition1 = new EditionSummaryDTO().id(randomId());
-		EditionSummaryDTO edition2 = new EditionSummaryDTO().id(randomId());
-		EditionSummaryDTO edition3 = new EditionSummaryDTO().id(randomId());
+		EditionSummaryDTO edition1 = new EditionSummaryDTO().id(randomId()).name("D");
+		EditionSummaryDTO edition2 = new EditionSummaryDTO().id(randomId()).name("b");
+		EditionSummaryDTO edition3 = new EditionSummaryDTO().id(randomId()).name("C");
 		editionRepository.save(SCEdition.builder().id(edition1.getId()).build());
 		editionRepository.save(SCEdition.builder().id(edition2.getId()).build());
 
@@ -108,7 +108,7 @@ public class CourseControllerTest extends ControllerTest {
 		when(courseApi.getCourseById(courseId)).thenReturn(
 				Mono.just(new CourseDetailsDTO().editions(List.of(edition1, edition2, edition3))));
 
-		assertThat(courseController.getEditionsOfCourse(courseId)).isEqualTo(List.of(edition1, edition2));
+		assertThat(courseController.getEditionsOfCourse(courseId)).isEqualTo(List.of(edition2, edition1));
 	}
 
 }

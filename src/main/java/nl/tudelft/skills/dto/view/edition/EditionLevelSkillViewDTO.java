@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -26,7 +26,7 @@ import lombok.*;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.ItemView;
 import nl.tudelft.skills.dto.view.module.TaskViewDTO;
-import nl.tudelft.skills.model.Skill;
+import nl.tudelft.skills.model.*;
 
 @Data
 @Builder
@@ -42,6 +42,16 @@ public class EditionLevelSkillViewDTO extends View<Skill> implements ItemView {
 	@NotNull
 	private Boolean hidden;
 	@NotNull
-	private List<TaskViewDTO> tasks;
+	private List<? extends TaskViewDTO<?>> tasks;
+
+	@Override
+	public void postApply() {
+		super.postApply();
+		this.tasks = data.getTasks().stream().map(t -> {
+			TaskViewDTO<?> dto = getMapper().map(t, t.viewClass());
+			dto.postApply();
+			return dto;
+		}).toList();
+	}
 
 }

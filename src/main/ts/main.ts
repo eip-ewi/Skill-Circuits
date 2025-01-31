@@ -28,6 +28,19 @@ function toggleOverlay(id) {
     }
 }
 
+function setOverlayState(id: string, open: boolean): void {
+    let overlay = document.getElementById(id) as HTMLDialogElement;
+    if (overlay.open && !open) {
+        overlay.close();
+    } else if (!overlay.open && open) {
+        overlay.showModal();
+        if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
+    }
+}
+
 if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
     module.exports.toggleOverlay = toggleOverlay;
+    module.exports.setOverlayState = setOverlayState;
 }

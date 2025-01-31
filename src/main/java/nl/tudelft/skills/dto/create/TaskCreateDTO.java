@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,46 +17,35 @@
  */
 package nl.tudelft.skills.dto.create;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import nl.tudelft.librador.dto.create.Create;
 import nl.tudelft.skills.dto.id.SkillIdDTO;
 import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.model.TaskType;
 
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class TaskCreateDTO extends Create<Task> {
-
-	@NotBlank
-	private String name;
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "taskType")
+@JsonSubTypes({
+		@JsonSubTypes.Type(value = RegularTaskCreateDTO.class, name = "RegularTask"),
+		@JsonSubTypes.Type(value = ChoiceTaskCreateDTO.class, name = "ChoiceTask")
+})
+public abstract class TaskCreateDTO<D extends Task> extends Create<D> {
 	@NotNull
 	private SkillIdDTO skill;
-	@NotNull
-	private TaskType type;
-	@NotNull
-	@Min(0)
-	private Integer time;
-	private String link;
 	@NotNull
 	private Integer index;
 
 	@Override
 	protected void postApply(Task data) {
-		if (link != null && link.isBlank()) {
-			data.setLink(null);
-		}
+		data.setIdx(index);
 	}
-
-	@Override
-	public Class<Task> clazz() {
-		return Task.class;
-	}
-
 }

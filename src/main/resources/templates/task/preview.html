@@ -1,7 +1,7 @@
 <!--
 
     Skill Circuits
-    Copyright (C) 2022 - Delft University of Technology
+    Copyright (C) 2025 - Delft University of Technology
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -23,12 +23,14 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <th:block layout:fragment="item">
+        <!-- TODO: handle ChoiceTasks here -->
         <span
+            th:if="${item.taskType} == 'RegularTask'"
             th:id="|item-${item.id}-icon|"
-            th:class="|fa-solid fa-${item.type.icon} item__icon|"
+            th:class="|fa-solid fa-${item.taskInfo.type.icon} item__icon|"
             th:bgcolor="green"
-            th:data-completed="${level == 'module'} ? ${item.completed ? 'true' : ''} : ${''}"
-            th:data-type="${item.type.icon}"
-            th:classappend="${level == 'module'} ? ${item.completed ? 'completed' : ''} : ${''}"></span>
+            th:data-completed="${level == 'module'} ? ${item.taskInfo.completed ? 'true' : ''} : ${''}"
+            th:data-type="${item.taskInfo.type.icon}"
+            th:classappend="${level == 'module'} ? ${item.taskInfo.completed ? 'completed' : ''} : ${''}"></span>
     </th:block>
 </html>

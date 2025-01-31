@@ -1,6 +1,6 @@
 #
 # Skill Circuits
-# Copyright (C) 2022 - Delft University of Technology
+# Copyright (C) 2025 - Delft University of Technology
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -1528,4 +1528,393 @@ databaseChangeLog:
             referencedColumnNames: id
             referencedTableName: research_participant
             validate: true
-
+# Store a student's revealed skills
+  - changeSet:
+      id: 1705055255520-1
+      author: rngla (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_37
+                  name: person_revealed_skill_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_37
+                  name: skills_revealed_id
+                  type: BIGINT
+            tableName: scperson_skills_revealed
+  - changeSet:
+      id: 1705055255520-2
+      author: rngla (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: person_revealed_skill_id
+            indexName: FKp7gdtsvvdi338qlau7nik7fma_INDEX_3
+            tableName: scperson_skills_revealed
+  - changeSet:
+      id: 1705055255520-3
+      author: rngla (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: skills_revealed_id
+            indexName: FKsex8nmu8xkxti3oaa367ldp_INDEX_3
+            tableName: scperson_skills_revealed
+  - changeSet:
+      id: 1705055255520-4
+      author: rngla (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: person_revealed_skill_id
+            baseTableName: scperson_skills_revealed
+            constraintName: FKp7gdtsvvdi338qlau7nik7fma
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: scperson
+            validate: true
+  - changeSet:
+      id: 1705055255520-5
+      author: rngla (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: skills_revealed_id
+            baseTableName: scperson_skills_revealed
+            constraintName: FKsex8nmu8xkxti3oaa367ldp
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: skill
+            validate: true
+# Removing Playlist feature tables
+  - changeSet:
+      id: 1725284460843-1
+      author: rngla (generated)
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: playlist_version
+            constraintName: FK4w6jaqt7cvu7iwny8g9m4nkmt
+  - changeSet:
+      id: 1725284460843-2
+      author: rngla (generated)
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: playlist
+            constraintName: FKf2v7empym2b0ihs0pbgwsaacy
+  - changeSet:
+      id: 1725284460843-3
+      author: rngla (generated)
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: playlist_version_tasks
+            constraintName: FKg86mm73xna9i47a9xgslj2wt7
+  - changeSet:
+      id: 1725284460843-4
+      author: rngla (generated)
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: usage_data
+            constraintName: FKkikh18arv5eujtv2f26ykhndp
+  - changeSet:
+      id: 1725284460843-5
+      author: rngla (generated)
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: playlist
+            constraintName: FKlieu928p8mfbqm4uktqgq8sm0
+  - changeSet:
+      id: 1725284460843-6
+      author: rngla (generated)
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: research_participant
+            constraintName: FKnoawfap41wy1l5xgop178dgfq
+  - changeSet:
+      id: 1725284460843-7
+      author: rngla (generated)
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: playlist_version_tasks
+            constraintName: FKqpn919ahm5gx28u94dgm87d0p
+  - changeSet:
+      id: 1725284460843-8
+      author: rngla (generated)
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: rating
+            constraintName: FKry4lvm3c8fwioeum2fm5y0x3j
+  - changeSet:
+      id: 1725284460843-9
+      author: rngla (generated)
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: playlist_task
+            constraintName: FKsnvc6w8exgm3r5tc5dh3us6jf
+  - changeSet:
+      id: 1725284460843-10
+      author: rngla (generated)
+      changes:
+        - dropUniqueConstraint:
+            constraintName: UK_64dt4vh7o4k7vbrfgmu5qrql3
+            tableName: research_participant
+  - changeSet:
+      id: 1725284460843-11
+      author: rngla (generated)
+      changes:
+        - dropTable:
+            tableName: playlist
+  - changeSet:
+      id: 1725284460843-12
+      author: rngla (generated)
+      changes:
+        - dropTable:
+            tableName: playlist_checkpoint
+  - changeSet:
+      id: 1725284460843-13
+      author: rngla (generated)
+      changes:
+        - dropTable:
+            tableName: playlist_task
+  - changeSet:
+      id: 1725284460843-14
+      author: rngla (generated)
+      changes:
+        - dropTable:
+            tableName: playlist_version
+  - changeSet:
+      id: 1725284460843-15
+      author: rngla (generated)
+      changes:
+        - dropTable:
+            tableName: playlist_version_tasks
+  - changeSet:
+      id: 1725284460843-16
+      author: rngla (generated)
+      changes:
+        - dropTable:
+            tableName: rating
+  - changeSet:
+      id: 1725284460843-17
+      author: rngla (generated)
+      changes:
+        - dropTable:
+            tableName: research_participant
+  - changeSet:
+      id: 1725284460843-18
+      author: rngla (generated)
+      changes:
+        - dropTable:
+            tableName: usage_data
+# Refactor tasks for introduction of choice tasks
+  - changeSet:
+      id: introduce-choice-tasks
+      author: Fanni Fiedrich
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  name: min_tasks
+                  type: INT
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_CHOICE_TASK_ID
+                  name: id
+                  type: BIGINT
+            tableName: choice_task
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: choice_task_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: tasks_id
+                  type: BIGINT
+            tableName: choice_task_tasks
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_REGULAR_TASK_ID
+                  name: id
+                  type: BIGINT
+            tableName: regular_task
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_TASK_INFO_ID
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: link
+                  type: VARCHAR(255)
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  name: time
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: type
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: task_id
+                  type: BIGINT
+            tableName: task_info
+        - addUniqueConstraint:
+            columnNames: tasks_id
+            constraintName: UK_b5x1p3iemd3y0hkt8mjwadutj
+            tableName: choice_task_tasks
+        - createIndex:
+            columns:
+              - column:
+                  name: choice_task_id
+            indexName: FK23ix52b2jn1gfm9skaoo2vuqn_INDEX_4
+            tableName: choice_task_tasks
+        - createIndex:
+            columns:
+              - column:
+                  name: task_id
+            indexName: FKer9mcdyqf63005umklqiv1kia_INDEX_A
+            tableName: task_info
+        - sql:
+            comment: Migrate tasks
+            sql: INSERT INTO regular_task SELECT id FROM task;
+        - sql:
+            dbms: mysql
+            comment: Add auto increment to ID of task_info
+            sql: ALTER TABLE task_info MODIFY COLUMN id BIGINT AUTO_INCREMENT;
+        - sql:
+            dbms: h2
+            comment: Add auto increment to ID of task_info
+            sql: ALTER TABLE task_info ALTER COLUMN id BIGINT AUTO_INCREMENT;
+        - sql:
+            comment: Migrate task infos
+            sql: INSERT INTO task_info (link, name, time, type, task_id) SELECT link, name, time, type, id FROM task;
+        - addForeignKeyConstraint:
+            baseColumnNames: choice_task_id
+            baseTableName: choice_task_tasks
+            constraintName: FK23ix52b2jn1gfm9skaoo2vuqn
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: choice_task
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: task_id
+            baseTableName: clicked_link
+            constraintName: FK6r0ixb6exd6dof00vqfpgeocw
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: regular_task
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: task_id
+            baseTableName: task_completion
+            constraintName: FKa6pqa4rvd2kxcrw2tfqeq9fwn
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: regular_task
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: task_id
+            baseTableName: task_info
+            constraintName: FKer9mcdyqf63005umklqiv1kia
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: task
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: tasks_id
+            baseTableName: choice_task_tasks
+            constraintName: FKeu3tpj1jlur65d5ov5ei8j343
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: task_info
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: id
+            baseTableName: regular_task
+            constraintName: FKh24gyn1h2ckorlayh66sjwk2b
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: task
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: id
+            baseTableName: choice_task
+            constraintName: FKhf21xrs4mfvuq5k8nnajh6rnw
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: task
+            validate: true
+        - dropForeignKeyConstraint:
+            baseTableName: task_completion
+            constraintName: FK2mq03rtqcy5jvlco1co1fco6a
+        - dropForeignKeyConstraint:
+            baseTableName: clicked_link
+            constraintName: FKjy82i90jv9tm04dy5lmdedv4t
+        - dropColumn:
+            columnName: link
+            tableName: task
+        - dropColumn:
+            columnName: name
+            tableName: task
+        - dropColumn:
+            columnName: time
+            tableName: task
+        - dropColumn:
+            columnName: type
+            tableName: task

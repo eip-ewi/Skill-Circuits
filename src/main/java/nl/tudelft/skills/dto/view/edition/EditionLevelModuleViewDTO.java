@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -28,7 +28,7 @@ import lombok.*;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.BlockView;
 import nl.tudelft.skills.dto.view.GroupView;
-import nl.tudelft.skills.dto.view.module.TaskViewDTO;
+import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
 import nl.tudelft.skills.model.SCModule;
 
 @Data
@@ -47,7 +47,7 @@ public class EditionLevelModuleViewDTO extends View<SCModule> implements GroupVi
 	private List<EditionLevelSubmoduleViewDTO> submodules;
 	@NotNull
 	@PostApply
-	private Set<TaskViewDTO> tasksWithLinks;
+	private Set<RegularTaskViewDTO> tasksWithLinks;
 
 	@Override
 	public List<? extends BlockView> getBlocks() {
@@ -57,12 +57,15 @@ public class EditionLevelModuleViewDTO extends View<SCModule> implements GroupVi
 	@Override
 	public void postApply() {
 		super.postApply();
+		// Only RegularTasks can have links
 		this.tasksWithLinks = this.getSubmodules().stream()
 				.flatMap(submodule -> submodule.getSkills().stream())
 				.flatMap(skill -> skill.getTasks().stream())
-				.filter(task -> task.getLink() != null)
+				.filter(task -> task instanceof RegularTaskViewDTO &&
+						((RegularTaskViewDTO) task).getTaskInfo().getLink() != null)
+				.map(task -> (RegularTaskViewDTO) task)
 				.collect(Collectors.toSet());
-		this.tasksWithLinks.forEach(TaskViewDTO::postApply);
+		this.tasksWithLinks.forEach(RegularTaskViewDTO::postApply);
 	}
 
 	public int getSkillsCount() {

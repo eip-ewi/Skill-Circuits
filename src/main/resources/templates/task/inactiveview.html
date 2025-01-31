@@ -1,7 +1,7 @@
 <!--
 
     Skill Circuits
-    Copyright (C) 2022 - Delft University of Technology
+    Copyright (C) 2025 - Delft University of Technology
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -26,13 +26,13 @@
         <th:block layout:replace="~{item/view :: item}">
             <th:block layout:fragment="item-content-element">
                 <a
-                    th:if="${item.link}"
-                    th:href="${item.link}"
+                    th:if="${item.taskInfo.link}"
+                    th:href="${item.taskInfo.link}"
                     target="_blank"
                     th:id="|item-${item.id}-link|">
                     <th:block layout:replace="~{item/view :: item-content}"></th:block>
                 </a>
-                <th:block th:unless="${item.link}">
+                <th:block th:unless="${item.taskInfo.link}">
                     <th:block layout:replace="~{item/view :: item-content}"></th:block>
                 </th:block>
             </th:block>
@@ -46,30 +46,30 @@
                     class="item__button"
                     data-staff="true"
                     disabled
-                    th:text="${item.time}"></button>
+                    th:text="${item.taskInfo.time}"></button>
             </th:block>
             <th:block layout:fragment="item-before-content">
                 <span
                     th:id="|item-${item.id}-icon|"
-                    th:class="|fa-solid fa-${item.type.icon} task-icon|"
-                    th:data-type="${item.type.icon}"></span>
+                    th:class="|fa-solid fa-${item.taskInfo.type.icon} task-icon|"
+                    th:data-type="${item.taskInfo.type.icon}"></span>
                 <th:block layout:replace="~{task/edit :: icon}"></th:block>
             </th:block>
             <th:block layout:fragment="item-after-content">
                 <span th:if="${canEdit}" th:text="|(${item.completedCount})|"></span>
                 <span
-                    th:if="${item.link}"
+                    th:if="${item.taskInfo.link}"
                     th:id="|item-${item.id}-link-icon|"
                     class="fa-solid fa-link always_visible"></span>
                 <div class="hover_input" data-edit="only">
                     <input
-                        th:data-initial="${item.link}"
+                        th:data-initial="${item.taskInfo.link}"
                         placeholder="Task link"
                         data-edit="only"
                         aria-label="Task URL"
                         type="url"
                         name="link"
-                        th:value="${item.link}" />
+                        th:value="${item.taskInfo.link}" />
                     <span data-edit="only" class="fa-solid fa-link always_visible"></span>
                 </div>
             </th:block>
@@ -77,6 +77,22 @@
     </th:block>
 
     <script layout:fragment="script" th:inline="javascript">
+        function insertTaskInOrder(order, taskList, taskLoc, items, task) {
+            if (items.length === 0) {
+                taskList.prepend(task);
+            } else if (
+                taskLoc >= order.indexOf(Number(items[items.length - 1].getAttribute("data-item")))
+            ) {
+                taskList.appendChild(task);
+            } else {
+                for (let i = 0; i < items.length; i++) {
+                    if (order.indexOf(Number(items[i].getAttribute("data-item"))) >= taskLoc) {
+                        items[i].insertAdjacentElement("beforebegin", task);
+                        break;
+                    }
+                }
+            }
+        }
         function addTaskToEditedSkill(button) {
             // Send custom path update if user is authenticated
 
@@ -100,7 +116,7 @@
                 url: "/person/add/" + taskId,
                 processData: false,
                 contentType: "application/json",
-                success: async () => {
+                success: async order => {
                     // Add task to left side
                     const task = await fetch(`/task/${taskId}`)
                         .then(res => res.text())
@@ -112,7 +128,11 @@
                         .catch(() => {
                             alert("Failed to add task");
                         });
-                    leftSide.querySelector(".items").appendChild(task);
+
+                    const taskLoc = order.indexOf(Number(task.getAttribute("data-item")));
+                    const items = leftSide.querySelectorAll(".item");
+                    const taskList = leftSide.querySelector(".items");
+                    insertTaskInOrder(order, taskList, taskLoc, items, task);
 
                     // Remove tasks from right side
                     rightSide.querySelectorAll(`.item[data-item="${taskId}"`).forEach(item => {
@@ -174,7 +194,7 @@
                 url: "/person/remove/" + taskId,
                 processData: false,
                 contentType: "application/json",
-                success: async () => {
+                success: async order => {
                     // Remove task from left side
                     document.getElementById(`item-${taskId}`).remove();
 
@@ -189,12 +209,21 @@
                         .catch(() => {
                             alert("Failed to add task");
                         });
+                    const taskLoc = order.indexOf(Number(task.getAttribute("data-item")));
+
                     [...rightSide.querySelectorAll(".path-toggle")]
                         .filter(path => paths.includes(path.dataset.id))
                         .forEach(path => {
-                            path.querySelector(".path-toggle__content").appendChild(
+                            const items = path.querySelectorAll(".item");
+                            const taskList = path.querySelector(".path-toggle__content");
+                            insertTaskInOrder(
+                                order,
+                                taskList,
+                                taskLoc,
+                                items,
                                 task.cloneNode(true)
                             );
+
                             // Make path toggle enabled if it was the first task
                             // Note: When CSS "has" is safely usable, this functionality can be moved to CSS
                             if (path.getAttribute("aria-disabled") === "true") {

@@ -12,10 +12,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## Added
+
 ## Changed
+
 ## Fixed
-- Path toggle listeners are added to hidden skills on first reveal (@ffiedrich)
-- Completion status of revealed hidden skills is updated without page reload (@ffiedrich)
+
+## [2.2.7]
+
+## Added
+- [Everyone] The skill circuits email address is now displayed on the home page. (@bbakos)
+- [Everyone] When a your session expires, a popup will now be shown asking you to log in again. (@bbakos)
+- [Teacher] Task order can now be changed using drag and drop. (@ffiedrich)
+
+## Changed
+- [Everyone] Courses are now displayed under 'Your courses' if you have a role in them.
+  This will not significantly impact the courses you see, unless you often work with other Labrador products. (@ffiedrich)
+- [Teacher] Modules, submodules, and checkpoints are now sorted alphabetically in dropdowns. (@bbakos)
+- [TA] TAs now get redirected to the latest edition of a course they have a role in, similar to students. (@ffiedrich)
+
+## Fixed
+- The correct checkpoint is now considered as the last checkpoint. (@ffiedrich)
+- Checkpoint deletion now makes the correct next checkpoint be used instead. (@ffiedrich)
+- Moving the last skill from a checkpoint now makes the checkpoint disappear. (@ffiedrich)
+- Redundant ghost checkpoint at bottom of page has been removed. (@ffiedrich)
+- After dragging a checkpoint, the menu now disappears unless it is hovered. (@ffiedrich)
+- Path toggle listeners are now correctly added to hidden skills on first reveal. (@ffiedrich)
+- Completion status of revealed hidden skills is now updated without page reload. (@ffiedrich)
+- Revealed skills now remain visible even when required tasks are marked as 'not completed'. (@rglans)
+- Skills no longer duplicate after the cancellation of the editing. (@bbakos)
+- The 'Optional' box is now displayed correctly. (@bbakos)
+- Only authorized people can now access tasks. (@bbakos)
+- Submodules can now be edited after editing modules in the setup page. (@bbakos)
+- Back button now navigates to previously expanded skills instead of navigating to the same page. (@ffiedrich)
+- Renaming a path does no longer remove all tasks in path. (@ffiedrich)
+- When starting to edit a new checkpoint whilst editing another checkpoint, the previous checkpoint will now be restored. (@bbakos)
+- Adding and removing a task on the custom path now results in the teacher determined order. (@bbakos)
 
 ## [2.2.6]
 

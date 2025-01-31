@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,17 +18,22 @@
 package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,9 +41,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.EditLinkDTO;
+import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
 import nl.tudelft.skills.dto.view.module.TaskViewDTO;
+import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.repository.TaskRepository;
+import nl.tudelft.skills.repository.RegularTaskRepository;
+import nl.tudelft.skills.security.AuthorisationService;
 
 @Transactional
 @AutoConfigureMockMvc
@@ -46,14 +54,17 @@ import nl.tudelft.skills.repository.TaskRepository;
 public class TaskControllerTest extends ControllerTest {
 
 	private final TaskController taskController;
-	private final TaskRepository taskRepository;
+	private final RegularTaskRepository regularTaskRepository;
 	private final RoleControllerApi roleApi;
+	private AuthorisationService authorisationService;
 
 	@Autowired
-	public TaskControllerTest(TaskRepository taskRepository, RoleControllerApi roleApi) {
-		this.taskRepository = taskRepository;
+	public TaskControllerTest(RegularTaskRepository regularTaskRepository, RoleControllerApi roleApi,
+			AuthorisationService authorisationService) {
+		this.regularTaskRepository = regularTaskRepository;
 		this.roleApi = roleApi;
-		this.taskController = new TaskController(taskRepository);
+		this.authorisationService = authorisationService;
+		this.taskController = new TaskController(regularTaskRepository, authorisationService);
 	}
 
 	private String createBody() throws JsonProcessingException {
@@ -81,7 +92,7 @@ public class TaskControllerTest extends ControllerTest {
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
-		Task task = taskRepository.getById(db.getTaskDo10a().getId());
+		RegularTask task = regularTaskRepository.getById(db.getTaskDo10a().getId());
 		assertThat(task.getLink()).isEqualTo("www.test.com");
 	}
 
@@ -109,8 +120,24 @@ public class TaskControllerTest extends ControllerTest {
 	}
 
 	@Test
-	void getTask() {
+	@WithUserDetails("teacher")
+	void getTaskTeacher() {
+		mockRole(roleApi, "TEACHER");
 		taskController.getTask(db.getTaskRead12().getId(), model);
+		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
+
+		assertThat(((RegularTaskViewDTO) model.getAttribute("item")).getPathIds())
+				.containsExactly(db.getPathFinderPath().getId());
+	}
+
+	@Test
+	@WithUserDetails("student")
+	void getTaskStudentPublished() {
+		mockRole(roleApi, "STUDENT");
+		Task task = db.getTaskRead12();
+		task.getSkill().getSubmodule().getModule().getEdition().setVisible(true);
+
+		taskController.getTask(task.getId(), model);
 		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
 
 		assertThat(((TaskViewDTO) model.getAttribute("item")).getPathIds())
@@ -118,8 +145,55 @@ public class TaskControllerTest extends ControllerTest {
 	}
 
 	@Test
-	void getTaskForCustomPath() {
+	@WithUserDetails("student")
+	void getTaskStudent() {
+		mockRole(roleApi, "STUDENT");
+		ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+				() -> taskController.getTask(db.getTaskRead12().getId(), model));
+		assertThat(exception.getMessage()).isEqualTo(HttpStatus.FORBIDDEN.toString());
+
+	}
+
+	@Test
+	@WithUserDetails("admin")
+	void getTaskForCustomPathAdmin() {
+		mockRole(roleApi, "ADMIN");
 		taskController.getTaskForCustomPath(db.getTaskRead12().getId(), model);
+		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
+
+		assertThat(((RegularTaskViewDTO) model.getAttribute("item")).getPathIds())
+				.containsExactly(db.getPathFinderPath().getId());
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER", "HEAD_TA" })
+	void getTaskForCustomPathAtLeastHeadTA(String role) {
+		mockRole(roleApi, role);
+		taskController.getTaskForCustomPath(db.getTaskRead12().getId(), model);
+		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
+
+		assertThat(((TaskViewDTO) model.getAttribute("item")).getPathIds())
+				.containsExactly(db.getPathFinderPath().getId());
+	}
+
+	@Test
+	@WithUserDetails("student")
+	void getTaskForCustomPathStudent() {
+		mockRole(roleApi, "STUDENT");
+		ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+				() -> taskController.getTaskForCustomPath(db.getTaskRead12().getId(), model));
+		assertThat(exception.getMessage()).isEqualTo(HttpStatus.FORBIDDEN.toString());
+	}
+
+	@Test
+	@WithUserDetails("student")
+	void getTaskForCustomPathStudentPublished() {
+		mockRole(roleApi, "STUDENT");
+		Task task = db.getTaskRead12();
+		task.getSkill().getSubmodule().getModule().getEdition().setVisible(true);
+
+		taskController.getTaskForCustomPath(task.getId(), model);
 		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
 
 		assertThat(((TaskViewDTO) model.getAttribute("item")).getPathIds())

@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -19,6 +19,7 @@ package nl.tudelft.skills.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -28,13 +29,12 @@ import nl.tudelft.skills.model.Task;
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
 	default Task findByIdOrThrow(Long id) {
-		return findById(id).orElseThrow(() -> new ResourceNotFoundException("Task was not found: " + id));
+		return findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Task was not found: " + id));
 	}
 
-	List<Task> findAllByIdIn(Collection<Long> id);
+	Set<Task> findAllByIdIn(Collection<Long> ids);
 
 	List<Task> findAllBySkillSubmoduleModuleEditionId(Long editionId);
-
-	void deleteAllByIdIn(Collection<Long> id);
 
 }

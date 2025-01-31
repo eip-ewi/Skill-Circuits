@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,9 +18,7 @@
 package nl.tudelft.skills.controller;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
@@ -34,17 +32,15 @@ import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.dto.view.TaskCompletedDTO;
-import nl.tudelft.skills.model.Path;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.model.TaskCompletion;
+import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
-import nl.tudelft.skills.playlists.service.PlaylistService;
 import nl.tudelft.skills.repository.PathRepository;
+import nl.tudelft.skills.repository.RegularTaskRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.security.AuthorisationService;
+import nl.tudelft.skills.service.PersonService;
 import nl.tudelft.skills.service.TaskCompletionService;
 
 @RestController
@@ -52,6 +48,7 @@ import nl.tudelft.skills.service.TaskCompletionService;
 @AllArgsConstructor
 public class PersonController {
 
+	private final RegularTaskRepository regularTaskRepository;
 	private final TaskRepository taskRepository;
 	private final PersonRepository scPersonRepository;
 	private final TaskCompletionService taskCompletionService;
@@ -59,7 +56,7 @@ public class PersonController {
 	private final PathRepository pathRepository;
 	private final AuthorisationService authorisationService;
 	private final RoleControllerApi roleControllerApi;
-	private final PlaylistService playlistService;
+	private final PersonService personService;
 
 	/**
 	 * Marks a certain task as completed or uncompleted for a certain person.
@@ -74,29 +71,30 @@ public class PersonController {
 	public TaskCompletedDTO updateTaskCompletedForPerson(@AuthenticatedPerson Person authPerson,
 			@PathVariable Long taskId, @RequestBody boolean completed) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
-		Task task = taskRepository.findByIdOrThrow(taskId);
+		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
 		if (completed) {
 			taskCompletionService.addTaskCompletion(person, task);
-
-			//			Playlist feature
-			playlistService.setPlTaskCompleted(person, task, true);
 
 			// If a user with default student role has no role, set it to be a student role
 			ifNoStudentRoleSetStudentRole(authPerson.getId(), task.getSkill().getSubmodule().getModule()
 					.getEdition().getId());
 
-			List<Task> completedTasks = person.getTaskCompletions().stream()
+			List<RegularTask> completedTasks = person.getTaskCompletions().stream()
 					.map(TaskCompletion::getTask).toList();
 
-			// TODO skill remains visible (see issue #90)
-			return new TaskCompletedDTO(task.getRequiredFor().stream()
-					.filter(s -> completedTasks.containsAll(s.getRequiredTasks()))
-					.map(Skill::getId).toList());
+			List<Skill> revealedSkills = task.getRequiredFor().stream()
+					.filter(s -> new HashSet<>(completedTasks).containsAll(s.getRequiredTasks()))
+					.collect(Collectors.toCollection(ArrayList::new));
+
+			// Store newly revealed skills in authPerson.tasksRevealed
+			Set<Skill> prefRevealed = personService.getOrCreateSCPerson(authPerson.getId())
+					.getSkillsRevealed();
+			revealedSkills.removeAll(prefRevealed);
+			revealedSkills.forEach(s -> personService.addRevealedSkill(authPerson.getId(), s));
+			return new TaskCompletedDTO(revealedSkills.stream().map(Skill::getId).toList());
+
 		} else {
 			taskCompletionService.deleteTaskCompletion(person, task);
-
-			//			Playlist feature
-			playlistService.setPlTaskCompleted(person, task, false);
 		}
 		return new TaskCompletedDTO(Collections.emptyList());
 	}
@@ -132,22 +130,20 @@ public class PersonController {
 			@RequestBody List<Long> completedTasks) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
 
-		List<Task> tasks = taskRepository.findAllById(completedTasks);
+		List<RegularTask> tasks = regularTaskRepository.findAllById(completedTasks);
 		tasks.forEach(task -> taskCompletionService.addTaskCompletion(person, task));
-
-		//		Playlist feature
-		tasks.forEach(task -> playlistService.setPlTaskCompleted(person, task, true));
 	}
 
 	/**
 	 * Adds a task to the user custom path.
 	 *
-	 * @param authPerson the currently authenticated person.
-	 * @param taskId     id of task to be added to custom path.
+	 * @param  authPerson the currently authenticated person.
+	 * @param  taskId     id of task to be added to custom path.
+	 * @return            List of task ids in the order they should appear in the skill.
 	 */
 	@PutMapping("add/{taskId}")
 	@Transactional
-	public void addTaskToOwnPath(@AuthenticatedPerson Person authPerson, @PathVariable Long taskId) {
+	public List<Long> addTaskToOwnPath(@AuthenticatedPerson Person authPerson, @PathVariable Long taskId) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
 		Task task = taskRepository.findByIdOrThrow(taskId);
 
@@ -160,19 +156,22 @@ public class PersonController {
 
 		person.getTasksAdded().add(task);
 
+		return task.getSkill().getTasks().stream().map(Task::getId).collect(Collectors.toList());
 	}
 
 	/**
 	 * Remove a task from the user custom path.
 	 *
-	 * @param authPerson the currently authenticated person.
-	 * @param taskId     id of task to be added to custom path.
+	 * @param  authPerson the currently authenticated person.
+	 * @param  taskId     id of task to be added to custom path.
+	 * @return            List of task ids in the order they should appear in the skill.
 	 */
 	@PutMapping("remove/{taskId}")
 	@Transactional
-	public void removeTaskFromOwnPath(@AuthenticatedPerson Person authPerson, @PathVariable Long taskId) {
+	public List<Long> removeTaskFromOwnPath(@AuthenticatedPerson Person authPerson,
+			@PathVariable Long taskId) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
-		Task task = taskRepository.findByIdOrThrow(taskId);
+		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
 
 		// if first time modifying skill, put all tasks from current path in own path
 		if (!person.getSkillsModified().contains(task.getSkill())) {
@@ -181,6 +180,8 @@ public class PersonController {
 		}
 
 		person.getTasksAdded().remove(task);
+
+		return task.getSkill().getTasks().stream().map(Task::getId).collect(Collectors.toList());
 	}
 
 	/**
@@ -211,8 +212,8 @@ public class PersonController {
 	/**
 	 * Takes all tasks from a skill on current path and adds them to the set of modified tasks.
 	 *
-	 * @param person
-	 * @param task
+	 * @param person The person for which the tasks will be added
+	 * @param task   The abstract task for which the skill is considered
 	 */
 	void addAllTaskFromCurrentPath(SCPerson person, Task task) {
 		Optional<Long> currentPathId = person.getPathPreferences().stream()

@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,8 +18,8 @@
 package nl.tudelft.skills.controller;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -138,50 +138,74 @@ public class CheckpointController {
 		return "redirect:/module/" + moduleId;
 	}
 
-	@Transactional
+	/**
+	 * Deletes a specified set of skills from a checkpoint. The skills need to be in the same module. If they
+	 * are not in the same module, 409 Conflict is returned. A request with such data should already be
+	 * prevented from the frontend.
+	 *
+	 * @param  id       The id of the checkpoint.
+	 * @param  skillIds The skills to delete.
+	 * @return          200 OK if the skills could be deleted from the checkpoint. 409 Conflict if the skills
+	 *                  are not in the same module, or the checkpoint is the last checkpoint. The returned
+	 *                  response also contains descriptive text to distinguish the conflicts.
+	 */
 	@DeleteMapping("{id}/skills")
 	@PreAuthorize("@authorisationService.canEditCheckpoint(#id)")
-	public ResponseEntity<Void> deleteSkillsFromCheckpoint(@PathVariable Long id,
+	public ResponseEntity<String> deleteSkillsFromCheckpoint(@PathVariable Long id,
 			@RequestBody List<Long> skillIds) {
+		if (skillIds.isEmpty()) {
+			return ResponseEntity.ok().build();
+		}
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(id);
-		Optional<Checkpoint> nextCheckpoint = checkpointService.findNextCheckpoint(checkpoint);
-		if (nextCheckpoint.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.CONFLICT);
-		}
-
 		Set<Skill> skills = skillRepository.findAllByIdIn(skillIds);
-		checkpoint.getSkills().removeAll(skills);
-		skills.forEach(skill -> {
-			skill.setCheckpoint(nextCheckpoint.get());
-			skillRepository.save(skill);
-		});
 
-		//if checkpoint has no skills left, delete it
-		if (checkpoint.getSkills().isEmpty()) {
-			checkpointRepository.delete(checkpoint);
+		// Check if skills are all in the same module
+		Set<Long> moduleIds = skills.stream().map(s -> s.getSubmodule().getModule().getId())
+				.collect(Collectors.toSet());
+		if (moduleIds.size() > 1) {
+			return new ResponseEntity<>("Skills need to be in the same module", HttpStatus.CONFLICT);
 		}
 
-		return ResponseEntity.ok().build();
+		// The method returns whether the skills could be deleted from the checkpoint
+		boolean deletedCheckpoint = checkpointService.deleteSkillsFromCheckpoint(checkpoint, skills,
+				moduleIds.iterator().next());
+
+		// If they could not be deleted, the checkpoint is the last checkpoint in the module
+		if (deletedCheckpoint) {
+			return new ResponseEntity<>(HttpStatus.OK);
+		}
+		return new ResponseEntity<>("Cannot delete last checkpoint", HttpStatus.CONFLICT);
 	}
 
-	@Transactional
+	/**
+	 * Deletes a given checkpoint, iff it is never the last checkpoint in any module.
+	 *
+	 * @param  id The id of the checkpoint to delete.
+	 * @return    200 OK iff the checkpoint could be deleted, 409 Conflict otherwise.
+	 */
 	@DeleteMapping
 	@PreAuthorize("@authorisationService.canDeleteCheckpoint(#id)")
 	public ResponseEntity<Void> deleteCheckpoint(@RequestParam Long id) {
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(id);
-		Optional<Checkpoint> nextCheckpoint = checkpointService.findNextCheckpoint(checkpoint);
-		if (!checkpoint.getSkills().isEmpty() && nextCheckpoint.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.CONFLICT);
-		}
-		checkpoint.getSkills().forEach(skill -> {
-			skill.setCheckpoint(nextCheckpoint.get());
-			skillRepository.save(skill);
-		});
 
-		checkpointRepository.delete(checkpoint);
-		return new ResponseEntity<>(HttpStatus.OK);
+		// The method returns whether the checkpoint could be deleted
+		// It is deleted iff it is never the last checkpoint in any module
+		boolean deletedCheckpoint = checkpointService.deleteCheckpoint(checkpoint);
+
+		if (deletedCheckpoint) {
+			return new ResponseEntity<>(HttpStatus.OK);
+		}
+		return new ResponseEntity<>(HttpStatus.CONFLICT);
 	}
 
+	/**
+	 * Creates a checkpoint in a given module. Adds the skills in the DTO to the checkpoint.
+	 *
+	 * @param  dto      The CheckpointCreateDTO containing information about the checkpoint to create and the
+	 *                  ids of the skills to add to it.
+	 * @param  moduleId The id of the module to which the checkpoint is added to reload the page.
+	 * @return          Redirection to the module page.
+	 */
 	@Transactional
 	@PostMapping
 	@PreAuthorize("@authorisationService.canCreateCheckpointInEdition(#dto.edition.id)")

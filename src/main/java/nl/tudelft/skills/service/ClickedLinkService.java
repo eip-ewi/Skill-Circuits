@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,14 +17,14 @@
  */
 package nl.tudelft.skills.service;
 
-import java.util.List;
+import java.util.Collection;
 
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.repository.ClickedLinkRepository;
 
 @Service
@@ -39,11 +39,11 @@ public class ClickedLinkService {
 	/**
 	 * Deletes the clicked links belonging to specific tasks
 	 *
-	 * @param tasks The list of tasks the clicked links should be deleted for
+	 * @param tasks The collection of tasks the clicked links should be deleted for
 	 */
 	@Transactional
-	public void deleteClickedLinksForTasks(List<Task> tasks) {
-		var taskIds = tasks.stream().map(Task::getId).toList();
+	public void deleteClickedLinksForTasks(Collection<RegularTask> tasks) {
+		var taskIds = tasks.stream().map(RegularTask::getId).toList();
 		clickedLinkRepository.deleteAllByTaskIdIn(taskIds);
 	}
 }

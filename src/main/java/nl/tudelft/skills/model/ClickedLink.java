@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -37,7 +37,7 @@ public class ClickedLink {
 
 	@NotNull
 	@ManyToOne
-	private Task task;
+	private RegularTask task;
 
 	@NotNull
 	@ManyToOne

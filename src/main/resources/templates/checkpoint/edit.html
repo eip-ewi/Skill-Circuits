@@ -1,7 +1,7 @@
 <!--
 
     Skill Circuits
-    Copyright (C) 2022 - Delft University of Technology
+    Copyright (C) 2025 - Delft University of Technology
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -40,12 +40,37 @@
                     class="fa-solid fa-xmark"></button>
                 <button type="submit" class="fa-solid fa-check"></button>
             </form>
+            <dialog layout:fragment="overlay" class="overlay" id="switch-checkpoint-overlay">
+                <form id="switch-checkpoint-form" class="confirmation">
+                    <input id="switch-checkpoint-id" name="id" type="hidden" />
+                    <p>
+                        You have unsaved changes. Are you sure you want to discard the changes in
+                        the checkpoint
+                        <!-- spotless:off -->
+                        &quot;<span id="switch-checkpoint-name"></span>&quot;?
+                        <!-- spotless:on -->
+                    </p>
+
+                    <div class="confirmation__buttons">
+                        <button type="button" onclick="toggleOverlay('switch-checkpoint-overlay')">
+                            Cancel
+                        </button>
+                        <button type="button" onclick="switchEdit()">Discard</button>
+                    </div>
+                </form>
+            </dialog>
         </div>
     </div>
 
     <script th:if="${canEdit}" layout:fragment="script">
-        function editCheckpoint() {
-            const checkpointId = $(this).data("checkpoint");
+        function cancelEdit(checkpointId) {
+            $("#edit-checkpoint-wrapper").append($("#edit-checkpoint"));
+            $(`#checkpoint-${checkpointId}`).attr("draggable", true);
+            $(`#checkpoint-${checkpointId}-display`).removeClass("hidden");
+            $(`#checkpoint-${checkpointId}-buttons`).removeClass("hidden");
+        }
+
+        function editSetup(checkpointId) {
             const checkpointDisplay = $(`#checkpoint-${checkpointId}-display`);
             const checkpointName = $(`#checkpoint-${checkpointId}`).data("name");
             const checkpointDeadline = $(`#checkpoint-${checkpointId}`).data("deadline");
@@ -60,6 +85,27 @@
             $(".checkpoint__name").removeClass("hidden");
             checkpointDisplay.addClass("hidden");
             $(`#checkpoint-${checkpointId}-buttons`).addClass("hidden");
+        }
+
+        function switchEdit() {
+            // if the changes are discarded, cancel the previously edited checkpoint
+            toggleOverlay("switch-checkpoint-overlay");
+            const prevEdit = $("#edit-checkpoint-id").val();
+            cancelEdit(prevEdit);
+            editSetup(document.getElementById("switch-checkpoint-id").value);
+        }
+
+        function editCheckpoint() {
+            const prevEdit = $("#edit-checkpoint-id").val();
+
+            // if a previously edited checkpoint wasn't finished, show a pop-up
+            if (prevEdit) {
+                toggleOverlay("switch-checkpoint-overlay");
+                $("#switch-checkpoint-name").text($(`#edit-checkpoint-name`).val());
+                $("#switch-checkpoint-id").val($(this).data("checkpoint"));
+            } else {
+                editSetup($(this).data("checkpoint"));
+            }
         }
 
         document.addEventListener("DOMContentLoaded", function () {
@@ -90,6 +136,7 @@
                         checkpoint.data("name", newName);
                         $(`#checkpoint-${checkpointId}-display`).removeClass("hidden");
                         $(`#checkpoint-${checkpointId}-buttons`).removeClass("hidden");
+                        $("#edit-checkpoint-id").val("");
                     },
                 });
             });
@@ -97,11 +144,9 @@
             $(".checkpoint__edit").click(editCheckpoint);
 
             $("#edit-checkpoint-cancel").click(function () {
-                let checkpointId = $("#edit-checkpoint-id").val();
-                $("#edit-checkpoint-wrapper").append($("#edit-checkpoint"));
-                $(`#checkpoint-${checkpointId}`).attr("draggable", true);
-                $(`#checkpoint-${checkpointId}-display`).removeClass("hidden");
-                $(`#checkpoint-${checkpointId}-buttons`).removeClass("hidden");
+                let checkpointId = $("#edit-checkpoint-id");
+                cancelEdit(checkpointId.val());
+                checkpointId.val("");
             });
         });
     </script>

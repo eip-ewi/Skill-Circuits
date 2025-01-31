@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.dto.view.InfoboxDTO;
-import nl.tudelft.skills.model.Task;
+import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.TaskCompletionService;
 
@@ -63,7 +63,7 @@ public class InfoboxController {
 				&& !authorisationService.isStaff();
 
 		if (studentAndAuthenticated) {
-			Task latestTask = taskCompletionService.latestTaskCompletion(authPerson);
+			RegularTask latestTask = taskCompletionService.latestTaskCompletion(authPerson);
 
 			if (latestTask != null) {
 				String taskInfo = "Last worked on: " + latestTask.getName();

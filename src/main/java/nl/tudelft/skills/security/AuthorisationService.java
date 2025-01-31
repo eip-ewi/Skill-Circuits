@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -53,7 +53,7 @@ public class AuthorisationService {
 	private SubmoduleRepository submoduleRepository;
 	private SkillRepository skillRepository;
 
-	private TaskRepository taskRepository;
+	private TaskRepository regularTaskRepository;
 	private CheckpointRepository checkpointRepository;
 	private PathRepository pathRepository;
 	private AbstractSkillRepository abstractSkillRepository;
@@ -393,23 +393,23 @@ public class AuthorisationService {
 	}
 
 	/**
-	 * Gets whether the authenticated user can edit a task.
+	 * Gets whether the authenticated user can edit a RegularTask.
 	 *
-	 * @param  taskId The id of the task
+	 * @param  taskId The id of the RegularTask
 	 * @return        True iff the user can edit the task
 	 */
-	public boolean canEditTask(Long taskId) {
-		return canEditSkill(taskRepository.findByIdOrThrow(taskId).getSkill().getId());
+	public boolean canEditRegularTask(Long taskId) {
+		return canEditSkill(regularTaskRepository.findByIdOrThrow(taskId).getSkill().getId());
 	}
 
 	/**
-	 * Gets whether the authenticated user can delete a task.
+	 * Gets whether the authenticated user can delete a RegularTask.
 	 *
-	 * @param  taskId The id of the task
+	 * @param  taskId The id of the RegularTask
 	 * @return        True iff the user can delete the task
 	 */
-	public boolean canDeleteTask(Long taskId) {
-		return canEditSkill(taskRepository.findByIdOrThrow(taskId).getSkill().getId());
+	public boolean canDeleteRegularTask(Long taskId) {
+		return canEditSkill(regularTaskRepository.findByIdOrThrow(taskId).getSkill().getId());
 	}
 
 	/**

@@ -1,7 +1,7 @@
 <!--
 
     Skill Circuits
-    Copyright (C) 2022 - Delft University of Technology
+    Copyright (C) 2025 - Delft University of Technology
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -78,10 +78,10 @@
                                 <input
                                     th:id="'prev-link' + ${task.id}"
                                     type="hidden"
-                                    th:value="${task.link}" />
+                                    th:value="${task.taskInfo.link}" />
                                 <input
                                     th:id="'link' + ${task.id}"
-                                    th:value="${task.link}"
+                                    th:value="${task.taskInfo.link}"
                                     th:data-task-id="${task.id}"
                                     type="url"
                                     aria-label="Change task URL"
@@ -94,9 +94,9 @@
                         </td>
                         <td>
                             <i
-                                th:class="|fa-solid fa-${task.type.icon}|"
+                                th:class="|fa-solid fa-${task.taskInfo.type.icon}|"
                                 th:id="'task-icon' + ${task.id}"></i>
-                            <span th:text="${task.name}"></span>
+                            <span th:text="${task.taskInfo.name}"></span>
                         </td>
                         <td th:text="${task.skillName}"></td>
                         <td th:text="${task.submoduleName}"></td>

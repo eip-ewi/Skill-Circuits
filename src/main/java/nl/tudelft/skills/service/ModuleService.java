@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,6 +18,7 @@
 package nl.tudelft.skills.service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,9 +36,10 @@ import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.module.ModuleLevelModuleViewDTO;
-import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
-import nl.tudelft.skills.dto.view.module.ModuleLevelSubmoduleViewDTO;
+import nl.tudelft.skills.dto.view.module.*;
+import nl.tudelft.skills.model.RegularTask;
+import nl.tudelft.skills.model.SCModule;
+import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 
@@ -48,19 +50,27 @@ public class ModuleService {
 	private final PersonRepository personRepository;
 	private final CircuitService circuitService;
 	private final PersonService personService;
+	private final TaskCompletionService taskCompletionService;
+	private final ClickedLinkService clickedLinkService;
 	private final CourseControllerApi courseApi;
 	private final EditionControllerApi editionApi;
 
 	public ModuleService(ModuleRepository moduleRepository, PersonRepository personRepository,
 			CircuitService circuitService, PersonService personService,
-			CourseControllerApi courseApi, EditionControllerApi editionApi) {
+			TaskCompletionService taskCompletionService,
+			ClickedLinkService clickedLinkService, CourseControllerApi courseApi,
+			EditionControllerApi editionApi) {
 		this.moduleRepository = moduleRepository;
 		this.personRepository = personRepository;
 		this.circuitService = circuitService;
 		this.personService = personService;
+		this.taskCompletionService = taskCompletionService;
+		this.clickedLinkService = clickedLinkService;
 		this.courseApi = courseApi;
 		this.editionApi = editionApi;
 	}
+
+	// TODO handling of choice tasks: completions & their visibility
 
 	/**
 	 * Configures the model for the module circuit view.
@@ -102,11 +112,14 @@ public class ModuleService {
 		model.addAttribute("studentMode", studentMode != null && studentMode);
 
 		model.addAttribute("tasksInPathIds", taskIdsInPath.orElse(new HashSet<>()));
+		model.addAttribute("skillsRevealedIds", personRepository.getById(person.getId()).getSkillsRevealed()
+				.stream().map(Skill::getId).collect(Collectors.toSet()));
 
 		EditionDetailsDTO edition = editionApi.getEditionById(module.getEdition().getId()).block();
 		CourseDetailsDTO course = courseApi.getCourseById(edition.getCourse().getId()).block();
 		model.addAttribute("courses",
-				courseApi.getAllCoursesByProgram(course.getProgram().getId()).collectList().block());
+				courseApi.getAllCoursesByProgram(course.getProgram().getId())
+						.sort((a, b) -> a.getName().compareToIgnoreCase(b.getName())).collectList().block());
 	}
 
 	/**
@@ -126,8 +139,34 @@ public class ModuleService {
 				.forEach(skill -> {
 					skill.setCompletedRequiredTasks(completedTasks.containsAll(skill.getRequiredTaskIds()));
 					skill.getTasks()
-							.forEach(task -> task.setCompleted(completedTasks.contains(task.getId())));
+							.forEach(task -> {
+								if (task instanceof RegularTaskViewDTO view) {
+									view.getTaskInfo().setCompleted(completedTasks.contains(task.getId()));
+								}
+							});
 				});
 	}
 
+	/**
+	 * Deletes a given module by its id.
+	 *
+	 * @param  moduleId The id of the module to delete.
+	 * @return          The module that was deleted.
+	 */
+	@Transactional
+	public SCModule deleteModule(Long moduleId) {
+		SCModule module = moduleRepository.findByIdOrThrow(moduleId);
+
+		// Delete all task completions and links (only necessary for RegularTasks)
+		List<RegularTask> tasks = module.getSubmodules().stream()
+				.flatMap(s -> s.getSkills().stream())
+				.flatMap(s -> s.getTasks().stream())
+				.filter(t -> t instanceof RegularTask)
+				.map(t -> (RegularTask) t).collect(Collectors.toList());
+		tasks.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
+		clickedLinkService.deleteClickedLinksForTasks(tasks);
+
+		moduleRepository.delete(module);
+		return module;
+	}
 }

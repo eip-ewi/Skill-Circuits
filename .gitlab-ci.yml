@@ -33,7 +33,7 @@ stages:
       - package-lock.json
     policy: pull
   rules:
-    - if: $CI_COMMIT_BRANCH == "master" ||
+    - if: $CI_COMMIT_BRANCH == "main" ||
         $CI_COMMIT_BRANCH == "development" ||
         $CI_MERGE_REQUEST_ID ||
         $CI_PIPELINE_SOURCE == "push"
@@ -173,7 +173,7 @@ publish_jar:
   extends: .build_cached
   stage: publish
   rules:
-     - if: $CI_COMMIT_BRANCH == "master" ||
+     - if: $CI_COMMIT_BRANCH == "main" ||
          $CI_COMMIT_BRANCH == "development" ||
          $CI_MERGE_REQUEST_ID ||
          $CI_PIPELINE_SOURCE == "push" ||
@@ -205,7 +205,7 @@ code_quality:
     - .gitlab_reporter
   stage: gitlab reports
   rules:
-    - if: $CI_COMMIT_BRANCH == "master" ||
+    - if: $CI_COMMIT_BRANCH == "main" ||
         $CI_COMMIT_BRANCH == "development" ||
         $CI_MERGE_REQUEST_ID
 
@@ -221,23 +221,7 @@ spotbugs-sast:
     - if: $CI_PIPELINE_SOURCE == "trigger" ||
         $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
       when: never
-    - if: $CI_COMMIT_BRANCH == "master" ||
-        $CI_COMMIT_BRANCH == "development" ||
-        $CI_MERGE_REQUEST_ID
-
-semgrep-sast:
-  stage: gitlab reports
-  needs:
-    - gradle_build
-  variables:
-    COMPILE: "false"
-    SECURE_LOG_LEVEL: "debug"
-  allow_failure: true
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "trigger" ||
-        $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
-      when: never
-    - if: $CI_COMMIT_BRANCH == "master" ||
+    - if: $CI_COMMIT_BRANCH == "main" ||
         $CI_COMMIT_BRANCH == "development" ||
         $CI_MERGE_REQUEST_ID
 
@@ -249,7 +233,7 @@ dast:
     - .gitlab_reporter
   stage: test2
   rules:
-    - if: $CI_COMMIT_BRANCH == "master" ||
+    - if: $CI_COMMIT_BRANCH == "main" ||
         $CI_COMMIT_BRANCH == "development" ||
         $CI_MERGE_REQUEST_ID
       when: manual
@@ -264,7 +248,7 @@ a11y:
     - if: $CI_PIPELINE_SOURCE == "trigger" ||
         $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
       when: never
-    - if: $CI_COMMIT_BRANCH == "master" ||
+    - if: $CI_COMMIT_BRANCH == "main" ||
         $CI_COMMIT_BRANCH == "development"
       when: manual
   stage: test2
@@ -278,7 +262,7 @@ a11y:
 #    - .gitlab_reporter
 #  stage: gitlab reports
 #  rules:
-#    - if: $CI_COMMIT_BRANCH == "master" ||
+#    - if: $CI_COMMIT_BRANCH == "main" ||
 #        $CI_COMMIT_BRANCH == "development" ||
 #        $CI_MERGE_REQUEST_ID
 #  needs:
@@ -320,7 +304,7 @@ dev-deploy:
     - if: $CI_PIPELINE_SOURCE == "trigger" ||
         $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
       when: never
-    - if: $CI_COMMIT_BRANCH == "development"
+    - if: $CI_COMMIT_BRANCH == "development" && $CI_PROJECT_NAMESPACE == "skill-circuits"
       when: on_success
 
 # TODO CONFIGURE
@@ -365,6 +349,6 @@ deploy:
     - if: $CI_PIPELINE_SOURCE == "trigger" ||
         $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
       when: never
-    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH == "main" && $CI_PROJECT_NAMESPACE == "skill-circuits"
       when: on_success
 

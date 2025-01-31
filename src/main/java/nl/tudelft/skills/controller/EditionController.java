@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -32,7 +32,6 @@ import org.springframework.web.bind.annotation.*;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.SCModuleSummaryDTO;
 import nl.tudelft.skills.model.SCEdition;
-import nl.tudelft.skills.playlists.service.ResearchParticipantService;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.EditionService;
@@ -45,21 +44,15 @@ public class EditionController {
 	private AuthorisationService authorisationService;
 	private HttpSession session;
 
-	//	Playlist feature
-	private ResearchParticipantService researchParticipantService;
-
 	@Autowired
 	public EditionController(EditionRepository editionRepository, EditionService editionService,
 			AuthorisationService authorisationService,
-			HttpSession session,
-			ResearchParticipantService researchParticipantService) {
+			HttpSession session) {
 		this.editionRepository = editionRepository;
 		this.editionService = editionService;
 		this.authorisationService = authorisationService;
 		this.session = session;
 
-		//		Playlist feature
-		this.researchParticipantService = researchParticipantService;
 	}
 
 	/**
@@ -75,13 +68,6 @@ public class EditionController {
 	public String getEditionPage(@PathVariable Long id, @RequestParam(required = false) String view,
 			Model model) {
 		editionService.configureEditionModel(id, model, session);
-
-		//		Playlist feature
-		long accId = 643L;
-		if (id == accId & !authorisationService.canEditEdition(accId)) {
-			researchParticipantService.addRPInfoToModel(authorisationService.getAuthPerson(), model);
-
-		}
 
 		if (authorisationService.canEditEdition(id) && view == null) {
 			view = "circuit";
@@ -164,7 +150,8 @@ public class EditionController {
 	@GetMapping("{id}/modules")
 	@PreAuthorize("@authorisationService.canGetModulesOfEdition(#id)")
 	public @ResponseBody List<SCModuleSummaryDTO> getModulesOfEdition(@PathVariable Long id) {
-		return View.convert(new ArrayList<>(editionRepository.findByIdOrThrow(id).getModules()),
+		return View.convert(new ArrayList<>(editionRepository.findByIdOrThrow(id).getModules()).stream()
+				.sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList(),
 				SCModuleSummaryDTO.class);
 	}
 

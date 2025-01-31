@@ -1,7 +1,7 @@
 <!--
 
     Skill Circuits
-    Copyright (C) 2022 - Delft University of Technology
+    Copyright (C) 2025 - Delft University of Technology
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -157,16 +157,46 @@
                     $.post("/module/setup", $("#new-module-form").serialize(), html => {
                         const element = $("<div/>").append(html).children()[0];
                         const newModuleId = $(element).data("module");
-                        const newModuleName = $(element).text();
+                        const newModuleName = $("#new-module-name").val();
 
                         $(element).find(".module__edit").click(editModule);
                         $(element).find(".module__delete").click(deleteModule);
-                        $("select[name='module.id']").append(
-                            `<option data-edit="only" value="${newModuleId}">${newModuleName}<option>`
-                        );
+
+                        let options = $("#module-list li a");
+
+                        let insertIndex = options.length;
+
+                        for (let i = 0; i < options.length; i++) {
+                            if (newModuleName.toLowerCase() < options[i].innerHTML.toLowerCase()) {
+                                insertIndex = i;
+                                break;
+                            }
+                        }
+
+                        // insert the new module name to the appropriate place in the dropdown
+                        $.each($("select[name='module.id']"), function () {
+                            if (options.length === 0 || insertIndex === options.length) {
+                                $(this).append(
+                                    `<option data-edit="only" value="${newModuleId}">${newModuleName}</option>`
+                                );
+                            } else {
+                                $(this)
+                                    .find("option")
+                                    .eq(insertIndex)
+                                    .before(
+                                        `<option data-edit="only" value="${newModuleId}">${newModuleName}</option>`
+                                    );
+                            }
+                        });
 
                         $("#new-module-name").val("");
-                        $("#module-list").prepend(element);
+
+                        // insert the new module name to the appropriate place in the setup list
+                        if (options.length === 0 || insertIndex === options.length) {
+                            $("#module-list").append(element);
+                        } else {
+                            $("#module-list").find("li").eq(insertIndex).before(element);
+                        }
                     });
                 });
 
@@ -177,7 +207,7 @@
                         $(element).find(".checkpoint__edit").click(editCheckpoint);
                         $(element).find(".checkpoint__delete").click(deleteCheckpoint);
                         $("#new-checkpoint-name").val("");
-                        $("#checkpoint-list").prepend(element);
+                        $("#checkpoint-list").append(element);
                     });
                 });
                 $("#new-path-form").submit(e => {

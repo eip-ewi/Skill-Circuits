@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -46,16 +46,11 @@ import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.dto.create.CheckpointCreateDTO;
-import nl.tudelft.skills.dto.create.ExternalSkillCreateDTO;
-import nl.tudelft.skills.dto.create.SkillCreateDTO;
-import nl.tudelft.skills.dto.create.TaskCreateDTO;
+import nl.tudelft.skills.dto.create.*;
 import nl.tudelft.skills.dto.id.*;
-import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
-import nl.tudelft.skills.dto.patch.TaskPatchDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
-import nl.tudelft.skills.dto.view.module.TaskViewDTO;
+import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.*;
@@ -73,6 +68,7 @@ public class SkillControllerTest extends ControllerTest {
 	private final ModuleService moduleService;
 	private final SubmoduleRepository submoduleRepository;
 	private final ExternalSkillRepository externalSkillRepository;
+	private final RegularTaskRepository regularTaskRepository;
 	private final TaskRepository taskRepository;
 	private final CheckpointRepository checkpointRepository;
 	private final PathRepository pathRepository;
@@ -89,7 +85,8 @@ public class SkillControllerTest extends ControllerTest {
 	private final RoleControllerApi roleApi;
 
 	@Autowired
-	public SkillControllerTest(SkillRepository skillRepository, TaskRepository taskRepository,
+	public SkillControllerTest(SkillRepository skillRepository, RegularTaskRepository regularTaskRepository,
+			TaskRepository taskRepository,
 			SkillService skillService, SubmoduleRepository submoduleRepository,
 			ExternalSkillRepository externalSkillRepository,
 			AbstractSkillRepository abstractSkillRepository, CheckpointRepository checkpointRepository,
@@ -102,6 +99,7 @@ public class SkillControllerTest extends ControllerTest {
 		this.session = mock(HttpSession.class);
 		this.moduleService = mock(ModuleService.class);
 		this.externalSkillRepository = externalSkillRepository;
+		this.regularTaskRepository = regularTaskRepository;
 		this.taskRepository = taskRepository;
 		this.clickedLinkService = clickedLinkService;
 		this.clickedLinkRepository = clickedLinkRepository;
@@ -119,51 +117,11 @@ public class SkillControllerTest extends ControllerTest {
 		this.roleApi = roleApi;
 
 		this.skillController = new SkillController(skillRepository, externalSkillRepository,
-				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
+				abstractSkillRepository, taskRepository, regularTaskRepository, submoduleRepository,
+				checkpointRepository,
 				pathRepository,
 				personRepository, skillService, moduleService, taskCompletionService, clickedLinkService,
 				personService, session);
-	}
-
-	@Test
-	void createSkill() {
-		var dto = SkillCreateDTO.builder()
-				.name("New Skill")
-				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
-				.checkpoint(new CheckpointIdDTO(db.getCheckpointLectureOne().getId()))
-				.requiredTaskIds(Collections.emptyList())
-				.column(10).row(11).newItems(new ArrayList<>()).build();
-
-		skillController.createSkill(null, dto, mock(Model.class));
-
-		assertTrue(skillRepository.findAll().stream().anyMatch(s -> s.getName().equals("New Skill")));
-	}
-
-	@Test
-	void createSkillWithTasks() {
-		TaskCreateDTO taskDto = TaskCreateDTO.builder().name("New Task").type(TaskType.EXERCISE)
-				.skill(new SkillIdDTO())
-				.index(1).time(1).build();
-		var dto = SkillCreateDTO.builder()
-				.name("New Skill")
-				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
-				.checkpoint(new CheckpointIdDTO(db.getCheckpointLectureOne().getId()))
-				.requiredTaskIds(Collections.emptyList())
-				.column(10).row(11).newItems(new ArrayList<>()).build();
-		dto.setNewItems(List.of(taskDto));
-		skillController.createSkill(null, dto, mock(Model.class));
-
-		Optional<Skill> skill = skillRepository.findAll().stream()
-				.filter(s -> s.getName().equals("New Skill"))
-				.findFirst();
-		assertTrue(skill.isPresent());
-
-		Optional<Task> task = taskRepository.findAll().stream().filter(t -> t.getName().equals("New Task"))
-				.findFirst();
-		assertTrue(task.isPresent());
-
-		assertThat(task.get().getSkill()).isEqualTo(skill.get());
-		assertThat(skill.get().getTasks()).containsExactly(task.get());
 	}
 
 	@Test
@@ -183,10 +141,10 @@ public class SkillControllerTest extends ControllerTest {
 		// This fixes flaky tests by ensuring the right beans are used.
 		SkillController skc = new SkillController(SpringContext.getBean(SkillRepository.class),
 				externalSkillRepository,
-				abstractSkillRepository, taskRepository, submoduleRepository,
+				abstractSkillRepository, taskRepository, regularTaskRepository, submoduleRepository,
 				SpringContext.getBean(CheckpointRepository.class), pathRepository,
-				personRepository, skillService, moduleService, taskCompletionService, clickedLinkService,
-				personService, session);
+				personRepository, SpringContext.getBean(SkillService.class), moduleService,
+				taskCompletionService, clickedLinkService, personService, session);
 
 		skc.createSkill(null, dto, mock(Model.class));
 
@@ -195,6 +153,9 @@ public class SkillControllerTest extends ControllerTest {
 		assertThat(skillRepository.findAll().stream()
 				.filter(s -> s.getName().equals("New skill with new checkpoint")).findFirst().get()
 				.getCheckpoint().getName()).isEqualTo("New Checkpoint");
+		assertThat(checkpointRepository.findAll().stream()
+				.filter(c -> c.getName().equals("New Checkpoint")).findFirst().get()
+				.getSkills()).anyMatch(s -> s.getName().equals("New skill with new checkpoint"));
 	}
 
 	@Test
@@ -208,75 +169,6 @@ public class SkillControllerTest extends ControllerTest {
 
 		assertTrue(abstractSkillRepository.findAll().stream().anyMatch(s -> s instanceof ExternalSkill es
 				&& skillRepository.findByIdOrThrow(es.getSkill().getId()).getName().equals("Assumption")));
-	}
-
-	@Test
-	void patchSkill() {
-		Long skillId = db.getSkillVariables().getId();
-		Task old = db.getTaskRead10();
-		TaskCreateDTO taskAdded = TaskCreateDTO.builder().name("New Task").type(TaskType.EXERCISE)
-				.skill(new SkillIdDTO(skillId)).index(1).time(1).build();
-		TaskPatchDTO oldTask = TaskPatchDTO.builder().name(old.getName()).type(old.getType())
-				.id(old.getId()).index(old.getIdx()).time(old.getTime()).build();
-
-		// Add a task and remove a task
-		skillController.patchSkill(SkillPatchDTO.builder()
-				.id(skillId)
-				.name("Updated")
-				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
-				.items(List.of(oldTask))
-				.newItems(List.of(taskAdded))
-				.removedItems(Set.of(db.getTaskDo10a().getId()))
-				.build(), model);
-
-		Skill skill = db.getSkillVariables();
-		assertThat(skill.getName()).isEqualTo("Updated");
-		assertThat(submoduleRepository.findByIdOrThrow(skill.getSubmodule().getId())).isEqualTo(
-				submoduleRepository.findByIdOrThrow(db.getSubmoduleCases().getId()));
-
-		// Check task related properties
-		Optional<Task> task = taskRepository.findAll().stream().filter(t -> t.getName().equals("New Task"))
-				.findFirst();
-		assertTrue(task.isPresent());
-		assertThat(skill.getTasks()).containsExactlyInAnyOrder(db.getTaskRead10(), task.get());
-		assertThat(task.get().getSkill()).isEqualTo(skill);
-
-		// Check that all TaskCompletion related information remains the same
-		assertThat(taskCompletionRepository.findAll()).hasSize(4);
-		assertThat(db.getPerson().getTaskCompletions()).hasSize(4);
-		assertThat(db.getTaskRead12().getCompletedBy()).hasSize(1);
-		assertThat(db.getTaskDo12ae().getCompletedBy()).hasSize(1);
-		assertThat(db.getTaskRead11().getCompletedBy()).hasSize(1);
-		assertThat(db.getTaskDo11ad().getCompletedBy()).hasSize(1);
-	}
-
-	@Test
-	void patchSkillDeletesTask() {
-		Long taskId = db.getTaskRead11().getId();
-
-		skillController.patchSkill(SkillPatchDTO.builder()
-				.id(db.getSkillNegation().getId())
-				.name("Updated")
-				.removedItems(Set.of(taskId))
-				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
-				.build(), model);
-
-		Skill skill = db.getSkillNegation();
-		assertThat(skill.getName()).isEqualTo("Updated");
-		assertThat(submoduleRepository.findByIdOrThrow(skill.getSubmodule().getId())).isEqualTo(
-				submoduleRepository.findByIdOrThrow(db.getSubmoduleCases().getId()));
-
-		// Check that the Task and its TaskCompletions were deleted
-		assertThat(taskRepository.findById(taskId)).isEmpty();
-		assertThat(taskCompletionRepository.findAll()).hasSize(3);
-		assertThat(db.getPerson().getTaskCompletions()).hasSize(3);
-		assertThat(taskRepository.findById(taskId)).isEmpty();
-		// Check that all other TaskCompletions remain the same
-		assertThat(db.getTaskRead12().getCompletedBy()).hasSize(1);
-		assertThat(db.getTaskDo12ae().getCompletedBy()).hasSize(1);
-		assertThat(db.getTaskDo11ad().getCompletedBy()).hasSize(1);
-		//Check that ClickedLinks are deleted
-		assertThat(clickedLinkRepository.findAll()).hasSize(1);
 	}
 
 	@Test
@@ -323,8 +215,8 @@ public class SkillControllerTest extends ControllerTest {
 		// of the recentActiveEditionForSkillOrLatest method
 		SkillService mockSkillService = mock(SkillService.class);
 		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
-				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
-				pathRepository,
+				abstractSkillRepository, taskRepository, regularTaskRepository,
+				submoduleRepository, checkpointRepository, pathRepository,
 				personRepository, mockSkillService, moduleService, taskCompletionService, clickedLinkService,
 				personService, session);
 
@@ -359,8 +251,8 @@ public class SkillControllerTest extends ControllerTest {
 		// of the recentActiveEditionForSkillOrLatest method
 		SkillService mockSkillService = mock(SkillService.class);
 		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
-				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
-				pathRepository,
+				abstractSkillRepository, taskRepository, regularTaskRepository,
+				submoduleRepository, checkpointRepository, pathRepository,
 				personRepository, mockSkillService, moduleService, taskCompletionService, clickedLinkService,
 				personService, session);
 
@@ -442,8 +334,8 @@ public class SkillControllerTest extends ControllerTest {
 		SCEdition edition = db.getEditionRL();
 		SCPerson person = db.getPerson();
 		Skill skill = db.getSkillVariables();
-		Task taskDo = db.getTaskDo10a();
-		Task taskRead = db.getTaskRead10();
+		RegularTask taskDo = db.getTaskDo10a();
+		RegularTask taskRead = db.getTaskRead10();
 		edition.setVisible(true);
 		mockRole(roleApi, "STUDENT");
 
@@ -479,8 +371,8 @@ public class SkillControllerTest extends ControllerTest {
 		pathRepository.save(explorerPath);
 		taskCompletionRepository.save(completion);
 		editionRepository.save(edition);
-		taskRepository.save(taskRead);
-		taskRepository.save(taskDo);
+		regularTaskRepository.save(taskRead);
+		regularTaskRepository.save(taskDo);
 		personRepository.save(person);
 
 		// Get authenticated person
@@ -494,14 +386,16 @@ public class SkillControllerTest extends ControllerTest {
 		ModuleLevelSkillViewDTO view = View.convert(skill, ModuleLevelSkillViewDTO.class);
 		view.getTasks().stream().filter(t -> t.getId().equals(taskRead.getId()))
 				.findFirst().get().setVisible(false);
-		view.getTasks().stream().filter(t -> t.getId().equals(taskDo.getId()))
-				.findFirst().get().setCompleted(true);
+		RegularTaskViewDTO taskView = view.getTasks().stream()
+				.filter(t -> t instanceof RegularTaskViewDTO && t.getId().equals(taskDo.getId()))
+				.findFirst().map(v -> (RegularTaskViewDTO) v).get();
+		taskView.getTaskInfo().setCompleted(true);
 		assertThat(model.getAttribute("block")).isEqualTo(view);
 
 		// Assert on added model attributes concerning paths and added tasks/modified skills
 		assertThat(model.getAttribute("selectedPathId")).isEqualTo(pathfinderPath.getId());
 		assertThat(model.getAttribute("tasksAdded")).isEqualTo(Set.of(
-				View.convert(taskDo, TaskViewDTO.class)));
+				View.convert(taskDo, RegularTaskViewDTO.class)));
 		assertThat(model.getAttribute("skillsModified")).isEqualTo(Set.of(view));
 	}
 
@@ -521,8 +415,8 @@ public class SkillControllerTest extends ControllerTest {
 		// of the recentActiveEditionForSkillOrLatest method
 		SkillService mockSkillService = mock(SkillService.class);
 		SkillController innerSkillController = new SkillController(skillRepository, externalSkillRepository,
-				abstractSkillRepository, taskRepository, submoduleRepository, checkpointRepository,
-				pathRepository,
+				abstractSkillRepository, taskRepository, regularTaskRepository,
+				submoduleRepository, checkpointRepository, pathRepository,
 				personRepository, mockSkillService, moduleService, taskCompletionService, clickedLinkService,
 				personService, session);
 

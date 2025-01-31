@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,7 +18,6 @@
 package nl.tudelft.skills.service;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,7 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.patch.PathPatchDTO;
+import nl.tudelft.skills.dto.patch.PathTasksPatchDTO;
 import nl.tudelft.skills.dto.view.edition.PathViewDTO;
 import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.Task;
@@ -53,11 +52,12 @@ public class PathService {
 	 * @param path  New path.
 	 */
 	@Transactional
-	public void updateTasksInPathManyToMany(PathPatchDTO patch, Path path) {
-		List<Task> oldTasks = taskRepository
+	public void updateTasksInPathManyToMany(PathTasksPatchDTO patch, Path path) {
+		Set<Task> oldTasks = taskRepository
 				.findAllByIdIn(path.getTasks().stream().map(Task::getId).toList());
 
-		Set<Task> selectedTasks = new HashSet<>(taskRepository.findAllByIdIn(patch.getTaskIds()));
+		Set<Task> selectedTasks = new HashSet<>(
+				taskRepository.findAllByIdIn(patch.getTaskIds()));
 
 		// remove tasks that are not in path
 		// if the patch has a moduleId, remove only tasks that are in this module

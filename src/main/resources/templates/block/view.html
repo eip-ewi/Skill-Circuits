@@ -1,7 +1,7 @@
 <!--
 
     Skill Circuits
-    Copyright (C) 2022 - Delft University of Technology
+    Copyright (C) 2025 - Delft University of Technology
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -38,8 +38,10 @@
         th:data-essential="${level == 'module'} ? ${block.essential} : ${null}"
         th:data-hidden="${level == 'module'} ? ${canEdit and block.hidden} : ${null}"
         th:data-checkpoint="${level == 'module'} ? ${block.checkpoint.id} : ${null}"
-        th:onclick="${level == 'module'} ? 'openExpandedSkillOverlay(event, this)' : ${null}"
-        th:if="${level != 'module'} or ${block.completedRequiredTasks or canEdit or not block.hidden}"
+        th:onclick="${level == 'module' and (studentMode or @authorisationService.isStudent())} ? 'toggleExpandedSkillOverlay(event, this)' : ${null}"
+        th:if="${level != 'module'} or
+            ${block.completedRequiredTasks or canEdit or not block.hidden} or
+                ${#sets.contains(skillsRevealedIds, block.id)}"
         layout:fragment="block">
         <div th:unless="${create}" th:id="|block-${block.id}-header|" class="block__header">
             <p
@@ -81,14 +83,18 @@
                 <th:block th:each="item, iter : ${block.items}">
                     <!-- Task view for teacher-->
                     <th:block th:if="${level == 'module' and canEdit}">
-                        <li layout:replace="~{task/view :: item}"></li>
+                        <li
+                            th:if="${item.taskType} == 'RegularTask'"
+                            layout:replace="~{task/view :: item}"></li>
+                        <!-- TODO add ChoiceTasks here -->
                     </th:block>
                     <!--  Task preview for student-->
                     <th:block
                         th:if="${level == 'module' and !canEdit}"
                         th:with="skillModified = ${skillsModified == null ? false : #sets.contains(skillsModified.![id], block.id)}">
                         <li
-                            th:classappend="${(item.visible and not skillModified) or (skillModified and #sets.contains(tasksAdded.![id], item.id))}? '' : 'hidden'"
+                            th:classappend="${(item.visible and not skillModified) or (skillModified and #sets.contains(tasksAdded.
+                                ![id], item.id))}? '' : 'hidden'"
                             style="display: inline"
                             layout:insert="~{task/preview :: item}"></li>
                     </th:block>

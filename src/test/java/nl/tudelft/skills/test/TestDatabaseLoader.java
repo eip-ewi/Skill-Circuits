@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -20,7 +20,7 @@ package nl.tudelft.skills.test;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -59,7 +59,9 @@ public class TestDatabaseLoader {
 	@Autowired
 	private SkillRepository skillRepository;
 	@Autowired
-	private TaskRepository taskRepository;
+	private RegularTaskRepository regularTaskRepository;
+	@Autowired
+	private TaskInfoRepository taskInfoRepository;
 	@Autowired
 	private ClickedLinkRepository clickedLinkRepository;
 	@Autowired
@@ -87,6 +89,9 @@ public class TestDatabaseLoader {
 	private Path pathFinderPath = Path.builder().edition(editionRL2021).name("Pathfinder").build();
 
 	private SCModule moduleProofTechniques = SCModule.builder().name("Proof Techniques")
+			.build();
+
+	private SCModule module = SCModule.builder().name("Module")
 			.build();
 
 	private Submodule submoduleLogicBasics = Submodule.builder().name("Logic Basics")
@@ -133,14 +138,23 @@ public class TestDatabaseLoader {
 			.row(3).column(0).build();
 	private Skill skillInductionPractice = Skill.builder().name("Induction Practice")
 			.row(6).column(2).build();
+	private Skill skillVariablesHidden = Skill.builder().name("Variables extra")
+			.hidden(true).row(2).column(4).build();
 
-	private Task taskRead12 = Task.builder().name("Read chapter 1.2").time(1)
-			.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build();
-	private Task taskDo12ae = Task.builder().name("Do exercise 1.2a-e").time(3).build();
-	private Task taskRead11 = Task.builder().name("Read chapter 1.1").time(5).build();
-	private Task taskDo11ad = Task.builder().name("Do exercise 1.1a-d").time(7).build();
-	private Task taskRead10 = Task.builder().name("Read chapter 1.0").time(13).build();
-	private Task taskDo10a = Task.builder().name("Do exercise 1.0a").time(20).build();
+	private TaskInfo taskInfoRead12 = TaskInfo.builder().name("Read chapter 1.2").time(1).build();
+	private TaskInfo taskInfoDo12ae = TaskInfo.builder().name("Do exercise 1.2a-e").time(3).build();
+	private TaskInfo taskInfoRead11 = TaskInfo.builder().name("Read chapter 1.1").time(5).build();
+	private TaskInfo taskInfoDo11ad = TaskInfo.builder().name("Do exercise 1.1a-d").time(7).build();
+	private TaskInfo taskInfoRead10 = TaskInfo.builder().name("Read chapter 1.0").time(13).build();
+	private TaskInfo taskInfoDo10a = TaskInfo.builder().name("Do exercise 1.0a").time(20).build();
+
+	private RegularTask taskRead12 = RegularTask.builder()
+			.paths(new HashSet<>(Collections.singletonList(pathFinderPath))).taskInfo(taskInfoRead12).build();
+	private RegularTask taskDo12ae = RegularTask.builder().taskInfo(taskInfoDo12ae).build();
+	private RegularTask taskRead11 = RegularTask.builder().taskInfo(taskInfoRead11).build();
+	private RegularTask taskDo11ad = RegularTask.builder().taskInfo(taskInfoDo11ad).build();
+	private RegularTask taskRead10 = RegularTask.builder().taskInfo(taskInfoRead10).build();
+	private RegularTask taskDo10a = RegularTask.builder().taskInfo(taskInfoDo10a).build();
 
 	private Badge badge1 = Badge.builder().name("Badge 1").build();
 	private Badge badge2 = Badge.builder().name("Badge 2").build();
@@ -179,6 +193,10 @@ public class TestDatabaseLoader {
 
 	public SCModule getModuleProofTechniques() {
 		return moduleRepository.findByIdOrThrow(moduleProofTechniques.getId());
+	}
+
+	public SCModule getModule() {
+		return moduleRepository.findByIdOrThrow(module.getId());
 	}
 
 	public Submodule getSubmoduleLogicBasics() {
@@ -265,28 +283,56 @@ public class TestDatabaseLoader {
 		return skillRepository.findByIdOrThrow(skillInductionPractice.getId());
 	}
 
-	public Task getTaskRead12() {
-		return taskRepository.findByIdOrThrow(taskRead12.getId());
+	public Skill getSkillVariablesHidden() {
+		return skillRepository.findByIdOrThrow(skillVariablesHidden.getId());
 	}
 
-	public Task getTaskDo12ae() {
-		return taskRepository.findByIdOrThrow(taskDo12ae.getId());
+	public RegularTask getTaskRead12() {
+		return regularTaskRepository.findByIdOrThrow(taskRead12.getId());
 	}
 
-	public Task getTaskRead11() {
-		return taskRepository.findByIdOrThrow(taskRead11.getId());
+	public RegularTask getTaskDo12ae() {
+		return regularTaskRepository.findByIdOrThrow(taskDo12ae.getId());
 	}
 
-	public Task getTaskDo11ad() {
-		return taskRepository.findByIdOrThrow(taskDo11ad.getId());
+	public RegularTask getTaskRead11() {
+		return regularTaskRepository.findByIdOrThrow(taskRead11.getId());
 	}
 
-	public Task getTaskRead10() {
-		return taskRepository.findByIdOrThrow(taskRead10.getId());
+	public RegularTask getTaskDo11ad() {
+		return regularTaskRepository.findByIdOrThrow(taskDo11ad.getId());
 	}
 
-	public Task getTaskDo10a() {
-		return taskRepository.findByIdOrThrow(taskDo10a.getId());
+	public RegularTask getTaskRead10() {
+		return regularTaskRepository.findByIdOrThrow(taskRead10.getId());
+	}
+
+	public RegularTask getTaskDo10a() {
+		return regularTaskRepository.findByIdOrThrow(taskDo10a.getId());
+	}
+
+	public TaskInfo getTaskInfoRead12() {
+		return taskInfoRepository.findByIdOrThrow(taskInfoRead12.getId());
+	}
+
+	public TaskInfo getTaskInfoDo12ae() {
+		return taskInfoRepository.findByIdOrThrow(taskInfoDo12ae.getId());
+	}
+
+	public TaskInfo getTaskInfoRead11() {
+		return taskInfoRepository.findByIdOrThrow(taskInfoRead11.getId());
+	}
+
+	public TaskInfo getTaskInfoDo11ad() {
+		return taskInfoRepository.findByIdOrThrow(taskInfoDo11ad.getId());
+	}
+
+	public TaskInfo getTaskInfoRead10() {
+		return taskInfoRepository.findByIdOrThrow(taskInfoRead10.getId());
+	}
+
+	public TaskInfo getTaskInfoDo10a() {
+		return taskInfoRepository.findByIdOrThrow(taskInfoDo10a.getId());
 	}
 
 	public Badge getBadge1() {
@@ -354,6 +400,8 @@ public class TestDatabaseLoader {
 	private void initModule() {
 		moduleProofTechniques.setEdition(editionRL2021);
 		moduleProofTechniques = moduleRepository.save(moduleProofTechniques);
+		module.setEdition(editionRL2021);
+		module = moduleRepository.save(module);
 	}
 
 	private void initSubmodule() {
@@ -372,11 +420,12 @@ public class TestDatabaseLoader {
 	}
 
 	private void initCheckpoint() {
+		checkpointLectureTwo.setEdition(this.getEditionRL());
+		checkpointLectureTwo = checkpointRepository.save(checkpointLectureTwo);
+
 		checkpointLectureOne.setEdition(this.getEditionRL());
 		checkpointLectureOne = checkpointRepository.save(checkpointLectureOne);
 
-		checkpointLectureTwo.setEdition(this.getEditionRL());
-		checkpointLectureTwo = checkpointRepository.save(checkpointLectureTwo);
 	}
 
 	private void initSkill() {
@@ -429,6 +478,10 @@ public class TestDatabaseLoader {
 		skillInductionPractice
 				.setParents(Set.of(skillTransitiveProperty, skillProofOutline, skillDividingIntoCases));
 		skillInductionPractice = skillRepository.save(skillInductionPractice);
+		skillVariablesHidden.setSubmodule(submoduleLogicBasics);
+		skillVariablesHidden.setCheckpoint(checkpointLectureTwo);
+		skillVariablesHidden.setParents(Set.of(skillVariables));
+		skillVariablesHidden = skillRepository.save(skillVariablesHidden);
 
 		checkpointLectureOne = checkpointRepository.save(checkpointLectureOne);
 		checkpointLectureTwo = checkpointRepository.save(checkpointLectureTwo);
@@ -436,19 +489,42 @@ public class TestDatabaseLoader {
 
 	private void initTask() {
 		taskRead12.setSkill(skillImplication);
+		taskRead12.setTaskInfo(taskInfoRead12);
+		taskInfoRead12.setTask(taskRead12);
+		taskRead12 = regularTaskRepository.save(taskRead12);
+		taskInfoRead12 = taskInfoRepository.save(taskInfoRead12);
+
 		taskDo12ae.setSkill(skillImplication);
-		taskRead12 = taskRepository.save(taskRead12);
-		taskDo12ae = taskRepository.save(taskDo12ae);
+		taskDo12ae.setTaskInfo(taskInfoDo12ae);
+		taskInfoDo12ae.setTask(taskDo12ae);
+		taskDo12ae = regularTaskRepository.save(taskDo12ae);
+		taskInfoDo12ae = taskInfoRepository.save(taskInfoDo12ae);
 
 		taskRead11.setSkill(skillNegation);
+		taskRead11.setTaskInfo(taskInfoRead11);
+		taskInfoRead11.setTask(taskRead11);
+		taskRead11 = regularTaskRepository.save(taskRead11);
+		taskInfoRead11 = taskInfoRepository.save(taskInfoRead11);
+
 		taskDo11ad.setSkill(skillNegation);
-		taskRead11 = taskRepository.save(taskRead11);
-		taskDo11ad = taskRepository.save(taskDo11ad);
+		taskDo11ad.setTaskInfo(taskInfoDo11ad);
+		taskInfoDo11ad.setTask(taskDo11ad);
+		taskDo11ad = regularTaskRepository.save(taskDo11ad);
+		taskInfoDo11ad = taskInfoRepository.save(taskInfoDo11ad);
 
 		taskRead10.setSkill(skillVariables);
+		taskRead10.setTaskInfo(taskInfoRead10);
+		taskRead10.setRequiredFor(Set.of(skillVariablesHidden));
+		taskInfoRead10.setTask(taskRead10);
+		taskRead10 = regularTaskRepository.save(taskRead10);
+		taskInfoRead10 = taskInfoRepository.save(taskInfoRead10);
+
 		taskDo10a.setSkill(skillVariables);
-		taskRead10 = taskRepository.save(taskRead10);
-		taskDo10a = taskRepository.save(taskDo10a);
+		taskDo10a.setTaskInfo(taskInfoDo10a);
+		taskDo10a.setRequiredFor(Set.of(skillVariablesHidden));
+		taskInfoDo10a.setTask(taskDo10a);
+		taskDo10a = regularTaskRepository.save(taskDo10a);
+		taskInfoDo10a = taskInfoRepository.save(taskInfoDo10a);
 	}
 
 	private void initPerson() {
@@ -544,5 +620,85 @@ public class TestDatabaseLoader {
 		taskDo12ae.setCompletedBy(new HashSet<>());
 		taskRead11.setCompletedBy(new HashSet<>());
 		taskCompletionRepository.deleteAll();
+	}
+
+	/**
+	 * Helper method for database setup. Creates a new module with 2 skills, 2 checkpoints (given as
+	 * parameters) and 1 submodule.
+	 *
+	 * @param checkpointA The first checkpoint.
+	 * @param checkpointB The last checkpoint.
+	 */
+	public void createSkillsInNewModuleHelper(Checkpoint checkpointA, Checkpoint checkpointB) {
+		SCModule module = SCModule.builder().name("Module").edition(getEditionRL()).build();
+		Submodule submodule = Submodule.builder().name("Submodule").module(module).row(0).column(0).build();
+		getEditionRL().getModules().add(module);
+		moduleRepository.save(module);
+		editionRepository.save(getEditionRL());
+		submoduleRepository.save(submodule);
+		module.getSubmodules().add(submodule);
+		moduleRepository.save(module);
+		Skill skillA = Skill.builder().name("Skill A").row(0).column(0).checkpoint(checkpointA)
+				.submodule(submodule)
+				.build();
+		Skill skillB = Skill.builder().name("Skill B").row(1).column(0).checkpoint(checkpointB)
+				.submodule(submodule)
+				.build();
+		submodule.getSkills().addAll(Set.of(skillA, skillB));
+		skillRepository.saveAll(Set.of(skillA, skillB));
+		submoduleRepository.save(submodule);
+		checkpointA.getSkills().add(skillA);
+		checkpointB.getSkills().add(skillB);
+		checkpointRepository.saveAll(Set.of(checkpointA, checkpointB));
+	}
+
+	/**
+	 * Creates a task in a new module (in edition editionRL2021) for testing purposes. Adds a new module,
+	 * submodule and skill.
+	 *
+	 * @return The created task.
+	 */
+	public RegularTask createTaskInNewModule() {
+		SCModule module = moduleRepository.save(SCModule.builder().edition(editionRL2021)
+				.name("New module").build());
+		editionRL2021.getModules().add(module);
+		editionRepository.save(editionRL2021);
+		Submodule submodule = Submodule.builder().module(module)
+				.name("New submodule").column(0).row(0).build();
+		submodule = submoduleRepository.save(submodule);
+		module.getSubmodules().add(submodule);
+		Skill skill = Skill.builder().submodule(submodule).checkpoint(getCheckpointLectureOne())
+				.name("New skill").column(0).row(0).build();
+		skill = skillRepository.save(skill);
+		getCheckpointLectureOne().getSkills().add(skill);
+		submodule.getSkills().add(skill);
+		submoduleRepository.save(submodule);
+		checkpointRepository.save(getCheckpointLectureOne());
+		TaskInfo taskInfo = TaskInfo.builder().name("New task").build();
+		RegularTask task = RegularTask.builder().taskInfo(taskInfo).skill(skill).build();
+		taskInfo.setTask(task);
+		taskInfoRepository.save(taskInfo);
+		regularTaskRepository.save(task);
+		skill.getTasks().add(task);
+		skillRepository.save(skill);
+		return task;
+	}
+
+	/**
+	 * Create and save a regular task by its Skill and name. The remainder of the fields are left at the
+	 * default values.
+	 *
+	 * @param  skill The Skill the Task should be added to.
+	 * @param  name  The name of the Task.
+	 * @return       The saved RegularTask.
+	 */
+	public RegularTask createTaskBySkillAndName(Skill skill, String name) {
+		TaskInfo taskInfo = TaskInfo.builder().name(name).build();
+		RegularTask task = RegularTask.builder().taskInfo(taskInfo).skill(skill).build();
+		taskInfo.setTask(task);
+		task = regularTaskRepository.save(task);
+		skill.getTasks().add(task);
+		skillRepository.save(skill);
+		return task;
 	}
 }

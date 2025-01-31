@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -99,12 +99,16 @@ public abstract class ControllerTest {
 	 * @param edition The edition for which to return this role.
 	 */
 	protected void mockRoleForEdition(RoleControllerApi roleApi, String role, Long edition) {
-		when(roleApi.getRolesById(eq(Set.of(edition)), anySet()))
-				.thenReturn(Flux.just(new RoleDetailsDTO()
-						.id(new Id().editionId(edition)
-								.personId(db.getPerson().getId()))
-						.person(new PersonSummaryDTO().id(db.getPerson().getId()).username("username"))
-						.type(RoleDetailsDTO.TypeEnum.valueOf(role))));
+		if (role == null || role.isBlank()) {
+			when(roleApi.getRolesById(eq(Set.of(edition)), anySet())).thenReturn(Flux.empty());
+		} else {
+			when(roleApi.getRolesById(eq(Set.of(edition)), anySet()))
+					.thenReturn(Flux.just(new RoleDetailsDTO()
+							.id(new Id().editionId(edition)
+									.personId(db.getPerson().getId()))
+							.person(new PersonSummaryDTO().id(db.getPerson().getId()).username("username"))
+							.type(RoleDetailsDTO.TypeEnum.valueOf(role))));
+		}
 	}
 
 }

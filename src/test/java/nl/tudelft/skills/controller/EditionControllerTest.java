@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -43,7 +43,6 @@ import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.SCModuleSummaryDTO;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.SCModule;
-import nl.tudelft.skills.playlists.service.ResearchParticipantService;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.EditionService;
@@ -67,7 +66,7 @@ public class EditionControllerTest extends ControllerTest {
 		this.editionService = mock(EditionService.class);
 		this.session = mock(HttpSession.class);
 		this.editionController = new EditionController(editionRepository, editionService,
-				authorisationService, session, mock(ResearchParticipantService.class));
+				authorisationService, session);
 		this.roleApi = roleApi;
 	}
 
@@ -117,7 +116,8 @@ public class EditionControllerTest extends ControllerTest {
 	@Test
 	void getModulesOfEdition() {
 		assertThat(editionController.getModulesOfEdition(db.getEditionRL().getId()))
-				.isEqualTo(List.of(mapper.map(db.getModuleProofTechniques(), SCModuleSummaryDTO.class)));
+				.isEqualTo(List.of(mapper.map(db.getModule(), SCModuleSummaryDTO.class),
+						mapper.map(db.getModuleProofTechniques(), SCModuleSummaryDTO.class)));
 	}
 
 	@Test
