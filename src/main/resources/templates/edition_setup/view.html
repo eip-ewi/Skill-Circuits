@@ -87,7 +87,7 @@
                         <button type="submit">create</button>
                     </form>
                     <ul id="module-list" class="editable-ul">
-                        <th:block th:each="module : ${edition.modules}">
+                        <th:block th:each="module : ${edition.modulesAlphabetic}">
                             <th:block layout:replace="~{edition_setup/module :: module}"></th:block>
                         </th:block>
                     </ul>

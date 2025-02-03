@@ -73,7 +73,7 @@
                     <a class="block" th:href="@{|/module/${module.id}|}">
                         <h2 th:text="${module.name}"></h2>
                         <h3
-                            style="font-size: 0.8rem"
+                            style="modufont-size: 0.8rem"
                             th:text="|${@skillRepository.countBySubmoduleModuleId(module.id)} skills|"></h3>
                     </a>
                 </th:block>
