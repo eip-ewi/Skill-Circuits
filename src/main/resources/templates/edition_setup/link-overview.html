@@ -55,7 +55,7 @@
             </form>
         </div>
 
-        <div th:each="module : ${edition.modules}">
+        <div th:each="module : ${edition.modulesAlphabetic}">
             <div th:if="${!#sets.isEmpty(module.tasksWithLinks)}" class="link__group">
                 <h3 th:text="${module.name}" />
                 <table class="link__table">
