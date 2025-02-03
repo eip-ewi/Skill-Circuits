@@ -64,7 +64,7 @@ public class EditionLevelEditionViewDTO extends View<SCEdition> implements Circu
 	 *
 	 * @return The list of modules
 	 */
-	public List<EditionLevelModuleViewDTO> getModules() {
+	public List<EditionLevelModuleViewDTO> getModulesAlphabetic() {
 		return modules.stream()
 				.sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList();
 	}
