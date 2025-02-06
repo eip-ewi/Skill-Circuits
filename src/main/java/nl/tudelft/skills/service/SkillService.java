@@ -258,10 +258,11 @@ public class SkillService {
 		Set<Path> paths = new HashSet<>(pathRepository.findAllByEditionId(edition.getId()));
 
 		// Set all task attributes and save to database
-		// TODO handling of ChoiceTasks
-		List<Task> newTasks = new ArrayList<>();
-		newTasks.addAll(newRegularTasks.stream()
-				.map(dto -> (Task) saveTaskFromRegularTaskDto(dto, skill, paths)).toList());
+		List<Task> newTasks = newChoiceTasks.stream()
+				.flatMap(dto -> saveTasksFromChoiceTaskDto(dto, skill, paths).stream())
+				.collect(Collectors.toList());
+		newTasks.addAll(
+				newRegularTasks.stream().map(dto -> saveTaskFromRegularTaskDto(dto, skill, paths)).toList());
 		skill.getTasks().addAll(newTasks);
 		skillRepository.save(skill);
 
@@ -423,12 +424,12 @@ public class SkillService {
 		choiceTask.setPaths(paths);
 
 		// Save all sub-tasks contained in the choice task
-		List<RegularTask> subTasks = choiceTaskDTO.getTasks().stream()
+		List<RegularTask> subTasks = choiceTaskDTO.getSubTasks().stream()
 				.map(taskDto -> saveTaskFromRegularTaskDto(taskDto, skill, paths))
 				.toList();
 
 		// Set the tasks of the choice task
-		choiceTask.getTasks().addAll(subTasks.stream().map(RegularTask::getTaskInfo).toList());
+		choiceTask.setTasks(subTasks.stream().map(RegularTask::getTaskInfo).collect(Collectors.toList()));
 		choiceTask = taskRepository.save(choiceTask);
 
 		// Return all tasks (choice task and sub-tasks)

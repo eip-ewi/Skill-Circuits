@@ -38,7 +38,7 @@ public class ChoiceTaskCreateDTO extends TaskCreateDTO<ChoiceTask> {
 	private Integer minTasks;
 	@NotNull
 	@Builder.Default
-	private List<RegularTaskCreateDTO> tasks = new ArrayList<>();
+	private List<RegularTaskCreateDTO> subTasks = new ArrayList<>();
 
 	// TODO: might need to add TaskInfo here
 
@@ -54,12 +54,4 @@ public class ChoiceTaskCreateDTO extends TaskCreateDTO<ChoiceTask> {
 		return ChoiceTask.class;
 	}
 
-	@Override
-	public void validate() {
-		// Validate RegularTasks and this ChoiceTask to have same Skill
-		if (!tasks.stream().allMatch(t -> Objects.equals(t.getSkill().getId(), getSkill().getId()))) {
-			errors.rejectValue("tasks", "skillOfTasksNotMatching",
-					"RegularTask is not in same Skill as ChoiceTask");
-		}
-	}
 }
