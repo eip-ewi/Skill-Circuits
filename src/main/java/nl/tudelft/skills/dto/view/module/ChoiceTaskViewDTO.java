@@ -18,6 +18,7 @@
 package nl.tudelft.skills.dto.view.module;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -39,12 +40,22 @@ public class ChoiceTaskViewDTO extends TaskViewDTO<ChoiceTask> {
 	private Integer minTasks;
 
 	@NotNull
-	@PostApply
 	@EqualsAndHashCode.Exclude
 	private List<RegularTaskViewDTO> tasks;
 
 	@NotNull
 	private Integer completedTasks;
 
-	// TODO: completion handling needs to be considered more concretely in the follow-up MR
+	// TODO: completion handling
+	@Override
+	public void postApply() {
+		super.postApply();
+		tasks = data.getTasks().stream()
+				.map(taskInfo -> {
+					RegularTaskViewDTO dto = getMapper().map(taskInfo.getTask(), RegularTaskViewDTO.class);
+					dto.postApply();
+					return dto;
+				})
+				.collect(Collectors.toList());
+	}
 }
