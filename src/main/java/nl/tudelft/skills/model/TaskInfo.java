@@ -51,5 +51,6 @@ public class TaskInfo {
 	@OneToOne(cascade = CascadeType.ALL)
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
+	// TODO: maybe make this RegularTask?
 	private Task task;
 }

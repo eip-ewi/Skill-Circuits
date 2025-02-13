@@ -23,12 +23,18 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <th:block layout:fragment="item">
-        <span
-            th:id="|item-${item.id}-icon|"
-            th:class="|fa-solid fa-${item.taskInfo.type.icon} item__icon|"
-            th:bgcolor="green"
-            th:data-completed="${level == 'module'} ? ${item.taskInfo.completed ? 'true' : ''} : ${''}"
-            th:data-type="${item.taskInfo.type.icon}"
-            th:classappend="${level == 'module'} ? ${item.taskInfo.completed ? 'completed' : ''} : ${''}"></span>
+        <hr th:if="${canEdit}" data-edit="only" class="item__separation" />
+        <!-- TODO correctly display ChoiceTask properties -->
+        <th:block>
+            <!-- TODO would be best to avoid overriding of "item" -->
+            <th:block th:each="item: ${item.tasks}">
+                <li layout:replace="~{task/view :: item}"></li>
+            </th:block>
+        </th:block>
+        <li th:text="${item.name}"></li>
+        <hr
+            class="item__separation"
+            data-edit="only"
+            th:if="${canEdit} and (${iter == null} or ${iter.size - iter.count} == 0)" />
     </th:block>
 </html>
