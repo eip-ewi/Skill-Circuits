@@ -27,31 +27,40 @@ function createTaskSeparation(): JQuery {
 }
 
 /**
- * Creates a new item.
+ * Creates a new regular or choice task.
+ *
+ * @param button    The button that was clicked.
+ * @param type      The type of task to add ("RegularTask" or "ChoiceTask").
  */
-function createItem(): void {
-    const button = $(this);
-    const blockId = button.data("block");
+function createItem(button: JQuery, type: String): void {
+    $(".item__create *").trigger("blur");
 
-    // Create a new task
-    const elem = $("#create-task").clone(true);
-    elem.removeClass("hidden");
-    elem.children("input[name='skill.id']").val(blockId);
+    if (type === "RegularTask") {
+        const parentElement = button.closest(".item__create");
+        const blockId = parentElement.data("block");
 
-    // Create a unique id for the new task element for event handling
-    const taskList = button.closest("ul").find("ul").first();
-    elem.attr("id", createUniqueNewTaskId(blockId, taskList));
+        // Create a new task
+        const elem = $("#create-task").clone(true);
+        elem.removeClass("hidden");
+        elem.children("input[name='skill.id']").val(blockId);
 
-    // Add the task and separation to the task list
-    // Creating a task is always in edit mode, so the separation is necessary for drag and drop handling
-    // If it is the first task, two separations need to be added
-    if (taskList.find(".item").length === 0) {
+        // Create a unique id for the new task element for event handling
+        const taskList = parentElement.siblings(".items").first();
+        elem.attr("id", createUniqueNewTaskId(blockId, taskList));
+
+        // Add the task and separation to the task list
+        // Creating a task is always in edit mode, so the separation is necessary for drag and drop handling
+        // If it is the first task, two separations need to be added
+        if (taskList.find(".item").length === 0) {
+            taskList.prepend(createTaskSeparation());
+        }
+        // As the <ul> has flex-direction: column-reverse we prepend the new task to have it at the end of the list
+        taskList.prepend(elem);
         taskList.prepend(createTaskSeparation());
+        elem.find("input[name='time']").trigger("focus");
+    } else if (type == "ChoiceTask") {
+        // TODO adding ChoiceTasks
     }
-    // As the <ul> has flex-direction: column-reverse we prepend the new task to have it at the end of the list
-    taskList.prepend(elem);
-    taskList.prepend(createTaskSeparation());
-    elem.find("input[name='time']").trigger("focus");
 }
 
 /**
@@ -75,18 +84,6 @@ function createUniqueNewTaskId(blockId: number, taskList: JQuery): string {
     return `new-task-${blockId}-${idSuffix}`;
 }
 
-/**
- * Adds the event listeners to elements for the creation of items.
- */
-function createItemEventListeners(): void {
-    $(".item__create").on("click", createItem);
-}
-
 if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
     module.exports.createUniqueNewTaskId = createUniqueNewTaskId;
-} else {
-    // For the browser view, add the event listeners
-    document.addEventListener("DOMContentLoaded", function () {
-        createItemEventListeners();
-    });
 }

@@ -39,7 +39,6 @@
                 <div data-edit="always" th:id="|${id}-content|" class="item__content">
                     <th:block layout:fragment="item-before-content"></th:block>
                     <th:block layout:fragment="item-name">
-                        <!-- TODO the below needs adjustments for ChoiceTasks -->
                         <th:block
                             th:with="itemName = ${level == 'module' and item.taskType == 'RegularTask'} ? ${item.taskInfo.name} : ${item.name}">
                             <span

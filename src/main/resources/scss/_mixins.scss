@@ -35,3 +35,20 @@
         display: none;
     }
 }
+
+@mixin button-list {
+    & > ul {
+        background-color: var(--primary-light);
+        border: 1px solid var(--primary-dark);
+        display: flex;
+        flex-direction: column;
+        list-style: none;
+        position: absolute;
+
+        & > li > button:hover,
+        button:focus-visible {
+            background-color: var(--primary-green);
+            color: var(--primary-light);
+        }
+    }
+}
