@@ -184,12 +184,38 @@
 
         & .item__delete {
             margin-right: 2rem;
+            background: white;
+            padding: 0 0.4rem;
+        }
+
+        & .choice_task__remove {
+            margin-right: 2rem;
+        }
+
+        & .item__name {
+            background-color: white;
+            font-weight: bold;
+            padding: 0 0.3rem;
+        }
+    }
+
+    &__name {
+        background: white;
+        padding: 0 0.3rem;
+
+        & input {
+            margin-left: 0.2rem;
         }
     }
 
     &__min_tasks {
-        width: 1.5rem;
-        margin-left: 1rem;
+        background-color: white;
+        padding: 0 0.3rem;
+        margin-left: 0.5rem;
+
+        & input {
+            width: 1.5rem;
+        }
     }
 
     &__items {
@@ -205,14 +231,22 @@
     }
 }
 
-.block:not([data-editing="true"]) .choice_task__items::before {
-    top: -1.2rem;
-    bottom: -0.6rem;
-    border: 3px solid #939393;
+.block:not([data-editing="true"]) {
+    .choice_task__items::before {
+        top: -1.2rem;
+        bottom: -0.6rem;
+        border: 3px solid #939393;
+    }
+
+    .choice_task__header {
+        margin-left: 0.45rem;
+    }
 }
 
-.block[data-editing="true"] .choice_task__items::before {
-    top: -1.2rem;
-    bottom: -0.6rem;
-    border: 3px solid #939393;
+.block[data-editing="true"] {
+    .choice_task__items::before {
+        top: -1.2rem;
+        bottom: -0.6rem;
+        border: 3px solid #939393;
+    }
 }

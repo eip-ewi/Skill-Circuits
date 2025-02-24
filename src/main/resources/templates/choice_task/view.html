@@ -35,10 +35,8 @@
         <input type="hidden" name="skill.id" th:value="${item.skill.id}" />
         <input type="hidden" name="taskType" value="ChoiceTask" />
 
-        <!-- TODO correctly display ChoiceTask properties -->
         <span class="item choice_task__header" data-edit="always">
             <span data-edit="always">
-                <!-- Before task -->
                 <input
                     th:if="${canEdit}"
                     aria-label="Selected"
@@ -46,52 +44,59 @@
                     class="hidden"
                     type="checkbox"
                     th:value="${item.id}" />
-                <span
-                    th:if="${canEdit}"
-                    class="fa-solid fa-ellipsis-vertical item__move always_visible"
-                    data-edit="only"></span>
 
-                <!-- Name -->
-                <span
-                    th:id="|${id}-name|"
-                    class="item__name"
-                    th:text="${item.name}"
-                    th:data-black="not ${canEdit} or ((${level == 'module'} and ${item.visible}) or ${level != 'module'})"></span>
-                <input
-                    th:if="${canEdit}"
-                    type="text"
-                    data-edit="only"
-                    name="name"
-                    required
-                    th:data-initial="${item.name}"
-                    aria-label="Name"
-                    placeholder="Name"
-                    th:value="${item.name}" />
+                <span data-edit="always" class="choice_task__name">
+                    <span
+                        th:if="${canEdit}"
+                        class="fa-solid fa-ellipsis-vertical item__move always_visible"
+                        data-edit="only"></span>
+                    <span
+                        th:id="|${id}-name|"
+                        class="item__name"
+                        th:text="${item.name}"
+                        th:data-black="not ${canEdit} or ((${level == 'module'} and ${item.visible}) or ${level != 'module'})"></span>
+                    <input
+                        th:if="${canEdit}"
+                        type="text"
+                        data-edit="only"
+                        name="name"
+                        required
+                        th:data-initial="${item.name}"
+                        aria-label="Name"
+                        placeholder="Name"
+                        th:value="${item.name}" />
+                </span>
 
-                <!-- Number of tasks -->
-                <span
-                    th:id="|${id}-min-tasks|"
-                    th:text="${item.minTasks}"
-                    th:data-black="not ${canEdit} or ((${level == 'module'} and ${item.visible}) or ${level != 'module'})"></span>
-                <input
-                    th:if="${canEdit}"
-                    type="text"
-                    data-edit="only"
-                    name="minTasks"
-                    required
-                    th:data-initial="${item.minTasks}"
-                    aria-label="Minimum tasks"
-                    placeholder="2"
-                    th:value="${item.minTasks}"
-                    class="choice_task__min_tasks" />
-                <span th:text="' / ' + ${item.tasks.size()}"></span>
+                <span data-edit="always" class="choice_task__min_tasks">
+                    <input
+                        th:if="${canEdit}"
+                        type="text"
+                        data-edit="only"
+                        name="minTasks"
+                        required
+                        th:data-initial="${item.minTasks}"
+                        aria-label="Minimum tasks"
+                        placeholder="2"
+                        th:value="${item.minTasks}" />
+
+                    <!-- TODO: Improve handling of conditions. Correctly handle number of completed tasks and tasks to complete (dynamic updating). -->
+                    <span th:text="${canEdit} ? 'to complete: ' :  'done: X '"></span>
+                    <span
+                        th:if="${canEdit}"
+                        th:id="|${id}-min-tasks|"
+                        th:text="${item.minTasks}"
+                        th:data-black="not ${canEdit} or ((${level == 'module'} and ${item.visible}) or ${level != 'module'})"></span>
+                    <span
+                        th:text="' / ' + (${canEdit} ? ${item.tasks.size()} : ${item.minTasks})"
+                        data-edit="always"></span>
+                </span>
             </span>
 
             <!-- Delete (teacher) and remove from path (student) -->
             <button
                 th:if="${not canEdit}"
                 name="removeFromPath"
-                class="circuit__button__symbol fa-solid fa-trash"
+                class="circuit__button__symbol fa-solid fa-trash choice_task__remove"
                 th:classappend="${item.completedTasks >= item.minTasks} ? 'hidden' : ''"
                 style="margin-left: auto"
                 title="Remove task from your path"
