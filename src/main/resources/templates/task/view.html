@@ -95,7 +95,7 @@
                     <span data-edit="only" class="fa-solid fa-link always_visible"></span>
                 </div>
                 <button
-                    th:if="${not canEdit}"
+                    th:if="${not canEdit and not item.isInChoiceTask}"
                     name="removeFromPath"
                     class="circuit__button__symbol fa-solid fa-trash"
                     th:classappend="${item.taskInfo.completed} ? 'hidden' : ''"

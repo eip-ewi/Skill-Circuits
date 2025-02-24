@@ -54,6 +54,7 @@ public class ChoiceTaskViewDTO extends TaskViewDTO<ChoiceTask> {
 				.map(taskInfo -> {
 					RegularTaskViewDTO dto = getMapper().map(taskInfo.getTask(), RegularTaskViewDTO.class);
 					dto.postApply();
+					dto.setIsInChoiceTask(true);
 					return dto;
 				})
 				.collect(Collectors.toList());
