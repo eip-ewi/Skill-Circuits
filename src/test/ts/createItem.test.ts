@@ -1,11 +1,11 @@
 // @ts-ignore
-import {createUniqueNewTaskId} from "../../main/ts/createItem.ts";
+import {createUniqueNewTaskIdPostfix} from "../../main/ts/createItem.ts";
 
 test("No task exists", () => {
     const taskList = document.createElement("ul");
     document.body.append(taskList);
 
-    expect(createUniqueNewTaskId(10, $(taskList))).toBe("new-task-10-0");
+    expect(createUniqueNewTaskIdPostfix($(taskList))).toBe(0);
 });
 
 test("Only old task exists", () => {
@@ -16,7 +16,7 @@ test("Only old task exists", () => {
     taskList.append(task);
     document.body.append(taskList);
 
-    expect(createUniqueNewTaskId(10, $(taskList))).toBe("new-task-10-0");
+    expect(createUniqueNewTaskIdPostfix($(taskList))).toBe(0);
 });
 
 test("New tasks exist", () => {
@@ -33,6 +33,6 @@ test("New tasks exist", () => {
     taskList.append(task2);
     document.body.append(taskList);
 
-    // Suffix should be the highest value + 1 (here: 2 + 1 = 3)
-    expect(createUniqueNewTaskId(10, $(taskList))).toBe("new-task-10-3");
+    // Postfix should be the highest value + 1 (here: 2 + 1 = 3)
+    expect(createUniqueNewTaskIdPostfix($(taskList))).toBe(3);
 });

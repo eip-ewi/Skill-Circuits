@@ -114,7 +114,6 @@
         height: 0.4rem;
         background-color: var(--primary-light);
         margin: 0;
-        position: relative;
 
         &.drag_over {
             height: 1.5rem;
@@ -170,10 +169,6 @@
     padding: 0.25rem;
 }
 
-.task {
-    position: relative;
-}
-
 .choice_task {
     &__header {
         justify-content: space-between;
@@ -214,7 +209,7 @@
         margin-left: 0.5rem;
 
         & input {
-            width: 1.5rem;
+            width: 1.8rem;
         }
     }
 
@@ -236,6 +231,7 @@
         top: -1.2rem;
         bottom: -0.6rem;
         border: 3px solid #939393;
+        z-index: -1;
     }
 
     .choice_task__header {
@@ -248,5 +244,6 @@
         top: -1.2rem;
         bottom: -0.6rem;
         border: 3px solid #939393;
+        z-index: -1;
     }
 }

@@ -25,87 +25,91 @@
     <th:block layout:fragment="item">
         <hr th:if="${canEdit}" data-edit="only" class="item__separation" />
 
-        <div data-edit="always" class="choice_task__items">
-            <!-- TODO would be best to avoid overriding of "item" and "iter" -->
-            <th:block th:each="item, iter : ${item.tasks}">
-                <li layout:replace="~{task/view :: item}"></li>
-            </th:block>
-        </div>
+        <li data-edit="always">
+            <input type="hidden" name="skill.id" th:value="${item.skill.id}" />
+            <input type="hidden" name="taskType" value="ChoiceTask" />
 
-        <input type="hidden" name="skill.id" th:value="${item.skill.id}" />
-        <input type="hidden" name="taskType" value="ChoiceTask" />
+            <span class="item choice_task__header" data-edit="always">
+                <span data-edit="always">
+                    <input
+                        th:if="${canEdit}"
+                        aria-label="Selected"
+                        name="selected"
+                        class="hidden"
+                        type="checkbox"
+                        th:value="${item.id}" />
 
-        <span class="item choice_task__header" data-edit="always">
-            <span data-edit="always">
-                <input
+                    <span data-edit="always" class="choice_task__name">
+                        <span
+                            th:if="${canEdit}"
+                            class="fa-solid fa-ellipsis-vertical item__move always_visible"
+                            data-edit="only"></span>
+                        <span
+                            th:id="|${id}-name|"
+                            class="item__name"
+                            th:text="${item.name}"
+                            th:data-black="not ${canEdit} or ((${level == 'module'} and ${item.visible}) or ${level != 'module'})"></span>
+                        <input
+                            th:if="${canEdit}"
+                            type="text"
+                            data-edit="only"
+                            name="name"
+                            required
+                            th:data-initial="${item.name}"
+                            aria-label="Name"
+                            placeholder="Name"
+                            th:value="${item.name}" />
+                    </span>
+
+                    <span data-edit="always" class="choice_task__min_tasks">
+                        <input
+                            th:if="${canEdit}"
+                            type="text"
+                            data-edit="only"
+                            name="minTasks"
+                            required
+                            th:data-initial="${item.minTasks}"
+                            aria-label="Minimum tasks"
+                            placeholder="Min."
+                            th:value="${item.minTasks}" />
+
+                        <!-- TODO: Improve handling of conditions. -->
+                        <!-- TODO: Correctly handle number of completed tasks and tasks to complete (dynamic updating). -->
+                        <span th:text="${canEdit} ? 'to complete: ' :  'done: X '"></span>
+                        <span
+                            th:if="${canEdit}"
+                            th:id="|${id}-min-tasks|"
+                            th:text="${item.minTasks}"
+                            th:data-black="not ${canEdit} or ((${level == 'module'} and ${item.visible}) or ${level != 'module'})"></span>
+                        <span
+                            th:text="' / ' + (${canEdit} ? ${item.tasks.size()} : ${item.minTasks})"
+                            data-edit="always"></span>
+                    </span>
+                </span>
+
+                <!-- Delete (teacher) and remove from path (student) -->
+                <button
+                    th:if="${not canEdit}"
+                    name="removeFromPath"
+                    class="circuit__button__symbol fa-solid fa-trash choice_task__remove"
+                    th:classappend="${item.completedTasks >= item.minTasks} ? 'hidden' : ''"
+                    style="margin-left: auto"
+                    title="Remove task from your path"
+                    onclick="removeTaskFromEditedSkill(this)"></button>
+                <button
                     th:if="${canEdit}"
-                    aria-label="Selected"
-                    name="selected"
-                    class="hidden"
-                    type="checkbox"
-                    th:value="${item.id}" />
-
-                <span data-edit="always" class="choice_task__name">
-                    <span
-                        th:if="${canEdit}"
-                        class="fa-solid fa-ellipsis-vertical item__move always_visible"
-                        data-edit="only"></span>
-                    <span
-                        th:id="|${id}-name|"
-                        class="item__name"
-                        th:text="${item.name}"
-                        th:data-black="not ${canEdit} or ((${level == 'module'} and ${item.visible}) or ${level != 'module'})"></span>
-                    <input
-                        th:if="${canEdit}"
-                        type="text"
-                        data-edit="only"
-                        name="name"
-                        required
-                        th:data-initial="${item.name}"
-                        aria-label="Name"
-                        placeholder="Name"
-                        th:value="${item.name}" />
-                </span>
-
-                <span data-edit="always" class="choice_task__min_tasks">
-                    <input
-                        th:if="${canEdit}"
-                        type="text"
-                        data-edit="only"
-                        name="minTasks"
-                        required
-                        th:data-initial="${item.minTasks}"
-                        aria-label="Minimum tasks"
-                        placeholder="2"
-                        th:value="${item.minTasks}" />
-
-                    <!-- TODO: Improve handling of conditions. Correctly handle number of completed tasks and tasks to complete (dynamic updating). -->
-                    <span th:text="${canEdit} ? 'to complete: ' :  'done: X '"></span>
-                    <span
-                        th:if="${canEdit}"
-                        th:id="|${id}-min-tasks|"
-                        th:text="${item.minTasks}"
-                        th:data-black="not ${canEdit} or ((${level == 'module'} and ${item.visible}) or ${level != 'module'})"></span>
-                    <span
-                        th:text="' / ' + (${canEdit} ? ${item.tasks.size()} : ${item.minTasks})"
-                        data-edit="always"></span>
-                </span>
+                    class="fa-solid fa-trash item__delete always_visible"
+                    data-edit="only"></button>
             </span>
 
-            <!-- Delete (teacher) and remove from path (student) -->
-            <button
-                th:if="${not canEdit}"
-                name="removeFromPath"
-                class="circuit__button__symbol fa-solid fa-trash choice_task__remove"
-                th:classappend="${item.completedTasks >= item.minTasks} ? 'hidden' : ''"
-                style="margin-left: auto"
-                title="Remove task from your path"
-                onclick="removeTaskFromEditedSkill(this)"></button>
-            <button
-                th:if="${canEdit}"
-                class="fa-solid fa-trash item__delete always_visible"
-                data-edit="only"></button>
-        </span>
+            <ul data-edit="always" class="choice_task__items">
+                <!-- TODO would be best to avoid overriding of "item" and "iter" -->
+                <!-- TODO reverse? -->
+                <th:block th:each="item, iter : ${item.tasks}">
+                    <li layout:replace="~{task/view :: item}"></li>
+                </th:block>
+            </ul>
+        </li>
 
         <hr
             class="item__separation"

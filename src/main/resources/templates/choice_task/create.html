@@ -23,6 +23,54 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <th:block layout:fragment="form">
-        <!-- TODO handle ChoiceTask creation -->
+        <li
+            data-edit="only"
+            th:if="${canEdit}"
+            id="create-choice-task"
+            class="hidden task"
+            data-new="true">
+            <input type="hidden" name="skill.id" />
+            <input type="hidden" name="taskType" value="ChoiceTask" />
+
+            <span class="item choice_task__header" data-edit="only">
+                <span data-edit="only">
+                    <span data-edit="only" class="choice_task__name">
+                        <span
+                            class="fa-solid fa-ellipsis-vertical item__move always_visible"
+                            data-edit="only"></span>
+                        <input
+                            type="text"
+                            data-edit="only"
+                            name="name"
+                            required
+                            aria-label="Name"
+                            placeholder="Name" />
+                    </span>
+
+                    <span data-edit="only" class="choice_task__min_tasks">
+                        <input
+                            type="text"
+                            data-edit="only"
+                            name="minTasks"
+                            required
+                            data-initial="1"
+                            aria-label="Minimum tasks"
+                            placeholder="Min."
+                            value="1" />
+
+                        <!-- TODO: Improve handling of conditions. -->
+                        <!-- TODO: Correctly handle number of completed tasks and tasks to complete (dynamic updating). -->
+                        <span th:id="|${id}-min-tasks|">1</span>
+                        <span data-edit="only">/ 2</span>
+                    </span>
+                </span>
+
+                <button
+                    class="fa-solid fa-trash item__delete always_visible"
+                    data-edit="only"></button>
+            </span>
+
+            <ul data-edit="only" class="choice_task__items"></ul>
+        </li>
     </th:block>
 </html>
