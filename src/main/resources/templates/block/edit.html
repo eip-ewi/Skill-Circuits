@@ -278,33 +278,6 @@
             }
             return data;
         }
-        function serialiseBlockItems(block) {
-            function serialiseItem(item, notDeletedItems) {
-                const data = {};
-                item.find("input, select").each((i, input) => {
-                    const name = $(input).attr("name");
-                    const value = $(input).val();
-                    if (name.includes(".")) {
-                        if (!data[name.split(".")[0]]) {
-                            data[name.split(".")[0]] = {};
-                        }
-                        data[name.split(".")[0]][name.split(".")[1]] = value;
-                    } else data[name] = value;
-                });
-                // Reverse the item order and get item index
-                data["index"] = notDeletedItems.length - 1 - notDeletedItems.index(item);
-
-                data["new"] = item.data("new") === true;
-                data["delete"] = item.data("delete") === true;
-                return data;
-            }
-
-            const items = block.children(".items").find(".item");
-            const notDeletedItems = items.filter(function () {
-                return !$(this).data("delete");
-            });
-            return items.map((i, item) => serialiseItem($(item), notDeletedItems)).toArray();
-        }
 
         function configureBlockEvents(block) {
             block.find(".block__edit").click(editBlock);

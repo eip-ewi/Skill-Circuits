@@ -117,6 +117,7 @@
         <div layout:replace="~{block/view :: script}"></div>
         <div layout:replace="~{block/move :: script}"></div>
         <div layout:replace="~{block/connect :: script}"></div>
+        <script th:if="${canEdit}" th:src="@{/js/serialiseItems.js}"></script>
 
         <div layout:replace="~{item/delete :: script}"></div>
 
