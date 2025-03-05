@@ -24,6 +24,7 @@ import javax.validation.constraints.NotNull;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import nl.tudelft.skills.dto.patch.RegularTaskPatchDTO;
 import nl.tudelft.skills.model.ChoiceTask;
 
 @Data
@@ -38,7 +39,10 @@ public class ChoiceTaskCreateDTO extends TaskCreateDTO<ChoiceTask> {
 	private Integer minTasks;
 	@NotNull
 	@Builder.Default
-	private List<RegularTaskCreateDTO> subTasks = new ArrayList<>();
+	private List<RegularTaskCreateDTO> newSubTasks = new ArrayList<>();
+	@NotNull
+	@Builder.Default
+	private List<RegularTaskPatchDTO> updatedSubTasks = new ArrayList<>();
 
 	@Override
 	protected void postApply(ChoiceTask data) {

@@ -1,3 +1,21 @@
+/*
+ * Skill Circuits
+ * Copyright (C) 2022 - Delft University of Technology
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 /**
  * Serialise items of a given block.
  *
@@ -68,13 +86,16 @@ function serialiseChoiceTask(item: JQuery, index: number) {
     const notDeletedItems = subTasks.filter(function () {
         return !$(this).data("delete");
     });
-    data["subTasks"] = subTasks
+    const subTaskData = subTasks
         .map((_, item) => {
             // TODO: also reverse indices?
             const index = notDeletedItems.index(item);
             return serialiseItem($(item), index);
         })
         .toArray();
+
+    data["updatedSubTasks"] = subTaskData.filter(item => !item["new"] && !item["delete"]);
+    data["newSubTasks"] = subTaskData.filter(item => item["new"]);
 
     return data;
 }

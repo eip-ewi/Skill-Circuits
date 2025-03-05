@@ -851,7 +851,8 @@ public class SkillServiceTest {
 				.skill(SkillIdDTO.builder().id(skill.getId()).build()).index(4).build();
 
 		// Patch task
-		List<Task> tasks = skillService.patchTasks(skill, List.of(regularTaskDTO));
+		List<Task> tasks = skillService.patchTasks(skill, Set.of(db.getPathFinderPath()),
+				List.of(regularTaskDTO));
 
 		// Assert on the task attributes
 		assertThat(tasks).hasSize(1);
@@ -862,6 +863,7 @@ public class SkillServiceTest {
 				.findFirst();
 		assertThat(createdRegularTask).isNotEmpty();
 		assertThat(regularTaskRepository.findByIdOrThrow(taskId)).isEqualTo(createdRegularTask.get());
+		// Paths should not be updated since they should only be used for new tasks
 		assertOnRegularTaskAttributes(createdRegularTask.get(), "Test Task", 4, skill, Set.of());
 	}
 
