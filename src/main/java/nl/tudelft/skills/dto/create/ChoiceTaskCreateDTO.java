@@ -46,6 +46,7 @@ public class ChoiceTaskCreateDTO extends TaskCreateDTO<ChoiceTask> {
 
 	@Override
 	protected void postApply(ChoiceTask data) {
+		super.postApply(data);
 		if (name != null && name.isBlank()) {
 			data.setName(null);
 		}

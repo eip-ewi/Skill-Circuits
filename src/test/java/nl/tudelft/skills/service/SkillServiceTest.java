@@ -832,7 +832,7 @@ public class SkillServiceTest {
 				.skill(SkillIdDTO.builder().id(skill.getId()).build()).index(4).build();
 
 		// Save task
-		RegularTask task = skillService.saveTaskFromRegularTaskDto(regularTaskDTO, skill,
+		RegularTask task = skillService.createRegularTask(regularTaskDTO, skill,
 				Set.of(db.getPathFinderPath()));
 
 		// Assert on the task attributes

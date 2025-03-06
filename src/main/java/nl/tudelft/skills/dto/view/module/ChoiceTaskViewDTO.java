@@ -44,6 +44,7 @@ public class ChoiceTaskViewDTO extends TaskViewDTO<ChoiceTask> {
 	private List<RegularTaskViewDTO> tasks;
 
 	@NotNull
+	@Builder.Default
 	private Integer completedTasks = 0;
 
 	// TODO: completion handling
