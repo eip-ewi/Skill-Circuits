@@ -64,15 +64,13 @@ function serialiseItem(item: JQuery, index: number) {
  * @param index     The index that should be assigned to the item.
  */
 function serialiseChoiceTask(item: JQuery, index: number) {
-    // TODO: handle patching
-
     const data = {};
     // serialise direct children (hidden fields)
     item.children("input").each((_, input) => {
         serialiseInput($(input), data);
     });
-    // serialise header
-    item.find(".choice_task__header")
+    // serialise header and footer
+    item.find(".choice_task__header, .choice_task__footer")
         .find("input, select")
         .each((_, input) => {
             serialiseInput($(input), data);

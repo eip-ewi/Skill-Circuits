@@ -61,31 +61,6 @@
                             placeholder="Name"
                             th:value="${item.name}" />
                     </span>
-
-                    <span data-edit="always" class="choice_task__min_tasks">
-                        <input
-                            th:if="${canEdit}"
-                            type="text"
-                            data-edit="only"
-                            name="minTasks"
-                            required
-                            th:data-initial="${item.minTasks}"
-                            aria-label="Minimum tasks"
-                            placeholder="Min."
-                            th:value="${item.minTasks}" />
-
-                        <!-- TODO: Improve handling of conditions. -->
-                        <!-- TODO: Correctly handle number of completed tasks and tasks to complete (dynamic updating). -->
-                        <span th:text="${canEdit} ? 'to complete: ' :  'done: X '"></span>
-                        <span
-                            th:if="${canEdit}"
-                            th:id="|${id}-min-tasks|"
-                            th:text="${item.minTasks}"
-                            th:data-black="not ${canEdit} or ((${level == 'module'} and ${item.visible}) or ${level != 'module'})"></span>
-                        <span
-                            th:text="' / ' + (${canEdit} ? ${item.tasks.size()} : ${item.minTasks})"
-                            data-edit="always"></span>
-                    </span>
                 </span>
 
                 <!-- Delete (teacher) and remove from path (student) -->
@@ -110,6 +85,32 @@
                     <li layout:replace="~{task/view :: item}"></li>
                 </th:block>
             </ul>
+
+            <span class="item choice_task__footer" data-edit="always">
+                <span data-edit="always" class="choice_task__min_tasks">
+                    <!-- TODO: Improve handling of conditions. -->
+                    <!-- TODO: Correctly handle number of completed tasks and tasks to complete (dynamic updating). -->
+                    <span
+                        th:text="${canEdit} ? 'to complete: ' :  'Choose X (more)'"
+                        data-edit="always"></span>
+                    <span
+                        th:if="${canEdit}"
+                        th:id="|${id}-min-tasks|"
+                        th:text="${item.minTasks}"
+                        th:data-black="not ${canEdit} or ((${level == 'module'} and ${item.visible}) or ${level != 'module'})"></span>
+
+                    <input
+                        th:if="${canEdit}"
+                        type="text"
+                        data-edit="only"
+                        name="minTasks"
+                        required
+                        th:data-initial="${item.minTasks}"
+                        aria-label="Minimum tasks"
+                        placeholder="Min."
+                        th:value="${item.minTasks}" />
+                </span>
+            </span>
         </li>
 
         <hr
