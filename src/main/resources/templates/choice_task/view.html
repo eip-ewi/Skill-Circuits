@@ -25,12 +25,19 @@
     <th:block layout:fragment="item">
         <hr th:if="${canEdit}" data-edit="only" class="item__separation" />
 
-        <li data-edit="always" class="task">
+        <li
+            data-edit="always"
+            class="task choice_task"
+            th:with="id = ${path == null} ? |item-${item.id}| : |item-${item.id}-${path.id}|"
+            th:id="${id}"
+            th:data-item="${item.id}"
+            th:data-path-ids="${level == 'module'} ? ${item.pathIds} : ${null}"
+            th:data-index-initial="${iter == null} ? 0 : ${iter.size - iter.count}">
             <input type="hidden" name="skill.id" th:value="${item.skill.id}" />
             <input type="hidden" name="taskType" value="ChoiceTask" />
             <input th:if="${canEdit}" name="id" type="hidden" th:value="${item.id}" />
 
-            <span class="item choice_task__header" data-edit="always">
+            <span class="choice_task__header" data-edit="always">
                 <span data-edit="always">
                     <input
                         th:if="${canEdit}"
@@ -68,7 +75,6 @@
                     th:if="${not canEdit}"
                     name="removeFromPath"
                     class="circuit__button__symbol fa-solid fa-trash choice_task__remove"
-                    th:classappend="${item.completedTasks >= item.minTasks} ? 'hidden' : ''"
                     style="margin-left: auto"
                     title="Remove task from your path"
                     onclick="removeTaskFromEditedSkill(this)"></button>
@@ -86,8 +92,11 @@
                 </th:block>
             </ul>
 
-            <span class="item choice_task__footer" data-edit="always">
-                <span data-edit="always" class="choice_task__min_tasks">
+            <span class="choice_task__footer" data-edit="always">
+                <span
+                    data-edit="always"
+                    class="choice_task__min_tasks"
+                    th:data-min-tasks="${item.minTasks}">
                     <!-- TODO: Improve handling of conditions. -->
                     <!-- TODO: Correctly handle number of completed tasks and tasks to complete (dynamic updating). -->
                     <span

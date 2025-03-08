@@ -24,13 +24,7 @@
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <th:block layout:fragment="item">
         <th:block th:each="i: ${#numbers.sequence(0, item.minTasks - 1)}">
-            <span
-                th:id="|item-${item.id}-icon|"
-                th:class="|fa-solid fa-shapes item__icon|"
-                th:bgcolor="green"
-                th:data-completed="${level == 'module'} ? ${i < item.completedTasks ? 'true' : ''} : ${''}"
-                th:classappend="${level == 'module'} ? ${i < item.completedTasks ? 'completed' : ''} : ${''}"></span>
-            <!-- TODO: is data-type needed here as well? -->
+            <span th:class="|fa-solid fa-shapes item__icon|" th:bgcolor="green"></span>
         </th:block>
     </th:block>
 </html>

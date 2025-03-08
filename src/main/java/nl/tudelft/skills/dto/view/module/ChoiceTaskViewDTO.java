@@ -43,11 +43,6 @@ public class ChoiceTaskViewDTO extends TaskViewDTO<ChoiceTask> {
 	@EqualsAndHashCode.Exclude
 	private List<RegularTaskViewDTO> tasks;
 
-	@NotNull
-	@Builder.Default
-	private Integer completedTasks = 0;
-
-	// TODO: completion handling
 	@Override
 	public void postApply() {
 		super.postApply();

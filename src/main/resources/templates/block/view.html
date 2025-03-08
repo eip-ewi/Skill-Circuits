@@ -103,6 +103,7 @@
                                 th:classappend="${(item.visible and not skillModified) or (skillModified and #sets.contains(tasksAdded.
                                 ![id], item.id))}? '' : 'hidden'"
                                 style="display: inline"
+                                th:id="|item-${item.id}-icons|"
                                 layout:insert="~{choice_task/preview :: item}"></li>
                         </th:block>
                     </th:block>
