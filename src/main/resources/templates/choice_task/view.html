@@ -99,15 +99,19 @@
                     th:data-min-tasks="${item.minTasks}">
                     <!-- TODO: Improve handling of conditions. -->
                     <!-- TODO: Correctly handle number of completed tasks and tasks to complete (dynamic updating). -->
-                    <span
-                        th:text="${canEdit} ? 'to complete: ' :  'Choose X (more)'"
-                        data-edit="always"></span>
+
+                    <!-- Student view -->
+                    <span th:if="${!canEdit}" th:id="|choice-task-${item.id}-footer|"></span>
+
+                    <!-- Teacher not in editing mode -->
                     <span
                         th:if="${canEdit}"
                         th:id="|${id}-min-tasks|"
-                        th:text="${item.minTasks}"
+                        th:text="|to complete: ${item.minTasks}|"
                         th:data-black="not ${canEdit} or ((${level == 'module'} and ${item.visible}) or ${level != 'module'})"></span>
 
+                    <!-- Teacher in editing mode -->
+                    <span th:if="${canEdit}" data-edit="only">to complete:</span>
                     <input
                         th:if="${canEdit}"
                         type="text"

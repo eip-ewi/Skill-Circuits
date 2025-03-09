@@ -248,18 +248,24 @@
 }
 
 .block:not([data-editing="true"]) {
-    .choice_task__header,
-    .choice_task__footer {
-        margin-left: 0.1rem;
+    .choice_task {
+        &__header,
+        &__footer {
+            margin-left: 0.1rem;
+        }
+
+        &__footer {
+            height: 1rem;
+        }
     }
 }
 
 .block[data-editing="true"] {
     .choice_task {
         margin-bottom: 0;
-    }
 
-    .choice_task__footer {
-        color: var(--primary-dark);
+        &__footer {
+            color: var(--primary-dark);
+        }
     }
 }
