@@ -38,36 +38,34 @@
             <input th:if="${canEdit}" name="id" type="hidden" th:value="${item.id}" />
 
             <span class="choice_task__header" data-edit="always">
-                <span data-edit="always">
+                <input
+                    th:if="${canEdit}"
+                    aria-label="Selected"
+                    name="selected"
+                    class="hidden"
+                    type="checkbox"
+                    th:value="${item.id}" />
+                <span
+                    th:if="${canEdit}"
+                    class="fa-solid fa-ellipsis-vertical item__move always_visible"
+                    data-edit="only"></span>
+
+                <span data-edit="always" class="choice_task__name">
+                    <span
+                        th:id="|${id}-name|"
+                        class="item__name"
+                        th:text="${item.name}"
+                        th:data-black="not ${canEdit} or ((${level == 'module'} and ${item.visible}) or ${level != 'module'})"></span>
                     <input
                         th:if="${canEdit}"
-                        aria-label="Selected"
-                        name="selected"
-                        class="hidden"
-                        type="checkbox"
-                        th:value="${item.id}" />
-
-                    <span data-edit="always" class="choice_task__name">
-                        <span
-                            th:if="${canEdit}"
-                            class="fa-solid fa-ellipsis-vertical item__move always_visible"
-                            data-edit="only"></span>
-                        <span
-                            th:id="|${id}-name|"
-                            class="item__name"
-                            th:text="${item.name}"
-                            th:data-black="not ${canEdit} or ((${level == 'module'} and ${item.visible}) or ${level != 'module'})"></span>
-                        <input
-                            th:if="${canEdit}"
-                            type="text"
-                            data-edit="only"
-                            name="name"
-                            required
-                            th:data-initial="${item.name}"
-                            aria-label="Name"
-                            placeholder="Name"
-                            th:value="${item.name}" />
-                    </span>
+                        type="text"
+                        data-edit="only"
+                        name="name"
+                        required
+                        th:data-initial="${item.name}"
+                        aria-label="Name"
+                        placeholder="Name"
+                        th:value="${item.name}" />
                 </span>
 
                 <!-- Delete (teacher) and remove from path (student) -->

@@ -79,6 +79,7 @@
         color: var(--darker-grey);
         cursor: grab;
         padding: 0.1rem;
+        background-color: var(--primary-light);
     }
 
     &__delete {
@@ -121,7 +122,8 @@
         }
     }
 
-    .circuit[data-moving="task"] &__separation {
+    .circuit[data-moving="task"] &__separation,
+    .circuit[data-moving="choice task"] &__separation {
         background-color: var(--grey-700);
     }
 
@@ -202,6 +204,11 @@
         }
     }
 
+    .block:not([data-editing="true"]) &__header,
+    &__footer {
+        margin-left: 0.1rem;
+    }
+
     &__header {
         position: relative;
         bottom: 0.5rem;
@@ -212,9 +219,18 @@
         font-size: 90%;
     }
 
+    .block:not([data-editing="true"]) &__footer {
+        height: 1rem;
+    }
+
+    .block[data-editing="true"] &__footer {
+        color: var(--primary-dark);
+    }
+
     &__name {
         background: white;
         padding: 0 0.1rem;
+        margin-right: auto;
 
         & input {
             margin-left: 0.2rem;
@@ -247,25 +263,6 @@
     }
 }
 
-.block:not([data-editing="true"]) {
-    .choice_task {
-        &__header,
-        &__footer {
-            margin-left: 0.1rem;
-        }
-
-        &__footer {
-            height: 1rem;
-        }
-    }
-}
-
-.block[data-editing="true"] {
-    .choice_task {
-        margin-bottom: 0;
-
-        &__footer {
-            color: var(--primary-dark);
-        }
-    }
+.block[data-editing="true"] .choice_task {
+    margin-bottom: 0;
 }
