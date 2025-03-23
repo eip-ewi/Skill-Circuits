@@ -20,10 +20,7 @@ package nl.tudelft.skills;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import javax.annotation.PostConstruct;
 
@@ -57,6 +54,8 @@ public class DevDatabaseLoader {
 	private SkillRepository skillRepository;
 	@Autowired
 	private RegularTaskRepository regularTaskRepository;
+	@Autowired
+	private ChoiceTaskRepository choiceTaskRepository;
 	@Autowired
 	private TaskInfoRepository taskInfoRepository;
 	@Autowired
@@ -614,15 +613,27 @@ public class DevDatabaseLoader {
 		experimentRunInfo.setTask(taskExperimentrun);
 		regularTaskRepository.save(taskExperimentrun);
 
+		// TODO: add more ChoiceTasks to the default data
 		TaskInfo task1Info = TaskInfo.builder().name("Task 1").time(10).build();
 		RegularTask taskTask1 = RegularTask.builder().skill(skillSimpleA).taskInfo(task1Info).build();
 		task1Info.setTask(taskTask1);
 		regularTaskRepository.save(taskTask1);
 
-		TaskInfo task2Info = TaskInfo.builder().name("Task 2").time(10).build();
-		RegularTask taskTask2 = RegularTask.builder().skill(skillSimpleA).taskInfo(task2Info).build();
-		task2Info.setTask(taskTask2);
-		regularTaskRepository.save(taskTask2);
+		TaskInfo task2bInfo = TaskInfo.builder().name("Task 2b").time(10).build();
+		RegularTask taskTask2b = RegularTask.builder().skill(skillSimpleA).taskInfo(task2bInfo).build();
+		task2bInfo.setTask(taskTask2b);
+		regularTaskRepository.save(taskTask2b);
+
+		TaskInfo task2aInfo = TaskInfo.builder().name("Task 2a").time(10).build();
+		RegularTask taskTask2a = RegularTask.builder().skill(skillSimpleA).taskInfo(task2aInfo).build();
+		task2aInfo.setTask(taskTask2a);
+		regularTaskRepository.save(taskTask2a);
+
+		ChoiceTask choiceTask2ab = ChoiceTask.builder().minTasks(1)
+				.tasks(new ArrayList<>(List.of(task2aInfo, task2bInfo))).name("Task 2 options")
+				.skill(skillSimpleA)
+				.build();
+		choiceTaskRepository.save(choiceTask2ab);
 
 		TaskInfo task3Info = TaskInfo.builder().name("Task 3").time(10).build();
 		RegularTask taskTask3 = RegularTask.builder().skill(skillSimpleB).taskInfo(task3Info).build();
