@@ -1,0 +1,54 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2025 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<!--Inspired by Queue.-->
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div layout:fragment="expired" th:if="${@authorisationService.isAuthenticated()}">
+        <dialog class="overlay" id="sessionExpiredModal">
+            <div class="confirmation">
+                <p>Your session has expired</p>
+
+                <div class="confirmation__buttons">
+                    <button onclick="toggleOverlay('sessionExpiredModal')">Close</button>
+                    <a
+                        th:href="@{/auth/login}"
+                        class="button"
+                        id="sessionExpiredLogin"
+                        onclick="toggleOverlay('sessionExpiredModal')">
+                        Log in
+                    </a>
+                </div>
+            </div>
+        </dialog>
+
+        <th:block th:if="${@authorisationService.isAuthenticated()}">
+            <script th:inline="javascript">
+                const timeout = 60 * 60;
+                setTimeout(function () {
+                    toggleOverlay("sessionExpiredModal");
+                    document.getElementById("sessionExpiredLogin").focus();
+                }, timeout * 1000);
+            </script>
+        </th:block>
+    </div>
+</html>

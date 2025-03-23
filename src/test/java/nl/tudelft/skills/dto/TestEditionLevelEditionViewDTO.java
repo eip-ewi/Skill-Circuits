@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -47,7 +47,7 @@ public class TestEditionLevelEditionViewDTO {
 	public void testModuleOrder() {
 		EditionLevelEditionViewDTO view = View.convert(db.getEditionRL(),
 				EditionLevelEditionViewDTO.class);
-		assertThat(view.getModules()).isEqualTo(List.of(View.convert(db.getModule(),
+		assertThat(view.getModulesAlphabetic()).isEqualTo(List.of(View.convert(db.getModule(),
 				EditionLevelModuleViewDTO.class),
 				View.convert(db.getModuleProofTechniques(),
 						EditionLevelModuleViewDTO.class)));
