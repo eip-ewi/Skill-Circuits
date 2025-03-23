@@ -23,17 +23,44 @@
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <th:block layout:fragment="item" th:fragment="item">
-        <!-- TODO correctly display ChoiceTask properties -->
-        <th:block>
-            <!-- TODO would be best to avoid overriding of "item" -->
-            <th:block th:each="item: ${item.tasks}">
-                <li layout:replace="~{task/preview :: item}"></li>
-            </th:block>
-        </th:block>
-        <li th:text="${item.name}"></li>
-    </th:block>
+        <li
+            data-edit="always"
+            class="task choice_task choice_task__inactive"
+            th:with="id = ${path == null} ? |item-${item.id}| : |item-${item.id}-${path.id}|"
+            th:id="${id}"
+            th:data-item="${item.id}"
+            th:data-path-ids="${level == 'module'} ? ${item.pathIds} : ${null}"
+            th:data-index-initial="${iter == null} ? 0 : ${iter.size - iter.count}">
+            <button
+                class="circuit__button__symbol choice_task__add fa-solid fa-plus"
+                title="Add task to your path"
+                onclick="addTaskToEditedSkill(this)"></button>
 
-    <script layout:fragment="script" th:inline="javascript">
-        // TODO add any necessary scripts
-    </script>
+            <div class="choice_task__container">
+                <span class="choice_task__header" data-edit="always">
+                    <span data-edit="always" class="choice_task__name">
+                        <span
+                            th:id="|${id}-name|"
+                            class="item__name"
+                            th:text="${item.name}"
+                            data-black="true"></span>
+                    </span>
+                </span>
+
+                <ul data-edit="always" class="choice_task__items">
+                    <!-- TODO would be best to avoid overriding of "item" and "iter" -->
+                    <!-- TODO reverse? -->
+                    <th:block th:each="item, iter : ${item.tasks}">
+                        <li layout:replace="~{task/view :: item}"></li>
+                    </th:block>
+                </ul>
+
+                <span class="choice_task__footer" data-edit="always">
+                    <span
+                        class="choice_task__min_tasks"
+                        th:text="'to complete: ' + ${item.minTasks}"></span>
+                </span>
+            </div>
+        </li>
+    </th:block>
 </html>

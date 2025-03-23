@@ -29,9 +29,13 @@ import org.springframework.web.server.ResponseStatusException;
 
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.EditLinkDTO;
+import nl.tudelft.skills.dto.view.module.ChoiceTaskViewDTO;
 import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
+import nl.tudelft.skills.model.ChoiceTask;
 import nl.tudelft.skills.model.RegularTask;
+import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.RegularTaskRepository;
+import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.security.AuthorisationService;
 
 @Controller
@@ -39,12 +43,14 @@ import nl.tudelft.skills.security.AuthorisationService;
 public class TaskController {
 	private final RegularTaskRepository regularTaskRepository;
 	private final AuthorisationService authorisationService;
+	private final TaskRepository taskRepository;
 
 	@Autowired
 	public TaskController(RegularTaskRepository regularTaskRepository,
-			AuthorisationService authorisationService) {
+			AuthorisationService authorisationService, TaskRepository taskRepository) {
 		this.regularTaskRepository = regularTaskRepository;
 		this.authorisationService = authorisationService;
+		this.taskRepository = taskRepository;
 	}
 
 	/**
@@ -64,8 +70,6 @@ public class TaskController {
 		return ResponseEntity.ok().build();
 	}
 
-	// TODO: getting a choice task
-
 	/**
 	 * Returns a task view for a custom path.
 	 *
@@ -76,18 +80,25 @@ public class TaskController {
 	@GetMapping("{taskId}")
 	@PreAuthorize("@authorisationService.isAuthenticated()")
 	public String getTask(@PathVariable Long taskId, Model model) {
-		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
-		if (task.getSkill().getSubmodule().getModule().getEdition().isVisible() || authorisationService
+		Task task = taskRepository.findByIdOrThrow(taskId);
+		if (!task.getSkill().getSubmodule().getModule().getEdition().isVisible() && !authorisationService
 				.isAtLeastHeadTAInEdition(task.getSkill().getSubmodule().getModule().getEdition().getId())) {
-			model.addAttribute("item", View.convert(task, RegularTaskViewDTO.class));
-			model.addAttribute("canEdit", false);
-			model.addAttribute("level", "module");
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+		}
+
+		model.addAttribute("canEdit", false);
+		model.addAttribute("level", "module");
+
+		// Return RegularTask
+		if (task instanceof RegularTask regularTask) {
+			model.addAttribute("item", View.convert(regularTask, RegularTaskViewDTO.class));
 			return "task/view";
 		}
-		throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-	}
 
-	// TODO: getting a choice task in an exploded skill
+		// Return ChoiceTask
+		model.addAttribute("item", View.convert((ChoiceTask) task, ChoiceTaskViewDTO.class));
+		return "choice_task/view";
+	}
 
 	/**
 	 * Returns task view paths overview in an exploded skill.
@@ -99,15 +110,25 @@ public class TaskController {
 	@GetMapping("{taskId}/preview")
 	@PreAuthorize("@authorisationService.isAuthenticated()")
 	public String getTaskForCustomPath(@PathVariable Long taskId, Model model) {
-		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
-		if (task.getSkill().getSubmodule().getModule().getEdition().isVisible() || authorisationService
+		// TODO create shared method with duplicated code
+		Task task = taskRepository.findByIdOrThrow(taskId);
+		if (!task.getSkill().getSubmodule().getModule().getEdition().isVisible() && !authorisationService
 				.isAtLeastHeadTAInEdition(task.getSkill().getSubmodule().getModule().getEdition().getId())) {
-			model.addAttribute("item", View.convert(task, RegularTaskViewDTO.class));
-			model.addAttribute("canEdit", false);
-			model.addAttribute("level", "module");
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+		}
+
+		model.addAttribute("canEdit", false);
+		model.addAttribute("level", "module");
+
+		// Return RegularTask
+		if (task instanceof RegularTask regularTask) {
+			model.addAttribute("item", View.convert(regularTask, RegularTaskViewDTO.class));
 			return "task/inactiveview :: item";
 		}
-		throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+
+		// Return ChoiceTask
+		model.addAttribute("item", View.convert((ChoiceTask) task, ChoiceTaskViewDTO.class));
+		return "choice_task/inactiveview :: item";
 	}
 
 }

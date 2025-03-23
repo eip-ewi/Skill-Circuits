@@ -171,7 +171,7 @@ public class PersonController {
 	public List<Long> removeTaskFromOwnPath(@AuthenticatedPerson Person authPerson,
 			@PathVariable Long taskId) {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
-		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
+		Task task = taskRepository.findByIdOrThrow(taskId);
 
 		// if first time modifying skill, put all tasks from current path in own path
 		if (!person.getSkillsModified().contains(task.getSkill())) {

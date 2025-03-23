@@ -46,6 +46,7 @@ import nl.tudelft.skills.dto.view.module.TaskViewDTO;
 import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.RegularTaskRepository;
+import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.security.AuthorisationService;
 
 @Transactional
@@ -60,11 +61,11 @@ public class TaskControllerTest extends ControllerTest {
 
 	@Autowired
 	public TaskControllerTest(RegularTaskRepository regularTaskRepository, RoleControllerApi roleApi,
-			AuthorisationService authorisationService) {
+			AuthorisationService authorisationService, TaskRepository taskRepository) {
 		this.regularTaskRepository = regularTaskRepository;
 		this.roleApi = roleApi;
 		this.authorisationService = authorisationService;
-		this.taskController = new TaskController(regularTaskRepository, authorisationService);
+		this.taskController = new TaskController(regularTaskRepository, authorisationService, taskRepository);
 	}
 
 	private String createBody() throws JsonProcessingException {

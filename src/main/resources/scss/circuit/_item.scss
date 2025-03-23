@@ -181,6 +181,14 @@
         --border-width: 2px;
     }
 
+    &__inactive {
+        display: flex;
+    }
+
+    &__container {
+        width: 90%;
+    }
+
     &__header,
     &__footer {
         justify-content: space-between;
@@ -189,19 +197,19 @@
         display: flex;
 
         & .item__delete {
-            margin-right: 2rem;
             background: white;
             padding: 0 0.4rem;
-        }
-
-        & .choice_task__remove {
-            margin-right: 2rem;
         }
 
         & .item__name {
             background-color: white;
             padding: 0 0.1rem;
         }
+    }
+
+    &__add {
+        align-self: flex-start;
+        margin-right: 0.85rem;
     }
 
     .block:not([data-editing="true"]) &__header,
