@@ -19,6 +19,7 @@ package nl.tudelft.skills.service;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -149,21 +150,21 @@ public class TaskCompletionService {
 		task.setCompletedBy(new HashSet<>());
 	}
 
+	// TODO: tests - updated and new
+
 	/**
-	 * Collects the completed tasks in an edition
+	 * Collects the completed regular tasks in an edition
 	 *
 	 * @param  scperson  The person completing the tasks
 	 * @param  editionId The edition
 	 * @return           The set of completed tasks
 	 */
-	private Set<RegularTask> getTasksDone(SCPerson scperson, long editionId) {
+	private Set<RegularTask> getRegularTasksDone(SCPerson scperson, long editionId) {
 		return scperson.getTaskCompletions().stream().map(TaskCompletion::getTask)
 				.filter(s -> Objects.equals(
 						s.getSkill().getSubmodule().getModule().getEdition().getId(), editionId))
 				.collect(Collectors.toSet());
 	}
-
-	// TODO consider completion of choice tasks below
 
 	/**
 	 * Collects the completed skills based on the given path preference and customized skills
@@ -176,12 +177,12 @@ public class TaskCompletionService {
 	 */
 	public Set<Skill> determineSkillsDone(Set<Skill> ownSkillsWithTask, SCPerson scPerson, long editionId,
 			List<PathPreference> personPathPreference) {
-		Set<RegularTask> tasksDone = getTasksDone(scPerson, editionId);
+		Set<RegularTask> tasksDone = getRegularTasksDone(scPerson, editionId);
 
 		// Completed skills from the customized skills
 		Set<Skill> ownSkillsDone = ownSkillsWithTask.stream()
-				.filter(s -> tasksDone.containsAll(scPerson.getTasksAdded().stream()
-						.filter(t -> t.getSkill().equals(s)).toList()))
+				.filter(s -> isListOfTasksCompleted(scPerson.getTasksAdded().stream()
+						.filter(t -> t.getSkill().equals(s)).toList(), tasksDone))
 				.collect(Collectors.toSet());
 
 		// Completed non-customized skills based on chosen path
@@ -189,20 +190,60 @@ public class TaskCompletionService {
 		if (personPathPreference.isEmpty() || personPathPreference.get(0).getPath() == null) {
 			skillsDone = tasksDone.stream()
 					.map(RegularTask::getSkill)
-					.filter(s -> !ownSkillsWithTask.contains(s) && tasksDone.containsAll(s.getTasks()))
+					.filter(s -> !ownSkillsWithTask.contains(s)
+							&& isListOfTasksCompleted(s.getTasks(), tasksDone))
 					.collect(Collectors.toSet());
 		} else {
 			Path personPath = personPathPreference.get(0).getPath();
 			skillsDone = tasksDone.stream()
 					.filter(t -> t.getPaths().contains(personPath))
 					.map(RegularTask::getSkill)
-					.filter(x -> !ownSkillsWithTask.contains(x) && tasksDone.containsAll(x.getTasks()
-							.stream().filter(y -> y.getPaths().contains(personPath)).toList()))
+					.filter(x -> !ownSkillsWithTask.contains(x) && isListOfTasksCompleted(x.getTasks()
+							.stream().filter(y -> y.getPaths().contains(personPath)).toList(), tasksDone))
 					.collect(Collectors.toSet());
 		}
 		skillsDone.addAll(ownSkillsDone);
 
 		return skillsDone;
+	}
+
+	/**
+	 * Determines whether a given list of tasks is completed. Considers properties of regular and choice
+	 * tasks.
+	 *
+	 * @param  tasks     The list of tasks for which completion status should be determined.
+	 * @param  tasksDone The set of regular tasks that has been completed.
+	 * @return           True if the list of tasks has been completed, else false.
+	 */
+	public boolean isListOfTasksCompleted(List<Task> tasks, Set<RegularTask> tasksDone) {
+		// Make set of tasks that are part of choice tasks
+		Set<Task> redundantRegularTasks = tasks.stream().flatMap(t -> {
+			if (t instanceof ChoiceTask choiceTask) {
+				return choiceTask.getTasks().stream().map(TaskInfo::getTask);
+			}
+			return Stream.empty();
+		}).collect(Collectors.toSet());
+
+		// Check that the regular tasks not part of choice tasks are completed
+		List<RegularTask> remainingRegularTasks = tasks.stream()
+				.filter(t -> t instanceof RegularTask && !redundantRegularTasks.contains(t))
+				.map(t -> (RegularTask) t).toList();
+		if (!tasksDone.containsAll(remainingRegularTasks))
+			return false;
+
+		// Check that the choice tasks are completed
+		List<ChoiceTask> choiceTasks = tasks.stream().filter(t -> t instanceof ChoiceTask)
+				.map(t -> (ChoiceTask) t).toList();
+		for (ChoiceTask choiceTask : choiceTasks) {
+			// Return false if it is not completed
+			long numCompleted = choiceTask.getTasks().stream()
+					.filter(t -> tasksDone.contains((RegularTask) t.getTask())).count();
+			if (numCompleted < choiceTask.getMinTasks())
+				return false;
+		}
+
+		// All tasks are completed
+		return true;
 	}
 
 	/**
