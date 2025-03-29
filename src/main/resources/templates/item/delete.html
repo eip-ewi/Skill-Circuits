@@ -22,23 +22,65 @@
     lang="en"
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <dialog layout:fragment="overlay" class="overlay" id="delete-choice-task-overlay">
+        <form id="delete-choice-task-form" class="confirmation">
+            <input id="delete-choice-task-id" name="id" type="hidden" />
+            <p>
+                Are you sure you want to delete the choice task
+                <span id="delete-choice-task-name"></span>
+                along with its subtasks?
+            </p>
+
+            <div class="confirmation__buttons">
+                <button type="button" onclick="toggleOverlay('delete-choice-task-overlay')">
+                    Cancel
+                </button>
+                <button type="button" onclick="confirmChoiceTaskDeletion()">Delete</button>
+            </div>
+        </form>
+    </dialog>
+
     <script th:if="${canEdit}" layout:fragment="script">
         function deleteItem() {
-            const item = $(this).parent();
-            if (item.data("new")) {
-                item.next(".item__separation").remove();
-                // If it is the last item, remove the last separation as well
-                if (item.siblings(".item").length === 0) {
-                    item.prev(".item__separation").remove();
+            if ($(this).closest(".task").hasClass("choice_task")) {
+                // If it is a choice task, show warning pop up
+                const task = $(this).closest(".task");
+                const name = task.find(".choice_task__name input").val();
+                if (name) {
+                    $("#delete-choice-task-name").text(`\"${name}\"`);
+                } else {
+                    $("#delete-choice-task-name").text("");
                 }
-                item.remove();
+                $("#delete-choice-task-id").val(task.attr("id"));
+                toggleOverlay("delete-choice-task-overlay");
             } else {
-                const del = item.data("delete") !== true;
-                item.data("delete", del);
-                item.attr("data-delete", del);
-                $(`#${item.attr("id")} :is(input)`).prop("disabled", del);
-                $(`#${item.attr("id")} .select`).attr("data-disabled", del);
+                const item = $(this).parent();
+                if (item.data("new")) {
+                    fullyDeleteItem(item);
+                } else {
+                    const del = item.data("delete") !== true;
+                    item.data("delete", del);
+                    item.attr("data-delete", del);
+                    $(`#${item.attr("id")} :is(input)`).prop("disabled", del);
+                    $(`#${item.attr("id")} .select`).attr("data-disabled", del);
+                }
             }
+        }
+
+        function fullyDeleteItem(item) {
+            item.next(".item__separation").remove();
+            // If it is the last item, remove the last separation as well
+            if (item.siblings(".item").length === 0) {
+                item.prev(".item__separation").remove();
+            }
+            item.remove();
+        }
+
+        function confirmChoiceTaskDeletion() {
+            const id = $("#delete-choice-task-id").val();
+            const task = $(`#${id}`);
+            fullyDeleteItem(task);
+            toggleOverlay("delete-choice-task-overlay");
         }
 
         document.addEventListener("DOMContentLoaded", function () {
