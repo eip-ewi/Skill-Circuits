@@ -95,9 +95,6 @@
                     data-edit="always"
                     class="choice_task__min_tasks"
                     th:data-min-tasks="${item.minTasks}">
-                    <!-- TODO: Improve handling of conditions. -->
-                    <!-- TODO: Correctly handle number of completed tasks and tasks to complete (dynamic updating). -->
-
                     <!-- Student view -->
                     <span th:if="${!canEdit}" th:id="|choice-task-${item.id}-footer|"></span>
 
