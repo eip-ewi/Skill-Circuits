@@ -423,15 +423,21 @@ public class SkillService {
 	 */
 	@Transactional
 	public void removeTasks(Skill skill, Set<Long> removedTasks) {
-		// TODO handling deletion of ChoiceTasks
-		Set<RegularTask> regularTasks = regularTaskRepository.findAllByIdIn(removedTasks);
-
 		// Remove tasks from custom skills
 		skill.getPersonModifiedSkill().forEach(p -> {
 			p.setTasksAdded(p.getTasksAdded().stream()
 					.filter(t -> !removedTasks.contains(t.getId())).collect(Collectors.toSet()));
 			personRepository.save(p);
 		});
+
+		// Handle choice tasks
+		Set<ChoiceTask> choiceTasks = choiceTaskRepository.findAllByIdIn(removedTasks);
+		choiceTaskRepository
+				.deleteAllByIdIn(choiceTasks.stream().map(ChoiceTask::getId).collect(Collectors.toList()));
+		skill.getTasks().removeAll(choiceTasks);
+
+		// Handle regular tasks
+		Set<RegularTask> regularTasks = regularTaskRepository.findAllByIdIn(removedTasks);
 
 		// Remove task completions, clicked links and task requirements
 		regularTasks.forEach(t -> {
@@ -443,10 +449,12 @@ public class SkillService {
 		});
 		clickedLinkService.deleteClickedLinksForTasks(regularTasks);
 
-		// Remove tasks
+		// Remove regular tasks
 		regularTaskRepository
 				.deleteAllByIdIn(regularTasks.stream().map(RegularTask::getId).collect(Collectors.toList()));
 		skill.getTasks().removeAll(regularTasks);
+
+		// Save skill
 		skillRepository.save(skill);
 	}
 

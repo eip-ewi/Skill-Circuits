@@ -300,7 +300,7 @@
                 block.find("input[name='hidden']").click(toggleRequiredTasksButton);
                 block.find("button[name='select-tasks']").click(selectRequiredTasks);
             }
-            block.find(".item__delete").click(deleteItem);
+            block.find(".item__delete").click(handleDeleteItemButton);
         }
 
         function saveEdit(block) {

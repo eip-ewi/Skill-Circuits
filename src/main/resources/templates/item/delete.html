@@ -41,7 +41,7 @@
     </dialog>
 
     <script th:if="${canEdit}" layout:fragment="script">
-        function deleteItem() {
+        function handleDeleteItemButton() {
             if ($(this).closest(".task").hasClass("choice_task")) {
                 // If it is a choice task, show warning pop up
                 const task = $(this).closest(".task");
@@ -55,36 +55,71 @@
                 toggleOverlay("delete-choice-task-overlay");
             } else {
                 const item = $(this).parent();
-                if (item.data("new")) {
-                    fullyDeleteItem(item);
-                } else {
-                    const del = item.data("delete") !== true;
-                    item.data("delete", del);
-                    item.attr("data-delete", del);
-                    $(`#${item.attr("id")} :is(input)`).prop("disabled", del);
-                    $(`#${item.attr("id")} .select`).attr("data-disabled", del);
-                }
+                deleteItem(item, false, item.data("delete") !== true);
             }
         }
 
-        function fullyDeleteItem(item) {
-            item.next(".item__separation").remove();
-            // If it is the last item, remove the last separation as well
-            if (item.siblings(".item").length === 0) {
-                item.prev(".item__separation").remove();
+        function deleteItem(item, hideIfOld, deletionStatusIfOld) {
+            if (item.data("new")) {
+                // Remove item separations
+                item.next(".item__separation").remove();
+                // If it is the last item, remove the last separation as well
+                if (item.siblings(".item:not(.hidden)").length === 0) {
+                    item.prev(".item__separation").remove();
+                }
+                // Delete item entirely
+                item.remove();
+            } else {
+                handleOldItemDeletion(item, hideIfOld, deletionStatusIfOld);
             }
-            item.remove();
+        }
+
+        function handleOldItemDeletion(item, hideItem, deletionStatus) {
+            // Remove item separations if the item will be hidden
+            if (hideItem) {
+                item.next(".item__separation").remove();
+                // If it is the last item, remove the last separation as well
+                if (item.siblings(".item:not(.hidden)").length === 0) {
+                    item.prev(".item__separation").remove();
+                }
+            }
+
+            // Set deletion status
+            item.data("delete", deletionStatus);
+            item.attr("data-delete", deletionStatus);
+            $(`#${item.attr("id")} :is(input)`).prop("disabled", deletionStatus);
+            $(`#${item.attr("id")} .select`).attr("data-disabled", deletionStatus);
+
+            // If it should be hidden, hide it
+            if (hideItem) {
+                item.addClass("hidden");
+            }
         }
 
         function confirmChoiceTaskDeletion() {
             const id = $("#delete-choice-task-id").val();
-            const task = $(`#${id}`);
-            fullyDeleteItem(task);
+            const choiceTask = $(`#${id}`);
+            const parentTaskList = choiceTask.closest(".items");
+
+            // Handle sub-tasks
+            choiceTask.find(".task").each(function () {
+                // Move out of choice task
+                const test = $(this).detach();
+                parentTaskList.append(test);
+
+                // Delete and hide task
+                deleteItem($(this), true, true);
+            });
+
+            // Handle and hide choice task
+            deleteItem(choiceTask, true, true);
+
+            // Hide overlay
             toggleOverlay("delete-choice-task-overlay");
         }
 
         document.addEventListener("DOMContentLoaded", function () {
-            $(".item__delete").click(deleteItem);
+            $(".item__delete").on("click", handleDeleteItemButton);
         });
     </script>
 </html>

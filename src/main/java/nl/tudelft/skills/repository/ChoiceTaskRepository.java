@@ -17,6 +17,9 @@
  */
 package nl.tudelft.skills.repository;
 
+import java.util.Collection;
+import java.util.Set;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
@@ -29,4 +32,7 @@ public interface ChoiceTaskRepository extends JpaRepository<ChoiceTask, Long> {
 				.orElseThrow(() -> new ResourceNotFoundException("ChoiceTask was not found: " + id));
 	}
 
+	Set<ChoiceTask> findAllByIdIn(Collection<Long> id);
+
+	void deleteAllByIdIn(Collection<Long> id);
 }
