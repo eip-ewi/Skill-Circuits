@@ -209,13 +209,12 @@
         display: flex;
 
         & .item__delete {
-            background: white;
+            background: var(--primary-light);
             padding: 0 0.4rem;
         }
 
         & .item__name {
-            background-color: white;
-            padding: 0 0.1rem;
+            padding: 0 0.2rem;
         }
     }
 
@@ -249,8 +248,8 @@
 
     &__name {
         background: white;
-        padding: 0 0.1rem;
         margin-right: auto;
+        height: 1rem;
 
         & input {
             margin-left: 0.2rem;
@@ -275,7 +274,7 @@
             position: absolute;
             right: -0.4rem;
             left: -0.4rem;
-            top: -1.13rem;
+            top: -1.12rem;
             bottom: -1.12rem;
             border: var(--border-width) solid var(--border-colour);
             z-index: -1;

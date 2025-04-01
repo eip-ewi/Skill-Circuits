@@ -53,15 +53,16 @@
                 <span data-edit="always" class="choice_task__name">
                     <span
                         th:id="|${id}-name|"
+                        th:if="${item.name} != null"
                         class="item__name"
                         th:text="${item.name}"
                         th:data-black="not ${canEdit} or ((${level == 'module'} and ${item.visible}) or ${level != 'module'})"></span>
+
                     <input
                         th:if="${canEdit}"
                         type="text"
                         data-edit="only"
                         name="name"
-                        required
                         th:data-initial="${item.name}"
                         aria-label="Name"
                         placeholder="Name"
