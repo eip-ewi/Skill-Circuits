@@ -210,6 +210,9 @@
                 delete data.checkpoint;
             }
             const items = serialiseBlockItems(block);
+            if (!validateItems(items)) {
+                return;
+            }
 
             data["newItems"] = items.filter(item => item.new);
 

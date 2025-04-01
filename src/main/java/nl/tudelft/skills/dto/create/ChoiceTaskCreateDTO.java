@@ -57,4 +57,20 @@ public class ChoiceTaskCreateDTO extends TaskCreateDTO<ChoiceTask> {
 		return ChoiceTask.class;
 	}
 
+	@Override
+	public void validate() {
+		super.validate();
+
+		int numberSubTasks = newSubTasks.size() + updatedSubTasks.size();
+		if (numberSubTasks <= 1) {
+			errors.rejectValue("newSubTasks", "notEnoughSubTasks",
+					"ChoiceTask has to contain at least two subtasks");
+			errors.rejectValue("updatedSubTasks", "notEnoughSubTasks",
+					"ChoiceTask has to contain at least two subtasks");
+		}
+		if (minTasks >= numberSubTasks) {
+			errors.rejectValue("minTasks", "invalidMinTasks",
+					"minTasks should be smaller than the number of subtasks");
+		}
+	}
 }
