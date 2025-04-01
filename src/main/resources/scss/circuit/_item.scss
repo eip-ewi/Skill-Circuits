@@ -183,7 +183,7 @@
         & .item:not(.completed) {
             color: var(--darker-grey);
 
-            & .item__button {
+            & .item__button:not(:hover):not(:focus-visible) {
                 background-color: var(--darker-grey);
             }
 
