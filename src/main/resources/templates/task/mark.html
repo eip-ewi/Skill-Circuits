@@ -204,18 +204,21 @@
                 }
             }
 
+            // Remove/add trash icon
+            if (completed > 0) {
+                choiceTask.find("[name='removeFromPath']").addClass("hidden");
+            } else {
+                choiceTask.find("[name='removeFromPath']").removeClass("hidden");
+            }
+
             const footerTextElem = $(`#choice-task-${taskId}-footer`);
             if (completed >= minTasks) {
                 choiceTask.addClass("completed");
-                // Remove/add trash icon
-                choiceTask.find("[name='removeFromPath']").addClass("hidden");
                 // Update footer and visibility
                 footerTextElem.text("");
                 footerTextElem.parent().css("display", "none");
             } else {
                 choiceTask.removeClass("completed");
-                // Remove/add trash icon
-                choiceTask.find("[name='removeFromPath']").removeClass("hidden");
                 // Update footer text and visibility
                 footerTextElem.text(
                     `Choose ${minTasks - completed}` + (completed === 0 ? "" : " more")
