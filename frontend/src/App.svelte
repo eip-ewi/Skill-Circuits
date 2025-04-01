@@ -2,6 +2,14 @@
     import Circuit from "./lib/circuit/Circuit.svelte";
     import Sidebar from "./lib/editor/Sidebar.svelte";
     import {ModuleLevel} from "./lib/data/level";
+    import {fetchAuth} from "./lib/data/auth";
+    import {onMount} from "svelte";
+
+    let authFetched = false;
+    onMount(async () => {
+        await fetchAuth(ModuleLevel, 3);
+        authFetched = true;
+    });
 </script>
 
 <header class="header">
@@ -19,9 +27,11 @@
     </button>
 </header>
 
-<Sidebar />
+{#if authFetched}
+    <Sidebar />
 
-<Circuit level={ModuleLevel}/>
+    <Circuit level={ModuleLevel} />
+{/if}
 
 <style>
 </style>

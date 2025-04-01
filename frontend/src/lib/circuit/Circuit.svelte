@@ -30,7 +30,6 @@
     onMount(async () => {
         let response: Response = await fetch(`/api/${level.circuit}/3`);
         circuit = new CircuitModel(await response.json());
-        await fetchAuth(level, 3);
 
         blocks = topoSort(circuit!.groups.flatMap(g => g.blocks));
         blockByPos = new Map();

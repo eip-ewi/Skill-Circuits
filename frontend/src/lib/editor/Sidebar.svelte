@@ -1,4 +1,6 @@
 <script lang="ts">
+    import {getAuth} from "../data/auth";
+
     let expanded = $state(true);
 
     function toggle() {
@@ -6,23 +8,25 @@
     }
 </script>
 
-<div class="sidebar" aria-expanded="{expanded}">
-    {#if expanded}
-        <button>
-            <span class="fa-solid fa-book"></span>
-            <span>Enter student mode</span>
-        </button>
-        <button onclick={toggle}>
-            <span class="fa-solid fa-chevron-left"></span>
-            <span>Collapse</span>
-        </button>
-    {:else }
-        <button onclick={toggle}>
-            <span class="fa-solid fa-chevron-right"></span>
-            <span>Expand</span>
-        </button>
-    {/if}
-</div>
+{#if getAuth().canEditModule}
+    <div class="sidebar" aria-expanded="{expanded}">
+        {#if expanded}
+            <button>
+                <span class="fa-solid fa-book"></span>
+                <span>Enter student mode</span>
+            </button>
+            <button onclick={toggle}>
+                <span class="fa-solid fa-chevron-left"></span>
+                <span>Collapse</span>
+            </button>
+        {:else }
+            <button onclick={toggle}>
+                <span class="fa-solid fa-chevron-right"></span>
+                <span>Expand</span>
+            </button>
+        {/if}
+    </div>
+{/if}
 
 <style>
     .sidebar {

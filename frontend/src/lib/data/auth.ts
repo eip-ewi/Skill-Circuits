@@ -12,6 +12,7 @@ export async function fetchAuth(level: Level, circuitId: number) {
 }
 
 interface Auth {
+    canEditModule: boolean,
     canEditBlocks: boolean,
     canEditItems: boolean,
     canCompleteItems: boolean,
