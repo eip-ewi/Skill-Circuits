@@ -179,6 +179,18 @@
     &.completed {
         --border-colour: var(--primary-green);
         --border-width: 2px;
+
+        & .item:not(.completed) {
+            color: var(--darker-grey);
+
+            & .item__button {
+                background-color: var(--darker-grey);
+            }
+
+            & .item__name {
+                color: var(--darker-grey);
+            }
+        }
     }
 
     &__inactive {
