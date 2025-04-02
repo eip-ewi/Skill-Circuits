@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 
 ## Fixed
+- [Everyone] If the new version information cannot be retrieved from GitLab, the what's new dialog is not shown. (@bbakos)
 
 ## [2.2.7]
 
