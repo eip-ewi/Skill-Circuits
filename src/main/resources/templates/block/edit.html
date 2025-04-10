@@ -257,58 +257,65 @@
                 return e.checkValidity();
             });
         }
+        function validateChoiceTask(choiceTask) {
+            // Validate that a choice task:
+            // - Contains more than one sub-task
+            // - Has minTasks < number of tasks
+
+            const numTasks =
+                choiceTask["newSubTasks"].length + choiceTask["updatedSubTasks"].length;
+            const minTasks = parseInt(choiceTask["minTasks"]);
+            const invalidNumTasks = numTasks <= 1;
+            const minTasksTooHigh = minTasks >= numTasks;
+
+            // If needed, display a warning pop up
+            if (invalidNumTasks || minTasksTooHigh || minTasks <= 0) {
+                const name = choiceTask["name"];
+                let warning = "";
+
+                if (invalidNumTasks) {
+                    if (name !== "") {
+                        warning =
+                            `\"${name}\" contains ${numTasks} task(s) but it needs to contain ` +
+                            "at least 2 tasks to choose from. Please adjust this.";
+                    } else {
+                        warning =
+                            "Please make sure that choice tasks contain at least 2 tasks to choose from.";
+                    }
+                } else if (minTasksTooHigh) {
+                    if (name !== "") {
+                        warning =
+                            `The number of tasks to complete for \"${name}\" is ${minTasks} but it contains ` +
+                            `${numTasks} task(s). Please make sure that the number of tasks to ` +
+                            "complete is smaller than the total number of tasks it contains.";
+                    } else {
+                        warning =
+                            "Please make sure that the number of tasks to complete for a choice task " +
+                            "is smaller than the total number of tasks it contains.";
+                    }
+                } else if (minTasks <= 0) {
+                    if (name !== "") {
+                        warning =
+                            `The number of tasks to complete for \"${name}\" is ${minTasks} but it should be at` +
+                            " least 1. Please adjust this.";
+                    } else {
+                        warning =
+                            "Please make sure that the number of tasks to complete for a choice task is at least 1.";
+                    }
+                }
+
+                // Show warning
+                $("#choice-task-warning-text").text(warning);
+                toggleOverlay("choice-task-warning-overlay");
+                return false;
+            }
+
+            return true;
+        }
         function validateItems(items) {
             return items
                 .filter(item => item["taskType"] === "ChoiceTask")
-                .every(choiceTask => {
-                    // Validate that each choice task:
-                    // - Contains more than one sub-task
-                    // - Has minTasks < number of tasks
-
-                    const numTasks =
-                        choiceTask["newSubTasks"].length + choiceTask["updatedSubTasks"].length;
-                    const minTasks = parseInt(choiceTask["minTasks"]);
-                    const invalidNumTasks = numTasks <= 1;
-                    const minTasksTooHigh = minTasks >= numTasks;
-
-                    // If needed, display a warning pop up
-                    if (invalidNumTasks || minTasksTooHigh || minTasks === 0) {
-                        const name = choiceTask["name"];
-                        let warning = "";
-
-                        if (invalidNumTasks) {
-                            if (name !== "") {
-                                warning = `\"${name}\" contains ${numTasks} tasks to choose from. It needs to contain at least 2. Please adjust this.`;
-                            } else {
-                                warning =
-                                    "Please make sure that choice tasks contain at least two tasks to choose from.";
-                            }
-                        } else if (minTasksTooHigh) {
-                            if (name !== "") {
-                                warning = `The number of tasks to complete for \"${name}\" is ${parseInt(
-                                    choiceTask["minTasks"]
-                                )} but it contains ${numTasks} tasks. Please adjust this.`;
-                            } else {
-                                warning =
-                                    "Please make sure that the number of tasks to complete for a choice task is smaller than the total tasks it contains.";
-                            }
-                        } else if (minTasks === 0) {
-                            if (name !== "") {
-                                warning = `The minimum number of tasks for \"${name}\" is 0 but it should be at least 1. Please adjust this.`;
-                            } else {
-                                warning =
-                                    "Please make sure that the number of tasks to complete for a choice task is at least 1.";
-                            }
-                        }
-
-                        // Show warning
-                        $("#choice-task-warning-text").text(warning);
-                        toggleOverlay("choice-task-warning-overlay");
-                        return false;
-                    }
-
-                    return true;
-                });
+                .every(validateChoiceTask);
         }
         function serialiseBlockHeader(block) {
             const data = {};
