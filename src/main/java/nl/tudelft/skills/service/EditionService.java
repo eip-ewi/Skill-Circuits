@@ -17,10 +17,7 @@
  */
 package nl.tudelft.skills.service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
@@ -53,6 +50,7 @@ public class EditionService {
 	private final AbstractSkillRepository abstractSkillRepository;
 	private final SkillRepository skillRepository;
 	private final RegularTaskRepository regularTaskRepository;
+	private final ChoiceTaskRepository choiceTaskRepository;
 
 	/**
 	 * Configures the model for the module circuit view.
@@ -438,51 +436,92 @@ public class EditionService {
 			Map<Path, Path> pathMap) {
 		Map<Task, Task> taskMap = new HashMap<>();
 
-		skillMap.forEach((prev, copy) -> prev.getTasks().forEach(t -> {
-			// TODO copying of ChoiceTasks. Needs more adjustments since they contain tasks (dependency).
-			// 	Below is only temporary solution for (regular) tasks!
+		skillMap.forEach((prev, copy) -> {
+			// First, copy all RegularTasks
+			prev.getTasks().forEach(t -> {
+				if (t instanceof RegularTask regularTask) {
+					TaskInfo taskInfo = TaskInfo.builder().name(regularTask.getName())
+							.type(regularTask.getType())
+							.time(regularTask.getTime())
+							.link(regularTask.getLink()).build();
 
-			if (t instanceof RegularTask regularTask) {
-				TaskInfo taskInfo = TaskInfo.builder().name(regularTask.getName())
-						.type(regularTask.getType())
-						.time(regularTask.getTime())
-						.link(regularTask.getLink()).build();
+					// Temporary task is needed since variables need to be final
+					RegularTask tempTask = RegularTask.builder()
+							.skill(copy)
+							.taskInfo(taskInfo)
+							.idx(regularTask.getIdx())
+							.build();
+					taskInfo.setTask(tempTask);
 
-				// Temporary task is needed since variables need to be final
-				RegularTask tempTask = RegularTask.builder()
-						.skill(copy)
-						.taskInfo(taskInfo)
-						.idx(regularTask.getIdx())
-						.build();
-				taskInfo.setTask(tempTask);
+					RegularTask regularTaskCopy = regularTaskRepository.save(tempTask);
+					copy.getTasks().add(regularTaskCopy);
+					updateTaskRelations(regularTask, regularTaskCopy, skillMap, pathMap);
 
-				RegularTask task = regularTaskRepository.save(tempTask);
-				copy.getTasks().add(task);
-				taskMap.put(regularTask, task);
+					// Put in task map
+					taskMap.put(regularTask, regularTaskCopy);
+				}
+			});
 
-				regularTask.getPaths().forEach(p -> {
-					Path copiedPath = pathMap.get(p);
-					if (copiedPath != null) {
-						// This should hold for any correctly formed edition
+			// Then, copy ChoiceTasks and link contained RegularTasks to them
+			prev.getTasks().forEach(t -> {
+				if (t instanceof ChoiceTask choiceTask) {
+					// Get the copied subtasks
+					List<TaskInfo> copiedSubTasks = choiceTask.getTasks().stream().map(taskInfo -> {
+						// In any correctly formed ChoiceTask, all RegularTasks were copied in the previous step
+						// and the map will contain them
+						return ((RegularTask) taskMap.get(taskInfo.getTask())).getTaskInfo();
+					}).collect(Collectors.toList());
 
-						task.getPaths().add(copiedPath);
-						copiedPath.getTasks().add(task);
-					}
-				});
+					// Copy ChoiceTask
+					ChoiceTask choiceTaskCopy = ChoiceTask.builder().name(choiceTask.getName())
+							.minTasks(choiceTask.getMinTasks())
+							.skill(copy)
+							.idx(choiceTask.getIdx())
+							.tasks(copiedSubTasks)
+							.build();
+					choiceTaskCopy = choiceTaskRepository.save(choiceTaskCopy);
+					copy.getTasks().add(choiceTaskCopy);
+					updateTaskRelations(choiceTask, choiceTaskCopy, skillMap, pathMap);
 
-				regularTask.getRequiredFor().forEach(req -> {
-					Skill copyRequiredFor = skillMap.get(req);
-					if (copyRequiredFor != null) {
-						// This should hold for any correctly formed edition
-
-						task.getRequiredFor().add(copyRequiredFor);
-						copyRequiredFor.getRequiredTasks().add(task);
-					}
-				});
-			}
-		}));
+					// Put in task map
+					taskMap.put(choiceTask, choiceTaskCopy);
+				}
+			});
+		});
 
 		return taskMap;
+	}
+
+	/**
+	 * Updates many-to-many relations for a copied task. Sets the paths of the copied task and if it is
+	 * required for any skill, adds it to the requisites of the copy of that skill.
+	 *
+	 * @param prev     Previous task.
+	 * @param copy     Copied task.
+	 * @param skillMap The map of skills, from previous skills to the new skills.
+	 * @param pathMap  The map of paths, from previous paths to the new paths.
+	 */
+	public void updateTaskRelations(Task prev, Task copy, Map<Skill, Skill> skillMap,
+			Map<Path, Path> pathMap) {
+		prev.getPaths().forEach(p -> {
+			Path copiedPath = pathMap.get(p);
+			if (copiedPath != null) {
+				// This should hold for any correctly formed edition
+
+				copy.getPaths().add(copiedPath);
+				copiedPath.getTasks().add(copy);
+			}
+		});
+
+		prev.getRequiredFor().forEach(req -> {
+			Skill copyRequiredFor = skillMap.get(req);
+			if (copyRequiredFor != null) {
+				// This should hold for any correctly formed edition
+
+				copy.getRequiredFor().add(copyRequiredFor);
+				copyRequiredFor.getRequiredTasks().add(copy);
+			}
+		});
 	}
 
 }
