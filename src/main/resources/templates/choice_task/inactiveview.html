@@ -49,9 +49,10 @@
 
                 <ul data-edit="always" class="choice_task__items">
                     <!-- TODO would be best to avoid overriding of "item" and "iter" -->
-                    <!-- TODO reverse? -->
-                    <th:block th:each="item, iter : ${item.tasks}">
-                        <li layout:replace="~{task/view :: item}"></li>
+                    <th:block
+                        th:each="item, iter : ${item.tasks}"
+                        th:with="addedFromChoiceTask=true">
+                        <li layout:replace="~{task/inactiveview :: item}"></li>
                     </th:block>
                 </ul>
 

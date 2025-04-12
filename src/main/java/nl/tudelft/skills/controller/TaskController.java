@@ -123,6 +123,7 @@ public class TaskController {
 		// Return RegularTask
 		if (task instanceof RegularTask regularTask) {
 			model.addAttribute("item", View.convert(regularTask, RegularTaskViewDTO.class));
+			model.addAttribute("addedFromChoiceTask", false);
 			return "task/inactiveview :: item";
 		}
 

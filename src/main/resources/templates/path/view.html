@@ -40,7 +40,9 @@
                     th:each="item : ${pathItemsOuter}"
                     th:with="taskAdded = ${#sets.contains(tasksAdded.![id], item.id)}">
                     <th:block th:if="${not modified or not taskAdded}">
-                        <th:block th:if="${item.taskType} == 'RegularTask'">
+                        <th:block
+                            th:if="${item.taskType} == 'RegularTask'"
+                            th:with="addedFromChoiceTask=false">
                             <li layout:replace="~{task/inactiveview :: item}"></li>
                         </th:block>
 
