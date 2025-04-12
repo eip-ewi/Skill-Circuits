@@ -542,6 +542,8 @@ public class SkillService {
 					RegularTask updTask = regularTaskRepository.findByIdOrThrow(taskDto.getId());
 					return regularTaskRepository.save(taskDto.apply(updTask));
 				}).toList());
+		// Order by index
+		tasks.sort(Comparator.comparing(Task::getIdx));
 
 		// Set the tasks of the choice task
 		choiceTask.setTasks(tasks.stream().map(task -> ((RegularTask) task).getTaskInfo())
