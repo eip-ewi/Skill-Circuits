@@ -1918,3 +1918,22 @@ databaseChangeLog:
         - dropColumn:
             columnName: type
             tableName: task
+  # Change task info hold a regular task instead of a task
+  - changeSet:
+      id: map-task-info-to-regular-task
+      author: Fanni Fiedrich
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: task_info
+            constraintName: FKer9mcdyqf63005umklqiv1kia
+        - addForeignKeyConstraint:
+            baseColumnNames: task_id
+            baseTableName: task_info
+            constraintName: FK668gtd2qb2rvcmu9ugwtw56yy
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: regular_task
+            validate: true

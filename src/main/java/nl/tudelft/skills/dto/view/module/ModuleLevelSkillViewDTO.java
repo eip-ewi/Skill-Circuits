@@ -78,7 +78,7 @@ public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
 
 	// TODO: add tests for this method
 	public List<? extends TaskViewDTO<?>> initializeTasks() {
-		List<Task> redundantRegularTasks = data.getTasks().stream().flatMap(t -> {
+		List<RegularTask> redundantRegularTasks = data.getTasks().stream().flatMap(t -> {
 			if (t instanceof ChoiceTask choiceTask) {
 				return choiceTask.getTasks().stream().map(TaskInfo::getTask);
 			}
