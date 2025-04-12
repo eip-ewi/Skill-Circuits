@@ -417,6 +417,11 @@ public class DevDatabaseLoader {
 		do12aeInfo.setTask(taskDo12ae);
 		regularTaskRepository.save(taskDo12ae);
 
+		TaskInfo do11adInfo = TaskInfo.builder().name("Do exercise 1.1a-d").time(10).build();
+		RegularTask taskDo11ad = RegularTask.builder().skill(skillNegation).taskInfo(do11adInfo).build();
+		do11adInfo.setTask(taskDo11ad);
+		regularTaskRepository.save(taskDo11ad);
+
 		TaskInfo read11Info = TaskInfo.builder().name("Read chapter 1.1").time(10)
 				.link("https://docs.oracle.com/en/java/javase/17/docs/api/index.html").type(TaskType.READING)
 				.build();
@@ -425,10 +430,20 @@ public class DevDatabaseLoader {
 		read11Info.setTask(taskRead11);
 		regularTaskRepository.save(taskRead11);
 
-		TaskInfo do11adInfo = TaskInfo.builder().name("Do exercise 1.1a-d").time(10).build();
-		RegularTask taskDo11ad = RegularTask.builder().skill(skillNegation).taskInfo(do11adInfo).build();
-		do11adInfo.setTask(taskDo11ad);
-		regularTaskRepository.save(taskDo11ad);
+		TaskInfo watchVideoInfo = TaskInfo.builder().name("Watch video").time(10)
+				.link("https://docs.oracle.com/en/java/javase/17/docs/api/index.html").type(TaskType.VIDEO)
+				.build();
+		RegularTask taskWatchVideo = RegularTask.builder().skill(skillNegation).taskInfo(watchVideoInfo)
+				.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build();
+		watchVideoInfo.setTask(taskWatchVideo);
+		regularTaskRepository.save(taskWatchVideo);
+
+		ChoiceTask choiceTaskNegation = ChoiceTask.builder().minTasks(1)
+				.tasks(new ArrayList<>(List.of(read11Info, watchVideoInfo))).name("What are negations?")
+				.skill(skillNegation)
+				.paths(new HashSet<>(Arrays.asList(pathFinderPath)))
+				.build();
+		choiceTaskRepository.save(choiceTaskNegation);
 
 		TaskInfo read10Info = TaskInfo.builder().name("Read chapter 1.0").time(10).type(TaskType.READING)
 				.build();
@@ -613,7 +628,6 @@ public class DevDatabaseLoader {
 		experimentRunInfo.setTask(taskExperimentrun);
 		regularTaskRepository.save(taskExperimentrun);
 
-		// TODO: add more ChoiceTasks to the default data
 		TaskInfo task1Info = TaskInfo.builder().name("Task 1").time(10).build();
 		RegularTask taskTask1 = RegularTask.builder().skill(skillSimpleA).taskInfo(task1Info).build();
 		task1Info.setTask(taskTask1);
