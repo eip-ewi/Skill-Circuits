@@ -41,6 +41,7 @@
                     <span data-edit="always" class="choice_task__name">
                         <span
                             th:id="|${id}-name|"
+                            th:if="${item.name} != null"
                             class="item__name"
                             th:text="${item.name}"
                             data-black="true"></span>
