@@ -72,7 +72,7 @@ public class EditionServiceTest {
 			SubmoduleRepository submoduleRepository, AbstractSkillRepository abstractSkillRepository,
 			SkillRepository skillRepository, RegularTaskRepository regularTaskRepository,
 			TestDatabaseLoader db,
-			CopyEditionTestDatabaseLoader editionDb) {
+			CopyEditionTestDatabaseLoader editionDb, EditionService editionService) {
 		this.editionApi = editionApi;
 		this.editionRepository = editionRepository;
 		this.checkpointRepository = checkpointRepository;
@@ -86,9 +86,7 @@ public class EditionServiceTest {
 		this.db = db;
 		this.editionDb = editionDb;
 		this.localDateTime = LocalDateTime.of(2023, 1, 10, 10, 10, 0);
-		editionService = new EditionService(editionApi, editionRepository, circuitService,
-				checkpointRepository, pathRepository, moduleRepository, submoduleRepository,
-				abstractSkillRepository, skillRepository, regularTaskRepository);
+		this.editionService = editionService;
 	}
 
 	@Test

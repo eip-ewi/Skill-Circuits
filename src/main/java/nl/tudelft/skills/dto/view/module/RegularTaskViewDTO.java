@@ -36,6 +36,7 @@ public class RegularTaskViewDTO extends TaskViewDTO<RegularTask> {
 	private Integer completedCount;
 
 	@NotNull
+	@Builder.Default
 	private Boolean isInChoiceTask = false;
 
 	@Override

@@ -38,7 +38,7 @@
             </th:block>
             <th:block layout:fragment="item-decoration">
                 <button
-                    th:if="${!addedFromChoiceTask}"
+                    th:if="${!item.isInChoiceTask}"
                     class="circuit__button__symbol fa-solid fa-plus"
                     title="Add task to your path"
                     onclick="addTaskToEditedSkill(this)"></button>
