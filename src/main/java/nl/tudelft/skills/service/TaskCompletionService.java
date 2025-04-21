@@ -237,7 +237,7 @@ public class TaskCompletionService {
 		for (ChoiceTask choiceTask : choiceTasks) {
 			// Return false if it is not completed
 			long numCompleted = choiceTask.getTasks().stream()
-					.filter(t -> tasksDone.contains((RegularTask) t.getTask())).count();
+					.filter(t -> tasksDone.contains(t.getTask())).count();
 			if (numCompleted < choiceTask.getMinTasks())
 				return false;
 		}

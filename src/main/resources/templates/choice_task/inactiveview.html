@@ -49,7 +49,7 @@
                 </span>
 
                 <ul data-edit="always" class="choice_task__items">
-                    <!-- TODO would be best to avoid overriding of "item" and "iter" -->
+                    <!-- Note that item and iter are intentionally overridden here -->
                     <th:block th:each="item, iter : ${item.tasks}">
                         <li layout:replace="~{task/inactiveview :: item}"></li>
                     </th:block>

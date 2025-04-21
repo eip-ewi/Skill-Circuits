@@ -104,8 +104,7 @@
             // Handle sub-tasks
             choiceTask.find(".task").each(function () {
                 // Move out of choice task
-                const test = $(this).detach();
-                parentTaskList.append(test);
+                parentTaskList.append($(this).detach());
 
                 // Delete and hide task
                 deleteItem($(this), true, true);

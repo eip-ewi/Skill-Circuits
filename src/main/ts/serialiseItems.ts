@@ -86,7 +86,6 @@ function serialiseChoiceTask(item: JQuery, index: number) {
     });
     const subTaskData = subTasks
         .map((_, item) => {
-            // TODO: also reverse indices?
             const index = notDeletedItems.index(item);
             return serialiseItem($(item), index);
         })

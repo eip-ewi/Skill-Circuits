@@ -107,7 +107,6 @@ function appendTask(taskList: JQuery, task: JQuery): void {
     // Creating a task is always in edit mode, so the separation is necessary for drag and drop handling
     // If it is the first task, two separations need to be added
     if (taskList.find("li").length === 0) {
-        // TODO is li good
         taskList.prepend(createTaskSeparation());
     }
 

@@ -179,9 +179,12 @@
             block.attr("data-editing", false);
             block.attr("draggable", true);
 
-            const deleted = block.find(".item[data-delete='true']");
+            // Note: To include choice tasks, always select both item class and task class
+
+            const deleted = block.find(".item[data-delete='true'], .task[data-delete='true']");
             deleted.attr("data-delete", false);
             deleted.data("delete", false);
+            deleted.removeClass("hidden");
             block.find("input").prop("disabled", false);
             block.find("select").attr("data-disabled", false);
             $(`#${block.attr("id")} input:not([type="hidden"])`).each((i, field) =>
@@ -209,38 +212,73 @@
                 });
             }
 
+            // Remove all item separations
+            block.find(".item__separation").remove();
+
             // Remove the new items
-            const numNewItems = block.find(".item[data-new='true']").length;
-            block.find(".item[data-new='true']").remove();
-
-            // Remove redundant item separations
-            block.find(".item__separation").slice(0, numNewItems).remove();
-
-            const items = block.find(".item");
-            const separations = block.find(".item__separation");
-
-            // First, append an item separation, if there is one
-            if (separations.length > 0) {
-                block.find(".items")[1].appendChild(separations[0]);
-            }
+            block.find(".item[data-new='true'], .task[data-new='true']").remove();
 
             // Re-order the items and item separations
-            items.each((i, item) => {
-                block
-                    .find(".items")[1]
-                    .appendChild(
-                        block.find(`.item[data-index-initial="${items.length - i - 1}"]`)[0]
+
+            // Append the upper item separation, if there is at least one task
+            if (block.find(".item, .task").length > 0) {
+                $(block.find(".items")[1]).append(createTaskSeparation());
+            }
+
+            // Add upper level items (items not in choice tasks)
+            const notInChoiceTaskStr = ":not([data-in-choice-task-initial='true'])";
+            const upperLevelItems = block
+                .find(`.item${notInChoiceTaskStr}, .task${notInChoiceTaskStr}`)
+                .sort((itemA, itemB) => {
+                    // Reverse ordering by index
+                    return (
+                        Number($(itemB).data("indexInitial")) -
+                        Number($(itemA).data("indexInitial"))
                     );
-
-                // Append an item separation, there should always be (number of tasks) + 1 separations,
-                // if there is at least one task
-                block.find(".items")[1].appendChild(separations[i + 1]);
-
-                let link = item.querySelector("a");
-                if (link != null) {
-                    link.appendChild(item.querySelector("a + .item__content"));
-                }
+                });
+            upperLevelItems.each((_, item) => {
+                addItemBackToItemList(item, block.find(".items")[1]);
             });
+
+            // Add lower level items (items in choice tasks)
+            const choiceTasks = block.find(".choice_task");
+            choiceTasks.each((_, choiceTask) => {
+                const itemList = $(choiceTask).find(".choice_task__items")[0];
+
+                // Add initial item separation (there needs to be > 1 subtask in a valid choice task)
+                itemList.appendChild(createTaskSeparation()[0]);
+
+                // Get, sort and add items
+                $(choiceTask)
+                    .data("subtaskIdsInitial")
+                    .map(subTaskId => {
+                        return block.find(`#item-${subTaskId}`)[0];
+                    })
+                    .sort((itemA, itemB) => {
+                        // Ordering by index
+                        return (
+                            Number($(itemA).data("indexInitial")) -
+                            Number($(itemB).data("indexInitial"))
+                        );
+                    })
+                    .forEach(item => {
+                        addItemBackToItemList(item, itemList);
+                    });
+            });
+        }
+        function addItemBackToItemList(item, itemList) {
+            // Append item
+            itemList.appendChild(item);
+
+            // Append an item separation, there should always be (number of tasks) + 1 separations,
+            // if there is at least one task
+            itemList.appendChild(createTaskSeparation()[0]);
+
+            // Append link
+            let link = $(item).children("a");
+            if (link.length > 0) {
+                link.append($(item).find("a + .item__content"));
+            }
         }
         function saveEditOrCreate() {
             const block = $(this).parent().parent();
