@@ -18,14 +18,12 @@
 package nl.tudelft.skills.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.EditLinkDTO;
@@ -61,7 +59,7 @@ public class TaskController {
 	 */
 	@Transactional
 	@PatchMapping("change-link")
-	@PreAuthorize("@authorisationService.canEditRegularTask(#editLinkDTO.taskId)")
+	@PreAuthorize("@authorisationService.canEditTask(#editLinkDTO.taskId)")
 	public ResponseEntity<Void> updateTaskLink(@RequestBody EditLinkDTO editLinkDTO) {
 		RegularTask task = regularTaskRepository.findByIdOrThrow(editLinkDTO.getTaskId());
 		task.setLink(editLinkDTO.getNewLink());
@@ -78,16 +76,12 @@ public class TaskController {
 	 * @return        Html page with the task.
 	 */
 	@GetMapping("{taskId}")
-	@PreAuthorize("@authorisationService.isAuthenticated()")
+	@PreAuthorize("@authorisationService.canViewTask({#taskId})")
 	public String getTask(@PathVariable Long taskId, Model model) {
-		Task task = taskRepository.findByIdOrThrow(taskId);
-		if (!task.getSkill().getSubmodule().getModule().getEdition().isVisible() && !authorisationService
-				.isAtLeastHeadTAInEdition(task.getSkill().getSubmodule().getModule().getEdition().getId())) {
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-		}
-
 		model.addAttribute("canEdit", false);
 		model.addAttribute("level", "module");
+
+		Task task = taskRepository.findByIdOrThrow(taskId);
 
 		// Return RegularTask
 		if (task instanceof RegularTask regularTask) {
@@ -108,17 +102,12 @@ public class TaskController {
 	 * @return        Html page with the task.
 	 */
 	@GetMapping("{taskId}/preview")
-	@PreAuthorize("@authorisationService.isAuthenticated()")
+	@PreAuthorize("@authorisationService.canViewTask({#taskId})")
 	public String getTaskForCustomPath(@PathVariable Long taskId, Model model) {
-		// TODO create shared method with duplicated code
-		Task task = taskRepository.findByIdOrThrow(taskId);
-		if (!task.getSkill().getSubmodule().getModule().getEdition().isVisible() && !authorisationService
-				.isAtLeastHeadTAInEdition(task.getSkill().getSubmodule().getModule().getEdition().getId())) {
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-		}
-
 		model.addAttribute("canEdit", false);
 		model.addAttribute("level", "module");
+
+		Task task = taskRepository.findByIdOrThrow(taskId);
 
 		// Return RegularTask
 		if (task instanceof RegularTask regularTask) {

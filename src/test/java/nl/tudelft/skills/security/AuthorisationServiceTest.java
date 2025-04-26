@@ -259,6 +259,30 @@ public class AuthorisationServiceTest {
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
+	void canViewTask(String role, boolean expected) {
+		mockRole(role);
+
+		assertThat(authorisationService.canViewTask(db.getTaskDo11ad().getId()))
+				.isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,true", "STUDENT,true", ",true" })
+	void canViewTaskWithVisibility(String role, boolean expected) {
+		mockRole(role);
+
+		SCEdition edition = db.getEditionRL();
+		edition.setVisible(true);
+		editionRepository.save(edition);
+
+		assertThat(authorisationService.canViewTask(db.getTaskDo11ad().getId()))
+				.isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
 	void canViewSkill(String role, boolean expected) {
 		mockRole(role);
 		assertThat(authorisationService.canViewSkill(db.getSkillAssumption().getId())).isEqualTo(expected);
@@ -511,18 +535,18 @@ public class AuthorisationServiceTest {
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
-	void canEditRegularTask(String role, boolean expected) {
+	void canEditTask(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canEditRegularTask(db.getTaskDo10a().getId())).isEqualTo(expected);
+		assertThat(authorisationService.canEditTask(db.getTaskDo10a().getId())).isEqualTo(expected);
 	}
 
 	@Transactional
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER,true", "HEAD_TA,true", "TA,false", "STUDENT,false", ",false" })
-	void canDeleteRegularTask(String role, boolean expected) {
+	void canDeleteTask(String role, boolean expected) {
 		mockRole(role);
-		assertThat(authorisationService.canDeleteRegularTask(db.getTaskDo10a().getId())).isEqualTo(expected);
+		assertThat(authorisationService.canDeleteTask(db.getTaskDo10a().getId())).isEqualTo(expected);
 	}
 
 	@Transactional
