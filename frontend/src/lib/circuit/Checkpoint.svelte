@@ -8,6 +8,10 @@
 
     let row = $state(Math.max(...checkpoint.skills.map(s => module.getBlock(s)!.row)));
 
+    let checkpointDate = new Date(checkpoint.deadline);
+    let options: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    let formattedCheckpointDate = new Intl.DateTimeFormat('en-US', options).format(checkpointDate);
+
     onMount(() => {
         updates.subscribe("blockRowChange", rowChange => {
             if (checkpoint.skills.includes(rowChange.block.id)) {
@@ -19,24 +23,28 @@
 
 <div class="checkpoint" style:grid-row="{row + 1}">
     <span>{checkpoint.name}</span>
+    <span id="deadline">{formattedCheckpointDate}</span>
 </div>
 
 <style>
     .checkpoint {
         grid-column: 1 / -1;
         position: relative;
-        /*height: 0;*/
-        z-index: 2;
+        bottom: -5.2rem;
+        display: flex;
+        gap: .5rem;
     }
 
     .checkpoint > span {
-        position: absolute;
-        bottom: -4.5rem;
-        left: -2rem;
-        background-color: var(--background-colour);
+        /*background-color: var(--background-colour);*/
         font-size: 1.125rem;
-        padding-inline: .5rem;
+        align-self: flex-end;
         z-index: 3;
+    }
+
+    .checkpoint > #deadline{
+        font-size: smaller;
+        color: var(--on-background-colour);
     }
 
     .checkpoint::after {
@@ -45,6 +53,7 @@
         border-radius: 2px;
         inset-inline: 0;
         position: absolute;
-        bottom: -4rem;
+        align-self: flex-end;
+        bottom: -.3rem;
     }
 </style>
