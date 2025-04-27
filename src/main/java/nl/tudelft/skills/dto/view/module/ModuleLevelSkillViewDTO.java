@@ -76,7 +76,6 @@ public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
 		this.tasks = initializeTasks();
 	}
 
-	// TODO: add tests for this method
 	public List<? extends TaskViewDTO<?>> initializeTasks() {
 		List<RegularTask> redundantRegularTasks = data.getTasks().stream().flatMap(t -> {
 			if (t instanceof ChoiceTask choiceTask) {
@@ -87,11 +86,13 @@ public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
 
 		// Filter out regular tasks that are part of a choice task
 		// This prevents duplication of tasks
-		return data.getTasks().stream().filter(t -> !redundantRegularTasks.contains(t)).map(t -> {
-			TaskViewDTO<?> dto = getMapper().map(t, t.viewClass());
-			dto.postApply();
-			return dto;
-		}).toList();
+		return data.getTasks().stream().filter(
+				t -> !(t instanceof RegularTask regularTask && redundantRegularTasks.contains(regularTask)))
+				.map(t -> {
+					TaskViewDTO<?> dto = getMapper().map(t, t.viewClass());
+					dto.postApply();
+					return dto;
+				}).toList();
 	}
 
 	@Override
