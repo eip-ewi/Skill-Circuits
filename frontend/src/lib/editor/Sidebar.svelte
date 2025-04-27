@@ -2,25 +2,37 @@
     import {getAuth} from "../data/auth.svelte";
 
     let expanded = $state(true);
+    let studentMode = $state(false);
 
-    function toggle() {
+    function toggleExpand() {
         expanded = !expanded;
+    }
+
+    function toggleMode() {
+        studentMode = !studentMode;
     }
 </script>
 
 {#if getAuth().canEditModule}
     <div class="sidebar" aria-expanded="{expanded}">
         {#if expanded}
-            <button>
+            <button onclick={toggleMode}>
                 <span class="fa-solid fa-book"></span>
-                <span>Enter student mode</span>
+                <span> Enter
+                    {#if studentMode}
+                        teacher
+                    {:else }
+                        student
+                    {/if}
+                     mode
+                </span>
             </button>
-            <button onclick={toggle}>
+            <button onclick={toggleExpand}>
                 <span class="fa-solid fa-chevron-left"></span>
                 <span>Collapse</span>
             </button>
         {:else }
-            <button onclick={toggle}>
+            <button onclick={toggleExpand}>
                 <span class="fa-solid fa-chevron-right"></span>
                 <span>Expand</span>
             </button>
