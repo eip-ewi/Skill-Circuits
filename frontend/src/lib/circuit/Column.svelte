@@ -3,7 +3,7 @@
     import {BlockColumnChange, type CircuitUpdates} from "../model/circuit_updates";
     import type {Level} from "../data/level";
     import type {CircuitModel} from "../model/circuit";
-    import {getAuth} from "../data/auth";
+    import {getAuth} from "../data/auth.svelte";
 
     let { updates, circuit, level, column, height } :
         { updates: CircuitUpdates, circuit: CircuitModel, level: Level, column: number, height: number } = $props();

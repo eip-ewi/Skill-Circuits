@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {getAuth} from "../data/auth";
+    import {getAuth} from "../data/auth.svelte";
 
     let expanded = $state(true);
 

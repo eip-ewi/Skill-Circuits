@@ -1,6 +1,6 @@
 <script lang="ts">
     import type {Point} from "../util/point";
-    import {getAuth} from "../data/auth";
+    import {getAuth} from "../data/auth.svelte";
 
     let { from, to, locked = false, animated = false }: { from: Point, to: Point, locked: boolean, animated: boolean } = $props();
 

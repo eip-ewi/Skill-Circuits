@@ -9,7 +9,7 @@
     import {onMount} from "svelte";
     import Item from "./Item.svelte";
     import type {BlockModel} from "../model/block";
-    import {getAuth} from "../data/auth";
+    import {getAuth} from "../data/auth.svelte";
     import type {BlockPatch} from "../data/block_patch";
     import type {ItemPatch} from "../data/item_patch";
 

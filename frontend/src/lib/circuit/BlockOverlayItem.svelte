@@ -2,7 +2,7 @@
     import type {ItemData} from "../data/item";
     import type {Level} from "../data/level";
     import {type CircuitUpdates, ItemCompletion} from "../model/circuit_updates";
-    import {getAuth} from "../data/auth";
+    import {getAuth} from "../data/auth.svelte";
 
     let { updates, level, item: data }: { updates: CircuitUpdates, level: Level, item: ItemData } = $props();
 

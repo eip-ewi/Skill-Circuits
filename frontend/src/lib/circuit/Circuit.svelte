@@ -13,7 +13,7 @@
     import {BlockRowChange, CircuitUpdates} from "../model/circuit_updates";
     import {BlockModel} from "../model/block";
     import {CircuitModel} from "../model/circuit";
-    import {fetchAuth, getAuth} from "../data/auth";
+    import {fetchAuth, getAuth} from "../data/auth.svelte";
     import Checkpoints from "./Checkpoints.svelte";
 
     let { level, columns = 5 }: { level: Level, columns: number } = $props();
