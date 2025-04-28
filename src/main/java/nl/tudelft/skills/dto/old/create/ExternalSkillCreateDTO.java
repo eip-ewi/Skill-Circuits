@@ -17,12 +17,12 @@
  */
 package nl.tudelft.skills.dto.old.create;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
 import nl.tudelft.librador.dto.create.Create;
-import nl.tudelft.skills.dto.old.id.SCModuleIdDTO;
-import nl.tudelft.skills.dto.old.id.SkillIdDTO;
+import nl.tudelft.skills.dto.id.SCModuleId;
+import nl.tudelft.skills.dto.id.SkillId;
 import nl.tudelft.skills.model.ExternalSkill;
 
 @Data
@@ -33,9 +33,9 @@ import nl.tudelft.skills.model.ExternalSkill;
 public class ExternalSkillCreateDTO extends Create<ExternalSkill> {
 
 	@NotNull
-	private SCModuleIdDTO module;
+	private SCModuleId module;
 	@NotNull
-	private SkillIdDTO skill;
+	private SkillId skill;
 	@NotNull
 	private Integer row;
 	@NotNull

@@ -20,13 +20,11 @@ package nl.tudelft.skills.model;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import nl.tudelft.skills.dto.view.module.TaskViewDTO;
-import nl.tudelft.skills.model.labracore.SCPerson;
 
 @Data
 @Entity
@@ -35,14 +33,15 @@ import nl.tudelft.skills.model.labracore.SCPerson;
 @AllArgsConstructor
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Task {
+
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@NotNull
 	@ManyToOne
-	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
 	private Skill skill;
 
 	@NotNull
@@ -57,10 +56,10 @@ public abstract class Task {
 	private Set<Achievement> achievements = new HashSet<>();
 
 	@NotNull
+	@ManyToMany
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToMany
 	private Set<Path> paths = new HashSet<>();
 
 	@NotNull
@@ -77,6 +76,7 @@ public abstract class Task {
 	@ManyToMany(mappedBy = "tasksAdded")
 	private Set<SCPerson> personsThatAddedTask = new HashSet<>();
 
-	public abstract Class<? extends TaskViewDTO<?>> viewClass();
+    public abstract String getName();
+    public abstract void setName(String name);
 
 }

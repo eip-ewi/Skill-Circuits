@@ -17,7 +17,7 @@
  */
 package nl.tudelft.skills.dto.old.create;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import nl.tudelft.librador.dto.create.Create;
-import nl.tudelft.skills.dto.old.id.SkillIdDTO;
+import nl.tudelft.skills.dto.id.SkillId;
 import nl.tudelft.skills.model.Task;
 
 @Data
@@ -40,7 +40,7 @@ import nl.tudelft.skills.model.Task;
 })
 public abstract class TaskCreateDTO<D extends Task> extends Create<D> {
 	@NotNull
-	private SkillIdDTO skill;
+	private SkillId skill;
 	@NotNull
 	private Integer index;
 

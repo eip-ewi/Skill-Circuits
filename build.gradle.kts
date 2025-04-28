@@ -6,12 +6,12 @@ import org.gradle.internal.fingerprint.classpath.impl.ClasspathFingerprintingStr
 import java.nio.file.Files
 
 group = "nl.tudelft.skills"
-version = "2.2.7"
+version = "2526.0.0"
 
-val javaVersion = JavaVersion.VERSION_17
+val javaVersion = JavaVersion.VERSION_21
 
-val labradoorVersion = "1.4.1"
-val libradorVersion = "1.3.0"
+val labradoorVersion = "1.8.1"
+val libradorVersion = "1.5.2"
 
 val genSourceDir = file("$buildDir/skills/src/main/java")
 
@@ -45,11 +45,11 @@ plugins {
     jacoco
     `maven-publish`
 
-    id("org.springframework.boot").version("2.7.18")
-    id("io.spring.dependency-management").version("1.1.4")
-    id("com.github.ben-manes.versions").version("0.50.0")
+    id("org.springframework.boot").version("3.5.4")
+    id("io.spring.dependency-management").version("1.1.7")
+    id("com.github.ben-manes.versions").version("0.52.0")
 
-    id("com.diffplug.spotless").version("6.23.3")
+    id("com.diffplug.spotless").version("7.2.1")
 
     id("com.github.hierynomus.license").version("0.16.1")
 }
@@ -192,6 +192,12 @@ tasks.getByName<Test>("test") {
     exclude("nl/tudelft/skills/integration/**")
 }
 
+dependencyManagement {
+    imports {
+        mavenBom("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:2.18.1")
+    }
+}
+
 dependencies {
     // Labrador
     implementation("nl.tudelft.labrador:labradoor:$labradoorVersion") {
@@ -201,15 +207,10 @@ dependencies {
         exclude("org.springframework.boot", "spring-boot-devtools")
     }
 
-    // SAML
-    implementation("com.github.ulisesbocchio:spring-boot-security-saml:1.17")
-
-    // Hibernate
-    implementation("org.hibernate:hibernate-core")
-    implementation("org.hibernate:hibernate-java8")
-
     // DB Drivers / Migration
+    implementation("org.hibernate.orm:hibernate-core")
     implementation("org.liquibase:liquibase-core")
+
     implementation("com.h2database:h2")
     implementation("com.mysql:mysql-connector-j")
     implementation("org.mariadb.jdbc:mariadb-java-client")
@@ -254,9 +255,9 @@ dependencies {
     implementation("org.webjars:font-awesome:6.1.2")
     implementation("org.webjars:chartjs:3.6.0")
 
-    // Jaeger
-    implementation("io.opentracing.contrib:opentracing-spring-jaeger-starter:3.3.1")
-    implementation("io.opentracing.contrib:opentracing-spring-jaeger-web-starter:3.3.1")
+    // Reporting
+    implementation("io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter")
+    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.18.0")
 
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
@@ -276,16 +277,10 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     runtimeOnly("org.junit.jupiter:junit-jupiter-engine")
 
-    testImplementation("org.apache.httpcomponents:httpclient")
-
     // Lombok
     compileOnly("org.projectlombok:lombok")
     testCompileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     testAnnotationProcessor("org.projectlombok:lombok")
-
-    // Sentry
-    implementation("io.sentry:sentry-spring-boot-starter:5.6.0")
-    implementation("io.sentry:sentry-logback:5.6.0")
 
 }

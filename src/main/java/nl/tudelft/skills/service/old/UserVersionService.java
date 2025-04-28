@@ -20,6 +20,7 @@ package nl.tudelft.skills.service.old;
 import java.util.List;
 import java.util.Optional;
 
+import nl.tudelft.skills.service.GitLabClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
 
@@ -56,7 +57,7 @@ public class UserVersionService {
 		if (!authorisationService.isAuthenticated()) {
 			return true;
 		}
-		Person person = authorisationService.getAuthPerson();
+		Person person = authorisationService.getAuthenticatedPerson();
 
 		Optional<UserVersion> userVersion = userVersionRepository.findByPersonId(person.getId());
 
@@ -75,7 +76,7 @@ public class UserVersionService {
 		if (!authorisationService.isAuthenticated() || isUpToDate()) {
 			return "";
 		}
-		Person person = authorisationService.getAuthPerson();
+		Person person = authorisationService.getAuthenticatedPerson();
 
 		Optional<UserVersion> userVersion = userVersionRepository.findByPersonId(person.getId());
 

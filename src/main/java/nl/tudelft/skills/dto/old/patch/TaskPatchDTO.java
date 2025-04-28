@@ -17,9 +17,9 @@
  */
 package nl.tudelft.skills.dto.old.patch;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,8 +27,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import nl.tudelft.librador.dto.patch.Patch;
+import nl.tudelft.skills.enums.TaskType;
 import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.model.TaskType;
 
 @Data
 @Builder
@@ -52,10 +52,10 @@ public class TaskPatchDTO extends Patch<Task> {
 
 	@Override
 	protected void applyOneToOne() {
-		updateNonNull(name, data::setName);
-		updateNonNull(time, data::setTime);
-		updateNonNull(type, data::setType);
-		data.setLink(link == null || link.isBlank() ? null : link);
+//		updateNonNull(name, data::setName);
+//		updateNonNull(time, data::setTime);
+//		updateNonNull(type, data::setType);
+//		data.setLink(link == null || link.isBlank() ? null : link);
 	}
 
 	@Override

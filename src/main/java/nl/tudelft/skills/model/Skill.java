@@ -19,15 +19,17 @@ package nl.tudelft.skills.model;
 
 import java.util.*;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+
+import javax.annotation.Nullable;
 
 @Data
 @Entity
@@ -46,10 +48,6 @@ public class Skill extends AbstractSkill {
 
 	@NotNull
 	@Builder.Default
-	private boolean essential = true;
-
-	@NotNull
-	@Builder.Default
 	private boolean hidden = false;
 
 	@NotNull
@@ -61,25 +59,25 @@ public class Skill extends AbstractSkill {
 
 	@Setter
 	@NotNull
+	@OrderBy("idx")
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@OrderBy("idx")
-	@Cascade(CascadeType.DELETE)
+	@Cascade(CascadeType.REMOVE)
 	@OneToMany(mappedBy = "skill")
 	private List<Task> tasks = new ArrayList<>();
 
-	@NotNull
+	@Nullable
+	@ManyToOne
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToOne
 	private Checkpoint checkpoint;
 
 	@NotNull
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@Cascade(CascadeType.DELETE)
+	@Cascade(CascadeType.REMOVE)
 	@OneToMany(mappedBy = "skill")
 	private Set<ExternalSkill> externalSkills = new HashSet<>();
 

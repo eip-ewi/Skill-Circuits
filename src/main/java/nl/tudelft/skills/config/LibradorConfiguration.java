@@ -19,14 +19,15 @@ package nl.tudelft.skills.config;
 
 import static org.modelmapper.convention.MatchingStrategies.STRICT;
 
+import nl.tudelft.skills.dto.id.*;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import nl.tudelft.librador.EnableLibrador;
 import nl.tudelft.librador.LibradorConfigAdapter;
 import nl.tudelft.librador.dto.id.IdMapperBuilder;
-import nl.tudelft.skills.dto.old.id.*;
 import nl.tudelft.skills.model.*;
 
 @Configuration
@@ -35,18 +36,23 @@ public class LibradorConfiguration extends LibradorConfigAdapter {
 
 	@Override
 	protected void configure(IdMapperBuilder builder) {
-		builder.register(SCEditionIdDTO.class, SCEdition.class);
-		builder.register(SCModuleIdDTO.class, SCModule.class);
-		builder.register(SubmoduleIdDTO.class, Submodule.class);
-		builder.register(CheckpointIdDTO.class, Checkpoint.class);
-		builder.register(SkillIdDTO.class, Skill.class);
-		builder.register(TaskIdDTO.class, Task.class);
+        builder.register(AbstractSkillId.class, AbstractSkill.class);
+		builder.register(CheckpointId.class, Checkpoint.class);
+        builder.register(ChoiceTaskId.class, ChoiceTask.class);
+        builder.register(PathId.class, Path.class);
+        builder.register(RegularTaskId.class, RegularTask.class);
+		builder.register(SCEditionId.class, SCEdition.class);
+		builder.register(SCModuleId.class, SCModule.class);
+		builder.register(SubmoduleId.class, Submodule.class);
+		builder.register(SkillId.class, Skill.class);
+		builder.register(TaskId.class, Task.class);
+        builder.register(TaskInfoId.class, TaskInfo.class);
 	}
 
 	@Bean
 	@Override
-	public ModelMapper modelMapper() {
-		ModelMapper modelMapper = super.modelMapper();
+	public ModelMapper modelMapper(ApplicationContext applicationContext) {
+		ModelMapper modelMapper = super.modelMapper(applicationContext);
 		modelMapper.getConfiguration().setMatchingStrategy(STRICT);
 		return modelMapper;
 	}

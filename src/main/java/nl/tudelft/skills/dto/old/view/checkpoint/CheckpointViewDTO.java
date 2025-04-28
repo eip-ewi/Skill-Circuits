@@ -21,10 +21,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
-import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.old.view.module.ModuleLevelEditionViewDTO;
 import nl.tudelft.skills.model.Checkpoint;
@@ -52,8 +51,8 @@ public class CheckpointViewDTO extends View<Checkpoint> {
 	@Override
 	public void postApply() {
 		super.postApply();
-		this.skillIds = SpringContext.getBean(SkillRepository.class).findAllByCheckpointId(data.getId())
-				.stream().map(Skill::getId).toList();
+//		this.skillIds = SpringContext.getBean(SkillRepository.class).findAllByCheckpointId(data.getId())
+//				.stream().map(Skill::getId).toList();
 	}
 
 	public static CheckpointViewDTO empty() {

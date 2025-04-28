@@ -47,7 +47,7 @@ import org.springframework.ui.Model;
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.create.SCModuleCreateDTO;
-import nl.tudelft.skills.dto.id.SCEditionIdDTO;
+import nl.tudelft.skills.dto.id.SCEditionId;
 import nl.tudelft.skills.dto.patch.SCModulePatchDTO;
 import nl.tudelft.skills.dto.view.SkillSummaryDTO;
 import nl.tudelft.skills.model.SCModule;
@@ -99,7 +99,7 @@ public class ModuleControllerTest extends ControllerTest {
 		new ModuleController(moduleRepository, moduleService, session)
 				.createModuleInEditionSetup(
 						SCModuleCreateDTO.builder()
-								.name("Module").edition(new SCEditionIdDTO(db.getEditionRL().getId()))
+								.name("Module").edition(new SCEditionId(db.getEditionRL().getId()))
 								.build(),
 						Mockito.mock(Model.class));
 
@@ -119,7 +119,7 @@ public class ModuleControllerTest extends ControllerTest {
 				SCModulePatchDTO.builder()
 						.id(db.getModuleProofTechniques().getId())
 						.name("Module 2.0")
-						.edition(new SCEditionIdDTO(
+						.edition(new SCEditionId(
 								db.getModuleProofTechniques().getEdition().getId()))
 						.build());
 

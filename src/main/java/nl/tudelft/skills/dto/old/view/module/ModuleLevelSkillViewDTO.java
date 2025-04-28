@@ -21,13 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
 import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.BlockView;
-import nl.tudelft.skills.dto.view.ItemView;
-import nl.tudelft.skills.dto.view.checkpoint.CheckpointViewDTO;
+import nl.tudelft.skills.dto.old.view.checkpoint.CheckpointViewDTO;
+import nl.tudelft.skills.dto.old.view.module.TaskViewDTO;
 import nl.tudelft.skills.model.*;
 
 @Data
@@ -35,7 +34,7 @@ import nl.tudelft.skills.model.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
+public class ModuleLevelSkillViewDTO extends View<Skill> {
 
 	@NotNull
 	private Long id;
@@ -73,32 +72,32 @@ public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
 		this.parentIds = data.getParents().stream().map(AbstractSkill::getId).toList();
 		this.childIds = data.getChildren().stream().map(AbstractSkill::getId).toList();
 		this.requiredTaskIds = data.getRequiredTasks().stream().map(Task::getId).toList();
-		this.tasks = initializeTasks();
+//		this.tasks = initializeTasks();
 	}
 
-	public List<? extends TaskViewDTO<?>> initializeTasks() {
-		List<RegularTask> redundantRegularTasks = data.getTasks().stream().flatMap(t -> {
-			if (t instanceof ChoiceTask choiceTask) {
-				return choiceTask.getTasks().stream().map(TaskInfo::getTask);
-			}
-			return Stream.empty();
-		}).toList();
-
-		// Filter out regular tasks that are part of a choice task
-		// This prevents duplication of tasks
-		return data.getTasks().stream().filter(
-				t -> !(t instanceof RegularTask regularTask && redundantRegularTasks.contains(regularTask)))
-				.map(t -> {
-					TaskViewDTO<?> dto = getMapper().map(t, t.viewClass());
-					dto.postApply();
-					return dto;
-				}).toList();
-	}
-
-	@Override
-	public List<? extends ItemView> getItems() {
-		return tasks;
-	}
+//	public List<? extends TaskViewDTO<?>> initializeTasks() {
+//		List<RegularTask> redundantRegularTasks = data.getTasks().stream().flatMap(t -> {
+//			if (t instanceof ChoiceTask choiceTask) {
+//				return choiceTask.getTasks().stream().map(TaskInfo::getTask);
+//			}
+//			return Stream.empty();
+//		}).toList();
+//
+//		// Filter out regular tasks that are part of a choice task
+//		// This prevents duplication of tasks
+//		return data.getTasks().stream().filter(
+//				t -> !(t instanceof RegularTask regularTask && redundantRegularTasks.contains(regularTask)))
+//				.map(t -> {
+//					TaskViewDTO<?> dto = getMapper().map(t, t.viewClass());
+//					dto.postApply();
+//					return dto;
+//				}).toList();
+//	}
+//
+//	@Override
+//	public List<? extends ItemView> getItems() {
+//		return tasks;
+//	}
 
 	public List<Long> getChildIds() {
 		return childIds;

@@ -17,11 +17,11 @@
  */
 package nl.tudelft.skills.dto.old.patch;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
 import nl.tudelft.librador.dto.patch.Patch;
-import nl.tudelft.skills.dto.old.id.SCEditionIdDTO;
+import nl.tudelft.skills.dto.id.SCEditionId;
 import nl.tudelft.skills.model.SCModule;
 
 @Data
@@ -34,7 +34,7 @@ public class SCModulePatchDTO extends Patch<SCModule> {
 	@NotNull
 	private Long id;
 	private String name;
-	private SCEditionIdDTO edition;
+	private SCEditionId edition;
 
 	@Override
 	protected void applyOneToOne() {

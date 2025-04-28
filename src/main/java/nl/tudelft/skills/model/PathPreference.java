@@ -17,7 +17,7 @@
  */
 package nl.tudelft.skills.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import lombok.*;
 
@@ -29,21 +29,21 @@ import lombok.*;
 public class PathPreference {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@ManyToOne
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToOne
 	private Path path;
 
+	@ManyToOne
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToOne
 	private SCEdition edition;
 
+	@ManyToOne
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToOne
 	private SCPerson person;
 }

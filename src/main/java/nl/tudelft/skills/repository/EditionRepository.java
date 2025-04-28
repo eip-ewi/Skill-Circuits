@@ -30,6 +30,9 @@ public interface EditionRepository extends JpaRepository<SCEdition, Long> {
 		return findById(id).orElseThrow(() -> new ResourceNotFoundException("Edition was not found: " + id));
 	}
 
-	Set<SCEdition> findByIsVisible(boolean isVisible);
+	default SCEdition getOrCreate(Long editionId) {
+		return findById(editionId).orElseGet(() ->
+			save(SCEdition.builder().id(editionId).build()));
+	}
 
 }

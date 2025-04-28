@@ -17,9 +17,10 @@
  */
 package nl.tudelft.skills.controller.old;
 
+import java.util.Collections;
 import java.util.List;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -30,14 +31,11 @@ import org.springframework.web.bind.annotation.*;
 
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.old.create.SCModuleCreateDTO;
 import nl.tudelft.skills.dto.old.patch.SCModulePatchDTO;
 import nl.tudelft.skills.dto.old.view.SkillSummaryDTO;
-import nl.tudelft.skills.dto.old.view.edition.EditionLevelModuleViewDTO;
 import nl.tudelft.skills.model.SCModule;
-import nl.tudelft.skills.playlists.service.ResearchParticipantService;
 import nl.tudelft.skills.repository.ModuleRepository;
 import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.old.ClickedLinkService;
@@ -54,20 +52,18 @@ public class ModuleController {
 	private final ClickedLinkService clickedLinkService;
 
 	//	Playlist feature
-	private ResearchParticipantService researchParticipantService;
 	private AuthorisationService authorisationService;
 
 	@Autowired
 	public ModuleController(ModuleRepository moduleRepository, ModuleService moduleService,
 			HttpSession session, TaskCompletionService taskCompletionService,
-			ClickedLinkService clickedLinkService, ResearchParticipantService researchParticipantService,
+			ClickedLinkService clickedLinkService,
 			AuthorisationService authorisationService) {
 		this.moduleRepository = moduleRepository;
 		this.moduleService = moduleService;
 		this.session = session;
 		this.taskCompletionService = taskCompletionService;
 		this.clickedLinkService = clickedLinkService;
-		this.researchParticipantService = researchParticipantService;
 		this.authorisationService = authorisationService;
 	}
 
@@ -90,7 +86,7 @@ public class ModuleController {
 		long accId = 643L;
 		if (moduleRepository.findByIdOrThrow(id).getEdition().getId() == accId
 				& !authorisationService.canEditEdition(accId)) {
-			researchParticipantService.addRPInfoToModel(person, model);
+//			researchParticipantService.addRPInfoToModel(person, model);
 		}
 		return "module/view";
 	}
@@ -105,9 +101,9 @@ public class ModuleController {
 	@Transactional
 	@PreAuthorize("@authorisationService.canCreateModuleInEdition(#create.edition.id)")
 	public String createModule(SCModuleCreateDTO create, Model model) {
-		SCModule module = moduleRepository.save(create.apply());
-		model.addAttribute("module", module);
-		model.addAttribute("edition", module.getEdition());
+//		SCModule module = moduleRepository.save(create.apply());
+//		model.addAttribute("module", module);
+//		model.addAttribute("edition", module.getEdition());
 		return "module/block";
 	}
 
@@ -121,8 +117,8 @@ public class ModuleController {
 	@Transactional
 	@PreAuthorize("@authorisationService.canCreateModuleInEdition(#create.edition.id)")
 	public String createModuleInEditionSetup(SCModuleCreateDTO create, Model model) {
-		SCModule module = moduleRepository.save(create.apply());
-		model.addAttribute("module", View.convert(module, EditionLevelModuleViewDTO.class));
+//		SCModule module = moduleRepository.save(create.apply());
+//		model.addAttribute("module", View.convert(module, EditionLevelModuleViewDTO.class));
 		return "edition_setup/module";
 	}
 
@@ -141,7 +137,7 @@ public class ModuleController {
 				.flatMap(s -> s.getSkills().stream())
 				.flatMap(s -> s.getTasks().stream()).toList();
 		tasks.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
-		clickedLinkService.deleteClickedLinksForTasks(tasks);
+//		clickedLinkService.deleteClickedLinksForTasks(tasks);
 		moduleRepository.delete(module);
 		return "redirect:/edition/" + module.getEdition().getId();
 	}
@@ -161,7 +157,7 @@ public class ModuleController {
 				.flatMap(s -> s.getSkills().stream())
 				.flatMap(s -> s.getTasks().stream()).toList();
 		tasks.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
-		clickedLinkService.deleteClickedLinksForTasks(tasks);
+//		clickedLinkService.deleteClickedLinksForTasks(tasks);
 		moduleRepository.delete(module);
 		return ResponseEntity.ok().build();
 	}
@@ -176,7 +172,7 @@ public class ModuleController {
 	@PreAuthorize("@authorisationService.canEditModule(#patch.id)")
 	public ResponseEntity<Void> patchModule(SCModulePatchDTO patch) {
 		SCModule module = moduleRepository.findByIdOrThrow(patch.getId());
-		moduleRepository.save(patch.apply(module));
+//		moduleRepository.save(patch.apply(module));
 		return ResponseEntity.ok().build();
 	}
 
@@ -190,10 +186,11 @@ public class ModuleController {
 	@PreAuthorize("@authorisationService.canEditModule(#patch.id)")
 	public String patchModuleSetup(SCModulePatchDTO patch, Model model) {
 		SCModule module = moduleRepository.findByIdOrThrow(patch.getId());
-		moduleRepository.save(patch.apply(module));
+//		moduleRepository.save(patch.apply(module));
 
-		return SpringContext.getBean(EditionController.class).getEditionPage(module.getEdition().getId(),
-				"circuit", model);
+        return "";
+//		return SpringContext.getBean(EditionController.class).getEditionPage(module.getEdition().getId(),
+//				"circuit", model);
 	}
 
 	/**
@@ -220,10 +217,11 @@ public class ModuleController {
 	@GetMapping("{id}/skills")
 	@PreAuthorize("@authorisationService.canGetSkillsOfModule(#id)")
 	public @ResponseBody List<SkillSummaryDTO> getSkillsOfModule(@PathVariable Long id) {
-		return View.convert(moduleRepository.findByIdOrThrow(id).getSubmodules().stream()
-				.flatMap(s -> s.getSkills().stream())
-				.sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList(),
-				SkillSummaryDTO.class);
+//		return View.convert(moduleRepository.findByIdOrThrow(id).getSubmodules().stream()
+//				.flatMap(s -> s.getSkills().stream())
+//				.sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList(),
+//				SkillSummaryDTO.class);
+        return Collections.emptyList();
 	}
 
 }

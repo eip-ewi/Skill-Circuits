@@ -19,15 +19,15 @@ package nl.tudelft.skills.security;
 
 import java.util.ArrayList;
 
+import nl.tudelft.labracore.lib.security.user.DefaultRole;
+import nl.tudelft.skills.enums.ViewMode;
 import org.springframework.stereotype.Service;
 
 import io.sentry.Sentry;
 import io.sentry.protocol.User;
 import nl.tudelft.labracore.lib.security.LabradorUserHandler;
 import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.skills.model.Inventory;
 import nl.tudelft.skills.model.SCPerson;
-import nl.tudelft.skills.repository.InventoryRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 /**
@@ -41,11 +41,9 @@ import nl.tudelft.skills.repository.labracore.PersonRepository;
 public class LoginUserHandler implements LabradorUserHandler {
 
 	private final PersonRepository scPersonRepository;
-	private final InventoryRepository inventoryRepository;
 
-	public LoginUserHandler(PersonRepository personRepository, InventoryRepository inventoryRepository) {
+	public LoginUserHandler(PersonRepository personRepository) {
 		this.scPersonRepository = personRepository;
-		this.inventoryRepository = inventoryRepository;
 	}
 
 	/**
@@ -61,11 +59,9 @@ public class LoginUserHandler implements LabradorUserHandler {
 			scope.setTag("DefaultRole", person.getDefaultRole().toString());
 		});
 		if (!scPersonRepository.existsById(person.getId())) {
-			Inventory inventory = Inventory.builder().inventoryItems(new ArrayList<>())
-					.build();
 
-			SCPerson scPerson = SCPerson.builder().id(person.getId()).inventory(inventory).build();
-			inventory.setPerson(scPerson);
+            boolean isEmployee = person.getDefaultRole() != DefaultRole.STUDENT;
+			SCPerson scPerson = SCPerson.builder().id(person.getId()).viewMode(isEmployee ? ViewMode.EDITOR : ViewMode.VIEWER).build();
 
 			scPersonRepository.save(scPerson);
 

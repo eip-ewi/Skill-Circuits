@@ -15,16 +15,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.create;
+package nl.tudelft.skills.dto.old.create;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
 import nl.tudelft.librador.dto.create.Create;
+import nl.tudelft.skills.enums.TaskType;
 import nl.tudelft.skills.model.TaskInfo;
-import nl.tudelft.skills.model.TaskType;
 
 @Data
 @Builder

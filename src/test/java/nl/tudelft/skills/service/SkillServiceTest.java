@@ -38,17 +38,16 @@ import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.dto.create.ChoiceTaskCreateDTO;
+import nl.tudelft.skills.dto.create.ChoiceTaskCreate;
 import nl.tudelft.skills.dto.create.RegularTaskCreateDTO;
 import nl.tudelft.skills.dto.create.SkillCreateDTO;
 import nl.tudelft.skills.dto.create.TaskInfoCreateDTO;
-import nl.tudelft.skills.dto.id.CheckpointIdDTO;
-import nl.tudelft.skills.dto.id.SkillIdDTO;
-import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
-import nl.tudelft.skills.dto.patch.ChoiceTaskPatchDTO;
-import nl.tudelft.skills.dto.patch.RegularTaskPatchDTO;
-import nl.tudelft.skills.dto.patch.SkillPatchDTO;
-import nl.tudelft.skills.dto.patch.TaskInfoPatchDTO;
+import nl.tudelft.skills.dto.id.CheckpointId;
+import nl.tudelft.skills.dto.id.SkillId;
+import nl.tudelft.skills.dto.id.SubmoduleId;
+import nl.tudelft.skills.dto.old.patch.ChoiceTaskPatchDTO;
+import nl.tudelft.skills.dto.old.patch.RegularTaskPatchDTO;
+import nl.tudelft.skills.dto.old.patch.TaskInfoPatchDTO;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.*;
@@ -696,7 +695,7 @@ public class SkillServiceTest {
 
 		RegularTaskCreateDTO subTaskDtoA = getRegularTaskCreateDTO("Subtask A", null, 0);
 		RegularTaskCreateDTO subTaskDtoB = getRegularTaskCreateDTO("Subtask B", null, 0);
-		ChoiceTaskCreateDTO choiceTaskDto = ChoiceTaskCreateDTO.builder()
+		ChoiceTaskCreate choiceTaskDto = ChoiceTaskCreate.builder()
 				.minTasks(1).index(1).name("New Choice Task")
 				.newSubTasks(List.of(subTaskDtoA, subTaskDtoB))
 				.updatedSubTasks(List.of())
@@ -704,8 +703,8 @@ public class SkillServiceTest {
 
 		SkillCreateDTO skillCreateDTO = SkillCreateDTO.builder()
 				.name("Test Skill")
-				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
-				.checkpoint(new CheckpointIdDTO(db.getCheckpointLectureOne().getId()))
+				.submodule(new SubmoduleId(db.getSubmoduleCases().getId()))
+				.checkpoint(new CheckpointId(db.getCheckpointLectureOne().getId()))
 				.requiredTaskIds(Collections.emptyList())
 				.column(10).row(11).newItems(List.of(choiceTaskDto, taskDtoA, taskDtoB)).build();
 
@@ -778,17 +777,17 @@ public class SkillServiceTest {
 		RegularTaskCreateDTO newTaskDto = RegularTaskCreateDTO.builder()
 				.taskInfo(TaskInfoCreateDTO.builder().name("Test Task").type(TaskType.VIDEO).link("link")
 						.time(10).build())
-				.skill(new SkillIdDTO(oldSkill.getId())).index(1).build();
+				.skill(new SkillId(oldSkill.getId())).index(1).build();
 		RegularTaskPatchDTO oldTaskPatchDto = RegularTaskPatchDTO.builder()
 				.taskInfo(TaskInfoPatchDTO.builder().name("Patched Task")
 						.time(10).type(TaskType.VIDEO).link("link").build())
-				.id(oldTask.getId()).skill(new SkillIdDTO(oldSkill.getId())).index(0).build();
+				.id(oldTask.getId()).skill(new SkillId(oldSkill.getId())).index(0).build();
 
 		// Patch skill
 		skillService.patchSkill(SkillPatchDTO.builder()
 				.id(oldSkill.getId())
 				.name("Patched Skill")
-				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
+				.submodule(new SubmoduleId(db.getSubmoduleCases().getId()))
 				.items(List.of(oldTaskPatchDto))
 				.newItems(List.of(newTaskDto))
 				.removedItems(Set.of(removedTask.getId()))
@@ -849,7 +848,7 @@ public class SkillServiceTest {
 		skillService.patchSkill(SkillPatchDTO.builder()
 				.id(oldSkill.getId())
 				.name("Patched Skill")
-				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
+				.submodule(new SubmoduleId(db.getSubmoduleCases().getId()))
 				.items(List.of(choiceTaskPatchDTO))
 				.newItems(List.of())
 				.removedItems(removedTasks.stream().map(RegularTask::getId).collect(Collectors.toSet()))
@@ -932,7 +931,7 @@ public class SkillServiceTest {
 	void saveNewTasksTestChoiceTask() {
 		Skill skill = db.getSkillImplication();
 		RegularTask updSubTask = db.getTaskDo12ae();
-		ChoiceTaskCreateDTO createDTO = getChoiceTaskCreateDTO();
+		ChoiceTaskCreate createDTO = getChoiceTaskCreateDTO();
 
 		// Save task
 		List<Task> tasks = skillService.saveNewTasks(skill, List.of(createDTO));
@@ -963,7 +962,7 @@ public class SkillServiceTest {
 		RegularTaskCreateDTO regularTaskDTO = RegularTaskCreateDTO.builder()
 				.taskInfo(TaskInfoCreateDTO.builder().name("Test Task").time(10).type(TaskType.VIDEO)
 						.link("link").build())
-				.skill(SkillIdDTO.builder().id(skill.getId()).build()).index(4).build();
+				.skill(SkillId.builder().id(skill.getId()).build()).index(4).build();
 
 		// Save task
 		RegularTask task = skillService.createRegularTask(regularTaskDTO, skill,
@@ -977,7 +976,7 @@ public class SkillServiceTest {
 	void createChoiceTaskTest() {
 		Skill skill = db.getSkillImplication();
 		RegularTask updSubTask = db.getTaskDo12ae();
-		ChoiceTaskCreateDTO createDTO = getChoiceTaskCreateDTO();
+		ChoiceTaskCreate createDTO = getChoiceTaskCreateDTO();
 
 		// Save choice task
 		ChoiceTask choiceTask = skillService.createChoiceTask(createDTO, skill,
@@ -1328,7 +1327,7 @@ public class SkillServiceTest {
 	 * @return       A RegularTaskCreateDTO.
 	 */
 	public RegularTaskCreateDTO getRegularTaskCreateDTO(String name, Skill skill, int index) {
-		SkillIdDTO idDTO = new SkillIdDTO();
+		SkillId idDTO = new SkillId();
 		if (skill != null) {
 			idDTO.setId(skill.getId());
 		}
@@ -1355,7 +1354,7 @@ public class SkillServiceTest {
 				.taskInfo(TaskInfoPatchDTO.builder().name(name).type(TaskType.VIDEO).time(10).link("link")
 						.build())
 				.index(index)
-				.skill(SkillIdDTO.builder().id(skill.getId()).build())
+				.skill(SkillId.builder().id(skill.getId()).build())
 				.id(id)
 				.build();
 	}
@@ -1366,7 +1365,7 @@ public class SkillServiceTest {
 	 *
 	 * @return A ChoiceTaskCreateDTO.
 	 */
-	public ChoiceTaskCreateDTO getChoiceTaskCreateDTO() {
+	public ChoiceTaskCreate getChoiceTaskCreateDTO() {
 		Skill skill = db.getSkillImplication();
 
 		// Patch one sub-task (in same skill)
@@ -1377,7 +1376,7 @@ public class SkillServiceTest {
 		// Create one sub-task
 		RegularTaskCreateDTO subTaskNewDTO = getRegularTaskCreateDTO("Subtask new", skill, 0);
 
-		return ChoiceTaskCreateDTO.builder()
+		return ChoiceTaskCreate.builder()
 				.minTasks(1).index(0)
 				.newSubTasks(List.of(subTaskNewDTO))
 				.updatedSubTasks(List.of(subTaskUpdDTO))
@@ -1406,7 +1405,7 @@ public class SkillServiceTest {
 				.minTasks(1).index(0)
 				.newSubTasks(List.of(subTaskNewDTO))
 				.updatedSubTasks(List.of(subTaskUpdDTO))
-				.skill(SkillIdDTO.builder().id(skill.getId()).build())
+				.skill(SkillId.builder().id(skill.getId()).build())
 				.build();
 	}
 

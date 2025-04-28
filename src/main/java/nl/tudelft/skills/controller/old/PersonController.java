@@ -21,9 +21,10 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.transaction.Transactional;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 
+import nl.tudelft.skills.service.old.PersonService;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.AllArgsConstructor;
@@ -31,16 +32,13 @@ import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.skills.dto.view.TaskCompletedDTO;
 import nl.tudelft.skills.model.*;
-import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.PathRepository;
 import nl.tudelft.skills.repository.RegularTaskRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.security.AuthorisationService;
-import nl.tudelft.skills.service.PersonService;
 import nl.tudelft.skills.service.TaskCompletionService;
 
 @RestController
@@ -56,7 +54,7 @@ public class PersonController {
 	private final PathRepository pathRepository;
 	private final AuthorisationService authorisationService;
 	private final RoleControllerApi roleControllerApi;
-	private final PersonService personService;
+//	private final PersonService personService;
 
 	/**
 	 * Marks a certain task as completed or uncompleted for a certain person.
@@ -65,39 +63,39 @@ public class PersonController {
 	 * @param taskId     the id of the task
 	 * @param completed  whether the task has been completed or uncompleted
 	 */
-	@PutMapping("completion/{taskId}")
-	@Transactional
-	@ResponseBody
-	public TaskCompletedDTO updateTaskCompletedForPerson(@AuthenticatedPerson Person authPerson,
-			@PathVariable Long taskId, @RequestBody boolean completed) {
-		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
-		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
-		if (completed) {
-			taskCompletionService.addTaskCompletion(person, task);
-
-			// If a user with default student role has no role, set it to be a student role
-			ifNoStudentRoleSetStudentRole(authPerson.getId(), task.getSkill().getSubmodule().getModule()
-					.getEdition().getId());
-
-			List<RegularTask> completedTasks = person.getTaskCompletions().stream()
-					.map(TaskCompletion::getTask).toList();
-
-			List<Skill> revealedSkills = task.getRequiredFor().stream()
-					.filter(s -> new HashSet<>(completedTasks).containsAll(s.getRequiredTasks()))
-					.collect(Collectors.toCollection(ArrayList::new));
-
-			// Store newly revealed skills in authPerson.tasksRevealed
-			Set<Skill> prefRevealed = personService.getOrCreateSCPerson(authPerson.getId())
-					.getSkillsRevealed();
-			revealedSkills.removeAll(prefRevealed);
-			revealedSkills.forEach(s -> personService.addRevealedSkill(authPerson.getId(), s));
-			return new TaskCompletedDTO(revealedSkills.stream().map(Skill::getId).toList());
-
-		} else {
-			taskCompletionService.deleteTaskCompletion(person, task);
-		}
-		return new TaskCompletedDTO(Collections.emptyList());
-	}
+//	@PutMapping("completion/{taskId}")
+//	@Transactional
+//	@ResponseBody
+//	public TaskCompletedDTO updateTaskCompletedForPerson(@AuthenticatedPerson Person authPerson,
+//                                                         @PathVariable Long taskId, @RequestBody boolean completed) {
+//		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
+//		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
+//		if (completed) {
+//			taskCompletionService.addTaskCompletion(person, task);
+//
+//			// If a user with default student role has no role, set it to be a student role
+//			ifNoStudentRoleSetStudentRole(authPerson.getId(), task.getSkill().getSubmodule().getModule()
+//					.getEdition().getId());
+//
+//			List<RegularTask> completedTasks = person.getTaskCompletions().stream()
+//					.map(TaskCompletion::getTask).toList();
+//
+//			List<Skill> revealedSkills = task.getRequiredFor().stream()
+//					.filter(s -> new HashSet<>(completedTasks).containsAll(s.getRequiredTasks()))
+//					.collect(Collectors.toCollection(ArrayList::new));
+//
+//			// Store newly revealed skills in authPerson.tasksRevealed
+//			Set<Skill> prefRevealed = personService.getOrCreateSCPerson(authPerson.getId())
+//					.getSkillsRevealed();
+//			revealedSkills.removeAll(prefRevealed);
+//			revealedSkills.forEach(s -> personService.addRevealedSkill(authPerson.getId(), s));
+//			return new TaskCompletedDTO(revealedSkills.stream().map(Skill::getId).toList());
+//
+//		} else {
+//			taskCompletionService.deleteTaskCompletion(person, task);
+//		}
+//		return new TaskCompletedDTO(Collections.emptyList());
+//	}
 
 	/**
 	 * If the user has a default student role but no role assigned in the edition, set them to have the
@@ -131,7 +129,7 @@ public class PersonController {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
 
 		List<RegularTask> tasks = regularTaskRepository.findAllById(completedTasks);
-		tasks.forEach(task -> taskCompletionService.addTaskCompletion(person, task));
+//		tasks.forEach(task -> taskCompletionService.addTaskCompletion(person, task));
 	}
 
 	/**

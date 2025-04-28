@@ -17,7 +17,7 @@
  */
 package nl.tudelft.skills.dto.old.view.edition;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
 

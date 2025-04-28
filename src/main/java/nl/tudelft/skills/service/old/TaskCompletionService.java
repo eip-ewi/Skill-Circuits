@@ -66,7 +66,7 @@ public class TaskCompletionService {
 		Optional<TaskCompletion> lastCompleted = taskCompletionRepository
 				.getFirstByPersonIdAndTimestampNotNullOrderByTimestampDesc(scperson.getId());
 
-		return lastCompleted.map(TaskCompletion::getTask).orElse(null);
+		return lastCompleted.map(TaskCompletion::getTask).map(info -> info.getTask() == null ? info.getChoiceTask() : info.getTask()).orElse(null);
 	}
 
 	/**
@@ -101,11 +101,12 @@ public class TaskCompletionService {
 	 */
 	@Transactional
 	public TaskCompletion addTaskCompletion(SCPerson person, Task task) {
-		TaskCompletion completion = taskCompletionRepository.save(TaskCompletion.builder()
-				.task(task).person(person).build());
-		person.getTaskCompletions().add(completion);
-		task.getCompletedBy().add(completion);
-		return completion;
+//		TaskCompletion completion = taskCompletionRepository.save(TaskCompletion.builder()
+//				.task(task).person(person).build());
+//		person.getTaskCompletions().add(completion);
+//		task.getCompletedBy().add(completion);
+//		return completion;
+        return null;
 	}
 
 	/**
@@ -124,7 +125,7 @@ public class TaskCompletionService {
 		completion.ifPresent((TaskCompletion taskCompletion) -> {
 			taskCompletionRepository.delete(taskCompletion);
 			person.getTaskCompletions().remove(taskCompletion);
-			task.getCompletedBy().remove(taskCompletion);
+//			task.getCompletedBy().remove(taskCompletion);
 		});
 
 		return completion.orElse(null);
@@ -138,13 +139,13 @@ public class TaskCompletionService {
 	 */
 	@Transactional
 	public void deleteTaskCompletionsOfTask(Task task) {
-		Set<TaskCompletion> taskCompletions = task.getCompletedBy();
-		// Remove from taskCompletionRepository
-		taskCompletionRepository.deleteAll(taskCompletions);
-		// Remove from Person sets
-		taskCompletions.forEach(tc -> tc.getPerson().getTaskCompletions().remove(tc));
-		// In case the Task will be used later on, also clear its TaskCompletion set
-		task.setCompletedBy(new HashSet<>());
+//		Set<TaskCompletion> taskCompletions = task.getCompletedBy();
+//		// Remove from taskCompletionRepository
+//		taskCompletionRepository.deleteAll(taskCompletions);
+//		// Remove from Person sets
+//		taskCompletions.forEach(tc -> tc.getPerson().getTaskCompletions().remove(tc));
+//		// In case the Task will be used later on, also clear its TaskCompletion set
+//		task.setCompletedBy(new HashSet<>());
 	}
 
 	/**
@@ -155,10 +156,11 @@ public class TaskCompletionService {
 	 * @return           The set of completed tasks
 	 */
 	private Set<Task> getTasksDone(SCPerson scperson, long editionId) {
-		return scperson.getTaskCompletions().stream().map(TaskCompletion::getTask)
-				.filter(s -> Objects.equals(
-						s.getSkill().getSubmodule().getModule().getEdition().getId(), editionId))
-				.collect(Collectors.toSet());
+//		return scperson.getTaskCompletions().stream().map(TaskCompletion::getTask)
+//				.filter(s -> Objects.equals(
+//						s.getSkill().getSubmodule().getModule().getEdition().getId(), editionId))
+//				.collect(Collectors.toSet());
+        return Collections.emptySet();
 	}
 
 	/**

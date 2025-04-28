@@ -54,21 +54,23 @@ public class CheckpointService {
 	 */
 	public Optional<Checkpoint> findNextCheckpointInModule(Checkpoint checkpoint, SCModule module) {
 		List<Skill> sortedSkills = module.getSubmodules().stream().flatMap(sm -> sm.getSkills().stream())
-				.sorted(Comparator.comparing(Skill::getRow).reversed()).toList();
+//				.sorted(Comparator.comparing(Skill::getRow).reversed())
+				.toList();
 
 		// If checkpoint is the last checkpoint (or there are no skills), return empty optional
 		if (sortedSkills.size() == 0 || sortedSkills.get(0).getCheckpoint().equals(checkpoint)) {
 			return Optional.empty();
 		}
 
-		// Get last row of the checkpoint, if any
-		Optional<Integer> lastRowOfCheckpoint = sortedSkills.stream()
-				.filter(s -> s.getCheckpoint().equals(checkpoint))
-				.map(Skill::getRow).findFirst();
-
-		// Find the checkpoint belonging to a skill with the smallest row after the last row, if any
-		return lastRowOfCheckpoint.flatMap(lastRow -> sortedSkills.stream().filter(s -> s.getRow() > lastRow)
-				.reduce((fst, lst) -> lst).map(Skill::getCheckpoint));
+		return Optional.empty();
+//		// Get last row of the checkpoint, if any
+//		Optional<Integer> lastRowOfCheckpoint = sortedSkills.stream()
+//				.filter(s -> s.getCheckpoint().equals(checkpoint))
+//				.map(Skill::getRow).findFirst();
+//
+//		// Find the checkpoint belonging to a skill with the smallest row after the last row, if any
+//		return lastRowOfCheckpoint.flatMap(lastRow -> sortedSkills.stream().filter(s -> s.getRow() > lastRow)
+//				.reduce((fst, lst) -> lst).map(Skill::getCheckpoint));
 	}
 
 	/**

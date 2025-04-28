@@ -19,8 +19,8 @@ package nl.tudelft.skills.controller.old;
 
 import java.util.HashSet;
 
-import javax.servlet.http.HttpSession;
-import javax.validation.Valid;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +34,6 @@ import nl.tudelft.skills.dto.old.create.SubmoduleCreateDTO;
 import nl.tudelft.skills.dto.old.patch.SubmodulePatchDTO;
 import nl.tudelft.skills.dto.old.patch.SubmodulePositionPatchDTO;
 import nl.tudelft.skills.dto.old.view.edition.EditionLevelEditionViewDTO;
-import nl.tudelft.skills.dto.old.view.edition.EditionLevelModuleViewDTO;
 import nl.tudelft.skills.dto.old.view.edition.EditionLevelSubmoduleViewDTO;
 import nl.tudelft.skills.model.AbstractSkill;
 import nl.tudelft.skills.model.Submodule;
@@ -71,8 +70,8 @@ public class SubmoduleController {
 	@PostMapping
 	@PreAuthorize("@authorisationService.canCreateSubmodule(#create.module.id)")
 	public String createSubmodule(@RequestBody SubmoduleCreateDTO create, Model model) {
-		Submodule submodule = submoduleRepository.saveAndFlush(create.apply());
-		editionService.configureEditionModel(submodule.getModule().getEdition().getId(), model, session);
+//		Submodule submodule = submoduleRepository.saveAndFlush(create.apply());
+//		editionService.configureEditionModel(submodule.getModule().getEdition().getId(), model, session);
 		return "edition/view";
 	}
 
@@ -104,12 +103,12 @@ public class SubmoduleController {
 	@PreAuthorize("@authorisationService.canEditSubmodule(#patch.id)")
 	public String patchSubmodule(@Valid @RequestBody SubmodulePatchDTO patch, Model model) {
 		Submodule submodule = submoduleRepository.findByIdOrThrow(patch.getId());
-		submoduleRepository.save(patch.apply(submodule));
+//		submoduleRepository.save(patch.apply(submodule));
 		patch.getRemovedItems().forEach(skillService::deleteSkill);
 
 		model.addAttribute("level", "edition");
 		model.addAttribute("groupType", "module");
-		model.addAttribute("block", View.convert(submodule, EditionLevelSubmoduleViewDTO.class));
+//		model.addAttribute("block", View.convert(submodule, EditionLevelSubmoduleViewDTO.class));
 		model.addAttribute("group", submodule.getModule());
 		model.addAttribute("circuit", buildCircuitFromSubmodule(submodule));
 		model.addAttribute("canEdit", true);
@@ -126,11 +125,11 @@ public class SubmoduleController {
 	 */
 	private EditionLevelEditionViewDTO buildCircuitFromSubmodule(Submodule submodule) {
 		return EditionLevelEditionViewDTO.builder()
-				.id(submodule.getModule().getEdition().getId())
-				.modules(moduleRepository.findAllByEditionId(submodule.getModule().getEdition().getId())
-						.stream()
-						.map(m -> EditionLevelModuleViewDTO.builder().id(m.getId()).name(m.getName()).build())
-						.toList())
+//				.id(submodule.getModule().getEdition().getId())
+//				.modules(moduleRepository.findAllByEditionId(submodule.getModule().getEdition().getId())
+//						.stream()
+//						.map(m -> nl.tudelft.skills.dto.view.edition.EditionLevelModuleViewDTO.builder().id(m.getId()).name(m.getName()).build())
+//						.toList())
 				.build();
 	}
 
@@ -146,7 +145,7 @@ public class SubmoduleController {
 	public ResponseEntity<Void> updateSubmodulePosition(@PathVariable Long id,
 			@RequestBody SubmodulePositionPatchDTO patch) {
 		Submodule submodule = submoduleRepository.findByIdOrThrow(id);
-		submoduleRepository.save(patch.apply(submodule));
+//		submoduleRepository.save(patch.apply(submodule));
 		return ResponseEntity.ok().build();
 	}
 

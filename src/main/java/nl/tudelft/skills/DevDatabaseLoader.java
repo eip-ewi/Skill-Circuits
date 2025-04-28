@@ -22,8 +22,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
+import nl.tudelft.skills.enums.TaskType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,7 @@ import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 @Service
-@Profile("dev")
+@Profile("development-data")
 @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection") // Can be disabled as this class is not tested.
 public class DevDatabaseLoader {
 
@@ -61,10 +62,6 @@ public class DevDatabaseLoader {
 	@Autowired
 	private CheckpointRepository checkpointRepository;
 	@Autowired
-	private BadgeRepository badgeRepository;
-	@Autowired
-	private InventoryRepository inventoryRepository;
-	@Autowired
 	private CourseControllerApi courseControllerApi;
 	@Autowired
 	private EditionControllerApi editionApi;
@@ -74,8 +71,6 @@ public class DevDatabaseLoader {
 	private PathRepository pathRepository;
 	@Autowired
 	private RoleControllerApi roleControllerApi;
-
-	private SCPerson person = SCPerson.builder().id(1L).build();
 
 	private EditionDetailsDTO editionOOPDetails;
 	private EditionDetailsDTO editionADSDetails;
@@ -129,13 +124,9 @@ public class DevDatabaseLoader {
 	private Skill skillSimpleE;
 	private Skill skillSimpleF;
 
-	private Inventory inventory;
-
 	private Checkpoint checkpointLectureOne;
 	private Checkpoint checkpointLectureTwo;
 	private Checkpoint checkpointSimple;
-
-	private Badge badge;
 
 	@PostConstruct
 	private void init() {
@@ -156,18 +147,10 @@ public class DevDatabaseLoader {
 		initCheckpoints();
 		initSkills();
 		initTasks();
-		initBadges();
 		initPerson();
 	}
 
 	private void initPerson() {
-		Inventory inventory = Inventory.builder().build();
-		person.setInventory(inventory);
-		inventory.setPerson(person);
-
-		person = personRepository.save(person);
-		// Add cseTeacher1 also as teacher for ADS
-
 		editionApi.getAllEditionsByCourse(scCourseADS.getId()).toStream()
 				.forEach(e -> roleControllerApi.addRole(new RoleCreateDTO()
 						.edition(new EditionIdDTO().id(e.getId()))
@@ -224,43 +207,43 @@ public class DevDatabaseLoader {
 		submoduleLogicBasics = submoduleRepository.save(Submodule.builder()
 				.name("Logic Basics")
 				.module(moduleProofTechniques)
-				.row(0)
+//				.row(0)
 				.column(0)
 				.build());
 		submoduleGeneralisation = submoduleRepository.save(Submodule.builder()
 				.name("Generalisation")
 				.module(moduleProofTechniques)
-				.row(1)
+//				.row(1)
 				.column(1)
 				.build());
 		submoduleCases = submoduleRepository.save(Submodule.builder()
 				.name("Cases")
 				.module(moduleProofTechniques)
-				.row(2)
+//				.row(2)
 				.column(2)
 				.build());
 		submoduleContradiction = submoduleRepository.save(Submodule.builder()
 				.name("Contradiction")
 				.module(moduleProofTechniques)
-				.row(3)
+//				.row(3)
 				.column(1)
 				.build());
 		submoduleContrapositive = submoduleRepository.save(Submodule.builder()
 				.name("Contrapositive")
 				.module(moduleProofTechniques)
-				.row(2)
+//				.row(2)
 				.column(3)
 				.build());
 		submoduleInduction = submoduleRepository.save(Submodule.builder()
 				.name("Induction")
 				.module(moduleProofTechniques)
-				.row(3)
+//				.row(3)
 				.column(0)
 				.build());
 		submoduleSimple = submoduleRepository.save(Submodule.builder()
 				.name("Simple Module")
 				.module(moduleSimple)
-				.row(0)
+//				.row(0)
 				.column(3)
 				.build());
 	}
@@ -269,39 +252,45 @@ public class DevDatabaseLoader {
 		skillImplication = skillRepository.save(Skill.builder()
 				.name("Implication")
 				.submodule(submoduleLogicBasics)
-				.row(0).column(0)
+//				.row(0)
+				.column(0)
 				.checkpoint(checkpointLectureOne)
 				.build());
 		skillNegation = skillRepository.save(Skill.builder()
 				.name("Negation")
 				.submodule(submoduleLogicBasics)
-				.row(0).column(2)
+//				.row(0)
+				.column(2)
 				.checkpoint(checkpointLectureOne)
 				.build());
 		skillVariables = skillRepository.save(Skill.builder()
 				.name("Variables")
 				.submodule(submoduleLogicBasics)
 				.checkpoint(checkpointLectureOne)
-				.row(0).column(4)
+//				.row(0)
+				.column(4)
 				.build());
 
 		skillProofOutline = skillRepository.save(Skill.builder()
 				.name("Proof Outline")
 				.submodule(submoduleGeneralisation)
 				.checkpoint(checkpointLectureOne)
-				.row(1).column(3)
+//				.row(1)
+				.column(3)
 				.build());
 		skillAssumption = skillRepository.save(Skill.builder()
 				.name("Assumption")
 				.submodule(submoduleGeneralisation)
-				.row(1).column(1)
+//				.row(1)
+				.column(1)
 				.checkpoint(checkpointLectureOne)
 				.parents(Set.of(skillImplication))
 				.build());
 		skillGeneralisationPractice = skillRepository.save(Skill.builder()
 				.name("Generalisation Practice")
 				.submodule(submoduleGeneralisation)
-				.row(2).column(3)
+//				.row(2)
+				.column(3)
 				.checkpoint(checkpointLectureTwo)
 				.parents(Set.of(skillAssumption, skillProofOutline, skillVariables))
 				.build());
@@ -309,13 +298,15 @@ public class DevDatabaseLoader {
 		skillDividingIntoCases = skillRepository.save(Skill.builder()
 				.name("Dividing into Cases")
 				.submodule(submoduleCases)
-				.row(2).column(1)
+//				.row(2)
+				.column(1)
 				.checkpoint(checkpointLectureTwo)
 				.build());
 		skillCasesPractice = skillRepository.save(Skill.builder()
 				.name("Cases Practice")
 				.submodule(submoduleCases)
-				.row(3).column(2)
+//				.row(3)
+				.column(2)
 				.checkpoint(checkpointLectureTwo)
 				.parents(Set.of(skillGeneralisationPractice, skillDividingIntoCases))
 				.build());
@@ -323,15 +314,17 @@ public class DevDatabaseLoader {
 		skillContradictionPractice = skillRepository.save(Skill.builder()
 				.name("Contradiction Practice")
 				.submodule(submoduleContradiction)
-				.row(3).column(3)
+//				.row(3)
+				.column(3)
 				.checkpoint(checkpointLectureTwo)
 				.parents(Set.of(skillGeneralisationPractice, skillNegation))
 				.build());
 
 		skillTransitiveProperty = skillRepository.save(Skill.builder()
 				.name("Transitive Property")
-				.submodule(submoduleInduction)
-				.row(3).column(0)
+				.submodule(submoduleLogicBasics)
+//				.row(3)
+				.column(0)
 				.checkpoint(checkpointLectureTwo)
 				.parents(Set.of(skillImplication))
 				.build());
@@ -339,14 +332,16 @@ public class DevDatabaseLoader {
 		skillNegateImplications = skillRepository.save(Skill.builder()
 				.name("Negate Implications")
 				.submodule(submoduleContrapositive)
-				.row(4).column(1)
+//				.row(4)
+				.column(1)
 				.checkpoint(checkpointLectureTwo)
 				.parents(Set.of(skillTransitiveProperty, skillCasesPractice))
 				.build());
 		skillContrapositivePractice = skillRepository.save(Skill.builder()
 				.name("Contrapositive Practice")
 				.submodule(submoduleContrapositive)
-				.row(5).column(1)
+//				.row(5)
+				.column(1)
 				.checkpoint(checkpointLectureTwo)
 				.parents(Set.of(skillNegateImplications, skillContradictionPractice))
 				.build());
@@ -354,7 +349,8 @@ public class DevDatabaseLoader {
 		skillInductionPractice = skillRepository.save(Skill.builder()
 				.name("Induction Practice")
 				.submodule(submoduleInduction)
-				.row(6).column(2)
+//				.row(6)
+				.column(2)
 				.checkpoint(checkpointLectureTwo)
 				.parents(Set.of(skillContradictionPractice, skillContrapositivePractice))
 				.build());
@@ -362,41 +358,47 @@ public class DevDatabaseLoader {
 		skillSimpleA = skillRepository.save(Skill.builder()
 				.name("Skill A")
 				.submodule(submoduleSimple)
-				.row(0).column(1)
+//				.row(0)
+				.column(1)
 				.checkpoint(checkpointSimple)
 				.build());
 		skillSimpleB = skillRepository.save(Skill.builder()
 				.name("Skill B")
 				.submodule(submoduleSimple)
-				.row(1).column(0)
+//				.row(1)
+				.column(0)
 				.parents(Set.of(skillSimpleA))
 				.checkpoint(checkpointSimple)
 				.build());
 		skillSimpleC = skillRepository.save(Skill.builder()
 				.name("Skill C")
 				.submodule(submoduleSimple)
-				.row(1).column(2)
+//				.row(1)
+				.column(2)
 				.parents(Set.of(skillSimpleA))
 				.checkpoint(checkpointSimple)
 				.build());
 		skillSimpleD = skillRepository.save(Skill.builder()
 				.name("Skill D")
 				.submodule(submoduleSimple)
-				.row(2).column(0)
+//				.row(2)
+				.column(0)
 				.parents(Set.of(skillSimpleB))
 				.checkpoint(checkpointSimple)
 				.build());
 		skillSimpleE = skillRepository.save(Skill.builder()
 				.name("Skill E")
 				.submodule(submoduleSimple)
-				.row(2).column(1)
+//				.row(2)
+				.column(1)
 				.parents(Set.of(skillSimpleB))
 				.checkpoint(checkpointSimple)
 				.build());
 		skillSimpleF = skillRepository.save(Skill.builder()
 				.name("Skill F")
 				.submodule(submoduleSimple)
-				.row(2).column(2)
+//				.row(2)
+				.column(2)
 				.parents(Set.of(skillSimpleB))
 				.checkpoint(checkpointSimple)
 				.build());
@@ -718,11 +720,6 @@ public class DevDatabaseLoader {
 				.edition(scEditionOOP)
 				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 53), LocalTime.MIDNIGHT))
 				.build());
-	}
-
-	private void initBadges() {
-		badge = badgeRepository
-				.save(Badge.builder().name("Your first badge!").build());
 	}
 
 }

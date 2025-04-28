@@ -20,12 +20,15 @@ package nl.tudelft.skills.model;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.*;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 
 @Data
 @Entity
@@ -36,24 +39,23 @@ import lombok.experimental.SuperBuilder;
 public abstract class AbstractSkill {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@Min(0)
-	@NotNull
-	@Column(name = "yPos")
-	private Integer row;
-
-	@Min(0)
-	@NotNull
+    @Nullable
 	@Column(name = "xPos")
 	private Integer column;
 
+    @NotNull
+    @Builder.Default
+    private boolean essential = true;
+
 	@NotNull
+	@ManyToMany
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToMany
 	private Set<AbstractSkill> parents = new HashSet<>();
 
 	@NotNull

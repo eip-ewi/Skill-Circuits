@@ -106,7 +106,7 @@ public class AuthorisationServiceTest {
 	@Test
 	@WithUserDetails("username")
 	void getAuthPerson() {
-		assertThat(authorisationService.getAuthPerson().getUsername()).isEqualTo("username");
+		assertThat(authorisationService.getAuthenticatedPerson().getUsername()).isEqualTo("username");
 	}
 
 	@Test

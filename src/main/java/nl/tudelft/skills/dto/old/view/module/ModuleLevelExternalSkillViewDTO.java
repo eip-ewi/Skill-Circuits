@@ -20,10 +20,9 @@ package nl.tudelft.skills.dto.old.view.module;
 import java.util.Collections;
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
-import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.old.view.BlockView;
 import nl.tudelft.skills.dto.old.view.ItemView;
@@ -60,8 +59,8 @@ public class ModuleLevelExternalSkillViewDTO extends View<ExternalSkill> impleme
 		super.postApply();
 		this.parentIds = data.getParents().stream().map(AbstractSkill::getId).toList();
 		this.childIds = data.getChildren().stream().map(AbstractSkill::getId).toList();
-		this.module = View.convert(SpringContext.getBean(SkillRepository.class).findByIdOrThrow(skill.getId())
-				.getSubmodule().getModule(), SCModuleSummaryDTO.class);
+//		this.module = View.convert(SpringContext.getBean(SkillRepository.class).findByIdOrThrow(skill.getId())
+//				.getSubmodule().getModule(), SCModuleSummaryDTO.class);
 	}
 
 	@Override

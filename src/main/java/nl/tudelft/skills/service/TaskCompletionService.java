@@ -17,14 +17,14 @@
  */
 package nl.tudelft.skills.service;
 
+import nl.tudelft.skills.model.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.AllArgsConstructor;
-import nl.tudelft.skills.model.SCPerson;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.model.TaskCompletion;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
+
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -33,17 +33,19 @@ public class TaskCompletionService {
 
 	private final TaskCompletionRepository taskCompletionRepository;
 
+    public Optional<Task> getLastCompletedTask(SCPerson person) {
+        return taskCompletionRepository.findLastTaskCompletedFor(person)
+                .map(completion -> completion.getTask().getTask() == null ? completion.getTask().getChoiceTask() : completion.getTask().getTask());
+    }
+
 	/**
 	 * Saves a TaskCompletion to the repository, given the corresponding SCPerson and Task.
 	 *
 	 * @param person The SCPerson that completed the Task
 	 * @param task   The Task that was completed
 	 */
-	public void completeTask(SCPerson person, Task task) {
-		TaskCompletion completion = taskCompletionRepository
-				.save(TaskCompletion.builder().task(task).person(person).build());
-		person.getTaskCompletions().add(completion);
-		task.getCompletedBy().add(completion);
+	public void completeTask(SCPerson person, TaskInfo task) {
+		taskCompletionRepository.save(TaskCompletion.builder().task(task).person(person).build());
 	}
 
 	/**
@@ -53,14 +55,8 @@ public class TaskCompletionService {
 	 * @param person The SCPerson that had completed the Task
 	 * @param task   The Task that was completed
 	 */
-	public void uncompleteTask(SCPerson person, Task task) {
-		person.getTaskCompletions().stream()
-				.filter(c -> c.getPerson().equals(person) && c.getTask().equals(task)).findFirst()
-				.ifPresent(taskCompletion -> {
-					taskCompletionRepository.delete(taskCompletion);
-					person.getTaskCompletions().remove(taskCompletion);
-					task.getCompletedBy().remove(taskCompletion);
-				});
+	public void uncompleteTask(SCPerson person, TaskInfo task) {
+        taskCompletionRepository.deleteByPersonAndTask(person, task);
 	}
 
 }

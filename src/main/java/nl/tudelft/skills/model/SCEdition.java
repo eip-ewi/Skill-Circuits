@@ -22,8 +22,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
 
@@ -55,15 +55,18 @@ public class SCEdition {
 	@OneToMany(mappedBy = "edition")
 	private Set<Checkpoint> checkpoints = new HashSet<>();
 
-	@EqualsAndHashCode.Exclude
-	@ToString.Exclude
-	@OneToMany(mappedBy = "edition")
+    @NotNull
 	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@OneToMany(mappedBy = "edition")
 	private Set<Path> paths = new HashSet<>();
 
-	@EqualsAndHashCode.Exclude
-	@ToString.Exclude
-	@Builder.Default
-	@OneToOne
-	private Path defaultPath = null;
+    @NotNull
+    @ManyToMany
+    @Builder.Default
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<SCPerson> editors = new HashSet<>();
+
 }

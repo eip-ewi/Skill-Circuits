@@ -17,13 +17,17 @@
  */
 package nl.tudelft.skills.service;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
+import nl.tudelft.librador.dto.DTOConverter;
+import nl.tudelft.skills.dto.create.SkillCreate;
+import nl.tudelft.skills.dto.patch.SkillPatch;
+import nl.tudelft.skills.model.AbstractSkill;
+import nl.tudelft.skills.model.Checkpoint;
+import nl.tudelft.skills.repository.AbstractSkillRepository;
 import org.springframework.stereotype.Service;
 
 import lombok.AllArgsConstructor;
-import nl.tudelft.skills.dto.patch.SkillPatchDTO;
-import nl.tudelft.skills.dto.patch.TaskPatchDTO;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.SkillRepository;
 
@@ -31,19 +35,47 @@ import nl.tudelft.skills.repository.SkillRepository;
 @AllArgsConstructor
 public class SkillService {
 
-	private final SkillRepository skillRepository;
+    private final AbstractSkillRepository abstractSkillRepository;
+    private final SkillRepository skillRepository;
 
-	private final TaskService taskService;
+    private final DTOConverter dtoConverter;
 
-	@Transactional
-	public void patchSkill(SkillPatchDTO patch) {
-		Skill skill = skillRepository.findByIdOrThrow(patch.getId());
-		patch.apply(skill);
-		skillRepository.save(skill);
+    @Transactional
+    public Skill createSkill(SkillCreate create) {
+        return skillRepository.save(create.apply(dtoConverter));
+    }
 
-		for (TaskPatchDTO taskPatch : patch.getTasks()) {
-			taskService.patchTask(taskPatch);
-		}
-	}
+    @Transactional
+    public void patchSkill(AbstractSkill skill, SkillPatch patch) {
+        patch.apply(skill, dtoConverter);
+        abstractSkillRepository.save(skill);
+    }
+
+    @Transactional
+    public void deleteSkill(AbstractSkill skill) {
+        skill.getChildren().forEach(parent -> {
+            parent.getParents().remove(skill);
+        });
+        abstractSkillRepository.saveAll(skill.getChildren());
+        abstractSkillRepository.delete(skill);
+    }
+
+    @Transactional
+    public void updatePosition(AbstractSkill skill, Integer column) {
+        skill.setColumn(column);
+        abstractSkillRepository.save(skill);
+    }
+
+    @Transactional
+    public void connect(AbstractSkill from, AbstractSkill to) {
+        to.getParents().add(from);
+        abstractSkillRepository.save(to);
+    }
+
+    @Transactional
+    public void disconnect(AbstractSkill from, AbstractSkill to) {
+        to.getParents().remove(from);
+        abstractSkillRepository.save(to);
+    }
 
 }

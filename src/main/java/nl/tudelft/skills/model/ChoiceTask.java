@@ -20,15 +20,16 @@ package nl.tudelft.skills.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import nl.tudelft.skills.dto.old.view.module.TaskViewDTO;
 import nl.tudelft.skills.dto.view.module.ChoiceTaskViewDTO;
-import nl.tudelft.skills.dto.view.module.TaskViewDTO;
 
 @Data
 @Entity
@@ -37,23 +38,21 @@ import nl.tudelft.skills.dto.view.module.TaskViewDTO;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class ChoiceTask extends Task {
-	// Can be empty
-	private String name;
 
-	@Builder.Default
+	// Can be empty
+    @NotNull
+    @Builder.Default
+	private String name = "";
+
 	@Min(1)
+	@Builder.Default
 	private Integer minTasks = 1;
 
 	@NotNull
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@OneToMany
+	@OneToMany(mappedBy = "choiceTask", cascade = CascadeType.ALL)
 	private List<TaskInfo> tasks = new ArrayList<>();
-
-	@Override
-	public Class<? extends TaskViewDTO<?>> viewClass() {
-		return ChoiceTaskViewDTO.class;
-	}
 
 }

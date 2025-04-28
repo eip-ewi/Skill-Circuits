@@ -20,11 +20,12 @@ package nl.tudelft.skills.model;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
 import nl.tudelft.skills.model.*;
+import nl.tudelft.skills.enums.ViewMode;
 
 @Data
 @Entity
@@ -36,22 +37,25 @@ public class SCPerson {
 	@Id
 	private Long id;
 
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private ViewMode viewMode;
+
+    @NotNull
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@OneToMany(mappedBy = "person")
 	private Set<TaskCompletion> taskCompletions = new HashSet<>();
 
-	@NotNull
-	@OneToOne(cascade = CascadeType.ALL)
-	private Inventory inventory;
-
+    @NotNull
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@OneToMany(mappedBy = "person")
 	private Set<PathPreference> pathPreferences = new HashSet<>();
 
+    @NotNull
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
@@ -59,6 +63,7 @@ public class SCPerson {
 	// For configuring a skill with any task in any path
 	private Set<Task> tasksAdded = new HashSet<>();
 
+    @NotNull
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
@@ -66,11 +71,19 @@ public class SCPerson {
 	// To remember which skills have already been revealed
 	private Set<Skill> skillsRevealed = new HashSet<>();
 
+    @NotNull
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@ManyToMany
 	@Builder.Default
 	// For configuring a skill with any task in any path
 	private Set<Skill> skillsModified = new HashSet<>();
+
+    @NotNull
+    @Builder.Default
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToMany(mappedBy = "editors")
+    private Set<SCEdition> editorInEditions = new HashSet<>();
 
 }

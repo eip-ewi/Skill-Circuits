@@ -17,12 +17,12 @@
  */
 package nl.tudelft.skills.dto.old.create;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
 import nl.tudelft.librador.dto.create.Create;
-import nl.tudelft.skills.dto.old.id.SCEditionIdDTO;
+import nl.tudelft.skills.dto.id.SCEditionId;
 import nl.tudelft.skills.model.Path;
 
 @Data
@@ -35,7 +35,7 @@ public class PathCreateDTO extends Create<Path> {
 	@NotBlank
 	private String name;
 	@NotNull
-	private SCEditionIdDTO edition;
+	private SCEditionId edition;
 
 	@Override
 	public Class<Path> clazz() {

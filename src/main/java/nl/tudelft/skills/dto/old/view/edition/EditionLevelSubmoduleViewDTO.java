@@ -20,7 +20,7 @@ package nl.tudelft.skills.dto.old.view.edition;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
 import nl.tudelft.librador.dto.view.View;
@@ -33,7 +33,7 @@ import nl.tudelft.skills.model.Submodule;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class EditionLevelSubmoduleViewDTO extends View<Submodule> implements BlockView {
+public class EditionLevelSubmoduleViewDTO extends View<Submodule> {
 
 	@NotNull
 	private Long id;
@@ -66,15 +66,15 @@ public class EditionLevelSubmoduleViewDTO extends View<Submodule> implements Blo
 				.distinct().toList();
 	}
 
-	@Override
-	public List<? extends ItemView> getItems() {
-		return skills;
-	}
+//	@Override
+//	public List<? extends ItemView> getItems() {
+//		return skills;
+//	}
 
-	@Override
-	public List<Long> getChildIds() {
-		return childIds;
-	}
+//	@Override
+//	public List<Long> getChildIds() {
+//		return childIds;
+//	}
 
 	public static EditionLevelSubmoduleViewDTO empty() {
 		return EditionLevelSubmoduleViewDTO.builder()

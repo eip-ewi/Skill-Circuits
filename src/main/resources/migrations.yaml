@@ -27,7 +27,7 @@ databaseChangeLog:
               - column:
                   constraints:
                     nullable: false
-                  name: idx
+                  name: index
                   type: INTEGER
             tableName: task
   - changeSet:
@@ -1937,3 +1937,186 @@ databaseChangeLog:
             referencedColumnNames: id
             referencedTableName: regular_task
             validate: true
+
+
+  ####################
+  # Version 2526.0.0 #
+  ####################
+
+  #
+  # Remove inventories
+  #
+  - changeSet:
+      id: remove-inventories
+      author: ruben
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: inventory_inventory_items
+            constraintName: FK4gwfo42iccppofjxx7yndoh78 # inventory_inventory_items.inventory_id -> inventory.id
+        - dropForeignKeyConstraint:
+            baseTableName: inventory_inventory_items
+            constraintName: FKshbh4txmrh1choxhfe89hqqnq # inventory_inventory_items.items_id -> inventory_item.id
+        - dropForeignKeyConstraint:
+            baseTableName: scperson
+            constraintName: FKo3yf33nocqc5g4krhvo1oq8dy # scperson.inventory_id -> inventory.id
+        - dropColumn:
+            columnName: inventory_id
+            tableName: scperson
+        - dropTable:
+            tableName: inventory_inventory_items
+        - dropTable:
+            tableName: inventory
+        - dropTable:
+            tableName: inventory_item
+
+  #
+  # Remove default paths
+  #
+  - changeSet:
+      id: remove-default-paths
+      author: ruben
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: scedition
+            constraintName: FKmh9dharmdw9id0ky3sectj1c1 # scedition.default_path_id -> path.id
+        - dropColumn:
+            columnName: default_path_id
+            tableName: scedition
+
+  #
+  # Profiles get a 'View mode'
+  #
+  - changeSet:
+      id: add-view-mode
+      author: ruben (generated)
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  defaultValue: VIEWER
+                  name: view_mode
+                  type: ENUM('VIEWER', 'EDITOR', 'ADMIN')
+            tableName: scperson
+
+  #
+  # External skills can also be essential
+  #
+  - changeSet:
+      id: external-skills-essential
+      author: ruben
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: essential
+                  type: BIT(1)
+                  defaultValueBoolean: false
+            tableName: abstract_skill
+        # move essentiality from skills to abstract skills
+        - sql:
+            dbms: mariadb,mysql
+            sql: update abstract_skill inner join skill on abstract_skill.id = skill.id set abstract_skill.essential = skill.essential;
+        - dropColumn:
+            columnName: essential
+            tableName: skill
+
+  #
+  # Paths get a description
+  #
+  - changeSet:
+      id: add-path-description
+      author: ruben
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: description
+                  type: TEXT
+            tableName: path
+
+  #
+  # Blocks do not specify their rows anymore
+  #
+  - changeSet:
+      id: remove-block-rows
+      author: ruben
+      changes:
+        - dropColumn:
+            columnName: y_pos
+            tableName: abstract_skill
+        - dropColumn:
+            columnName: y_pos
+            tableName: submodule
+
+  #
+  # Blocks can be unplaced by having a null column
+  #
+  - changeSet:
+      id: allow-null-columns
+      author: ruben
+      changes:
+        - dropNotNullConstraint:
+            columnDataType: int
+            columnName: x_pos
+            tableName: abstract_skill
+        - dropNotNullConstraint:
+            columnDataType: int
+            columnName: x_pos
+            tableName: submodule
+
+  #
+  # Checkpoints can be null
+  #
+  - changeSet:
+      id: allow-null-checkpoints
+      author: ruben (generated)
+      changes:
+        - dropNotNullConstraint:
+            columnDataType: bigint
+            columnName: checkpoint_id
+            tableName: skill
+
+  #
+  # Task types are now stored as strings
+  #
+  - changeSet:
+      id: 1755760731911-2
+      author: ruben
+      changes:
+        - renameColumn:
+            oldColumnName: type
+            newColumnName: type_index
+            columnDataType: int
+            tableName: task_info
+        - addColumn:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: type
+                  type: ENUM('READING', 'VIDEO', 'QUIZ', 'IMPLEMENTATION', 'EXERCISE', 'COLLABORATION', 'EXPERIMENT', 'CLASSROOM')
+                  defaultValue: READING
+            tableName: task_info
+        - sql:
+            sql: update task_info set type = "READING" where type_index = 0;
+        - sql:
+            sql: update task_info set type = "VIDEO" where type_index = 1;
+        - sql:
+            sql: update task_info set type = "QUIZ" where type_index = 2;
+        - sql:
+            sql: update task_info set type = "IMPLEMENTATION" where type_index = 3;
+        - sql:
+            sql: update task_info set type = "EXERCISE" where type_index = 4;
+        - sql:
+            sql: update task_info set type = "COLLABORATION" where type_index = 5;
+        - sql:
+            sql: update task_info set type = "EXPERIMENT" where type_index = 6;
+        - sql:
+            sql: update task_info set type = "CLASSROOM" where type_index = 7;
+        - dropColumn:
+            columnName: type_index
+            tableName: task_info

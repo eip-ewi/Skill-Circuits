@@ -28,12 +28,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import nl.tudelft.librador.exception.DTOValidationException;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.dto.create.ChoiceTaskCreateDTO;
+import nl.tudelft.skills.dto.create.ChoiceTaskCreate;
 import nl.tudelft.skills.dto.create.RegularTaskCreateDTO;
 import nl.tudelft.skills.dto.create.TaskInfoCreateDTO;
-import nl.tudelft.skills.dto.id.SkillIdDTO;
-import nl.tudelft.skills.dto.patch.RegularTaskPatchDTO;
-import nl.tudelft.skills.dto.patch.TaskInfoPatchDTO;
+import nl.tudelft.skills.dto.id.SkillId;
+import nl.tudelft.skills.dto.old.patch.RegularTaskPatchDTO;
+import nl.tudelft.skills.dto.old.patch.TaskInfoPatchDTO;
 import nl.tudelft.skills.model.TaskType;
 
 @Transactional
@@ -44,14 +44,14 @@ public class TestChoiceTaskCreateDTO {
 
 	@Test
 	public void testNoSubTasks() {
-		ChoiceTaskCreateDTO createDTO = getChoiceTaskCreateDTO();
+		ChoiceTaskCreate createDTO = getChoiceTaskCreateDTO();
 		Exception exception = assertThrows(DTOValidationException.class, createDTO::apply);
 		assertThat(exception.getMessage()).contains("ChoiceTask has to contain at least two subtasks");
 	}
 
 	@Test
 	public void testOneNewSubTask() {
-		ChoiceTaskCreateDTO createDTO = getChoiceTaskCreateDTO();
+		ChoiceTaskCreate createDTO = getChoiceTaskCreateDTO();
 		createDTO.setNewSubTasks(List.of(getTaskCreateDTO()));
 		Exception exception = assertThrows(DTOValidationException.class, createDTO::apply);
 		assertThat(exception.getMessage()).contains("ChoiceTask has to contain at least two subtasks");
@@ -59,7 +59,7 @@ public class TestChoiceTaskCreateDTO {
 
 	@Test
 	public void testOneUpdatedSubTask() {
-		ChoiceTaskCreateDTO createDTO = getChoiceTaskCreateDTO();
+		ChoiceTaskCreate createDTO = getChoiceTaskCreateDTO();
 		createDTO.setUpdatedSubTasks(List.of(getTaskPatchDTO()));
 		Exception exception = assertThrows(DTOValidationException.class, createDTO::apply);
 		assertThat(exception.getMessage()).contains("ChoiceTask has to contain at least two subtasks");
@@ -67,7 +67,7 @@ public class TestChoiceTaskCreateDTO {
 
 	@Test
 	public void testNumberMinTasksTooSmall() {
-		ChoiceTaskCreateDTO createDTO = getChoiceTaskCreateDTO();
+		ChoiceTaskCreate createDTO = getChoiceTaskCreateDTO();
 		createDTO.setNewSubTasks(List.of(getTaskCreateDTO(), getTaskCreateDTO()));
 		createDTO.setMinTasks(0);
 		Exception exception = assertThrows(DTOValidationException.class, createDTO::apply);
@@ -77,7 +77,7 @@ public class TestChoiceTaskCreateDTO {
 
 	@Test
 	public void testNumberMinTasksTooBig() {
-		ChoiceTaskCreateDTO createDTO = getChoiceTaskCreateDTO();
+		ChoiceTaskCreate createDTO = getChoiceTaskCreateDTO();
 		createDTO.setNewSubTasks(List.of(getTaskCreateDTO()));
 		createDTO.setUpdatedSubTasks(List.of(getTaskPatchDTO()));
 		createDTO.setMinTasks(2);
@@ -88,7 +88,7 @@ public class TestChoiceTaskCreateDTO {
 
 	@Test
 	public void testValidChoiceTaskCreateDTO() {
-		ChoiceTaskCreateDTO createDTO = getChoiceTaskCreateDTO();
+		ChoiceTaskCreate createDTO = getChoiceTaskCreateDTO();
 		createDTO.setNewSubTasks(List.of(getTaskCreateDTO(), getTaskCreateDTO()));
 		createDTO.setMinTasks(1);
 		assertDoesNotThrow(createDTO::apply);
@@ -99,12 +99,12 @@ public class TestChoiceTaskCreateDTO {
 	 *
 	 * @return A ChoiceTaskCreateDTO.
 	 */
-	public ChoiceTaskCreateDTO getChoiceTaskCreateDTO() {
-		return ChoiceTaskCreateDTO
+	public ChoiceTaskCreate getChoiceTaskCreateDTO() {
+		return ChoiceTaskCreate
 				.builder()
 				.minTasks(1)
 				.index(1)
-				.skill(SkillIdDTO.builder().id(1L).build())
+				.skill(SkillId.builder().id(1L).build())
 				.build();
 	}
 
@@ -117,7 +117,7 @@ public class TestChoiceTaskCreateDTO {
 		return RegularTaskCreateDTO.builder()
 				.taskInfo(TaskInfoCreateDTO.builder().name("Task").type(TaskType.READING).time(0).build())
 				.index(1)
-				.skill(SkillIdDTO.builder().id(1L).build())
+				.skill(SkillId.builder().id(1L).build())
 				.build();
 	}
 
@@ -131,7 +131,7 @@ public class TestChoiceTaskCreateDTO {
 				.taskInfo(TaskInfoPatchDTO.builder().name("Task").type(TaskType.READING).time(0).build())
 				.id(2L)
 				.index(1)
-				.skill(SkillIdDTO.builder().id(1L).build())
+				.skill(SkillId.builder().id(1L).build())
 				.build();
 	}
 }

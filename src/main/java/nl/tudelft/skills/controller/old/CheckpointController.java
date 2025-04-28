@@ -61,7 +61,7 @@ public class CheckpointController {
 	@PreAuthorize("@authorisationService.canEditCheckpoint(#patch.id)")
 	public ResponseEntity<Void> patchCheckpoint(CheckpointPatchDTO patch) {
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(patch.getId());
-		checkpointRepository.save(patch.apply(checkpoint));
+//		checkpointRepository.save(patch.apply(checkpoint));
 		return ResponseEntity.ok().build();
 	}
 
@@ -70,7 +70,7 @@ public class CheckpointController {
 	@PreAuthorize("@authorisationService.canEditCheckpoint(#patch.id)")
 	public ResponseEntity<Void> patchCheckpointName(CheckpointNamePatchDTO patch) {
 		Checkpoint checkpoint = checkpointRepository.findByIdOrThrow(patch.getId());
-		checkpointRepository.save(patch.apply(checkpoint));
+//		checkpointRepository.save(patch.apply(checkpoint));
 		return ResponseEntity.ok().build();
 	}
 
@@ -208,8 +208,8 @@ public class CheckpointController {
 	@PostMapping
 	@PreAuthorize("@authorisationService.canCreateCheckpointInEdition(#dto.edition.id)")
 	public String createCheckpoint(CheckpointCreateDTO dto, @RequestParam Long moduleId) {
-		Checkpoint checkpoint = checkpointRepository.save(dto.apply());
-		skillRepository.findAllByIdIn(dto.getSkillIds()).forEach(skill -> skill.setCheckpoint(checkpoint));
+//		Checkpoint checkpoint = checkpointRepository.save(dto.apply());
+//		skillRepository.findAllByIdIn(dto.getSkillIds()).forEach(skill -> skill.setCheckpoint(checkpoint));
 
 		return "redirect:module/" + moduleId;
 	}
@@ -225,9 +225,9 @@ public class CheckpointController {
 	@PostMapping("setup")
 	@PreAuthorize("@authorisationService.canCreateCheckpointInEdition(#dto.edition.id)")
 	public String createCheckpointSetup(CheckpointCreateDTO dto, Model model) {
-		Checkpoint checkpoint = checkpointRepository.saveAndFlush(dto.apply());
-
-		model.addAttribute("checkpoint", View.convert(checkpoint, CheckpointViewDTO.class));
+//		Checkpoint checkpoint = checkpointRepository.saveAndFlush(dto.apply());
+//
+//		model.addAttribute("checkpoint", View.convert(checkpoint, CheckpointViewDTO.class));
 
 		return "edition_setup/checkpoint";
 

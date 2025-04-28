@@ -20,10 +20,11 @@ package nl.tudelft.skills.model;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.*;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
@@ -38,23 +39,20 @@ import lombok.*;
 public class Submodule {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@NotNull
 	@ManyToOne
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
 	private SCModule module;
 
 	@NotBlank
 	private String name;
 
 	@Min(0)
-	@NotNull
-	@Column(name = "yPos")
-	private Integer row;
-
-	@Min(0)
-	@NotNull
+	@Nullable
 	@Column(name = "xPos")
 	private Integer column;
 

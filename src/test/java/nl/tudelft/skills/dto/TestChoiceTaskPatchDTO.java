@@ -32,10 +32,10 @@ import nl.tudelft.librador.exception.DTOValidationException;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.create.RegularTaskCreateDTO;
 import nl.tudelft.skills.dto.create.TaskInfoCreateDTO;
-import nl.tudelft.skills.dto.id.SkillIdDTO;
-import nl.tudelft.skills.dto.patch.ChoiceTaskPatchDTO;
-import nl.tudelft.skills.dto.patch.RegularTaskPatchDTO;
-import nl.tudelft.skills.dto.patch.TaskInfoPatchDTO;
+import nl.tudelft.skills.dto.id.SkillId;
+import nl.tudelft.skills.dto.old.patch.ChoiceTaskPatchDTO;
+import nl.tudelft.skills.dto.old.patch.RegularTaskPatchDTO;
+import nl.tudelft.skills.dto.old.patch.TaskInfoPatchDTO;
 import nl.tudelft.skills.model.ChoiceTask;
 import nl.tudelft.skills.model.TaskType;
 import nl.tudelft.skills.test.TestDatabaseLoader;
@@ -155,7 +155,7 @@ public class TestChoiceTaskPatchDTO {
 				.name("New name")
 				.minTasks(1)
 				.index(1)
-				.skill(SkillIdDTO.builder().id(db.getSkillVariables().getId()).build())
+				.skill(SkillId.builder().id(db.getSkillVariables().getId()).build())
 				.build();
 	}
 
@@ -168,7 +168,7 @@ public class TestChoiceTaskPatchDTO {
 		return RegularTaskCreateDTO.builder()
 				.taskInfo(TaskInfoCreateDTO.builder().name("New task").type(TaskType.READING).time(0).build())
 				.index(1)
-				.skill(SkillIdDTO.builder().id(db.getSkillVariables().getId()).build())
+				.skill(SkillId.builder().id(db.getSkillVariables().getId()).build())
 				.build();
 	}
 
@@ -183,7 +183,7 @@ public class TestChoiceTaskPatchDTO {
 						TaskInfoPatchDTO.builder().name("Video renamed").type(TaskType.VIDEO).time(0).build())
 				.id(db.getTaskVideo().getId())
 				.index(1)
-				.skill(SkillIdDTO.builder().id(db.getSkillVariables().getId()).build())
+				.skill(SkillId.builder().id(db.getSkillVariables().getId()).build())
 				.build();
 	}
 }

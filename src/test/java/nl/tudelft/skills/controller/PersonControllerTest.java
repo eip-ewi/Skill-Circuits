@@ -50,7 +50,6 @@ import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.security.AuthorisationService;
-import nl.tudelft.skills.service.PersonService;
 import nl.tudelft.skills.service.TaskCompletionService;
 import reactor.core.publisher.Mono;
 
@@ -75,7 +74,7 @@ public class PersonControllerTest extends ControllerTest {
 			TaskCompletionService taskCompletionService,
 			PathPreferenceRepository pathPreferenceRepository,
 			SkillRepository skillRepository,
-			PathRepository pathRepository,
+			PathsController pathRepository,
 			AuthorisationService authorisationService,
 			RoleControllerApi roleApi,
 			PersonService personService) {

@@ -32,7 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.dto.old.view.InventoryViewDTO;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 @Transactional

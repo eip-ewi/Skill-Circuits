@@ -20,16 +20,14 @@ package nl.tudelft.skills.service.old;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
-import org.springframework.data.util.Pair;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 
 import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
-import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.old.view.edition.*;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.*;
@@ -58,24 +56,24 @@ public class EditionService {
 	 * @param session The http session
 	 */
 	public void configureEditionModel(Long id, Model model, HttpSession session) {
-		EditionLevelEditionViewDTO edition = getEditionView(id);
-
-		Set<Pair<Integer, Integer>> positions = edition.getFilledPositions();
-		int columns = positions.stream().mapToInt(Pair::getFirst).max().orElse(0) + 1;
-		int rows = positions.stream().mapToInt(Pair::getSecond).max().orElse(0) + 1;
-		Boolean studentMode = (Boolean) session.getAttribute("student-mode-" + id);
-
-		Set<PathViewDTO> pathsInEdition = getPaths(edition.getId());
-
-		model.addAttribute("level", "edition");
-		model.addAttribute("edition", edition);
-		circuitService.setCircuitAttributes(model, positions, columns, rows);
-
-		model.addAttribute("emptyBlock", EditionLevelSubmoduleViewDTO.empty());
-		model.addAttribute("emptyGroup", EditionLevelModuleViewDTO.empty());
-		model.addAttribute("studentMode", studentMode != null && studentMode);
-
-		model.addAttribute("paths", pathsInEdition);
+//		EditionLevelEditionViewDTO edition = getEditionView(id);
+//
+//		Set<Pair<Integer, Integer>> positions = edition.getFilledPositions();
+//		int columns = positions.stream().mapToInt(Pair::getFirst).max().orElse(0) + 1;
+//		int rows = positions.stream().mapToInt(Pair::getSecond).max().orElse(0) + 1;
+//		Boolean studentMode = (Boolean) session.getAttribute("student-mode-" + id);
+//
+//		Set<PathViewDTO> pathsInEdition = getPaths(edition.getId());
+//
+//		model.addAttribute("level", "edition");
+//		model.addAttribute("edition", edition);
+//		circuitService.setCircuitAttributes(model, positions, columns, rows);
+//
+//		model.addAttribute("emptyBlock", EditionLevelSubmoduleViewDTO.empty());
+//		model.addAttribute("emptyGroup", EditionLevelModuleViewDTO.empty());
+//		model.addAttribute("studentMode", studentMode != null && studentMode);
+//
+//		model.addAttribute("paths", pathsInEdition);
 	}
 
 	/**
@@ -88,8 +86,8 @@ public class EditionService {
 	public EditionLevelEditionViewDTO getEditionView(Long id) {
 		EditionDetailsDTO edition = editionApi.getEditionById(id).block();
 
-		EditionLevelEditionViewDTO view = View.convert(getOrCreateSCEdition(id),
-				EditionLevelEditionViewDTO.class);
+//		EditionLevelEditionViewDTO view = View.convert(getOrCreateSCEdition(id),
+//				EditionLevelEditionViewDTO.class);
 
 		List<EditionLevelEditionSummaryDTO> olderEditions = editionApi
 				.getAllEditionsByCourse(edition.getCourse().getId())
@@ -98,11 +96,12 @@ public class EditionService {
 				.map(dto -> new EditionLevelEditionSummaryDTO(dto.getId(), dto.getName()))
 				.collect(Collectors.toList());
 
-		view.setName(edition.getName());
-		view.setCourse(
-				new EditionLevelCourseViewDTO(edition.getCourse().getId(), edition.getCourse().getName(),
-						olderEditions));
-		return view;
+        return null;
+//		view.setName(edition.getName());
+//		view.setCourse(
+//				new EditionLevelCourseViewDTO(edition.getCourse().getId(), edition.getCourse().getName(),
+//						olderEditions));
+//		return view;
 	}
 
 	/**
@@ -112,9 +111,10 @@ public class EditionService {
 	 * @return           List of PathViewDTOs for edition with id.
 	 */
 	public Set<PathViewDTO> getPaths(Long editionId) {
-		return editionRepository.findById(editionId).get()
-				.getPaths().stream().map(p -> View.convert(p, PathViewDTO.class))
-				.collect(Collectors.toSet());
+//		return editionRepository.findById(editionId).get()
+//				.getPaths().stream().map(p -> View.convert(p, PathViewDTO.class))
+//				.collect(Collectors.toSet());
+        return Collections.emptySet();
 	}
 
 	/**
@@ -124,7 +124,8 @@ public class EditionService {
 	 * @return           The default path of an edition if it exists, null otherwise.
 	 */
 	public Path getDefaultPath(Long editionId) {
-		return editionRepository.findById(editionId).get().getDefaultPath();
+//		return editionRepository.findById(editionId).get().getDefaultPath();
+        return null;
 	}
 
 	/**
@@ -179,7 +180,7 @@ public class EditionService {
 
 		// Copy paths
 		Map<Path, Path> pathMap = copyEditionPaths(editionFrom, editionTo);
-		editionTo.setDefaultPath(pathMap.get(editionFrom.getDefaultPath()));
+//		editionTo.setDefaultPath(pathMap.get(editionFrom.getDefaultPath()));
 
 		// Copy modules and submodules
 		Map<SCModule, SCModule> moduleMap = copyEditionModules(editionFrom, editionTo);
@@ -307,7 +308,7 @@ public class EditionService {
 						Submodule.builder()
 								.name(sm.getName())
 								.module(copy)
-								.row(sm.getRow())
+//								.row(sm.getRow())
 								.column(sm.getColumn())
 								.build());
 
@@ -343,7 +344,7 @@ public class EditionService {
 						Skill.builder()
 								.name(s.getName())
 								.submodule(copy)
-								.row(s.getRow())
+//								.row(s.getRow())
 								.column(s.getColumn())
 								.essential(s.isEssential())
 								.hidden(s.isHidden())
@@ -391,7 +392,7 @@ public class EditionService {
 					ExternalSkill.builder()
 							.module(copy)
 							.skill(linkedSkill)
-							.row(s.getRow())
+//							.row(s.getRow())
 							.column(s.getColumn())
 							.build());
 

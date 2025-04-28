@@ -19,8 +19,8 @@ package nl.tudelft.skills.model;
 
 import java.time.LocalDateTime;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -43,7 +43,7 @@ public class TaskCompletion {
 
 	@NotNull
 	@ManyToOne
-	private RegularTask task;
+	private TaskInfo task;
 
 	// The timestamp can be null for the already stored completions without time indication
 	@Builder.Default

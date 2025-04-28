@@ -21,14 +21,14 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
+import nl.tudelft.skills.dto.id.SCEditionId;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import lombok.*;
 import nl.tudelft.librador.dto.create.Create;
-import nl.tudelft.skills.dto.old.id.SCEditionIdDTO;
 import nl.tudelft.skills.model.Checkpoint;
 
 @Data
@@ -41,7 +41,7 @@ public class CheckpointCreateDTO extends Create<Checkpoint> {
 	@NotBlank
 	private String name;
 	@NotNull
-	private SCEditionIdDTO edition;
+	private SCEditionId edition;
 	@NotNull
 	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
 	@Builder.Default

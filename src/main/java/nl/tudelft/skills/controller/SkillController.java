@@ -17,33 +17,75 @@
  */
 package nl.tudelft.skills.controller;
 
-import org.springframework.transaction.annotation.Transactional;
+import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
+import nl.tudelft.labracore.lib.security.user.Person;
+import nl.tudelft.skills.annotation.AuthenticatedSCPerson;
+import nl.tudelft.skills.dto.create.SkillCreate;
+import nl.tudelft.skills.dto.patch.SkillPatch;
+import nl.tudelft.skills.dto.view.circuit.module.ModuleLevelSkillView;
+import nl.tudelft.skills.model.AbstractSkill;
+import nl.tudelft.skills.model.SCPerson;
+import nl.tudelft.skills.service.ModuleCircuitService;
+import nl.tudelft.skills.service.TaskCompletionService;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.AllArgsConstructor;
 import nl.tudelft.librador.resolver.annotations.PathEntity;
-import nl.tudelft.skills.dto.patch.SkillPatchDTO;
-import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.service.SkillService;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("api/skill")
+@RequestMapping("/api/skills")
 public class SkillController {
 
+    private final ModuleCircuitService moduleCircuitService;
 	private final SkillService skillService;
+    private final TaskCompletionService taskCompletionService;
 
-	@ResponseBody
-	@Transactional
+    @GetMapping("{skill}/module")
+    public Long getModuleFromSkill(@PathEntity AbstractSkill skill) {
+        return skill.getSubmodule().getModule().getId();
+    }
+
+    @GetMapping("last-active")
+    public Long getLastActiveSkill(@AuthenticatedSCPerson SCPerson person) {
+        return taskCompletionService.getLastCompletedTask(person).map(task -> task.getSkill().getId()).orElseThrow(ResourceNotFoundException::new);
+    }
+
+    @PostMapping
+    public ModuleLevelSkillView createSkill(@AuthenticatedSCPerson SCPerson person, @RequestBody SkillCreate create) {
+        return moduleCircuitService.convertToSkillView(skillService.createSkill(create), person);
+    }
+
+    @PatchMapping("{skill}")
+    public void patchSkill(@PathEntity AbstractSkill skill, @RequestBody SkillPatch patch) {
+        skillService.patchSkill(skill, patch);
+    }
+
+    @DeleteMapping("{skill}")
+    public void deleteSkill(@PathEntity AbstractSkill skill) {
+        skillService.deleteSkill(skill);
+    }
+
 	@PatchMapping("{skill}/position")
-	public void updatePosition(@PathEntity Skill skill, @RequestParam Integer column) {
-		skill.setColumn(column);
+	public void updatePosition(@PathEntity AbstractSkill skill, @RequestParam Integer column) {
+		skillService.updatePosition(skill, column);
 	}
 
-	@ResponseBody
-	@PatchMapping
-	public void updateSkill(@RequestBody SkillPatchDTO patch) {
-		skillService.patchSkill(patch);
-	}
+    @DeleteMapping("{skill}/position")
+    public void removeSkillFromCircuit(@PathEntity AbstractSkill skill) {
+        skillService.updatePosition(skill, null);
+    }
+
+    @PostMapping("connections/{from}/{to}")
+    public void connect(@PathEntity AbstractSkill from, @PathEntity AbstractSkill to) {
+        skillService.connect(from, to);
+    }
+
+    @DeleteMapping("connections/{from}/{to}")
+    public void disconnect(@PathEntity AbstractSkill from, @PathEntity AbstractSkill to) {
+        skillService.disconnect(from, to);
+    }
 
 }

@@ -24,8 +24,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.old.view.InventoryViewDTO;
 import nl.tudelft.skills.model.SCPerson;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 
@@ -47,8 +45,8 @@ public class InventoryController {
 	@GetMapping
 	public String getInventoryPage(@AuthenticatedPerson Person person, Model model) {
 		SCPerson scPerson = personRepository.findByIdOrThrow(person.getId());
-		model.addAttribute("inventory", View.convert(scPerson.getInventory(),
-				InventoryViewDTO.class));
+//		model.addAttribute("inventory", View.convert(scPerson.getInventory(),
+//				InventoryViewDTO.class));
 		return "inventory/view";
 	}
 }

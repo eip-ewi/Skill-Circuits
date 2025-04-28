@@ -101,7 +101,8 @@ public class PathService {
 	public PathViewDTO getPath(Long pathId) {
 		if (pathId == null)
 			return null;
-		return View.convert(pathRepository.getById(pathId), PathViewDTO.class);
+//		return View.convert(pathRepository.getById(pathId), PathViewDTO.class);
+        return null;
 	}
 
 }

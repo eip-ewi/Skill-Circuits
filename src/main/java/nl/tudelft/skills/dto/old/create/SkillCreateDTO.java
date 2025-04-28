@@ -21,15 +21,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
-import nl.tudelft.librador.SpringContext;
 import nl.tudelft.librador.dto.create.Create;
-import nl.tudelft.skills.dto.old.id.CheckpointIdDTO;
-import nl.tudelft.skills.dto.old.id.SubmoduleIdDTO;
+import nl.tudelft.skills.dto.id.CheckpointId;
+import nl.tudelft.skills.dto.id.SubmoduleId;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.TaskRepository;
@@ -47,8 +46,8 @@ public class SkillCreateDTO extends Create<Skill> {
 	@Builder.Default
 	private Boolean hidden = false;
 	@NotNull
-	private SubmoduleIdDTO submodule;
-	private CheckpointIdDTO checkpoint;
+	private SubmoduleId submodule;
+	private CheckpointId checkpoint;
 	private CheckpointCreateDTO checkpointCreate;
 	@Min(0)
 	@NotNull
@@ -69,13 +68,13 @@ public class SkillCreateDTO extends Create<Skill> {
 
 	@Override
 	protected void postApply(Skill data) {
-		if (hidden) {
-			TaskRepository taskRepository = SpringContext
-					.getBean(TaskRepository.class);
-			Set<Task> requiredTasks = taskRepository.findAllByIdIn(requiredTaskIds);
-			requiredTasks.forEach(t -> t.getRequiredFor().add(data));
-			data.setRequiredTasks(new HashSet<>(requiredTasks));
-		}
+//		if (hidden) {
+//			TaskRepository taskRepository = SpringContext
+//					.getBean(TaskRepository.class);
+//			Set<Task> requiredTasks = taskRepository.findAllByIdIn(requiredTaskIds);
+//			requiredTasks.forEach(t -> t.getRequiredFor().add(data));
+//			data.setRequiredTasks(new HashSet<>(requiredTasks));
+//		}
 	}
 
 	@Override

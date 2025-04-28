@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2025 - Delft University of Technology
+ * Copyright (C) 2022 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -19,8 +19,14 @@ package nl.tudelft.skills.security;
 
 import static nl.tudelft.labracore.api.dto.RoleDetailsDTO.TypeEnum.*;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
+import jakarta.validation.constraints.NotNull;
+import nl.tudelft.labracore.api.dto.RoleId;
+import nl.tudelft.skills.enums.ViewMode;
+import nl.tudelft.skills.model.*;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,23 +35,117 @@ import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.PersonControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
-import nl.tudelft.labracore.api.dto.Id;
 import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
 import nl.tudelft.labracore.api.dto.RoleEditionDetailsDTO;
 import nl.tudelft.labracore.lib.security.LabradorUserDetails;
 import nl.tudelft.labracore.lib.security.user.DefaultRole;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.cache.RoleCacheManager;
-import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.*;
+
+import java.util.Optional;
+import java.util.function.Predicate;
 
 @Service
 @AllArgsConstructor
 public class AuthorisationService {
 
+    private final EditionRepository editionRepository;
+    private final PersonRepository personRepository;
+
+    /**
+     * Gets the currently authenticated user.
+     *
+     * @return The currently authenticated person, and null if no such person exists.
+     */
+    public Person getAuthenticatedPerson() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            return null;
+        }
+        if (authentication.getPrincipal() instanceof LabradorUserDetails userDetails) {
+            return userDetails.getUser();
+        }
+        return null;
+    }
+
+    /**
+     * Gets whether the user is authenticated.
+     *
+     * @return True iff the user is authenticated
+     */
+    public boolean isAuthenticated() {
+        return getAuthenticatedPerson() != null;
+    }
+
+    /*
+     * Role
+     */
+
+    public boolean hasAdminRole() {
+        return withAuthenticatedPerson(person -> person.getDefaultRole() == DefaultRole.ADMIN);
+    }
+
+    public boolean isAdmin() {
+        return hasAdminRole() && withAuthenticatedSCPerson(person -> person.getViewMode() == ViewMode.ADMIN);
+    }
+
+    public boolean hasEditorRole(Long editionId) {
+        return withRole(editionId, role -> role == TEACHER || role == HEAD_TA);
+    }
+
+    public boolean isEditor(Long editionId) {
+        if (isAdmin()) {
+            return true;
+        }
+        return hasEditorRole(editionId) && withAuthenticatedSCPerson(person -> person.getViewMode() == ViewMode.EDITOR);
+    }
+
+    /*
+     * Permissions
+     */
+
+    public boolean canEditEditionCircuit(Long editionId) {
+        return isAdmin() || isEditor(editionId);
+    }
+
+    public boolean canViewEditionCircuit(Long editionId) {
+        return isAdmin() || canEditEditionCircuit(editionId) || editionRepository.findByIdOrThrow(editionId).isVisible();
+    }
+
+    public boolean canEditModuleCircuit(SCModule module) {
+        return canEditEditionCircuit(module.getEdition().getId());
+    }
+
+    public boolean canViewModuleCircuit(SCModule module) {
+        return canViewEditionCircuit(module.getEdition().getId());
+    }
+
+    /*
+     * Helper
+     */
+
+    public boolean withAuthenticatedPerson(Predicate<Person> predicate) {
+        Person authenticatedPerson = getAuthenticatedPerson();
+        return authenticatedPerson != null && predicate.test(authenticatedPerson);
+    }
+
+    public boolean withAuthenticatedSCPerson(Predicate<SCPerson> predicate) {
+        return withAuthenticatedPerson(person -> predicate.test(personRepository.findByIdOrThrow(person.getId())));
+    }
+
+    public boolean withRole(Long editionId, Predicate<RoleDetailsDTO.TypeEnum> predicate) {
+        if (!isAuthenticated()) {
+            return false;
+        }
+        RoleDetailsDTO.TypeEnum role = roleCache.get(new RoleId().editionId(editionId).personId(getAuthenticatedPerson().getId())).map(RoleDetailsDTO::getType).orElse(null);
+        return role != null && predicate.test(role);
+    }
+
+    // Old
+
 	private RoleCacheManager roleCache;
 
-	private EditionRepository editionRepository;
 	private ModuleRepository moduleRepository;
 	private SubmoduleRepository submoduleRepository;
 	private SkillRepository skillRepository;
@@ -59,46 +159,12 @@ public class AuthorisationService {
 	private PersonControllerApi personApi;
 
 	/**
-	 * Gets the currently authenticated user.
-	 *
-	 * @return The currently authenticated person, and null if no such person exists.
-	 */
-	public Person getAuthPerson() {
-		if (!isAuthenticated()) {
-			return null;
-		}
-		return ((LabradorUserDetails) SecurityContextHolder.getContext()
-				.getAuthentication().getPrincipal()).getUser();
-	}
-
-	/**
-	 * Gets whether the user is authenticated.
-	 *
-	 * @return True iff the user is authenticated
-	 */
-	public boolean isAuthenticated() {
-		return SecurityContextHolder.getContext().getAuthentication()
-				.getPrincipal() instanceof LabradorUserDetails;
-	}
-
-	/**
-	 * Gets whether the authenticated user is an admin.
-	 *
-	 * @return True iff the authenticated user is an admin
-	 */
-	public boolean isAdmin() {
-		if (!isAuthenticated())
-			return false;
-		return getAuthPerson().getDefaultRole() == DefaultRole.ADMIN;
-	}
-
-	/**
 	 * Gets whether the authenticated user is staff.
 	 *
 	 * @return True iff the authenticated user is staff
 	 */
 	public boolean isStaff() {
-		return isAdmin() || getAuthPerson().getDefaultRole() == DefaultRole.TEACHER;
+		return isAdmin() || getAuthenticatedPerson().getDefaultRole() == DefaultRole.TEACHER;
 	}
 
 	/**
@@ -107,7 +173,7 @@ public class AuthorisationService {
 	 * @return True iff the authenticated user is a manager
 	 */
 	public boolean isManagerAnywhere() {
-		return isStaff() || personApi.getRolesForPerson(getAuthPerson().getId())
+		return isStaff() || personApi.getRolesForPerson(getAuthenticatedPerson().getId())
 				.any(r -> r.getType() == RoleEditionDetailsDTO.TypeEnum.HEAD_TA
 						|| r.getType() == RoleEditionDetailsDTO.TypeEnum.TEACHER)
 				.block();
@@ -121,7 +187,7 @@ public class AuthorisationService {
 	public boolean isStudent() {
 		if (!isAuthenticated())
 			return false;
-		return getAuthPerson().getDefaultRole() == DefaultRole.STUDENT;
+		return getAuthenticatedPerson().getDefaultRole() == DefaultRole.STUDENT;
 	}
 
 	/**
@@ -169,17 +235,6 @@ public class AuthorisationService {
 					&& canViewEdition(((ExternalSkill) skill).getModule().getEdition().getId());
 		}
 		return isAuthenticated() && canViewEdition(skill.getSubmodule().getModule().getEdition().getId());
-	}
-
-	/**
-	 * Gets whether the authenticated user can view a task.
-	 *
-	 * @param  taskId The id of the task.
-	 * @return        True iff the user can view the task.
-	 */
-	public boolean canViewTask(Long taskId) {
-		Task task = taskRepository.findByIdOrThrow(taskId);
-		return canViewEdition(task.getSkill().getSubmodule().getModule().getEdition().getId());
 	}
 
 	/**
@@ -533,7 +588,7 @@ public class AuthorisationService {
 	public @Nullable RoleDetailsDTO.TypeEnum getRoleInEdition(Long editionId) {
 		if (!isAuthenticated())
 			return null;
-		return roleCache.get(new Id().editionId(editionId).personId(getAuthPerson().getId()))
+		return roleCache.get(new RoleId().editionId(editionId).personId(getAuthenticatedPerson().getId()))
 				.map(RoleDetailsDTO::getType).orElse(null);
 	}
 

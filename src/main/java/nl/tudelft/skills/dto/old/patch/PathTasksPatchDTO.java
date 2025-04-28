@@ -20,7 +20,7 @@ package nl.tudelft.skills.dto.old.patch;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
 import nl.tudelft.librador.dto.patch.Patch;

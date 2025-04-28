@@ -20,13 +20,13 @@ package nl.tudelft.skills.model;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
-import nl.tudelft.skills.dto.view.module.TaskViewDTO;
+import nl.tudelft.skills.dto.old.view.module.TaskViewDTO;
+import nl.tudelft.skills.enums.TaskType;
 
 @Data
 @Entity
@@ -39,22 +39,12 @@ public class RegularTask extends Task {
 	@OneToOne(mappedBy = "task", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private TaskInfo taskInfo;
 
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@OneToMany(mappedBy = "task")
-	private Set<TaskCompletion> completedBy = new HashSet<>();
-
-	@Override
-	public Class<? extends TaskViewDTO<?>> viewClass() {
-		return RegularTaskViewDTO.class;
-	}
-
+    @Override
 	public String getName() {
 		return taskInfo.getName();
 	}
 
+    @Override
 	public void setName(String name) {
 		taskInfo.setName(name);
 	}

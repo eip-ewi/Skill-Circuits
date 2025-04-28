@@ -17,13 +17,13 @@
  */
 package nl.tudelft.skills.dto.old.create;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
 import nl.tudelft.librador.dto.create.Create;
-import nl.tudelft.skills.dto.old.id.SCModuleIdDTO;
+import nl.tudelft.skills.dto.id.SCModuleId;
 import nl.tudelft.skills.model.Submodule;
 
 @Data
@@ -36,7 +36,7 @@ public class SubmoduleCreateDTO extends Create<Submodule> {
 	@NotBlank
 	private String name;
 	@NotNull
-	private SCModuleIdDTO module;
+	private SCModuleId module;
 	@Min(0)
 	@NotNull
 	private Integer row;

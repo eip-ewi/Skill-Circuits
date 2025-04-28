@@ -19,7 +19,7 @@ package nl.tudelft.skills.dto.old.view.module;
 
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
 import nl.tudelft.librador.dto.view.View;
@@ -42,7 +42,7 @@ public class ModuleLevelEditionViewDTO extends View<SCEdition> {
 	public void postApply() {
 		super.postApply();
 		// get all paths in this edition
-		this.pathViews = data.getPaths().stream().map(p -> View.convert(p, PathViewDTO.class)).toList();
+//		this.pathViews = data.getPaths().stream().map(p -> View.convert(p, PathViewDTO.class)).toList();
 	}
 
 	public List<PathViewDTO> getPaths() {

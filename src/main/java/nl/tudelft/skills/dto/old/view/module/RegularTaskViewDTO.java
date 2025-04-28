@@ -15,12 +15,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view.module;
+package nl.tudelft.skills.dto.old.view.module;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import nl.tudelft.skills.dto.old.view.module.TaskViewDTO;
 import nl.tudelft.skills.model.RegularTask;
 
 @Data
@@ -42,6 +43,6 @@ public class RegularTaskViewDTO extends TaskViewDTO<RegularTask> {
 	@Override
 	public void postApply() {
 		super.postApply();
-		completedCount = data.getCompletedBy().size();
+//		completedCount = data.getCompletedBy().size();
 	}
 }

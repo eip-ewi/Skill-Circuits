@@ -20,8 +20,8 @@ package nl.tudelft.skills.controller.old;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpSession;
-import javax.validation.Valid;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,13 +36,10 @@ import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.old.create.ExternalSkillCreateDTO;
 import nl.tudelft.skills.dto.old.create.SkillCreateDTO;
 import nl.tudelft.skills.dto.old.create.TaskCreateDTO;
-import nl.tudelft.skills.dto.old.id.CheckpointIdDTO;
-import nl.tudelft.skills.dto.old.id.SkillIdDTO;
 import nl.tudelft.skills.dto.old.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.old.patch.SkillPositionPatchDTO;
 import nl.tudelft.skills.dto.old.view.module.ModuleLevelEditionViewDTO;
 import nl.tudelft.skills.dto.old.view.module.ModuleLevelModuleViewDTO;
-import nl.tudelft.skills.dto.old.view.module.ModuleLevelSkillViewDTO;
 import nl.tudelft.skills.dto.old.view.module.ModuleLevelSubmoduleViewDTO;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.*;
@@ -78,18 +75,18 @@ public class SkillController {
 	@PreAuthorize("@authorisationService.canViewSkill(#id)")
 	public String getSkill(@AuthenticatedPerson Person person, @PathVariable Long id, Model model) {
 		Skill skill = skillRepository.findByIdOrThrow(id);
-		ModuleLevelSkillViewDTO view = View.convert(skill, ModuleLevelSkillViewDTO.class);
-		view.setCompletedRequiredTasks(true);
+//		ModuleLevelSkillViewDTO view = View.convert(skill, ModuleLevelSkillViewDTO.class);
+//		view.setCompletedRequiredTasks(true);
 
 		// Set completed tasks
 		Set<Long> completedTasks = personRepository.getById(person.getId()).getTaskCompletions().stream()
 				.map(tc -> tc.getTask().getId()).collect(Collectors.toSet());
-		view.getTasks().forEach(t -> t.setCompleted(completedTasks.contains(t.getId())));
+//		view.getTasks().forEach(t -> t.setCompleted(completedTasks.contains(t.getId())));
 
 		// Add general model attributes
 		model.addAttribute("level", "module");
 		model.addAttribute("groupType", "submodule");
-		model.addAttribute("block", view);
+//		model.addAttribute("block", view);
 		model.addAttribute("group", skill.getSubmodule());
 		model.addAttribute("circuit", buildCircuitFromSkill(skill));
 		model.addAttribute("canEdit", false);
@@ -98,8 +95,8 @@ public class SkillController {
 		// Add information concerning personal path to model
 		Optional<Set<Long>> taskIdsInPath = personService.setPersonalPathAttributes(person.getId(), model,
 				skill.getSubmodule().getModule().getEdition().getId(), skill);
-		taskIdsInPath.ifPresent(
-				taskIdsInner -> view.getTasks().forEach(t -> t.setVisible(taskIdsInner.contains(t.getId()))));
+//		taskIdsInPath.ifPresent(
+//				taskIdsInner -> view.getTasks().forEach(t -> t.setVisible(taskIdsInner.contains(t.getId()))));
 
 		return "block/view";
 	}
@@ -115,33 +112,33 @@ public class SkillController {
 	@PreAuthorize("@authorisationService.canCreateSkill(#create.submodule.id)")
 	public String createSkill(@AuthenticatedPerson Person person, @RequestBody SkillCreateDTO create,
 			Model model) {
-		if (create.getCheckpoint() == null) {
-			create.setCheckpoint(new CheckpointIdDTO(
-					checkpointRepository.saveAndFlush(create.getCheckpointCreate().apply()).getId()));
-		}
-		Skill skill = skillRepository.saveAndFlush(create.apply());
-		List<Task> tasks = create.getNewItems().stream()
-				.sorted(Comparator.comparingInt(TaskCreateDTO::getIndex).reversed()).map(dto -> {
-					dto.setSkill(SkillIdDTO.builder().id(skill.getId()).build());
-					return dto.apply();
-				}).toList();
-		for (Task task : tasks) {
-			task.setSkill(skill);
-		}
-		skill.setTasks(taskRepository.saveAll(tasks));
+//		if (create.getCheckpoint() == null) {
+//			create.setCheckpoint(new CheckpointIdDTO(
+//					checkpointRepository.saveAndFlush(create.getCheckpointCreate().apply()).getId()));
+//		}
+//		Skill skill = skillRepository.saveAndFlush(create.apply());
+//		List<Task> tasks = create.getNewItems().stream()
+//				.sorted(Comparator.comparingInt(TaskCreateDTO::getIndex).reversed()).map(dto -> {
+//					dto.setSkill(SkillIdDTO.builder().id(skill.getId()).build());
+//					return dto.apply();
+//				}).toList();
+//		for (Task task : tasks) {
+//			task.setSkill(skill);
+//		}
+//		skill.setTasks(taskRepository.saveAll(tasks));
 
-		checkpointRepository.findBySkillsContains(skill).getSkills().add(skill);
+//		checkpointRepository.findBySkillsContains(skill).getSkills().add(skill);
 
 		// New tasks will be included in all paths by default
-		SCEdition edition = skill.getSubmodule().getModule().getEdition();
+//		SCEdition edition = skill.getSubmodule().getModule().getEdition();
 
-		Set<Path> paths = new HashSet<>(pathRepository.findAllByEditionId(edition.getId()));
-		tasks.forEach(t -> {
-			t.setPaths(paths);
-			taskRepository.save(t);
-		});
+//		Set<Path> paths = new HashSet<>(pathRepository.findAllByEditionId(edition.getId()));
+//		tasks.forEach(t -> {
+//			t.setPaths(paths);
+//			taskRepository.save(t);
+//		});
 
-		moduleService.configureModuleModel(person, skill.getSubmodule().getModule().getId(), model, session);
+//		moduleService.configureModuleModel(person, skill.getSubmodule().getModule().getId(), model, session);
 		return "module/view";
 	}
 
@@ -156,10 +153,10 @@ public class SkillController {
 	@PreAuthorize("@authorisationService.canCreateSkillInModule(#create.module.id)")
 	public String createSkill(@AuthenticatedPerson Person person, @RequestBody ExternalSkillCreateDTO create,
 			Model model) {
-		ExternalSkill skill = externalSkillRepository.saveAndFlush(create.apply());
-		skill.setSkill(skillRepository.findByIdOrThrow(skill.getSkill().getId()));
-
-		moduleService.configureModuleModel(person, skill.getModule().getId(), model, session);
+//		ExternalSkill skill = externalSkillRepository.saveAndFlush(create.apply());
+//		skill.setSkill(skillRepository.findByIdOrThrow(skill.getSkill().getId()));
+//
+//		moduleService.configureModuleModel(person, skill.getModule().getId(), model, session);
 		return "module/view";
 	}
 
@@ -185,52 +182,52 @@ public class SkillController {
 	 * @param  patch The patch containing the new data in JSON format
 	 * @return       The HTML for the updated skill block
 	 */
-	@PatchMapping
-	@Transactional
-	@PreAuthorize("@authorisationService.canEditSkill(#patch.id)")
-	public String patchSkill(@Valid @RequestBody SkillPatchDTO patch, Model model) {
-		Skill skill = skillRepository.findByIdOrThrow(patch.getId());
-		List<Task> oldTasks = skill.getTasks();
-		skillRepository.save(patch.apply(skill));
-
-		// Remove selected tasks from custom skill in person
-		skill.getPersonModifiedSkill().forEach(p -> {
-			p.setTasksAdded(p.getTasksAdded().stream()
-					.filter(t -> !patch.getRemovedItems().contains(t.getId())).collect(Collectors.toSet()));
-			personRepository.save(p);
-		});
-
-		taskRepository.findAllByIdIn(patch.getRemovedItems())
-				.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
-		clickedLinkService.deleteClickedLinksForTasks(taskRepository.findAllByIdIn(patch.getRemovedItems()));
-
-		taskRepository.deleteAllByIdIn(patch.getRemovedItems());
-		taskRepository.saveAll(skill.getRequiredTasks());
-
-		// New tasks will be included in all paths by default
-		SCEdition edition = skill.getSubmodule().getModule().getEdition();
-
-		Set<Path> paths = new HashSet<>(pathRepository.findAllByEditionId(edition.getId()));
-		skillRepository.findByIdOrThrow(skill.getId()).getTasks().stream().filter(t -> !oldTasks.contains(t))
-				.forEach(t -> {
-					t.setPaths(paths);
-					t.setSkill(skill);
-					taskRepository.save(t);
-				});
-
-		model.addAttribute("level", "module");
-		model.addAttribute("groupType", "submodule");
-		model.addAttribute("block", View.convert(skill, ModuleLevelSkillViewDTO.class));
-		model.addAttribute("group", skill.getSubmodule());
-		model.addAttribute("circuit", buildCircuitFromSkill(skill));
-		model.addAttribute("canEdit", true);
-		model.addAttribute("canDelete", true);
-		Boolean studentMode = (Boolean) session
-				.getAttribute("student-mode-" + skill.getSubmodule().getModule().getEdition().getId());
-		model.addAttribute("studentMode", studentMode != null && studentMode);
-
-		return "block/view";
-	}
+//	@PatchMapping
+//	@Transactional
+//	@PreAuthorize("@authorisationService.canEditSkill(#patch.id)")
+//	public String patchSkill(@Valid @RequestBody SkillPatchDTO patch, Model model) {
+//		Skill skill = skillRepository.findByIdOrThrow(patch.getId());
+//		List<Task> oldTasks = skill.getTasks();
+////		skillRepository.save(patch.apply(skill));
+//
+//		// Remove selected tasks from custom skill in person
+//		skill.getPersonModifiedSkill().forEach(p -> {
+//			p.setTasksAdded(p.getTasksAdded().stream()
+//					.filter(t -> !patch.getRemovedItems().contains(t.getId())).collect(Collectors.toSet()));
+//			personRepository.save(p);
+//		});
+//
+//		taskRepository.findAllByIdIn(patch.getRemovedItems())
+//				.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
+//		clickedLinkService.deleteClickedLinksForTasks(taskRepository.findAllByIdIn(patch.getRemovedItems()));
+//
+//		taskRepository.deleteAllByIdIn(patch.getRemovedItems());
+//		taskRepository.saveAll(skill.getRequiredTasks());
+//
+//		// New tasks will be included in all paths by default
+//		SCEdition edition = skill.getSubmodule().getModule().getEdition();
+//
+//		Set<Path> paths = new HashSet<>(pathRepository.findAllByEditionId(edition.getId()));
+//		skillRepository.findByIdOrThrow(skill.getId()).getTasks().stream().filter(t -> !oldTasks.contains(t))
+//				.forEach(t -> {
+//					t.setPaths(paths);
+//					t.setSkill(skill);
+//					taskRepository.save(t);
+//				});
+//
+//		model.addAttribute("level", "module");
+//		model.addAttribute("groupType", "submodule");
+////		model.addAttribute("block", View.convert(skill, ModuleLevelSkillViewDTO.class));
+//		model.addAttribute("group", skill.getSubmodule());
+//		model.addAttribute("circuit", buildCircuitFromSkill(skill));
+//		model.addAttribute("canEdit", true);
+//		model.addAttribute("canDelete", true);
+//		Boolean studentMode = (Boolean) session
+//				.getAttribute("student-mode-" + skill.getSubmodule().getModule().getEdition().getId());
+//		model.addAttribute("studentMode", studentMode != null && studentMode);
+//
+//		return "block/view";
+//	}
 
 	/**
 	 * Creates a circuit view from a skill.
@@ -239,16 +236,17 @@ public class SkillController {
 	 * @return       The circuit view
 	 */
 	private ModuleLevelModuleViewDTO buildCircuitFromSkill(Skill skill) {
-		return ModuleLevelModuleViewDTO.builder()
-				.id(skill.getSubmodule().getModule().getId())
-				.submodules(submoduleRepository.findAllByModuleId(skill.getSubmodule().getModule().getId())
-						.stream()
-						.map(s -> ModuleLevelSubmoduleViewDTO.builder().id(s.getId()).name(s.getName())
-								.build())
-						.toList())
-				.edition(ModuleLevelEditionViewDTO.builder()
-						.id(skill.getSubmodule().getModule().getEdition().getId()).build())
-				.build();
+//		return ModuleLevelModuleViewDTO.builder()
+//				.id(skill.getSubmodule().getModule().getId())
+//				.submodules(submoduleRepository.findAllByModuleId(skill.getSubmodule().getModule().getId())
+//						.stream()
+//						.map(s -> ModuleLevelSubmoduleViewDTO.builder().id(s.getId()).name(s.getName())
+//								.build())
+//						.toList())
+//				.edition(ModuleLevelEditionViewDTO.builder()
+//						.id(skill.getSubmodule().getModule().getEdition().getId()).build())
+//				.build();
+        return null;
 	}
 
 	/**
@@ -264,7 +262,7 @@ public class SkillController {
 	public ResponseEntity<Void> updateSkillPosition(@PathVariable Long id,
 			@RequestBody SkillPositionPatchDTO patch) {
 		AbstractSkill skill = abstractSkillRepository.findByIdOrThrow(id);
-		abstractSkillRepository.save(patch.apply(skill));
+//		abstractSkillRepository.save(patch.apply(skill));
 		return ResponseEntity.ok().build();
 	}
 

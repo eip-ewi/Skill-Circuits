@@ -66,18 +66,18 @@ public class CourseService {
 	@Transactional
 	public CourseLevelCourseViewDTO getCourseView(Long id) {
 		CourseDetailsDTO course = courseApi.getCourseById(id).block();
-
-		CourseLevelCourseViewDTO view = View.convert(getOrCreateSCCourse(id),
-				CourseLevelCourseViewDTO.class);
-
-		view.setName(course.getName());
-
-		view.setCode(course.getCode());
-
-		view.setEditions(course.getEditions().stream()
-				.map(e -> new CourseLevelEditionViewDTO(e.getId(), e.getName())).toList());
-
-		return view;
+        return null;
+//		CourseLevelCourseViewDTO view = View.convert(getOrCreateSCCourse(id),
+//				CourseLevelCourseViewDTO.class);
+//
+//		view.setName(course.getName());
+//
+//		view.setCode(course.getCode());
+//
+//		view.setEditions(course.getEditions().stream()
+//				.map(e -> new CourseLevelEditionViewDTO(e.getId(), e.getName())).toList());
+//
+//		return view;
 	}
 
 	/**

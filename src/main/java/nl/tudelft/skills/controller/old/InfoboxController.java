@@ -15,8 +15,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.controller;
+package nl.tudelft.skills.controller.old;
 
+import nl.tudelft.skills.dto.old.view.InfoboxDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.skills.dto.view.InfoboxDTO;
 import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.skills.service.TaskCompletionService;
@@ -56,31 +56,32 @@ public class InfoboxController {
 	@GetMapping
 	@ResponseBody
 	public InfoboxDTO getInformation() {
-		Person authPerson = authorisationService.getAuthPerson();
-
-		// Not enabled in student mode
-		boolean studentAndAuthenticated = authorisationService.isAuthenticated()
-				&& !authorisationService.isStaff();
-
-		if (studentAndAuthenticated) {
-			RegularTask latestTask = taskCompletionService.latestTaskCompletion(authPerson);
-
-			if (latestTask != null) {
-				String taskInfo = "Last worked on: " + latestTask.getName();
-
-				long moduleId = latestTask.getSkill().getSubmodule().getModule().getId();
-				long skillId = latestTask.getSkill().getId();
-				String link = "/module/" + moduleId + "#block-" + skillId + "-name";
-
-				String locationString = "In " + taskCompletionService.getLocationString(latestTask);
-
-				return new InfoboxDTO(true, true, taskInfo, link, locationString);
-			} else {
-				return InfoboxDTO.builder().studentAndAuthenticated(true).completedSomeTask(false).build();
-			}
-		} else {
-			return InfoboxDTO.builder().studentAndAuthenticated(false).build();
-		}
+        return null;
+//		Person authPerson = authorisationService.getAuthenticatedPerson();
+//
+//		// Not enabled in student mode
+//		boolean studentAndAuthenticated = authorisationService.isAuthenticated()
+//				&& !authorisationService.isStaff();
+//
+//		if (studentAndAuthenticated) {
+//			RegularTask latestTask = taskCompletionService.latestTaskCompletion(authPerson);
+//
+//			if (latestTask != null) {
+//				String taskInfo = "Last worked on: " + latestTask.getName();
+//
+//				long moduleId = latestTask.getSkill().getSubmodule().getModule().getId();
+//				long skillId = latestTask.getSkill().getId();
+//				String link = "/module/" + moduleId + "#block-" + skillId + "-name";
+//
+//				String locationString = "In " + taskCompletionService.getLocationString(latestTask);
+//
+//				return new InfoboxDTO(true, true, taskInfo, link, locationString);
+//			} else {
+//				return InfoboxDTO.builder().studentAndAuthenticated(true).completedSomeTask(false).build();
+//			}
+//		} else {
+//			return InfoboxDTO.builder().studentAndAuthenticated(false).build();
+//		}
 	}
 
 }

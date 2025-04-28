@@ -50,7 +50,7 @@ public class TaskController {
 	@PreAuthorize("@authorisationService.canEditTask(#editLinkDTO.taskId)")
 	public ResponseEntity<Void> updateTaskLink(@RequestBody EditLinkDTO editLinkDTO) {
 		Task task = taskRepository.findByIdOrThrow(editLinkDTO.getTaskId());
-		task.setLink(editLinkDTO.getNewLink());
+//		task.setLink(editLinkDTO.getNewLink());
 		taskRepository.save(task);
 
 		return ResponseEntity.ok().build();
@@ -66,7 +66,7 @@ public class TaskController {
 	@GetMapping("{taskId}")
 	public String getTask(@PathVariable Long taskId, Model model) {
 		Task task = taskRepository.findByIdOrThrow(taskId);
-		model.addAttribute("item", View.convert(task, TaskViewDTO.class));
+//		model.addAttribute("item", View.convert(task, TaskViewDTO.class));
 		model.addAttribute("canEdit", false);
 		model.addAttribute("level", "module");
 		return "task/view";
@@ -82,7 +82,7 @@ public class TaskController {
 	@GetMapping("{taskId}/preview")
 	public String getTaskForCustomPath(@PathVariable Long taskId, Model model) {
 		Task task = taskRepository.findByIdOrThrow(taskId);
-		model.addAttribute("item", View.convert(task, TaskViewDTO.class));
+//		model.addAttribute("item", View.convert(task, TaskViewDTO.class));
 		model.addAttribute("canEdit", false);
 		return "task/inactiveview :: item";
 	}

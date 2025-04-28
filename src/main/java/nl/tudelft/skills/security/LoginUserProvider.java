@@ -19,10 +19,18 @@ package nl.tudelft.skills.security;
 
 import static nl.tudelft.labracore.lib.security.user.DefaultRole.*;
 
+import lombok.AllArgsConstructor;
+import nl.tudelft.labracore.api.PersonControllerApi;
+import nl.tudelft.labracore.api.dto.PersonDetailsDTO;
+import nl.tudelft.labracore.lib.security.user.DefaultRole;
+import nl.tudelft.labracore.lib.security.user.Person;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import nl.tudelft.labracore.lib.security.memory.InMemoryUserProvider;
+import reactor.core.publisher.Mono;
 
 /**
  * Provider for in-memory user information.
@@ -33,24 +41,33 @@ import nl.tudelft.labracore.lib.security.memory.InMemoryUserProvider;
 
 @Service
 @Profile("!production")
+@AllArgsConstructor
 public class LoginUserProvider extends InMemoryUserProvider {
 
-	/**
-	 * Adds the users created and added inside the constructor to the in-memory database.
-	 */
-	public LoginUserProvider() {
-		super("pass");
-		// default password for all users is "pass" (used when no password for user is provided)
+	private final PersonControllerApi personApi;
 
-		add("Admin 1", 7, ADMIN, "admin1");
-		// username: admin1, password: admin1
+	@Override
+	public Person findByUsername(String username) {
+		PersonDetailsDTO person = personApi.getPersonByUsername(username).onErrorResume(e -> Mono.empty())
+				.block();
+		if (person == null)
+			return null;
+		return Person.builder()
+				.id(person.getId())
+				.externalId(person.getExternalId())
+				.username(person.getUsername())
+				.email(person.getEmail())
+				.displayName(person.getDisplayName())
+				.defaultRole(DefaultRole.valueOf(person.getDefaultRole().name()))
+				.number(person.getNumber())
+				.build();
+	}
 
-		add("CSE Teacher 1", 5, TEACHER, "cseteacher1");
-		// username: cseteacher1, password: cseteacher1
+	private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-		add("CSE Student 1", 11, STUDENT, "csestudent1");
-		// username: csestudent1, password: csestudent1
-
+	@Override
+	public String getPasswordFor(Person person) {
+		return passwordEncoder.encode(person.getUsername());
 	}
 
 }

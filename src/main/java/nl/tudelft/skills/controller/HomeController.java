@@ -31,9 +31,14 @@ public class HomeController {
 		return "index";
 	}
 
-	@GetMapping("auth/login")
+	@GetMapping("/login")
 	public String loginPage() {
-		return "login";
+		return "index";
+	}
+
+	@GetMapping("/page/**")
+	public String anyPage() {
+		return "index";
 	}
 
 }

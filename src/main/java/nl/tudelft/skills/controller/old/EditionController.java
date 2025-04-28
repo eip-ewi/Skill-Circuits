@@ -18,10 +18,11 @@
 package nl.tudelft.skills.controller.old;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import javax.servlet.http.HttpSession;
-import javax.transaction.Transactional;
+import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -148,9 +149,10 @@ public class EditionController {
 	@GetMapping("{id}/modules")
 	@PreAuthorize("@authorisationService.canGetModulesOfEdition(#id)")
 	public @ResponseBody List<SCModuleSummaryDTO> getModulesOfEdition(@PathVariable Long id) {
-		return View.convert(new ArrayList<>(editionRepository.findByIdOrThrow(id).getModules()).stream()
-				.sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList(),
-				SCModuleSummaryDTO.class);
+//		return View.convert(new ArrayList<>(editionRepository.findByIdOrThrow(id).getModules()).stream()
+//				.sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList(),
+//				SCModuleSummaryDTO.class);
+        return Collections.emptyList();
 	}
 
 }
