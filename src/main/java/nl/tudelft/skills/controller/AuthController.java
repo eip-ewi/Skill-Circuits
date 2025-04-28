@@ -29,15 +29,18 @@ public class AuthController {
 
 	private final AuthorisationService authorisationService;
 
-    public record Auth(boolean canEditModule, boolean canEditBlocks, boolean canEditItems, boolean canCompleteItems) {}
+	public record Auth(boolean canEditModule, boolean canEditBlocks, boolean canEditItems,
+			boolean canCompleteItems) {
+	}
 
-    @GetMapping("module/{moduleId}")
-    public Auth getAuthForModule(@PathVariable Long moduleId, @RequestParam(defaultValue = "false") boolean studentMode) {
+	@GetMapping("module/{moduleId}")
+	public Auth getAuthForModule(@PathVariable Long moduleId,
+			@RequestParam(defaultValue = "false") boolean studentMode) {
 		boolean canEditModule = authorisationService.canEditModule(moduleId);
-        boolean canEditBlocks = authorisationService.canEditModule(moduleId);
-        boolean canEditItems = authorisationService.canEditModule(moduleId);
-        boolean canCompleteItems = true;
-        return new Auth(canEditModule, canEditBlocks, canEditItems, canCompleteItems);
-    }
+		boolean canEditBlocks = authorisationService.canEditModule(moduleId);
+		boolean canEditItems = authorisationService.canEditModule(moduleId);
+		boolean canCompleteItems = true;
+		return new Auth(canEditModule, canEditBlocks, canEditItems, canCompleteItems);
+	}
 
 }
