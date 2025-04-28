@@ -13,10 +13,13 @@
     function dragOver(event: DragEvent) {
         if (!getAuth().canEditBlocks) return;
 
-        let block = circuit.getBlock(parseInt(event.dataTransfer!.getData("text/plain")!))!;
-        if (column === block.column) return;
+        const blockId = parseInt(event.dataTransfer!.types.find(t => t.startsWith("id-"))!.substring(3));
+        // chrome security does not allow getData during dragOver, this is a workaround
+        let block = circuit.getBlock(blockId)!;
+        if (!block || column === block.column) return;
 
-        let moving = event.dataTransfer?.dropEffect === "move";
+        // dropEffect is broken in chrome, this is a workaround
+        let moving = event.dataTransfer!.types.includes("move");
         element.setAttribute("data-dragging", moving.toString());
         if (!moving) return;
 
@@ -34,8 +37,10 @@
     function drop(event: DragEvent) {
         if (!getAuth().canEditBlocks) return;
 
+        // dropEffect is broken in chrome, this is a workaround
+        let moving = event.dataTransfer!.types.includes("move");
         document.querySelectorAll(".column").forEach(column => column.setAttribute("data-dragging", "false"));
-        if (event.dataTransfer?.dropEffect !== "move") return;
+        if (!moving) return;
 
         let block = circuit.getBlock(parseInt(event.dataTransfer!.getData("text/plain")!))!;
         if (column === block.column) return;

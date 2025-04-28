@@ -58,6 +58,10 @@
 
     function dragStart(event: DragEvent) {
         if (!getAuth().canEditBlocks) return;
+        // chrome security does not allow getData during dragOver, this is a workaround
+        event.dataTransfer!.setData(`id-${element.dataset["id"]!}`, "");
+        // dropEffect is broken in chrome, this is a workaround
+        event.dataTransfer!.setData("move", "");
         event.dataTransfer!.setData("text/plain", element.dataset["id"]!);
         event.dataTransfer!.effectAllowed = "move";
         dragging = true;
