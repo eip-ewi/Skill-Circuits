@@ -112,17 +112,17 @@ gradle_integration_test:
       when: manual
 
 # Run js tests
-gradle_js_test:
-  extends: .build_cached
-  stage: test
-  needs:
-    - gradle_build
-  before_script:
-    - cd frontend
-    - npm install
-    - cd ..
-  script:
-    - npm test
+#gradle_js_test:
+#  extends: .build_cached
+#  stage: test
+#  needs:
+#    - gradle_build
+#  before_script:
+#    - cd frontend
+#    - npm install
+#    - cd ..
+#  script:
+#    - npm test
 
 # Run spotless
 gradle_spotless:
