@@ -1,7 +1,7 @@
 <!--
 
     Skill Circuits
-    Copyright (C) 2025 - Delft University of Technology
+    Copyright (C) 2022 - Delft University of Technology
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -17,27 +17,30 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 -->
-<!DOCTYPE html>
-<html
-    lang="en"
-    xmlns:th="http://www.thymeleaf.org"
-    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-    layout:decorate="~{container}">
-    <head>
-        <title>Login</title>
-    </head>
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-    <body>
-        <div layout:fragment="content">
-            <h1>Login</h1>
+    <title>Skill Circuits</title>
 
-            <form th:action="@{/perform-login}" method="post">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" />
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" />
-                <button type="submit">Log in</button>
-            </form>
-        </div>
-    </body>
+    <meta name="csrf-token" th:value="${_csrf.token}"/>
+    <meta name="csrf-header" th:value="${_csrf.headerName}"/>
+
+    <link rel="stylesheet" href="/webjars/font-awesome/css/all.css"/>
+    <link th:href="@{/skill-circuits-frontend.css}" rel="stylesheet" type="text/css">
+</head>
+<body>
+
+<form th:action="@{/perform-login}" th:method="post">
+    <label for="username"></label>
+    <input id="username" name="username"/>
+    <label for="password"></label>
+    <input id="password" name="password" type="password"/>
+    <button>Login</button>
+</form>
+
+</body>
 </html>
