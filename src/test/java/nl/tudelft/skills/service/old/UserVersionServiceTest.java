@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.service;
+package nl.tudelft.skills.service.old;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -24,8 +24,6 @@ import static org.mockito.Mockito.when;
 import java.time.Instant;
 import java.util.List;
 
-import nl.tudelft.skills.service.old.GitLabClient;
-import nl.tudelft.skills.service.old.UserVersionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
