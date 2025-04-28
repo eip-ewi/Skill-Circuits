@@ -31,8 +31,8 @@ import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
 import nl.tudelft.labracore.api.dto.RoleEditionDetailsDTO;
 import nl.tudelft.labracore.lib.security.user.DefaultRole;
 import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.SCPerson;
+import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.security.AuthorisationService;
 
 public class HomeService {

@@ -22,7 +22,6 @@ import java.util.Set;
 import java.util.stream.IntStream;
 
 import org.springframework.data.util.Pair;
-import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 public class CircuitService {

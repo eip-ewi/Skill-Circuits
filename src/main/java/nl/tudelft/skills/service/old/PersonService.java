@@ -30,9 +30,9 @@ import nl.tudelft.skills.dto.old.view.module.ModuleLevelSkillViewDTO;
 import nl.tudelft.skills.dto.old.view.module.TaskViewDTO;
 import nl.tudelft.skills.model.Path;
 import nl.tudelft.skills.model.PathPreference;
+import nl.tudelft.skills.model.SCPerson;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.model.SCPerson;
 import nl.tudelft.skills.repository.PathRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 

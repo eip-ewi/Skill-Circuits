@@ -28,16 +28,17 @@ import nl.tudelft.skills.model.Task;
 @AllArgsConstructor
 public class TaskPatchDTO extends Patch<Task> {
 
-    private Long id;
-    private String name;
-    private Integer time;
+	private Long id;
+	private String name;
+	private Integer time;
 
-    @Override
-    protected void applyOneToOne() {
-        updateNonNull(name, data::setName);
-        updateNonNull(time, data::setTime);
-    }
+	@Override
+	protected void applyOneToOne() {
+		updateNonNull(name, data::setName);
+		updateNonNull(time, data::setTime);
+	}
 
-    @Override
-    protected void validate() {}
+	@Override
+	protected void validate() {
+	}
 }

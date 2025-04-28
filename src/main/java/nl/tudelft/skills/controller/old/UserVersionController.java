@@ -28,8 +28,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.skills.model.UserVersion;
 import nl.tudelft.skills.model.SCPerson;
+import nl.tudelft.skills.model.UserVersion;
 import nl.tudelft.skills.repository.UserVersionRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 

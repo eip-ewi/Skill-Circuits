@@ -22,7 +22,6 @@ import java.util.Collection;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.repository.ClickedLinkRepository;

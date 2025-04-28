@@ -17,26 +17,29 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 -->
-<!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
 
-    <title>Skill Circuits</title>
+        <title>Skill Circuits</title>
 
-    <meta name="csrf-token" th:value="${_csrf.token}"/>
-    <meta name="csrf-header" th:value="${_csrf.headerName}"/>
+        <meta name="csrf-token" th:value="${_csrf.token}" />
+        <meta name="csrf-header" th:value="${_csrf.headerName}" />
 
-    <link rel="stylesheet" href="/webjars/font-awesome/css/all.css"/>
+        <link rel="stylesheet" href="/webjars/font-awesome/css/all.css" />
 
-    <script th:src="@{/skill-circuits-frontend.js}" type="module"></script>
-    <link th:href="@{/skill-circuits-frontend.css}" rel="stylesheet" type="text/css">
-</head>
-<body>
-
-<div id="app"></div>
-
-</body>
+        <script th:src="@{/skill-circuits-frontend.js}" type="module"></script>
+        <link th:href="@{/skill-circuits-frontend.css}" rel="stylesheet" type="text/css" />
+    </head>
+    <body>
+        <div id="app"></div>
+    </body>
 </html>

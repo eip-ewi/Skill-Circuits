@@ -23,11 +23,6 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
-import nl.tudelft.skills.dto.old.view.module.ModuleLevelEditionViewDTO;
-import nl.tudelft.skills.dto.old.view.module.ModuleLevelModuleViewDTO;
-import nl.tudelft.skills.dto.old.view.module.ModuleLevelSkillViewDTO;
-import nl.tudelft.skills.dto.old.view.module.ModuleLevelSubmoduleViewDTO;
-import nl.tudelft.skills.service.old.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,9 +40,14 @@ import nl.tudelft.skills.dto.old.id.CheckpointIdDTO;
 import nl.tudelft.skills.dto.old.id.SkillIdDTO;
 import nl.tudelft.skills.dto.old.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.old.patch.SkillPositionPatchDTO;
+import nl.tudelft.skills.dto.old.view.module.ModuleLevelEditionViewDTO;
+import nl.tudelft.skills.dto.old.view.module.ModuleLevelModuleViewDTO;
+import nl.tudelft.skills.dto.old.view.module.ModuleLevelSkillViewDTO;
+import nl.tudelft.skills.dto.old.view.module.ModuleLevelSubmoduleViewDTO;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.service.old.*;
 
 @RequestMapping("skill")
 @AllArgsConstructor

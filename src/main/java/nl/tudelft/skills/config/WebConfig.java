@@ -21,13 +21,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import lombok.AllArgsConstructor;
-import nl.tudelft.labracore.lib.security.LabradorUserDetails;
-import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
-import nl.tudelft.labracore.lib.security.user.NoAuthenticatedPersonException;
-import nl.tudelft.skills.annotation.AuthenticatedSCPerson;
-import nl.tudelft.skills.model.SCPerson;
-import nl.tudelft.skills.repository.labracore.PersonRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.MethodParameter;
@@ -42,6 +35,14 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
+
+import lombok.AllArgsConstructor;
+import nl.tudelft.labracore.lib.security.LabradorUserDetails;
+import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
+import nl.tudelft.labracore.lib.security.user.NoAuthenticatedPersonException;
+import nl.tudelft.skills.annotation.AuthenticatedSCPerson;
+import nl.tudelft.skills.model.SCPerson;
+import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 @Configuration
 @AllArgsConstructor
@@ -87,16 +88,21 @@ public class WebConfig implements WebMvcConfigurer {
 		}
 
 		public boolean supportsParameter(MethodParameter parameter) {
-			return parameter.hasParameterAnnotation(AuthenticatedSCPerson.class) && SCPerson.class.isAssignableFrom(parameter.getParameterType());
+			return parameter.hasParameterAnnotation(AuthenticatedSCPerson.class)
+					&& SCPerson.class.isAssignableFrom(parameter.getParameterType());
 		}
 
-		public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+		public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+				NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
 			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 			Object ud = auth == null ? null : auth.getPrincipal();
 			if (ud instanceof LabradorUserDetails) {
-				Long personId = ((LabradorUserDetails)ud).getUser().getId();
-				return personRepository.findById(personId).orElseGet(() -> personRepository.save(SCPerson.builder().id(personId).build()));
-			} else if (((AuthenticatedPerson) Objects.requireNonNull((AuthenticatedPerson)parameter.getParameterAnnotation(AuthenticatedPerson.class))).required()) {
+				Long personId = ((LabradorUserDetails) ud).getUser().getId();
+				return personRepository.findById(personId)
+						.orElseGet(() -> personRepository.save(SCPerson.builder().id(personId).build()));
+			} else if (((AuthenticatedPerson) Objects.requireNonNull(
+					(AuthenticatedPerson) parameter.getParameterAnnotation(AuthenticatedPerson.class)))
+					.required()) {
 				throw new NoAuthenticatedPersonException("No authenticated person found for request.");
 			} else {
 				return null;

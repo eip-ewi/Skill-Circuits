@@ -17,11 +17,10 @@
  */
 package nl.tudelft.skills.controller;
 
-import javax.transaction.Transactional;
-
-import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+
+import lombok.AllArgsConstructor;
 
 @Controller
 @AllArgsConstructor

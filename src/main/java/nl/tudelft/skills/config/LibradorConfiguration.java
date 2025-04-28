@@ -19,8 +19,6 @@ package nl.tudelft.skills.config;
 
 import static org.modelmapper.convention.MatchingStrategies.STRICT;
 
-import nl.tudelft.skills.dto.old.id.*;
-import nl.tudelft.skills.model.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +26,8 @@ import org.springframework.context.annotation.Configuration;
 import nl.tudelft.librador.EnableLibrador;
 import nl.tudelft.librador.LibradorConfigAdapter;
 import nl.tudelft.librador.dto.id.IdMapperBuilder;
+import nl.tudelft.skills.dto.old.id.*;
+import nl.tudelft.skills.model.*;
 
 @Configuration
 @EnableLibrador

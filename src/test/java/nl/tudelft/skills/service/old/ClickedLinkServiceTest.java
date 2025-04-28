@@ -17,45 +17,37 @@
  */
 package nl.tudelft.skills.service.old;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Arrays;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.repository.ClickedLinkRepository;
-import nl.tudelft.skills.test.TestDatabaseLoader;
 
 @Transactional
 @SpringBootTest(classes = TestSkillCircuitsApplication.class)
 class ClickedLinkServiceTest {
 
-//	private TestDatabaseLoader db;
-//	private final ClickedLinkService clickedLinkService;
-//	private final ClickedLinkRepository clickedLinkRepository;
-//
-//	@Autowired
-//	public ClickedLinkServiceTest(TestDatabaseLoader testDatabaseLoader,
-//			ClickedLinkService clickedLinkService, ClickedLinkRepository clickedLinkRepository) {
-//		this.db = testDatabaseLoader;
-//		this.clickedLinkService = clickedLinkService;
-//		this.clickedLinkRepository = clickedLinkRepository;
-//	}
+	//	private TestDatabaseLoader db;
+	//	private final ClickedLinkService clickedLinkService;
+	//	private final ClickedLinkRepository clickedLinkRepository;
+	//
+	//	@Autowired
+	//	public ClickedLinkServiceTest(TestDatabaseLoader testDatabaseLoader,
+	//			ClickedLinkService clickedLinkService, ClickedLinkRepository clickedLinkRepository) {
+	//		this.db = testDatabaseLoader;
+	//		this.clickedLinkService = clickedLinkService;
+	//		this.clickedLinkRepository = clickedLinkRepository;
+	//	}
 
-//	@Test
-//	void deleteClickedLinksForTasksOneTask() {
-//		clickedLinkService.deleteClickedLinksForTasks(Arrays.asList(db.getTaskRead11()));
-//		assertThat(clickedLinkRepository.findAll()).hasSize(1);
-//	}
-//
-//	@Test
-//	void deleteClickedLinksForTasks() {
-//		clickedLinkService.deleteClickedLinksForTasks(
-//				Arrays.asList(db.getTaskRead11(), db.getTaskRead12(), db.getTaskDo12ae()));
-//		assertThat(clickedLinkRepository.findAll()).hasSize(0);
-//	}
+	//	@Test
+	//	void deleteClickedLinksForTasksOneTask() {
+	//		clickedLinkService.deleteClickedLinksForTasks(Arrays.asList(db.getTaskRead11()));
+	//		assertThat(clickedLinkRepository.findAll()).hasSize(1);
+	//	}
+	//
+	//	@Test
+	//	void deleteClickedLinksForTasks() {
+	//		clickedLinkService.deleteClickedLinksForTasks(
+	//				Arrays.asList(db.getTaskRead11(), db.getTaskRead12(), db.getTaskDo12ae()));
+	//		assertThat(clickedLinkRepository.findAll()).hasSize(0);
+	//	}
 }
