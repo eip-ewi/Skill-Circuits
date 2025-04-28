@@ -29,8 +29,8 @@ stages:
     key: "gradle-build"
     paths:
       - .gradle/
-      - node_modules/
-      - package-lock.json
+      - frontend/node_modules/
+      - frontend/package-lock.json
     policy: pull
   rules:
     - if: $CI_COMMIT_BRANCH == "main" ||
@@ -58,7 +58,9 @@ gradle_build:
     paths:
       - build/
   script:
+    - cd frontend
     - npm install
+    - cd ..
     - gradle --build-cache build testClasses -x test -x licenseMain -x licenseTest -x spotlessJava -x spotlessCheck
 
 # Run tests
@@ -79,7 +81,9 @@ gradle_test:
           coverage_format: cobertura
           path: build/reports/jacoco/test/jacocoTestReport.xml
   before_script:
+    - cd frontend
     - npm install
+    - cd ..
   script:
     - gradle --build-cache test
   after_script:
@@ -98,7 +102,9 @@ gradle_integration_test:
   needs:
     - gradle_build
   script:
+    - cd frontend
     - npm install
+    - cd ..
     - echo base-url=https://skills.eiptest.ewi.tudelft.nl/>src/test/resources/integration.properties
     - gradle --build-cache integrationTest
   rules:
@@ -112,7 +118,9 @@ gradle_js_test:
   needs:
     - gradle_build
   before_script:
+    - cd frontend
     - npm install
+    - cd ..
   script:
     - npm test
 
