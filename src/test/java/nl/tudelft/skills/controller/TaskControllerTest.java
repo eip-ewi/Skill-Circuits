@@ -22,6 +22,8 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.Set;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -38,6 +40,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.EditLinkDTO;
+import nl.tudelft.skills.dto.view.module.ChoiceTaskViewDTO;
 import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
 import nl.tudelft.skills.dto.view.module.TaskViewDTO;
 import nl.tudelft.skills.model.RegularTask;
@@ -115,21 +118,41 @@ public class TaskControllerTest extends ControllerTest {
 				.andExpect(status().isForbidden());
 	}
 
-	@Test
-	@WithUserDetails("teacher")
-	void getTaskTeacher() throws Exception {
-		mockRole(roleApi, "TEACHER");
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER", "HEAD_TA" })
+	void getTaskAtLeastHeadTA(String role) throws Exception {
+		mockRole(roleApi, role);
 		Long taskId = db.getTaskRead12().getId();
 
 		// Check that authentication passes as intended
-		mvc.perform(get("/task/" + taskId).with(csrf()))
-				.andExpect(status().isOk());
+		String content = mvc.perform(get("/task/" + taskId).with(csrf()))
+				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+		// Check that it is a regular task: Contains regular task but not contain choice task
+		// (a choice task would contain regular tasks)
+		assertThat(content).contains("name=\"taskType\" value=\"RegularTask\"");
+		assertThat(content).doesNotContain("name=\"taskType\" value=\"ChoiceTask\"");
 
 		// Check that model attributes get changed as intended
 		taskController.getTask(db.getTaskRead12().getId(), model);
-		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
-		assertThat(((RegularTaskViewDTO) model.getAttribute("item")).getPathIds())
-				.containsExactly(db.getPathFinderPath().getId());
+		assertModelAttributes(RegularTaskViewDTO.class, Set.of(db.getPathFinderPath().getId()));
+	}
+
+	@Test
+	@WithUserDetails("teacher")
+	void getChoiceTaskTest() throws Exception {
+		mockRole(roleApi, "TEACHER");
+		Long taskId = db.getChoiceTaskBookOrVideo().getId();
+
+		// Check that authentication passes as intended
+		String content = mvc.perform(get("/task/" + taskId).with(csrf()))
+				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+		// Check that it is a choice task
+		assertThat(content).contains("name=\"taskType\" value=\"ChoiceTask\"");
+
+		// Check that model attributes get changed as intended
+		taskController.getTask(db.getChoiceTaskBookOrVideo().getId(), model);
+		assertModelAttributes(ChoiceTaskViewDTO.class, Set.of());
 	}
 
 	@Test
@@ -145,9 +168,7 @@ public class TaskControllerTest extends ControllerTest {
 
 		// Check that model attributes get changed as intended
 		taskController.getTask(task.getId(), model);
-		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
-		assertThat(((TaskViewDTO) model.getAttribute("item")).getPathIds())
-				.containsExactly(db.getPathFinderPath().getId());
+		assertModelAttributes(RegularTaskViewDTO.class, Set.of(db.getPathFinderPath().getId()));
 	}
 
 	@Test
@@ -174,9 +195,7 @@ public class TaskControllerTest extends ControllerTest {
 
 		// Check that model attributes get changed as intended
 		taskController.getTaskForCustomPath(db.getTaskRead12().getId(), model);
-		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
-		assertThat(((RegularTaskViewDTO) model.getAttribute("item")).getPathIds())
-				.containsExactly(db.getPathFinderPath().getId());
+		assertModelAttributes(RegularTaskViewDTO.class, Set.of(db.getPathFinderPath().getId()));
 	}
 
 	@ParameterizedTest
@@ -187,14 +206,31 @@ public class TaskControllerTest extends ControllerTest {
 		Long taskId = db.getTaskRead12().getId();
 
 		// Check that authentication passes as intended
-		mvc.perform(get("/task/" + taskId + "/preview").with(csrf()))
-				.andExpect(status().isOk());
+		String content = mvc.perform(get("/task/" + taskId + "/preview").with(csrf()))
+				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+		// Check that it is not a choice task
+		assertThat(content).doesNotContain("choice_task");
 
 		// Check that model attributes get changed as intended
 		taskController.getTaskForCustomPath(db.getTaskRead12().getId(), model);
-		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
-		assertThat(((TaskViewDTO) model.getAttribute("item")).getPathIds())
-				.containsExactly(db.getPathFinderPath().getId());
+		assertModelAttributes(RegularTaskViewDTO.class, Set.of(db.getPathFinderPath().getId()));
+	}
+
+	@Test
+	@WithUserDetails("teacher")
+	void getChoiceTaskCustomPathTest() throws Exception {
+		mockRole(roleApi, "TEACHER");
+		Long taskId = db.getChoiceTaskBookOrVideo().getId();
+
+		// Check that authentication passes as intended
+		String content = mvc.perform(get("/task/" + taskId + "/preview").with(csrf()))
+				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+		// Check that it is a choice task
+		assertThat(content).contains("choice_task");
+
+		// Check that model attributes get changed as intended
+		taskController.getTask(db.getChoiceTaskBookOrVideo().getId(), model);
+		assertModelAttributes(ChoiceTaskViewDTO.class, Set.of());
 	}
 
 	@Test
@@ -221,8 +257,20 @@ public class TaskControllerTest extends ControllerTest {
 
 		// Check that model attributes get changed as intended
 		taskController.getTaskForCustomPath(task.getId(), model);
+		assertModelAttributes(RegularTaskViewDTO.class, Set.of(db.getPathFinderPath().getId()));
+	}
+
+	/**
+	 * Helper method for tests. Asserts that "canEdit" is false, the view DTO is of a specific subclass and
+	 * that the paths match the given pathIds.
+	 *
+	 * @param taskViewDTOClass The subclass the viewDTO should be.
+	 * @param pathIds          The ids of the paths the task should be in.
+	 */
+	private void assertModelAttributes(Class<?> taskViewDTOClass, Set<Long> pathIds) {
 		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
-		assertThat(((TaskViewDTO) model.getAttribute("item")).getPathIds())
-				.containsExactly(db.getPathFinderPath().getId());
+		TaskViewDTO<?> viewDTO = (TaskViewDTO<?>) model.getAttribute("item");
+		assertThat(viewDTO).isInstanceOf(taskViewDTOClass);
+		assertThat(viewDTO.getPathIds()).containsExactlyElementsOf(pathIds);
 	}
 }
