@@ -68,9 +68,9 @@ public class ChoiceTaskCreateDTO extends TaskCreateDTO<ChoiceTask> {
 			errors.rejectValue("updatedSubTasks", "notEnoughSubTasks",
 					"ChoiceTask has to contain at least two subtasks");
 		}
-		if (minTasks >= numberSubTasks) {
+		if (minTasks <= 0 || minTasks >= numberSubTasks) {
 			errors.rejectValue("minTasks", "invalidMinTasks",
-					"minTasks should be smaller than the number of subtasks");
+					"minTasks should be larger than zero and smaller than the number of subtasks");
 		}
 	}
 }
