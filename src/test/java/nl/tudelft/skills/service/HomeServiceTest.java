@@ -357,8 +357,14 @@ public class HomeServiceTest {
 				.person(person).task(db.getTaskRead10()).build();
 		TaskCompletion completion6 = TaskCompletion.builder().id(6L)
 				.person(person).task(db.getTaskDo10a()).build();
+		TaskCompletion completion7 = TaskCompletion.builder().id(7L)
+				.person(person).task(db.getTaskBook()).build();
+		TaskCompletion completion8 = TaskCompletion.builder().id(8L)
+				.person(person).task(db.getTaskVideo()).build();
 		person.setTaskCompletions(
-				Set.of(completion1, completion2, completion3, completion4, completion5, completion6));
+				Set.of(completion1, completion2, completion3, completion4, completion5, completion6,
+						completion7,
+						completion8));
 
 		Map<Long, Long> courseToEditionMap = Map.of(db.getCourseRL().getId(), db.getEditionRL().getId());
 
@@ -368,6 +374,28 @@ public class HomeServiceTest {
 		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
 		assertThat(courseCompletedSkills.get(db.getCourseRL().getId()))
 				.isEqualTo(skillRepository.findAll().size());
+	}
+
+	@Test
+	void getCompletedSkillsWithChoiceTask() {
+		SCPerson person = new SCPerson();
+		// Only one task in choice task needs to be completed
+		TaskCompletion completion1 = TaskCompletion.builder().id(1L)
+				.person(person).task(db.getTaskBook()).build();
+		TaskCompletion completion2 = TaskCompletion.builder().id(1L)
+				.person(person).task(db.getTaskRead10()).build();
+		TaskCompletion completion3 = TaskCompletion.builder().id(1L)
+				.person(person).task(db.getTaskDo10a()).build();
+		person.setTaskCompletions(
+				Set.of(completion1, completion2, completion3));
+
+		Map<Long, Long> courseToEditionMap = Map.of(db.getCourseRL().getId(), db.getEditionRL().getId());
+
+		// Skill variables is completed
+		Map<Long, Integer> courseCompletedSkills = homeService.getCompletedSkillsPerCourse(person,
+				courseToEditionMap);
+		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
+		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(5);
 	}
 
 	@Test
@@ -431,20 +459,6 @@ public class HomeServiceTest {
 				courseToEditionMap);
 		assertTrue(courseCompletedSkills.entrySet().stream().anyMatch(e -> e.getValue() > 0));
 		assertThat(courseCompletedSkills.get(db.getCourseRL().getId())).isEqualTo(3);
-	}
-
-	/**
-	 * Creates a RoleDetailsDTO with the specified edition id and role.
-	 *
-	 * @param  id   The id of the edition.
-	 * @param  role The role.
-	 * @return      A RoleDetailsDTO with the specified edition id and role.
-	 */
-	private RoleDetailsDTO getRoleDetails(Long id, RoleDetailsDTO.TypeEnum role) {
-		return new RoleDetailsDTO().id(new Id().editionId(id).personId(db.getPerson().getId()))
-				.person(new PersonSummaryDTO().id(db.getPerson().getId()).username("username"))
-				.edition(new EditionSummaryDTO().id(id))
-				.type(role);
 	}
 
 	/**

@@ -18,12 +18,14 @@
 package nl.tudelft.skills.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 import java.util.*;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,14 +35,11 @@ import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
-import nl.tudelft.skills.model.RegularTask;
-import nl.tudelft.skills.model.SCCourse;
-import nl.tudelft.skills.model.SCEdition;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.TaskCompletion;
+import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.labracore.SCPerson;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
+import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.test.TestDatabaseLoader;
 import reactor.core.publisher.Mono;
@@ -55,14 +54,16 @@ public class TaskCompletionServiceTest {
 	private final SkillRepository skillRepository;
 
 	private final TestDatabaseLoader db;
+	private TaskRepository taskRepository;
 
 	@Autowired
 	public TaskCompletionServiceTest(EditionControllerApi editionApi, PersonRepository personRepository,
 			TaskCompletionRepository taskCompletionRepository, SkillRepository skillRepository,
-			TestDatabaseLoader db) {
+			TaskRepository taskRepository, TestDatabaseLoader db) {
 		this.editionApi = editionApi;
 		this.taskCompletionRepository = taskCompletionRepository;
 		this.skillRepository = skillRepository;
+		this.taskRepository = taskRepository;
 		this.db = db;
 		this.taskCompletionService = new TaskCompletionService(taskCompletionRepository, personRepository,
 				editionApi, this.skillRepository);
@@ -177,7 +178,16 @@ public class TaskCompletionServiceTest {
 	}
 
 	@Test
-	public void determineSkillsDone() {
+	public void determineSkillsDoneNoneCompleted() {
+		SCPerson person = new SCPerson();
+		person.setTaskCompletions(Set.of());
+		Set<Skill> skillsDone = taskCompletionService.determineSkillsDone(Collections.emptySet(), person,
+				db.getEditionRL().getId(), Collections.emptyList());
+		assertThat(skillsDone).isEmpty();
+	}
+
+	@Test
+	public void determineSkillsDoneSimple() {
 		SCPerson person = new SCPerson();
 		TaskCompletion completion1 = TaskCompletion.builder().id(1L)
 				.person(person).task(db.getTaskRead12()).build();
@@ -187,6 +197,182 @@ public class TaskCompletionServiceTest {
 		Set<Skill> skillsDone = taskCompletionService.determineSkillsDone(Collections.emptySet(), person,
 				db.getEditionRL().getId(), Collections.emptyList());
 		assertEquals((Set.of(db.getSkillImplication())), skillsDone);
+	}
+
+	// TODO check adding CT to own path
+
+	@ParameterizedTest
+	@ValueSource(ints = { 0, 1 })
+	public void determineSkillsDoneWithChoiceTask(int indexTaskToComplete) {
+		SCPerson person = new SCPerson();
+		// Which task is completed should not matter, so test for both separately
+		RegularTask taskToComplete = db.getChoiceTaskBookOrVideo().getTasks().get(indexTaskToComplete)
+				.getTask();
+
+		// Complete one task in choice task
+		TaskCompletion completion1 = TaskCompletion.builder().id(1L)
+				.person(person).task(taskToComplete).build();
+		// Complete remaining regular tasks in skill
+		TaskCompletion completion2 = TaskCompletion.builder().id(2L)
+				.person(person).task(db.getTaskRead10()).build();
+		TaskCompletion completion3 = TaskCompletion.builder().id(2L)
+				.person(person).task(db.getTaskDo10a()).build();
+		person.setTaskCompletions(Set.of(completion1, completion2, completion3));
+
+		// The skill should be completed
+		Set<Skill> skillsDone = taskCompletionService.determineSkillsDone(Collections.emptySet(), person,
+				db.getEditionRL().getId(), Collections.emptyList());
+		assertEquals((Set.of(db.getSkillVariables())), skillsDone);
+	}
+
+	@Test
+	public void determineSkillsDoneCustomSkill() {
+		SCPerson person = new SCPerson();
+		TaskCompletion completion = TaskCompletion.builder().id(1L)
+				.person(person).task(db.getTaskRead12()).build();
+		person.setTaskCompletions(Set.of(completion));
+		person.setTasksAdded(Set.of(db.getTaskRead12()));
+		Set<Skill> skillsDone = taskCompletionService.determineSkillsDone(Set.of(db.getSkillImplication()),
+				person,
+				db.getEditionRL().getId(), Collections.emptyList());
+		assertEquals((Set.of(db.getSkillImplication())), skillsDone);
+	}
+
+	@Test
+	public void determineSkillsDoneWithPathPreference() {
+		RegularTask task = db.getTaskRead12();
+		task.setPaths(new HashSet<>(Set.of(db.getPathFinderPath())));
+		taskRepository.save(task);
+
+		SCPerson person = new SCPerson();
+		TaskCompletion completion = TaskCompletion.builder().id(1L)
+				.person(person).task(task).build();
+		person.setTaskCompletions(Set.of(completion));
+		person.setTasksAdded(Set.of(task));
+
+		PathPreference pathPreference = PathPreference.builder().path(db.getPathFinderPath()).person(person)
+				.edition(db.getEditionRL()).build();
+
+		Set<Skill> skillsDone = taskCompletionService.determineSkillsDone(Set.of(db.getSkillImplication()),
+				person,
+				db.getEditionRL().getId(), List.of(pathPreference));
+		assertEquals((Set.of(db.getSkillImplication())), skillsDone);
+	}
+
+	@Test
+	public void testIsListOfTasksCompletedOnlyRegularTasksFalse() {
+		// Only one completed
+		assertFalse(
+				taskCompletionService.isListOfTasksCompleted(List.of(db.getTaskDo10a(), db.getTaskRead12()),
+						Set.of(db.getTaskDo10a())));
+
+		// None completed
+		assertFalse(
+				taskCompletionService.isListOfTasksCompleted(List.of(db.getTaskDo10a(), db.getTaskRead12()),
+						Set.of()));
+
+		// One completed but not in list
+		assertFalse(
+				taskCompletionService.isListOfTasksCompleted(List.of(db.getTaskDo10a(), db.getTaskRead12()),
+						Set.of(db.getTaskRead11())));
+	}
+
+	@Test
+	public void testIsListOfTasksCompletedOnlyRegularTasksTrue() {
+		// Same collection
+		assertTrue(
+				taskCompletionService.isListOfTasksCompleted(List.of(db.getTaskDo10a(), db.getTaskRead12()),
+						Set.of(db.getTaskDo10a(), db.getTaskRead12())));
+
+		// Additional task completed
+		assertTrue(
+				taskCompletionService.isListOfTasksCompleted(List.of(db.getTaskDo10a(), db.getTaskRead12()),
+						Set.of(db.getTaskDo10a(), db.getTaskRead12(), db.getTaskRead11())));
+	}
+
+	@Test
+	public void testIsListOfTasksCompletedChoiceTaskDoneTrue() {
+		// One task in choice task completed
+		assertTrue(taskCompletionService.isListOfTasksCompleted(
+				List.of(db.getChoiceTaskBookOrVideo(), db.getTaskBook(), db.getTaskVideo()),
+				Set.of(db.getTaskBook())));
+		assertTrue(taskCompletionService.isListOfTasksCompleted(
+				List.of(db.getChoiceTaskBookOrVideo(), db.getTaskBook(), db.getTaskVideo()),
+				Set.of(db.getTaskVideo())));
+
+		// Both tasks in choice task completed
+		assertTrue(taskCompletionService.isListOfTasksCompleted(
+				List.of(db.getChoiceTaskBookOrVideo(), db.getTaskBook(), db.getTaskVideo()),
+				Set.of(db.getTaskBook(), db.getTaskVideo())));
+
+		// Additional task completed
+		assertTrue(taskCompletionService.isListOfTasksCompleted(
+				List.of(db.getChoiceTaskBookOrVideo(), db.getTaskBook(), db.getTaskVideo()),
+				Set.of(db.getTaskBook(), db.getTaskVideo(), db.getTaskRead12())));
+	}
+
+	@Test
+	public void testIsListOfTasksCompletedTaskAndChoiceTaskFalse() {
+		// Choice task not completed (once with additional completed task, once without)
+		assertFalse(taskCompletionService.isListOfTasksCompleted(
+				List.of(db.getChoiceTaskBookOrVideo(), db.getTaskBook(), db.getTaskVideo(),
+						db.getTaskDo10a()),
+				Set.of(db.getTaskDo10a())));
+		assertFalse(taskCompletionService.isListOfTasksCompleted(
+				List.of(db.getChoiceTaskBookOrVideo(), db.getTaskBook(), db.getTaskVideo(),
+						db.getTaskDo10a()),
+				Set.of(db.getTaskDo10a(), db.getTaskRead12())));
+
+		// Regular task not completed (once with additional completed task, once without)
+		assertFalse(taskCompletionService.isListOfTasksCompleted(
+				List.of(db.getChoiceTaskBookOrVideo(), db.getTaskBook(), db.getTaskVideo(),
+						db.getTaskDo10a()),
+				Set.of(db.getTaskBook())));
+		assertFalse(taskCompletionService.isListOfTasksCompleted(
+				List.of(db.getChoiceTaskBookOrVideo(), db.getTaskBook(), db.getTaskVideo(),
+						db.getTaskDo10a()),
+				Set.of(db.getTaskBook(), db.getTaskRead12())));
+	}
+
+	@Test
+	public void testIsListOfTasksCompletedTaskAndChoiceTaskTrue() {
+		// Once with additional completed task, once without
+		assertTrue(taskCompletionService.isListOfTasksCompleted(
+				List.of(db.getChoiceTaskBookOrVideo(), db.getTaskBook(), db.getTaskVideo(),
+						db.getTaskDo10a()),
+				Set.of(db.getTaskBook(), db.getTaskDo10a())));
+		assertTrue(taskCompletionService.isListOfTasksCompleted(
+				List.of(db.getChoiceTaskBookOrVideo(), db.getTaskBook(), db.getTaskVideo(),
+						db.getTaskDo10a()),
+				Set.of(db.getTaskBook(), db.getTaskDo10a(), db.getTaskRead12())));
+	}
+
+	@Test
+	public void testIsListOfTasksCompletedTooLittleTasksInChoiceTaskDone() {
+		// Check that completing a task in a choice task that requires more tasks to be done, does not make the
+		// choice task completed
+
+		ChoiceTask choiceTask = db.getChoiceTaskBookOrVideo();
+		RegularTask newTask = db.createTaskBySkillAndName(db.getSkillVariables(), "Additional task");
+		choiceTask.getTasks().add(newTask.getTaskInfo());
+		choiceTask.setMinTasks(2);
+		taskRepository.save(choiceTask);
+		taskRepository.save(newTask);
+
+		// Only one task in choice task completed and two are needed
+		assertFalse(taskCompletionService.isListOfTasksCompleted(
+				List.of(choiceTask, db.getTaskBook(), db.getTaskVideo(), newTask),
+				Set.of(db.getTaskBook())));
+
+		// No task completed
+		assertFalse(taskCompletionService.isListOfTasksCompleted(
+				List.of(choiceTask, db.getTaskBook(), db.getTaskVideo(), newTask),
+				Set.of()));
+
+		// Task outside the choice task completed
+		assertFalse(taskCompletionService.isListOfTasksCompleted(
+				List.of(choiceTask, db.getTaskBook(), db.getTaskVideo(), newTask),
+				Set.of(db.getTaskRead12())));
 	}
 
 	@Test
