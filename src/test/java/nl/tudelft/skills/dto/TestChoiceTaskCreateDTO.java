@@ -78,7 +78,8 @@ public class TestChoiceTaskCreateDTO {
 	@Test
 	public void testNumberMinTasksTooBig() {
 		ChoiceTaskCreateDTO createDTO = getChoiceTaskCreateDTO();
-		createDTO.setNewSubTasks(List.of(getTaskCreateDTO(), getTaskCreateDTO()));
+		createDTO.setNewSubTasks(List.of(getTaskCreateDTO()));
+		createDTO.setUpdatedSubTasks(List.of(getTaskPatchDTO()));
 		createDTO.setMinTasks(2);
 		Exception exception = assertThrows(DTOValidationException.class, createDTO::apply);
 		assertThat(exception.getMessage())
