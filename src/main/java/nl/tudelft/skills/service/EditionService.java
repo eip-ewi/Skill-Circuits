@@ -501,7 +501,7 @@ public class EditionService {
 	 * @param skillMap The map of skills, from previous skills to the new skills.
 	 * @param pathMap  The map of paths, from previous paths to the new paths.
 	 */
-	public void updateTaskRelations(Task prev, Task copy, Map<Skill, Skill> skillMap,
+	void updateTaskRelations(Task prev, Task copy, Map<Skill, Skill> skillMap,
 			Map<Path, Path> pathMap) {
 		prev.getPaths().forEach(p -> {
 			Path copiedPath = pathMap.get(p);
