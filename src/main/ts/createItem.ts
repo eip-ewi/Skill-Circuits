@@ -137,4 +137,5 @@ function createUniqueNewTaskIdPostfix(taskList: JQuery): number {
 
 if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
     module.exports.createUniqueNewTaskIdPostfix = createUniqueNewTaskIdPostfix;
+    module.exports.appendTask = appendTask;
 }
