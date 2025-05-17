@@ -62,7 +62,6 @@ public class SkillService {
 	private final TaskRepository taskRepository;
 	private final ChoiceTaskRepository choiceTaskRepository;
 	private final PathRepository pathRepository;
-	private final TaskInfoRepository taskInfoRepository;
 	private final SkillRepository skillRepository;
 
 	/**
@@ -236,7 +235,7 @@ public class SkillService {
 	 *
 	 * @param  skill       The skill to which the new tasks belong.
 	 * @param  newTaskDTOs The TaskCreateDTOs for the new tasks.
-	 * @return             A list of the tasks that were created.
+	 * @return             A list of the upper level tasks that were created.
 	 */
 	@Transactional
 	public List<Task> saveNewTasks(Skill skill, List<? extends TaskCreateDTO<?>> newTaskDTOs) {
@@ -368,8 +367,10 @@ public class SkillService {
 
 			// Handle sub-tasks of ChoiceTasks
 			if (task instanceof ChoiceTask choiceTask) {
-				for (TaskInfo taskInfo : choiceTask.getTasks()) {
-					orderedTasks.add(taskInfo.getTask());
+				for (int j = 0; j < choiceTask.getTasks().size(); j++) {
+					RegularTask subTask = choiceTask.getTasks().get(j).getTask();
+					orderedTasks.add(subTask);
+					subTask.setIdx(j);
 				}
 			}
 		}
@@ -416,7 +417,8 @@ public class SkillService {
 	}
 
 	/**
-	 * Remove tasks by their ids from a given skill.
+	 * Remove tasks by their ids from a given skill. If a ChoiceTask is removed, this method assumes that the
+	 * ids for all sub-tasks in it are also in the removedTasks list.
 	 *
 	 * @param skill        The skill that contains the tasks.
 	 * @param removedTasks The ids of the tasks that should be removed.
@@ -491,8 +493,6 @@ public class SkillService {
 
 		return allTasks;
 	}
-
-	// TODO: tests for the new and updated methods
 
 	/**
 	 * Patches a given ChoiceTask.
