@@ -352,7 +352,7 @@
         }
         function validateItems(items) {
             return items
-                .filter(item => item["taskType"] === "ChoiceTask")
+                .filter(item => item["delete"] === false && item["taskType"] === "ChoiceTask")
                 .every(validateChoiceTask);
         }
         function serialiseBlockHeader(block) {
