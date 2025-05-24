@@ -27,27 +27,17 @@
         th:if="${canEdit}"
         data-edit="only"
         class="item__create"
-        th:data-block="${block.id}"
-        tabindex="-1">
-        <!-- TODO make the dropdown tabbable -->
+        th:data-block="${block.id}">
         <ul data-edit="only" tabindex="-1">
             <li data-edit="only" tabindex="-1">
-                <button
-                    type="button"
-                    data-edit="only"
-                    tabindex="-1"
-                    onclick="createItem($(this), 'RegularTask')">
+                <button type="button" data-edit="only" onclick="createItem($(this), 'RegularTask')">
                     <span data-edit="only" class="fa-solid fa-plus"></span>
                     <span data-edit="only">Regular task</span>
                     <span data-edit="only" class="dropdown_icon fa-solid fa-chevron-down"></span>
                 </button>
             </li>
             <li data-edit="only" tabindex="-1">
-                <button
-                    type="button"
-                    data-edit="only"
-                    tabindex="-1"
-                    onclick="createItem($(this), 'ChoiceTask')">
+                <button type="button" data-edit="only" onclick="createItem($(this), 'ChoiceTask')">
                     <span data-edit="only" class="fa-solid fa-plus"></span>
                     <span data-edit="only">Choice task</span>
                 </button>
