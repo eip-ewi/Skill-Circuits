@@ -115,7 +115,6 @@ function serialiseInput(input: JQuery, data: {}) {
     } else data[name] = value;
 }
 
-// TODO: tests
 if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
     module.exports.serialiseBlockItems = serialiseBlockItems;
     module.exports.serialiseInput = serialiseInput;
