@@ -287,6 +287,15 @@
             z-index: -1;
         }
     }
+
+    /* slight style adjustments for empty names */
+    &__empty_name &__items::before {
+        top: -0.8rem;
+    }
+
+    &__empty_name &__header {
+        margin-bottom: -0.3rem;
+    }
 }
 
 .block[data-editing="true"] .choice_task {

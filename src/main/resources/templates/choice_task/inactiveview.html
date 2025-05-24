@@ -26,6 +26,7 @@
         <li
             data-edit="always"
             class="task choice_task choice_task__inactive"
+            th:classappend="${item.name} == null ? 'choice_task__empty_name' : ''"
             th:with="id = ${path == null} ? |item-${item.id}| : |item-${item.id}-${path.id}|"
             th:id="${id}"
             th:data-item="${item.id}"
