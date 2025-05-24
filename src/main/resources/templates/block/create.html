@@ -153,7 +153,7 @@
         }
 
         function cancelCreateBlock(block) {
-            block.find(".item").remove();
+            block.find(".item, .task").remove();
             block.find(".item__separation").remove();
             block.removeClass("visible");
             block.find("select > option").prop("selected", false);
@@ -224,7 +224,7 @@
                 contentType: "application/json",
                 data: JSON.stringify(data),
                 success: html => {
-                    block.find(".item").remove();
+                    block.find(".item, .task").remove();
                     block.find(".item__separation").remove();
                     block.removeClass("visible");
                     block.find("select > option").prop("selected", false);

@@ -63,8 +63,11 @@
             if (item.data("new")) {
                 // Remove item separations
                 item.next(".item__separation").remove();
-                // If it is the last item, remove the last separation as well
-                if (item.siblings(".item:not(.hidden)").length === 0) {
+                // If it is the last item, and is not inside a choice task, remove the last separation as well
+                if (
+                    item.parents(".choice_task").length === 0 &&
+                    item.siblings(".item:not(.hidden), .task:not(.hidden)").length === 0
+                ) {
                     item.prev(".item__separation").remove();
                 }
                 // Delete item entirely
@@ -78,8 +81,11 @@
             // Remove item separations if the item will be hidden
             if (hideItem) {
                 item.next(".item__separation").remove();
-                // If it is the last item, remove the last separation as well
-                if (item.siblings(".item:not(.hidden)").length === 0) {
+                // If it is the last item, and is not inside a choice task, remove the last separation as well
+                if (
+                    item.parents(".choice_task").length === 0 &&
+                    item.siblings(".item:not(.hidden), .task:not(.hidden)").length === 0
+                ) {
                     item.prev(".item__separation").remove();
                 }
             }

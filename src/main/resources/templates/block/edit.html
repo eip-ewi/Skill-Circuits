@@ -215,7 +215,12 @@
             // Remove all item separations
             block.find(".item__separation").remove();
 
-            // Remove the new items
+            // Move tasks out of newly created choice tasks
+            block.find(".choice_task[data-new='true'] .task").each(function () {
+                $(block.find(".items")[1]).append($(this).detach());
+            });
+
+            // Remove all new items
             block.find(".item[data-new='true'], .task[data-new='true']").remove();
 
             // Re-order the items and item separations
