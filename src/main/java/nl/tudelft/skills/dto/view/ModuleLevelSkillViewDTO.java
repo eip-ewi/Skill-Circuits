@@ -25,5 +25,6 @@ public record ModuleLevelSkillViewDTO(
 		Integer column,
 		List<Long> parents,
 		List<Long> children,
-		List<ModuleLevelTaskViewDTO> items) implements BlockView {
+		List<ModuleLevelTaskViewDTO> items,
+		Boolean essential) implements BlockView {
 }

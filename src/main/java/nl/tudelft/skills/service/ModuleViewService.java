@@ -65,7 +65,8 @@ public class ModuleViewService {
 				skill.getColumn(),
 				skill.getParents().stream().map(AbstractSkill::getId).toList(),
 				skill.getChildren().stream().map(AbstractSkill::getId).toList(),
-				skill.getTasks().stream().map(t -> getItemView(t, person)).toList());
+				skill.getTasks().stream().map(t -> getItemView(t, person)).toList(),
+				skill.isEssential());
 	}
 
 	public ModuleLevelTaskViewDTO getItemView(Task task, SCPerson person) {

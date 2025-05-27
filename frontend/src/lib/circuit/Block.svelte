@@ -102,6 +102,7 @@
 <div bind:this={element} data-id="{block.id}" class="block" draggable="{getAuth().canEditBlocks}"  data-locked="{locked && !getAuth().canEditBlocks}" data-completed="{completed}"
      data-dragging="{dragging}" onclick={openOverlay} ondragstart={dragStart} ondragend={dragEnd} onmouseenter={mouseEnter} onmouseleave={mouseLeave} data-editing="{editing}">
     <span class="block__title">{block.name}</span>
+    {#if !block.essential} <span class="block__optional">Optional</span> {/if}
     <ul class="block__items" data-editing="{editing}">
         {#each block.items as item, index}
             <Item {updates} {item} {editing} patch={itemPatches[index]!}/>
@@ -168,6 +169,15 @@
     .block__title {
         font-size: 1.25rem;
         font-weight: 700;
+    }
+
+    .block__optional {
+        font-size: 0.9rem;
+        position: absolute;
+        right: 0.8rem;
+        top: 0;
+        font-weight: 500;
+        color: var(--on-group-colour);
     }
 
     .block__items {

@@ -7,4 +7,5 @@ export interface BlockData {
     parents: number[];
     children: number[];
     items: ItemData[];
+    essential: boolean;
 }

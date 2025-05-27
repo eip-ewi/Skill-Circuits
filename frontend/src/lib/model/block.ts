@@ -11,6 +11,7 @@ export class BlockModel implements BlockData {
     items: ItemData[];
     parents: number[];
     children: number[];
+    essential: boolean;
 
     private circuit: CircuitModel;
 
@@ -22,6 +23,7 @@ export class BlockModel implements BlockData {
         this.items = data.items;
         this.parents = data.parents;
         this.children = data.children;
+        this.essential = data.essential;
 
         this.circuit = circuit;
     }
