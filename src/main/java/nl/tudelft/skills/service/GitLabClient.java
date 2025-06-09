@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -36,11 +37,16 @@ public class GitLabClient {
 	 * @return An array of Releases for Skill Circuits
 	 */
 	public List<ReleaseDTO> getReleases() {
-		var entity = webClient.get()
-				.uri("api/v4/projects/7331/releases?include_html_description=true")
-				.retrieve()
-				.toEntity(ReleaseDTO[].class)
-				.block();
+		ResponseEntity<ReleaseDTO[]> entity = null;
+		try {
+			entity = webClient.get()
+					.uri("api/v4/projects/7331/releases?include_html_description=true")
+					.retrieve()
+					.toEntity(ReleaseDTO[].class)
+					.block();
+		} catch (Exception e) {
+		}
+
 		if (entity == null || entity.getBody() == null) {
 			return Collections.emptyList();
 		} else {
