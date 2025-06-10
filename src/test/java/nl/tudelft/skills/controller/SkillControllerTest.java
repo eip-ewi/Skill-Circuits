@@ -309,6 +309,7 @@ public class SkillControllerTest extends ControllerTest {
 		editionRepository.save(db.getEditionRL());
 		mockRole(roleApi, "STUDENT");
 		Skill skill = db.getSkillVariables();
+		when(session.getAttribute("studentMode")).thenReturn(false);
 
 		// Get authenticated person
 		Person authPerson = ((LabradorUserDetails) SecurityContextHolder.getContext().getAuthentication()
@@ -325,6 +326,9 @@ public class SkillControllerTest extends ControllerTest {
 		// The skill view should be unmodified (all tasks with their initial visibility, meaning all are visible)
 		ModuleLevelSkillViewDTO view = View.convert(skill, ModuleLevelSkillViewDTO.class);
 		assertThat(model.getAttribute("block")).isEqualTo(view);
+
+		// Student mode should be false
+		assertThat((Boolean) model.getAttribute("studentMode")).isFalse();
 	}
 
 	@Test
@@ -338,6 +342,7 @@ public class SkillControllerTest extends ControllerTest {
 		RegularTask taskRead = db.getTaskRead10();
 		edition.setVisible(true);
 		mockRole(roleApi, "STUDENT");
+		when(session.getAttribute("studentMode")).thenReturn(false);
 
 		// Create new path
 		Path explorerPath = Path.builder().name("Explorer").edition(edition)
@@ -397,6 +402,9 @@ public class SkillControllerTest extends ControllerTest {
 		assertThat(model.getAttribute("tasksAdded")).isEqualTo(Set.of(
 				View.convert(taskDo, RegularTaskViewDTO.class)));
 		assertThat(model.getAttribute("skillsModified")).isEqualTo(Set.of(view));
+
+		// Student mode should be false
+		assertThat((Boolean) model.getAttribute("studentMode")).isFalse();
 	}
 
 	@Test
