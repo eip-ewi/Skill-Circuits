@@ -76,6 +76,7 @@ public class SkillController {
 	@PreAuthorize("@authorisationService.canViewSkill(#id)")
 	public String getSkill(@AuthenticatedPerson Person person, @PathVariable Long id, Model model) {
 		Skill skill = skillRepository.findByIdOrThrow(id);
+		Long editionId = skill.getSubmodule().getModule().getEdition().getId();
 		ModuleLevelSkillViewDTO view = View.convert(skill, ModuleLevelSkillViewDTO.class);
 		view.setCompletedRequiredTasks(true);
 
@@ -97,10 +98,12 @@ public class SkillController {
 		model.addAttribute("circuit", buildCircuitFromSkill(skill));
 		model.addAttribute("canEdit", false);
 		model.addAttribute("canDelete", false);
+		Boolean studentMode = (Boolean) session.getAttribute("student-mode-" + editionId);
+		model.addAttribute("studentMode", studentMode != null && studentMode);
 
 		// Add information concerning personal path to model
 		Optional<Set<Long>> taskIdsInPath = personService.setPersonalPathAttributes(person.getId(), model,
-				skill.getSubmodule().getModule().getEdition().getId(), skill);
+				editionId, skill);
 		taskIdsInPath.ifPresent(
 				taskIdsInner -> view.getTasks().forEach(t -> t.setVisible(taskIdsInner.contains(t.getId()))));
 
