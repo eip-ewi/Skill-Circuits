@@ -1,0 +1,67 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2025 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <th:block layout:fragment="item" th:fragment="item">
+        <li
+            data-edit="always"
+            class="task choice_task choice_task__inactive"
+            th:classappend="${item.name} == null ? 'choice_task__empty_name' : ''"
+            th:with="id = ${path == null} ? |item-${item.id}| : |item-${item.id}-${path.id}|"
+            th:id="${id}"
+            th:data-item="${item.id}"
+            th:data-path-ids="${level == 'module'} ? ${item.pathIds} : ${null}"
+            th:data-index-initial="${iter == null} ? 0 : ${iter.size - iter.count}">
+            <button
+                class="circuit__button__symbol choice_task__add fa-solid fa-plus"
+                title="Add task to your path"
+                onclick="addTaskToEditedSkill(this)"></button>
+
+            <div class="choice_task__container">
+                <span class="choice_task__header" data-edit="always">
+                    <span data-edit="always" class="choice_task__name">
+                        <span
+                            th:id="|${id}-name|"
+                            th:if="${item.name} != null"
+                            class="item__name"
+                            th:text="${item.name}"
+                            data-black="true"></span>
+                    </span>
+                </span>
+
+                <ul data-edit="always" class="choice_task__items">
+                    <!-- Note that item and iter are intentionally overridden here -->
+                    <th:block th:each="item, iter : ${item.tasks}">
+                        <li layout:replace="~{task/inactiveview :: item}"></li>
+                    </th:block>
+                </ul>
+
+                <span class="choice_task__footer" data-edit="always">
+                    <span
+                        class="choice_task__min_tasks"
+                        th:text="'to complete: ' + ${item.minTasks}"></span>
+                </span>
+            </div>
+        </li>
+    </th:block>
+</html>

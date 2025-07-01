@@ -18,20 +18,22 @@
 package nl.tudelft.skills.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.EditLinkDTO;
+import nl.tudelft.skills.dto.view.module.ChoiceTaskViewDTO;
 import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
+import nl.tudelft.skills.model.ChoiceTask;
 import nl.tudelft.skills.model.RegularTask;
+import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.RegularTaskRepository;
+import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.security.AuthorisationService;
 
 @Controller
@@ -39,12 +41,14 @@ import nl.tudelft.skills.security.AuthorisationService;
 public class TaskController {
 	private final RegularTaskRepository regularTaskRepository;
 	private final AuthorisationService authorisationService;
+	private final TaskRepository taskRepository;
 
 	@Autowired
 	public TaskController(RegularTaskRepository regularTaskRepository,
-			AuthorisationService authorisationService) {
+			AuthorisationService authorisationService, TaskRepository taskRepository) {
 		this.regularTaskRepository = regularTaskRepository;
 		this.authorisationService = authorisationService;
+		this.taskRepository = taskRepository;
 	}
 
 	/**
@@ -55,7 +59,7 @@ public class TaskController {
 	 */
 	@Transactional
 	@PatchMapping("change-link")
-	@PreAuthorize("@authorisationService.canEditRegularTask(#editLinkDTO.taskId)")
+	@PreAuthorize("@authorisationService.canEditTask(#editLinkDTO.taskId)")
 	public ResponseEntity<Void> updateTaskLink(@RequestBody EditLinkDTO editLinkDTO) {
 		RegularTask task = regularTaskRepository.findByIdOrThrow(editLinkDTO.getTaskId());
 		task.setLink(editLinkDTO.getNewLink());
@@ -63,8 +67,6 @@ public class TaskController {
 
 		return ResponseEntity.ok().build();
 	}
-
-	// TODO: getting a choice task
 
 	/**
 	 * Returns a task view for a custom path.
@@ -74,20 +76,23 @@ public class TaskController {
 	 * @return        Html page with the task.
 	 */
 	@GetMapping("{taskId}")
-	@PreAuthorize("@authorisationService.isAuthenticated()")
+	@PreAuthorize("@authorisationService.canViewTask({#taskId})")
 	public String getTask(@PathVariable Long taskId, Model model) {
-		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
-		if (task.getSkill().getSubmodule().getModule().getEdition().isVisible() || authorisationService
-				.isAtLeastHeadTAInEdition(task.getSkill().getSubmodule().getModule().getEdition().getId())) {
-			model.addAttribute("item", View.convert(task, RegularTaskViewDTO.class));
-			model.addAttribute("canEdit", false);
-			model.addAttribute("level", "module");
+		model.addAttribute("canEdit", false);
+		model.addAttribute("level", "module");
+
+		Task task = taskRepository.findByIdOrThrow(taskId);
+
+		// Return RegularTask
+		if (task instanceof RegularTask regularTask) {
+			model.addAttribute("item", View.convert(regularTask, RegularTaskViewDTO.class));
 			return "task/view";
 		}
-		throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-	}
 
-	// TODO: getting a choice task in an exploded skill
+		// Return ChoiceTask
+		model.addAttribute("item", View.convert((ChoiceTask) task, ChoiceTaskViewDTO.class));
+		return "choice_task/view";
+	}
 
 	/**
 	 * Returns task view paths overview in an exploded skill.
@@ -97,17 +102,22 @@ public class TaskController {
 	 * @return        Html page with the task.
 	 */
 	@GetMapping("{taskId}/preview")
-	@PreAuthorize("@authorisationService.isAuthenticated()")
+	@PreAuthorize("@authorisationService.canViewTask({#taskId})")
 	public String getTaskForCustomPath(@PathVariable Long taskId, Model model) {
-		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
-		if (task.getSkill().getSubmodule().getModule().getEdition().isVisible() || authorisationService
-				.isAtLeastHeadTAInEdition(task.getSkill().getSubmodule().getModule().getEdition().getId())) {
-			model.addAttribute("item", View.convert(task, RegularTaskViewDTO.class));
-			model.addAttribute("canEdit", false);
-			model.addAttribute("level", "module");
+		model.addAttribute("canEdit", false);
+		model.addAttribute("level", "module");
+
+		Task task = taskRepository.findByIdOrThrow(taskId);
+
+		// Return RegularTask
+		if (task instanceof RegularTask regularTask) {
+			model.addAttribute("item", View.convert(regularTask, RegularTaskViewDTO.class));
 			return "task/inactiveview :: item";
 		}
-		throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+
+		// Return ChoiceTask
+		model.addAttribute("item", View.convert((ChoiceTask) task, ChoiceTaskViewDTO.class));
+		return "choice_task/inactiveview :: item";
 	}
 
 }

@@ -189,6 +189,43 @@
                 renderInfobox(data);
             });
         }
+        function updateChoiceTaskState(choiceTask) {
+            const minTasks = Number(choiceTask.find(".choice_task__min_tasks").data("minTasks"));
+            const completed = choiceTask.find(".item.completed").length;
+            const taskId = choiceTask.data("item");
+
+            // Toggle task icons in skill preview
+            const taskIcons = $(`#item-${taskId}-icons`).find(".item__icon");
+            for (let i = 0; i < minTasks; i++) {
+                if (i < completed) {
+                    $(taskIcons[i]).addClass("completed");
+                } else {
+                    $(taskIcons[i]).removeClass("completed");
+                }
+            }
+
+            // Remove/add trash icon
+            if (completed > 0) {
+                choiceTask.find("[name='removeFromPath']").addClass("hidden");
+            } else {
+                choiceTask.find("[name='removeFromPath']").removeClass("hidden");
+            }
+
+            const footerTextElem = $(`#choice-task-${taskId}-footer`);
+            if (completed >= minTasks) {
+                choiceTask.addClass("completed");
+                // Update footer and visibility
+                footerTextElem.text("");
+                footerTextElem.parent().css("display", "none");
+            } else {
+                choiceTask.removeClass("completed");
+                // Update footer text and visibility
+                footerTextElem.text(
+                    `Choose ${minTasks - completed}` + (completed === 0 ? "" : " more")
+                );
+                footerTextElem.parent().css("display", "");
+            }
+        }
         function updateBlockState(blockId) {
             if (!blockId.toString().match(/\d+/)) return; // Skip incorrect block ids
 
@@ -201,10 +238,13 @@
 
             block.removeClass("completed active disabled");
 
-            if (
-                left.find(".item").length > 0 &&
-                left.find(".item").not(".completed").length === 0
-            ) {
+            // Mark states of all choice tasks
+            [...block.find(".choice_task")].forEach(choiceTask =>
+                updateChoiceTaskState($(choiceTask))
+            );
+
+            const itemsToConsider = left.find(".items:first").children(".task");
+            if (itemsToConsider.length > 0 && itemsToConsider.not(".completed").length === 0) {
                 block.addClass("completed");
             } else {
                 const allParentsCompleted = [...block.data("parents")].every(

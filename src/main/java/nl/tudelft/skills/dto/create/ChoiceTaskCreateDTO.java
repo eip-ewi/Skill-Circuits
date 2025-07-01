@@ -24,6 +24,7 @@ import javax.validation.constraints.NotNull;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import nl.tudelft.skills.dto.patch.RegularTaskPatchDTO;
 import nl.tudelft.skills.model.ChoiceTask;
 
 @Data
@@ -38,12 +39,14 @@ public class ChoiceTaskCreateDTO extends TaskCreateDTO<ChoiceTask> {
 	private Integer minTasks;
 	@NotNull
 	@Builder.Default
-	private List<RegularTaskCreateDTO> tasks = new ArrayList<>();
-
-	// TODO: might need to add TaskInfo here
+	private List<RegularTaskCreateDTO> newSubTasks = new ArrayList<>();
+	@NotNull
+	@Builder.Default
+	private List<RegularTaskPatchDTO> updatedSubTasks = new ArrayList<>();
 
 	@Override
 	protected void postApply(ChoiceTask data) {
+		super.postApply(data);
 		if (name != null && name.isBlank()) {
 			data.setName(null);
 		}
@@ -56,10 +59,18 @@ public class ChoiceTaskCreateDTO extends TaskCreateDTO<ChoiceTask> {
 
 	@Override
 	public void validate() {
-		// Validate RegularTasks and this ChoiceTask to have same Skill
-		if (!tasks.stream().allMatch(t -> Objects.equals(t.getSkill().getId(), getSkill().getId()))) {
-			errors.rejectValue("tasks", "skillOfTasksNotMatching",
-					"RegularTask is not in same Skill as ChoiceTask");
+		super.validate();
+
+		int numberSubTasks = newSubTasks.size() + updatedSubTasks.size();
+		if (numberSubTasks <= 1) {
+			errors.rejectValue("newSubTasks", "notEnoughSubTasks",
+					"ChoiceTask has to contain at least two subtasks");
+			errors.rejectValue("updatedSubTasks", "notEnoughSubTasks",
+					"ChoiceTask has to contain at least two subtasks");
+		}
+		if (minTasks <= 0 || minTasks >= numberSubTasks) {
+			errors.rejectValue("minTasks", "invalidMinTasks",
+					"minTasks should be larger than zero and smaller than the number of subtasks");
 		}
 	}
 }

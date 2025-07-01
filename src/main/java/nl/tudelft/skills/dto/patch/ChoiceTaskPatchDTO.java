@@ -20,15 +20,13 @@ package nl.tudelft.skills.dto.patch;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import nl.tudelft.skills.dto.create.TaskCreateDTO;
+import nl.tudelft.skills.dto.create.RegularTaskCreateDTO;
 import nl.tudelft.skills.model.ChoiceTask;
 
 @Data
@@ -43,12 +41,10 @@ public class ChoiceTaskPatchDTO extends TaskPatchDTO<ChoiceTask> {
 	private Integer minTasks;
 	@NotNull
 	@Builder.Default
-	private List<TaskPatchDTO<?>> tasks = new ArrayList<>();
+	private List<RegularTaskPatchDTO> updatedSubTasks = new ArrayList<>();
 	@NotNull
 	@Builder.Default
-	private List<TaskCreateDTO<?>> newTasks = new ArrayList<>();
-
-	// TODO: might need to add taskInfo here
+	private List<RegularTaskCreateDTO> newSubTasks = new ArrayList<>();
 
 	@Override
 	protected void applyOneToOne() {
@@ -59,14 +55,25 @@ public class ChoiceTaskPatchDTO extends TaskPatchDTO<ChoiceTask> {
 
 	@Override
 	protected void validate() {
-		Set<Long> taskIds = data.getTasks().stream().map(taskInfo -> taskInfo.getTask().getId())
-				.collect(Collectors.toSet());
-		if (!newTasks.stream().allMatch(t -> Objects.equals(t.getSkill().getId(), getSkill().getId()))) {
-			errors.rejectValue("newTasks", "regularTaskNotInSameSkill",
+		int numberSubTasks = newSubTasks.size() + updatedSubTasks.size();
+		if (numberSubTasks <= 1) {
+			errors.rejectValue("newSubTasks", "notEnoughSubTasks",
+					"ChoiceTask has to contain at least two subtasks");
+			errors.rejectValue("updatedSubTasks", "notEnoughSubTasks",
+					"ChoiceTask has to contain at least two subtasks");
+		}
+		if (minTasks <= 0 || minTasks >= numberSubTasks) {
+			errors.rejectValue("minTasks", "invalidMinTasks",
+					"minTasks should be larger than zero and smaller than the number of subtasks");
+		}
+		if (!newSubTasks.stream().allMatch(t -> Objects.equals(t.getSkill().getId(), getSkill().getId()))) {
+			errors.rejectValue("newSubTasks", "regularTaskNotInSameSkill",
 					"RegularTask is not in same Skill as ChoiceTask");
 		}
-		if (!taskIds.containsAll(tasks.stream().map(TaskPatchDTO::getId).collect(Collectors.toSet()))) {
-			errors.rejectValue("tasks", "regularTaskNotInChoiceTask", "RegularTask is not in ChoiceTask");
+		if (!updatedSubTasks.stream()
+				.allMatch(t -> Objects.equals(t.getSkill().getId(), getSkill().getId()))) {
+			errors.rejectValue("updatedSubTasks", "regularTaskNotInSameSkill",
+					"RegularTask is not in same Skill as ChoiceTask");
 		}
 	}
 }

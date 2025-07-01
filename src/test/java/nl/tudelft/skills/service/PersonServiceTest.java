@@ -35,6 +35,7 @@ import org.springframework.ui.Model;
 
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.dto.view.module.ChoiceTaskViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
 import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
 import nl.tudelft.skills.model.*;
@@ -53,6 +54,7 @@ public class PersonServiceTest {
 	private final PersonService personService;
 	private final SkillRepository skillRepository;
 	private final RegularTaskRepository regularTaskRepository;
+	private final TaskRepository taskRepository;
 	private final PathPreferenceRepository pathPreferenceRepository;
 
 	private final TestDatabaseLoader db;
@@ -61,12 +63,13 @@ public class PersonServiceTest {
 	@Autowired
 	public PersonServiceTest(PersonRepository personRepository, PathRepository pathRepository,
 			EditionRepository editionRepository, SkillRepository skillRepository,
-			RegularTaskRepository regularTaskRepository,
+			RegularTaskRepository regularTaskRepository, TaskRepository taskRepository,
 			PathPreferenceRepository pathPreferenceRepository, EditionService editionService,
 			TestDatabaseLoader db) {
 		this.personRepository = personRepository;
 		this.skillRepository = skillRepository;
 		this.regularTaskRepository = regularTaskRepository;
+		this.taskRepository = taskRepository;
 		this.editionRepository = editionRepository;
 		this.pathPreferenceRepository = pathPreferenceRepository;
 		this.db = db;
@@ -156,6 +159,72 @@ public class PersonServiceTest {
 		// taskDo10a is in skillVariables
 		person.getTasksAdded().add(task);
 		task.getPersonsThatAddedTask().add(person);
+	}
+
+	@Transactional
+	void addChoiceTaskToTasks() {
+		SCPerson person = db.getPerson();
+		ChoiceTask choiceTask = db.getChoiceTaskBookOrVideo();
+		RegularTask taskA = db.getTaskBook();
+		RegularTask taskB = db.getTaskVideo();
+		Skill skill = db.getSkillVariables();
+
+		person.getTasksAdded().addAll(Set.of(choiceTask, taskA, taskB));
+		choiceTask.getPersonsThatAddedTask().add(person);
+		taskA.getPersonsThatAddedTask().add(person);
+		taskB.getPersonsThatAddedTask().add(person);
+		person.getSkillsModified().add(skill);
+		skill.getPersonModifiedSkill().add(person);
+	}
+
+	@Test
+	void setPersonalPathAttributesPathAndSkillNullWithChoiceTask() {
+		// Path: null, skill: null, tasksAdded: contains tasks and choice task, skillsModified: contains some skills
+
+		// Add choice task
+		addChoiceTaskToTasks();
+
+		Optional<Set<Long>> taskIds = personService.setPersonalPathAttributes(db.getPerson().getId(), model,
+				db.getEditionRL().getId(), null);
+
+		assertThat(taskIds).isEmpty();
+		assertThat(model.getAttribute("selectedPathId")).isNull();
+		assertThat(model.getAttribute("tasksAdded"))
+				.isEqualTo(Set.of(
+						View.convert(db.getChoiceTaskBookOrVideo(), ChoiceTaskViewDTO.class),
+						View.convert(db.getTaskBook(), RegularTaskViewDTO.class),
+						View.convert(db.getTaskVideo(), RegularTaskViewDTO.class)));
+		assertThat(model.getAttribute("skillsModified")).isEqualTo(
+				Set.of(View.convert(db.getSkillVariables(), ModuleLevelSkillViewDTO.class)));
+	}
+
+	@Test
+	void setPersonalPathAttributesPathAndSkillSetWithChoiceTask() {
+		// Path: null, skill: non-null, tasksAdded: contains tasks and choice task, skillsModified: contains some skills
+
+		// Add choice task
+		addChoiceTaskToTasks();
+
+		// Add task outside of skill variables
+		RegularTask task = db.getTaskRead12();
+		SCPerson person = db.getPerson();
+		person.getTasksAdded().add(task);
+		personRepository.save(person);
+		taskRepository.save(task);
+
+		Optional<Set<Long>> taskIds = personService.setPersonalPathAttributes(db.getPerson().getId(), model,
+				db.getEditionRL().getId(), db.getSkillVariables());
+
+		assertThat(taskIds).isEmpty();
+		assertThat(model.getAttribute("selectedPathId")).isNull();
+		// tasksAdded should not contain the task outside the skill
+		assertThat(model.getAttribute("tasksAdded"))
+				.isEqualTo(Set.of(
+						View.convert(db.getChoiceTaskBookOrVideo(), ChoiceTaskViewDTO.class),
+						View.convert(db.getTaskBook(), RegularTaskViewDTO.class),
+						View.convert(db.getTaskVideo(), RegularTaskViewDTO.class)));
+		assertThat(model.getAttribute("skillsModified")).isEqualTo(
+				Set.of(View.convert(db.getSkillVariables(), ModuleLevelSkillViewDTO.class)));
 	}
 
 	@Test

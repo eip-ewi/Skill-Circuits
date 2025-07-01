@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.servlet.http.HttpSession;
 
@@ -139,10 +140,15 @@ public class ModuleService {
 				.forEach(skill -> {
 					skill.setCompletedRequiredTasks(completedTasks.containsAll(skill.getRequiredTaskIds()));
 					skill.getTasks()
-							.forEach(task -> {
+							.stream().flatMap(task -> {
 								if (task instanceof RegularTaskViewDTO view) {
-									view.getTaskInfo().setCompleted(completedTasks.contains(task.getId()));
+									return Stream.of(view);
+								} else if (task instanceof ChoiceTaskViewDTO view) {
+									return view.getTasks().stream();
 								}
+								return Stream.empty();
+							}).forEach(view -> {
+								view.getTaskInfo().setCompleted(completedTasks.contains(view.getId()));
 							});
 				});
 	}

@@ -62,7 +62,6 @@ public class SkillService {
 	private final TaskRepository taskRepository;
 	private final ChoiceTaskRepository choiceTaskRepository;
 	private final PathRepository pathRepository;
-	private final TaskInfoRepository taskInfoRepository;
 	private final SkillRepository skillRepository;
 
 	/**
@@ -77,8 +76,8 @@ public class SkillService {
 		skill.getChildren().forEach(c -> c.getParents().remove(skill));
 		if (skill instanceof Skill s) {
 			s.getTasks().forEach(t -> {
-				if (t instanceof RegularTask) {
-					taskCompletionRepository.deleteAll(((RegularTask) t).getCompletedBy());
+				if (t instanceof RegularTask regularTask) {
+					taskCompletionRepository.deleteAll(regularTask.getCompletedBy());
 				}
 			});
 
@@ -222,16 +221,13 @@ public class SkillService {
 		Skill skill = skillRepository.saveAndFlush(create.apply());
 
 		// Save new tasks
-		List<Task> allTasks = saveNewTasks(skill, create.getNewItems());
+		List<Task> upperLevelTasks = saveNewTasks(skill, create.getNewItems());
 
-		// Reverse ordering of tasks
-		allTasks.sort(Comparator.comparingInt(Task::getIdx).reversed());
-
-		// Set tasks of skill
-		skill.setTasks(allTasks);
+		// Handle ordering of skill tasks by indices
+		skill.setTasks(updateAndOrderSkillTasks(upperLevelTasks));
 
 		// Save skill and return
-		return abstractSkillRepository.save(skill);
+		return skillRepository.save(skill);
 	}
 
 	/**
@@ -239,7 +235,7 @@ public class SkillService {
 	 *
 	 * @param  skill       The skill to which the new tasks belong.
 	 * @param  newTaskDTOs The TaskCreateDTOs for the new tasks.
-	 * @return             A list of the tasks that were created.
+	 * @return             A list of the upper level tasks that were created.
 	 */
 	@Transactional
 	public List<Task> saveNewTasks(Skill skill, List<? extends TaskCreateDTO<?>> newTaskDTOs) {
@@ -258,14 +254,65 @@ public class SkillService {
 		Set<Path> paths = new HashSet<>(pathRepository.findAllByEditionId(edition.getId()));
 
 		// Set all task attributes and save to database
-		// TODO handling of ChoiceTasks
-		List<Task> newTasks = new ArrayList<>();
-		newTasks.addAll(newRegularTasks.stream()
-				.map(dto -> (Task) saveTaskFromRegularTaskDto(dto, skill, paths)).toList());
+		List<Task> newTasks = newChoiceTasks.stream()
+				.map(dto -> createChoiceTask(dto, skill, paths))
+				.collect(Collectors.toList());
+		newTasks.addAll(
+				newRegularTasks.stream().map(dto -> createRegularTask(dto, skill, paths)).toList());
 		skill.getTasks().addAll(newTasks);
 		skillRepository.save(skill);
 
 		return newTasks;
+	}
+
+	/**
+	 * Saves a ChoiceTask and the RegularTasks that are in the ChoiceTask, specified by a ChoiceTaskCreateDTO.
+	 * All new tasks are added to a given skill and paths.
+	 *
+	 * @param  choiceTaskDTO The ChoiceTaskCreateDTO for creating the ChoiceTask and the RegularTasks in it.
+	 * @param  skill         The skill to which the tasks should be added.
+	 * @param  paths         The paths to which new tasks should be added.
+	 * @return               The created ChoiceTask.
+	 */
+	@Transactional
+	public ChoiceTask createChoiceTask(ChoiceTaskCreateDTO choiceTaskDTO, Skill skill,
+			Set<Path> paths) {
+		// Apply task DTO and set attributes
+		choiceTaskDTO.setSkill(SkillIdDTO.builder().id(skill.getId()).build());
+		ChoiceTask choiceTask = choiceTaskDTO.apply();
+		choiceTask.setSkill(skill);
+		choiceTask.setPaths(paths);
+
+		// Save all sub-tasks contained in the choice task and add them to it
+		// Return updated choice task
+		return saveChoiceTaskSubTasks(choiceTask, choiceTaskDTO.getNewSubTasks(),
+				choiceTaskDTO.getUpdatedSubTasks(), skill, paths);
+	}
+
+	/**
+	 * Saves the RegularTask specified by a RegularTaskCreateDTO, and adds it to a given skill and paths.
+	 *
+	 * @param  regularTaskDTO The RegularTaskCreateDTO for creating the RegularTask.
+	 * @param  skill          The skill to which the task should be added.
+	 * @param  paths          The paths to which the task should be added.
+	 * @return                The created RegularTask.
+	 */
+	@Transactional
+	public RegularTask createRegularTask(RegularTaskCreateDTO regularTaskDTO, Skill skill,
+			Set<Path> paths) {
+		// Apply task DTO and set attributes
+		regularTaskDTO.setSkill(SkillIdDTO.builder().id(skill.getId()).build());
+		RegularTask task = regularTaskDTO.apply();
+		task.setPaths(paths);
+		task.setSkill(skill);
+
+		// Apply taskInfo DTO and set attributes
+		TaskInfo taskInfo = regularTaskDTO.getTaskInfo().apply();
+		taskInfo.setTask(task);
+		task.setTaskInfo(taskInfo);
+
+		// Save and return task
+		return taskRepository.save(task);
 	}
 
 	/**
@@ -284,17 +331,51 @@ public class SkillService {
 		skill = patchRequiredTasks(skill, skill.getRequiredTasks(),
 				taskRepository.findAllByIdIn(patch.getRequiredTaskIds()));
 
+		// New tasks will be included in all paths by default
+		SCEdition edition = skill.getSubmodule().getModule().getEdition();
+		Set<Path> paths = new HashSet<>(pathRepository.findAllByEditionId(edition.getId()));
+
 		// Patch, save and remove tasks
-		List<Task> allTasks = new ArrayList<>(patchTasks(skill, patch.getItems()));
-		allTasks.addAll(saveNewTasks(skill, patch.getNewItems()));
+		List<Task> upperLevelTasks = new ArrayList<>(patchTasks(skill, paths, patch.getItems()));
+		upperLevelTasks.addAll(saveNewTasks(skill, patch.getNewItems()));
 		removeTasks(skill, patch.getRemovedItems());
 
-		// Reverse ordering of tasks by their index and set tasks
-		allTasks.sort(Comparator.comparingInt(Task::getIdx).reversed());
-		skill.setTasks(allTasks);
+		// Handle ordering of skill tasks by indices
+		skill.setTasks(updateAndOrderSkillTasks(upperLevelTasks));
 
 		// Save and return skill
 		return skillRepository.save(skill);
+	}
+
+	/**
+	 * Creates a list of all tasks in a skill by the upper level tasks (i.e., also includes tasks in choice
+	 * tasks). Orders the upper level reversely according to their indices and updates their indices.
+	 *
+	 * @param  upperLevelTasks Tasks in the upper level of a skill (not including tasks in choice tasks).
+	 * @return                 List of all tasks in the skill.
+	 */
+	public List<Task> updateAndOrderSkillTasks(List<Task> upperLevelTasks) {
+		// Reverse ordering of tasks by their index
+		upperLevelTasks.sort(Comparator.comparingInt(Task::getIdx).reversed());
+
+		// Add all tasks to a list and update task indices
+		List<Task> orderedTasks = new ArrayList<>();
+		for (int i = 0; i < upperLevelTasks.size(); i++) {
+			Task task = upperLevelTasks.get(i);
+			orderedTasks.add(task);
+			task.setIdx(i);
+
+			// Handle sub-tasks of ChoiceTasks
+			if (task instanceof ChoiceTask choiceTask) {
+				for (int j = 0; j < choiceTask.getTasks().size(); j++) {
+					RegularTask subTask = choiceTask.getTasks().get(j).getTask();
+					orderedTasks.add(subTask);
+					subTask.setIdx(j);
+				}
+			}
+		}
+
+		return orderedTasks;
 	}
 
 	/**
@@ -336,22 +417,29 @@ public class SkillService {
 	}
 
 	/**
-	 * Remove tasks by their ids from a given skill.
+	 * Remove tasks by their ids from a given skill. If a ChoiceTask is removed, this method assumes that the
+	 * ids for all sub-tasks in it are also in the removedTasks list.
 	 *
 	 * @param skill        The skill that contains the tasks.
 	 * @param removedTasks The ids of the tasks that should be removed.
 	 */
 	@Transactional
 	public void removeTasks(Skill skill, Set<Long> removedTasks) {
-		// TODO handling deletion of ChoiceTasks
-		Set<RegularTask> regularTasks = regularTaskRepository.findAllByIdIn(removedTasks);
-
 		// Remove tasks from custom skills
 		skill.getPersonModifiedSkill().forEach(p -> {
 			p.setTasksAdded(p.getTasksAdded().stream()
 					.filter(t -> !removedTasks.contains(t.getId())).collect(Collectors.toSet()));
 			personRepository.save(p);
 		});
+
+		// Handle choice tasks
+		Set<ChoiceTask> choiceTasks = choiceTaskRepository.findAllByIdIn(removedTasks);
+		choiceTaskRepository
+				.deleteAllByIdIn(choiceTasks.stream().map(ChoiceTask::getId).collect(Collectors.toList()));
+		skill.getTasks().removeAll(choiceTasks);
+
+		// Handle regular tasks
+		Set<RegularTask> regularTasks = regularTaskRepository.findAllByIdIn(removedTasks);
 
 		// Remove task completions, clicked links and task requirements
 		regularTasks.forEach(t -> {
@@ -363,10 +451,12 @@ public class SkillService {
 		});
 		clickedLinkService.deleteClickedLinksForTasks(regularTasks);
 
-		// Remove tasks
+		// Remove regular tasks
 		regularTaskRepository
 				.deleteAllByIdIn(regularTasks.stream().map(RegularTask::getId).collect(Collectors.toList()));
 		skill.getTasks().removeAll(regularTasks);
+
+		// Save skill
 		skillRepository.save(skill);
 	}
 
@@ -378,7 +468,7 @@ public class SkillService {
 	 * @return             A list of the tasks that were patched.
 	 */
 	@Transactional
-	public List<Task> patchTasks(Skill skill, List<? extends TaskPatchDTO<?>> taskPatches) {
+	public List<Task> patchTasks(Skill skill, Set<Path> paths, List<? extends TaskPatchDTO<?>> taskPatches) {
 		Map<Long, Task> idToTask = skill.getTasks().stream()
 				.collect(Collectors.toMap(Task::getId, Function.identity()));
 
@@ -397,71 +487,70 @@ public class SkillService {
 		allTasks.addAll(newRegularTasks.stream()
 				.map(patch -> taskRepository.save(patch.apply((RegularTask) idToTask.get(patch.getId()))))
 				.toList());
-		// TODO patching ChoiceTasks
+		allTasks.addAll(newChoiceTasks.stream()
+				.map(patch -> patchChoiceTask(patch, skill, idToTask, paths))
+				.toList());
 
 		return allTasks;
 	}
 
 	/**
-	 * Saves a ChoiceTask and the RegularTasks that are in the ChoiceTask, specified by a ChoiceTaskCreateDTO.
-	 * All new tasks are added to a given skill and paths.
+	 * Patches a given ChoiceTask.
 	 *
-	 * @param  choiceTaskDTO The ChoiceTaskCreateDTO for creating the ChoiceTask and the RegularTasks in it.
-	 * @param  skill         The skill to which the tasks should be added.
-	 * @param  paths         The paths to which the tasks should be added.
-	 * @return               A list of the created ChoiceTask and the RegularTasks in it.
+	 * @param  choiceTaskDTO The ChoiceTaskPatchDTO.
+	 * @param  skill         The skill to which the ChoiceTask belongs.
+	 * @param  idToTask      A mapping of ids to tasks, for tasks in the skill that existed prior to patching
+	 *                       it.
+	 * @param  paths         The paths to which newly created tasks should be added.
+	 * @return               The patched ChoiceTask.
 	 */
 	@Transactional
-	public List<Task> saveTasksFromChoiceTaskDto(ChoiceTaskCreateDTO choiceTaskDTO, Skill skill,
-			Set<Path> paths) {
-		// TODO tests for this method will be added when ChoiceTasks are fully implemented
-
+	public ChoiceTask patchChoiceTask(ChoiceTaskPatchDTO choiceTaskDTO, Skill skill,
+			Map<Long, Task> idToTask, Set<Path> paths) {
 		// Apply task DTO and set attributes
-		choiceTaskDTO.setSkill(SkillIdDTO.builder().id(skill.getId()).build());
-		ChoiceTask choiceTask = choiceTaskDTO.apply();
-		choiceTask.setSkill(skill);
-		choiceTask.setPaths(paths);
+		ChoiceTask choiceTask = (ChoiceTask) idToTask.get(choiceTaskDTO.getId());
+		choiceTask = choiceTaskDTO.apply(choiceTask);
 
-		// Save all sub-tasks contained in the choice task
-		List<RegularTask> subTasks = choiceTaskDTO.getTasks().stream()
-				.map(taskDto -> saveTaskFromRegularTaskDto(taskDto, skill, paths))
-				.toList();
-
-		// Set the tasks of the choice task
-		choiceTask.getTasks().addAll(subTasks.stream().map(RegularTask::getTaskInfo).toList());
-		choiceTask = taskRepository.save(choiceTask);
-
-		// Return all tasks (choice task and sub-tasks)
-		List<Task> tasks = new ArrayList<>();
-		tasks.add(choiceTask);
-		tasks.addAll(subTasks);
-		return tasks;
+		// Save all sub-tasks contained in the choice task and add them to it
+		// Return patched choice task
+		return saveChoiceTaskSubTasks(choiceTask, choiceTaskDTO.getNewSubTasks(),
+				choiceTaskDTO.getUpdatedSubTasks(), skill, paths);
 	}
 
 	/**
-	 * Saves the RegularTask specified by a RegularTaskCreateDTO, and adds it to a given skill and paths.
+	 * Saves RegularTasks from the given Create/Patch DTOs, adds them to the ChoiceTask.
 	 *
-	 * @param  regularTaskDTO The RegularTaskCreateDTO for creating the RegularTask.
-	 * @param  skill          The skill to which the task should be added.
-	 * @param  paths          The paths to which the task should be added.
-	 * @return                The created RegularTask.
+	 * @param  choiceTask      The ChoiceTask to which the sub-tasks belong.
+	 * @param  newSubTasks     List of RegularTaskCreateDTOs for newly created RegularTasks.
+	 * @param  updatedSubTasks List of RegularTaskPatchDTO for patched RegularTasks.
+	 * @param  skill           The skill to which the tasks belong.
+	 * @param  paths           The paths to which newly created sub-tasks should be added.
+	 * @return                 The updated ChoiceTask.
 	 */
 	@Transactional
-	public RegularTask saveTaskFromRegularTaskDto(RegularTaskCreateDTO regularTaskDTO, Skill skill,
-			Set<Path> paths) {
-		// Apply task DTO and set attributes
-		regularTaskDTO.setSkill(SkillIdDTO.builder().id(skill.getId()).build());
-		RegularTask task = regularTaskDTO.apply();
-		task.setPaths(paths);
-		task.setSkill(skill);
+	public ChoiceTask saveChoiceTaskSubTasks(ChoiceTask choiceTask,
+			List<RegularTaskCreateDTO> newSubTasks,
+			List<RegularTaskPatchDTO> updatedSubTasks,
+			Skill skill, Set<Path> paths) {
+		// Save new sub-tasks
+		List<Task> tasks = newSubTasks.stream()
+				.map(taskDto -> createRegularTask(taskDto, skill, paths))
+				.collect(Collectors.toList());
+		// Save patched sub-tasks
+		tasks.addAll(updatedSubTasks.stream()
+				.map(taskDto -> {
+					RegularTask updTask = regularTaskRepository.findByIdOrThrow(taskDto.getId());
+					return regularTaskRepository.save(taskDto.apply(updTask));
+				}).toList());
+		// Order by index
+		tasks.sort(Comparator.comparing(Task::getIdx));
 
-		// Apply taskInfo DTO and set attributes
-		TaskInfo taskInfo = regularTaskDTO.getTaskInfo().apply();
-		taskInfo.setTask(task);
-		task.setTaskInfo(taskInfo);
+		// Set the tasks of the choice task
+		choiceTask.setTasks(tasks.stream().map(task -> ((RegularTask) task).getTaskInfo())
+				.collect(Collectors.toList()));
 
-		// Save and return task
-		return taskRepository.save(task);
+		// Save and return choice task
+		return taskRepository.save(choiceTask);
 	}
 
 }

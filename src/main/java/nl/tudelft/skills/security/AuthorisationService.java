@@ -36,10 +36,7 @@ import nl.tudelft.labracore.lib.security.LabradorUserDetails;
 import nl.tudelft.labracore.lib.security.user.DefaultRole;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.cache.RoleCacheManager;
-import nl.tudelft.skills.model.AbstractSkill;
-import nl.tudelft.skills.model.ExternalSkill;
-import nl.tudelft.skills.model.SCModule;
-import nl.tudelft.skills.model.Skill;
+import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.*;
 
 @Service
@@ -53,7 +50,7 @@ public class AuthorisationService {
 	private SubmoduleRepository submoduleRepository;
 	private SkillRepository skillRepository;
 
-	private TaskRepository regularTaskRepository;
+	private TaskRepository taskRepository;
 	private CheckpointRepository checkpointRepository;
 	private PathRepository pathRepository;
 	private AbstractSkillRepository abstractSkillRepository;
@@ -172,6 +169,17 @@ public class AuthorisationService {
 					&& canViewEdition(((ExternalSkill) skill).getModule().getEdition().getId());
 		}
 		return isAuthenticated() && canViewEdition(skill.getSubmodule().getModule().getEdition().getId());
+	}
+
+	/**
+	 * Gets whether the authenticated user can view a task.
+	 *
+	 * @param  taskId The id of the task.
+	 * @return        True iff the user can view the task.
+	 */
+	public boolean canViewTask(Long taskId) {
+		Task task = taskRepository.findByIdOrThrow(taskId);
+		return canViewEdition(task.getSkill().getSubmodule().getModule().getEdition().getId());
 	}
 
 	/**
@@ -393,23 +401,23 @@ public class AuthorisationService {
 	}
 
 	/**
-	 * Gets whether the authenticated user can edit a RegularTask.
+	 * Gets whether the authenticated user can edit a task.
 	 *
-	 * @param  taskId The id of the RegularTask
+	 * @param  taskId The id of the task
 	 * @return        True iff the user can edit the task
 	 */
-	public boolean canEditRegularTask(Long taskId) {
-		return canEditSkill(regularTaskRepository.findByIdOrThrow(taskId).getSkill().getId());
+	public boolean canEditTask(Long taskId) {
+		return canEditSkill(taskRepository.findByIdOrThrow(taskId).getSkill().getId());
 	}
 
 	/**
-	 * Gets whether the authenticated user can delete a RegularTask.
+	 * Gets whether the authenticated user can delete a task.
 	 *
-	 * @param  taskId The id of the RegularTask
+	 * @param  taskId The id of the task
 	 * @return        True iff the user can delete the task
 	 */
-	public boolean canDeleteRegularTask(Long taskId) {
-		return canEditSkill(regularTaskRepository.findByIdOrThrow(taskId).getSkill().getId());
+	public boolean canDeleteTask(Long taskId) {
+		return canEditSkill(taskRepository.findByIdOrThrow(taskId).getSkill().getId());
 	}
 
 	/**

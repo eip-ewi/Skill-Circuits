@@ -23,8 +23,10 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +62,7 @@ public class EditionServiceTest {
 	private final AbstractSkillRepository abstractSkillRepository;
 	private final SkillRepository skillRepository;
 	private final RegularTaskRepository regularTaskRepository;
+	private ChoiceTaskRepository choiceTaskRepository;
 
 	private final TestDatabaseLoader db;
 	private final CopyEditionTestDatabaseLoader editionDb;
@@ -71,8 +74,8 @@ public class EditionServiceTest {
 			PathRepository pathRepository, ModuleRepository moduleRepository,
 			SubmoduleRepository submoduleRepository, AbstractSkillRepository abstractSkillRepository,
 			SkillRepository skillRepository, RegularTaskRepository regularTaskRepository,
-			TestDatabaseLoader db,
-			CopyEditionTestDatabaseLoader editionDb) {
+			ChoiceTaskRepository choiceTaskRepository, TestDatabaseLoader db,
+			CopyEditionTestDatabaseLoader editionDb, EditionService editionService) {
 		this.editionApi = editionApi;
 		this.editionRepository = editionRepository;
 		this.checkpointRepository = checkpointRepository;
@@ -82,13 +85,12 @@ public class EditionServiceTest {
 		this.abstractSkillRepository = abstractSkillRepository;
 		this.skillRepository = skillRepository;
 		this.regularTaskRepository = regularTaskRepository;
+		this.choiceTaskRepository = choiceTaskRepository;
 
 		this.db = db;
 		this.editionDb = editionDb;
 		this.localDateTime = LocalDateTime.of(2023, 1, 10, 10, 10, 0);
-		editionService = new EditionService(editionApi, editionRepository, circuitService,
-				checkpointRepository, pathRepository, moduleRepository, submoduleRepository,
-				abstractSkillRepository, skillRepository, regularTaskRepository);
+		this.editionService = editionService;
 	}
 
 	@Test
@@ -218,7 +220,7 @@ public class EditionServiceTest {
 	@Test
 	@Transactional
 	public void testCopyEditionCheckpoints() {
-		editionDb.initEditionFrom(db.getSkillAssumption());
+		editionDb.initEditionFrom(db.getSkillAssumption(), true, true);
 
 		int amountBefore = checkpointRepository.findAll().size();
 		Map<Checkpoint, Checkpoint> copies = editionService.copyEditionCheckpoints(editionDb.getFrom(),
@@ -261,7 +263,7 @@ public class EditionServiceTest {
 	@Test
 	@Transactional
 	public void testCopyEditionPaths() {
-		editionDb.initEditionFrom(db.getSkillAssumption());
+		editionDb.initEditionFrom(db.getSkillAssumption(), true, true);
 
 		int amountBefore = pathRepository.findAll().size();
 		Map<Path, Path> copies = editionService.copyEditionPaths(editionDb.getFrom(), editionDb.getTo());
@@ -300,7 +302,7 @@ public class EditionServiceTest {
 	@Test
 	@Transactional
 	public void testCopyEditionModules() {
-		editionDb.initEditionFrom(db.getSkillAssumption());
+		editionDb.initEditionFrom(db.getSkillAssumption(), true, true);
 
 		int amountBefore = moduleRepository.findAll().size();
 		Map<SCModule, SCModule> copies = editionService.copyEditionModules(editionDb.getFrom(),
@@ -341,7 +343,7 @@ public class EditionServiceTest {
 	@Test
 	@Transactional
 	public void testCopyEditionSubmodules() {
-		editionDb.initEditionFrom(db.getSkillAssumption());
+		editionDb.initEditionFrom(db.getSkillAssumption(), true, true);
 		editionDb.initModules(false);
 
 		int amountBefore = submoduleRepository.findAll().size();
@@ -387,7 +389,7 @@ public class EditionServiceTest {
 	@Test
 	@Transactional
 	public void testCopyEditionSkills() {
-		editionDb.initEditionFrom(db.getSkillAssumption());
+		editionDb.initEditionFrom(db.getSkillAssumption(), true, true);
 		editionDb.initModules(false);
 		editionDb.initSubmodules(false);
 		editionDb.initCheckpoints(false);
@@ -470,7 +472,7 @@ public class EditionServiceTest {
 	@Test
 	@Transactional
 	public void testCopyEditionExternalSkills() {
-		editionDb.initEditionFrom(db.getSkillAssumption());
+		editionDb.initEditionFrom(db.getSkillAssumption(), true, true);
 		editionDb.initModules(false);
 		editionDb.initSubmodules(false);
 		editionDb.initCheckpoints(false);
@@ -536,7 +538,7 @@ public class EditionServiceTest {
 	@Test
 	@Transactional
 	public void testLinkParentsChildrenEditionSkills() {
-		editionDb.initEditionFrom(db.getSkillAssumption());
+		editionDb.initEditionFrom(db.getSkillAssumption(), true, true);
 		editionDb.initModules(false);
 		editionDb.initSubmodules(false);
 		editionDb.initCheckpoints(false);
@@ -592,8 +594,8 @@ public class EditionServiceTest {
 
 	@Test
 	@Transactional
-	public void testCopyEditionTasks() {
-		editionDb.initEditionFrom(db.getSkillAssumption());
+	public void testCopyEditionRegularTasks() {
+		editionDb.initEditionFrom(db.getSkillAssumption(), true, false);
 		editionDb.initModules(false);
 		editionDb.initSubmodules(false);
 		editionDb.initCheckpoints(false);
@@ -603,16 +605,19 @@ public class EditionServiceTest {
 		editionDb.initExternalSkillSameEdition(false);
 		editionDb.initParentChild(false);
 
-		int amountBefore = regularTaskRepository.findAll().size();
+		int regularAmountBefore = regularTaskRepository.findAll().size();
+		int choiceAmountBefore = choiceTaskRepository.findAll().size();
 		Map<Skill, Skill> skillCopies = Map.of(editionDb.getSkillFromA(), editionDb.getSkillToA(),
 				editionDb.getSkillFromB(), editionDb.getSkillToB());
 		Map<Path, Path> pathCopies = Map.of(editionDb.getPathFromA(), editionDb.getPathToA(),
 				editionDb.getPathFromB(), editionDb.getPathToB());
+
 		Map<Task, Task> copies = editionService.copyAndLinkEditionTasks(skillCopies,
 				pathCopies);
 		assertThat(copies.keySet()).containsExactlyInAnyOrder(editionDb.getTaskFromA(),
 				editionDb.getTaskFromB());
-		assertThat(regularTaskRepository.findAll()).hasSize(amountBefore + 2);
+		assertThat(regularTaskRepository.findAll()).hasSize(regularAmountBefore + 2);
+		assertThat(choiceTaskRepository.findAll()).hasSize(choiceAmountBefore);
 
 		// Safety check that the previous skills were not changed
 		Skill oldA = skillRepository.findByIdOrThrow(editionDb.getSkillFromA().getId());
@@ -640,21 +645,138 @@ public class EditionServiceTest {
 		assertThat(editionDb.getPathToB().getTasks()).isEmpty();
 	}
 
+	@Test
+	@Transactional
+	public void testCopyEditionChoiceTask() {
+		editionDb.initEditionFrom(db.getSkillAssumption(), false, true);
+		editionDb.initModules(false);
+		editionDb.initSubmodules(false);
+		editionDb.initCheckpoints(false);
+		editionDb.initPaths(false);
+		editionDb.initSkills(false);
+		editionDb.initExternalSkillOtherEdition(false, db.getSkillAssumption());
+		editionDb.initExternalSkillSameEdition(false);
+		editionDb.initParentChild(false);
+
+		int regularAmountBefore = regularTaskRepository.findAll().size();
+		int choiceAmountBefore = choiceTaskRepository.findAll().size();
+		Map<Skill, Skill> skillCopies = Map.of(editionDb.getSkillFromA(), editionDb.getSkillToA(),
+				editionDb.getSkillFromB(), editionDb.getSkillToB());
+		Map<Path, Path> pathCopies = Map.of(editionDb.getPathFromA(), editionDb.getPathToA(),
+				editionDb.getPathFromB(), editionDb.getPathToB());
+
+		Map<Task, Task> copies = editionService.copyAndLinkEditionTasks(skillCopies,
+				pathCopies);
+		assertThat(copies.keySet()).containsExactlyInAnyOrder(editionDb.getChoiceTaskFromA(),
+				editionDb.getSubTaskFromA(), editionDb.getSubTaskFromB());
+		assertThat(regularTaskRepository.findAll()).hasSize(regularAmountBefore + 2);
+		assertThat(choiceTaskRepository.findAll()).hasSize(choiceAmountBefore + 1);
+
+		// Safety check that the previous skills were not changed
+		Skill oldA = skillRepository.findByIdOrThrow(editionDb.getSkillFromA().getId());
+		assertThat(oldA).isEqualTo(editionDb.getSkillFromA());
+		assertThat(oldA.getTasks()).containsExactly(editionDb.getSubTaskFromA(), editionDb.getSubTaskFromB(),
+				editionDb.getChoiceTaskFromA());
+		Skill oldB = skillRepository.findByIdOrThrow(editionDb.getSkillFromB().getId());
+		assertThat(oldB).isEqualTo(editionDb.getSkillFromB());
+		assertThat(oldB.getRequiredTasks()).isEmpty();
+		assertThat(oldB.getTasks()).isEmpty();
+
+		ChoiceTask choiceTaskCopy = (ChoiceTask) copies.get(editionDb.getChoiceTaskFromA());
+		RegularTask subTaskACopy = (RegularTask) copies.get(editionDb.getSubTaskFromA());
+		RegularTask subTaskBCopy = (RegularTask) copies.get(editionDb.getSubTaskFromB());
+
+		testTaskEqualityHelper(editionDb.getChoiceTaskFromA(), choiceTaskCopy, editionDb.getSkillToA());
+		testTaskEqualityHelper(editionDb.getSubTaskFromA(), subTaskACopy, editionDb.getSkillToA());
+		testTaskEqualityHelper(editionDb.getSubTaskFromB(), subTaskBCopy, editionDb.getSkillToA());
+		assertThat(editionDb.getSkillToA().getTasks()).containsExactly(subTaskACopy, subTaskBCopy,
+				choiceTaskCopy);
+
+		assertThat(editionDb.getSkillToB().getRequiredTasks()).isEmpty();
+		assertThat(editionDb.getSkillToA().getRequiredTasks()).isEmpty();
+		for (Task task : copies.values()) {
+			assertThat(task.getRequiredFor()).isEmpty();
+			assertThat(task.getPaths()).containsExactly(editionDb.getPathToA());
+		}
+		assertThat(editionDb.getPathToA().getTasks()).containsExactlyInAnyOrder(choiceTaskCopy, subTaskACopy,
+				subTaskBCopy);
+		assertThat(editionDb.getPathToB().getTasks()).isEmpty();
+	}
+
+	@Test
+	@Transactional
+	public void testUpdateTaskRelations() {
+		editionDb.initEditionFrom(db.getSkillAssumption(), false, false);
+		editionDb.initModules(false);
+		editionDb.initSubmodules(false);
+		editionDb.initCheckpoints(false);
+		editionDb.initPaths(false);
+		editionDb.initSkills(false);
+		editionDb.initExternalSkillOtherEdition(false, db.getSkillAssumption());
+		editionDb.initExternalSkillSameEdition(false);
+		editionDb.initParentChild(false);
+
+		Task prev = editionDb.initSingleRegularTask(editionDb.getSkillFromA(),
+				new HashSet<>(Set.of(editionDb.getPathFromA(), editionDb.getPathFromB())));
+		editionDb.getSkillFromB().getRequiredTasks().add(prev);
+		prev.getRequiredFor().add(editionDb.getSkillFromB());
+
+		// Copy is not yet in any paths and the requirements are not linked yet
+		Task copy = editionDb.initSingleRegularTask(editionDb.getSkillFromA(), new HashSet<>());
+
+		Map<Skill, Skill> skillCopies = Map.of(editionDb.getSkillFromA(), editionDb.getSkillToA(),
+				editionDb.getSkillFromB(), editionDb.getSkillToB());
+		Map<Path, Path> pathCopies = Map.of(editionDb.getPathFromA(), editionDb.getPathToA(),
+				editionDb.getPathFromB(), editionDb.getPathToB());
+
+		editionService.updateTaskRelations(prev, copy, skillCopies, pathCopies);
+
+		// Assert on task requirements
+		assertThat(copy.getRequiredFor()).containsExactly(editionDb.getSkillToB());
+		assertThat(editionDb.getSkillToB().getRequiredTasks()).containsExactly(copy);
+
+		// Assert on paths
+		assertThat(copy.getPaths()).containsExactlyInAnyOrder(editionDb.getPathToA(), editionDb.getPathToB());
+		assertThat(editionDb.getPathToA().getTasks()).contains(copy);
+		assertThat(editionDb.getPathToB().getTasks()).contains(copy);
+	}
+
 	private void testTaskEqualityHelper(Task initial, Task copy, Skill skillTo) {
 		assertThat(copy).isNotNull();
-		assertThat(regularTaskRepository.findByIdOrThrow(copy.getId())).isEqualTo(copy);
 		assertThat(initial).hasSameClassAs(copy);
-		// TODO this requires adjustments when ChoiceTasks are implemented
-		if (initial instanceof RegularTask regularInitial && copy instanceof RegularTask regularCopy) {
-			assertThat(regularCopy.getName()).isEqualTo(regularInitial.getName());
-			assertThat(regularCopy.getType()).isEqualTo(regularInitial.getType());
-			assertThat(regularCopy.getTime()).isEqualTo(regularInitial.getTime());
-			assertThat(regularCopy.getLink()).isEqualTo(regularInitial.getLink());
-		}
 		assertThat(copy.getIdx()).isEqualTo(initial.getIdx());
-		assertThat(skillTo.getTasks()).containsExactly(copy);
+		assertThat(copy.getSkill()).isEqualTo(skillTo);
+		assertThat(skillTo.getTasks()).contains(copy);
+
+		if (initial instanceof RegularTask regularInitial && copy instanceof RegularTask regularCopy) {
+			testRegularTaskEqualityHelper(regularInitial, regularCopy);
+		} else if (initial instanceof ChoiceTask choiceInitial && copy instanceof ChoiceTask choiceCopy) {
+			testChoiceTaskEqualityHelper(choiceInitial, choiceCopy, skillTo);
+		}
+	}
+
+	private void testRegularTaskEqualityHelper(RegularTask initial, RegularTask copy) {
+		assertThat(regularTaskRepository.findByIdOrThrow(copy.getId())).isEqualTo(copy);
+		assertThat(copy.getName()).isEqualTo(initial.getName());
+		assertThat(copy.getType()).isEqualTo(initial.getType());
+		assertThat(copy.getTime()).isEqualTo(initial.getTime());
+		assertThat(copy.getLink()).isEqualTo(initial.getLink());
 
 		// Safety check that the previous task was not changed
 		assertThat(regularTaskRepository.findByIdOrThrow(initial.getId())).isEqualTo(initial);
+	}
+
+	private void testChoiceTaskEqualityHelper(ChoiceTask initial, ChoiceTask copy, Skill skillTo) {
+		assertThat(choiceTaskRepository.findByIdOrThrow(copy.getId())).isEqualTo(copy);
+		assertThat(copy.getName()).isEqualTo(initial.getName());
+		assertThat(copy.getMinTasks()).isEqualTo(initial.getMinTasks());
+		assertThat(initial.getTasks()).hasSameSizeAs(copy.getTasks());
+		for (int i = 0; i < initial.getTasks().size(); i++) {
+			testTaskEqualityHelper(initial.getTasks().get(i).getTask(), copy.getTasks().get(i).getTask(),
+					skillTo);
+		}
+
+		// Safety check that the previous task was not changed
+		assertThat(choiceTaskRepository.findByIdOrThrow(initial.getId())).isEqualTo(initial);
 	}
 }

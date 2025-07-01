@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## Added
+- [Everyone] Functionality to add and complete choice tasks. Choice tasks contain a set of regular tasks, of which at least k need to be completed.
 
 ## Changed
 

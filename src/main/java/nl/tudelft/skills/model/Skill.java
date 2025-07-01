@@ -60,6 +60,7 @@ public class Skill extends AbstractSkill {
 	@ManyToMany(mappedBy = "requiredFor")
 	private Set<Task> requiredTasks = new HashSet<>();
 
+	@Setter
 	@NotNull
 	@Builder.Default
 	@ToString.Exclude
@@ -106,11 +107,4 @@ public class Skill extends AbstractSkill {
 	@EqualsAndHashCode.Exclude
 	@ManyToMany(mappedBy = "skillsModified")
 	private Set<SCPerson> personModifiedSkill = new HashSet<>();
-
-	public void setTasks(List<Task> tasks) {
-		this.tasks = tasks;
-		for (int i = 0; i < tasks.size(); i++) {
-			tasks.get(i).setIdx(i);
-		}
-	}
 }

@@ -38,6 +38,7 @@
             </th:block>
             <th:block layout:fragment="item-decoration">
                 <button
+                    th:if="${!item.isInChoiceTask}"
                     class="circuit__button__symbol fa-solid fa-plus"
                     title="Add task to your path"
                     onclick="addTaskToEditedSkill(this)"></button>
@@ -103,7 +104,7 @@
                 window.location.reload();
             }
 
-            const taskId = button.closest(".item").dataset.item;
+            const taskId = button.closest(".task").dataset.item;
             const expandedSkill = button.closest(".expanded-skill");
             const blockId = button.closest(".overlay").id.split("-")[1];
             const block = $(`#block-${blockId}`);
@@ -123,19 +124,24 @@
                         .then(html => {
                             const div = document.createElement("div");
                             div.innerHTML = html;
-                            return div.querySelector(".item");
+                            return div.querySelector(".task");
                         })
                         .catch(() => {
                             alert("Failed to add task");
                         });
 
                     const taskLoc = order.indexOf(Number(task.getAttribute("data-item")));
-                    const items = leftSide.querySelectorAll(".item");
+                    const items = leftSide.querySelectorAll(".task");
                     const taskList = leftSide.querySelector(".items");
                     insertTaskInOrder(order, taskList, taskLoc, items, task);
 
+                    // Handle choice task specific updates
+                    if (task.classList.contains("choice_task")) {
+                        updateChoiceTaskState($(task));
+                    }
+
                     // Remove tasks from right side
-                    rightSide.querySelectorAll(`.item[data-item="${taskId}"`).forEach(item => {
+                    rightSide.querySelectorAll(`.task[data-item="${taskId}"`).forEach(item => {
                         const pathToggle = $(item.closest(".path-toggle"));
                         item.remove();
 
@@ -156,9 +162,13 @@
                         .classList.remove("hidden");
 
                     // Show icon in preview
-                    document
-                        .getElementById(`item-${taskId}-icon`)
-                        .parentElement.classList.remove("hidden");
+                    if (task.classList.contains("choice_task")) {
+                        document.getElementById(`item-${taskId}-icons`).classList.remove("hidden");
+                    } else {
+                        document
+                            .getElementById(`item-${taskId}-icon`)
+                            .parentElement.classList.remove("hidden");
+                    }
 
                     // Update completion status of skill and child skills
                     updateBlockState(blockId);
@@ -180,8 +190,8 @@
                 window.location.reload();
             }
 
-            const taskId = button.closest(".item").dataset.item;
-            const paths = button.closest(".item").dataset.pathIds;
+            const taskId = button.closest(".task").dataset.item;
+            const paths = button.closest(".task").dataset.pathIds;
             const expandedSkill = button.closest(".expanded-skill");
             const blockId = button.closest(".overlay").id.split("-")[1];
             const block = $(`#block-${blockId}`);
@@ -204,7 +214,7 @@
                         .then(html => {
                             const div = document.createElement("div");
                             div.innerHTML = html;
-                            return div.querySelector(".item");
+                            return div.querySelector(".task");
                         })
                         .catch(() => {
                             alert("Failed to add task");
@@ -214,7 +224,7 @@
                     [...rightSide.querySelectorAll(".path-toggle")]
                         .filter(path => paths.includes(path.dataset.id))
                         .forEach(path => {
-                            const items = path.querySelectorAll(".item");
+                            const items = path.querySelectorAll(".task");
                             const taskList = path.querySelector(".path-toggle__content");
                             insertTaskInOrder(
                                 order,
@@ -240,9 +250,13 @@
                         .classList.remove("hidden");
 
                     // Hide icon in preview
-                    document
-                        .getElementById(`item-${taskId}-icon`)
-                        .parentElement.classList.add("hidden");
+                    if (task.classList.contains("choice_task")) {
+                        document.getElementById(`item-${taskId}-icons`).classList.add("hidden");
+                    } else {
+                        document
+                            .getElementById(`item-${taskId}-icon`)
+                            .parentElement.classList.add("hidden");
+                    }
 
                     // Update completion status of skill and child skills
                     updateBlockState(blockId);

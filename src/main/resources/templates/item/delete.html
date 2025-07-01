@@ -22,27 +22,109 @@
     lang="en"
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <dialog layout:fragment="overlay" class="overlay" id="delete-choice-task-overlay">
+        <form id="delete-choice-task-form" class="confirmation">
+            <input id="delete-choice-task-id" name="id" type="hidden" />
+            <p>
+                Are you sure you want to delete the choice task
+                <span id="delete-choice-task-name"></span>
+                along with its subtasks?
+            </p>
+
+            <div class="confirmation__buttons">
+                <button type="button" onclick="toggleOverlay('delete-choice-task-overlay')">
+                    Cancel
+                </button>
+                <button type="button" onclick="confirmChoiceTaskDeletion()">Delete</button>
+            </div>
+        </form>
+    </dialog>
+
     <script th:if="${canEdit}" layout:fragment="script">
-        function deleteItem() {
-            const item = $(this).parent();
-            if (item.data("new")) {
-                item.next(".item__separation").remove();
-                // If it is the last item, remove the last separation as well
-                if (item.siblings(".item").length === 0) {
-                    item.prev(".item__separation").remove();
+        function handleDeleteItemButton() {
+            if ($(this).closest(".task").hasClass("choice_task")) {
+                // If it is a choice task, show warning pop up
+                const task = $(this).closest(".task");
+                const name = task.find(".choice_task__name input").val();
+                if (name) {
+                    $("#delete-choice-task-name").text(`\"${name}\"`);
+                } else {
+                    $("#delete-choice-task-name").text("");
                 }
-                item.remove();
+                $("#delete-choice-task-id").val(task.attr("id"));
+                toggleOverlay("delete-choice-task-overlay");
             } else {
-                const del = item.data("delete") !== true;
-                item.data("delete", del);
-                item.attr("data-delete", del);
-                $(`#${item.attr("id")} :is(input)`).prop("disabled", del);
-                $(`#${item.attr("id")} .select`).attr("data-disabled", del);
+                const item = $(this).parent();
+                deleteItem(item, false, item.data("delete") !== true);
             }
         }
 
+        function deleteItem(item, hideIfOld, deletionStatusIfOld) {
+            if (item.data("new")) {
+                // Remove item separations
+                item.next(".item__separation").remove();
+                // If it is the last item, and is not inside a choice task, remove the last separation as well
+                if (
+                    item.parents(".choice_task").length === 0 &&
+                    item.siblings(".item:not(.hidden), .task:not(.hidden)").length === 0
+                ) {
+                    item.prev(".item__separation").remove();
+                }
+                // Delete item entirely
+                item.remove();
+            } else {
+                handleOldItemDeletion(item, hideIfOld, deletionStatusIfOld);
+            }
+        }
+
+        function handleOldItemDeletion(item, hideItem, deletionStatus) {
+            // Remove item separations if the item will be hidden
+            if (hideItem) {
+                item.next(".item__separation").remove();
+                // If it is the last item, and is not inside a choice task, remove the last separation as well
+                if (
+                    item.parents(".choice_task").length === 0 &&
+                    item.siblings(".item:not(.hidden), .task:not(.hidden)").length === 0
+                ) {
+                    item.prev(".item__separation").remove();
+                }
+            }
+
+            // Set deletion status
+            item.data("delete", deletionStatus);
+            item.attr("data-delete", deletionStatus);
+            $(`#${item.attr("id")} :is(input)`).prop("disabled", deletionStatus);
+            $(`#${item.attr("id")} .select`).attr("data-disabled", deletionStatus);
+
+            // If it should be hidden, hide it
+            if (hideItem) {
+                item.addClass("hidden");
+            }
+        }
+
+        function confirmChoiceTaskDeletion() {
+            const id = $("#delete-choice-task-id").val();
+            const choiceTask = $(`#${id}`);
+            const parentTaskList = choiceTask.closest(".items");
+
+            // Handle sub-tasks
+            choiceTask.find(".task").each(function () {
+                // Move out of choice task
+                parentTaskList.append($(this).detach());
+
+                // Delete and hide task
+                deleteItem($(this), true, true);
+            });
+
+            // Handle and hide choice task
+            deleteItem(choiceTask, true, true);
+
+            // Hide overlay
+            toggleOverlay("delete-choice-task-overlay");
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
-            $(".item__delete").click(deleteItem);
+            $(".item__delete").on("click", handleDeleteItemButton);
         });
     </script>
 </html>

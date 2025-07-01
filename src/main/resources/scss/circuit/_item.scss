@@ -79,6 +79,7 @@
         color: var(--darker-grey);
         cursor: grab;
         padding: 0.1rem;
+        background-color: var(--primary-light);
     }
 
     &__delete {
@@ -108,23 +109,6 @@
         text-align: center;
     }
 
-    &__create {
-        background-color: var(--primary-dark);
-        border: 1px solid var(--primary-light);
-        color: var(--primary-light);
-        cursor: pointer;
-        min-width: 2.5rem;
-        padding: 0.25rem 0.5rem;
-        margin-top: 0.4rem;
-
-        &:hover,
-        &:focus-visible {
-            background-color: var(--primary-light);
-            border: 1px solid var(--primary-dark);
-            color: var(--primary-green);
-        }
-    }
-
     &__separation {
         border: none;
         width: 100%;
@@ -138,11 +122,182 @@
         }
     }
 
-    .circuit[data-moving="task"] &__separation {
+    .circuit[data-moving="task"] &__separation,
+    .circuit[data-moving="choice task"] &__separation {
         background-color: var(--grey-700);
+    }
+
+    &__create {
+        margin-top: 0.5rem;
+        margin-bottom: 2.2rem;
+
+        @include button-list();
+
+        & > ul {
+            & > li > button {
+                transform: scaleY(0);
+                display: none;
+                background: none;
+                font-size: 1rem;
+                border: none;
+                padding: 0.15rem 0.5rem;
+                width: 100%;
+                cursor: pointer;
+
+                gap: 0.25rem;
+                height: 100%;
+
+                & > .dropdown_icon {
+                    color: var(--darker-grey);
+                    margin-left: 0.5rem;
+                }
+            }
+        }
+
+        &:is(&:hover, &:focus-within):not([data-disabled="true"]) button,
+        & li:first-child > button {
+            transform: scaleY(1);
+            align-items: center;
+            display: flex;
+        }
+
+        &:is(&:hover, &:focus-within):not([data-disabled="true"]) .dropdown_icon {
+            transform: rotate(180deg);
+        }
     }
 }
 
-.block[data-editing="true"] .task {
-    padding: 0.25rem;
+.block[data-editing="true"] {
+    .task {
+        padding: 0.25rem;
+    }
+
+    .choice_task {
+        margin-top: 0.5rem;
+    }
+}
+
+.choice_task {
+    --border-colour: var(--darker-grey);
+    --border-width: 1px;
+    margin-bottom: 0.5rem;
+    margin-top: 0.7rem;
+
+    &.completed {
+        --border-colour: var(--primary-green);
+        --border-width: 2px;
+
+        & .item:not(.completed) {
+            color: var(--darker-grey);
+
+            & .item__button:not(:hover):not(:focus-visible) {
+                background-color: var(--darker-grey);
+            }
+
+            & .item__name {
+                color: var(--darker-grey);
+            }
+        }
+    }
+
+    &__inactive {
+        display: flex;
+    }
+
+    &__container {
+        width: 90%;
+    }
+
+    &__header,
+    &__footer {
+        justify-content: space-between;
+        margin-left: 1rem;
+        z-index: 10;
+        display: flex;
+
+        & .item__delete {
+            background: var(--primary-light);
+            padding: 0 0.4rem;
+        }
+
+        & .item__name {
+            padding: 0 0.2rem;
+        }
+    }
+
+    &__add {
+        align-self: flex-start;
+        margin-right: 0.85rem;
+    }
+
+    .block:not([data-editing="true"]) &__header,
+    &__footer {
+        margin-left: 0.1rem;
+    }
+
+    &__header {
+        position: relative;
+        bottom: 0.5rem;
+    }
+
+    &__footer {
+        color: var(--darker-grey);
+        font-size: 90%;
+    }
+
+    .block:not([data-editing="true"]) &__footer {
+        height: 1rem;
+    }
+
+    .block[data-editing="true"] &__footer {
+        color: var(--primary-dark);
+    }
+
+    &__name {
+        background: white;
+        margin-right: auto;
+        height: 1rem;
+
+        & input {
+            margin-left: 0.2rem;
+        }
+    }
+
+    &__min_tasks {
+        background-color: white;
+        padding: 0 0.2rem;
+
+        & input {
+            width: 2.2rem;
+        }
+    }
+
+    &__items {
+        position: relative;
+        margin-bottom: 0.5rem;
+
+        &::before {
+            content: "";
+            position: absolute;
+            right: -0.4rem;
+            left: -0.4rem;
+            top: -1.1rem;
+            bottom: -1.12rem;
+            border: var(--border-width) solid var(--border-colour);
+            z-index: -1;
+        }
+    }
+
+    /* slight style adjustments for empty names */
+    &__empty_name &__items::before {
+        top: -0.8rem;
+    }
+
+    &__empty_name &__header {
+        margin-bottom: -0.3rem;
+    }
+}
+
+.block[data-editing="true"] .choice_task {
+    margin-bottom: 0;
 }

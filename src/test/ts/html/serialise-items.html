@@ -1,0 +1,116 @@
+<div id="block">
+    <ul class="items">
+    <ul class="items">
+        <hr class="item__separation">
+
+        <li id="new-regular-task" class="item task" data-new="true">
+            <input type="hidden" name="skill.id" value="10">
+            <input id="non-nested-input-test" type="hidden" name="taskType" value="RegularTask">
+            <input id="nested-input-test-1" type="number" name="taskInfo.time" value="5">
+            <select id="select-test" name="taskInfo.type" hidden="">
+                <option value="READING" selected="selected"></option>
+                <option value="VIDEO"></option>
+                <option value="QUIZ"></option>
+            </select>
+            <input id="nested-input-test-2" type="text" name="taskInfo.name" value="New regular task">
+            <input type="url" name="taskInfo.link" value="">
+        </li>
+
+        <hr class="item__separation">
+
+        <li id="deleted-regular-task" class="item task" data-delete="true">
+            <input type="hidden" name="skill.id" value="10">
+            <input type="hidden" name="taskType" value="RegularTask">
+            <input type="number" name="taskInfo.time" value="10">
+            <select name="taskInfo.type" hidden="">
+                <option value="READING"></option>
+                <option value="VIDEO" selected="selected"></option>
+                <option value="QUIZ"></option>
+            </select>
+            <input type="text" name="taskInfo.name" value="Deleted regular task">
+            <input type="url" name="taskInfo.link" value="">
+        </li>
+
+        <hr class="item__separation">
+
+        <li id="new-choice-task" class="task choice_task" data-new="true">
+            <input type="hidden" name="skill.id" value="10">
+            <input type="hidden" name="taskType" value="ChoiceTask">
+
+            <span class="choice_task__header">
+                <input name="name" value="Choice task name">
+            </span>
+
+            <ul>
+                <hr class="item__separation">
+
+                <li id="new-sub-task" class="item task" data-new="true">
+                    <input type="hidden" name="skill.id" value="10">
+                    <input type="hidden" name="taskType" value="RegularTask">
+                    <input type="number" name="taskInfo.time" value="5">
+                    <select name="taskInfo.type" hidden="">
+                        <option value="READING" selected="selected"></option>
+                        <option value="VIDEO"></option>
+                        <option value="QUIZ"></option>
+                    </select>
+                    <input type="text" name="taskInfo.name" value="New sub-task">
+                    <input type="url" name="taskInfo.link" value="">
+                </li>
+
+                <hr class="item__separation">
+
+                <li id="deleted-sub-task" class="item task" data-delete="true">
+                    <input type="hidden" name="skill.id" value="10">
+                    <input type="hidden" name="taskType" value="RegularTask">
+                    <input type="number" name="taskInfo.time" value="10">
+                    <select name="taskInfo.type" hidden="">
+                        <option value="READING"></option>
+                        <option value="VIDEO" selected="selected"></option>
+                        <option value="QUIZ"></option>
+                    </select>
+                    <input type="text" name="taskInfo.name" value="Deleted sub-task">
+                    <input type="url" name="taskInfo.link" value="">
+                </li>
+
+                <hr class="item__separation">
+
+                <li id="old-sub-task" class="item task">
+                    <input type="hidden" name="skill.id" value="10">
+                    <input type="hidden" name="taskType" value="RegularTask">
+                    <input type="number" name="taskInfo.time" value="15">
+                    <select name="taskInfo.type" hidden="">
+                        <option value="READING"></option>
+                        <option value="VIDEO"></option>
+                        <option value="QUIZ" selected="selected"></option>
+                    </select>
+                    <input type="text" name="taskInfo.name" value="Old sub-task">
+                    <input type="url" name="taskInfo.link" value="http://localhost:8084">
+                </li>
+
+                <hr class="item__separation">
+            </ul>
+
+        <span class="choice_task__footer">
+            <input type="number" name="minTasks" value="1">
+        </span>
+    </li>
+
+        <hr class="item__separation">
+
+        <li id="old-regular-task" class="item task">
+            <input type="hidden" name="skill.id" value="10">
+            <input type="hidden" name="taskType" value="RegularTask">
+            <input type="number" name="taskInfo.time" value="15">
+            <select name="taskInfo.type" hidden="">
+                <option value="READING"></option>
+                <option value="VIDEO"></option>
+                <option value="QUIZ" selected="selected"></option>
+            </select>
+            <input type="text" name="taskInfo.name" value="Old regular task">
+            <input type="url" name="taskInfo.link" value="http://localhost:8084">
+        </li>
+
+        <hr class="item__separation">
+    </ul>
+</ul>
+</div>

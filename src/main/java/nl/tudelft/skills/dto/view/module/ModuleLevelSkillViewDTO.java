@@ -19,6 +19,7 @@ package nl.tudelft.skills.dto.view.module;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import javax.validation.constraints.NotNull;
 
@@ -72,14 +73,26 @@ public class ModuleLevelSkillViewDTO extends View<Skill> implements BlockView {
 		this.parentIds = data.getParents().stream().map(AbstractSkill::getId).toList();
 		this.childIds = data.getChildren().stream().map(AbstractSkill::getId).toList();
 		this.requiredTaskIds = data.getRequiredTasks().stream().map(Task::getId).toList();
+		this.tasks = initializeTasks();
+	}
 
-		// TODO: make sure each RegularTask is there only once, depending on if it is associated
-		//  to a ChoiceTask or not (Skill contains it "twice", once by association)
-		this.tasks = data.getTasks().stream().map(t -> {
-			TaskViewDTO<?> dto = getMapper().map(t, t.viewClass());
-			dto.postApply();
-			return dto;
+	public List<? extends TaskViewDTO<?>> initializeTasks() {
+		List<RegularTask> redundantRegularTasks = data.getTasks().stream().flatMap(t -> {
+			if (t instanceof ChoiceTask choiceTask) {
+				return choiceTask.getTasks().stream().map(TaskInfo::getTask);
+			}
+			return Stream.empty();
 		}).toList();
+
+		// Filter out regular tasks that are part of a choice task
+		// This prevents duplication of tasks
+		return data.getTasks().stream().filter(
+				t -> !(t instanceof RegularTask regularTask && redundantRegularTasks.contains(regularTask)))
+				.map(t -> {
+					TaskViewDTO<?> dto = getMapper().map(t, t.viewClass());
+					dto.postApply();
+					return dto;
+				}).toList();
 	}
 
 	@Override

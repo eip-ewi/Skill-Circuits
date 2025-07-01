@@ -18,15 +18,19 @@
 package nl.tudelft.skills.test;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import lombok.Getter;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.*;
 
 @Service
+@Getter
 public class CopyEditionTestDatabaseLoader {
 
 	private final Long USED_EDITION_ID = 69L;
@@ -43,6 +47,8 @@ public class CopyEditionTestDatabaseLoader {
 	private TaskInfoRepository taskInfoRepository;
 	@Autowired
 	private RegularTaskRepository regularTaskRepository;
+	@Autowired
+	private ChoiceTaskRepository choiceTaskRepository;
 	@Autowired
 	private PathRepository pathRepository;
 	@Autowired
@@ -86,7 +92,11 @@ public class CopyEditionTestDatabaseLoader {
 	private RegularTask taskFromA;
 	private RegularTask taskFromB;
 
-	public void initEditionFrom(Skill linkTo) {
+	private ChoiceTask choiceTaskFromA;
+	private RegularTask subTaskFromA;
+	private RegularTask subTaskFromB;
+
+	public void initEditionFrom(Skill linkTo, boolean initRegularTasks, boolean initChoiceTasks) {
 		initEditions();
 		initCheckpoints(true);
 		initPaths(true);
@@ -96,7 +106,12 @@ public class CopyEditionTestDatabaseLoader {
 		initExternalSkillSameEdition(true);
 		initExternalSkillOtherEdition(true, linkTo);
 		initParentChild(true);
-		initTasks();
+		if (initRegularTasks) {
+			initRegularTasks();
+		}
+		if (initChoiceTasks) {
+			initChoiceTasks();
+		}
 	}
 
 	public void initEditions() {
@@ -242,133 +257,36 @@ public class CopyEditionTestDatabaseLoader {
 		}
 	}
 
-	public void initTasks() {
-		TaskInfo taskInfoFromA = TaskInfo.builder().name("Task A").build();
-		taskFromA = RegularTask.builder().skill(skillFromA).taskInfo(taskInfoFromA).paths(Set.of(pathFromA))
-				.build();
-		taskInfoFromA.setTask(taskFromA);
-		taskFromA = regularTaskRepository.save(taskFromA);
-		pathFromA.getTasks().add(taskFromA);
-		skillFromA.getTasks().add(taskFromA);
-		TaskInfo taskInfoFromB = TaskInfo.builder().name("Task B").build();
-		taskFromB = RegularTask.builder().skill(skillFromB).taskInfo(taskInfoFromB).build();
-		taskInfoFromB.setTask(taskFromA);
-		taskFromB = regularTaskRepository.save(taskFromB);
-		skillFromB.getTasks().add(taskFromB);
+	public void initRegularTasks() {
+		taskFromA = initSingleRegularTask(skillFromA, new HashSet<>(Set.of(pathFromA)));
+		taskFromB = initSingleRegularTask(skillFromB, new HashSet<>());
+
 		skillFromB.getRequiredTasks().add(taskFromA);
 		taskFromA.getRequiredFor().add(skillFromB);
 	}
 
-	public SCEdition getFrom() {
-		return from;
+	public void initChoiceTasks() {
+		subTaskFromA = initSingleRegularTask(skillFromA, new HashSet<>(Set.of(pathFromA)));
+		subTaskFromB = initSingleRegularTask(skillFromA, new HashSet<>(Set.of(pathFromA)));
+
+		choiceTaskFromA = choiceTaskRepository.save(ChoiceTask.builder().name("Choice task").skill(skillFromA)
+				.tasks(List.of(subTaskFromA.getTaskInfo(), subTaskFromB.getTaskInfo()))
+				.paths(Set.of(pathFromA)).build());
+		pathFromA.getTasks().add(choiceTaskFromA);
+		skillFromA.getTasks().add(choiceTaskFromA);
 	}
 
-	public SCEdition getTo() {
-		return to;
-	}
-
-	public SCModule getModuleFromA() {
-		return moduleFromA;
-	}
-
-	public SCModule getModuleFromB() {
-		return moduleFromB;
-	}
-
-	public SCModule getModuleToA() {
-		return moduleToA;
-	}
-
-	public SCModule getModuleToB() {
-		return moduleToB;
-	}
-
-	public Checkpoint getCheckpointFromA() {
-		return checkpointFromA;
-	}
-
-	public Checkpoint getCheckpointFromB() {
-		return checkpointFromB;
-	}
-
-	public Checkpoint getCheckpointToA() {
-		return checkpointToA;
-	}
-
-	public Checkpoint getCheckpointToB() {
-		return checkpointToB;
-	}
-
-	public Path getPathFromA() {
-		return pathFromA;
-	}
-
-	public Path getPathFromB() {
-		return pathFromB;
-	}
-
-	public Path getPathToA() {
-		return pathToA;
-	}
-
-	public Path getPathToB() {
-		return pathToB;
-	}
-
-	public Submodule getSubmoduleFromA() {
-		return submoduleFromA;
-	}
-
-	public Submodule getSubmoduleFromB() {
-		return submoduleFromB;
-	}
-
-	public Submodule getSubmoduleToA() {
-		return submoduleToA;
-	}
-
-	public Submodule getSubmoduleToB() {
-		return submoduleToB;
-	}
-
-	public ExternalSkill getExtSkillFromA() {
-		return extSkillFromA;
-	}
-
-	public ExternalSkill getExtSkillFromB() {
-		return extSkillFromB;
-	}
-
-	public ExternalSkill getExtSkillToA() {
-		return extSkillToA;
-	}
-
-	public ExternalSkill getExtSkillToB() {
-		return extSkillToB;
-	}
-
-	public Skill getSkillFromA() {
-		return skillFromA;
-	}
-
-	public Skill getSkillFromB() {
-		return skillFromB;
-	}
-
-	public Skill getSkillToA() {
-		return skillToA;
-	}
-
-	public Skill getSkillToB() {
-		return skillToB;
-	}
-
-	public RegularTask getTaskFromA() {
-		return taskFromA;
-	}
-
-	public RegularTask getTaskFromB() {
-		return taskFromB;
+	public RegularTask initSingleRegularTask(Skill skill, Set<Path> paths) {
+		TaskInfo taskInfo = TaskInfo.builder().name("Task").build();
+		RegularTask task = RegularTask.builder().skill(skill).taskInfo(taskInfo).paths(paths)
+				.build();
+		taskInfo.setTask(task);
+		task = regularTaskRepository.save(task);
+		skill.getTasks().add(task);
+		for (Path path : paths) {
+			path.getTasks().add(task);
+		}
+		return task;
 	}
 
 }

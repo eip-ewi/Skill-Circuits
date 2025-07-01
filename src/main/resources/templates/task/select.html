@@ -37,7 +37,7 @@
         let taskInput;
         let taskSelectCallBack;
         function openTaskSelect(input, callback) {
-            const checkboxes = $(".item input[name='selected']");
+            const checkboxes = $(".task input[name='selected']");
             checkboxes.removeClass("hidden");
             checkboxes.css("pointer-events", "initial");
             $(".circuit").attr("data-task-select", true);
@@ -45,13 +45,13 @@
             $(".checkpoint").css("pointer-events", "none");
             $("#select-task-dialog").removeClass("hidden");
             JSON.parse(`[${input.val()}]`).forEach(i =>
-                $(`.item input[name='selected'][value='${i}']`).prop("checked", true).change()
+                $(`.task input[name='selected'][value='${i}']`).prop("checked", true).change()
             );
             taskInput = input;
             taskSelectCallback = callback;
         }
         function closeTaskSelect(save) {
-            const checkboxes = $(".item input[name='selected']");
+            const checkboxes = $(".task input[name='selected']");
             checkboxes.addClass("hidden");
             $(".circuit").removeAttr("data-task-select");
             $(".block").css("pointer-events", "");
@@ -71,7 +71,7 @@
         document.addEventListener("DOMContentLoaded", function () {
             $("#select-task-cancel").click(() => closeTaskSelect(false));
             $("#select-task-select").click(() => closeTaskSelect(true));
-            $(".item input[name='selected']").change(function () {
+            $(".task input[name='selected']").change(function () {
                 const amount = $("#select-task-amount");
                 if ($(this).prop("checked")) {
                     amount.text(parseInt(amount.text()) + 1);

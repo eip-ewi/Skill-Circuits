@@ -63,13 +63,9 @@
         <th:block layout:replace="~{block/edit :: header}"></th:block>
 
         <ul data-edit="always" class="items">
-            <li data-edit="only" th:if="${canEdit and level == 'module'}">
-                <button
-                    data-edit="only"
-                    th:id="|create-item-${block.id}-button|"
-                    class="item__create fa-solid fa-plus"
-                    th:data-block="${block.id}"></button>
-            </li>
+            <th:block th:if="${canEdit and level == 'module'}">
+                <li layout:replace="~{block/task_dropdown :: dropdown}"></li>
+            </th:block>
             <h3
                 style="font-size: 0.8rem"
                 th:if="${block.items.size() == 0 and level == 'module' and canEdit}">
@@ -83,20 +79,33 @@
                 <th:block th:each="item, iter : ${block.items}">
                     <!-- Task view for teacher-->
                     <th:block th:if="${level == 'module' and canEdit}">
-                        <li
-                            th:if="${item.taskType} == 'RegularTask'"
-                            layout:replace="~{task/view :: item}"></li>
-                        <!-- TODO add ChoiceTasks here -->
+                        <th:block th:if="${item.taskType} == 'RegularTask'">
+                            <li layout:replace="~{task/view :: item}"></li>
+                        </th:block>
+                        <th:block th:if="${item.taskType} == 'ChoiceTask'">
+                            <li layout:replace="~{choice_task/view :: item}"></li>
+                        </th:block>
                     </th:block>
                     <!--  Task preview for student-->
                     <th:block
                         th:if="${level == 'module' and !canEdit}"
                         th:with="skillModified = ${skillsModified == null ? false : #sets.contains(skillsModified.![id], block.id)}">
-                        <li
-                            th:classappend="${(item.visible and not skillModified) or (skillModified and #sets.contains(tasksAdded.
+                        <th:block th:if="${item.taskType} == 'RegularTask'">
+                            <li
+                                th:classappend="${(item.visible and not skillModified) or (skillModified and #sets.contains(tasksAdded.
                                 ![id], item.id))}? '' : 'hidden'"
-                            style="display: inline"
-                            layout:insert="~{task/preview :: item}"></li>
+                                style="display: inline"
+                                layout:insert="~{task/preview :: item}"></li>
+                        </th:block>
+
+                        <th:block th:if="${item.taskType} == 'ChoiceTask'">
+                            <li
+                                th:classappend="${(item.visible and not skillModified) or (skillModified and #sets.contains(tasksAdded.
+                                ![id], item.id))}? '' : 'hidden'"
+                                style="display: inline"
+                                th:id="|item-${item.id}-icons|"
+                                layout:insert="~{choice_task/preview :: item}"></li>
+                        </th:block>
                     </th:block>
                     <th:block th:unless="${level == 'module'}">
                         <li layout:replace="~{item/view :: item}"></li>

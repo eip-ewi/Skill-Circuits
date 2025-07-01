@@ -35,6 +35,10 @@ public class RegularTaskViewDTO extends TaskViewDTO<RegularTask> {
 	@NotNull
 	private Integer completedCount;
 
+	@NotNull
+	@Builder.Default
+	private Boolean isInChoiceTask = false;
+
 	@Override
 	public void postApply() {
 		super.postApply();

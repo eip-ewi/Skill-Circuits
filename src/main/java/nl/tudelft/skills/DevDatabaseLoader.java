@@ -20,10 +20,7 @@ package nl.tudelft.skills;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import javax.annotation.PostConstruct;
 
@@ -57,6 +54,8 @@ public class DevDatabaseLoader {
 	private SkillRepository skillRepository;
 	@Autowired
 	private RegularTaskRepository regularTaskRepository;
+	@Autowired
+	private ChoiceTaskRepository choiceTaskRepository;
 	@Autowired
 	private TaskInfoRepository taskInfoRepository;
 	@Autowired
@@ -418,6 +417,11 @@ public class DevDatabaseLoader {
 		do12aeInfo.setTask(taskDo12ae);
 		regularTaskRepository.save(taskDo12ae);
 
+		TaskInfo do11adInfo = TaskInfo.builder().name("Do exercise 1.1a-d").time(10).build();
+		RegularTask taskDo11ad = RegularTask.builder().skill(skillNegation).taskInfo(do11adInfo).build();
+		do11adInfo.setTask(taskDo11ad);
+		regularTaskRepository.save(taskDo11ad);
+
 		TaskInfo read11Info = TaskInfo.builder().name("Read chapter 1.1").time(10)
 				.link("https://docs.oracle.com/en/java/javase/17/docs/api/index.html").type(TaskType.READING)
 				.build();
@@ -426,10 +430,20 @@ public class DevDatabaseLoader {
 		read11Info.setTask(taskRead11);
 		regularTaskRepository.save(taskRead11);
 
-		TaskInfo do11adInfo = TaskInfo.builder().name("Do exercise 1.1a-d").time(10).build();
-		RegularTask taskDo11ad = RegularTask.builder().skill(skillNegation).taskInfo(do11adInfo).build();
-		do11adInfo.setTask(taskDo11ad);
-		regularTaskRepository.save(taskDo11ad);
+		TaskInfo watchVideoInfo = TaskInfo.builder().name("Watch video").time(10)
+				.link("https://docs.oracle.com/en/java/javase/17/docs/api/index.html").type(TaskType.VIDEO)
+				.build();
+		RegularTask taskWatchVideo = RegularTask.builder().skill(skillNegation).taskInfo(watchVideoInfo)
+				.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build();
+		watchVideoInfo.setTask(taskWatchVideo);
+		regularTaskRepository.save(taskWatchVideo);
+
+		ChoiceTask choiceTaskNegation = ChoiceTask.builder().minTasks(1)
+				.tasks(new ArrayList<>(List.of(read11Info, watchVideoInfo))).name("What are negations?")
+				.skill(skillNegation)
+				.paths(new HashSet<>(Arrays.asList(pathFinderPath)))
+				.build();
+		choiceTaskRepository.save(choiceTaskNegation);
 
 		TaskInfo read10Info = TaskInfo.builder().name("Read chapter 1.0").time(10).type(TaskType.READING)
 				.build();
@@ -619,10 +633,21 @@ public class DevDatabaseLoader {
 		task1Info.setTask(taskTask1);
 		regularTaskRepository.save(taskTask1);
 
-		TaskInfo task2Info = TaskInfo.builder().name("Task 2").time(10).build();
-		RegularTask taskTask2 = RegularTask.builder().skill(skillSimpleA).taskInfo(task2Info).build();
-		task2Info.setTask(taskTask2);
-		regularTaskRepository.save(taskTask2);
+		TaskInfo task2bInfo = TaskInfo.builder().name("Task 2b").time(10).build();
+		RegularTask taskTask2b = RegularTask.builder().skill(skillSimpleA).taskInfo(task2bInfo).build();
+		task2bInfo.setTask(taskTask2b);
+		regularTaskRepository.save(taskTask2b);
+
+		TaskInfo task2aInfo = TaskInfo.builder().name("Task 2a").time(10).build();
+		RegularTask taskTask2a = RegularTask.builder().skill(skillSimpleA).taskInfo(task2aInfo).build();
+		task2aInfo.setTask(taskTask2a);
+		regularTaskRepository.save(taskTask2a);
+
+		ChoiceTask choiceTask2ab = ChoiceTask.builder().minTasks(1)
+				.tasks(new ArrayList<>(List.of(task2aInfo, task2bInfo))).name("Task 2 options")
+				.skill(skillSimpleA)
+				.build();
+		choiceTaskRepository.save(choiceTask2ab);
 
 		TaskInfo task3Info = TaskInfo.builder().name("Task 3").time(10).build();
 		RegularTask taskTask3 = RegularTask.builder().skill(skillSimpleB).taskInfo(task3Info).build();

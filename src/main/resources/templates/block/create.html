@@ -153,7 +153,7 @@
         }
 
         function cancelCreateBlock(block) {
-            block.find(".item").remove();
+            block.find(".item, .task").remove();
             block.find(".item__separation").remove();
             block.removeClass("visible");
             block.find("select > option").prop("selected", false);
@@ -210,6 +210,9 @@
                 delete data.checkpoint;
             }
             const items = serialiseBlockItems(block);
+            if (!validateItems(items)) {
+                return;
+            }
 
             data["newItems"] = items.filter(item => item.new);
 
@@ -221,7 +224,7 @@
                 contentType: "application/json",
                 data: JSON.stringify(data),
                 success: html => {
-                    block.find(".item").remove();
+                    block.find(".item, .task").remove();
                     block.find(".item__separation").remove();
                     block.removeClass("visible");
                     block.find("select > option").prop("selected", false);

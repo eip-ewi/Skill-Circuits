@@ -51,5 +51,5 @@ public class TaskInfo {
 	@OneToOne(cascade = CascadeType.ALL)
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
-	private Task task;
+	private RegularTask task;
 }

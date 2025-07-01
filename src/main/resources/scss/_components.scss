@@ -1,3 +1,5 @@
+@use "./mixins" as *;
+
 .info_icon {
     position: relative;
     display: inline-block;
@@ -60,14 +62,12 @@
 
     &__items {
         transform: scaleY(0);
+        z-index: 100;
+        position: absolute;
+
+        @include button-list();
 
         & > ul {
-            background-color: var(--primary-light);
-            border: 1px solid var(--primary-dark);
-            display: flex;
-            flex-direction: column;
-            list-style: none;
-            position: absolute;
             z-index: 30;
 
             & > li > button {
@@ -79,12 +79,6 @@
                 height: 100%;
                 padding: 0.1rem 0.25rem;
                 width: 100%;
-
-                &:hover,
-                &:focus-visible {
-                    background-color: var(--primary-green);
-                    color: var(--primary-light);
-                }
             }
         }
     }

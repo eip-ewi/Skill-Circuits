@@ -18,10 +18,11 @@
 package nl.tudelft.skills.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -29,11 +30,9 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,11 +40,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
 import nl.tudelft.skills.dto.view.EditLinkDTO;
+import nl.tudelft.skills.dto.view.module.ChoiceTaskViewDTO;
 import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
 import nl.tudelft.skills.dto.view.module.TaskViewDTO;
 import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.RegularTaskRepository;
+import nl.tudelft.skills.repository.TaskRepository;
 import nl.tudelft.skills.security.AuthorisationService;
 
 @Transactional
@@ -56,15 +57,13 @@ public class TaskControllerTest extends ControllerTest {
 	private final TaskController taskController;
 	private final RegularTaskRepository regularTaskRepository;
 	private final RoleControllerApi roleApi;
-	private AuthorisationService authorisationService;
 
 	@Autowired
 	public TaskControllerTest(RegularTaskRepository regularTaskRepository, RoleControllerApi roleApi,
-			AuthorisationService authorisationService) {
+			AuthorisationService authorisationService, TaskRepository taskRepository) {
 		this.regularTaskRepository = regularTaskRepository;
 		this.roleApi = roleApi;
-		this.authorisationService = authorisationService;
-		this.taskController = new TaskController(regularTaskRepository, authorisationService);
+		this.taskController = new TaskController(regularTaskRepository, authorisationService, taskRepository);
 	}
 
 	private String createBody() throws JsonProcessingException {
@@ -119,84 +118,159 @@ public class TaskControllerTest extends ControllerTest {
 				.andExpect(status().isForbidden());
 	}
 
+	@ParameterizedTest
+	@WithUserDetails("username")
+	@CsvSource({ "TEACHER", "HEAD_TA" })
+	void getTaskAtLeastHeadTA(String role) throws Exception {
+		mockRole(roleApi, role);
+		Long taskId = db.getTaskRead12().getId();
+
+		// Check that authentication passes as intended
+		String content = mvc.perform(get("/task/" + taskId).with(csrf()))
+				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+		// Check that it is a regular task: Contains regular task but not contain choice task
+		// (a choice task would contain regular tasks)
+		assertThat(content).contains("name=\"taskType\" value=\"RegularTask\"");
+		assertThat(content).doesNotContain("name=\"taskType\" value=\"ChoiceTask\"");
+
+		// Check that model attributes get changed as intended
+		taskController.getTask(db.getTaskRead12().getId(), model);
+		assertModelAttributes(RegularTaskViewDTO.class, Set.of(db.getPathFinderPath().getId()));
+	}
+
 	@Test
 	@WithUserDetails("teacher")
-	void getTaskTeacher() {
+	void getChoiceTaskTest() throws Exception {
 		mockRole(roleApi, "TEACHER");
-		taskController.getTask(db.getTaskRead12().getId(), model);
-		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
+		Long taskId = db.getChoiceTaskBookOrVideo().getId();
 
-		assertThat(((RegularTaskViewDTO) model.getAttribute("item")).getPathIds())
-				.containsExactly(db.getPathFinderPath().getId());
+		// Check that authentication passes as intended
+		String content = mvc.perform(get("/task/" + taskId).with(csrf()))
+				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+		// Check that it is a choice task
+		assertThat(content).contains("name=\"taskType\" value=\"ChoiceTask\"");
+
+		// Check that model attributes get changed as intended
+		taskController.getTask(db.getChoiceTaskBookOrVideo().getId(), model);
+		assertModelAttributes(ChoiceTaskViewDTO.class, Set.of());
 	}
 
 	@Test
 	@WithUserDetails("student")
-	void getTaskStudentPublished() {
+	void getTaskStudentPublished() throws Exception {
 		mockRole(roleApi, "STUDENT");
 		Task task = db.getTaskRead12();
 		task.getSkill().getSubmodule().getModule().getEdition().setVisible(true);
 
-		taskController.getTask(task.getId(), model);
-		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
+		// Check that authentication passes as intended
+		mvc.perform(get("/task/" + task.getId()).with(csrf()))
+				.andExpect(status().isOk());
 
-		assertThat(((TaskViewDTO) model.getAttribute("item")).getPathIds())
-				.containsExactly(db.getPathFinderPath().getId());
+		// Check that model attributes get changed as intended
+		taskController.getTask(task.getId(), model);
+		assertModelAttributes(RegularTaskViewDTO.class, Set.of(db.getPathFinderPath().getId()));
 	}
 
 	@Test
 	@WithUserDetails("student")
-	void getTaskStudent() {
+	void getTaskStudent() throws Exception {
 		mockRole(roleApi, "STUDENT");
-		ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-				() -> taskController.getTask(db.getTaskRead12().getId(), model));
-		assertThat(exception.getMessage()).isEqualTo(HttpStatus.FORBIDDEN.toString());
+		Long taskId = db.getTaskRead12().getId();
+
+		// Check that access is forbidden (edition is hidden)
+		mvc.perform(get("/task/" + taskId).with(csrf()))
+				.andExpect(status().isForbidden());
 
 	}
 
 	@Test
 	@WithUserDetails("admin")
-	void getTaskForCustomPathAdmin() {
+	void getTaskForCustomPathAdmin() throws Exception {
 		mockRole(roleApi, "ADMIN");
-		taskController.getTaskForCustomPath(db.getTaskRead12().getId(), model);
-		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
+		Long taskId = db.getTaskRead12().getId();
 
-		assertThat(((RegularTaskViewDTO) model.getAttribute("item")).getPathIds())
-				.containsExactly(db.getPathFinderPath().getId());
+		// Check that authentication passes as intended
+		mvc.perform(get("/task/" + taskId + "/preview").with(csrf()))
+				.andExpect(status().isOk());
+
+		// Check that model attributes get changed as intended
+		taskController.getTaskForCustomPath(db.getTaskRead12().getId(), model);
+		assertModelAttributes(RegularTaskViewDTO.class, Set.of(db.getPathFinderPath().getId()));
 	}
 
 	@ParameterizedTest
 	@WithUserDetails("username")
 	@CsvSource({ "TEACHER", "HEAD_TA" })
-	void getTaskForCustomPathAtLeastHeadTA(String role) {
+	void getTaskForCustomPathAtLeastHeadTA(String role) throws Exception {
 		mockRole(roleApi, role);
+		Long taskId = db.getTaskRead12().getId();
+
+		// Check that authentication passes as intended
+		String content = mvc.perform(get("/task/" + taskId + "/preview").with(csrf()))
+				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+		// Check that it is not a choice task
+		assertThat(content).doesNotContain("choice_task");
+
+		// Check that model attributes get changed as intended
 		taskController.getTaskForCustomPath(db.getTaskRead12().getId(), model);
-		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
+		assertModelAttributes(RegularTaskViewDTO.class, Set.of(db.getPathFinderPath().getId()));
+	}
 
-		assertThat(((TaskViewDTO) model.getAttribute("item")).getPathIds())
-				.containsExactly(db.getPathFinderPath().getId());
+	@Test
+	@WithUserDetails("teacher")
+	void getChoiceTaskCustomPathTest() throws Exception {
+		mockRole(roleApi, "TEACHER");
+		Long taskId = db.getChoiceTaskBookOrVideo().getId();
+
+		// Check that authentication passes as intended
+		String content = mvc.perform(get("/task/" + taskId + "/preview").with(csrf()))
+				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+		// Check that it is a choice task
+		assertThat(content).contains("choice_task");
+
+		// Check that model attributes get changed as intended
+		taskController.getTask(db.getChoiceTaskBookOrVideo().getId(), model);
+		assertModelAttributes(ChoiceTaskViewDTO.class, Set.of());
 	}
 
 	@Test
 	@WithUserDetails("student")
-	void getTaskForCustomPathStudent() {
+	void getTaskForCustomPathStudent() throws Exception {
 		mockRole(roleApi, "STUDENT");
-		ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-				() -> taskController.getTaskForCustomPath(db.getTaskRead12().getId(), model));
-		assertThat(exception.getMessage()).isEqualTo(HttpStatus.FORBIDDEN.toString());
+		Long taskId = db.getTaskRead12().getId();
+
+		// Check that access is forbidden (edition is hidden)
+		mvc.perform(get("/task/" + taskId + "/preview").with(csrf()))
+				.andExpect(status().isForbidden());
 	}
 
 	@Test
 	@WithUserDetails("student")
-	void getTaskForCustomPathStudentPublished() {
+	void getTaskForCustomPathStudentPublished() throws Exception {
 		mockRole(roleApi, "STUDENT");
 		Task task = db.getTaskRead12();
 		task.getSkill().getSubmodule().getModule().getEdition().setVisible(true);
 
-		taskController.getTaskForCustomPath(task.getId(), model);
-		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
+		// Check that authentication passes as intended
+		mvc.perform(get("/task/" + task.getId() + "/preview").with(csrf()))
+				.andExpect(status().isOk());
 
-		assertThat(((TaskViewDTO) model.getAttribute("item")).getPathIds())
-				.containsExactly(db.getPathFinderPath().getId());
+		// Check that model attributes get changed as intended
+		taskController.getTaskForCustomPath(task.getId(), model);
+		assertModelAttributes(RegularTaskViewDTO.class, Set.of(db.getPathFinderPath().getId()));
+	}
+
+	/**
+	 * Helper method for tests. Asserts that "canEdit" is false, the view DTO is of a specific subclass and
+	 * that the paths match the given pathIds.
+	 *
+	 * @param taskViewDTOClass The subclass the viewDTO should be.
+	 * @param pathIds          The ids of the paths the task should be in.
+	 */
+	private void assertModelAttributes(Class<?> taskViewDTOClass, Set<Long> pathIds) {
+		assertThat(model.getAttribute("canEdit")).isEqualTo(false);
+		TaskViewDTO<?> viewDTO = (TaskViewDTO<?>) model.getAttribute("item");
+		assertThat(viewDTO).isInstanceOf(taskViewDTOClass);
+		assertThat(viewDTO.getPathIds()).containsExactlyElementsOf(pathIds);
 	}
 }

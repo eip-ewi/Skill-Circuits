@@ -48,7 +48,12 @@
                             th:with="taskAdded = ${#sets.contains(tasksAdded.![id], item.id)}">
                             <th:block
                                 th:if="${(item.visible and not modified) or (modified and taskAdded)}">
-                                <li layout:replace="~{task/view :: item}"></li>
+                                <th:block th:if="${item.taskType} == 'RegularTask'">
+                                    <li layout:replace="~{task/view :: item}"></li>
+                                </th:block>
+                                <th:block th:if="${item.taskType} == 'ChoiceTask'">
+                                    <li layout:replace="~{choice_task/view :: item}"></li>
+                                </th:block>
                             </th:block>
                         </th:block>
                         <li th:if="not ${canEdit}" class="hide-with-siblings">
@@ -78,6 +83,7 @@
     <th:block layout:fragment="script" th:if="${level == 'module' and not canEdit}">
         <div layout:replace="~{path/view :: script}"></div>
         <div layout:replace="~{task/inactiveview :: script}"></div>
+        <div layout:replace="~{choice_task/inactiveview :: script}"></div>
 
         <script>
             /**

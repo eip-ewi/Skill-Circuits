@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 
 import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.dto.view.module.ChoiceTaskViewDTO;
 import nl.tudelft.skills.dto.view.module.ModuleLevelSkillViewDTO;
 import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
 import nl.tudelft.skills.model.*;
@@ -97,18 +98,27 @@ public class PersonService {
 		// If the skill is null, the tasksAdded and skillsModified are all added tasks and modified skills. Otherwise,
 		// they are only added corresponding to the skill (tasks in the skill and the skill itself, if modified).
 
-		// TODO handling of ChoiceTasks here
 		if (skill == null) {
 			model.addAttribute("tasksAdded",
-					tasks.stream().filter(t -> t instanceof RegularTask)
-							.map(at -> View.convert((RegularTask) at, RegularTaskViewDTO.class))
+					tasks.stream()
+							.map(t -> {
+								if (t instanceof ChoiceTask choiceTask) {
+									return View.convert(choiceTask, ChoiceTaskViewDTO.class);
+								}
+								return View.convert((RegularTask) t, RegularTaskViewDTO.class);
+							})
 							.collect(Collectors.toSet()));
 			model.addAttribute("skillsModified", skillsModified.stream()
 					.map(at -> View.convert(at, ModuleLevelSkillViewDTO.class)).collect(Collectors.toSet()));
 		} else {
 			model.addAttribute("tasksAdded", tasks.stream()
-					.filter(t -> t instanceof RegularTask && skill.getTasks().contains(t))
-					.map(at -> View.convert((RegularTask) at, RegularTaskViewDTO.class))
+					.filter(t -> skill.getTasks().contains(t))
+					.map(t -> {
+						if (t instanceof ChoiceTask choiceTask) {
+							return View.convert(choiceTask, ChoiceTaskViewDTO.class);
+						}
+						return View.convert((RegularTask) t, RegularTaskViewDTO.class);
+					})
 					.collect(Collectors.toSet()));
 			model.addAttribute("skillsModified",
 					skillsModified.contains(skill)

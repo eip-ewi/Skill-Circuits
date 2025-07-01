@@ -22,13 +22,18 @@
     lang="en"
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-    <th:block layout:fragment="item">
-        <span
-            th:id="|item-${item.id}-icon|"
-            th:class="|fa-solid fa-${item.taskInfo.type.icon} item__icon|"
-            th:bgcolor="green"
-            th:data-completed="${level == 'module'} ? ${item.taskInfo.completed ? 'true' : ''} : ${''}"
-            th:data-type="${item.taskInfo.type.icon}"
-            th:classappend="${level == 'module'} ? ${item.taskInfo.completed ? 'completed' : ''} : ${''}"></span>
-    </th:block>
+    <dialog layout:fragment="overlay" class="overlay" id="choice-task-warning-overlay">
+        <form class="confirmation">
+            <p id="choice-task-warning-text"></p>
+
+            <div class="confirmation__buttons">
+                <button
+                    type="button"
+                    onclick="toggleOverlay('choice-task-warning-overlay')"
+                    style="margin-left: auto">
+                    Okay
+                </button>
+            </div>
+        </form>
+    </dialog>
 </html>

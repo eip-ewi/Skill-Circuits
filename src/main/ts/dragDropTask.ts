@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -25,7 +25,13 @@ function handleTaskDragStart(event: DragEvent): void {
     if (event.target instanceof HTMLElement && event.target.classList.contains("task")) {
         event.dataTransfer.dropEffect = "move";
         $(event.target).css("opacity", "0.5");
-        $("#circuit").attr("data-moving", "task");
+
+        let taskType = "task";
+        if ($(event.target).closest(".task").hasClass("choice_task")) {
+            taskType = "choice task";
+        }
+        $("#circuit").attr("data-moving", taskType);
+
         event.dataTransfer.setData("text/plain", event.target.id);
     }
 }
@@ -51,10 +57,15 @@ function handleTaskDragEnd(event: DragEvent): void {
 function handleTaskDragEnter(event: DragEvent): void {
     if (
         event.target instanceof HTMLElement &&
-        event.target.classList.contains("item__separation") &&
-        $("#circuit").attr("data-moving") === "task"
+        event.target.classList.contains("item__separation")
     ) {
-        $(event.target).addClass("drag_over");
+        const taskCondition = $("#circuit").attr("data-moving") === "task";
+        const choiceTaskCondition =
+            $("#circuit").attr("data-moving") === "choice task" &&
+            $(event.target).closest(".choice_task").length === 0;
+        if (taskCondition || choiceTaskCondition) {
+            $(event.target).addClass("drag_over");
+        }
     }
 }
 
@@ -66,10 +77,15 @@ function handleTaskDragEnter(event: DragEvent): void {
 function handleTaskDragLeave(event: DragEvent): void {
     if (
         event.target instanceof HTMLElement &&
-        event.target.classList.contains("item__separation") &&
-        $("#circuit").attr("data-moving") === "task"
+        event.target.classList.contains("item__separation")
     ) {
-        event.target.classList.remove("drag_over");
+        const taskCondition = $("#circuit").attr("data-moving") === "task";
+        const choiceTaskCondition =
+            $("#circuit").attr("data-moving") === "choice task" &&
+            $(event.target).closest(".choice_task").length === 0;
+        if (taskCondition || choiceTaskCondition) {
+            event.target.classList.remove("drag_over");
+        }
     }
 }
 
@@ -81,11 +97,16 @@ function handleTaskDragLeave(event: DragEvent): void {
 function handleTaskDragOver(event: DragEvent): void {
     if (
         event.target instanceof HTMLElement &&
-        event.target.classList.contains("item__separation") &&
-        $("#circuit").attr("data-moving") === "task"
+        event.target.classList.contains("item__separation")
     ) {
-        event.preventDefault();
-        event.dataTransfer.dropEffect = "move";
+        const taskCondition = $("#circuit").attr("data-moving") === "task";
+        const choiceTaskCondition =
+            $("#circuit").attr("data-moving") === "choice task" &&
+            $(event.target).closest(".choice_task").length === 0;
+        if (taskCondition || choiceTaskCondition) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "move";
+        }
     }
 }
 
@@ -98,7 +119,8 @@ function handleTaskDrop(event: DragEvent): void {
     if (
         event.target instanceof HTMLElement &&
         event.target.classList.contains("item__separation") &&
-        $("#circuit").attr("data-moving") === "task"
+        ($("#circuit").attr("data-moving") === "task" ||
+            $("#circuit").attr("data-moving") === "choice task")
     ) {
         event.preventDefault();
 
@@ -132,7 +154,8 @@ function handleTaskDrop(event: DragEvent): void {
  */
 function handleTaskMouseDown(event: Event): void {
     if (event.target instanceof HTMLElement && event.target.classList.contains("item__move")) {
-        event.target.parentElement.draggable = true;
+        const parentElem = $(event.target).closest(".task");
+        parentElem.attr("draggable", "true");
     }
 }
 
@@ -143,7 +166,8 @@ function handleTaskMouseDown(event: Event): void {
  */
 function handleTaskMouseUp(event: Event): void {
     if (event.target instanceof HTMLElement && event.target.classList.contains("item__move")) {
-        event.target.parentElement.draggable = false;
+        const parentElem = $(event.target).closest(".task");
+        parentElem.attr("draggable", "false");
     }
 }
 

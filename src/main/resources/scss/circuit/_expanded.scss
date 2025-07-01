@@ -76,6 +76,7 @@
 
     &__content {
         display: none;
+        list-style: none;
     }
 
     &[aria-expanded="true"] {

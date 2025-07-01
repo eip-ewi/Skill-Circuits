@@ -20,9 +20,7 @@ package nl.tudelft.skills.test;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import javax.annotation.PostConstruct;
 
@@ -60,6 +58,8 @@ public class TestDatabaseLoader {
 	private SkillRepository skillRepository;
 	@Autowired
 	private RegularTaskRepository regularTaskRepository;
+	@Autowired
+	private ChoiceTaskRepository choiceTaskRepository;
 	@Autowired
 	private TaskInfoRepository taskInfoRepository;
 	@Autowired
@@ -147,6 +147,10 @@ public class TestDatabaseLoader {
 	private TaskInfo taskInfoDo11ad = TaskInfo.builder().name("Do exercise 1.1a-d").time(7).build();
 	private TaskInfo taskInfoRead10 = TaskInfo.builder().name("Read chapter 1.0").time(13).build();
 	private TaskInfo taskInfoDo10a = TaskInfo.builder().name("Do exercise 1.0a").time(20).build();
+	private TaskInfo taskInfoBook = TaskInfo.builder().type(TaskType.READING).name("Read chapter 1.3")
+			.time(15).build();
+	private TaskInfo taskInfoVideo = TaskInfo.builder().type(TaskType.VIDEO).name("Watch video").time(18)
+			.build();
 
 	private RegularTask taskRead12 = RegularTask.builder()
 			.paths(new HashSet<>(Collections.singletonList(pathFinderPath))).taskInfo(taskInfoRead12).build();
@@ -155,6 +159,11 @@ public class TestDatabaseLoader {
 	private RegularTask taskDo11ad = RegularTask.builder().taskInfo(taskInfoDo11ad).build();
 	private RegularTask taskRead10 = RegularTask.builder().taskInfo(taskInfoRead10).build();
 	private RegularTask taskDo10a = RegularTask.builder().taskInfo(taskInfoDo10a).build();
+	private RegularTask taskBook = RegularTask.builder().taskInfo(taskInfoBook).build();
+	private RegularTask taskVideo = RegularTask.builder().taskInfo(taskInfoVideo).build();
+
+	private ChoiceTask choiceTaskBookOrVideo = ChoiceTask.builder()
+			.tasks(new ArrayList<>(List.of(taskInfoBook, taskInfoVideo))).build();
 
 	private Badge badge1 = Badge.builder().name("Badge 1").build();
 	private Badge badge2 = Badge.builder().name("Badge 2").build();
@@ -311,6 +320,18 @@ public class TestDatabaseLoader {
 		return regularTaskRepository.findByIdOrThrow(taskDo10a.getId());
 	}
 
+	public RegularTask getTaskVideo() {
+		return regularTaskRepository.findByIdOrThrow(taskVideo.getId());
+	}
+
+	public RegularTask getTaskBook() {
+		return regularTaskRepository.findByIdOrThrow(taskBook.getId());
+	}
+
+	public ChoiceTask getChoiceTaskBookOrVideo() {
+		return choiceTaskRepository.findByIdOrThrow(choiceTaskBookOrVideo.getId());
+	}
+
 	public TaskInfo getTaskInfoRead12() {
 		return taskInfoRepository.findByIdOrThrow(taskInfoRead12.getId());
 	}
@@ -333,6 +354,14 @@ public class TestDatabaseLoader {
 
 	public TaskInfo getTaskInfoDo10a() {
 		return taskInfoRepository.findByIdOrThrow(taskInfoDo10a.getId());
+	}
+
+	public TaskInfo getTaskInfoVideo() {
+		return taskInfoRepository.findByIdOrThrow(taskInfoVideo.getId());
+	}
+
+	public TaskInfo getTaskInfoBook() {
+		return taskInfoRepository.findByIdOrThrow(taskInfoBook.getId());
 	}
 
 	public Badge getBadge1() {
@@ -525,6 +554,21 @@ public class TestDatabaseLoader {
 		taskInfoDo10a.setTask(taskDo10a);
 		taskDo10a = regularTaskRepository.save(taskDo10a);
 		taskInfoDo10a = taskInfoRepository.save(taskInfoDo10a);
+
+		taskVideo.setSkill(skillVariables);
+		taskVideo.setTaskInfo(taskInfoVideo);
+		taskInfoVideo.setTask(taskVideo);
+		taskVideo = regularTaskRepository.save(taskVideo);
+		taskInfoVideo = taskInfoRepository.save(taskInfoVideo);
+
+		taskBook.setSkill(skillVariables);
+		taskBook.setTaskInfo(taskInfoBook);
+		taskInfoBook.setTask(taskBook);
+		taskBook = regularTaskRepository.save(taskBook);
+		taskInfoBook = taskInfoRepository.save(taskInfoBook);
+
+		choiceTaskBookOrVideo.setSkill(skillVariables);
+		choiceTaskBookOrVideo = choiceTaskRepository.save(choiceTaskBookOrVideo);
 	}
 
 	private void initPerson() {

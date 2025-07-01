@@ -36,12 +36,14 @@ import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.*;
 import nl.tudelft.skills.TestSkillCircuitsApplication;
+import nl.tudelft.skills.dto.create.ChoiceTaskCreateDTO;
 import nl.tudelft.skills.dto.create.RegularTaskCreateDTO;
 import nl.tudelft.skills.dto.create.SkillCreateDTO;
 import nl.tudelft.skills.dto.create.TaskInfoCreateDTO;
 import nl.tudelft.skills.dto.id.CheckpointIdDTO;
 import nl.tudelft.skills.dto.id.SkillIdDTO;
 import nl.tudelft.skills.dto.id.SubmoduleIdDTO;
+import nl.tudelft.skills.dto.patch.ChoiceTaskPatchDTO;
 import nl.tudelft.skills.dto.patch.RegularTaskPatchDTO;
 import nl.tudelft.skills.dto.patch.SkillPatchDTO;
 import nl.tudelft.skills.dto.patch.TaskInfoPatchDTO;
@@ -130,18 +132,25 @@ public class SkillServiceTest {
 				taskCompletionService,
 				courseApi, authorisationService, clickedLinkService, personRepository, regularTaskRepository,
 				taskRepository, choiceTaskRepository,
-				pathRepository, taskInfoRepository, skillRepository);
+				pathRepository, skillRepository);
 	}
 
 	@Test
-	public void deleteSkill() {
+	public void deleteSkillWithRegularTasksAndChoiceTask() {
 		Long id = db.getSkillVariables().getId();
+		Set<Long> taskIds = db.getSkillVariables().getTasks().stream().map(Task::getId)
+				.collect(Collectors.toSet());
 
 		skillService.deleteSkill(id);
 		assertThat(abstractSkillRepository.existsById(id)).isFalse();
 
 		// All TaskCompletions are in other Skills, so they should not have been deleted
 		assertThat(taskCompletionRepository.findAll()).hasSize(4);
+
+		// Assert that the tasks in it do not exist anymore
+		for (Long taskId : taskIds) {
+			assertThat(taskRepository.existsById(taskId)).isFalse();
+		}
 	}
 
 	@Test
@@ -678,22 +687,25 @@ public class SkillServiceTest {
 
 	@Test
 	void createSkillTest() {
-		// TODO when implemented, add a ChoiceTask test
-		// Create a skill with two tasks
-		RegularTaskCreateDTO taskDtoA = RegularTaskCreateDTO.builder()
-				.taskInfo(TaskInfoCreateDTO.builder().name("Test Task A").type(TaskType.VIDEO).link("link")
-						.time(10).build())
-				.skill(new SkillIdDTO()).index(0).build();
-		RegularTaskCreateDTO taskDtoB = RegularTaskCreateDTO.builder()
-				.taskInfo(TaskInfoCreateDTO.builder().name("Test Task B").type(TaskType.VIDEO).link("link")
-						.time(10).build())
-				.skill(new SkillIdDTO()).index(1).build();
+		// Create a skill with two regular tasks and a choice task containing two sub-tasks
+
+		RegularTaskCreateDTO taskDtoA = getRegularTaskCreateDTO("Test Task A", null, 2);
+		RegularTaskCreateDTO taskDtoB = getRegularTaskCreateDTO("Test Task B", null, 0);
+
+		RegularTaskCreateDTO subTaskDtoA = getRegularTaskCreateDTO("Subtask A", null, 0);
+		RegularTaskCreateDTO subTaskDtoB = getRegularTaskCreateDTO("Subtask B", null, 0);
+		ChoiceTaskCreateDTO choiceTaskDto = ChoiceTaskCreateDTO.builder()
+				.minTasks(1).index(1).name("New Choice Task")
+				.newSubTasks(List.of(subTaskDtoA, subTaskDtoB))
+				.updatedSubTasks(List.of())
+				.build();
+
 		SkillCreateDTO skillCreateDTO = SkillCreateDTO.builder()
 				.name("Test Skill")
 				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
 				.checkpoint(new CheckpointIdDTO(db.getCheckpointLectureOne().getId()))
 				.requiredTaskIds(Collections.emptyList())
-				.column(10).row(11).newItems(List.of(taskDtoA, taskDtoB)).build();
+				.column(10).row(11).newItems(List.of(choiceTaskDto, taskDtoA, taskDtoB)).build();
 
 		skillService.createSkill(skillCreateDTO);
 
@@ -704,18 +716,39 @@ public class SkillServiceTest {
 				.filter(t -> t.getName().equals("Test Task A")).findFirst();
 		Optional<RegularTask> taskB = regularTaskRepository.findAll().stream()
 				.filter(t -> t.getName().equals("Test Task B")).findFirst();
+		Optional<RegularTask> subTaskA = regularTaskRepository.findAll().stream()
+				.filter(t -> t.getName().equals("Subtask A")).findFirst();
+		Optional<RegularTask> subTaskB = regularTaskRepository.findAll().stream()
+				.filter(t -> t.getName().equals("Subtask B")).findFirst();
+		Optional<ChoiceTask> choiceTask = choiceTaskRepository.findAll().stream()
+				.filter(t -> t.getName() != null && t.getName().equals("New Choice Task")).findFirst();
 		assertThat(skill).isNotEmpty();
 		assertThat(taskA).isNotEmpty();
 		assertThat(taskB).isNotEmpty();
+		assertThat(subTaskA).isNotEmpty();
+		assertThat(subTaskB).isNotEmpty();
+		assertThat(choiceTask).isNotEmpty();
 
-		// Assert on tasks (ordering should be reversed)
-		assertOnRegularTaskAttributes(taskA.get(), "Test Task A", 1, skill.get(),
+		// Assert on upper level tasks (ordering should be reversed on upper layer)
+		assertOnRegularTaskAttributes(taskA.get(), null, "Test Task A", 0, skill.get(),
 				Set.of(db.getPathFinderPath()));
-		assertOnRegularTaskAttributes(taskB.get(), "Test Task B", 0, skill.get(),
+		assertOnChoiceTaskAttributes(choiceTask.get(), null, 1, "New Choice Task", 1,
+				skill.get(), Set.of(db.getPathFinderPath()));
+		assertOnRegularTaskAttributes(taskB.get(), null, "Test Task B", 2, skill.get(),
+				Set.of(db.getPathFinderPath()));
+
+		// Assert on sub-tasks (ordering should remain the same)
+		assertThat(choiceTask.get().getTasks()).hasSize(2);
+		RegularTask finalSubTaskA = choiceTask.get().getTasks().get(0).getTask();
+		RegularTask finalSubTaskB = choiceTask.get().getTasks().get(1).getTask();
+		assertOnRegularTaskAttributes(finalSubTaskA, null, "Subtask A", 0, skill.get(),
+				Set.of(db.getPathFinderPath()));
+		assertOnRegularTaskAttributes(finalSubTaskB, null, "Subtask B", 1, skill.get(),
 				Set.of(db.getPathFinderPath()));
 
 		// Assert on skill
-		assertThat(skill.get().getTasks()).containsExactly(taskB.get(), taskA.get());
+		assertThat(skill.get().getTasks()).containsExactly(taskA.get(), choiceTask.get(), finalSubTaskA,
+				finalSubTaskB, taskB.get());
 		assertThat(skill.get().getCheckpoint()).isEqualTo(db.getCheckpointLectureOne());
 		assertThat(db.getCheckpointLectureOne().getSkills()).contains(skill.get());
 		assertThat(skill.get().getSubmodule()).isEqualTo(db.getSubmoduleCases());
@@ -728,7 +761,6 @@ public class SkillServiceTest {
 
 	@Test
 	void patchSkillTest() {
-		// TODO when implemented, add a ChoiceTask test
 		// Changes made: Task removal, task addition, task patch, change task ordering,
 		// hide and rename skill, add required task
 
@@ -776,9 +808,9 @@ public class SkillServiceTest {
 		assertThat(patchedTask).isNotEmpty();
 		assertThat(taskRepository.findById(removedTask.getId())).isEmpty();
 		assertThat(taskInfoRepository.findById(removedTask.getTaskInfo().getId())).isEmpty();
-		assertOnRegularTaskAttributes(addedTask.get(), "Test Task", 0, newSkill,
+		assertOnRegularTaskAttributes(addedTask.get(), null, "Test Task", 0, newSkill,
 				Set.of(db.getPathFinderPath()));
-		assertOnRegularTaskAttributes(patchedTask.get(), "Patched Task", 1, newSkill,
+		assertOnRegularTaskAttributes(patchedTask.get(), oldTask.getId(), "Patched Task", 1, newSkill,
 				Set.of());
 		assertThat(db.getSkillVariablesHidden().getRequiredTasks()).doesNotContain(removedTask);
 
@@ -800,31 +832,131 @@ public class SkillServiceTest {
 	}
 
 	@Test
+	void patchSkillWithChoiceTaskTest() {
+		// Changes made: Choice task patch with sub-task addition and sub-task patch, and remaining tasks removed from skill
+
+		Skill oldSkill = db.getSkillVariables();
+		RegularTask oldTask = db.getTaskBook();
+		Set<RegularTask> removedTasks = Set.of(db.getTaskDo10a(), db.getTaskRead10(), db.getTaskVideo());
+		ChoiceTask oldChoiceTask = db.getChoiceTaskBookOrVideo();
+
+		// Create DTO
+		ChoiceTaskPatchDTO choiceTaskPatchDTO = getChoiceTaskPatchDTO();
+
+		// Patch skill
+		skillService.patchSkill(SkillPatchDTO.builder()
+				.id(oldSkill.getId())
+				.name("Patched Skill")
+				.submodule(new SubmoduleIdDTO(db.getSubmoduleCases().getId()))
+				.items(List.of(choiceTaskPatchDTO))
+				.newItems(List.of())
+				.removedItems(removedTasks.stream().map(RegularTask::getId).collect(Collectors.toSet()))
+				.requiredTaskIds(List.of())
+				.hidden(false)
+				.build());
+
+		Skill newSkill = db.getSkillVariables();
+		// Check task related properties (task ordering should be reversed)
+		Optional<ChoiceTask> patchedChoiceTask = newSkill.getTasks().stream()
+				.filter(t -> t instanceof ChoiceTask)
+				.map(t -> (ChoiceTask) t)
+				.findFirst();
+		Optional<RegularTask> patchedSubTask = newSkill.getTasks().stream()
+				.filter(t -> t instanceof RegularTask r && r.getName().equals("Subtask updated"))
+				.map(t -> (RegularTask) t)
+				.findFirst();
+		Optional<RegularTask> newSubTask = newSkill.getTasks().stream()
+				.filter(t -> t instanceof RegularTask r && r.getName().equals("Subtask new"))
+				.map(t -> (RegularTask) t)
+				.findFirst();
+		assertThat(patchedChoiceTask).isNotEmpty();
+		assertThat(patchedSubTask).isNotEmpty();
+		assertThat(newSubTask).isNotEmpty();
+
+		assertOnSubTaskAttributes(choiceTaskPatchDTO.getNewSubTasks(),
+				choiceTaskPatchDTO.getUpdatedSubTasks(), patchedChoiceTask.get(), oldTask, newSkill);
+		assertOnChoiceTaskAttributes(patchedChoiceTask.get(), oldChoiceTask.getId(), 1, null, 0, newSkill,
+				Set.of());
+		assertOnRegularTaskAttributes(newSubTask.get(), null, "Subtask new", 0, newSkill,
+				Set.of(db.getPathFinderPath()));
+		assertOnRegularTaskAttributes(patchedSubTask.get(), null, "Subtask updated", 1, newSkill,
+				Set.of());
+
+		// Assert on removed tasks
+		for (RegularTask removedTask : removedTasks) {
+			assertThat(taskRepository.findById(removedTask.getId())).isEmpty();
+			assertThat(taskInfoRepository.findById(removedTask.getTaskInfo().getId())).isEmpty();
+		}
+
+		// Assert on skill attributes
+		assertThat(newSkill.getTasks()).containsExactly(patchedChoiceTask.get(), newSubTask.get(),
+				patchedSubTask.get());
+		assertThat(newSkill.isHidden()).isFalse();
+		assertThat(newSkill.getRequiredTasks()).isEmpty();
+		assertThat(newSkill.getName()).isEqualTo("Patched Skill");
+		assertThat(newSkill.getColumn()).isEqualTo(oldSkill.getColumn());
+		assertThat(newSkill.getRow()).isEqualTo(oldSkill.getRow());
+
+		// Check that all TaskCompletion related information remains the same
+		assertThat(taskCompletionRepository.findAll()).hasSize(4);
+		assertThat(db.getPerson().getTaskCompletions()).hasSize(4);
+		assertThat(db.getTaskRead12().getCompletedBy()).hasSize(1);
+		assertThat(db.getTaskDo12ae().getCompletedBy()).hasSize(1);
+		assertThat(db.getTaskRead11().getCompletedBy()).hasSize(1);
+		assertThat(db.getTaskDo11ad().getCompletedBy()).hasSize(1);
+	}
+
+	@Test
 	void saveNewTasksTestRegularTask() {
-		// TODO when implemented, add a ChoiceTask test
 		Skill skill = db.getSkillImplication();
-		RegularTaskCreateDTO regularTaskDTO = RegularTaskCreateDTO.builder()
-				.taskInfo(TaskInfoCreateDTO.builder().name("Test Task").time(10).type(TaskType.VIDEO)
-						.link("link").build())
-				.skill(SkillIdDTO.builder().id(skill.getId()).build()).index(4).build();
+		RegularTaskCreateDTO regularTaskDTO = getRegularTaskCreateDTO("Test Task", skill, 4);
 
 		// Save task
 		List<Task> tasks = skillService.saveNewTasks(skill, List.of(regularTaskDTO));
 
 		// Assert on the task attributes
 		assertThat(tasks).hasSize(1);
-		Optional<RegularTask> createdRegularTask = tasks.stream()
-				.filter(t -> t instanceof RegularTask regularTask
-						&& regularTask.getName().equals("Test Task"))
-				.map(t -> (RegularTask) t)
-				.findFirst();
-		assertThat(createdRegularTask).isNotEmpty();
-		assertOnRegularTaskAttributes(createdRegularTask.get(), "Test Task", 4, skill,
+		assertThat(tasks.get(0)).isInstanceOf(RegularTask.class);
+		RegularTask regularTask = (RegularTask) tasks.get(0);
+		assertOnRegularTaskAttributes(regularTask, null, "Test Task", regularTaskDTO.getIndex(), skill,
 				Set.of(db.getPathFinderPath()));
+
+		// Assert on skill (no guarantees for ordering in this method)
+		assertThat(skillRepository.findByIdOrThrow((skill.getId())).getTasks())
+				.contains(regularTask);
 	}
 
 	@Test
-	void saveTasksFromRegularTaskDtoTest() {
+	void saveNewTasksTestChoiceTask() {
+		Skill skill = db.getSkillImplication();
+		RegularTask updSubTask = db.getTaskDo12ae();
+		ChoiceTaskCreateDTO createDTO = getChoiceTaskCreateDTO();
+
+		// Save task
+		List<Task> tasks = skillService.saveNewTasks(skill, List.of(createDTO));
+
+		// Should only contain upper level task
+		assertThat(tasks).hasSize(1);
+
+		// Assert on choice task
+		assertThat(tasks.get(0)).isInstanceOf(ChoiceTask.class);
+		ChoiceTask choiceTask = (ChoiceTask) tasks.get(0);
+		assertOnChoiceTaskAttributes(choiceTask, null, createDTO.getMinTasks(), null, 0, skill,
+				Set.of(db.getPathFinderPath()));
+		assertThat(choiceTask.getTasks()).hasSize(2);
+
+		// Assert on sub-tasks
+		assertOnSubTaskAttributes(createDTO.getNewSubTasks(), createDTO.getUpdatedSubTasks(), choiceTask,
+				updSubTask, skill);
+
+		// Assert on skill (no guarantees for ordering in this method)
+		assertThat(skillRepository.findByIdOrThrow((skill.getId())).getTasks())
+				.contains(choiceTask.getTasks().get(0).getTask(), choiceTask.getTasks().get(1).getTask(),
+						choiceTask);
+	}
+
+	@Test
+	void createRegularTaskTest() {
 		Skill skill = db.getSkillImplication();
 		RegularTaskCreateDTO regularTaskDTO = RegularTaskCreateDTO.builder()
 				.taskInfo(TaskInfoCreateDTO.builder().name("Test Task").time(10).type(TaskType.VIDEO)
@@ -832,42 +964,111 @@ public class SkillServiceTest {
 				.skill(SkillIdDTO.builder().id(skill.getId()).build()).index(4).build();
 
 		// Save task
-		RegularTask task = skillService.saveTaskFromRegularTaskDto(regularTaskDTO, skill,
+		RegularTask task = skillService.createRegularTask(regularTaskDTO, skill,
 				Set.of(db.getPathFinderPath()));
 
 		// Assert on the task attributes
-		assertOnRegularTaskAttributes(task, "Test Task", 4, skill, Set.of(db.getPathFinderPath()));
+		assertOnRegularTaskAttributes(task, null, "Test Task", 4, skill, Set.of(db.getPathFinderPath()));
+	}
+
+	@Test
+	void createChoiceTaskTest() {
+		Skill skill = db.getSkillImplication();
+		RegularTask updSubTask = db.getTaskDo12ae();
+		ChoiceTaskCreateDTO createDTO = getChoiceTaskCreateDTO();
+
+		// Save choice task
+		ChoiceTask choiceTask = skillService.createChoiceTask(createDTO, skill,
+				Set.of(db.getPathFinderPath()));
+
+		// Assert on sub-tasks
+		assertOnSubTaskAttributes(createDTO.getNewSubTasks(), createDTO.getUpdatedSubTasks(), choiceTask,
+				updSubTask, skill);
+
+		// Assert on the choice task attributes
+		assertOnChoiceTaskAttributes(choiceTask, null, createDTO.getMinTasks(), null, 0, skill,
+				Set.of(db.getPathFinderPath()));
 	}
 
 	@Test
 	void patchTasksTestRegularTask() {
-		// TODO when implemented, add a ChoiceTask test
 		Skill skill = db.getSkillImplication();
 		Long taskId = db.getTaskDo12ae().getId();
-		RegularTaskPatchDTO regularTaskDTO = RegularTaskPatchDTO.builder()
-				.id(taskId)
-				.taskInfo(TaskInfoPatchDTO.builder().name("Test Task").time(10).type(TaskType.VIDEO)
-						.link("link").build())
-				.skill(SkillIdDTO.builder().id(skill.getId()).build()).index(4).build();
+		RegularTaskPatchDTO regularTaskDTO = getRegularTaskPatchDTO(taskId, "Test Task", skill, 4);
 
 		// Patch task
-		List<Task> tasks = skillService.patchTasks(skill, List.of(regularTaskDTO));
+		List<Task> tasks = skillService.patchTasks(skill, Set.of(db.getPathFinderPath()),
+				List.of(regularTaskDTO));
 
 		// Assert on the task attributes
 		assertThat(tasks).hasSize(1);
-		Optional<RegularTask> createdRegularTask = tasks.stream()
-				.filter(t -> t instanceof RegularTask regularTask
-						&& regularTask.getName().equals("Test Task"))
-				.map(t -> (RegularTask) t)
-				.findFirst();
-		assertThat(createdRegularTask).isNotEmpty();
-		assertThat(regularTaskRepository.findByIdOrThrow(taskId)).isEqualTo(createdRegularTask.get());
-		assertOnRegularTaskAttributes(createdRegularTask.get(), "Test Task", 4, skill, Set.of());
+		assertThat(tasks.get(0)).isInstanceOf(RegularTask.class);
+		// Paths should not be updated since they should only be used for new tasks
+		assertOnRegularTaskAttributes((RegularTask) tasks.get(0), taskId, "Test Task", 4, skill, Set.of());
+	}
+
+	@Test
+	void patchTasksTestChoiceTask() {
+		Skill skill = db.getSkillVariables();
+		RegularTask updSubTask = db.getTaskBook();
+		ChoiceTaskPatchDTO choiceTaskPatchDTO = getChoiceTaskPatchDTO();
+
+		// Patch task
+		List<Task> tasks = skillService.patchTasks(skill, Set.of(db.getPathFinderPath()),
+				List.of(choiceTaskPatchDTO));
+
+		// Assert on the task attributes
+		assertThat(tasks).hasSize(1);
+		assertThat(tasks.get(0)).isInstanceOf(ChoiceTask.class);
+		ChoiceTask choiceTask = (ChoiceTask) tasks.get(0);
+
+		// Assert on sub-tasks
+		assertOnSubTaskAttributes(choiceTaskPatchDTO.getNewSubTasks(),
+				choiceTaskPatchDTO.getUpdatedSubTasks(), choiceTask, updSubTask, skill);
+
+		// Assert on the choice task attributes
+		// Paths should not be updated since they should only be used for new tasks
+		assertOnChoiceTaskAttributes(choiceTask, null, choiceTaskPatchDTO.getMinTasks(), null, 0, skill,
+				Set.of());
+	}
+
+	@Test
+	void patchTasksTestRegularAndChoiceTask() {
+		Skill skill = db.getSkillVariables();
+		Long taskId = db.getTaskRead10().getId();
+		RegularTaskPatchDTO regularTaskDTO = getRegularTaskPatchDTO(taskId, "Test Task", skill, 4);
+
+		RegularTask updSubTask = db.getTaskBook();
+		ChoiceTaskPatchDTO choiceTaskPatchDTO = getChoiceTaskPatchDTO();
+
+		// Patch task
+		List<Task> tasks = skillService.patchTasks(skill, Set.of(db.getPathFinderPath()),
+				List.of(regularTaskDTO, choiceTaskPatchDTO));
+
+		// Assert that there is one regular and one choice task
+		assertThat(tasks).hasSize(2);
+		Optional<Task> filteredRegularTask = tasks.stream().filter(t -> t instanceof RegularTask).findFirst();
+		assertThat(filteredRegularTask).isPresent();
+		RegularTask regularTask = (RegularTask) filteredRegularTask.get();
+		Optional<Task> filteredChoiceTask = tasks.stream().filter(t -> t instanceof ChoiceTask).findFirst();
+		assertThat(filteredChoiceTask).isPresent();
+		ChoiceTask choiceTask = (ChoiceTask) filteredChoiceTask.get();
+
+		// Paths should not be updated since they should only be used for new tasks
+		assertOnRegularTaskAttributes(regularTask, taskId, "Test Task", 4, skill, Set.of());
+
+		// Assert on sub-tasks
+		assertOnSubTaskAttributes(choiceTaskPatchDTO.getNewSubTasks(),
+				choiceTaskPatchDTO.getUpdatedSubTasks(), choiceTask, updSubTask, skill);
+
+		// Assert on the choice task attributes
+		// Paths should not be updated since they should only be used for new tasks
+		assertOnChoiceTaskAttributes(choiceTask, null, choiceTaskPatchDTO.getMinTasks(), null, 0, skill,
+				Set.of());
 	}
 
 	@Test
 	void removeTasksTestModified() {
-		// TODO when implemented, add ChoiceTask tests
 		// Add a skill modification
 		Skill skill = db.getSkillImplication();
 		RegularTask task = db.getTaskRead12();
@@ -950,6 +1151,23 @@ public class SkillServiceTest {
 	}
 
 	@Test
+	void removeTasksTestChoiceTask() {
+		Skill skill = db.getSkillVariables();
+		ChoiceTask choiceTask = db.getChoiceTaskBookOrVideo();
+		RegularTask taskA = db.getTaskBook();
+		RegularTask taskB = db.getTaskVideo();
+
+		skillService.removeTasks(skill, Set.of(choiceTask.getId(), taskA.getId(), taskB.getId()));
+
+		assertThat(taskRepository.findById(choiceTask.getId())).isEmpty();
+		assertThat(taskRepository.findById(taskA.getId())).isEmpty();
+		assertThat(taskInfoRepository.findById(taskA.getTaskInfo().getId())).isEmpty();
+		assertThat(taskRepository.findById(taskB.getId())).isEmpty();
+		assertThat(taskInfoRepository.findById(taskB.getTaskInfo().getId())).isEmpty();
+		assertThat(db.getSkillVariables().getTasks()).doesNotContain(choiceTask, taskA, taskB);
+	}
+
+	@Test
 	void patchRequiredTasksTestNotHidden() {
 		// Pass one task as required task
 		skillService.patchRequiredTasks(db.getSkillVariables(), Set.of(), Set.of(db.getTaskRead12()));
@@ -966,14 +1184,17 @@ public class SkillServiceTest {
 		skill.setHidden(true);
 		skill = skillRepository.save(skill);
 
-		// Pass one task as required task
-		skillService.patchRequiredTasks(skill, Set.of(), Set.of(db.getTaskRead12()));
+		// Pass one regular and one choice task as required tasks
+		skillService.patchRequiredTasks(skill, Set.of(),
+				Set.of(db.getTaskRead12(), db.getChoiceTaskBookOrVideo()));
 
-		// Assert that the task was added as requirement
+		// Assert that the tasks were added as requirements
 		Skill skillAfter = db.getSkillVariables();
-		Task taskAfter = db.getTaskRead12();
-		assertThat(skillAfter.getRequiredTasks()).containsExactly(taskAfter);
-		assertThat(taskAfter.getRequiredFor()).containsExactly(skillAfter);
+		Task regTaskAfter = db.getTaskRead12();
+		Task choiceTaskAfter = db.getChoiceTaskBookOrVideo();
+		assertThat(skillAfter.getRequiredTasks()).containsExactlyInAnyOrder(regTaskAfter, choiceTaskAfter);
+		assertThat(regTaskAfter.getRequiredFor()).containsExactly(skillAfter);
+		assertThat(choiceTaskAfter.getRequiredFor()).containsExactly(skillAfter);
 	}
 
 	@Test
@@ -1012,16 +1233,195 @@ public class SkillServiceTest {
 		assertThat(db.getTaskDo10a().getRequiredFor()).isEmpty();
 	}
 
+	@Test
+	void testUpdateAndOrderSkillTasks() {
+		RegularTask taskA = db.createTaskBySkillAndName(db.getSkillVariables(), "Task A");
+		taskA.setIdx(0);
+		RegularTask taskB = db.createTaskBySkillAndName(db.getSkillVariables(), "Task B");
+		taskB.setIdx(2);
+		ChoiceTask choiceTask = db.getChoiceTaskBookOrVideo();
+		choiceTask.setIdx(1);
+		RegularTask subTaskA = choiceTask.getTasks().get(0).getTask();
+		RegularTask subTaskB = choiceTask.getTasks().get(1).getTask();
+
+		List<Task> orderedTasks = skillService
+				.updateAndOrderSkillTasks(new ArrayList<>(List.of(taskA, taskB, choiceTask)));
+
+		// The two sub-tasks of the choice task should be added to the returned list
+		assertThat(orderedTasks).hasSize(5);
+
+		// By index, the tasks should be in the following order:
+		// taskB, choice task, subTaskA, subTaskB, taskA
+		assertThat(orderedTasks).containsExactly(taskB, choiceTask, subTaskA, subTaskB, taskA);
+
+		// Assert on the indices being changed
+		assertThat(taskB.getIdx()).isEqualTo(0);
+		assertThat(choiceTask.getIdx()).isEqualTo(1);
+		assertThat(subTaskA.getIdx()).isEqualTo(0);
+		assertThat(subTaskB.getIdx()).isEqualTo(1);
+		assertThat(taskA.getIdx()).isEqualTo(2);
+	}
+
+	@Test
+	void testPatchChoiceTask() {
+		Skill skill = db.getSkillVariables();
+		RegularTask updSubTask = db.getTaskBook();
+		ChoiceTaskPatchDTO patchDTO = getChoiceTaskPatchDTO();
+		Set<Path> pathsBefore = db.getChoiceTaskBookOrVideo().getPaths();
+
+		HashMap<Long, Task> idToTask = new HashMap<>();
+		for (Task task : skill.getTasks()) {
+			idToTask.put(task.getId(), task);
+		}
+
+		// Save choice task
+		ChoiceTask choiceTask = skillService.patchChoiceTask(patchDTO, skill,
+				idToTask, Set.of(db.getPathFinderPath()));
+
+		// Assert on sub-tasks
+		assertOnSubTaskAttributes(patchDTO.getNewSubTasks(), patchDTO.getUpdatedSubTasks(), choiceTask,
+				updSubTask, skill);
+
+		// Assert on the choice task attributes
+		// Paths should not have changed
+		assertOnChoiceTaskAttributes(choiceTask, patchDTO.getId(), patchDTO.getMinTasks(), null, 0, skill,
+				pathsBefore);
+	}
+
+	@Test
+	void testSaveChoiceTaskSubTasks() {
+		Skill skill = db.getSkillVariables();
+		RegularTask updSubTask = db.getTaskBook();
+		RegularTaskPatchDTO subTaskUpdDTO = getRegularTaskPatchDTO(updSubTask.getId(), "Subtask updated",
+				skill, 1);
+		RegularTaskCreateDTO subTaskNewDTO = getRegularTaskCreateDTO("Subtask new", skill, 0);
+		ChoiceTask choiceTask = db.getChoiceTaskBookOrVideo();
+		Set<Path> pathsBefore = db.getChoiceTaskBookOrVideo().getPaths();
+
+		// Save choice task
+		ChoiceTask choiceTaskUpd = skillService.saveChoiceTaskSubTasks(choiceTask, List.of(subTaskNewDTO),
+				List.of(subTaskUpdDTO), skill, Set.of(db.getPathFinderPath()));
+
+		// Assert on sub-tasks
+		assertThat(choiceTaskUpd.getTasks()).hasSize(2);
+		assertOnRegularTaskAttributes(choiceTask.getTasks().get(0).getTask(), null, "Subtask new",
+				subTaskNewDTO.getIndex(), skill, Set.of(db.getPathFinderPath()));
+		assertOnRegularTaskAttributes(choiceTask.getTasks().get(1).getTask(), subTaskUpdDTO.getId(),
+				"Subtask updated",
+				subTaskUpdDTO.getIndex(), skill, updSubTask.getPaths());
+
+		// Assert on the choice task attributes
+		// Paths should not have changed
+		assertOnChoiceTaskAttributes(choiceTaskUpd, choiceTask.getId(), choiceTask.getMinTasks(),
+				choiceTask.getName(), 0, skill,
+				pathsBefore);
+	}
+
 	/**
-	 * Helper method to assert on attributes of a created or patched regular task with pre-defined values.
+	 * Helper method to create a RegularTaskCreateDTO with some given and some default attributes.
 	 *
-	 * @param task  The task to assert on.
-	 * @param idx   The index the task should have.
-	 * @param name  The name the task should have.
-	 * @param skill The skill in which the task should be.
-	 * @param paths The paths in which the task should be.
+	 * @param  name  The task name.
+	 * @param  skill The skill in which the task is. Null, if this is in a new skill.
+	 * @param  index The task index.
+	 * @return       A RegularTaskCreateDTO.
 	 */
-	void assertOnRegularTaskAttributes(RegularTask task, String name, int idx, Skill skill, Set<Path> paths) {
+	public RegularTaskCreateDTO getRegularTaskCreateDTO(String name, Skill skill, int index) {
+		SkillIdDTO idDTO = new SkillIdDTO();
+		if (skill != null) {
+			idDTO.setId(skill.getId());
+		}
+
+		return RegularTaskCreateDTO.builder()
+				.taskInfo(TaskInfoCreateDTO.builder().name(name).type(TaskType.VIDEO).time(10).link("link")
+						.build())
+				.index(index)
+				.skill(idDTO)
+				.build();
+	}
+
+	/**
+	 * Helper method to create a RegularTaskCreateDTO with some given and some default attributes.
+	 *
+	 * @param  id    The task id.
+	 * @param  name  The task name.
+	 * @param  skill The skill in which the task is.
+	 * @param  index The task index.
+	 * @return       A RegularTaskCreateDTO.
+	 */
+	public RegularTaskPatchDTO getRegularTaskPatchDTO(Long id, String name, Skill skill, int index) {
+		return RegularTaskPatchDTO.builder()
+				.taskInfo(TaskInfoPatchDTO.builder().name(name).type(TaskType.VIDEO).time(10).link("link")
+						.build())
+				.index(index)
+				.skill(SkillIdDTO.builder().id(skill.getId()).build())
+				.id(id)
+				.build();
+	}
+
+	/**
+	 * Helper method to create a ChoiceTaskCreateDTO with default attributes. It is in the Implication skill,
+	 * with one patched task (task: do 12ae) and one new task.
+	 *
+	 * @return A ChoiceTaskCreateDTO.
+	 */
+	public ChoiceTaskCreateDTO getChoiceTaskCreateDTO() {
+		Skill skill = db.getSkillImplication();
+
+		// Patch one sub-task (in same skill)
+		RegularTask updSubTask = db.getTaskDo12ae();
+		RegularTaskPatchDTO subTaskUpdDTO = getRegularTaskPatchDTO(updSubTask.getId(), "Subtask updated",
+				skill, 1);
+
+		// Create one sub-task
+		RegularTaskCreateDTO subTaskNewDTO = getRegularTaskCreateDTO("Subtask new", skill, 0);
+
+		return ChoiceTaskCreateDTO.builder()
+				.minTasks(1).index(0)
+				.newSubTasks(List.of(subTaskNewDTO))
+				.updatedSubTasks(List.of(subTaskUpdDTO))
+				.build();
+	}
+
+	/**
+	 * Helper method to create a ChoiceTaskPatchDTO with default attributes. It patches task "do video or
+	 * book", is in the Variables skill and has one patched task (task: book) and one new task.
+	 *
+	 * @return A ChoiceTaskPatchDTO.
+	 */
+	public ChoiceTaskPatchDTO getChoiceTaskPatchDTO() {
+		Skill skill = db.getSkillVariables();
+
+		// Patch one sub-task (in same skill/in choice task)
+		RegularTask updSubTask = db.getTaskBook();
+		RegularTaskPatchDTO subTaskUpdDTO = getRegularTaskPatchDTO(updSubTask.getId(), "Subtask updated",
+				skill, 1);
+
+		// Create one sub-task
+		RegularTaskCreateDTO subTaskNewDTO = getRegularTaskCreateDTO("Subtask new", skill, 0);
+
+		return ChoiceTaskPatchDTO.builder()
+				.id(db.getChoiceTaskBookOrVideo().getId())
+				.minTasks(1).index(0)
+				.newSubTasks(List.of(subTaskNewDTO))
+				.updatedSubTasks(List.of(subTaskUpdDTO))
+				.skill(SkillIdDTO.builder().id(skill.getId()).build())
+				.build();
+	}
+
+	/**
+	 * Helper method to assert on attributes of a created or patched regular task with some given and some
+	 * default values.
+	 *
+	 * @param task      The task to assert on.
+	 * @param initialId If the task existed beforehand, the id of the task, to check it remains the same.
+	 *                  Else, null.
+	 * @param name      The name the task should have.
+	 * @param idx       The index the task should have.
+	 * @param skill     The skill in which the task should be.
+	 * @param paths     The paths in which the task should be.
+	 */
+	void assertOnRegularTaskAttributes(RegularTask task, Long initialId, String name, int idx, Skill skill,
+			Set<Path> paths) {
 		assertThat(task.getName()).isEqualTo(name);
 		assertThat(task.getTime()).isEqualTo(10);
 		assertThat(task.getType()).isEqualTo(TaskType.VIDEO);
@@ -1029,5 +1429,66 @@ public class SkillServiceTest {
 		assertThat(task.getIdx()).isEqualTo(idx);
 		assertThat(task.getSkill()).isEqualTo(skill);
 		assertThat(task.getPaths()).containsExactlyInAnyOrderElementsOf(paths);
+
+		Long id = task.getId();
+		if (initialId != null) {
+			id = initialId;
+			assertThat(task.getId()).isEqualTo(id);
+		}
+		assertThat(task).isEqualTo(regularTaskRepository.findByIdOrThrow(id));
+	}
+
+	/**
+	 * Helper method to assert on attributes of a created or patched choice task with some given and some
+	 * default values.
+	 *
+	 * @param task      The task to assert on.
+	 * @param initialId If the task existed beforehand, the id of the task, to check it remains the same.
+	 *                  Else, null.
+	 * @param name      The name the task should have.
+	 * @param idx       The index the task should have.
+	 * @param skill     The skill in which the task should be.
+	 * @param paths     The paths in which the task should be.
+	 */
+	void assertOnChoiceTaskAttributes(ChoiceTask task, Long initialId, int minTasks, String name, int idx,
+			Skill skill, Set<Path> paths) {
+		assertThat(task.getMinTasks()).isEqualTo(minTasks);
+		assertThat(task.getName()).isEqualTo(name);
+		assertThat(task.getIdx()).isEqualTo(idx);
+		assertThat(task.getSkill()).isEqualTo(skill);
+		assertThat(task.getPaths()).containsExactlyInAnyOrderElementsOf(paths);
+
+		Long id = task.getId();
+		if (initialId != null) {
+			id = initialId;
+			assertThat(task.getId()).isEqualTo(id);
+		}
+		assertThat(task).isEqualTo(choiceTaskRepository.findByIdOrThrow(id));
+	}
+
+	/**
+	 * Helper method to assert on attributes of the sub-tasks of a created or patched choice task with some
+	 * given and some default values.
+	 *
+	 * @param newSubTasks List of the RegularTaskCreateDTO in the choice task create/patch.
+	 * @param updSubTasks List of the RegularTaskPatchDTO in the choice task create/patch.
+	 * @param choiceTask  The new/updated choice task.
+	 * @param updSubTask  The initial version of the regular task that has been patched by a
+	 *                    RegularTaskPatchDTO.
+	 * @param skill       The skill in which all tasks should be.
+	 */
+	void assertOnSubTaskAttributes(List<RegularTaskCreateDTO> newSubTasks,
+			List<RegularTaskPatchDTO> updSubTasks,
+			ChoiceTask choiceTask, RegularTask updSubTask, Skill skill) {
+		// Assert on sub-tasks
+		assertThat(choiceTask.getTasks()).hasSize(2);
+		RegularTask finalTaskA = choiceTask.getTasks().get(0).getTask();
+		RegularTask finalTaskB = choiceTask.getTasks().get(1).getTask();
+		assertOnRegularTaskAttributes(finalTaskA, null, "Subtask new",
+				newSubTasks.get(0).getIndex(), skill,
+				Set.of(db.getPathFinderPath()));
+		assertOnRegularTaskAttributes(finalTaskB, updSubTasks.get(0).getId(), "Subtask updated",
+				updSubTasks.get(0).getIndex(), skill,
+				updSubTask.getPaths());
 	}
 }
