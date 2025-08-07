@@ -24,6 +24,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
 import nl.tudelft.skills.model.ClickedLink;
+import nl.tudelft.skills.model.RegularTask;
 
 public interface ClickedLinkRepository extends JpaRepository<ClickedLink, Long> {
 
@@ -33,6 +34,8 @@ public interface ClickedLinkRepository extends JpaRepository<ClickedLink, Long> 
 	}
 
 	Set<ClickedLink> getByPersonId(Long id);
+
+	List<ClickedLink> getByTask(RegularTask task);
 
 	List<ClickedLink> deleteAllByTaskIdIn(List<Long> taskIds);
 }

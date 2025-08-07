@@ -29,11 +29,15 @@ import org.springframework.ui.Model;
 
 import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.api.EditionControllerApi;
+import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
+import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
 import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.dto.view.TaskStatsDTO;
 import nl.tudelft.skills.dto.view.edition.*;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.*;
+import nl.tudelft.skills.security.AuthorisationService;
 
 @Service
 @AllArgsConstructor
@@ -51,6 +55,11 @@ public class EditionService {
 	private final SkillRepository skillRepository;
 	private final RegularTaskRepository regularTaskRepository;
 	private final ChoiceTaskRepository choiceTaskRepository;
+	private final TaskRepository taskRepository;
+	private final ClickedLinkRepository clickedLinkRepository;
+	private final PathPreferenceRepository pathPreferenceRepository;
+	private final AuthorisationService authorisationService;
+	private final RoleControllerApi roleControllerApi;
 
 	/**
 	 * Configures the model for the module circuit view.
@@ -78,6 +87,55 @@ public class EditionService {
 		model.addAttribute("studentMode", studentMode != null && studentMode);
 
 		model.addAttribute("paths", pathsInEdition);
+	}
+
+	public List<TaskStatsDTO> teacherStatsTaskLevel(Long id) {
+		List<Task> tasks = taskRepository.findAllBySkillSubmoduleModuleEditionId(id);
+
+		List<RegularTask> regularTasks = tasks.stream().filter(t -> t instanceof RegularTask)
+				.map(t -> (RegularTask) t).collect(Collectors.toList());
+
+		return regularTasks.stream().map(t -> {
+			Set<Long> usersCompletedTask = t.getCompletedBy().stream().map(c -> c.getPerson().getId())
+					.collect(Collectors.toSet());
+			Set<Long> studentsCompletedTask = usersCompletedTask.isEmpty() ? Set.of()
+					: roleControllerApi.getRolesById(Set.of(id), usersCompletedTask).toStream()
+							.filter(r -> r.getType().equals(RoleDetailsDTO.TypeEnum.STUDENT))
+							.map(r -> r.getPerson().getId()).collect(Collectors.toSet());
+
+			Set<Long> usersHaveTaskOnPath = t.getPaths().stream().flatMap(p -> pathPreferenceRepository
+					.findAllByPathId(p.getId()).stream().map(x -> x.getPerson().getId()))
+					.collect(Collectors.toSet());
+			long numOfStudentsHaveTaskOnPath = usersHaveTaskOnPath.isEmpty() ? 0
+					: roleControllerApi.getRolesById(Set.of(id), usersHaveTaskOnPath).toStream()
+							.filter(r -> r.getType().equals(RoleDetailsDTO.TypeEnum.STUDENT)).count();
+
+			List<Long> peopleClickedLink = clickedLinkRepository.getByTask(t).stream()
+					.map(c -> c.getPerson().getId()).collect(Collectors.toList());
+
+			Set<Long> studentsClickedLink = peopleClickedLink.isEmpty() ? Set.of()
+					: roleControllerApi.getRolesById(Set.of(id),
+							new HashSet<>(peopleClickedLink)).toStream()
+							.filter(r -> r.getType().equals(RoleDetailsDTO.TypeEnum.STUDENT))
+							.map(x -> x.getPerson().getId()).collect(Collectors.toSet());
+			long numOfStudentsClickedLink = peopleClickedLink.stream().filter(studentsClickedLink::contains)
+					.count();
+
+			long studentsClickedAndCompleted = studentsCompletedTask.stream()
+					.filter(studentsClickedLink::contains).count();
+
+			return new TaskStatsDTO(t.getTaskInfo().getId(),
+					t.getTaskInfo().getName(),
+					t.getSkill().getName(),
+					t.getSkill().getCheckpoint().getName(),
+					t.getSkill().getSubmodule().getName(),
+					t.getSkill().getSubmodule().getModule().getName(),
+					studentsCompletedTask.size(),
+					numOfStudentsHaveTaskOnPath,
+					numOfStudentsClickedLink,
+					studentsClickedLink.size(),
+					studentsClickedAndCompleted);
+		}).collect(Collectors.toList());
 	}
 
 	/**

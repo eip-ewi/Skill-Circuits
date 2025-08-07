@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.SCModuleSummaryDTO;
+import nl.tudelft.skills.dto.view.TaskStatsDTO;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.security.AuthorisationService;
@@ -153,6 +154,13 @@ public class EditionController {
 		return View.convert(new ArrayList<>(editionRepository.findByIdOrThrow(id).getModules()).stream()
 				.sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList(),
 				SCModuleSummaryDTO.class);
+	}
+
+	@GetMapping("{id}/teacher_stats")
+	@ResponseBody
+	@PreAuthorize("@authorisationService.isAdmin()")
+	public List<TaskStatsDTO> showAllTaskStats(@PathVariable Long id) {
+		return editionService.teacherStatsTaskLevel(id);
 	}
 
 }
