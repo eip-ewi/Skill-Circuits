@@ -27,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import nl.tudelft.labracore.api.PersonControllerApi;
 import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
-import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
 import nl.tudelft.labracore.api.dto.RoleEditionDetailsDTO;
 import nl.tudelft.labracore.lib.security.user.DefaultRole;
 import nl.tudelft.labracore.lib.security.user.Person;
@@ -99,25 +98,25 @@ public class HomeService {
 			// Note: "Managed" needs to be the first check, otherwise a course may be incorrectly added to a different
 			// list (the course may be added to active editions / own editions, since teachers are not considered
 			// as a special case there).
-			if (person != null && authorisationService.canViewCourse(course.getId())) {
-				// managed: The user can see the course, so manages it
-				managed.add(course);
-			} else if (person != null && hasActiveEdition && isOwnEdition) {
-				// ownActive: The user has completed at least one skill, and the course has an active edition
-				ownActive.add(course);
-			} else if (person != null && isOwnEdition) {
-				// ownFinished: The user has completed at least one skill, and the course does not have
-				// an active edition
-				ownFinished.add(course);
-			} else if (hasActiveEdition) {
-				// availableActive: Course has an active edition, and the user is either not logged in
-				// or does not have any skills completed in it
-				availableActive.add(course);
-			} else {
-				// availableFinished: Course does not have an active edition, and the user is either not logged in
-				// or does not have any skills completed in it
-				availableFinished.add(course);
-			}
+			//			if (person != null && authorisationService.canViewCourse(course.getId())) {
+			//				// managed: The user can see the course, so manages it
+			//				managed.add(course);
+			//			} else if (person != null && hasActiveEdition && isOwnEdition) {
+			//				// ownActive: The user has completed at least one skill, and the course has an active edition
+			//				ownActive.add(course);
+			//			} else if (person != null && isOwnEdition) {
+			//				// ownFinished: The user has completed at least one skill, and the course does not have
+			//				// an active edition
+			//				ownFinished.add(course);
+			//			} else if (hasActiveEdition) {
+			//				// availableActive: Course has an active edition, and the user is either not logged in
+			//				// or does not have any skills completed in it
+			//				availableActive.add(course);
+			//			} else {
+			//				// availableFinished: Course does not have an active edition, and the user is either not logged in
+			//				// or does not have any skills completed in it
+			//				availableFinished.add(course);
+			//			}
 		}
 
 		Map<String, List<CourseSummaryDTO>> courseGroups = new HashMap<>();
@@ -223,13 +222,13 @@ public class HomeService {
 				continue;
 			}
 
-			RoleDetailsDTO.TypeEnum role = authorisationService
-					.getRoleInEdition(entry.getValue());
+			//			RoleDetailsDTO.TypeEnum role = authorisationService
+			//					.getRoleInEdition(entry.getValue());
 
 			// If the user has any role in the edition, add it to own courses
-			if (role != null) {
-				ownCourses.add(entry.getKey());
-			}
+			//			if (role != null) {
+			//				ownCourses.add(entry.getKey());
+			//			}
 		}
 		return ownCourses;
 	}

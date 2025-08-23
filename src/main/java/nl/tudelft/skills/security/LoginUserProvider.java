@@ -19,17 +19,17 @@ package nl.tudelft.skills.security;
 
 import static nl.tudelft.labracore.lib.security.user.DefaultRole.*;
 
-import lombok.AllArgsConstructor;
-import nl.tudelft.labracore.api.PersonControllerApi;
-import nl.tudelft.labracore.api.dto.PersonDetailsDTO;
-import nl.tudelft.labracore.lib.security.user.DefaultRole;
-import nl.tudelft.labracore.lib.security.user.Person;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import lombok.AllArgsConstructor;
+import nl.tudelft.labracore.api.PersonControllerApi;
+import nl.tudelft.labracore.api.dto.PersonDetailsDTO;
 import nl.tudelft.labracore.lib.security.memory.InMemoryUserProvider;
+import nl.tudelft.labracore.lib.security.user.DefaultRole;
+import nl.tudelft.labracore.lib.security.user.Person;
 import reactor.core.publisher.Mono;
 
 /**

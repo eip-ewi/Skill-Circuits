@@ -3,10 +3,15 @@ import type { Block } from "../../dto/circuit/block";
 import type {Point} from "../../data/point";
 import {getCircuit} from "./circuit.svelte";
 
-export function createConnectionPath(from: Block, to: Block): LineSegments {
+export function createConnectionPath(from: Block, to: Block): LineSegments | undefined {
     let circuitRect = getCircuit().boundingRect!();
-    let fromRect = from.boundingRect!();
-    let toRect = to.boundingRect!();
+    let fromRect = from.boundingRect?.();
+    let toRect = to.boundingRect?.();
+
+    if (fromRect === undefined || toRect === undefined) {
+        return undefined;
+    }
+
     let relativeFrom = {
         x1: fromRect.left - circuitRect.left,
         y1: fromRect.top - circuitRect.top,

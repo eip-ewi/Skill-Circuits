@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,9 +17,9 @@
  */
 package nl.tudelft.skills.dto.view.circuit.edition;
 
-import nl.tudelft.skills.dto.view.circuit.BlockView;
-
 import java.util.List;
+
+import nl.tudelft.skills.dto.view.circuit.BlockView;
 
 public record EditionLevelSubmoduleView(
 		long id,
@@ -28,8 +28,8 @@ public record EditionLevelSubmoduleView(
 		List<Long> parents,
 		List<Long> children,
 		List<EditionLevelSkillView> items) implements BlockView {
-    @Override
-    public String getBlockType() {
-        return "submodule";
-    }
+	@Override
+	public String getBlockType() {
+		return "submodule";
+	}
 }

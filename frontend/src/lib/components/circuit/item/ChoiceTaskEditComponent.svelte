@@ -75,7 +75,7 @@
 <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 <div class="task" ondragenter={dragEnter} ondragleave={dragLeave} ondragover={dragOver} ondrop={drop} data-dragging={dragging}>
     <div class="heading">
-        <input name="name" type="text" value={task.name} onchange={editName} placeholder="An optional name..."/>
+        <input name="choiceTaskName" type="text" value={task.name} onchange={editName} placeholder="An optional name..."/>
         <div class="min-tasks">
             <label for="min-tasks-{task.id}">Complete at least</label>
             <input id="min-tasks-{task.id}" name="minTasks" type="number" value={task.minTasks} min="1" max={Math.max(1, task.tasks.length - 1)} onchange={editMinTasks}/>
@@ -88,25 +88,24 @@
 </div>
 
 <style>
-
     .task {
-        border: 1px solid var(--on-block-divider-colour);
-        border-radius: 16px;
+        border: 1px solid var(--choice-task-outline-colour);
+        border-radius: var(--choice-task-outline-radius);
         display: grid;
-        gap: 0.5rem;
-        padding: 1.5rem .5rem .5rem .5rem;
+        gap: 0.5em;
+        padding: 1.5em .5em .5em .5em;
         position: relative;
-        margin-bottom: .5rem;
-        margin-top: 1rem;
-        min-height: 2rem;
+        margin-bottom: .5em;
+        margin-top: 1em;
+        min-height: 2em;
         width: 100%;
     }
 
     .heading {
         display: flex;
-        gap: 1rem;
+        gap: 1em;
         left: 0;
-        padding-inline: 1rem;
+        padding-inline: 1em;
         position: absolute;
         justify-content: space-between;
         top: 0;
@@ -115,30 +114,33 @@
     }
 
     input {
+        background-color: var(--neutral-surface-colour);
         border: 1px solid var(--on-block-divider-colour);
-        border-radius: 8px;
-        padding: 0.25rem .5rem;
+        border-radius: .5em;
+        color: var(--on-neutral-surface-colour);
+        padding: 0.25em .5em;
     }
 
     .min-tasks {
         align-items: center;
         display: flex;
-        gap: 0.375rem;
+        gap: 0.375em;
     }
 
     .min-tasks label {
         background-color: var(--block-colour);
         font-size: var(--font-size-200);
-        padding-inline: .25rem;
+        padding-inline: .25em;
     }
 
     .min-tasks input {
-        max-width: 3.5rem;
+        max-width: 3.5em;
     }
 
     .drop-indicator {
-        background-color: var(--on-background-highlight-colour);
-        border-radius: inherit;
+        background-color: var(--task-drop-indication-colour);
+        border: var(--task-drop-indication-border);
+        border-radius: var(--task-drop-indication-border-radius);
         inset: 0;
         position: absolute;
     }

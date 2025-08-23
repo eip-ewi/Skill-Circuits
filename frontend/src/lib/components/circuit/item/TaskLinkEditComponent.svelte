@@ -2,9 +2,10 @@
 
     import type {TaskInfo, TaskItem} from "../../../dto/circuit/module/task";
     import {editTaskLink} from "../../../logic/circuit/updates/task_updates";
-    import Select from "../../form/Select.svelte";
-    import Option from "../../form/Option.svelte";
+    import Select from "../../util/Select.svelte";
+    import Option from "../../util/Option.svelte";
     import {TaskIcons} from "../../../dto/task_icons";
+    import Button from "../../util/Button.svelte";
 
     let { taskInfo }: { taskInfo: TaskInfo } = $props();
 
@@ -19,14 +20,14 @@
 </script>
 
 <div class="controls" aria-expanded={expanded} data-direction={(input?.getBoundingClientRect?.()?.left ?? 0) + 32*16 > window.innerWidth ? "left" : "right"}>
-    <button aria-label="Edit link" class="button" aria-pressed={expanded} onclick={ () => expanded = !expanded }>
+    <Button square primary aria-label="Edit link" aria-pressed={expanded} onclick={ () => expanded = !expanded }>
         {#if expanded}
             <span class="fa-solid fa-check"></span>
         {:else}
             <span class="fa-solid fa-link"></span>
         {/if}
-    </button>
-    <input bind:this={input} type="text" placeholder="Task link..." onchange={editLink} value={taskInfo.link}/>
+    </Button>
+    <input bind:this={input} name="link" type="text" placeholder="Task link..." onchange={editLink} value={taskInfo.link}/>
 </div>
 
 
@@ -35,30 +36,15 @@
         position: relative;
     }
 
-    .button {
-        aspect-ratio: 1 / 1;
-        background-color: var(--primary-surface-colour);
-        border: none;
-        border-radius: 8px;
-        color: var(--on-primary-surface-colour);
-        cursor: pointer;
-        display: grid;
-        min-width: 2rem;
-        place-items: center;
-    }
-
-    .button:where(:hover, :focus-visible, [aria-pressed="true"]) {
-        background-color: var(--primary-surface-active-colour);
-        color: var(--on-primary-surface-colour);
-    }
-
     input {
+        background-color: var(--neutral-surface-colour);
         border: 1px solid var(--on-block-divider-colour);
-        border-radius: 8px;
+        border-radius: .5em;
         box-shadow: .75rem 1.25rem 1.625rem 0 color-mix(in srgb, var(--shadow-colour) 8%, transparent);
-        left: calc(100% + 0.25rem);
-        min-width: 32rem;
-        padding: .25rem .5rem;
+        color: var(--on-neutral-surface-colour);
+        left: calc(100% + 0.25em);
+        min-width: 32em;
+        padding: .25em .5em;
         position: absolute;
         top: -1px;
         transform-origin: left;
@@ -68,7 +54,7 @@
 
     .controls[data-direction="left"] input {
         left: initial;
-        right: calc(100% + 0.25rem);
+        right: calc(100% + 0.25em);
         transform-origin: right;
     }
 

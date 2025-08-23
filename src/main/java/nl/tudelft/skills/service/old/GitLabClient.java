@@ -21,11 +21,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import nl.tudelft.skills.dto.old.view.ReleaseDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import nl.tudelft.skills.dto.old.view.ReleaseDTO;
 
 @Service
 public class GitLabClient {

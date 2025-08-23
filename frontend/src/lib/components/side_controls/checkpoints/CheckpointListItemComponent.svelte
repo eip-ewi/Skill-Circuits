@@ -3,6 +3,8 @@
     import moment from "moment";
     import type {Checkpoint} from "../../../dto/checkpoint";
     import {deleteCheckpoint, editCheckpointDeadline, editCheckpointName} from "../../../logic/updates/checkpoint_updates";
+    import Button from "../../util/Button.svelte";
+    import WithConfirmationDialog from "../../util/WithConfirmationDialog.svelte";
 
     let { checkpoint }: { checkpoint: Checkpoint } = $props();
 
@@ -20,10 +22,6 @@
     async function editDeadline(event: Event) {
         const newDeadline = (event.target as HTMLInputElement).value;
         deadlineToSet = await editCheckpointDeadline(checkpoint, moment(newDeadline, "YYYY-MM-DDTHH:mm"));
-    }
-
-    async function remove() {
-        await deleteCheckpoint(checkpoint);
     }
 
     async function stopEditing() {
@@ -46,16 +44,23 @@
     {/if}
     <div class="controls">
         {#if checkpoint.editing === true }
-            <button aria-label="Stop editing" class="button" onclick={stopEditing}>
+            <Button square aria-label="Stop editing" onclick={stopEditing}>
                 <span class="fa-solid fa-check"></span>
-            </button>
+            </Button>
         {:else}
-            <button aria-label="Edit checkpoint" class="button" onclick={ () => checkpoint.editing = true }>
+            <Button square aria-label="Edit checkpoint" onclick={ () => checkpoint.editing = true }>
                 <span class="fa-solid fa-pencil"></span>
-            </button>
-            <button aria-label="Delete checkpoint" class="danger button" onclick={remove}>
-                <span class="fa-solid fa-trash"></span>
-            </button>
+            </Button>
+            <WithConfirmationDialog onconfirm={ () => deleteCheckpoint(checkpoint) } icon="fa-solid fa-trash" action="Delete">
+                {#snippet button(showDialog: () => void) }
+                    <Button square type="caution" aria-label="Delete checkpoint" onclick={showDialog}>
+                        <span class="fa-solid fa-trash"></span>
+                    </Button>
+                {/snippet}
+                <p>
+                    Are you sure you want to delete '{checkpoint.name}'?
+                </p>
+            </WithConfirmationDialog>
         {/if}
     </div>
 </div>
@@ -91,31 +96,9 @@
         gap: 0.5rem;
     }
 
-    .button {
-        aspect-ratio: 1 / 1;
-        background-color: var(--block-colour);
-        border: none;
-        border-radius: 8px;
-        color: var(--on-block-colour);
-        cursor: pointer;
-        display: grid;
-        min-width: 2rem;
-        place-items: center;
-    }
-
-    .button:where(:hover, :focus-visible) {
-        background-color: var(--primary-surface-active-colour);
-        color: var(--on-primary-surface-colour);
-    }
-
-    .button.danger:where(:hover, :focus-visible) {
-        background-color: var(--primary-error-active-colour);
-        color: var(--on-error-surface-colour);
-    }
-
     input {
         border: none;
         border-radius: 8px;
-        padding: .25rem .5rem;
+        padding: .5rem 1rem;
     }
 </style>

@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,14 +17,16 @@
  */
 package nl.tudelft.skills.service;
 
-import nl.tudelft.skills.model.*;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.AllArgsConstructor;
+import nl.tudelft.skills.dto.AfterTaskCompletionCircuitUpdate;
+import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
-
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -32,11 +34,14 @@ import java.util.Optional;
 public class TaskCompletionService {
 
 	private final TaskCompletionRepository taskCompletionRepository;
+	private final HiddenSkillRevealingService hiddenSkillRevealingService;
 
-    public Optional<Task> getLastCompletedTask(SCPerson person) {
-        return taskCompletionRepository.findLastTaskCompletedFor(person)
-                .map(completion -> completion.getTask().getTask() == null ? completion.getTask().getChoiceTask() : completion.getTask().getTask());
-    }
+	public Optional<Task> getLastCompletedTask(SCPerson person) {
+		return taskCompletionRepository.findLastTaskCompletedFor(person)
+				.map(completion -> completion.getTask().getTask() == null
+						? completion.getTask().getChoiceTask()
+						: completion.getTask().getTask());
+	}
 
 	/**
 	 * Saves a TaskCompletion to the repository, given the corresponding SCPerson and Task.
@@ -44,8 +49,11 @@ public class TaskCompletionService {
 	 * @param person The SCPerson that completed the Task
 	 * @param task   The Task that was completed
 	 */
-	public void completeTask(SCPerson person, TaskInfo task) {
+	public AfterTaskCompletionCircuitUpdate completeTask(SCPerson person, TaskInfo task) {
 		taskCompletionRepository.save(TaskCompletion.builder().task(task).person(person).build());
+		return new AfterTaskCompletionCircuitUpdate(
+				hiddenSkillRevealingService.revealSkillsAfterTaskCompletion(task, person).stream()
+						.map(AbstractSkill::getId).collect(Collectors.toSet()));
 	}
 
 	/**
@@ -56,7 +64,7 @@ public class TaskCompletionService {
 	 * @param task   The Task that was completed
 	 */
 	public void uncompleteTask(SCPerson person, TaskInfo task) {
-        taskCompletionRepository.deleteByPersonAndTask(person, task);
+		taskCompletionRepository.deleteByPersonAndTask(person, task);
 	}
 
 }

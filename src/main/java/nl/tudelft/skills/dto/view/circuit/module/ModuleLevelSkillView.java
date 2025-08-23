@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,23 +17,23 @@
  */
 package nl.tudelft.skills.dto.view.circuit.module;
 
-import nl.tudelft.skills.dto.view.circuit.BlockView;
-import nl.tudelft.skills.model.ExternalSkill;
-
 import java.util.List;
+
+import nl.tudelft.skills.dto.view.circuit.BlockView;
 
 public record ModuleLevelSkillView(
 		long id,
 		String name,
 		Integer column,
-        boolean essential,
-        boolean external,
-        Long checkpoint,
+		boolean essential,
+		boolean hidden,
+		boolean external,
+		Long checkpoint,
 		List<Long> parents,
 		List<Long> children,
 		List<ModuleLevelTaskView> items) implements BlockView {
-    @Override
-    public String getBlockType() {
-        return "skill";
-    }
+	@Override
+	public String getBlockType() {
+		return "skill";
+	}
 }

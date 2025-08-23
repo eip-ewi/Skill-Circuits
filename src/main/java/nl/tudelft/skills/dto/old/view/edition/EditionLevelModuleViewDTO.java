@@ -17,13 +17,10 @@
  */
 package nl.tudelft.skills.dto.view.edition;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import jakarta.validation.constraints.NotNull;
-
 import lombok.*;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.old.view.edition.EditionLevelSubmoduleViewDTO;
@@ -48,31 +45,31 @@ public class EditionLevelModuleViewDTO extends View<SCModule> {
 	@PostApply
 	private Set<RegularTaskViewDTO> tasksWithLinks;
 
-//	@Override
-//	public List<? extends BlockView> getBlocks() {
-//		return submodules;
-//	}
-//
-//	@Override
-//	public void postApply() {
-//		super.postApply();
-//		// Only RegularTasks can have links
-//		this.tasksWithLinks = this.getSubmodules().stream()
-//				.flatMap(submodule -> submodule.getSkills().stream())
-//				.flatMap(skill -> skill.getTasks().stream())
-//				.filter(task -> task instanceof RegularTaskViewDTO &&
-//						((RegularTaskViewDTO) task).getTaskInfo().getLink() != null)
-//				.map(task -> (RegularTaskViewDTO) task)
-//				.collect(Collectors.toSet());
-//		this.tasksWithLinks.forEach(RegularTaskViewDTO::postApply);
-//	}
-//
-//	public int getSkillsCount() {
-//		return submodules.stream().mapToInt(s -> s.getSkills().size()).sum();
-//	}
-//
-//	public static EditionLevelModuleViewDTO empty() {
-//		return EditionLevelModuleViewDTO.builder()
-//				.id(-1L).name("").submodules(new ArrayList<>()).build();
-//	}
+	//	@Override
+	//	public List<? extends BlockView> getBlocks() {
+	//		return submodules;
+	//	}
+	//
+	//	@Override
+	//	public void postApply() {
+	//		super.postApply();
+	//		// Only RegularTasks can have links
+	//		this.tasksWithLinks = this.getSubmodules().stream()
+	//				.flatMap(submodule -> submodule.getSkills().stream())
+	//				.flatMap(skill -> skill.getTasks().stream())
+	//				.filter(task -> task instanceof RegularTaskViewDTO &&
+	//						((RegularTaskViewDTO) task).getTaskInfo().getLink() != null)
+	//				.map(task -> (RegularTaskViewDTO) task)
+	//				.collect(Collectors.toSet());
+	//		this.tasksWithLinks.forEach(RegularTaskViewDTO::postApply);
+	//	}
+	//
+	//	public int getSkillsCount() {
+	//		return submodules.stream().mapToInt(s -> s.getSkills().size()).sum();
+	//	}
+	//
+	//	public static EditionLevelModuleViewDTO empty() {
+	//		return EditionLevelModuleViewDTO.builder()
+	//				.id(-1L).name("").submodules(new ArrayList<>()).build();
+	//	}
 }

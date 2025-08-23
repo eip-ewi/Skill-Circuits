@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,51 +17,55 @@
  */
 package nl.tudelft.skills.controller;
 
-import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
-import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.skills.annotation.AuthenticatedSCPerson;
-import nl.tudelft.skills.dto.create.ModuleCreate;
-import nl.tudelft.skills.dto.patch.ModulePatch;
-import nl.tudelft.skills.dto.view.ModuleView;
-import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelModuleView;
-import nl.tudelft.skills.model.SCPerson;
-import nl.tudelft.skills.service.EditionCircuitService;
-import nl.tudelft.skills.service.ModuleCircuitService;
-import nl.tudelft.skills.service.ModuleService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.AllArgsConstructor;
 import nl.tudelft.librador.resolver.annotations.PathEntity;
+import nl.tudelft.skills.annotation.AuthenticatedSCPerson;
+import nl.tudelft.skills.dto.create.ModuleCreate;
+import nl.tudelft.skills.dto.patch.ModulePatch;
+import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelModuleView;
 import nl.tudelft.skills.dto.view.circuit.module.ModuleLevelModuleView;
 import nl.tudelft.skills.model.SCModule;
+import nl.tudelft.skills.model.SCPerson;
+import nl.tudelft.skills.service.EditionCircuitService;
+import nl.tudelft.skills.service.ModuleCircuitService;
+import nl.tudelft.skills.service.ModuleService;
 
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/modules")
 public class ModuleController {
 
-    private final EditionCircuitService editionCircuitService;
+	private final EditionCircuitService editionCircuitService;
 	private final ModuleCircuitService moduleCircuitService;
-    private final ModuleService moduleService;
+	private final ModuleService moduleService;
 
-    @GetMapping("{module}/circuit")
-    public ModuleLevelModuleView getModuleCircuit(@AuthenticatedSCPerson SCPerson person, @PathEntity SCModule module) {
-        return moduleCircuitService.getModuleCircuit(module, person);
-    }
+	@GetMapping("{module}/circuit")
+	@PreAuthorize("@authorisationService.canViewModuleCircuit(#module)")
+	public ModuleLevelModuleView getModuleCircuit(@AuthenticatedSCPerson SCPerson person,
+			@PathEntity SCModule module) {
+		return moduleCircuitService.getModuleCircuit(module, person);
+	}
 
-    @PostMapping
-    public EditionLevelModuleView createModule(@AuthenticatedSCPerson SCPerson person, @RequestBody ModuleCreate create) {
-        return editionCircuitService.convertToModuleView(moduleService.createModule(create), person);
-    }
+	@PostMapping
+	@PreAuthorize("@authorisationService.canEditEditionCircuit(#create.edition.id)")
+	public EditionLevelModuleView createModule(@AuthenticatedSCPerson SCPerson person,
+			@RequestBody ModuleCreate create) {
+		return editionCircuitService.convertToModuleView(moduleService.createModule(create), person);
+	}
 
-    @PatchMapping("{module}")
-    public void patchModule(@PathEntity SCModule module, @RequestBody ModulePatch patch) {
-        moduleService.patchModule(module, patch);
-    }
+	@PatchMapping("{module}")
+	@PreAuthorize("@authorisationService.canEditModuleCircuit(#module)")
+	public void patchModule(@PathEntity SCModule module, @RequestBody ModulePatch patch) {
+		moduleService.patchModule(module, patch);
+	}
 
-    @DeleteMapping("{module}")
-    public void deleteModule(@PathEntity SCModule module) {
-        moduleService.deleteModule(module);
-    }
+	@DeleteMapping("{module}")
+	@PreAuthorize("@authorisationService.canEditModuleCircuit(#module)")
+	public void deleteModule(@PathEntity SCModule module) {
+		moduleService.deleteModule(module);
+	}
 
 }

@@ -21,7 +21,7 @@
 
 <div class="indication" transition:transition>
     {#if action === BlockActions.Goto}
-        <span class="rotated fa-solid fa-arrow-up-right-from-square"></span>
+        <span class="fa-solid fa-arrow-up-right-from-square" class:rotated={!isLevel(ModuleLevel)}></span>
         {#if isLevel(ModuleLevel)} <span>Go to source</span> {/if}
         {#if isLevel(EditionLevel)} <span>Go to module</span> {/if}
         {#if isLevel(TrackLevel)} <span>Go to course</span> {/if}
@@ -75,19 +75,23 @@
         <span class="fa-solid fa-check"></span>
         <span>Stop editing</span>
     {/if}
+    {#if action === BlockActions.Bookmark}
+        <span class="fa-solid fa-bookmark"></span>
+        <span>Bookmark</span>
+    {/if}
 </div>
 
 <style>
     .indication {
-        background-color: var(--block-colour);
-        border: none;
-        border-radius: 8px;
+        background-color: var(--neutral-surface-colour);
+        border: var(--neutral-surface-border);
+        border-radius: var(--surface-border-radius);
         box-shadow: .75rem 1.25rem 1.625rem 0 color-mix(in srgb, var(--shadow-colour) 8%, transparent);
-        bottom: -3rem;
-        color: var(--on-block-colour);
+        bottom: -3em;
+        color: var(--on-neutral-surface-colour);
         cursor: pointer;
         left: 50%;
-        padding: .5rem 1rem;
+        padding: .5em 1em;
         position: absolute;
         transform-origin: top;
         translate: -50% 0;

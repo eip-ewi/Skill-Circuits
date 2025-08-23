@@ -17,32 +17,22 @@
  */
 package nl.tudelft.skills.service.old;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import jakarta.servlet.http.HttpSession;
-
-import nl.tudelft.skills.dto.old.view.module.ModuleLevelModuleViewDTO;
-import org.springframework.data.util.Pair;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 
+import jakarta.servlet.http.HttpSession;
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.EditionControllerApi;
-import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
-import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.librador.dto.view.View;
+import nl.tudelft.skills.dto.old.view.module.ModuleLevelModuleViewDTO;
 import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.model.SCModule;
-import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.repository.ModuleRepository;
-import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.repository.PersonRepository;
 
 public class ModuleService {
 
@@ -82,44 +72,44 @@ public class ModuleService {
 	 */
 	@Transactional
 	public void configureModuleModel(Person person, Long id, Model model, HttpSession session) {
-//		ModuleLevelModuleViewDTO module = View.convert(moduleRepository.findByIdOrThrow(id),
-//				ModuleLevelModuleViewDTO.class);
+		//		ModuleLevelModuleViewDTO module = View.convert(moduleRepository.findByIdOrThrow(id),
+		//				ModuleLevelModuleViewDTO.class);
 
-//		setCompletedTasksForPerson(module, person.getId());
-//
-//		Set<Pair<Integer, Integer>> positions = module.getFilledPositions();
-//		int columns = positions.stream().mapToInt(Pair::getFirst).max().orElse(0) + 1;
-//		int rows = positions.stream().mapToInt(Pair::getSecond).max().orElse(0) + 1;
-//		Boolean studentMode = (Boolean) session.getAttribute("student-mode-" + module.getEdition().getId());
-//
-//		// Set the path and modified skill/task properties, if a path is selected, get tasks in it
-//		Optional<Set<Long>> taskIdsInPath = personService.setPersonalPathAttributes(person.getId(), model,
-//				module.getEdition().getId(), null);
-//
-//		// If path is selected (doesn't apply for no-path), show only tasks on followed path
-//		// Tasks not in path get visibility property false
-//		taskIdsInPath.ifPresent(
-//				taskIdsInner -> module.getSubmodules().stream().flatMap(s -> s.getSkills().stream()).forEach(
-//						s -> s.setTasks(s.getTasks().stream()
-//								.peek(t -> t.setVisible(taskIdsInner.contains(t.getId()))).toList())));
+		//		setCompletedTasksForPerson(module, person.getId());
+		//
+		//		Set<Pair<Integer, Integer>> positions = module.getFilledPositions();
+		//		int columns = positions.stream().mapToInt(Pair::getFirst).max().orElse(0) + 1;
+		//		int rows = positions.stream().mapToInt(Pair::getSecond).max().orElse(0) + 1;
+		//		Boolean studentMode = (Boolean) session.getAttribute("student-mode-" + module.getEdition().getId());
+		//
+		//		// Set the path and modified skill/task properties, if a path is selected, get tasks in it
+		//		Optional<Set<Long>> taskIdsInPath = personService.setPersonalPathAttributes(person.getId(), model,
+		//				module.getEdition().getId(), null);
+		//
+		//		// If path is selected (doesn't apply for no-path), show only tasks on followed path
+		//		// Tasks not in path get visibility property false
+		//		taskIdsInPath.ifPresent(
+		//				taskIdsInner -> module.getSubmodules().stream().flatMap(s -> s.getSkills().stream()).forEach(
+		//						s -> s.setTasks(s.getTasks().stream()
+		//								.peek(t -> t.setVisible(taskIdsInner.contains(t.getId()))).toList())));
 
-//		model.addAttribute("level", "module");
-//		model.addAttribute("module", module);
-//		circuitService.setCircuitAttributes(model, positions, columns, rows);
-//
-//		model.addAttribute("emptyBlock", ModuleLevelSkillViewDTO.empty());
-//		model.addAttribute("emptyGroup", ModuleLevelSubmoduleViewDTO.empty());
-//		model.addAttribute("studentMode", studentMode != null && studentMode);
-//
-//		model.addAttribute("tasksInPathIds", taskIdsInPath.orElse(new HashSet<>()));
-//		model.addAttribute("skillsRevealedIds", personRepository.getById(person.getId()).getSkillsRevealed()
-//				.stream().map(Skill::getId).collect(Collectors.toSet()));
-//
-//		EditionDetailsDTO edition = editionApi.getEditionById(module.getEdition().getId()).block();
-//		CourseDetailsDTO course = courseApi.getCourseById(edition.getCourse().getId()).block();
-//		model.addAttribute("courses",
-//				courseApi.getAllCoursesByProgram(course.getProgram().getId())
-//						.sort((a, b) -> a.getName().compareToIgnoreCase(b.getName())).collectList().block());
+		//		model.addAttribute("level", "module");
+		//		model.addAttribute("module", module);
+		//		circuitService.setCircuitAttributes(model, positions, columns, rows);
+		//
+		//		model.addAttribute("emptyBlock", ModuleLevelSkillViewDTO.empty());
+		//		model.addAttribute("emptyGroup", ModuleLevelSubmoduleViewDTO.empty());
+		//		model.addAttribute("studentMode", studentMode != null && studentMode);
+		//
+		//		model.addAttribute("tasksInPathIds", taskIdsInPath.orElse(new HashSet<>()));
+		//		model.addAttribute("skillsRevealedIds", personRepository.getById(person.getId()).getSkillsRevealed()
+		//				.stream().map(Skill::getId).collect(Collectors.toSet()));
+		//
+		//		EditionDetailsDTO edition = editionApi.getEditionById(module.getEdition().getId()).block();
+		//		CourseDetailsDTO course = courseApi.getCourseById(edition.getCourse().getId()).block();
+		//		model.addAttribute("courses",
+		//				courseApi.getAllCoursesByProgram(course.getProgram().getId())
+		//						.sort((a, b) -> a.getName().compareToIgnoreCase(b.getName())).collectList().block());
 	}
 
 	/**
@@ -134,22 +124,22 @@ public class ModuleService {
 		Set<Long> completedTasks = personRepository.getById(personId).getTaskCompletions().stream()
 				.map(tc -> tc.getTask().getId()).collect(Collectors.toSet());
 
-//		moduleViewDTO.getSubmodules().stream()
-//				.flatMap(sub -> sub.getSkills().stream())
-//				.forEach(skill -> {
-//					skill.setCompletedRequiredTasks(completedTasks.containsAll(skill.getRequiredTaskIds()));
-//					skill.getTasks()
-//							.stream().flatMap(task -> {
-//								if (task instanceof nl.tudelft.skills.dto.view.module.RegularTaskViewDTO view) {
-//									return Stream.of(view);
-//								} else if (task instanceof nl.tudelft.skills.dto.view.module.ChoiceTaskViewDTO view) {
-//									return view.getTasks().stream();
-//								}
-//								return Stream.empty();
-//							}).forEach(view -> {
-//								view.getTaskInfo().setCompleted(completedTasks.contains(view.getId()));
-//							});
-//				});
+		//		moduleViewDTO.getSubmodules().stream()
+		//				.flatMap(sub -> sub.getSkills().stream())
+		//				.forEach(skill -> {
+		//					skill.setCompletedRequiredTasks(completedTasks.containsAll(skill.getRequiredTaskIds()));
+		//					skill.getTasks()
+		//							.stream().flatMap(task -> {
+		//								if (task instanceof nl.tudelft.skills.dto.view.module.RegularTaskViewDTO view) {
+		//									return Stream.of(view);
+		//								} else if (task instanceof nl.tudelft.skills.dto.view.module.ChoiceTaskViewDTO view) {
+		//									return view.getTasks().stream();
+		//								}
+		//								return Stream.empty();
+		//							}).forEach(view -> {
+		//								view.getTaskInfo().setCompleted(completedTasks.contains(view.getId()));
+		//							});
+		//				});
 	}
 
 	/**

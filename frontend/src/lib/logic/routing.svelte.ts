@@ -20,13 +20,14 @@ export function loadPage(newPage: string, overwrite: boolean = false) {
     if (!newPage.startsWith("/")) {
         newPage = "/" + newPage;
     }
-    if (newPage !== "/") {
-        newPage = "/page" + newPage;
+    let url = newPage;
+    if (url !== "/") {
+        url = "/page" + url;
     }
     if (overwrite) {
-        window.history.replaceState({}, "", newPage);
+        window.history.replaceState({}, "", url);
     } else {
-        window.history.pushState({}, "", newPage);
+        window.history.pushState({}, "", url);
     }
     page = newPage;
 }

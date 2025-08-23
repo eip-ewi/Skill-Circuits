@@ -3,8 +3,9 @@
     import {updateBlockPosition} from "../../../logic/circuit/updates/position_updates.svelte.js";
     import {BlockStates} from "../../../data/block_state";
     import {createBlock} from "../../../logic/circuit/updates/block_updates";
-    import {getAuthorisation} from "../../../logic/authorisation.svelte";
+    import {canEditCircuit, getAuthorisation} from "../../../logic/authorisation.svelte";
     import {areColumnsEnabled} from "../../../dto/columns.svelte";
+    import {createExternalSkill} from "../../../logic/circuit/updates/skill_updates";
 
     let { column, height }: { column: number, height: number } = $props();
 
@@ -37,20 +38,25 @@
 
         dragging = false;
 
-        if (event.dataTransfer!.dropEffect === "move") {
+        if (event.dataTransfer!.effectAllowed === "move") {
             let blockId = parseInt(event.dataTransfer!.getData("skill-circuits/block"));
             let block = getBlock(blockId);
             await updateBlockPosition(block, column);
         }
 
-        if (event.dataTransfer!.dropEffect === "copy") {
+        if (event.dataTransfer!.effectAllowed === "copy") {
             await createBlock(column);
+        }
+
+        if (event.dataTransfer!.effectAllowed === "link") {
+            let blockId = parseInt(event.dataTransfer!.getData("skill-circuits/block"));
+            await createExternalSkill(blockId, column);
         }
     }
 </script>
 
-{#if areColumnsEnabled()}
-    <div class="column-wrapper" style:grid-column={column + 1} style:grid-row="1 / span {height}" data-dragging={dragging}>
+{#if canEditCircuit()}
+    <div class="column-wrapper" style:grid-column={column + 1} style:grid-row="1 / span {height}" data-dragging={dragging} data-interactible={areColumnsEnabled()}>
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div class="column"
              ondragenter={dragEnter} ondragover={dragOver} ondragleave={dragLeave} ondrop={drop}></div>
@@ -83,6 +89,10 @@
     }
 
     .column-wrapper[data-dragging="true"] .background {
-        background-color: var(--on-background-highlight-colour);
+        background-color: var(--column-colour);
+    }
+
+    .column-wrapper[data-interactible="false"] {
+        pointer-events: none;
     }
 </style>

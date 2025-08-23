@@ -7,6 +7,8 @@
     import type {Block} from "../../../dto/circuit/block";
     import {getBlocks, getCircuit} from "../../../logic/circuit/circuit.svelte";
     import {deleteBlock} from "../../../logic/circuit/updates/block_updates";
+    import Button from "../../util/Button.svelte";
+    import WithConfirmationDialog from "../../util/WithConfirmationDialog.svelte";
 
     let { block, action = $bindable(), draggable = $bindable() }: { block: Block, action: BlockAction | undefined, draggable: boolean } = $props();
 
@@ -50,30 +52,47 @@
 
 <div class="controls" data-side={(block.boundingRect === undefined ? 0 : block.boundingRect!().right) + 128 > window.innerWidth ? "left" : "right"} transition:transition>
     {#if block.state === BlockStates.Connecting}
-        <button onclick={stopConnecting} aria-label="Stop editing connections" class="fa-solid fa-link-slash" onmouseenter={ () => action = BlockActions.CancelLink } onmouseleave={ () => action = undefined }></button>
+        <Button square={true} aria-label="Stop editing connections" onclick={stopConnecting} onmouseenter={ () => action = BlockActions.CancelLink } onmouseleave={ () => action = undefined }>
+            <span class="fa-solid fa-link-slash"></span>
+        </Button>
     {:else if block.state === BlockStates.Editing}
-        <button aria-label="Stop editing" class="fa-solid fa-check" onclick={stopEditing} onmouseenter={ () => action = BlockActions.StopEdit } onmouseleave={ () => action = undefined }></button>
+        <Button square={true} aria-label="Stop editing" onclick={stopEditing} onmouseenter={ () => action = BlockActions.StopEdit } onmouseleave={ () => action = undefined }>
+            <span class="fa-solid fa-check"></span>
+        </Button>
     {:else}
-        <div aria-label="Move" class="drag" tabindex="0" role="button"
-             onmouseenter={ () => { action = BlockActions.Move; draggable = true; } }
-             onmouseleave={ () => { action = undefined; draggable = false } }>
+        <Button square={true} aria-label="Move" onclick={stopEditing} style="cursor: grab;"
+                onmouseenter={ () => { action = BlockActions.Move; draggable = true; } }
+                onmouseleave={ () => { action = undefined; draggable = false; } }>
             <span class="fa-solid fa-up-down-left-right"></span>
-        </div>
+        </Button>
         {#if isLevel(ModuleLevel)}
-            <button onclick={connect} aria-label="Edit connections" class="fa-solid fa-link" onmouseenter={ () => action = BlockActions.Link } onmouseleave={ () => action = undefined }></button>
+            <Button square={true} onclick={connect} aria-label="Edit connections" onmouseenter={ () => action = BlockActions.Link } onmouseleave={ () => action = undefined }>
+                <span class="fa-solid fa-link"></span>
+            </Button>
         {/if}
-        <button aria-label="Edit" class="fa-solid fa-pencil" onclick={edit} onmouseenter={ () => action = BlockActions.Edit } onmouseleave={ () => action = undefined }></button>
-        <button aria-label="Delete" class="danger fa-solid fa-trash" onclick={remove} onmouseenter={ () => action = BlockActions.Delete } onmouseleave={ () => action = undefined }></button>
+        <Button square={true} aria-label="Edit" onclick={edit} onmouseenter={ () => action = BlockActions.Edit } onmouseleave={ () => action = undefined }>
+            <span class="fa-solid fa-pencil"></span>
+        </Button>
+        <WithConfirmationDialog onconfirm={ () => deleteBlock(block) } icon="fa-solid fa-trash" action="Delete">
+            {#snippet button(showDialog: () => void) }
+                <Button square={true} type="caution" aria-label="Delete" onclick={showDialog} onmouseenter={ () => action = BlockActions.Delete } onmouseleave={ () => action = undefined }>
+                    <span class="fa-solid fa-trash"></span>
+                </Button>
+            {/snippet}
+            <p>
+                Are you sure you want to delete '{block.name}'?
+            </p>
+        </WithConfirmationDialog>
     {/if}
 </div>
 
 <style>
     .controls {
         display: grid;
-        gap: .5rem;
+        gap: .5em;
         grid-template-columns: 1fr 1fr;
-        right: 0.5rem;
-        padding: 1.5rem 1.5rem 1.5rem 1rem;
+        right: 0.5em;
+        padding: 1.5em 1.5em 1.5em 1em;
         position: absolute;
         top: 50%;
         transform-origin: left;
@@ -82,37 +101,21 @@
 
     .controls[data-side="left"] {
         direction: rtl;
-        left: 0.5rem;
+        left: 0.5em;
         right: initial;
-        padding: 1.5rem 1rem 1.5rem 1.5rem;
+        padding: 1.5em 1em 1.5em 1.5em;
         translate: -100% -50%;
         transform-origin: right;
     }
 
     .controls > * {
         aspect-ratio: 1 / 1;
-        background-color: var(--block-colour);
         border: none;
-        border-radius: 8px;
+        border-radius: .5em;
         box-shadow: .75rem 1.25rem 1.625rem 0 color-mix(in srgb, var(--shadow-colour) 8%, transparent);
-        color: var(--on-block-colour);
         cursor: pointer;
         display: grid;
-        min-width: 2rem;
+        min-width: 2em;
         place-items: center;
-    }
-
-    .controls > *:where(:hover, :focus-visible) {
-        background-color: var(--primary-surface-active-colour);
-        color: var(--on-primary-surface-colour);
-    }
-
-    .controls > *.danger:where(:hover, :focus-visible) {
-        background-color: var(--primary-error-active-colour);
-        color: var(--on-error-surface-colour);
-    }
-
-    .controls > *.drag {
-        cursor: grab;
     }
 </style>

@@ -2,8 +2,8 @@
 
     import type {TaskInfo, TaskItem} from "../../../dto/circuit/module/task";
     import {editTaskTime, editTaskType} from "../../../logic/circuit/updates/task_updates";
-    import Select from "../../form/Select.svelte";
-    import Option from "../../form/Option.svelte";
+    import Select from "../../util/Select.svelte";
+    import Option from "../../util/Option.svelte";
     import {TaskIcons} from "../../../dto/task_icons";
 
     let { taskInfo }: { taskInfo: TaskInfo } = $props();
@@ -16,27 +16,29 @@
 
 <div class="controls">
     <span class="icon fa-solid fa-clock"></span>
-    <input type="number" min="0" value={taskInfo.time} onchange={editTime}/>
+    <input name="time" type="number" min="0" value={taskInfo.time} onchange={editTime}/>
 </div>
 
 <style>
     .controls {
         align-items: center;
         display: flex;
-        gap: 0.25rem;
+        gap: 0.25em;
         position: relative;
     }
 
     .icon {
-        left: .5rem;
+        left: .5em;
         opacity: 0.25;
         position: absolute;
     }
 
     input {
+        background-color: var(--neutral-surface-colour);
         border: 1px solid var(--on-block-divider-colour);
-        border-radius: 8px;
-        max-width: 5.625rem;
-        padding: .25rem .5rem .25rem 1.75rem;
+        border-radius: .5em;
+        color: var(--on-neutral-surface-colour);
+        max-width: 5.625em;
+        padding: .25em .5em .25em 1.75em;
     }
 </style>

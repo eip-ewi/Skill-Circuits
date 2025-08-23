@@ -8,6 +8,7 @@ export interface Edition {
     id: number;
     name: string;
     course: Course,
+    published: boolean,
     checkpoints: Checkpoint[];
     modules: Module[];
     paths: Path[];
@@ -22,4 +23,14 @@ export interface EditionCard {
         id: number;
         name: String;
     },
+}
+
+export interface ManagedEdition {
+    id: number;
+    name: string;
+    hasCircuit: boolean;
+    course: {
+        id: number;
+        name: string;
+    }
 }

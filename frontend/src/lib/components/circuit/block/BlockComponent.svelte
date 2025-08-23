@@ -15,7 +15,7 @@
     import TaskIconsComponent from "../item/TaskIconsComponent.svelte";
     import BlockActionIndicationComponent from "./BlockActionIndicationComponent.svelte";
     import ExpandedViewOpenButtonComponent from "./ExpandedViewOpenButtonComponent.svelte";
-    import ExpandedBlock from "./ExpandedBlock.svelte";
+    import ExpandedBlockComponent from "./ExpandedBlockComponent.svelte";
     import {getBlock, getBlocks, getCircuit, getGraph} from "../../../logic/circuit/circuit.svelte";
     import BlockControlsComponent from "./BlockControlsComponent.svelte";
     import {type BlockAction, BlockActions} from "../../../data/block_action";
@@ -27,12 +27,15 @@
     import {updateBlockPosition} from "../../../logic/circuit/updates/position_updates.svelte";
     import BlockAssignPathsComponent from "./BlockAssignPathsComponent.svelte";
     import {disableColumns, enableColumns} from "../../../dto/columns.svelte";
+    import BookmarkSkillButtonComponent from "./BookmarkSkillButtonComponent.svelte";
+    import {isSkillBookmarked} from "../../../logic/bookmarks.svelte";
 
     let { block }: { block: Block } = $props();
 
     let locked: boolean = $derived(!canEditCircuit() && !isUnlocked(block));
     let completed: boolean = $derived(!canEditCircuit() && isCompleted(block));
     let clickable: boolean = $derived((!canEditCircuit() || getLevel() !== ModuleLevel) && (block.state !== BlockStates.Editing && block.state !== BlockStates.AssigningPaths));
+    let hidden: boolean = $derived(block.state === BlockStates.Inactive && canEditCircuit() && block.blockType === "skill" && !block.external && block.hidden)
 
     let draggable: boolean = $state(false);
     let action: BlockAction | undefined = $state();
@@ -43,6 +46,7 @@
     let expanded: boolean = $state(false);
 
     let element: HTMLElement;
+
     $effect(() => {
         // Recalculate when any of the following change
         block.column;
@@ -57,11 +61,10 @@
     });
 
     function recalculateBounds() {
-        block.boundingRect = () => element.getBoundingClientRect();
+        block.boundingRect = () => element?.getBoundingClientRect?.();
     }
 
     onMount(async () => {
-        block.state = BlockStates.Inactive;
         await tick();
         recalculateBounds();
 
@@ -144,6 +147,7 @@
     <div bind:this={element} class="block"
          data-locked={locked} data-completed={completed} data-clickable={clickable} data-wiggle={block.state === BlockStates.Dragging}
          data-unfocus={unfocused} data-pulse={block.state === BlockStates.Connecting}
+         data-hidden={hidden}
          onclick={click} onmouseenter={mouseEnterBlock} onmouseleave={mouseLeaveBlock}>
         {#if block.state === BlockStates.Editing}
             <BlockEditComponent {block}></BlockEditComponent>
@@ -155,10 +159,13 @@
     </div>
 
     <div class="controls">
+        {#if block.blockType === "skill" && !block.external && (block.state === BlockStates.Hovering || isSkillBookmarked(block)) && !canEditCircuit()}
+            <BookmarkSkillButtonComponent bind:action skill={block}></BookmarkSkillButtonComponent>
+        {/if}
         {#if block.state === BlockStates.Hovering && (block.blockType !== "skill" || block.external) && !canEditCircuit()}
             <ExpandedViewOpenButtonComponent bind:action bind:open={expanded}></ExpandedViewOpenButtonComponent>
         {/if}
-        {#if canEditCircuit() && (block.state === BlockStates.Hovering || block.state === BlockStates.Connecting || block.state === BlockStates.Editing)}
+        {#if canEditCircuit() && (draggable || block.state === BlockStates.Hovering || block.state === BlockStates.Connecting || block.state === BlockStates.Editing)}
             <BlockControlsComponent {block} bind:action bind:draggable></BlockControlsComponent>
         {/if}
         {#if block.state === BlockStates.WaitingForConnection}
@@ -170,7 +177,7 @@
     </div>
 
     {#if isLevel(ModuleLevel) && !canEditCircuit()}
-        <ExpandedBlock {block} bind:open={expanded}></ExpandedBlock>
+        <ExpandedBlockComponent {block} bind:open={expanded}></ExpandedBlockComponent>
     {/if}
 </div>
 
@@ -182,12 +189,14 @@
 
     .block {
         background-color: var(--block-colour);
-        border-radius: 16px;
+        border: var(--block-border);
+        border-radius: var(--block-border-radius);
         box-shadow: .75rem 1.25rem 1.625rem 0 color-mix(in srgb, var(--shadow-colour) 8%, transparent);
+        color: var(--on-block-colour);
         display: flex;
         flex-direction: column;
-        gap: .5rem;
-        padding: 1rem;
+        gap: .5em;
+        padding: 1em;
         position: relative;
         transition: filter ease-in-out 150ms, box-shadow ease-in-out 150ms;
     }
@@ -204,15 +213,21 @@
         opacity: .25;
     }
 
+    .block[data-hidden="true"] {
+        opacity: .5;
+    }
+
     .block[data-locked="true"] {
-        filter: blur(.375rem);
+        filter: blur(.375em);
     }
     .block-wrapper:hover .block[data-locked="true"] {
         filter: none;
     }
 
     .block[data-completed="true"] {
-        background-color: var(--completed-block-colour);
+        background-color: var(--block-completed-colour);
+        border: var(--block-completed-border);
+        color: var(--on-block-completed-colour);
     }
 
     .block-wrapper[data-clickable="true"]:hover {

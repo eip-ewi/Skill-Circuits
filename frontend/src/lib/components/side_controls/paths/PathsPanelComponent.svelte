@@ -8,6 +8,7 @@
     import {ModuleLevel} from "../../../data/level";
     import {getBlocks} from "../../../logic/circuit/circuit.svelte";
     import {BlockStates} from "../../../data/block_state";
+    import Button from "../../util/Button.svelte";
 
     let { open = $bindable() }: { open: boolean } = $props();
 
@@ -32,7 +33,7 @@
 
 {#if canEditCircuit()}
     <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
-    <div class="panel" aria-expanded={open}>
+    <div class="scrollable glass panel" aria-expanded={open}>
         <div class="heading">
             <h2>Paths</h2>
             <div class="controls">
@@ -46,7 +47,7 @@
         </div>
         {#if isLevel(ModuleLevel)}
             <div class="extra-controls">
-                <button class="button" onclick={bulkEdit}>
+                <Button onclick={bulkEdit}>
                     {#if bulkEditing}
                         <span class="fa-solid fa-check"></span>
                         <span>Stop editing</span>
@@ -54,7 +55,7 @@
                         <span class="fa-solid fa-pencil"></span>
                         <span>Edit paths in bulk</span>
                     {/if}
-                </button>
+                </Button>
             </div>
         {/if}
         <div class="paths">
@@ -67,13 +68,7 @@
 
 <style>
     .panel {
-        backdrop-filter: blur(.5rem) saturate(180%);
-        background: color-mix(in srgb, white 25%, transparent);
-        border-radius: 24px 0 0 24px;
-        box-shadow:
-                .75rem 1.25rem 1.9rem 0 color-mix(in srgb, var(--shadow-colour) 4%, transparent),
-                inset 0.125rem 0.125rem 0.0625rem 0 rgba(255 255 255 / 0.6),
-                inset -0.0625rem -0.0625rem 0.0625rem rgba(255 255 255 / 0.4);
+        border-radius: var(--panel-border-radius) 0 0 var(--panel-border-radius);
         inset-block: 2rem;
         max-width: 32rem;
         overflow-y: auto;
@@ -95,7 +90,6 @@
 
     .heading {
         align-items: center;
-        color: var(--on-header-colour);
         display: flex;
         justify-content: space-between;
         gap: 2rem;
@@ -125,28 +119,15 @@
 
     .button {
         align-items: center;
-        background: none;
+        background: var(--on-glass-surface-colour);
         border: none;
         border-radius: 8px;
-        color: var(--on-header-colour);
         cursor: pointer;
         display: flex;
         padding: 0.5rem;
         text-decoration: none;
     }
     .button:focus-visible, .button:hover {
-        background: color-mix(in srgb, color-mix(in oklab, var(--primary-colour) 40%, white) 25%, transparent);
-    }
-
-    .extra-controls .button {
-        background-color: var(--block-colour);
-        color: var(--on-block-colour);
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-    }
-
-    .extra-controls .button:where(:hover, :focus-visible) {
-        background-color: var(--primary-surface-active-colour);
-        color: var(--on-primary-surface-colour);
+        background: var(--on-glass-surface-active-colour);
     }
 </style>

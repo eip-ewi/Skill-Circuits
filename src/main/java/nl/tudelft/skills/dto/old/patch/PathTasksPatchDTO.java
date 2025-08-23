@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.validation.constraints.NotNull;
-
 import lombok.*;
 import nl.tudelft.librador.dto.patch.Patch;
 import nl.tudelft.skills.model.Path;

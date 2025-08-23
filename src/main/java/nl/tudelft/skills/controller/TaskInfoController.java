@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,52 +17,63 @@
  */
 package nl.tudelft.skills.controller;
 
+import java.util.Collections;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
 import lombok.AllArgsConstructor;
 import nl.tudelft.librador.resolver.annotations.PathEntity;
 import nl.tudelft.skills.annotation.AuthenticatedSCPerson;
-import nl.tudelft.skills.dto.create.RegularTaskCreate;
+import nl.tudelft.skills.dto.AfterTaskCompletionCircuitUpdate;
 import nl.tudelft.skills.dto.patch.SubtaskMove;
 import nl.tudelft.skills.dto.patch.TaskInfoPatch;
-import nl.tudelft.skills.dto.patch.TaskMove;
-import nl.tudelft.skills.dto.patch.TaskPatch;
-import nl.tudelft.skills.dto.view.circuit.module.ModuleLevelTaskView;
 import nl.tudelft.skills.model.*;
-import nl.tudelft.skills.service.ModuleCircuitService;
-import nl.tudelft.skills.service.TaskCompletionService;
-import nl.tudelft.skills.service.TaskInfoService;
-import nl.tudelft.skills.service.TaskService;
-import org.springframework.web.bind.annotation.*;
+import nl.tudelft.skills.service.*;
 
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/task-info")
 public class TaskInfoController {
 
-    private final TaskCompletionService taskCompletionService;
-    private final TaskInfoService taskInfoService;
+	private final ClickedLinkService clickedLinkService;
+	private final TaskCompletionService taskCompletionService;
+	private final TaskInfoService taskInfoService;
 
-    @PatchMapping("{taskInfo}")
-    public void patchTaskInfo(@PathEntity TaskInfo taskInfo, @RequestBody TaskInfoPatch patch) {
-        taskInfoService.patchTaskInfo(taskInfo, patch);
-    }
+	@PostMapping("{taskInfo}/click")
+	@PreAuthorize("@authorisationService.canViewTaskInfo(#taskInfo)")
+	public void reportClickedList(@AuthenticatedSCPerson SCPerson person, @PathEntity TaskInfo taskInfo) {
+		clickedLinkService.reportClickedLink(person, taskInfo);
+	}
 
-    @PatchMapping("{subtask}/task")
-    public void moveSubtask(@PathEntity TaskInfo subtask, @RequestBody SubtaskMove move) {
-        taskInfoService.moveSubtask(subtask, move);
-    }
+	@PatchMapping("{taskInfo}")
+	@PreAuthorize("@authorisationService.canEditTaskInfo(#taskInfo)")
+	public void patchTaskInfo(@PathEntity TaskInfo taskInfo, @RequestBody TaskInfoPatch patch) {
+		taskInfoService.patchTaskInfo(taskInfo, patch);
+	}
 
-    @PostMapping("{taskInfo}/complete")
-    public void updateTaskCompletion(@AuthenticatedSCPerson SCPerson person, @PathEntity TaskInfo taskInfo, @RequestParam boolean completed) {
-        if (completed) {
-            taskCompletionService.completeTask(person, taskInfo);
-        } else {
-            taskCompletionService.uncompleteTask(person, taskInfo);
-        }
-    }
+	@PatchMapping("{subtask}/task")
+	@PreAuthorize("@authorisationService.canEditTaskInfo(#subtask) and @authorisationService.canEditTask(#move.choiceTask)")
+	public void moveSubtask(@PathEntity TaskInfo subtask, @RequestBody SubtaskMove move) {
+		taskInfoService.moveSubtask(subtask, move);
+	}
 
-    @DeleteMapping("{taskInfo}")
-    public void deleteTaskInfo(@PathEntity TaskInfo taskInfo) {
-        taskInfoService.deleteTaskInfo(taskInfo);
-    }
+	@PostMapping("{taskInfo}/complete")
+	@PreAuthorize("@authorisationService.canViewTaskInfo(#tayyskInfo)")
+	public AfterTaskCompletionCircuitUpdate updateTaskCompletion(@AuthenticatedSCPerson SCPerson person,
+			@PathEntity TaskInfo taskInfo, @RequestParam boolean completed) {
+		if (completed) {
+			return taskCompletionService.completeTask(person, taskInfo);
+		} else {
+			taskCompletionService.uncompleteTask(person, taskInfo);
+			return new AfterTaskCompletionCircuitUpdate(Collections.emptySet());
+		}
+	}
+
+	@DeleteMapping("{taskInfo}")
+	@PreAuthorize("@authorisationService.canEditTaskInfo(#taskInfo)")
+	public void deleteTaskInfo(@PathEntity TaskInfo taskInfo) {
+		taskInfoService.deleteTaskInfo(taskInfo);
+	}
 
 }

@@ -9,6 +9,8 @@
     import type {Snippet} from "svelte";
     import type {ChoiceTaskChoice, TaskInfo} from "../../../dto/circuit/module/task";
     import {deleteSubtask, editTaskInfoName, editTaskLink} from "../../../logic/circuit/updates/task_updates";
+    import Button from "../../util/Button.svelte";
+    import WithConfirmationDialog from "../../util/WithConfirmationDialog.svelte";
 
     let { taskInfo, children }: { taskInfo: TaskInfo, children?: Snippet } = $props();
 
@@ -17,10 +19,6 @@
     async function editName(event: Event) {
         const newName = (event.target as HTMLInputElement).value;
         await editTaskInfoName(taskInfo, newName);
-    }
-
-    async function remove() {
-        await deleteSubtask(taskInfo as ChoiceTaskChoice);
     }
 
     function dragStart(event: DragEvent) {
@@ -41,12 +39,21 @@
              onmouseenter={ () => draggable = true } onmouseleave={ () => setTimeout(() => draggable = false, 200) }></div>
     {/if}
     <TaskTypeEditComponent {taskInfo}></TaskTypeEditComponent>
-    <input class="name" value={taskInfo.name} onchange={editName}/>
+    <input class="name" name="item-name" value={taskInfo.name} onchange={editName}/>
     <TaskTimeEditComponent {taskInfo}></TaskTimeEditComponent>
     <TaskLinkEditComponent {taskInfo}></TaskLinkEditComponent>
     {@render children?.()}
     {#if taskInfo.taskType === "choice"}
-        <button aria-label="Remove item" class="button danger fa-solid fa-trash" onclick={remove}></button>
+        <WithConfirmationDialog onconfirm={ () => deleteSubtask(taskInfo) } icon="fa-solid fa-trash" action="Delete">
+            {#snippet button(showDialog: () => void) }
+                <Button square primary type="caution" aria-label="Delete item" onclick={showDialog}>
+                    <span class="fa-solid fa-trash"></span>
+                </Button>
+            {/snippet}
+            <p>
+                Are you sure you want to delete '{taskInfo.name}'?
+            </p>
+        </WithConfirmationDialog>
     {/if}
 </div>
 
@@ -54,46 +61,20 @@
     .item {
         align-items: center;
         display: flex;
-        gap: 0.5rem;
+        gap: 0.5em;
     }
 
     .grip {
-        background: none;
-        border: none;
-        color: grey;
         cursor: grab;
+        opacity: 0.5;
     }
 
     .name {
+        background-color: var(--neutral-surface-colour);
         border: 1px solid var(--on-block-divider-colour);
-        border-radius: 8px;
+        border-radius: .5em;
+        color: var(--on-neutral-surface-colour);
         flex-grow: 1;
-        padding: .25rem .5rem;
-    }
-
-    .button {
-        aspect-ratio: 1 / 1;
-        background-color: var(--primary-surface-colour);
-        border: none;
-        border-radius: 8px;
-        color: var(--on-primary-surface-colour);
-        cursor: pointer;
-        display: grid;
-        min-width: 2rem;
-        place-items: center;
-    }
-
-    .button:where(:hover, :focus-visible) {
-        background-color: var(--primary-surface-active-colour);
-        color: var(--on-primary-surface-colour);
-    }
-
-    .button.danger {
-        background-color: var(--primary-error-colour);
-        color: var(--on-error-surface-colour);
-    }
-    .button.danger:where(:hover, :focus-visible) {
-        background-color: var(--primary-error-active-colour);
-        color: var(--on-error-surface-colour);
+        padding: .25em .5em;
     }
 </style>

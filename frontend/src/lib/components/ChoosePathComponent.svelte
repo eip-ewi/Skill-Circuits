@@ -5,6 +5,7 @@
     import {getPaths} from "../logic/edition/edition.svelte";
     import type {Path} from "../dto/path";
     import {isOnCircuit} from "../logic/circuit/level.svelte";
+    import Button from "./util/Button.svelte";
 
     let dialog: HTMLDialogElement | undefined = $state();
 
@@ -25,9 +26,9 @@
                         <h3 class="path-name">{path.name}</h3>
                         <p class="path-description">{path.description}</p>
                         <div class="path-select">
-                            <button onclick={ () => selectPath(path) }>
+                            <Button primary onclick={ () => selectPath(path) }>
                                 Select '{path.name}'
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 {/each}
@@ -58,6 +59,7 @@
     .content {
         background: var(--block-colour);
         box-shadow: 2rem 2rem 4rem color-mix(in srgb, var(--shadow-colour) 8%, transparent);
+        color: var(--on-block-colour);
         display: grid;
         gap: 1rem;
         max-height: calc(100vh - 12rem);
@@ -84,20 +86,5 @@
     .path-name {
         font-size: var(--font-size-400);
         font-weight: 500;
-    }
-
-    .path-select button {
-        background-color: var(--primary-surface-colour);
-        border: none;
-        border-radius: 8px;
-        color: var(--on-primary-surface-colour);
-        cursor: pointer;
-        display: inline-block;
-        padding: .5rem 1rem;
-    }
-
-    .path-select button:where(:hover, :focus-visible) {
-        background-color: var(--primary-surface-active-colour);
-        color: var(--on-primary-surface-colour);
     }
 </style>

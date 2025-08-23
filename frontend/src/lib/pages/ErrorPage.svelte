@@ -1,11 +1,12 @@
 <script lang="ts">
+import PageLayout from "./PageLayout.svelte";
 </script>
 
 <svelte:head>
     <title>Error - Skill Circuits</title>
 </svelte:head>
 
-<main>
+<PageLayout>
     <div class="content">
 
         <h1>Error</h1>
@@ -13,15 +14,9 @@
         <p>Oops something went wrong :(</p>
 
     </div>
-</main>
+</PageLayout>
 
 <style>
-    main {
-        margin-inline: auto;
-        max-width: min(100%, 80rem);
-        padding: 4rem 2rem 2rem 2rem;
-    }
-
     h1 {
         color: var(--on-background-colour);
         font-size: var(--font-size-700);

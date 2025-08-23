@@ -19,10 +19,9 @@ package nl.tudelft.skills.service.old;
 
 import java.util.Collection;
 
-import jakarta.transaction.Transactional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
+import jakarta.transaction.Transactional;
 import nl.tudelft.skills.model.RegularTask;
 import nl.tudelft.skills.repository.ClickedLinkRepository;
 

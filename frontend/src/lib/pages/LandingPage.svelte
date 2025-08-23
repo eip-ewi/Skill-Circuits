@@ -3,6 +3,10 @@
     import EditionCardComponent from "../components/edition/EditionCardComponent.svelte";
     import HeaderComponent from "../components/HeaderComponent.svelte";
     import {clearLevel} from "../logic/circuit/level.svelte";
+    import {getAuthorisation} from "../logic/authorisation.svelte";
+    import PageTabs from "../components/util/PageTabs.svelte";
+    import Tab from "../components/util/Tab.svelte";
+    import PageLayout from "./PageLayout.svelte";
 
     let editions: Editions | undefined = $state();
 
@@ -18,14 +22,17 @@
     <title>My Courses - Skill Circuits</title>
 </svelte:head>
 
-<main>
+<PageLayout>
     <div class="content">
 
-        {#await load()}
-            <div></div>
-        {:then _}
+        <PageTabs>
+            <Tab page="/">My courses</Tab>
+            <Tab page="/editions">Course catalog</Tab>
+        </PageTabs>
 
-            <h1>My Courses</h1>
+        <h1>My Courses</h1>
+
+        {#await load() then _}
 
             {#if editions !== undefined}
 
@@ -33,7 +40,7 @@
                     <div class="editions">
                         <h2>Current editions</h2>
                         {#each editions.currentEditions as editionView}
-                            <EditionCardComponent edition={editionView.edition} role={editionView.role}></EditionCardComponent>
+                            <EditionCardComponent edition={editionView}></EditionCardComponent>
                         {/each}
                     </div>
                 {/if}
@@ -42,7 +49,7 @@
                     <div class="editions">
                         <h2>Upcoming editions</h2>
                         {#each editions.currentEditions as editionView}
-                            <EditionCardComponent edition={editionView.edition} role={editionView.role}></EditionCardComponent>
+                            <EditionCardComponent edition={editionView}></EditionCardComponent>
                         {/each}
                     </div>
                 {/if}
@@ -51,7 +58,7 @@
                     <div class="editions">
                         <h2>Finished editions</h2>
                         {#each editions.finishedEditions as editionView}
-                            <EditionCardComponent edition={editionView.edition} role={editionView.role}></EditionCardComponent>
+                            <EditionCardComponent edition={editionView}></EditionCardComponent>
                         {/each}
                     </div>
                 {/if}
@@ -60,7 +67,7 @@
                     <div class="editions">
                         <h2>Archived editions</h2>
                         {#each editions.archivedEditions as editionView}
-                            <EditionCardComponent edition={editionView.edition} role={editionView.role}></EditionCardComponent>
+                            <EditionCardComponent edition={editionView}></EditionCardComponent>
                         {/each}
                     </div>
                 {/if}
@@ -70,20 +77,14 @@
 
     </div>
 
-</main>
+</PageLayout>
 
 <style>
-    main {
-        margin-inline: auto;
-        max-width: min(100%, 80rem);
-        padding: 4rem 2rem 2rem 2rem;
-    }
-
     h1 {
         color: var(--on-background-colour);
         font-size: var(--font-size-700);
         font-weight: 500;
-        margin-bottom: 2rem;
+        margin-block: 2rem;
         text-align: center;
     }
 
@@ -96,7 +97,8 @@
 
     .editions {
         background-color: var(--group-colour);
-        border-radius: 24px;
+        border: 1px solid var(--group-border-colour);
+        border-radius: var(--group-border-radius);
         display: grid;
         gap: 1rem;
         grid-template-columns: repeat(auto-fill, minmax(23rem, 1fr));

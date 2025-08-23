@@ -19,7 +19,6 @@ package nl.tudelft.skills.dto.old.view.edition;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
 import lombok.*;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.model.Path;

@@ -28,10 +28,7 @@ import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
 import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
-import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
-import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.old.view.course.CourseLevelCourseViewDTO;
-import nl.tudelft.skills.dto.old.view.course.CourseLevelEditionViewDTO;
 import nl.tudelft.skills.model.SCCourse;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.CourseRepository;
@@ -66,18 +63,18 @@ public class CourseService {
 	@Transactional
 	public CourseLevelCourseViewDTO getCourseView(Long id) {
 		CourseDetailsDTO course = courseApi.getCourseById(id).block();
-        return null;
-//		CourseLevelCourseViewDTO view = View.convert(getOrCreateSCCourse(id),
-//				CourseLevelCourseViewDTO.class);
-//
-//		view.setName(course.getName());
-//
-//		view.setCode(course.getCode());
-//
-//		view.setEditions(course.getEditions().stream()
-//				.map(e -> new CourseLevelEditionViewDTO(e.getId(), e.getName())).toList());
-//
-//		return view;
+		return null;
+		//		CourseLevelCourseViewDTO view = View.convert(getOrCreateSCCourse(id),
+		//				CourseLevelCourseViewDTO.class);
+		//
+		//		view.setName(course.getName());
+		//
+		//		view.setCode(course.getCode());
+		//
+		//		view.setEditions(course.getEditions().stream()
+		//				.map(e -> new CourseLevelEditionViewDTO(e.getId(), e.getName())).toList());
+		//
+		//		return view;
 	}
 
 	/**
@@ -123,23 +120,23 @@ public class CourseService {
 		// Otherwise, calls getLastEditionForCourse to get the last edition (by starting date).
 		return course.getEditions().stream()
 				.filter(edition -> {
-					RoleDetailsDTO.TypeEnum role = authorisationService.getRoleInEdition(edition.getId());
+					//					RoleDetailsDTO.TypeEnum role = authorisationService.getRoleInEdition(edition.getId());
 
-					// Discard, if the role is null
-					if (role == null) {
-						return false;
-					}
-
-					// If the user is at least a head TA, the edition does not have to be visible
-					if (userIsAdmin || role == HEAD_TA || role == TEACHER) {
-						return true;
-					}
-
-					// For TAs and students, the edition needs to be visible
-					if (role == STUDENT || role == TA) {
-						return editionRepository.findById(edition.getId()).map(SCEdition::isVisible)
-								.orElse(false);
-					}
+					//					// Discard, if the role is null
+					//					if (role == null) {
+					//						return false;
+					//					}
+					//
+					//					// If the user is at least a head TA, the edition does not have to be visible
+					//					if (userIsAdmin || role == HEAD_TA || role == TEACHER) {
+					//						return true;
+					//					}
+					//
+					//					// For TAs and students, the edition needs to be visible
+					//					if (role == STUDENT || role == TA) {
+					//						return editionRepository.findById(edition.getId()).map(SCEdition::isVisible)
+					//								.orElse(false);
+					//					}
 
 					// Otherwise, the user has an invalid role, so discard (here only BLOCKED)
 					return false;

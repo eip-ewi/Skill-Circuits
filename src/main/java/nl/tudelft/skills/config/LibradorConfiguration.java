@@ -19,7 +19,6 @@ package nl.tudelft.skills.config;
 
 import static org.modelmapper.convention.MatchingStrategies.STRICT;
 
-import nl.tudelft.skills.dto.id.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -28,7 +27,10 @@ import org.springframework.context.annotation.Configuration;
 import nl.tudelft.librador.EnableLibrador;
 import nl.tudelft.librador.LibradorConfigAdapter;
 import nl.tudelft.librador.dto.id.IdMapperBuilder;
+import nl.tudelft.skills.dto.id.*;
 import nl.tudelft.skills.model.*;
+import nl.tudelft.skills.model.bookmark.BookmarkList;
+import nl.tudelft.skills.model.bookmark.PersonalBookmarkList;
 
 @Configuration
 @EnableLibrador
@@ -36,17 +38,20 @@ public class LibradorConfiguration extends LibradorConfigAdapter {
 
 	@Override
 	protected void configure(IdMapperBuilder builder) {
-        builder.register(AbstractSkillId.class, AbstractSkill.class);
+		builder.register(AbstractSkillId.class, AbstractSkill.class);
+		builder.register(BookmarkListId.class, BookmarkList.class);
 		builder.register(CheckpointId.class, Checkpoint.class);
-        builder.register(ChoiceTaskId.class, ChoiceTask.class);
-        builder.register(PathId.class, Path.class);
-        builder.register(RegularTaskId.class, RegularTask.class);
+		builder.register(ChoiceTaskId.class, ChoiceTask.class);
+		builder.register(PathId.class, Path.class);
+		builder.register(PersonalBookmarkListId.class, PersonalBookmarkList.class);
+		builder.register(RegularTaskId.class, RegularTask.class);
 		builder.register(SCEditionId.class, SCEdition.class);
 		builder.register(SCModuleId.class, SCModule.class);
+		builder.register(SCPersonId.class, SCPerson.class);
 		builder.register(SubmoduleId.class, Submodule.class);
 		builder.register(SkillId.class, Skill.class);
 		builder.register(TaskId.class, Task.class);
-        builder.register(TaskInfoId.class, TaskInfo.class);
+		builder.register(TaskInfoId.class, TaskInfo.class);
 	}
 
 	@Bean

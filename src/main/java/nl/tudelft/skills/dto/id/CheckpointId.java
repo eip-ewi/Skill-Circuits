@@ -17,6 +17,8 @@
  */
 package nl.tudelft.skills.dto.id;
 
+import org.springframework.data.repository.CrudRepository;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -25,7 +27,6 @@ import lombok.experimental.SuperBuilder;
 import nl.tudelft.librador.dto.id.IdDTO;
 import nl.tudelft.skills.model.Checkpoint;
 import nl.tudelft.skills.repository.CheckpointRepository;
-import org.springframework.data.repository.CrudRepository;
 
 @Data
 @SuperBuilder

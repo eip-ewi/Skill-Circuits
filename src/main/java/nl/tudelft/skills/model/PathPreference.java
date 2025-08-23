@@ -18,7 +18,6 @@
 package nl.tudelft.skills.model;
 
 import jakarta.persistence.*;
-
 import lombok.*;
 
 @Data

@@ -7,6 +7,8 @@
     import {isUnlocked} from "../../../logic/circuit/display/unlock";
     import {isCompleted} from "../../../logic/circuit/display/completion";
     import {getCircuit} from "../../../logic/circuit/circuit.svelte";
+    import {onMount, tick} from "svelte";
+    import {getTheme} from "../../../logic/theme.svelte";
 
     let { from, to }: { from: Block, to: Block } = $props();
 
@@ -15,11 +17,28 @@
 
     let element: SVGPathElement | undefined = $state();
 
+    let radius: number = $state(getDefinedRadius());
+
+    onMount(() => {
+        radius = Math.max(3.2, Math.min(16 * window.innerWidth / 1732, 16));
+    });
+
     $effect(() => {
         if (element !== undefined && !locked && !canEditCircuit()) {
             animate();
         }
     });
+
+    $effect(() => {
+        getTheme();
+        tick().then(() => {
+            radius = getDefinedRadius();
+        });
+    })
+
+    function getDefinedRadius() {
+        return parseInt(getComputedStyle(document.documentElement).getPropertyValue("--connection-radius"));
+    }
 
     function animate() {
         let length = element!.getTotalLength();
@@ -31,24 +50,29 @@
     }
 </script>
 
+<svelte:window onresize={ () => radius = Math.max(3.2, Math.min(getDefinedRadius() * window.innerWidth / 1732, getDefinedRadius())) }></svelte:window>
+
 {#if getCircuit().boundingRect !== undefined && from.boundingRect !== undefined && to.boundingRect !== undefined}
-    <path xmlns="http://www.w3.org/2000/svg" class="line" d={generatePathString(createConnectionPath(from, to), 16)}
-          data-locked={locked} data-preview={to.preview === true} bind:this={element} data-animate={animated}/>
+    {@const path = createConnectionPath(from, to)}
+    {#if path !== undefined}
+        <path xmlns="http://www.w3.org/2000/svg" class="line" d={generatePathString(path, radius)}
+              data-locked={locked} data-preview={to.preview === true} bind:this={element} data-animate={animated}/>
+    {/if}
 {/if}
 
 <style>
     path {
         fill: none;
         padding: .25rem;
-        stroke: #575757;
-        stroke-width: 4px;
+        stroke: var(--connection-colour);
+        stroke-width: var(--connection-width);
         transition: filter ease-in-out 150ms, opacity ease-in-out 150ms;
         z-index: 10;
     }
 
     path:hover {
-        stroke: color-mix(in oklab, var(--secondary-colour) 80%, var(--background-colour));
-        stroke-width: 6px;
+        stroke: var(--connection-highlighted-colour);
+        stroke-width: var(--connection-highlighted-width);
     }
 
     path[data-animate="true"] {
@@ -59,12 +83,11 @@
 
     path[data-locked="true"] {
         opacity: 0;
-        filter: blur(.2rem);
-        stroke: #c0c0c0;
+        filter: blur(.2em);
     }
 
     path[data-preview="true"] {
-        opacity: 1;
+        opacity: 0.3;
     }
 
     @keyframes draw {

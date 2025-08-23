@@ -11,11 +11,13 @@ export interface ISkillBlock extends IBlock {
 
 export interface RegularSkillBlock extends ISkillBlock {
     checkpoint: number | null;
+    hidden: boolean;
     external: false;
 }
 
 export interface ExternalSkillBlock extends ISkillBlock {
     checkpoint: null;
+    hidden: undefined;
     external: true;
 }
 

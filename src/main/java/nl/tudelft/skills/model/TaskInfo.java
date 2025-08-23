@@ -17,18 +17,17 @@
  */
 package nl.tudelft.skills.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
 import lombok.*;
 import nl.tudelft.skills.enums.TaskType;
-
-import java.util.HashSet;
-import java.util.Set;
-
+import nl.tudelft.skills.model.bookmark.BookmarkList;
 
 @Data
 @Entity
@@ -45,7 +44,7 @@ public class TaskInfo {
 
 	@NotNull
 	@Builder.Default
-    @Enumerated(EnumType.STRING)
+	@Enumerated(EnumType.STRING)
 	private TaskType type = TaskType.EXERCISE;
 
 	@Builder.Default
@@ -60,23 +59,30 @@ public class TaskInfo {
 	@OneToOne(cascade = CascadeType.ALL)
 	private RegularTask task;
 
-    @Nullable
-    @ManyToOne
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private ChoiceTask choiceTask;
+	@Nullable
+	@ManyToOne
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	private ChoiceTask choiceTask;
 
-    @NotNull
-    @Builder.Default
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "task")
-    private Set<TaskCompletion> completedBy = new HashSet<>();
+	@NotNull
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@OneToMany(mappedBy = "task")
+	private Set<TaskCompletion> completedBy = new HashSet<>();
 
-    @NotNull
-    @Builder.Default
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "task")
-    private Set<ClickedLink> clickedLinks = new HashSet<>();
+	@NotNull
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@OneToMany(mappedBy = "task")
+	private Set<ClickedLink> clickedLinks = new HashSet<>();
+
+	@NotNull
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@ManyToMany(mappedBy = "tasks")
+	private Set<BookmarkList> onLists = new HashSet<>();
 }

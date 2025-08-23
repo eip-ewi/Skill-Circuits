@@ -20,20 +20,18 @@ package nl.tudelft.skills.controller;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.transaction.Transactional;
-
-import nl.tudelft.skills.dto.old.view.ClickedLinkDTO;
-import nl.tudelft.skills.model.SCPerson;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.transaction.Transactional;
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.skills.model.ClickedLink;
+import nl.tudelft.skills.dto.old.view.ClickedLinkDTO;
 import nl.tudelft.skills.model.RegularTask;
+import nl.tudelft.skills.model.SCPerson;
 import nl.tudelft.skills.repository.ClickedLinkRepository;
+import nl.tudelft.skills.repository.PersonRepository;
 import nl.tudelft.skills.repository.RegularTaskRepository;
-import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 @RestController
 @RequestMapping("/clicked_links")
@@ -63,8 +61,8 @@ public class ClickedLinkController {
 		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
 		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
 
-//		clickedLinkRepository.save(ClickedLink.builder()
-//				.task(task).person(person).build());
+		//		clickedLinkRepository.save(ClickedLink.builder()
+		//				.task(task).person(person).build());
 
 	}
 
@@ -85,13 +83,13 @@ public class ClickedLinkController {
 		for (var clickedLink : allClickedLinks) {
 			Long taskId = clickedLink.getTask().getId();
 			String taskName = clickedLink.getTask().getName();
-//			String skillName = clickedLink.getTask().getSkill().getName();
-//			Long editionId = clickedLink.getTask().getSkill().getSubmodule().getModule().getEdition().getId();
+			//			String skillName = clickedLink.getTask().getSkill().getName();
+			//			Long editionId = clickedLink.getTask().getSkill().getSubmodule().getModule().getEdition().getId();
 			Long personId = clickedLink.getPerson().getId();
-//			ClickedLinkDTO clickedLinkInfo = new ClickedLinkDTO(clickedLink.getId(), taskId, taskName,
-//					skillName, editionId, personId,
-//					clickedLink.getTimestamp());
-//			clickedLinksInfo.add(clickedLinkInfo);
+			//			ClickedLinkDTO clickedLinkInfo = new ClickedLinkDTO(clickedLink.getId(), taskId, taskName,
+			//					skillName, editionId, personId,
+			//					clickedLink.getTimestamp());
+			//			clickedLinksInfo.add(clickedLinkInfo);
 		}
 		return clickedLinksInfo;
 	}

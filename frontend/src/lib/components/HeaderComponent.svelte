@@ -7,11 +7,15 @@
     import {getCircuit} from "../logic/circuit/circuit.svelte";
     import {cubicInOut, linear} from "svelte/easing";
     import type {Attachment} from "svelte/attachments";
-    import {canEditCircuit, getAuthorisation, isEditorForCircuit, setViewMode, toggleViewMode} from "../logic/authorisation.svelte";
+    import {canEditCircuit, getAuthorisation, isEditorForAny, isEditorForCircuit, setViewMode, toggleViewMode} from "../logic/authorisation.svelte";
     import Csrf from "./Csrf.svelte";
     import {loadHomePage, loadPage, pageMatches} from "../logic/routing.svelte";
     import {fade} from "svelte/transition";
     import {getEdition} from "../logic/edition/edition.svelte";
+    import ThemeSelectComponent from "./ThemeSelectComponent.svelte";
+    import WIthConfirmationDialog from "./util/WithConfirmationDialog.svelte";
+    import WithConfirmationDialog from "./util/WithConfirmationDialog.svelte";
+    import {resetProgress} from "../logic/updates/edition_updates";
 
     let userMenuOpen: boolean = $state(false);
 
@@ -22,13 +26,17 @@
         }
     }
 
+    function openThemeDialog() {
+        (document.getElementById("theme-select") as HTMLDialogElement).showModal();
+    }
+
     function shrinkLeftMargin(node: HTMLElement, params: { delay?: number }) {
         return {
             delay: params.delay || 0,
             duration: 200,
             easing: cubicInOut,
             css: (t: number) => `
-                margin-left: ${(1-t) * 4 + 8}rem;
+                margin-left: calc(${(1-t) / 3} * var(--spacing) + var(--spacing) / 3 * 2);
             `,
         };
     }
@@ -39,7 +47,7 @@
             duration: 200,
             easing: cubicInOut,
             css: (t: number) => `
-                margin-left: ${t * 4.25 + 7.75}rem;
+                margin-left: calc(${t / 48  * 17} * var(--spacing) + var(--spacing) / 48 * 31);
                 opacity: ${t};
             `,
         };
@@ -51,7 +59,7 @@
             duration: 200,
             easing: cubicInOut,
             css: (t: number) => `
-                transform: translateX(calc(${(1-t) * -100}% - ${(1-t) * 2}rem));
+                transform: translateX(calc(${(1-t) * -100}% - ${(1-t) * 2}em));
             `,
         };
     }
@@ -66,8 +74,8 @@
                 background: color-mix(in srgb, white ${t * 25}%, transparent);
                 box-shadow:
                         .75rem 1.25rem 1.9rem 0 color-mix(in srgb, var(--shadow-colour) ${t * 4}%, transparent),
-                        inset 0.125rem 0.125rem 0.0625rem 0 rgba(255 255 255 / ${t * 0.5}),
-                        inset -0.0625rem -0.0625rem 0.0625rem rgba(255 255 255 / ${t * 0.5});
+                        inset 0.125em 0.125em 0.0625em 0 color-mix(in srgb, var(--glass-glint-colour) ${t * 60}%, transparent),
+                        inset -0.0625em -0.0625em 0.0625em color-mix(in srgb, var(--glass-glint-colour) ${t * 40}%, transparent);
             `,
         };
     }
@@ -86,7 +94,7 @@
 
 {#if isOnCircuit() || pageMatches(/\//)}
     <div class="header-wrapper">
-        <div class="header surface">
+        <div class="header glass surface">
             {#if !isOnCircuit()}
                 <button class="button" onclick={returnToLastLeftOf}>
                     <span class="icon fa-solid fa-play"></span>
@@ -118,7 +126,7 @@
             </button>
 
             {#if userMenuOpen}
-                <div in:shrinkLeftMargin={{}} style="opacity: 0; margin-left: 8rem;" aria-hidden="true">
+                <div in:shrinkLeftMargin={{}} style="opacity: 0; margin-left: calc(var(--spacing) / 3 * 2);" aria-hidden="true">
                     <span class="icon fa-solid fa-user-circle"></span>
                     <span>{getAuthenticatedPerson()!.displayName}</span>
                 </div>
@@ -132,7 +140,7 @@
 
         {#if userMenuOpen}
             <div class="user-menu" in:moveRight={{}} out:moveRight={{delay: 200}}>
-                <div class="surface" in:growVertical={{delay: 200}} out:growVertical={{}}>
+                <div class="glass surface" in:growVertical={{delay: 200}} out:growVertical={{}}>
                     <form action="/logout" method="post">
                         <Csrf></Csrf>
                         <button class="button">
@@ -140,7 +148,24 @@
                             <span>Log out</span>
                         </button>
                     </form>
-                    {#if isOnCircuit() && isEditorForCircuit()}
+                    <button class="button" onclick={openThemeDialog}>
+                        <span class="icon fa-solid fa-palette"></span>
+                        <span>Theme</span>
+                    </button>
+                    {#if !canEditCircuit() && isLevel(EditionLevel)}
+                        <WithConfirmationDialog icon="fa-solid fa-repeat" action="Reset progress" onconfirm={ () => resetProgress() }>
+                            {#snippet button(openConfirmationDialog: () => void) }
+                                <button class="button" onclick={openConfirmationDialog}>
+                                    <span class="icon fa-solid fa-repeat"></span>
+                                    <span>Reset progress</span>
+                                </button>
+                            {/snippet}
+                            <p>
+                                Are you sure you want to reset all your progress in '{getEdition().name}'?
+                            </p>
+                        </WithConfirmationDialog>
+                    {/if}
+                    {#if isEditorForAny()}
                         {#if canEditCircuit()}
                             <button class="button" onclick={ () => toggleViewMode() }>
                                 <span class="icon fa-solid fa-eye"></span>
@@ -163,7 +188,7 @@
                         <span class="icon fa-solid fa-chevron-down"></span>
                     </button>
                 </div>
-                <div class="surface" in:becomeSurface={{}} out:becomeSurface={{delay: 200}}>
+                <div class="glass surface" in:becomeSurface={{}} out:becomeSurface={{delay: 200}}>
                     <button class="button">
                         <span class="icon fa-solid fa-user-circle"></span>
                         <span>Profile</span>
@@ -172,12 +197,18 @@
             </div>
         {/if}
     </div>
+
+    <ThemeSelectComponent></ThemeSelectComponent>
 {/if}
+
 
 <style>
     .header-wrapper {
+        --spacing: calc(min(calc(12em * 4), calc(100vw - 20rem)) / 4);
+        font-size: clamp(0.5rem, 0.85vw, 1rem);
+
         bottom: 2rem;
-        gap: 2rem;
+        gap: 2em;
         left: 50%;
         position: fixed;
         translate: -50% 0;
@@ -187,18 +218,19 @@
     .header {
         align-items: center;
         display: flex;
+        white-space: nowrap;
     }
 
     .header > * + * {
-        margin-left: 12rem;
+        margin-left: var(--spacing);
     }
 
     .user-menu {
         bottom: 0;
         display: grid;
-        gap: 1rem;
-        left: calc(100% + 2rem);
-        min-width: 7.75rem;
+        gap: 1em;
+        left: calc(100% + 2em);
+        min-width: 7.75em;
         position: absolute;
     }
 
@@ -206,50 +238,41 @@
         display: grid;
     }
 
-    .user-menu :first-child {
+    .user-menu > :first-child {
+        justify-content: center;
         transform-origin: bottom;
     }
 
-    .surface {
-        border-radius: 100vh;
-        box-shadow:
-                .75rem 1.25rem 1.9rem 0 color-mix(in srgb, var(--shadow-colour) 4%, transparent),
-                inset 0.125rem 0.125rem 0.0625rem 0 rgba(255 255 255 / 0.6),
-                inset -0.0625rem -0.0625rem 0.0625rem rgba(255 255 255 / 0.4);
-        padding: 1rem 1rem;
-        position: relative;
-        overflow: hidden;
+    .user-menu > :last-child {
+        white-space: nowrap;
     }
 
-    .surface::before {
-        backdrop-filter: blur(.5rem) saturate(180%);
-        background-color: color-mix(in srgb, white 25%, transparent);
-        content: "";
-        height: 200%;
-        left: -50%;
-        position: absolute;
-        top: -50%;
-        width: 200%;
-        z-index: -1;
+    .user-menu form {
+        display: grid;
+    }
+
+    .surface {
+        border-radius: var(--header-border-radius);
+        padding: 1em 1em;
     }
 
     .button {
-        background: none;
+        background: var(--on-glass-surface-colour);
         border: none;
-        border-radius: 100vh;
-        color: var(--on-header-colour);
+        border-radius: var(--header-border-radius);
+        color: var(--on-glass-colour);
         cursor: pointer;
         display: grid;
         justify-items: center;
-        gap: 0.5rem;
-        padding: 1rem;
+        gap: 0.5em;
+        padding: 1em;
         text-decoration: none;
     }
     .button:focus-visible, .button:hover {
-        background: color-mix(in srgb, color-mix(in oklab, var(--primary-colour) 40%, white) 25%, transparent);
+        background: var(--on-glass-surface-active-colour);
     }
 
     .icon {
-        font-size: var(--font-size-600);
+        font-size: 1.5em;
     }
 </style>

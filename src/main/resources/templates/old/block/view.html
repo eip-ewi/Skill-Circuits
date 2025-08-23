@@ -127,7 +127,9 @@
                 th:data-block="${block.id}"></button>
         </div>
 
-        <span class="block__info" th:if="${levelSvelte == 'module'} ? ${not block.essential} : ${false}">
+        <span
+            class="block__info"
+            th:if="${levelSvelte == 'module'} ? ${not block.essential} : ${false}">
             Optional
         </span>
 

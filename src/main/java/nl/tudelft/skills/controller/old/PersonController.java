@@ -17,218 +17,194 @@
  */
 package nl.tudelft.skills.controller;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.transaction.Transactional;
-
-import nl.tudelft.skills.service.old.PersonService;
-import org.springframework.web.bind.annotation.*;
-
-import lombok.AllArgsConstructor;
-import nl.tudelft.labracore.api.RoleControllerApi;
-import nl.tudelft.labracore.api.dto.*;
-import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
-import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.skills.model.*;
-import nl.tudelft.skills.repository.PathRepository;
-import nl.tudelft.skills.repository.RegularTaskRepository;
-import nl.tudelft.skills.repository.SkillRepository;
-import nl.tudelft.skills.repository.TaskRepository;
-import nl.tudelft.skills.repository.labracore.PersonRepository;
-import nl.tudelft.skills.security.AuthorisationService;
-import nl.tudelft.skills.service.TaskCompletionService;
-
-@RestController
-@RequestMapping("/person")
-@AllArgsConstructor
-public class PersonController {
-
-	private final RegularTaskRepository regularTaskRepository;
-	private final TaskRepository taskRepository;
-	private final PersonRepository scPersonRepository;
-	private final TaskCompletionService taskCompletionService;
-	private final SkillRepository skillRepository;
-	private final PathRepository pathRepository;
-	private final AuthorisationService authorisationService;
-	private final RoleControllerApi roleControllerApi;
-//	private final PersonService personService;
-
-	/**
-	 * Marks a certain task as completed or uncompleted for a certain person.
-	 *
-	 * @param authPerson the currently authenticated person
-	 * @param taskId     the id of the task
-	 * @param completed  whether the task has been completed or uncompleted
-	 */
-//	@PutMapping("completion/{taskId}")
-//	@Transactional
-//	@ResponseBody
-//	public TaskCompletedDTO updateTaskCompletedForPerson(@AuthenticatedPerson Person authPerson,
-//                                                         @PathVariable Long taskId, @RequestBody boolean completed) {
-//		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
-//		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
-//		if (completed) {
-//			taskCompletionService.addTaskCompletion(person, task);
+//@RestController
+//@RequestMapping("/person")
+//@AllArgsConstructor
+//public class PersonController {
 //
-//			// If a user with default student role has no role, set it to be a student role
-//			ifNoStudentRoleSetStudentRole(authPerson.getId(), task.getSkill().getSubmodule().getModule()
-//					.getEdition().getId());
+//	private final RegularTaskRepository regularTaskRepository;
+//	private final TaskRepository taskRepository;
+//	private final PersonRepository scPersonRepository;
+//	private final TaskCompletionService taskCompletionService;
+//	private final SkillRepository skillRepository;
+//	private final PathRepository pathRepository;
+//	private final AuthorisationService authorisationService;
+//	private final RoleControllerApi roleControllerApi;
+////	private final PersonService personService;
 //
-//			List<RegularTask> completedTasks = person.getTaskCompletions().stream()
-//					.map(TaskCompletion::getTask).toList();
+//	/**
+//	 * Marks a certain task as completed or uncompleted for a certain person.
+//	 *
+//	 * @param authPerson the currently authenticated person
+//	 * @param taskId     the id of the task
+//	 * @param completed  whether the task has been completed or uncompleted
+//	 */
+////	@PutMapping("completion/{taskId}")
+////	@Transactional
+////	@ResponseBody
+////	public TaskCompletedDTO updateTaskCompletedForPerson(@AuthenticatedPerson Person authPerson,
+////                                                         @PathVariable Long taskId, @RequestBody boolean completed) {
+////		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
+////		RegularTask task = regularTaskRepository.findByIdOrThrow(taskId);
+////		if (completed) {
+////			taskCompletionService.addTaskCompletion(person, task);
+////
+////			// If a user with default student role has no role, set it to be a student role
+////			ifNoStudentRoleSetStudentRole(authPerson.getId(), task.getSkill().getSubmodule().getModule()
+////					.getEdition().getId());
+////
+////			List<RegularTask> completedTasks = person.getTaskCompletions().stream()
+////					.map(TaskCompletion::getTask).toList();
+////
+////			List<Skill> revealedSkills = task.getRequiredFor().stream()
+////					.filter(s -> new HashSet<>(completedTasks).containsAll(s.getRequiredTasks()))
+////					.collect(Collectors.toCollection(ArrayList::new));
+////
+////			// Store newly revealed skills in authPerson.tasksRevealed
+////			Set<Skill> prefRevealed = personService.getOrCreateSCPerson(authPerson.getId())
+////					.getSkillsRevealed();
+////			revealedSkills.removeAll(prefRevealed);
+////			revealedSkills.forEach(s -> personService.addRevealedSkill(authPerson.getId(), s));
+////			return new TaskCompletedDTO(revealedSkills.stream().map(Skill::getId).toList());
+////
+////		} else {
+////			taskCompletionService.deleteTaskCompletion(person, task);
+////		}
+////		return new TaskCompletedDTO(Collections.emptyList());
+////	}
 //
-//			List<Skill> revealedSkills = task.getRequiredFor().stream()
-//					.filter(s -> new HashSet<>(completedTasks).containsAll(s.getRequiredTasks()))
-//					.collect(Collectors.toCollection(ArrayList::new));
-//
-//			// Store newly revealed skills in authPerson.tasksRevealed
-//			Set<Skill> prefRevealed = personService.getOrCreateSCPerson(authPerson.getId())
-//					.getSkillsRevealed();
-//			revealedSkills.removeAll(prefRevealed);
-//			revealedSkills.forEach(s -> personService.addRevealedSkill(authPerson.getId(), s));
-//			return new TaskCompletedDTO(revealedSkills.stream().map(Skill::getId).toList());
-//
-//		} else {
-//			taskCompletionService.deleteTaskCompletion(person, task);
+//	/**
+//	 * If the user has a default student role but no role assigned in the edition, set them to have the
+//	 * student role.
+//	 *
+//	 * @param personId  The Labracore id of the authenticated user.
+//	 * @param editionId The id of the edition to change the role in.
+//	 */
+//	void ifNoStudentRoleSetStudentRole(Long personId, Long editionId) {
+//		// If the user has a role, or is not a student by default, do not do anything
+//		RoleDetailsDTO.TypeEnum type = authorisationService.getRoleInEdition(editionId);
+//		if (type != null || !authorisationService.isStudent()) {
+//			return;
 //		}
-//		return new TaskCompletedDTO(Collections.emptyList());
+//
+//		RoleCreateDTO roleCreateDTO = new RoleCreateDTO().person(new PersonIdDTO().id(personId))
+//				.edition(new EditionIdDTO().id(editionId)).type(RoleCreateDTO.TypeEnum.STUDENT);
+//		roleControllerApi.addRole(roleCreateDTO).block();
 //	}
-
-	/**
-	 * If the user has a default student role but no role assigned in the edition, set them to have the
-	 * student role.
-	 *
-	 * @param personId  The Labracore id of the authenticated user.
-	 * @param editionId The id of the edition to change the role in.
-	 */
-	void ifNoStudentRoleSetStudentRole(Long personId, Long editionId) {
-		// If the user has a role, or is not a student by default, do not do anything
-		RoleDetailsDTO.TypeEnum type = authorisationService.getRoleInEdition(editionId);
-		if (type != null || !authorisationService.isStudent()) {
-			return;
-		}
-
-		RoleCreateDTO roleCreateDTO = new RoleCreateDTO().person(new PersonIdDTO().id(personId))
-				.edition(new EditionIdDTO().id(editionId)).type(RoleCreateDTO.TypeEnum.STUDENT);
-		roleControllerApi.addRole(roleCreateDTO).block();
-	}
-
-	/**
-	 * Marks a list of task as completed for a certain person.
-	 *
-	 * @param authPerson     the currently authenticated person
-	 * @param completedTasks a list of ids of completed tasks
-	 */
-	@PutMapping("complete")
-	@Transactional
-	public void setTasksCompletedForPerson(@AuthenticatedPerson Person authPerson,
-			@RequestBody List<Long> completedTasks) {
-		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
-
-		List<RegularTask> tasks = regularTaskRepository.findAllById(completedTasks);
-//		tasks.forEach(task -> taskCompletionService.addTaskCompletion(person, task));
-	}
-
-	/**
-	 * Adds a task to the user custom path.
-	 *
-	 * @param  authPerson the currently authenticated person.
-	 * @param  taskId     id of task to be added to custom path.
-	 * @return            List of task ids in the order they should appear in the skill.
-	 */
-	@PutMapping("add/{taskId}")
-	@Transactional
-	public List<Long> addTaskToOwnPath(@AuthenticatedPerson Person authPerson, @PathVariable Long taskId) {
-		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
-		Task task = taskRepository.findByIdOrThrow(taskId);
-
-		// if first time modifying skill, put all tasks from current path in own path
-
-		if (!person.getSkillsModified().contains(task.getSkill())) {
-			addAllTaskFromCurrentPath(person, task);
-			person.getSkillsModified().add(task.getSkill());
-		}
-
-		person.getTasksAdded().add(task);
-
-		return task.getSkill().getTasks().stream().map(Task::getId).collect(Collectors.toList());
-	}
-
-	/**
-	 * Remove a task from the user custom path.
-	 *
-	 * @param  authPerson the currently authenticated person.
-	 * @param  taskId     id of task to be added to custom path.
-	 * @return            List of task ids in the order they should appear in the skill.
-	 */
-	@PutMapping("remove/{taskId}")
-	@Transactional
-	public List<Long> removeTaskFromOwnPath(@AuthenticatedPerson Person authPerson,
-			@PathVariable Long taskId) {
-		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
-		Task task = taskRepository.findByIdOrThrow(taskId);
-
-		// if first time modifying skill, put all tasks from current path in own path
-		if (!person.getSkillsModified().contains(task.getSkill())) {
-			addAllTaskFromCurrentPath(person, task);
-			person.getSkillsModified().add(task.getSkill());
-		}
-
-		person.getTasksAdded().remove(task);
-
-		return task.getSkill().getTasks().stream().map(Task::getId).collect(Collectors.toList());
-	}
-
-	/**
-	 * Resets a custom skill for a student. All tasks in the skill will be according to the selected path.
-	 *
-	 * @param authPerson the currently authenticated person.
-	 * @param skillId    id of the skill to be reset.
-	 */
-	@PostMapping("reset/{skillId}")
-	@Transactional
-	public void resetSkill(@AuthenticatedPerson Person authPerson, @PathVariable Long skillId,
-			HttpServletResponse response) throws IOException {
-		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
-		Skill skill = skillRepository.findByIdOrThrow(skillId);
-
-		// Remove the skill from the set of custom skills
-		person.setSkillsModified(
-				person.getSkillsModified().stream().filter(s -> !s.getId().equals(skillId))
-						.collect(Collectors.toSet()));
-		//Remove the tasks from the custom skill
-		person.setTasksAdded(
-				person.getTasksAdded().stream().filter(t -> !t.getSkill().getId().equals(skillId))
-						.collect(Collectors.toSet()));
-
-		response.sendRedirect("/module/" + skill.getSubmodule().getModule().getId() + "#block-" + skillId);
-	}
-
-	/**
-	 * Takes all tasks from a skill on current path and adds them to the set of modified tasks.
-	 *
-	 * @param person The person for which the tasks will be added
-	 * @param task   The abstract task for which the skill is considered
-	 */
-	void addAllTaskFromCurrentPath(SCPerson person, Task task) {
-		Optional<Long> currentPathId = person.getPathPreferences().stream()
-				.filter(p -> p.getEdition().equals(task.getSkill().getSubmodule().getModule().getEdition()))
-				.filter(p -> p.getPath() != null)
-				.map(p -> p.getPath().getId()).findFirst();
-
-		currentPathId.ifPresentOrElse(id -> {
-			Path path = pathRepository.getById(id);
-			task.getSkill().getTasks().forEach(t -> {
-				if (t.getPaths().contains(path))
-					person.getTasksAdded().add(t);
-			});
-		}, () -> {
-			// add all tasks
-			task.getSkill().getTasks().forEach(t -> person.getTasksAdded().add(t));
-		});
-	}
-
-}
+//
+//	/**
+//	 * Marks a list of task as completed for a certain person.
+//	 *
+//	 * @param authPerson     the currently authenticated person
+//	 * @param completedTasks a list of ids of completed tasks
+//	 */
+//	@PutMapping("complete")
+//	@Transactional
+//	public void setTasksCompletedForPerson(@AuthenticatedPerson Person authPerson,
+//			@RequestBody List<Long> completedTasks) {
+//		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
+//
+//		List<RegularTask> tasks = regularTaskRepository.findAllById(completedTasks);
+////		tasks.forEach(task -> taskCompletionService.addTaskCompletion(person, task));
+//	}
+//
+//	/**
+//	 * Adds a task to the user custom path.
+//	 *
+//	 * @param  authPerson the currently authenticated person.
+//	 * @param  taskId     id of task to be added to custom path.
+//	 * @return            List of task ids in the order they should appear in the skill.
+//	 */
+//	@PutMapping("add/{taskId}")
+//	@Transactional
+//	public List<Long> addTaskToOwnPath(@AuthenticatedPerson Person authPerson, @PathVariable Long taskId) {
+//		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
+//		Task task = taskRepository.findByIdOrThrow(taskId);
+//
+//		// if first time modifying skill, put all tasks from current path in own path
+//
+//		if (!person.getSkillsModified().contains(task.getSkill())) {
+//			addAllTaskFromCurrentPath(person, task);
+//			person.getSkillsModified().add(task.getSkill());
+//		}
+//
+//		person.getTasksAdded().add(task);
+//
+//		return task.getSkill().getTasks().stream().map(Task::getId).collect(Collectors.toList());
+//	}
+//
+//	/**
+//	 * Remove a task from the user custom path.
+//	 *
+//	 * @param  authPerson the currently authenticated person.
+//	 * @param  taskId     id of task to be added to custom path.
+//	 * @return            List of task ids in the order they should appear in the skill.
+//	 */
+//	@PutMapping("remove/{taskId}")
+//	@Transactional
+//	public List<Long> removeTaskFromOwnPath(@AuthenticatedPerson Person authPerson,
+//			@PathVariable Long taskId) {
+//		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
+//		Task task = taskRepository.findByIdOrThrow(taskId);
+//
+//		// if first time modifying skill, put all tasks from current path in own path
+//		if (!person.getSkillsModified().contains(task.getSkill())) {
+//			addAllTaskFromCurrentPath(person, task);
+//			person.getSkillsModified().add(task.getSkill());
+//		}
+//
+//		person.getTasksAdded().remove(task);
+//
+//		return task.getSkill().getTasks().stream().map(Task::getId).collect(Collectors.toList());
+//	}
+//
+//	/**
+//	 * Resets a custom skill for a student. All tasks in the skill will be according to the selected path.
+//	 *
+//	 * @param authPerson the currently authenticated person.
+//	 * @param skillId    id of the skill to be reset.
+//	 */
+//	@PostMapping("reset/{skillId}")
+//	@Transactional
+//	public void resetSkill(@AuthenticatedPerson Person authPerson, @PathVariable Long skillId,
+//			HttpServletResponse response) throws IOException {
+//		SCPerson person = scPersonRepository.findByIdOrThrow(authPerson.getId());
+//		Skill skill = skillRepository.findByIdOrThrow(skillId);
+//
+//		// Remove the skill from the set of custom skills
+//		person.setSkillsModified(
+//				person.getSkillsModified().stream().filter(s -> !s.getId().equals(skillId))
+//						.collect(Collectors.toSet()));
+//		//Remove the tasks from the custom skill
+//		person.setTasksAdded(
+//				person.getTasksAdded().stream().filter(t -> !t.getSkill().getId().equals(skillId))
+//						.collect(Collectors.toSet()));
+//
+//		response.sendRedirect("/module/" + skill.getSubmodule().getModule().getId() + "#block-" + skillId);
+//	}
+//
+//	/**
+//	 * Takes all tasks from a skill on current path and adds them to the set of modified tasks.
+//	 *
+//	 * @param person The person for which the tasks will be added
+//	 * @param task   The abstract task for which the skill is considered
+//	 */
+//	void addAllTaskFromCurrentPath(SCPerson person, Task task) {
+//		Optional<Long> currentPathId = person.getPathPreferences().stream()
+//				.filter(p -> p.getEdition().equals(task.getSkill().getSubmodule().getModule().getEdition()))
+//				.filter(p -> p.getPath() != null)
+//				.map(p -> p.getPath().getId()).findFirst();
+//
+//		currentPathId.ifPresentOrElse(id -> {
+//			Path path = pathRepository.getById(id);
+//			task.getSkill().getTasks().forEach(t -> {
+//				if (t.getPaths().contains(path))
+//					person.getTasksAdded().add(t);
+//			});
+//		}, () -> {
+//			// add all tasks
+//			task.getSkill().getTasks().forEach(t -> person.getTasksAdded().add(t));
+//		});
+//	}
+//
+//}

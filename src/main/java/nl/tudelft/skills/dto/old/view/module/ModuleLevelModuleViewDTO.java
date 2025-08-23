@@ -18,23 +18,19 @@
 package nl.tudelft.skills.dto.old.view.module;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 import org.springframework.data.util.Pair;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.old.view.CircuitView;
 import nl.tudelft.skills.dto.old.view.GroupView;
 import nl.tudelft.skills.dto.old.view.checkpoint.CheckpointViewDTO;
 import nl.tudelft.skills.dto.old.view.edition.PathViewDTO;
-import nl.tudelft.skills.model.AbstractSkill;
 import nl.tudelft.skills.model.SCModule;
 
 @Data
@@ -83,8 +79,8 @@ public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitV
 	 */
 	@Override
 	public List<? extends GroupView> getGroups() {
-//		return submodules.stream().sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList();
-        return Collections.emptyList();
+		//		return submodules.stream().sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList();
+		return Collections.emptyList();
 	}
 
 	/**
@@ -94,40 +90,40 @@ public class ModuleLevelModuleViewDTO extends View<SCModule> implements CircuitV
 	public void postApply() {
 		super.postApply();
 		// get all checkpoints in this edition
-//		this.checkpointsInEdition = data.getEdition().getCheckpoints().stream()
-//				.map(cp -> View.convert(cp, CheckpointViewDTO.class))
-//				.sorted(Comparator.comparing(CheckpointViewDTO::getDeadline, Comparator.nullsLast(
-//						Comparator.naturalOrder())))
-//				.toList();
-//		// get all checkpoints that contain a skill that is in this module
-//		Set<Long> skillIdsInModule = data.getSubmodules().stream()
-//				.flatMap(sub -> sub.getSkills().stream().map(AbstractSkill::getId))
-//				.collect(Collectors.toSet());
-//		this.checkpoints = data.getEdition().getCheckpoints().stream()
-//				.filter(checkpoint -> checkpoint.getSkills().stream()
-//						.anyMatch(skill -> skillIdsInModule.contains(skill.getId())))
-//				.map(checkpoint -> View.convert(checkpoint, CheckpointViewDTO.class)).toList();
-//		this.remainingCheckpointsInEdition = checkpointsInEdition.stream()
-//				.filter(checkpoint -> !checkpoints.contains(checkpoint)).toList();
-//		// get all used checkpoints in edition
-//		this.usedCheckpointsInEdition = checkpointsInEdition.stream()
-//				.filter(c -> !remainingCheckpointsInEdition.contains(c)).collect(Collectors.toList());
-//		// get all paths in this edition
-//		this.paths = data.getEdition().getPaths().stream().map(p -> View.convert(p, PathViewDTO.class))
-//				.toList();
-//		// get all external skills in edition
-//		this.externalSkillList = data.getExternalSkills().stream()
-//				.map(s -> View.convert(s, ModuleLevelExternalSkillViewDTO.class)).toList();
+		//		this.checkpointsInEdition = data.getEdition().getCheckpoints().stream()
+		//				.map(cp -> View.convert(cp, CheckpointViewDTO.class))
+		//				.sorted(Comparator.comparing(CheckpointViewDTO::getDeadline, Comparator.nullsLast(
+		//						Comparator.naturalOrder())))
+		//				.toList();
+		//		// get all checkpoints that contain a skill that is in this module
+		//		Set<Long> skillIdsInModule = data.getSubmodules().stream()
+		//				.flatMap(sub -> sub.getSkills().stream().map(AbstractSkill::getId))
+		//				.collect(Collectors.toSet());
+		//		this.checkpoints = data.getEdition().getCheckpoints().stream()
+		//				.filter(checkpoint -> checkpoint.getSkills().stream()
+		//						.anyMatch(skill -> skillIdsInModule.contains(skill.getId())))
+		//				.map(checkpoint -> View.convert(checkpoint, CheckpointViewDTO.class)).toList();
+		//		this.remainingCheckpointsInEdition = checkpointsInEdition.stream()
+		//				.filter(checkpoint -> !checkpoints.contains(checkpoint)).toList();
+		//		// get all used checkpoints in edition
+		//		this.usedCheckpointsInEdition = checkpointsInEdition.stream()
+		//				.filter(c -> !remainingCheckpointsInEdition.contains(c)).collect(Collectors.toList());
+		//		// get all paths in this edition
+		//		this.paths = data.getEdition().getPaths().stream().map(p -> View.convert(p, PathViewDTO.class))
+		//				.toList();
+		//		// get all external skills in edition
+		//		this.externalSkillList = data.getExternalSkills().stream()
+		//				.map(s -> View.convert(s, ModuleLevelExternalSkillViewDTO.class)).toList();
 
 	}
 
 	@Override
 	public Set<Pair<Integer, Integer>> getFilledPositions() {
-//		var externalPositions = externalSkillList.stream()
-//				.map(s -> Pair.of(s.getColumn(), s.getRow())).collect(Collectors.toSet());
-//		var skillPositions = submodules.stream().flatMap(m -> m.getSkills().stream())
-//				.map(s -> Pair.of(s.getColumn(), s.getRow())).collect(Collectors.toSet());
-//		externalPositions.addAll(skillPositions);
+		//		var externalPositions = externalSkillList.stream()
+		//				.map(s -> Pair.of(s.getColumn(), s.getRow())).collect(Collectors.toSet());
+		//		var skillPositions = submodules.stream().flatMap(m -> m.getSkills().stream())
+		//				.map(s -> Pair.of(s.getColumn(), s.getRow())).collect(Collectors.toSet());
+		//		externalPositions.addAll(skillPositions);
 		return Collections.emptySet();
 	}
 }

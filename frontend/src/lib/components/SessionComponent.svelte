@@ -1,6 +1,7 @@
 <script lang="ts">
     import {onMount} from "svelte";
     import {checkSession} from "../logic/session";
+    import Button from "./util/Button.svelte";
 
     let dialog: HTMLDialogElement;
 
@@ -38,7 +39,10 @@
 <dialog bind:this={dialog} class="dialog">
     <h2>Session expired</h2>
     <p>Your session has expired. Click below to log in again in a new tab.</p>
-    <a class="button" href="/auth/login" target="_blank" onclick={startCheckingSuccessfulLogin}>Log in</a>
+    <Button primary href="/auth/login" target="_blank" onclick={startCheckingSuccessfulLogin}>
+        <span class="fa-solid fa-right-to-bracket"></span>
+        <span>Log in</span>
+    </Button>
 </dialog>
 
 <style>
@@ -69,17 +73,5 @@
     .dialog h2 {
         font-size: 2rem;
         font-weight: 700;
-    }
-
-    .button {
-        background-color: var(--primary-surface-colour);
-        border-radius: 8px;
-        color: var(--on-primary-surface-colour);
-        padding: .5rem 1rem;
-        text-decoration: none;
-    }
-
-    .button:where(:hover, :focus-visible) {
-        background-color: var(--primary-surface-active-colour);
     }
 </style>

@@ -20,15 +20,14 @@ package nl.tudelft.skills.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
+
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
-
 import lombok.*;
 
 @Data
@@ -44,8 +43,8 @@ public class Submodule {
 
 	@NotNull
 	@ManyToOne
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
 	private SCModule module;
 
 	@NotBlank

@@ -2,10 +2,11 @@
 
     import Csrf from "../components/Csrf.svelte";
     import {onMount} from "svelte";
+    import PageLayout from "./PageLayout.svelte";
 
 </script>
 
-<main>
+<PageLayout>
     <form method="post" action="/perform-login">
         <h1>Log In</h1>
 
@@ -25,20 +26,14 @@
 
         <button>Log in</button>
     </form>
-</main>
+</PageLayout>
 
 <style>
-    main {
-        align-content: start;
-        display: grid;
-        justify-content: center;
-        height: 100%;
-        padding: 4rem 2rem 2rem 2rem;
-    }
 
     form {
         display: grid;
         gap: 1rem;
+        place-items: center;
     }
 
     h1 {
@@ -70,14 +65,16 @@
     }
 
     input {
+        background-color: var(--neutral-surface-colour);
         border: 1px solid var(--on-block-divider-colour);
+        color: var(--on-neutral-surface-colour);
         border-radius: 8px;
         padding: .5rem 1rem;
     }
 
     button {
         background-color: var(--block-colour);
-        border: none;
+        border: 1px solid var(--on-block-divider-colour);
         border-radius: 8px;
         box-shadow: .75rem 1.25rem 1.625rem 0 color-mix(in srgb, var(--shadow-colour) 8%, transparent);
         cursor: pointer;

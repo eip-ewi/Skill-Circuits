@@ -13,10 +13,11 @@ export namespace BlockActions {
     export let RemoveChild: "remove child" = "remove child";
     export let CancelLink: "cancel link" = "cancel link";
     export let StopEdit: "stop edit" = "stop edit";
+    export let Bookmark: "bookmark" = "bookmark";
 }
 
 export type BlockAction = typeof BlockActions.Goto | typeof BlockActions.Expand
     | typeof BlockActions.Move | typeof BlockActions.Edit | typeof BlockActions.Delete
     | typeof BlockActions.Link | typeof BlockActions.AddParent | typeof BlockActions.AddChild
     | typeof BlockActions.RemoveParent | typeof BlockActions.RemoveChild | typeof BlockActions.CancelLink
-    | typeof BlockActions.StopEdit ;
+    | typeof BlockActions.StopEdit | typeof BlockActions.Bookmark ;

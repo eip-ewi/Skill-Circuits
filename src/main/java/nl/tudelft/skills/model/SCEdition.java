@@ -24,7 +24,6 @@ import java.util.Set;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-
 import lombok.*;
 
 @Data
@@ -46,7 +45,7 @@ public class SCEdition {
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@OneToMany(mappedBy = "edition")
-	private List<SCModule> modules = new ArrayList<>();
+	private Set<SCModule> modules = new HashSet<>();
 
 	@NotNull
 	@Builder.Default
@@ -55,18 +54,19 @@ public class SCEdition {
 	@OneToMany(mappedBy = "edition")
 	private Set<Checkpoint> checkpoints = new HashSet<>();
 
-    @NotNull
+	@NotNull
+	@OrderBy("idx")
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@OneToMany(mappedBy = "edition")
-	private Set<Path> paths = new HashSet<>();
+	private List<Path> paths = new ArrayList<>();
 
-    @NotNull
-    @ManyToMany
-    @Builder.Default
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private Set<SCPerson> editors = new HashSet<>();
+	@NotNull
+	@ManyToMany
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	private Set<SCPerson> editors = new HashSet<>();
 
 }

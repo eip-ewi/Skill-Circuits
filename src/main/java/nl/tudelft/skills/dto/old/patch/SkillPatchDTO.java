@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -23,13 +23,11 @@ import java.util.stream.Collectors;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-
 import nl.tudelft.librador.dto.patch.Patch;
 import nl.tudelft.skills.dto.id.SubmoduleId;
 import nl.tudelft.skills.dto.old.create.TaskCreateDTO;
@@ -77,37 +75,37 @@ public class SkillPatchDTO extends Patch<Skill> {
 	protected void applyOneToMany() {
 		Map<Long, Task> tasks = data.getTasks().stream()
 				.collect(Collectors.toMap(Task::getId, Function.identity()));
-//		List<Task> orderedTasks = new ArrayList<>(
-//				items.stream().map(p -> p.apply(tasks.get(p.getId()))).toList());
+		//		List<Task> orderedTasks = new ArrayList<>(
+		//				items.stream().map(p -> p.apply(tasks.get(p.getId()))).toList());
 
 		Map<Long, Integer> order = items.stream()
 				.collect(Collectors.toMap(TaskPatchDTO::getId, TaskPatchDTO::getIndex));
 
-//		TaskRepository taskRepository = SpringContext.getBean(TaskRepository.class);
-//		orderedTasks.addAll(newItems.stream().map(c -> {
-//			Task task = taskRepository.save(c.apply());
-//			order.put(task.getId(), c.getIndex());
-//			return task;
-//		}).toList());
+		//		TaskRepository taskRepository = SpringContext.getBean(TaskRepository.class);
+		//		orderedTasks.addAll(newItems.stream().map(c -> {
+		//			Task task = taskRepository.save(c.apply());
+		//			order.put(task.getId(), c.getIndex());
+		//			return task;
+		//		}).toList());
 
 		data.getTasks().stream().filter(t -> removedItems.contains(t.getId())).toList()
 				.forEach(t -> data.getTasks().remove(t));
 
-//		orderedTasks.sort(Comparator.<Task>comparingInt(t -> order.get(t.getId())).reversed());
-//		data.setTasks(orderedTasks);
+		//		orderedTasks.sort(Comparator.<Task>comparingInt(t -> order.get(t.getId())).reversed());
+		//		data.setTasks(orderedTasks);
 	}
 
 	@Override
 	protected void applyManyToManyMappedBy() {
 		if (hidden) {
-//			Set<Task> requiredTasks = new HashSet<>(
-//					SpringContext.getBean(TaskRepository.class).findAllByIdIn(requiredTaskIds));
-//			updateManyToManyMappedBy(data, data.getRequiredTasks(), requiredTasks, Task::getRequiredFor);
-//			data.setRequiredTasks(requiredTasks);
+			//			Set<Task> requiredTasks = new HashSet<>(
+			//					SpringContext.getBean(TaskRepository.class).findAllByIdIn(requiredTaskIds));
+			//			updateManyToManyMappedBy(data, data.getRequiredTasks(), requiredTasks, Task::getRequiredFor);
+			//			data.setRequiredTasks(requiredTasks);
 		} else {
-			updateManyToManyMappedByIds(data, data.getRequiredTasks(), Collections.emptyList(),
-					Task::getRequiredFor);
-			data.setRequiredTasks(Collections.emptySet());
+			//			updateManyToManyMappedByIds(data, data.getRequiredTasks(), Collections.emptyList(),
+			//					Task::getRequiredFor);
+			//			data.setRequiredTasks(Collections.emptySet());
 		}
 	}
 

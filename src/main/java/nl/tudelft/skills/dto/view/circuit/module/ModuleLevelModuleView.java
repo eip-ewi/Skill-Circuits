@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,19 +17,18 @@
  */
 package nl.tudelft.skills.dto.view.circuit.module;
 
-import nl.tudelft.skills.dto.view.CheckpointView;
-import nl.tudelft.skills.dto.view.circuit.CircuitView;
-
 import java.util.List;
+
+import nl.tudelft.skills.dto.view.circuit.CircuitView;
 
 public record ModuleLevelModuleView(
 		long id,
 		String name,
-        long editionId,
-        List<ModuleLevelSkillView> externalSkills,
+		long editionId,
+		List<ModuleLevelSkillView> externalSkills,
 		List<ModuleLevelSubmoduleView> groups) implements CircuitView {
-    @Override
-    public String getCircuitType() {
-        return "module";
-    }
+	@Override
+	public String getCircuitType() {
+		return "module";
+	}
 }

@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -20,13 +20,14 @@ package nl.tudelft.skills.dto.view.circuit.edition;
 import nl.tudelft.skills.dto.view.circuit.ItemView;
 
 public record EditionLevelSkillView(
-        long id,
-        String name,
-        boolean essential,
-        boolean completed,
-        boolean locked) implements ItemView {
-    @Override
-    public String getItemType() {
-        return "skill";
-    }
+		long id,
+		String name,
+		boolean essential,
+		boolean hidden,
+		boolean completed,
+		boolean locked) implements ItemView {
+	@Override
+	public String getItemType() {
+		return "skill";
+	}
 }

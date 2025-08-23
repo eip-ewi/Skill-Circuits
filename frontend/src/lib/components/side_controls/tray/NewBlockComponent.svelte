@@ -24,8 +24,10 @@
 <style>
     .block {
         background-color: var(--block-colour);
-        border-radius: 16px;
+        border: var(--block-border);
+        border-radius: var(--block-border-radius);
         box-shadow: 0.25rem 0.25rem 0.5rem 0 color-mix(in srgb, var(--shadow-colour) 8%, transparent);
+        color: var(--on-block-colour);
         cursor: grab;
         display: flex;
         flex-direction: column;

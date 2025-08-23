@@ -26,6 +26,6 @@ public enum TaskType {
 	EXERCISE,
 	COLLABORATION,
 	EXPERIMENT,
-    CLASSROOM;
+	CLASSROOM;
 
 }

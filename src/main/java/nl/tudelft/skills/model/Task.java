@@ -22,7 +22,6 @@ import java.util.Set;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -49,13 +48,6 @@ public abstract class Task {
 	private Integer idx = 0;
 
 	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@ManyToMany(mappedBy = "tasks")
-	private Set<Achievement> achievements = new HashSet<>();
-
-	@NotNull
 	@ManyToMany
 	@Builder.Default
 	@ToString.Exclude
@@ -66,17 +58,23 @@ public abstract class Task {
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToMany
-	private Set<Skill> requiredFor = new HashSet<>();
+	@ManyToMany(mappedBy = "tasksAdded")
+	private Set<SCPerson> personsThatAddedTask = new HashSet<>();
 
 	@NotNull
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToMany(mappedBy = "tasksAdded")
-	private Set<SCPerson> personsThatAddedTask = new HashSet<>();
+	@ManyToMany(mappedBy = "tasksRemoved")
+	private Set<SCPerson> personsThatRemovedTask = new HashSet<>();
 
-    public abstract String getName();
-    public abstract void setName(String name);
+	public abstract String getName();
+
+	public abstract void setName(String name);
+
+	@PreRemove
+	public void removeFromCustomPaths() {
+		personsThatAddedTask.forEach(person -> person.getTasksAdded().remove(this));
+	}
 
 }

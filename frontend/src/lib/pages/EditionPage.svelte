@@ -11,8 +11,9 @@
     import TrayComponent from "../components/side_controls/tray/TrayComponent.svelte";
     import SideControlsComponent from "../components/side_controls/SideControlsComponent.svelte";
     import ChoosePathComponent from "../components/ChoosePathComponent.svelte";
-    import {fetchActivePath} from "../logic/edition/active_path.svelte";
+    import {fetchActivePath, fetchPathCustomisation} from "../logic/edition/active_path.svelte";
     import {fetchEdition, getEdition} from "../logic/edition/edition.svelte";
+    import PageLayout from "./PageLayout.svelte";
 
     let { editionId }: { editionId: number } = $props();
 
@@ -24,6 +25,7 @@
         await fetchEdition(editionId);
         await fetchCircuit(`/api/editions/${editionId}/circuit`);
         await fetchActivePath();
+        await fetchPathCustomisation();
         await fetchDevMode();
     }
 </script>
@@ -39,7 +41,7 @@
     {/if}
 </svelte:head>
 
-<main>
+<PageLayout fullWidth>
 
     {#await load() then _}
 
@@ -52,14 +54,4 @@
 
     {/await}
 
-</main>
-
-<style>
-    main {
-        align-content: start;
-        display: grid;
-        justify-content: center;
-        height: 100%;
-        padding: 4rem 2rem 2rem 2rem;
-    }
-</style>
+</PageLayout>

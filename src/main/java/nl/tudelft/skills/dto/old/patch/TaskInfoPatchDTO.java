@@ -20,11 +20,10 @@ package nl.tudelft.skills.dto.old.patch;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
 import lombok.*;
 import nl.tudelft.librador.dto.patch.Patch;
-import nl.tudelft.skills.model.TaskInfo;
 import nl.tudelft.skills.enums.TaskType;
+import nl.tudelft.skills.model.TaskInfo;
 
 @Data
 @Builder

@@ -17,24 +17,9 @@
  */
 package nl.tudelft.skills.dto.old.view.edition;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-
-import org.springframework.data.util.Pair;
-
 import lombok.*;
 import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.old.view.CircuitView;
-import nl.tudelft.skills.dto.old.view.GroupView;
-import nl.tudelft.skills.dto.old.view.checkpoint.CheckpointViewDTO;
-import nl.tudelft.skills.model.Checkpoint;
 import nl.tudelft.skills.model.SCEdition;
-import nl.tudelft.skills.repository.CheckpointRepository;
 
 @Data
 @Builder
@@ -43,60 +28,60 @@ import nl.tudelft.skills.repository.CheckpointRepository;
 @EqualsAndHashCode(callSuper = false)
 public class EditionLevelEditionViewDTO extends View<SCEdition> {
 
-//	@NotNull
-//	private Long id;
-//	@NotNull
-//	private EditionLevelCourseViewDTO course;
-//	@NotBlank
-//	private String name;
-//	@NotNull
-//	@PostApply
-//	private List<EditionLevelModuleViewDTO> modules;
-//	@NotNull
-//	@PostApply
-//	private List<CheckpointViewDTO> checkpointsInEdition;
-//	@NotNull
-//	private Set<PathViewDTO> paths;
-//
-//	/**
-//	 * Gets the modules of an edition sorted in alphabetic order.
-//	 *
-//	 * @return The list of modules
-//	 */
-//	public List<EditionLevelModuleViewDTO> getModulesAlphabetic() {
-//		return modules.stream()
-//				.sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList();
-//	}
-//
-//	/**
-//	 * Gets the modules of an edition sorted in alphabetic order.
-//	 *
-//	 * @return The list of modules
-//	 */
-//	@Override
-//	public List<? extends GroupView> getGroups() {
-//		return modules.stream().sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList();
-//	}
-//
-//	/**
-//	 * Orders the checkpoints in increasing deadline order.
-//	 */
-//	@Override
-//	public void postApply() {
-//		super.postApply();
-////		this.checkpointsInEdition = View.convert(
+	//	@NotNull
+	//	private Long id;
+	//	@NotNull
+	//	private EditionLevelCourseViewDTO course;
+	//	@NotBlank
+	//	private String name;
+	//	@NotNull
+	//	@PostApply
+	//	private List<EditionLevelModuleViewDTO> modules;
+	//	@NotNull
+	//	@PostApply
+	//	private List<CheckpointViewDTO> checkpointsInEdition;
+	//	@NotNull
+	//	private Set<PathViewDTO> paths;
+	//
+	//	/**
+	//	 * Gets the modules of an edition sorted in alphabetic order.
+	//	 *
+	//	 * @return The list of modules
+	//	 */
+	//	public List<EditionLevelModuleViewDTO> getModulesAlphabetic() {
+	//		return modules.stream()
+	//				.sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList();
+	//	}
+	//
+	//	/**
+	//	 * Gets the modules of an edition sorted in alphabetic order.
+	//	 *
+	//	 * @return The list of modules
+	//	 */
+	//	@Override
+	//	public List<? extends GroupView> getGroups() {
+	//		return modules.stream().sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList();
+	//	}
+	//
+	//	/**
+	//	 * Orders the checkpoints in increasing deadline order.
+	//	 */
+	//	@Override
+	//	public void postApply() {
+	//		super.postApply();
+	////		this.checkpointsInEdition = View.convert(
 ////				SpringContext.getBean(CheckpointRepository.class)
 ////						.findAllById(this.data.getCheckpoints().stream().map(Checkpoint::getId).toList()),
 ////				CheckpointViewDTO.class);
-//		this.checkpointsInEdition = this.checkpointsInEdition.stream()
-//				.sorted(Comparator.comparing(CheckpointViewDTO::getDeadline, Comparator.nullsLast(
-//						Comparator.naturalOrder())))
-//				.toList();
-//	}
-//
-//	@Override
-//	public Set<Pair<Integer, Integer>> getFilledPositions() {
-//		return modules.stream().flatMap(m -> m.getSubmodules().stream())
-//				.map(s -> Pair.of(s.getColumn(), s.getRow())).collect(Collectors.toSet());
-//	}
+	//		this.checkpointsInEdition = this.checkpointsInEdition.stream()
+	//				.sorted(Comparator.comparing(CheckpointViewDTO::getDeadline, Comparator.nullsLast(
+	//						Comparator.naturalOrder())))
+	//				.toList();
+	//	}
+	//
+	//	@Override
+	//	public Set<Pair<Integer, Integer>> getFilledPositions() {
+	//		return modules.stream().flatMap(m -> m.getSubmodules().stream())
+	//				.map(s -> Pair.of(s.getColumn(), s.getRow())).collect(Collectors.toSet());
+	//	}
 }

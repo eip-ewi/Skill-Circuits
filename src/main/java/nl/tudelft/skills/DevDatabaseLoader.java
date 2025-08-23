@@ -22,21 +22,19 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 
-import jakarta.annotation.PostConstruct;
-
-import nl.tudelft.skills.enums.TaskType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+import jakarta.annotation.PostConstruct;
 import nl.tudelft.labracore.api.CourseControllerApi;
 import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.*;
+import nl.tudelft.skills.enums.TaskType;
 import nl.tudelft.skills.model.*;
-import nl.tudelft.skills.model.SCPerson;
 import nl.tudelft.skills.repository.*;
-import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.repository.PersonRepository;
 
 @Service
 @Profile("development-data")
@@ -181,10 +179,12 @@ public class DevDatabaseLoader {
 		pathFinderPath = pathRepository.save(Path.builder()
 				.edition(scEditionOOP)
 				.name("Pathfinder")
+				.description("")
 				.build());
 		explorerPath = pathRepository.save(Path.builder()
 				.edition(scEditionOOP)
 				.name("Explorer")
+				.description("")
 				.build());
 	}
 
@@ -207,43 +207,43 @@ public class DevDatabaseLoader {
 		submoduleLogicBasics = submoduleRepository.save(Submodule.builder()
 				.name("Logic Basics")
 				.module(moduleProofTechniques)
-//				.row(0)
+				//				.row(0)
 				.column(0)
 				.build());
 		submoduleGeneralisation = submoduleRepository.save(Submodule.builder()
 				.name("Generalisation")
 				.module(moduleProofTechniques)
-//				.row(1)
+				//				.row(1)
 				.column(1)
 				.build());
 		submoduleCases = submoduleRepository.save(Submodule.builder()
 				.name("Cases")
 				.module(moduleProofTechniques)
-//				.row(2)
+				//				.row(2)
 				.column(2)
 				.build());
 		submoduleContradiction = submoduleRepository.save(Submodule.builder()
 				.name("Contradiction")
 				.module(moduleProofTechniques)
-//				.row(3)
+				//				.row(3)
 				.column(1)
 				.build());
 		submoduleContrapositive = submoduleRepository.save(Submodule.builder()
 				.name("Contrapositive")
 				.module(moduleProofTechniques)
-//				.row(2)
+				//				.row(2)
 				.column(3)
 				.build());
 		submoduleInduction = submoduleRepository.save(Submodule.builder()
 				.name("Induction")
 				.module(moduleProofTechniques)
-//				.row(3)
+				//				.row(3)
 				.column(0)
 				.build());
 		submoduleSimple = submoduleRepository.save(Submodule.builder()
 				.name("Simple Module")
 				.module(moduleSimple)
-//				.row(0)
+				//				.row(0)
 				.column(3)
 				.build());
 	}
@@ -252,14 +252,14 @@ public class DevDatabaseLoader {
 		skillImplication = skillRepository.save(Skill.builder()
 				.name("Implication")
 				.submodule(submoduleLogicBasics)
-//				.row(0)
+				//				.row(0)
 				.column(0)
 				.checkpoint(checkpointLectureOne)
 				.build());
 		skillNegation = skillRepository.save(Skill.builder()
 				.name("Negation")
 				.submodule(submoduleLogicBasics)
-//				.row(0)
+				//				.row(0)
 				.column(2)
 				.checkpoint(checkpointLectureOne)
 				.build());
@@ -267,7 +267,7 @@ public class DevDatabaseLoader {
 				.name("Variables")
 				.submodule(submoduleLogicBasics)
 				.checkpoint(checkpointLectureOne)
-//				.row(0)
+				//				.row(0)
 				.column(4)
 				.build());
 
@@ -275,13 +275,13 @@ public class DevDatabaseLoader {
 				.name("Proof Outline")
 				.submodule(submoduleGeneralisation)
 				.checkpoint(checkpointLectureOne)
-//				.row(1)
+				//				.row(1)
 				.column(3)
 				.build());
 		skillAssumption = skillRepository.save(Skill.builder()
 				.name("Assumption")
 				.submodule(submoduleGeneralisation)
-//				.row(1)
+				//				.row(1)
 				.column(1)
 				.checkpoint(checkpointLectureOne)
 				.parents(Set.of(skillImplication))
@@ -289,7 +289,7 @@ public class DevDatabaseLoader {
 		skillGeneralisationPractice = skillRepository.save(Skill.builder()
 				.name("Generalisation Practice")
 				.submodule(submoduleGeneralisation)
-//				.row(2)
+				//				.row(2)
 				.column(3)
 				.checkpoint(checkpointLectureTwo)
 				.parents(Set.of(skillAssumption, skillProofOutline, skillVariables))
@@ -298,14 +298,14 @@ public class DevDatabaseLoader {
 		skillDividingIntoCases = skillRepository.save(Skill.builder()
 				.name("Dividing into Cases")
 				.submodule(submoduleCases)
-//				.row(2)
+				//				.row(2)
 				.column(1)
 				.checkpoint(checkpointLectureTwo)
 				.build());
 		skillCasesPractice = skillRepository.save(Skill.builder()
 				.name("Cases Practice")
 				.submodule(submoduleCases)
-//				.row(3)
+				//				.row(3)
 				.column(2)
 				.checkpoint(checkpointLectureTwo)
 				.parents(Set.of(skillGeneralisationPractice, skillDividingIntoCases))
@@ -314,7 +314,7 @@ public class DevDatabaseLoader {
 		skillContradictionPractice = skillRepository.save(Skill.builder()
 				.name("Contradiction Practice")
 				.submodule(submoduleContradiction)
-//				.row(3)
+				//				.row(3)
 				.column(3)
 				.checkpoint(checkpointLectureTwo)
 				.parents(Set.of(skillGeneralisationPractice, skillNegation))
@@ -323,7 +323,7 @@ public class DevDatabaseLoader {
 		skillTransitiveProperty = skillRepository.save(Skill.builder()
 				.name("Transitive Property")
 				.submodule(submoduleLogicBasics)
-//				.row(3)
+				//				.row(3)
 				.column(0)
 				.checkpoint(checkpointLectureTwo)
 				.parents(Set.of(skillImplication))
@@ -332,7 +332,7 @@ public class DevDatabaseLoader {
 		skillNegateImplications = skillRepository.save(Skill.builder()
 				.name("Negate Implications")
 				.submodule(submoduleContrapositive)
-//				.row(4)
+				//				.row(4)
 				.column(1)
 				.checkpoint(checkpointLectureTwo)
 				.parents(Set.of(skillTransitiveProperty, skillCasesPractice))
@@ -340,7 +340,7 @@ public class DevDatabaseLoader {
 		skillContrapositivePractice = skillRepository.save(Skill.builder()
 				.name("Contrapositive Practice")
 				.submodule(submoduleContrapositive)
-//				.row(5)
+				//				.row(5)
 				.column(1)
 				.checkpoint(checkpointLectureTwo)
 				.parents(Set.of(skillNegateImplications, skillContradictionPractice))
@@ -349,7 +349,7 @@ public class DevDatabaseLoader {
 		skillInductionPractice = skillRepository.save(Skill.builder()
 				.name("Induction Practice")
 				.submodule(submoduleInduction)
-//				.row(6)
+				//				.row(6)
 				.column(2)
 				.checkpoint(checkpointLectureTwo)
 				.parents(Set.of(skillContradictionPractice, skillContrapositivePractice))
@@ -358,14 +358,14 @@ public class DevDatabaseLoader {
 		skillSimpleA = skillRepository.save(Skill.builder()
 				.name("Skill A")
 				.submodule(submoduleSimple)
-//				.row(0)
+				//				.row(0)
 				.column(1)
 				.checkpoint(checkpointSimple)
 				.build());
 		skillSimpleB = skillRepository.save(Skill.builder()
 				.name("Skill B")
 				.submodule(submoduleSimple)
-//				.row(1)
+				//				.row(1)
 				.column(0)
 				.parents(Set.of(skillSimpleA))
 				.checkpoint(checkpointSimple)
@@ -373,7 +373,7 @@ public class DevDatabaseLoader {
 		skillSimpleC = skillRepository.save(Skill.builder()
 				.name("Skill C")
 				.submodule(submoduleSimple)
-//				.row(1)
+				//				.row(1)
 				.column(2)
 				.parents(Set.of(skillSimpleA))
 				.checkpoint(checkpointSimple)
@@ -381,7 +381,7 @@ public class DevDatabaseLoader {
 		skillSimpleD = skillRepository.save(Skill.builder()
 				.name("Skill D")
 				.submodule(submoduleSimple)
-//				.row(2)
+				//				.row(2)
 				.column(0)
 				.parents(Set.of(skillSimpleB))
 				.checkpoint(checkpointSimple)
@@ -389,7 +389,7 @@ public class DevDatabaseLoader {
 		skillSimpleE = skillRepository.save(Skill.builder()
 				.name("Skill E")
 				.submodule(submoduleSimple)
-//				.row(2)
+				//				.row(2)
 				.column(1)
 				.parents(Set.of(skillSimpleB))
 				.checkpoint(checkpointSimple)
@@ -397,7 +397,7 @@ public class DevDatabaseLoader {
 		skillSimpleF = skillRepository.save(Skill.builder()
 				.name("Skill F")
 				.submodule(submoduleSimple)
-//				.row(2)
+				//				.row(2)
 				.column(2)
 				.parents(Set.of(skillSimpleB))
 				.checkpoint(checkpointSimple)
@@ -410,19 +410,19 @@ public class DevDatabaseLoader {
 		RegularTask taskRead12 = RegularTask.builder().skill(skillImplication).taskInfo(read12Info)
 				.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build();
 		read12Info.setTask(taskRead12);
-		regularTaskRepository.save(taskRead12);
+		taskInfoRepository.save(read12Info);
 
 		TaskInfo do12aeInfo = TaskInfo.builder().name("Do exercise 1.2a-e")
 				.time(10).type(TaskType.EXERCISE).build();
 		RegularTask taskDo12ae = RegularTask.builder().skill(skillImplication).taskInfo(do12aeInfo)
 				.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build();
 		do12aeInfo.setTask(taskDo12ae);
-		regularTaskRepository.save(taskDo12ae);
+		taskInfoRepository.save(do12aeInfo);
 
 		TaskInfo do11adInfo = TaskInfo.builder().name("Do exercise 1.1a-d").time(10).build();
 		RegularTask taskDo11ad = RegularTask.builder().skill(skillNegation).taskInfo(do11adInfo).build();
 		do11adInfo.setTask(taskDo11ad);
-		regularTaskRepository.save(taskDo11ad);
+		taskInfoRepository.save(do11adInfo);
 
 		TaskInfo read11Info = TaskInfo.builder().name("Read chapter 1.1").time(10)
 				.link("https://docs.oracle.com/en/java/javase/17/docs/api/index.html").type(TaskType.READING)
@@ -430,7 +430,7 @@ public class DevDatabaseLoader {
 		RegularTask taskRead11 = RegularTask.builder().skill(skillNegation).taskInfo(read11Info)
 				.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build();
 		read11Info.setTask(taskRead11);
-		regularTaskRepository.save(taskRead11);
+		taskInfoRepository.save(read11Info);
 
 		TaskInfo watchVideoInfo = TaskInfo.builder().name("Watch video").time(10)
 				.link("https://docs.oracle.com/en/java/javase/17/docs/api/index.html").type(TaskType.VIDEO)
@@ -438,7 +438,7 @@ public class DevDatabaseLoader {
 		RegularTask taskWatchVideo = RegularTask.builder().skill(skillNegation).taskInfo(watchVideoInfo)
 				.paths(new HashSet<>(Arrays.asList(pathFinderPath))).build();
 		watchVideoInfo.setTask(taskWatchVideo);
-		regularTaskRepository.save(taskWatchVideo);
+		taskInfoRepository.save(watchVideoInfo);
 
 		ChoiceTask choiceTaskNegation = ChoiceTask.builder().minTasks(1)
 				.tasks(new ArrayList<>(List.of(read11Info, watchVideoInfo))).name("What are negations?")

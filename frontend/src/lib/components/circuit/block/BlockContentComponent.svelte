@@ -8,6 +8,7 @@
     import {ModuleLevel} from "../../../data/level";
     import TaskIconsComponent from "../item/TaskIconsComponent.svelte";
     import {getItemsOnPath} from "../../../logic/edition/active_path.svelte";
+    import {isSkillItemRevealed} from "../../../logic/circuit/unlocked_skills.svelte";
 
     let { block }: { block: Block } = $props();
 
@@ -28,7 +29,7 @@
 {:else if canEditCircuit()}
     <span>{block.items.length} {getLevel().items}</span>
 {:else}
-    <span>{block.items.filter(item => item.completed).length}/{block.items.length} completed</span>
+    <span>{block.items.filter(item => item.completed).length}/{block.items.filter(item => item.itemType !== "skill" || !item.hidden || isSkillItemRevealed(item)).length} completed</span>
 {/if}
 
 <style>
@@ -39,13 +40,13 @@
     }
 
     .name {
-        font-size: 1.25rem;
+        font-size: 1.25em;
         font-weight: 700;
     }
 
     .label {
         font-style: italic;
         opacity: 35%;
-        margin-top: -.25rem;
+        margin-top: -.25em;
     }
 </style>

@@ -2,24 +2,25 @@ import type {Group} from "../../dto/circuit/group";
 import type {Point} from "../../data/point";
 import type {Allocation, Blob, Neighbours} from "../../data/blob";
 import type {Block} from "../../dto/circuit/block";
+import {isBlockVisible} from "./circuit.svelte";
 
 export function createBlobs(groups: Group[]): Blob[] {
-    function placedBlocks(group: Group): Block[] {
-        return group.blocks.filter(block => block.column !== null);
+    function visibleBlocks(group: Group): Block[] {
+        return group.blocks.filter(block => isBlockVisible(block));
     }
 
     let blobs: Blob[] =
-        groups.filter(group => placedBlocks(group).length > 0).map(group => { return {
+        groups.filter(group => visibleBlocks(group).length > 0).map(group => { return {
             group: group,
             min: {
-                x: Math.min(...placedBlocks(group).map(block => block.column!)),
-                y: Math.min(...placedBlocks(group).map(block => block.row!)),
+                x: Math.min(...visibleBlocks(group).map(block => block.column!)),
+                y: Math.min(...visibleBlocks(group).map(block => block.row!)),
             },
             max: {
-                x: Math.max(...placedBlocks(group).map(block => block.column!)),
-                y: Math.max(...placedBlocks(group).map(block => block.row!)),
+                x: Math.max(...visibleBlocks(group).map(block => block.column!)),
+                y: Math.max(...visibleBlocks(group).map(block => block.row!)),
             },
-            allocations: placedBlocks(group).map(block => { return { point: { x: block.column!, y: block.row! }, neighbours: emptyNeighbours(), showName: false, block: block }; }),
+            allocations: visibleBlocks(group).map(block => { return { point: { x: block.column!, y: block.row! }, neighbours: emptyNeighbours(), showName: false, block: block }; }),
         }; })
             .toSorted((a, b) => area(a) - area(b));
 

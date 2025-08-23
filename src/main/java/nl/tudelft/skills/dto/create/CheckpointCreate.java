@@ -1,4 +1,25 @@
+/*
+ * Skill Circuits
+ * Copyright (C) 2025 - Delft University of Technology
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package nl.tudelft.skills.dto.create;
+
+import java.time.LocalDateTime;
+
+import org.springframework.format.annotation.DateTimeFormat;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -6,13 +27,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import nl.tudelft.librador.dto.create.Create;
-import nl.tudelft.librador.dto.patch.Patch;
 import nl.tudelft.skills.dto.id.SCEditionId;
 import nl.tudelft.skills.model.Checkpoint;
-import nl.tudelft.skills.model.SCEdition;
-import org.springframework.format.annotation.DateTimeFormat;
-
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -20,19 +36,19 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = false)
 public class CheckpointCreate extends Create<Checkpoint> {
 
-    @NotNull
-    private String name;
+	@NotNull
+	private String name;
 
-    @NotNull
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    private LocalDateTime deadline;
+	@NotNull
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+	private LocalDateTime deadline;
 
-    @NotNull
-    private SCEditionId edition;
+	@NotNull
+	private SCEditionId edition;
 
-    @Override
-    public Class<Checkpoint> clazz() {
-        return Checkpoint.class;
-    }
+	@Override
+	public Class<Checkpoint> clazz() {
+		return Checkpoint.class;
+	}
 
 }

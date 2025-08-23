@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,16 +17,16 @@
  */
 package nl.tudelft.skills.dto.view.circuit.module;
 
-import nl.tudelft.skills.dto.view.circuit.GroupView;
-
 import java.util.List;
+
+import nl.tudelft.skills.dto.view.circuit.GroupView;
 
 public record ModuleLevelSubmoduleView(
 		long id,
 		String name,
 		List<ModuleLevelSkillView> blocks) implements GroupView {
-    @Override
-    public String getGroupType() {
-        return "submodule";
-    }
+	@Override
+	public String getGroupType() {
+		return "submodule";
+	}
 }

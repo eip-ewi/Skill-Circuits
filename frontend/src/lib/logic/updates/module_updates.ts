@@ -1,8 +1,11 @@
 import type {Checkpoint} from "../../dto/checkpoint";
 import {withCsrf} from "../csrf";
 import moment from "moment";
-import {getCheckpoints, getEdition, getModules, getSortedCheckpoints} from "../edition/edition.svelte";
+import {getCheckpoints, getEdition, getModule, getModules, getSortedCheckpoints} from "../edition/edition.svelte";
 import type {Module} from "../../dto/module";
+import {getCircuit} from "../circuit/circuit.svelte";
+import {isLevel} from "../circuit/level.svelte";
+import {EditionLevel} from "../../data/level";
 
 export async function createModule(): Promise<Module | undefined> {
     let response = await fetch(`/api/modules`, withCsrf({
@@ -20,6 +23,9 @@ export async function createModule(): Promise<Module | undefined> {
 
     if (response.ok) {
         let module = await response.json();
+        if (isLevel(EditionLevel)) {
+            getCircuit().groups.push(module);
+        }
         getModules().unshift(module);
         return getModules()[0]!;
     }
@@ -29,6 +35,9 @@ export async function createModule(): Promise<Module | undefined> {
 export async function editModuleName(module: Module, newName: string) {
     let oldName = module.name;
     module.name = newName;
+    if (isLevel(EditionLevel)) {
+        getCircuit().groups.find(g => g.id === module.id)!.name = newName;
+    }
 
     let response = await fetch(`/api/modules/${module.id}`, withCsrf({
         method: "PATCH",
@@ -41,6 +50,9 @@ export async function editModuleName(module: Module, newName: string) {
     }));
 
     if (!response.ok) {
+        if (isLevel(EditionLevel)) {
+            getCircuit().groups.find(g => g.id === module.id)!.name = oldName;
+        }
         module.name = oldName;
     }
 }
@@ -51,6 +63,9 @@ export async function deleteModule(module: Module) {
     }));
 
     if (response.ok) {
-        getModules().splice(getModules().findIndex(c => c.id === module.id)!, 1);
+        if (isLevel(EditionLevel)) {
+            getCircuit().groups.splice(getCircuit().groups.findIndex(g => g.id === module.id), 1);
+        }
+        getModules().splice(getModules().findIndex(m => m.id === module.id)!, 1);
     }
 }

@@ -21,11 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.validation.constraints.NotNull;
-
 import lombok.*;
 import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.old.view.BlockView;
-import nl.tudelft.skills.dto.old.view.ItemView;
 import nl.tudelft.skills.model.Submodule;
 
 @Data
@@ -66,15 +63,15 @@ public class EditionLevelSubmoduleViewDTO extends View<Submodule> {
 				.distinct().toList();
 	}
 
-//	@Override
-//	public List<? extends ItemView> getItems() {
-//		return skills;
-//	}
+	//	@Override
+	//	public List<? extends ItemView> getItems() {
+	//		return skills;
+	//	}
 
-//	@Override
-//	public List<Long> getChildIds() {
-//		return childIds;
-//	}
+	//	@Override
+	//	public List<Long> getChildIds() {
+	//		return childIds;
+	//	}
 
 	public static EditionLevelSubmoduleViewDTO empty() {
 		return EditionLevelSubmoduleViewDTO.builder()

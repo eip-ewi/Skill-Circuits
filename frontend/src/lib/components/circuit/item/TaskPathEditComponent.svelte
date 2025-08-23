@@ -1,9 +1,10 @@
 <script lang="ts">
 
     import type {TaskItem} from "../../../dto/circuit/module/task";
-    import Select from "../../form/Select.svelte";
+    import Select from "../../util/Select.svelte";
     import {editTaskPaths} from "../../../logic/circuit/updates/task_updates";
     import {getPaths} from "../../../logic/edition/edition.svelte";
+    import Button from "../../util/Button.svelte";
 
     let { task }: { task: TaskItem } = $props();
 
@@ -15,10 +16,14 @@
 
 <Select onchange={editPath} multiple>
     {#snippet button(click: (event: MouseEvent) => void, focus: () => void, blur: () => void)}
-        <button aria-label="Edit path" class="button" onmousedown={click} onfocus={focus} onblur={blur}>
-            <span class="fa-solid fa-shoe-prints"></span>
-            <span class="counter">{task.paths.length}</span>
-        </button>
+        <div class="button">
+            <Button square primary aria-label="Edit path" onmousedown={click} onfocus={focus} onblur={blur}>
+                <span class="fa-solid fa-shoe-prints"></span>
+                <div class="counter">
+                    <span>{task.paths.length}</span>
+                </div>
+            </Button>
+        </div>
     {/snippet}
     {#each getPaths() as path}
         <option value={path.id} selected={task.paths.includes(path.id)}>{path.name}</option>
@@ -27,31 +32,21 @@
 
 <style>
     .button {
-        aspect-ratio: 1 / 1;
-        background-color: var(--primary-surface-colour);
-        border: none;
-        border-radius: 8px;
-        color: var(--on-primary-surface-colour);
-        cursor: pointer;
-        display: grid;
-        min-width: 2rem;
-        place-items: center;
         position: relative;
-    }
-
-    .button:where(:hover, :focus-visible) {
-        background-color: var(--primary-surface-active-colour);
-        color: var(--on-primary-surface-colour);
     }
 
     .counter {
         aspect-ratio: 1 / 1;
         background-color: var(--primary-surface-colour);
         border-radius: 100%;
+        color: var(--on-primary-surface-colour);
+        display: grid;
         font-size: var(--font-size-100);
+        outline: var(--primary-surface-border);
+        place-items: center;
         position: absolute;
-        right: -.25rem;
-        top: -.25rem;
-        width: 1.125rem;
+        right: -.5em;
+        top: -.5em;
+        width: 1.5em;
     }
 </style>

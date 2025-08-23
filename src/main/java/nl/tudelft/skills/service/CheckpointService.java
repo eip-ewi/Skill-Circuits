@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,41 +17,40 @@
  */
 package nl.tudelft.skills.service;
 
+import org.springframework.stereotype.Service;
+
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import nl.tudelft.librador.dto.DTOConverter;
 import nl.tudelft.skills.dto.create.CheckpointCreate;
 import nl.tudelft.skills.dto.patch.CheckpointPatch;
-import nl.tudelft.skills.dto.patch.SkillPatch;
-import nl.tudelft.skills.model.AbstractSkill;
 import nl.tudelft.skills.model.Checkpoint;
 import nl.tudelft.skills.repository.CheckpointRepository;
-import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
 public class CheckpointService {
 
-    private final CheckpointRepository checkpointRepository;
+	private final CheckpointRepository checkpointRepository;
 
-    private final DTOConverter dtoConverter;
+	private final DTOConverter dtoConverter;
 
-    @Transactional
-    public Checkpoint createCheckpoint(CheckpointCreate create) {
-        return checkpointRepository.save(create.apply(dtoConverter));
-    }
+	@Transactional
+	public Checkpoint createCheckpoint(CheckpointCreate create) {
+		return checkpointRepository.save(create.apply(dtoConverter));
+	}
 
-    @Transactional
-    public void patchCheckpoint(Checkpoint checkpoint, CheckpointPatch patch) {
-        patch.apply(checkpoint, dtoConverter);
-        checkpointRepository.save(checkpoint);
-    }
+	@Transactional
+	public void patchCheckpoint(Checkpoint checkpoint, CheckpointPatch patch) {
+		patch.apply(checkpoint, dtoConverter);
+		checkpointRepository.save(checkpoint);
+	}
 
-    @Transactional
-    public void deleteCheckpoint(Checkpoint checkpoint) {
-        checkpoint.getSkills().forEach(skill -> {
-            skill.setCheckpoint(null);
-        });
-        checkpointRepository.delete(checkpoint);
-    }
+	@Transactional
+	public void deleteCheckpoint(Checkpoint checkpoint) {
+		checkpoint.getSkills().forEach(skill -> {
+			skill.setCheckpoint(null);
+		});
+		checkpointRepository.delete(checkpoint);
+	}
 }

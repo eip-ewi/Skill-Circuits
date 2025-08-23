@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,65 +17,83 @@
  */
 package nl.tudelft.skills.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import nl.tudelft.librador.dto.DTOConverter;
+import nl.tudelft.skills.dto.create.ExternalSkillCreate;
 import nl.tudelft.skills.dto.create.SkillCreate;
 import nl.tudelft.skills.dto.patch.SkillPatch;
 import nl.tudelft.skills.model.AbstractSkill;
-import nl.tudelft.skills.model.Checkpoint;
-import nl.tudelft.skills.repository.AbstractSkillRepository;
-import org.springframework.stereotype.Service;
-
-import lombok.AllArgsConstructor;
+import nl.tudelft.skills.model.ExternalSkill;
 import nl.tudelft.skills.model.Skill;
+import nl.tudelft.skills.model.bookmark.HiddenSkillBookmarkList;
+import nl.tudelft.skills.repository.AbstractSkillRepository;
+import nl.tudelft.skills.repository.ExternalSkillRepository;
 import nl.tudelft.skills.repository.SkillRepository;
+import nl.tudelft.skills.repository.bookmark.HiddenSkillBookmarkListRepository;
 
 @Service
 @AllArgsConstructor
 public class SkillService {
 
-    private final AbstractSkillRepository abstractSkillRepository;
-    private final SkillRepository skillRepository;
+	private final AbstractSkillRepository abstractSkillRepository;
+	private final ExternalSkillRepository externalSkillRepository;
+	private final HiddenSkillBookmarkListRepository hiddenSkillBookmarkListRepository;
+	private final SkillRepository skillRepository;
 
-    private final DTOConverter dtoConverter;
+	private final DTOConverter dtoConverter;
 
-    @Transactional
-    public Skill createSkill(SkillCreate create) {
-        return skillRepository.save(create.apply(dtoConverter));
-    }
+	@Transactional
+	public Skill createSkill(SkillCreate create) {
+		return skillRepository.save(create.apply(dtoConverter));
+	}
 
-    @Transactional
-    public void patchSkill(AbstractSkill skill, SkillPatch patch) {
-        patch.apply(skill, dtoConverter);
-        abstractSkillRepository.save(skill);
-    }
+	@Transactional
+	public ExternalSkill createSkill(ExternalSkillCreate create) {
+		return externalSkillRepository.save(create.apply(dtoConverter));
+	}
 
-    @Transactional
-    public void deleteSkill(AbstractSkill skill) {
-        skill.getChildren().forEach(parent -> {
-            parent.getParents().remove(skill);
-        });
-        abstractSkillRepository.saveAll(skill.getChildren());
-        abstractSkillRepository.delete(skill);
-    }
+	@Transactional
+	public void patchSkill(AbstractSkill abstractSkill, SkillPatch patch) {
+		patch.apply(abstractSkill, dtoConverter);
+		abstractSkillRepository.save(abstractSkill);
 
-    @Transactional
-    public void updatePosition(AbstractSkill skill, Integer column) {
-        skill.setColumn(column);
-        abstractSkillRepository.save(skill);
-    }
+		if (abstractSkill instanceof Skill skill && patch.getHidden() != null) {
+			if (patch.getHidden()) {
+				HiddenSkillBookmarkList list = HiddenSkillBookmarkList.builder().skill(skill).build();
+				hiddenSkillBookmarkListRepository.save(list);
+				skill.setRequirements(list);
+			} else {
+				hiddenSkillBookmarkListRepository.deleteBySkill(skill);
+				skill.setRequirements(null);
+			}
+			skillRepository.save(skill);
+		}
+	}
 
-    @Transactional
-    public void connect(AbstractSkill from, AbstractSkill to) {
-        to.getParents().add(from);
-        abstractSkillRepository.save(to);
-    }
+	@Transactional
+	public void deleteSkill(AbstractSkill skill) {
+		abstractSkillRepository.delete(skill);
+	}
 
-    @Transactional
-    public void disconnect(AbstractSkill from, AbstractSkill to) {
-        to.getParents().remove(from);
-        abstractSkillRepository.save(to);
-    }
+	@Transactional
+	public void updatePosition(AbstractSkill skill, Integer column) {
+		skill.setColumn(column);
+		abstractSkillRepository.save(skill);
+	}
+
+	@Transactional
+	public void connect(AbstractSkill from, AbstractSkill to) {
+		to.getParents().add(from);
+		abstractSkillRepository.save(to);
+	}
+
+	@Transactional
+	public void disconnect(AbstractSkill from, AbstractSkill to) {
+		to.getParents().remove(from);
+		abstractSkillRepository.save(to);
+	}
 
 }

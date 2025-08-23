@@ -17,15 +17,8 @@
  */
 package nl.tudelft.skills.dto.old.view.module;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import jakarta.validation.constraints.NotNull;
-
 import lombok.*;
 import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.old.view.BlockView;
-import nl.tudelft.skills.dto.old.view.GroupView;
 import nl.tudelft.skills.model.Submodule;
 
 @Data
@@ -35,27 +28,27 @@ import nl.tudelft.skills.model.Submodule;
 @EqualsAndHashCode(callSuper = false)
 public class ModuleLevelSubmoduleViewDTO extends View<Submodule> {
 
-//	@NotNull
-//	private Long id;
-//	@NotNull
-//	private String name;
-//	@NotNull
-//	@PostApply
-//	private List<ModuleLevelSkillViewDTO> skills;
-//	@NotNull
-//	private List<Long> childIds;
-//
-//	@Override
-//	public List<? extends BlockView> getBlocks() {
-//		return skills;
-//	}
-//
-//	public static ModuleLevelSubmoduleViewDTO empty() {
-//		return ModuleLevelSubmoduleViewDTO.builder()
-//				.id(-1L)
-//				.name("")
-//				.skills(new ArrayList<>())
-//				.childIds(new ArrayList<>()).build();
-//
-//	}
+	//	@NotNull
+	//	private Long id;
+	//	@NotNull
+	//	private String name;
+	//	@NotNull
+	//	@PostApply
+	//	private List<ModuleLevelSkillViewDTO> skills;
+	//	@NotNull
+	//	private List<Long> childIds;
+	//
+	//	@Override
+	//	public List<? extends BlockView> getBlocks() {
+	//		return skills;
+	//	}
+	//
+	//	public static ModuleLevelSubmoduleViewDTO empty() {
+	//		return ModuleLevelSubmoduleViewDTO.builder()
+	//				.id(-1L)
+	//				.name("")
+	//				.skills(new ArrayList<>())
+	//				.childIds(new ArrayList<>()).build();
+	//
+	//	}
 }

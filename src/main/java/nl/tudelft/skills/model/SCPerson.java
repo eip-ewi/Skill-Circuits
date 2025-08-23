@@ -22,10 +22,9 @@ import java.util.Set;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-
 import lombok.*;
-import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.enums.ViewMode;
+import nl.tudelft.skills.model.bookmark.PersonalBookmarkList;
 
 @Data
 @Entity
@@ -37,53 +36,58 @@ public class SCPerson {
 	@Id
 	private Long id;
 
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    private ViewMode viewMode;
+	@NotNull
+	@Enumerated(EnumType.STRING)
+	private ViewMode viewMode;
 
-    @NotNull
+	@NotNull
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@OneToMany(mappedBy = "person")
 	private Set<TaskCompletion> taskCompletions = new HashSet<>();
 
-    @NotNull
+	@NotNull
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@OneToMany(mappedBy = "person")
 	private Set<PathPreference> pathPreferences = new HashSet<>();
 
-    @NotNull
+	@NotNull
+	@ManyToMany
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToMany
-	// For configuring a skill with any task in any path
 	private Set<Task> tasksAdded = new HashSet<>();
 
-    @NotNull
+	@NotNull
+	@ManyToMany
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
+	private Set<Task> tasksRemoved = new HashSet<>();
+
+	@NotNull
 	@ManyToMany
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
 	// To remember which skills have already been revealed
 	private Set<Skill> skillsRevealed = new HashSet<>();
 
-    @NotNull
+	@NotNull
+	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToMany
-	@Builder.Default
-	// For configuring a skill with any task in any path
-	private Set<Skill> skillsModified = new HashSet<>();
+	@ManyToMany(mappedBy = "editors")
+	private Set<SCEdition> editorInEditions = new HashSet<>();
 
-    @NotNull
-    @Builder.Default
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @ManyToMany(mappedBy = "editors")
-    private Set<SCEdition> editorInEditions = new HashSet<>();
+	@NotNull
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@OneToMany(mappedBy = "person", cascade = CascadeType.ALL)
+	private Set<PersonalBookmarkList> bookmarkLists = new HashSet<>();
 
 }

@@ -3,26 +3,60 @@
     import type {TaskInfo, TaskItem} from "../../../dto/circuit/module/task";
     import {withCsrf} from "../../../logic/csrf";
     import {TaskIcons} from "../../../dto/task_icons";
-    import {toggleTaskCompletion} from "../../../logic/circuit/updates/task_updates";
+    import {reportClickedLink, toggleTaskCompletion} from "../../../logic/circuit/updates/task_updates";
+    import {getBookmarks, isTaskInfoBookmarked} from "../../../logic/bookmarks.svelte";
+    import {addTaskInfoToBookmarkList, removeTaskInfoFromBookmarkList} from "../../../logic/updates/bookmark_updates";
+    import Dropdown from "../../util/Dropdown.svelte";
+    import BookmarkMenuComponent from "../../bookmark/BookmarkMenuComponent.svelte";
+    import Button from "../../util/Button.svelte";
+    import Link from "../../util/Link.svelte";
 
-    let { task }: { task: TaskInfo } = $props();
+    let { task, hideBookmark, hidePathCustomisation }: { task: TaskInfo, hideBookmark?: boolean | undefined, hidePathCustomisation?: boolean } = $props();
+
+    let draggable: boolean = $state(false);
+    let bookmarksOpen: boolean = $state(false);
 
     async function toggleComplete() {
         await toggleTaskCompletion(task);
     }
+
+    function dragStart(event: DragEvent) {
+        if (task.taskType === "regular") {
+            event.dataTransfer!.effectAllowed = "move";
+            event.dataTransfer!.setData("skill-circuits/item", task.id.toString());
+        }
+    }
+
+    function dragEnd(event: DragEvent) {
+    }
 </script>
+
 
 <button class="checkbox" aria-label="Complete task" aria-pressed={task.completed} onclick={toggleComplete}>
     <span>{"\u2713"}</span>
 </button>
-<span class="description">
+<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
+<div class="description" draggable={draggable} ondragstart={dragStart} ondragend={dragEnd}>
+    {#if !hidePathCustomisation && task.taskType === "regular"}
+        <div role="button" tabindex="0" aria-label="Move task to skill"
+             class="grip fa-solid fa-grip-vertical"
+             onmouseenter={ () => draggable = true } onmouseleave={ () => setTimeout(() => draggable = false, 200) }></div>
+    {/if}
     <span class="icon fa-solid fa-{TaskIcons[task.type]}"></span>
     {#if task.link === null}
         <span class="name">{task.name}</span>
     {:else}
-        <a class="name" href={task.link} target="_blank">{task.name}</a>
+        <Link onclick={ () => reportClickedLink(task) } href={task.link} target="_blank">{task.name}</Link>
     {/if}
-</span>
+</div>
+{#if hideBookmark !== true}
+    <BookmarkMenuComponent bind:open={bookmarksOpen} onLists={getBookmarks().filter(list => list.tasks.some(t => t.taskType === "regular" && t.infoId === task.infoId))}
+                           addToList={ list => addTaskInfoToBookmarkList(task, list) } removeFromList={ list => removeTaskInfoFromBookmarkList(task, list) }>
+        <Button square aria-label="Bookmark" onclick={ () => bookmarksOpen = true }>
+            <span class="fa-bookmark" class:fa-regular={!isTaskInfoBookmarked(task)} class:fa-solid={isTaskInfoBookmarked(task)}></span>
+        </Button>
+    </BookmarkMenuComponent>
+{/if}
 <span class="time">
     <span class="fa-solid fa-clock"></span>
     <span>{task.time}</span>
@@ -32,12 +66,12 @@
     .checkbox {
         aspect-ratio: 1 / 1;
         background: none;
-        border: 2px solid var(--on-block-divider-colour);
-        border-radius: 4px;
+        border: var(--checkbox-border);
+        border-radius: var(--checkbox-border-radius);
         cursor: pointer;
         outline: none;
         position: relative;
-        width: 1.5rem;
+        width: 1.5em;
     }
     .checkbox[aria-pressed="true"] {
         background-color: var(--checkbox-checked-colour);
@@ -61,20 +95,17 @@
     .description {
         align-items: center;
         display: flex;
-        gap: .25rem;
-    }
-
-    a.name {
-        color: var(--link-colour);
-        text-decoration: none;
-    }
-    a.name:hover, a.name:focus-visible {
-        color: var(--link-active-colour);
+        gap: .375em;
     }
 
     .time {
         align-items: center;
         display: flex;
-        gap: .25rem;
+        gap: .25em;
+    }
+
+    .grip {
+        cursor: grab;
+        opacity: 0.5;
     }
 </style>

@@ -19,7 +19,6 @@ package nl.tudelft.skills.dto.old.patch;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -45,7 +44,7 @@ public class SubmodulePositionPatchDTO extends Patch<Submodule> {
 	@Override
 	protected void applyOneToOne() {
 		updateNonNull(column, data::setColumn);
-//		updateNonNull(row, data::setRow);
+		//		updateNonNull(row, data::setRow);
 	}
 
 	@Override

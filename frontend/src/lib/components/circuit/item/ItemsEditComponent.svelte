@@ -107,7 +107,7 @@
 <style>
     .items {
         display: grid;
-        gap: 0.5rem;
+        gap: 0.5em;
     }
 
     .item-wrapper {
@@ -115,37 +115,42 @@
     }
 
     .drop-indicator {
-        background: var(--on-background-highlight-colour);
+        background: var(--task-drop-indication-colour);
+        border: var(--task-drop-indication-border);
         display: none;
-        height: calc(.5rem + .25rem);
-        left: -.25rem;
+        height: calc(.5em + .25em);
+        left: -.25em;
         position: absolute;
         pointer-events: none;
-        width: calc(100% + 0.5rem);
+        width: calc(100% + 0.5em);
         z-index: 1;
     }
 
     .pre.drop-indicator {
-        border-radius: 0 0 8px 8px;
-        top: -.25rem;
+        border-radius: 0 0 var(--task-drop-indication-border-radius) var(--task-drop-indication-border-radius);
+        border-top: none;
+        top: -.25em;
     }
     .item-wrapper:first-child .pre.drop-indicator {
-        border-radius: 8px;
-        height: 1.5rem;
-        top: -1rem;
+        border: var(--task-drop-indication-border);
+        border-radius: var(--task-drop-indication-border-radius);
+        height: 1.5em;
+        top: -1em;
     }
     .item-wrapper[data-dropping="pre"] .pre.drop-indicator {
         display: initial;
     }
 
     .post.drop-indicator {
-        border-radius: 8px 8px 0 0;
-        bottom: -.25rem;
+        border-radius: var(--task-drop-indication-border-radius) var(--task-drop-indication-border-radius) 0 0;
+        border-bottom: none;
+        bottom: -.25em;
     }
     .item-wrapper:last-child .post.drop-indicator {
-        border-radius: 8px;
-        bottom: -1rem;
-        height: 1.5rem;
+        border: var(--task-drop-indication-border);
+        border-radius: var(--task-drop-indication-border-radius);
+        bottom: -1em;
+        height: 1.5em;
     }
     .item-wrapper[data-dropping="post"] .post.drop-indicator {
         display: initial;

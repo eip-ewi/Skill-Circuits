@@ -18,10 +18,8 @@
 package nl.tudelft.skills.dto.old.create;
 
 import jakarta.validation.constraints.NotNull;
-
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import nl.tudelft.skills.dto.old.create.TaskCreateDTO;
 import nl.tudelft.skills.model.RegularTask;
 
 @Data

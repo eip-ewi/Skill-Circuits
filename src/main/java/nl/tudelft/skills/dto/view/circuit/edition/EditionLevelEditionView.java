@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,21 +17,20 @@
  */
 package nl.tudelft.skills.dto.view.circuit.edition;
 
+import java.util.List;
+
 import nl.tudelft.skills.dto.view.CheckpointView;
 import nl.tudelft.skills.dto.view.PathView;
 import nl.tudelft.skills.dto.view.circuit.CircuitView;
-
-import java.util.List;
 
 public record EditionLevelEditionView(
 		long id,
 		String name,
 		List<EditionLevelModuleView> groups,
-        List<CheckpointView> checkpoints,
-        List<PathView> paths
-) implements CircuitView {
-    @Override
-    public String getCircuitType() {
-        return "edition";
-    }
+		List<CheckpointView> checkpoints,
+		List<PathView> paths) implements CircuitView {
+	@Override
+	public String getCircuitType() {
+		return "edition";
+	}
 }

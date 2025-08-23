@@ -17,11 +17,10 @@
  */
 package nl.tudelft.skills.dto.old.create;
 
-import jakarta.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import nl.tudelft.librador.dto.create.Create;

@@ -23,10 +23,8 @@ import java.util.Set;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.hibernate.annotations.Cascade;
 
 @Data
 @Entity
@@ -42,11 +40,15 @@ public class Path {
 	@NotBlank
 	private String name;
 
-    @Lob
-    @NotNull
-    @Size(max = 8096)
-    @Column(columnDefinition = "TEXT")
-    private String description;
+	@NotNull
+	@Builder.Default
+	private Integer idx = 0;
+
+	@Lob
+	@NotNull
+	@Size(max = 8096)
+	@Column(columnDefinition = "TEXT")
+	private String description;
 
 	@NotNull
 	@ManyToOne
@@ -60,11 +62,11 @@ public class Path {
 	@ManyToMany(mappedBy = "paths")
 	private Set<Task> tasks = new HashSet<>();
 
-    @NotNull
-    @Builder.Default
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "path", cascade = CascadeType.ALL)
-    private Set<PathPreference> preferences = new HashSet<>();
+	@NotNull
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@OneToMany(mappedBy = "path", cascade = CascadeType.REMOVE)
+	private Set<PathPreference> preferences = new HashSet<>();
 
 }

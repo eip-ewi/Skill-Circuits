@@ -63,7 +63,7 @@
 <style>
     .block {
         display: grid;
-        gap: 1rem;
+        gap: 1em;
     }
 
     .heading {
@@ -72,7 +72,7 @@
     }
 
     .name {
-        font-size: 1.25rem;
+        font-size: 1.25em;
         font-weight: 700;
     }
 
@@ -87,12 +87,12 @@
     }
     th:not(:first-child) {
         border-block: 1px solid var(--on-block-divider-colour);
-        padding-inline: .375rem;
+        padding-inline: .375em;
     }
 
     td:first-child {
         border-block: 1px solid var(--on-block-divider-colour);
-        padding-inline: .375rem;
+        padding-inline: .375em;
     }
     td:not(:first-child) {
         border: 1px solid var(--on-block-divider-colour);
@@ -101,6 +101,11 @@
     .cell {
         display: grid;
         place-items: center;
-        padding: .375rem;
+        padding: .375em;
+    }
+
+    input[type="checkbox"] {
+        aspect-ratio: 1 / 1;
+        width: 0.875em;
     }
 </style>

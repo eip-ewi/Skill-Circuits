@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -24,9 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.old.view.EditLinkDTO;
-import nl.tudelft.skills.dto.old.view.module.TaskViewDTO;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.TaskRepository;
 
@@ -50,7 +48,7 @@ public class TaskController {
 	@PreAuthorize("@authorisationService.canEditTask(#editLinkDTO.taskId)")
 	public ResponseEntity<Void> updateTaskLink(@RequestBody EditLinkDTO editLinkDTO) {
 		Task task = taskRepository.findByIdOrThrow(editLinkDTO.getTaskId());
-//		task.setLink(editLinkDTO.getNewLink());
+		//		task.setLink(editLinkDTO.getNewLink());
 		taskRepository.save(task);
 
 		return ResponseEntity.ok().build();
@@ -66,7 +64,7 @@ public class TaskController {
 	@GetMapping("{taskId}")
 	public String getTask(@PathVariable Long taskId, Model model) {
 		Task task = taskRepository.findByIdOrThrow(taskId);
-//		model.addAttribute("item", View.convert(task, TaskViewDTO.class));
+		//		model.addAttribute("item", View.convert(task, TaskViewDTO.class));
 		model.addAttribute("canEdit", false);
 		model.addAttribute("level", "module");
 		return "task/view";
@@ -82,7 +80,7 @@ public class TaskController {
 	@GetMapping("{taskId}/preview")
 	public String getTaskForCustomPath(@PathVariable Long taskId, Model model) {
 		Task task = taskRepository.findByIdOrThrow(taskId);
-//		model.addAttribute("item", View.convert(task, TaskViewDTO.class));
+		//		model.addAttribute("item", View.convert(task, TaskViewDTO.class));
 		model.addAttribute("canEdit", false);
 		return "task/inactiveview :: item";
 	}

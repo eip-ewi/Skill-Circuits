@@ -21,14 +21,14 @@ export async function createPath(): Promise<Path | undefined> {
     if (response.ok) {
         let path = await response.json();
 
-        getPaths().unshift(path);
+        getPaths().push(path);
 
         let circuit = getCircuit();
         if (circuit.circuitType === "module") {
             circuit.groups.forEach(group => group.blocks.forEach(block => block.items.forEach(item => item.paths.push(path.id))));
         }
 
-        return getPaths()[0]!;
+        return getPaths().at(-1)!;
     }
     return undefined;
 }

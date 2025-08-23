@@ -18,7 +18,6 @@
 package nl.tudelft.skills.dto.old.patch;
 
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 @Data
 //@SuperBuilder
@@ -26,16 +25,16 @@ import lombok.experimental.SuperBuilder;
 //@AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class RegularTaskPatchDTO extends TaskPatchDTO {
-//	@NotNull
-//	private TaskInfoPatchDTO taskInfo;
-//
-//	@Override
-//	protected void applyOneToOne() {
-//		super.applyOneToOne();
-//		data.setTaskInfo(taskInfo.apply(data.getTaskInfo()));
-//	}
-//
-//	@Override
-//	protected void validate() {
-//	}
+	//	@NotNull
+	//	private TaskInfoPatchDTO taskInfo;
+	//
+	//	@Override
+	//	protected void applyOneToOne() {
+	//		super.applyOneToOne();
+	//		data.setTaskInfo(taskInfo.apply(data.getTaskInfo()));
+	//	}
+	//
+	//	@Override
+	//	protected void validate() {
+	//	}
 }

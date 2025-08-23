@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -36,8 +36,8 @@ import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.Task;
 import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.AbstractSkillRepository;
+import nl.tudelft.skills.repository.PersonRepository;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
-import nl.tudelft.skills.repository.labracore.PersonRepository;
 import nl.tudelft.skills.security.AuthorisationService;
 
 @AllArgsConstructor
@@ -62,9 +62,9 @@ public class SkillService {
 		AbstractSkill skill = abstractSkillRepository.findByIdOrThrow(id);
 		skill.getChildren().forEach(c -> c.getParents().remove(skill));
 		if (skill instanceof Skill s) {
-//			s.getTasks().forEach(t -> taskCompletionRepository.deleteAll(t.getCompletedBy()));
-//
-//			clickedLinkService.deleteClickedLinksForTasks(s.getTasks());
+			//			s.getTasks().forEach(t -> taskCompletionRepository.deleteAll(t.getCompletedBy()));
+			//
+			//			clickedLinkService.deleteClickedLinksForTasks(s.getTasks());
 
 			s.getFutureEditionSkills().forEach(innerSkill -> innerSkill.setPreviousEditionSkill(null));
 			if (s.getPreviousEditionSkill() != null) {
@@ -72,22 +72,22 @@ public class SkillService {
 			}
 
 			// Remove references from user if they were customized skils
-			s.getPersonModifiedSkill().forEach(p -> {
-				// Remove skill from list of custom modified skills
-				SCPerson person = personRepository.findByIdOrThrow(p.getId());
-				person.getSkillsModified().remove(s);
+			//			s.getPersonModifiedSkill().forEach(p -> {
+			//				// Remove skill from list of custom modified skills
+			//				SCPerson person = personRepository.findByIdOrThrow(p.getId());
+			//				person.getSkillsModified().remove(s);
+			//
+			//				// Remove the tasks from the custom skill
+			//				person.setTasksAdded(
+			//						person.getTasksAdded().stream().filter(t -> !t.getSkill().getId().equals(s.getId()))
+			//								.collect(Collectors.toSet()));
+			//				personRepository.save(person);
+			//			});
 
-				// Remove the tasks from the custom skill
-				person.setTasksAdded(
-						person.getTasksAdded().stream().filter(t -> !t.getSkill().getId().equals(s.getId()))
-								.collect(Collectors.toSet()));
-				personRepository.save(person);
-			});
-
-			s.getRequiredTasks().forEach(t -> {
-				t.getRequiredFor().remove(s);
-				taskRepository.save(t);
-			});
+			//			s.getRequiredTasks().forEach(t -> {
+			//				t.getRequiredFor().remove(s);
+			//				taskRepository.save(t);
+			//			});
 		}
 		abstractSkillRepository.delete(skill);
 		return skill;
@@ -114,10 +114,10 @@ public class SkillService {
 				.collect(toMap(EditionSummaryDTO::getId, Function.identity()));
 
 		// Get ids of the editions the person as completed at least one task in
-//		Set<Long> completedTasksInEditions = taskCompletionRepository.getByPersonId(personId).stream()
-//				.map(taskCompletion -> taskCompletion.getTask().getSkill().getSubmodule()
-//						.getModule().getEdition().getId())
-//				.collect(Collectors.toSet());
+		//		Set<Long> completedTasksInEditions = taskCompletionRepository.getByPersonId(personId).stream()
+		//				.map(taskCompletion -> taskCompletion.getTask().getSkill().getSubmodule()
+		//						.getModule().getEdition().getId())
+		//				.collect(Collectors.toSet());
 
 		// Do DFS
 		List<Skill> traversal = traverseSkillTree(skill);
@@ -133,15 +133,15 @@ public class SkillService {
 				.collect(Collectors.toList());
 
 		// If it exists, return the skill from the last edition the person has completed a task in
-//		Optional<Skill> completedTasksInEdition = traversal.stream()
-//				.filter(innerSkill -> completedTasksInEditions.contains(innerSkill.getSubmodule()
-//						.getModule().getEdition().getId()))
-//				.findFirst();
-//
-//		// If it does not exist, return the skill in the latest edition
-//		// If there is no skill visible to the user, returns null
-//		return completedTasksInEdition.orElse(traversal.size() > 0 ? traversal.get(0) : null);
-        return null;
+		//		Optional<Skill> completedTasksInEdition = traversal.stream()
+		//				.filter(innerSkill -> completedTasksInEditions.contains(innerSkill.getSubmodule()
+		//						.getModule().getEdition().getId()))
+		//				.findFirst();
+		//
+		//		// If it does not exist, return the skill in the latest edition
+		//		// If there is no skill visible to the user, returns null
+		//		return completedTasksInEdition.orElse(traversal.size() > 0 ? traversal.get(0) : null);
+		return null;
 	}
 
 	/**

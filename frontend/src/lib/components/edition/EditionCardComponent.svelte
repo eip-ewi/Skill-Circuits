@@ -1,32 +1,31 @@
 <script lang="ts">
-    import type {Role} from "../../dto/role";
-    import {roleToName} from "../../logic/role";
     import {loadPage} from "../../logic/routing.svelte";
     import type {EditionCard} from "../../dto/edition";
+    import {getAuthorisation} from "../../logic/authorisation.svelte";
 
-    let { edition, role }: { edition: EditionCard, role: Role } = $props();
+    let { edition }: { edition: EditionCard } = $props();
 </script>
 
 <button class="edition" onclick={ () => loadPage(`/editions/${edition.id}`) }>
+    <span class="role">{getAuthorisation().managedEditions.includes(edition.id) ? 'Editor' : 'Student'}</span>
     <h3>
         <span>{edition.course.name}</span>
         <span>{edition.name}</span>
     </h3>
-    <span class="role">{roleToName(role)}</span>
 </button>
 
 <style>
     .edition {
         background-color: var(--block-colour);
-        border: none;
-        border-radius: 8px;
+        border: var(--block-border);
+        border-radius: var(--block-border-radius);
         box-shadow: .75rem 1.25rem 1.625rem 0 color-mix(in srgb, var(--shadow-colour) 8%, transparent);
         color: var(--on-block-colour);
         cursor: pointer;
         display: grid;
         justify-items: start;
-        gap: 1rem;
-        padding: .5rem 1rem;
+        gap: 0;
+        padding: 1em;
         text-decoration: none;
         transition: transform 150ms ease-in-out;
     }
@@ -43,5 +42,11 @@
     h3 span:first-child {
         font-size: var(--font-size-500);
         font-weight: 700;
+    }
+
+    .role {
+        font-style: italic;
+        opacity: 35%;
+        margin-top: -.25em;
     }
 </style>

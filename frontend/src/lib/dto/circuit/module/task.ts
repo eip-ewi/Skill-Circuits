@@ -16,10 +16,6 @@ export interface ITaskInfo {
 }
 
 export interface RegularTaskItem extends ITaskItem, ITaskInfo {
-    type: string;
-    time: number;
-    link: string | null;
-
     taskType: "regular";
 }
 

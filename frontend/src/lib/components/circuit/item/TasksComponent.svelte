@@ -4,14 +4,14 @@
     import TaskComponent from "./TaskComponent.svelte";
     import ChoiceTaskComponent from "./ChoiceTaskComponent.svelte";
 
-    let { tasks }: { tasks: TaskItem[] } = $props();
+    let { tasks, hideBookmark }: { tasks: TaskItem[], hideBookmark?: boolean } = $props();
 
 </script>
 
-<div class="tasks">
+<div class="tasks" style="--columns: {hideBookmark === true ? 3 : 4}">
     {#each tasks as task}
         {#if task.taskType === "regular"}
-            <TaskComponent {task}></TaskComponent>
+            <TaskComponent {task} {hideBookmark}></TaskComponent>
         {:else}
             <ChoiceTaskComponent {task}></ChoiceTaskComponent>
         {/if}
@@ -21,11 +21,11 @@
 <style>
     .tasks {
         align-items: center;
-        column-gap: 0.75rem;
+        column-gap: 0.6em;
         display: grid;
         font-size: var(--font-size-500);
-        grid-template-columns: auto auto auto;
+        grid-template-columns: repeat(var(--columns, 4), auto);
         justify-content: start;
-        row-gap: 0.25rem;
+        row-gap: 0.2em;
     }
 </style>

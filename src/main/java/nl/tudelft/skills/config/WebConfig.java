@@ -42,7 +42,7 @@ import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.NoAuthenticatedPersonException;
 import nl.tudelft.skills.annotation.AuthenticatedSCPerson;
 import nl.tudelft.skills.model.SCPerson;
-import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.repository.PersonRepository;
 
 @Configuration
 @AllArgsConstructor

@@ -2,6 +2,7 @@
     import {cubicInOut} from "svelte/easing";
     import {type BlockAction, BlockActions} from "../../../data/block_action";
     import type {Block} from "../../../dto/circuit/block";
+    import Button from "../../util/Button.svelte";
 
     let { action = $bindable(), open = $bindable() }: { action: BlockAction | undefined, open: boolean } = $props();
 
@@ -16,28 +17,17 @@
     }
 </script>
 
-<button aria-label="Expand" onclick={ () => open = true } onmouseenter={ () => action = BlockActions.Expand } onmouseleave={ () => action = undefined } transition:transition>
-    <span class="fa-solid fa-expand"></span>
-</button>
+<div class="expand-button" transition:transition>
+    <Button square aria-label="Expand" onclick={ () => open = true } onmouseenter={ () => action = BlockActions.Expand } onmouseleave={ () => action = undefined }>
+        <span class="fa-solid fa-expand"></span>
+    </Button>
+</div>
 
 <style>
-    button {
-        aspect-ratio: 1 / 1;
-        background-color: var(--block-colour);
-        color: var(--on-block-colour);
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        display: grid;
-        place-items: center;
+    .expand-button {
         position: absolute;
-        min-width: 2rem;
-        right: -.5rem;
-        top: -.5rem;
+        right: -.5em;
+        top: -.5em;
         transform-origin: bottom left;
-    }
-    button:hover, button:focus-visible {
-        background-color: var(--primary-surface-active-colour);
-        color: var(--on-primary-surface-colour);
     }
 </style>

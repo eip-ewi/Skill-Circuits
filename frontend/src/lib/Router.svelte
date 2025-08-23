@@ -9,12 +9,17 @@
     import LoginPage from "./pages/LoginPage.svelte";
     import SkillPage from "./pages/SkillPage.svelte";
     import ErrorPage from "./pages/ErrorPage.svelte";
+    import CatalogPage from "./pages/CatalogPage.svelte";
+    import PrivacyPage from "./pages/PrivacyPage.svelte";
 </script>
 
 <svelte:window onpopstate={reloadPageFromUrl}></svelte:window>
 
 {#if getPage() === "/"}
     <LandingPage></LandingPage>
+
+{:else if pageMatches(/^\/editions$/)}
+    <CatalogPage></CatalogPage>
 
 {:else if pageMatches(/\/editions\/(\d+)/)}
     <EditionPage editionId={parseInt(extractPathVariable(/\/editions\/(\d+)/))}></EditionPage>
@@ -27,6 +32,9 @@
 
 {:else if pageMatches(/\/skills\/(\d+)/)}
     <SkillPage skillId={parseInt(extractPathVariable(/\/skills\/(\d+)/))}></SkillPage>
+
+{:else if pageMatches(/^\/privacy/)}
+    <PrivacyPage></PrivacyPage>
 
 {:else if pageMatches(/\/error/)}
     <ErrorPage></ErrorPage>

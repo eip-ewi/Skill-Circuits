@@ -1,24 +1,24 @@
 <script lang="ts">
 
     import {clearLevel} from "../logic/circuit/level.svelte";
+    import PageLayout from "./PageLayout.svelte";
 
 </script>
 
-<main>
+<PageLayout>
 
-    <h1>Welcome to Skill Circuits!</h1>
+    <div class="content">
+        <h1>Welcome to Skill Circuits!</h1>
 
-    <a href="/login">Click here to log in</a>
+        <a href="/login">Click here to log in</a>
+    </div>
 
-</main>
+</PageLayout>
 
 <style>
-    main {
-        align-content: start;
+    .content {
         display: grid;
-        justify-content: center;
-        height: 100%;
-        padding: 4rem 2rem 2rem 2rem;
+        place-items: center;
     }
 
     h1 {

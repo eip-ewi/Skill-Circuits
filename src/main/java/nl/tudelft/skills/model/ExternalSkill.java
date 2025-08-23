@@ -20,7 +20,6 @@ package nl.tudelft.skills.model;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotNull;
-
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 

@@ -18,18 +18,19 @@
 package nl.tudelft.skills.model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import nl.tudelft.skills.dto.old.view.module.TaskViewDTO;
-import nl.tudelft.skills.dto.view.module.ChoiceTaskViewDTO;
+import nl.tudelft.skills.model.bookmark.BookmarkList;
 
 @Data
 @Entity
@@ -40,8 +41,8 @@ import nl.tudelft.skills.dto.view.module.ChoiceTaskViewDTO;
 public class ChoiceTask extends Task {
 
 	// Can be empty
-    @NotNull
-    @Builder.Default
+	@NotNull
+	@Builder.Default
 	private String name = "";
 
 	@Min(1)
@@ -54,5 +55,12 @@ public class ChoiceTask extends Task {
 	@EqualsAndHashCode.Exclude
 	@OneToMany(mappedBy = "choiceTask", cascade = CascadeType.ALL)
 	private List<TaskInfo> tasks = new ArrayList<>();
+
+	@NotNull
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@ManyToMany(mappedBy = "choiceTasks")
+	private Set<BookmarkList> onLists = new HashSet<>();
 
 }

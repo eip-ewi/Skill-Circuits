@@ -9,7 +9,7 @@
     import {Graph} from "../../logic/circuit/graph";
     import type {Warning} from "../../data/warning";
     import {hasCycle} from "../../logic/diagnostics/detect_cycles";
-    import {getBlocks, getCircuit, getGraph} from "../../logic/circuit/circuit.svelte";
+    import {getBlocks, getCircuit, getGraph, getVisibleBlocks} from "../../logic/circuit/circuit.svelte";
     import GroupComponent from "./group/GroupComponent.svelte";
     import GroupsComponent from "./group/GroupsComponent.svelte";
     import {canEditCircuit, getAuthorisation} from "../../logic/authorisation.svelte";
@@ -20,7 +20,6 @@
     import CheckpointComponent from "./checkpoint/CheckpointComponent.svelte";
     import { fade } from "svelte/transition";
     import {getVisibleCheckpoints} from "../../logic/edition/edition.svelte";
-    import {resetActivePath} from "../../logic/edition/active_path.svelte";
 
     let { warnings = $bindable() }: { warnings: Warning[] } = $props();
 
@@ -85,7 +84,7 @@
             <ColumnComponent {column} {height}></ColumnComponent>
         {/each}
 
-        {#each getPlacedBlocks() as block}
+        {#each getVisibleBlocks() as block}
             <BlockComponent {block}></BlockComponent>
         {/each}
 
@@ -93,22 +92,26 @@
 
 </div>
 
-<div>
-    <button onclick={() => getCircuit().width = (getCircuit().width ?? 0) + 1 }>+Column</button>
-    <button onclick={() => getCircuit().width = (getCircuit().width ?? 0) - 1 }>-Column</button>
-    <button onclick={resetActivePath}>Path reset</button>
-</div>
+{#if canEditCircuit()}
+    <div>
+        <button onclick={() => getCircuit().width = (getCircuit().width ?? 0) + 1 }>+Column</button>
+        <button onclick={() => getCircuit().width = (getCircuit().width ?? 0) - 1 }>-Column</button>
+    </div>
+{/if}
 
 <style>
 
     .circuit {
+        font-size: clamp(.2rem, calc(16 / 1732 * 100vw), 1rem);
+
         align-items: start;
         display: grid;
-        gap: 4rem;
+        gap: 4em;
         justify-content: center;
-        padding-bottom: 12rem;
-        padding-inline: 2rem;
+        padding-bottom: 12em;
+        padding-inline: 2em;
         position: relative;
+
     }
 
     h1 {
@@ -121,9 +124,9 @@
     .grid {
         align-items: start;
         display: grid;
-        column-gap: 6rem;
+        column-gap: 6em;
         grid-template-columns: repeat(var(--columns, 5), 1fr);
-        row-gap: 8rem;
+        row-gap: 8em;
     }
 
 </style>

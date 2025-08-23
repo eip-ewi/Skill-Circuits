@@ -11,15 +11,12 @@
     import ChoiceTaskEditComponent from "./ChoiceTaskEditComponent.svelte";
     import {editTaskInfoName} from "../../../logic/circuit/updates/task_updates";
     import TaskInfoEditComponent from "./TaskInfoEditComponent.svelte";
+    import Button from "../../util/Button.svelte";
+    import WithConfirmationDialog from "../../util/WithConfirmationDialog.svelte";
 
     let { task }: { task: TaskItem } = $props();
 
     let draggable: boolean = $state(false);
-
-    async function editName(event: Event) {
-        const newName = (event.target as HTMLInputElement).value;
-        await editItemName(task, newName);
-    }
 
     function dragStart(event: DragEvent) {
         event.dataTransfer!.effectAllowed = "move";
@@ -35,10 +32,6 @@
 
     }
 
-    async function remove() {
-        await deleteItem(task);
-    }
-
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
@@ -50,11 +43,31 @@
         <TaskInfoEditComponent taskInfo={task}>
             <TaskPathEditComponent task={task}></TaskPathEditComponent>
         </TaskInfoEditComponent>
-        <button aria-label="Remove item" class="button danger fa-solid fa-trash" onclick={remove}></button>
+
+        <WithConfirmationDialog onconfirm={ () => deleteItem(task) } icon="fa-solid fa-trash" action="Delete">
+            {#snippet button(showDialog: () => void) }
+                <Button square primary type="caution" aria-label="Delete item" onclick={showDialog}>
+                    <span class="fa-solid fa-trash" ></span>
+                </Button>
+            {/snippet}
+            <p>
+                Are you sure you want to delete '{task.name}'?
+            </p>
+        </WithConfirmationDialog>
     {:else}
         <ChoiceTaskEditComponent {task}></ChoiceTaskEditComponent>
         <TaskPathEditComponent task={task}></TaskPathEditComponent>
-        <button aria-label="Remove item" class="button danger fa-solid fa-trash" onclick={remove}></button>
+
+        <WithConfirmationDialog onconfirm={ () => deleteItem(task) } icon="fa-solid fa-trash" action="Delete">
+            {#snippet button(showDialog: () => void) }
+                <Button square primary type="caution" aria-label="Delete item" onclick={showDialog}>
+                    <span class="fa-solid fa-trash" ></span>
+                </Button>
+            {/snippet}
+            <p>
+                Are you sure you want to delete this task?
+            </p>
+        </WithConfirmationDialog>
     {/if}
 </div>
 
@@ -62,39 +75,11 @@
     .task {
         align-items: center;
         display: flex;
-        gap: 0.5rem;
+        gap: 0.5em;
     }
 
     .grip {
-        background: none;
-        border: none;
-        color: grey;
         cursor: grab;
-    }
-
-    .button {
-        aspect-ratio: 1 / 1;
-        background-color: var(--primary-surface-colour);
-        border: none;
-        border-radius: 8px;
-        color: var(--on-primary-surface-colour);
-        cursor: pointer;
-        display: grid;
-        min-width: 2rem;
-        place-items: center;
-    }
-
-    .button:where(:hover, :focus-visible) {
-        background-color: var(--primary-surface-active-colour);
-        color: var(--on-primary-surface-colour);
-    }
-
-    .button.danger {
-        background-color: var(--primary-error-colour);
-        color: var(--on-error-surface-colour);
-    }
-    .button.danger:where(:hover, :focus-visible) {
-        background-color: var(--primary-error-active-colour);
-        color: var(--on-error-surface-colour);
+        opacity: 0.5;
     }
 </style>

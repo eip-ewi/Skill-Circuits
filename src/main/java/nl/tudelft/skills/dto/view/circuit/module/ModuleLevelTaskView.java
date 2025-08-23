@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,78 +17,77 @@
  */
 package nl.tudelft.skills.dto.view.circuit.module;
 
+import java.util.List;
+
 import nl.tudelft.skills.dto.view.circuit.ItemView;
 import nl.tudelft.skills.enums.TaskType;
 
-import java.util.List;
-
 public sealed interface ModuleLevelTaskView extends ItemView {
 
-    record Regular(
-            long id,
-            long infoId,
-            String name,
-            TaskType type,
-            int time,
-            String link,
-            boolean completed,
-            List<Long> paths
-    ) implements ModuleLevelTaskView {
-        @Override
-        public String getTaskType() {
-            return "regular";
-        }
-    }
+	record Regular(
+			long id,
+			long infoId,
+			String name,
+			TaskType type,
+			int time,
+			String link,
+			boolean completed,
+			List<Long> paths) implements ModuleLevelTaskView {
+		@Override
+		public String getTaskType() {
+			return "regular";
+		}
+	}
 
-    record Choice(
-            long id,
-            String name,
-            int minTasks,
-            List<ChoiceTaskChoiceView> tasks,
-            List<Long> paths
-    ) implements ModuleLevelTaskView {
-        @Override
-        public boolean completed() {
-            return tasks.stream().filter(ChoiceTaskChoiceView::completed).count() >= minTasks;
-        }
-        public boolean getCompleted() {
-            return completed();
-        }
-        @Override
-        public String getTaskType() {
-            return "choice";
-        }
-    }
+	record Choice(
+			long id,
+			String name,
+			int minTasks,
+			List<ChoiceTaskChoiceView> tasks,
+			List<Long> paths) implements ModuleLevelTaskView {
+		@Override
+		public boolean completed() {
+			return tasks.stream().filter(ChoiceTaskChoiceView::completed).count() >= minTasks;
+		}
 
-    record ChoiceTaskChoiceView(
-            long infoId,
-            String name,
-            TaskType type,
-            int time,
-            String link,
-            boolean completed
-    ) {
-        public String getTaskType() {
-            return "choice";
-        }
-    }
+		public boolean getCompleted() {
+			return completed();
+		}
 
-    List<Long> paths();
+		@Override
+		public String getTaskType() {
+			return "choice";
+		}
+	}
 
-    String getTaskType();
+	record ChoiceTaskChoiceView(
+			long infoId,
+			String name,
+			TaskType type,
+			int time,
+			String link,
+			boolean completed) {
+		public String getTaskType() {
+			return "choice";
+		}
+	}
 
-    @Override
-    default boolean locked() {
-        return false;
-    }
+	List<Long> paths();
 
-    default boolean getLocked() {
-        return locked();
-    }
+	String getTaskType();
 
-    @Override
-    default String getItemType() {
-        return "task";
-    }
+	@Override
+	default boolean locked() {
+		return false;
+	}
+
+	default boolean getLocked() {
+		return locked();
+	}
+
+	@Override
+	default String getItemType() {
+		return "task";
+	}
 
 }

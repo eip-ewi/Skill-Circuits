@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.validation.constraints.NotNull;
-
 import lombok.*;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.model.SCCourse;

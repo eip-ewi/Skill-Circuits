@@ -20,13 +20,12 @@ package nl.tudelft.skills.model;
 import java.util.HashSet;
 import java.util.Set;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Data
@@ -42,8 +41,8 @@ public class SCModule {
 
 	@NotNull
 	@ManyToOne
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
 	private SCEdition edition;
 
 	@NotBlank

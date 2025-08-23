@@ -8,6 +8,7 @@
     import {getBlock, getBlocks, getGraph} from "../../../logic/circuit/circuit.svelte";
     import {connectSkills, disconnectSkills} from "../../../logic/circuit/updates/connection_updates.svelte";
     import type {SkillBlock} from "../../../dto/circuit/module/skill";
+    import Button from "../../util/Button.svelte";
 
     let { skill, action = $bindable(), connectable = $bindable() }: { skill: SkillBlock, action: BlockAction | undefined, connectable: boolean } = $props();
 
@@ -92,16 +93,24 @@
 
 <div class="controls" transition:transition>
     {#if connectUp}
-        <button aria-label="Add as dependency" class="fa-solid fa-arrow-up" onclick={addParent} onmouseenter={ () => action = BlockActions.AddParent } onmouseleave={ () => action = undefined }></button>
+        <Button square aria-label="Add as dependency" onclick={addParent} onmouseenter={ () => action = BlockActions.AddParent } onmouseleave={ () => action = undefined }>
+            <span class="fa-solid fa-arrow-up"></span>
+        </Button>
     {:else if disconnectUp}
-        <button aria-label="Remove dependency" class="danger fa-solid fa-link-slash" onclick={removeParent} onmouseenter={ () => action = BlockActions.RemoveParent } onmouseleave={ () => action = undefined }></button>
+        <Button square aria-label="Remove dependency" type="caution" onclick={removeParent} onmouseenter={ () => action = BlockActions.RemoveParent } onmouseleave={ () => action = undefined }>
+            <span class="fa-solid fa-link-slash"></span>
+        </Button>
     {:else}
         <div class="placeholder"></div>
     {/if}
     {#if connectDown}
-        <button aria-label="Add as dependant" class="fa-solid fa-arrow-down" onclick={addChild} onmouseenter={ () => action = BlockActions.AddChild } onmouseleave={ () => action = undefined }></button>
+        <Button square aria-label="Add as dependant" onclick={addChild} onmouseenter={ () => action = BlockActions.AddChild } onmouseleave={ () => action = undefined }>
+            <span class="fa-solid fa-arrow-down"></span>
+        </Button>
     {:else if disconnectDown}
-        <button aria-label="Remove dependant" class="danger fa-solid fa-link-slash" onclick={removeChild} onmouseenter={ () => action = BlockActions.RemoveChild } onmouseleave={ () => action = undefined }></button>
+        <Button square type="caution" aria-label="Remove dependant" onclick={removeChild} onmouseenter={ () => action = BlockActions.RemoveChild } onmouseleave={ () => action = undefined }>
+            <span class="fa-solid fa-link-slash"></span>
+        </Button>
     {:else}
         <div class="placeholder"></div>
     {/if}
@@ -117,27 +126,5 @@
         top: 50%;
         transform-origin: center;
         translate: -50% -50%;
-    }
-
-    .controls > :not(.placeholder) {
-        aspect-ratio: 1 / 1;
-        background-color: var(--block-colour);
-        border: none;
-        border-radius: 8px;
-        color: var(--on-block-colour);
-        cursor: pointer;
-        display: grid;
-        min-width: 2rem;
-        place-items: center;
-    }
-
-    .controls > :not(.placeholder):where(:hover, :focus-visible) {
-        background-color: var(--primary-surface-active-colour);
-        color: var(--on-primary-surface-colour);
-    }
-
-    .controls > :not(.placeholder).danger:where(:hover, :focus-visible) {
-        background-color: var(--primary-error-active-colour);
-        color: var(--on-error-surface-colour);
     }
 </style>

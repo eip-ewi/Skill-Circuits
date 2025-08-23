@@ -18,10 +18,8 @@
 package nl.tudelft.skills.dto.old.view.module;
 
 import jakarta.validation.constraints.NotNull;
-
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import nl.tudelft.skills.dto.old.view.module.TaskViewDTO;
 import nl.tudelft.skills.model.RegularTask;
 
 @Data
@@ -43,6 +41,6 @@ public class RegularTaskViewDTO extends TaskViewDTO<RegularTask> {
 	@Override
 	public void postApply() {
 		super.postApply();
-//		completedCount = data.getCompletedBy().size();
+		//		completedCount = data.getCompletedBy().size();
 	}
 }

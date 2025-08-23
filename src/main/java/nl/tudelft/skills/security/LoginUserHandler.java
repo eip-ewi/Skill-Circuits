@@ -17,18 +17,14 @@
  */
 package nl.tudelft.skills.security;
 
-import java.util.ArrayList;
-
-import nl.tudelft.labracore.lib.security.user.DefaultRole;
-import nl.tudelft.skills.enums.ViewMode;
 import org.springframework.stereotype.Service;
 
 import io.sentry.Sentry;
 import io.sentry.protocol.User;
+import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.lib.security.LabradorUserHandler;
 import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.skills.model.SCPerson;
-import nl.tudelft.skills.repository.labracore.PersonRepository;
+import nl.tudelft.skills.service.SCPersonService;
 
 /**
  * Interface for handling user logins on the client implementation.
@@ -38,13 +34,10 @@ import nl.tudelft.skills.repository.labracore.PersonRepository;
  */
 
 @Service
+@AllArgsConstructor
 public class LoginUserHandler implements LabradorUserHandler {
 
-	private final PersonRepository scPersonRepository;
-
-	public LoginUserHandler(PersonRepository personRepository) {
-		this.scPersonRepository = personRepository;
-	}
+	private final SCPersonService sCPersonService;
 
 	/**
 	 * Makes changes to the DB when someone logs in.
@@ -58,15 +51,7 @@ public class LoginUserHandler implements LabradorUserHandler {
 			user.setUsername(person.getUsername());
 			scope.setTag("DefaultRole", person.getDefaultRole().toString());
 		});
-		if (!scPersonRepository.existsById(person.getId())) {
-
-            boolean isEmployee = person.getDefaultRole() != DefaultRole.STUDENT;
-			SCPerson scPerson = SCPerson.builder().id(person.getId()).viewMode(isEmployee ? ViewMode.EDITOR : ViewMode.VIEWER).build();
-
-			scPersonRepository.save(scPerson);
-
-		}
-
+		sCPersonService.getOrCreate(person.getId());
 	}
 
 }

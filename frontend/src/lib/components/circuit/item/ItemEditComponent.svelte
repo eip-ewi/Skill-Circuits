@@ -7,6 +7,8 @@
     import TaskLinkEditComponent from "./TaskLinkEditComponent.svelte";
     import TaskPathEditComponent from "./TaskPathEditComponent.svelte";
     import type {Snippet} from "svelte";
+    import Button from "../../util/Button.svelte";
+    import WithConfirmationDialog from "../../util/WithConfirmationDialog.svelte";
 
     let { item }: { item: Item } = $props();
 
@@ -14,54 +16,35 @@
         const newName = (event.target as HTMLInputElement).value;
         await editItemName(item, newName);
     }
-
-    async function remove() {
-        await deleteItem(item);
-    }
 </script>
 
 <div class="item">
-    <input class="name" value={item.name} onchange={editName}/>
-    <button aria-label="Remove item" class="button danger fa-solid fa-trash" onclick={remove}></button>
+    <input class="name" name="item-name" value={item.name} onchange={editName}/>
+    <WithConfirmationDialog onconfirm={ () => deleteItem(item) } icon="fa-solid fa-trash" action="Delete">
+        {#snippet button(showDialog: () => void) }
+            <Button square primary type="caution" aria-label="Delete item" onclick={showDialog}>
+                <span class="fa-solid fa-trash" ></span>
+            </Button>
+        {/snippet}
+        <p>
+            Are you sure you want to delete '{item.name}'?
+        </p>
+    </WithConfirmationDialog>
 </div>
 
 <style>
     .item {
         align-items: center;
         display: flex;
-        gap: 0.5rem;
+        gap: 0.5em;
     }
 
     .name {
+        background-color: var(--neutral-surface-colour);
         border: 1px solid var(--on-block-divider-colour);
-        border-radius: 8px;
+        border-radius: .5em;
+        color: var(--on-neutral-surface-colour);
         flex-grow: 1;
-        padding: .25rem .5rem;
-    }
-
-    .button {
-        aspect-ratio: 1 / 1;
-        background-color: var(--primary-surface-colour);
-        border: none;
-        border-radius: 8px;
-        color: var(--on-primary-surface-colour);
-        cursor: pointer;
-        display: grid;
-        min-width: 2rem;
-        place-items: center;
-    }
-
-    .button:where(:hover, :focus-visible) {
-        background-color: var(--primary-surface-active-colour);
-        color: var(--on-primary-surface-colour);
-    }
-
-    .button.danger {
-        background-color: var(--primary-error-colour);
-        color: var(--on-error-surface-colour);
-    }
-    .button.danger:where(:hover, :focus-visible) {
-        background-color: var(--primary-error-active-colour);
-        color: var(--on-error-surface-colour);
+        padding: .25em .5em;
     }
 </style>

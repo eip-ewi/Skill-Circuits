@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -20,8 +20,6 @@ package nl.tudelft.skills.controller.old;
 import java.util.Collections;
 import java.util.List;
 
-import jakarta.servlet.http.HttpSession;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,9 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpSession;
 import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
 import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.old.create.SCModuleCreateDTO;
 import nl.tudelft.skills.dto.old.patch.SCModulePatchDTO;
 import nl.tudelft.skills.dto.old.view.SkillSummaryDTO;
@@ -84,10 +82,10 @@ public class ModuleController {
 
 		//		Playlist feature
 		long accId = 643L;
-		if (moduleRepository.findByIdOrThrow(id).getEdition().getId() == accId
-				& !authorisationService.canEditEdition(accId)) {
-//			researchParticipantService.addRPInfoToModel(person, model);
-		}
+		//		if (moduleRepository.findByIdOrThrow(id).getEdition().getId() == accId
+		//				& !authorisationService.canEditEdition(accId)) {
+		//			researchParticipantService.addRPInfoToModel(person, model);
+		//		}
 		return "module/view";
 	}
 
@@ -101,9 +99,9 @@ public class ModuleController {
 	@Transactional
 	@PreAuthorize("@authorisationService.canCreateModuleInEdition(#create.edition.id)")
 	public String createModule(SCModuleCreateDTO create, Model model) {
-//		SCModule module = moduleRepository.save(create.apply());
-//		model.addAttribute("module", module);
-//		model.addAttribute("edition", module.getEdition());
+		//		SCModule module = moduleRepository.save(create.apply());
+		//		model.addAttribute("module", module);
+		//		model.addAttribute("edition", module.getEdition());
 		return "module/block";
 	}
 
@@ -117,8 +115,8 @@ public class ModuleController {
 	@Transactional
 	@PreAuthorize("@authorisationService.canCreateModuleInEdition(#create.edition.id)")
 	public String createModuleInEditionSetup(SCModuleCreateDTO create, Model model) {
-//		SCModule module = moduleRepository.save(create.apply());
-//		model.addAttribute("module", View.convert(module, EditionLevelModuleViewDTO.class));
+		//		SCModule module = moduleRepository.save(create.apply());
+		//		model.addAttribute("module", View.convert(module, EditionLevelModuleViewDTO.class));
 		return "edition_setup/module";
 	}
 
@@ -137,7 +135,7 @@ public class ModuleController {
 				.flatMap(s -> s.getSkills().stream())
 				.flatMap(s -> s.getTasks().stream()).toList();
 		tasks.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
-//		clickedLinkService.deleteClickedLinksForTasks(tasks);
+		//		clickedLinkService.deleteClickedLinksForTasks(tasks);
 		moduleRepository.delete(module);
 		return "redirect:/edition/" + module.getEdition().getId();
 	}
@@ -157,7 +155,7 @@ public class ModuleController {
 				.flatMap(s -> s.getSkills().stream())
 				.flatMap(s -> s.getTasks().stream()).toList();
 		tasks.forEach(taskCompletionService::deleteTaskCompletionsOfTask);
-//		clickedLinkService.deleteClickedLinksForTasks(tasks);
+		//		clickedLinkService.deleteClickedLinksForTasks(tasks);
 		moduleRepository.delete(module);
 		return ResponseEntity.ok().build();
 	}
@@ -172,7 +170,7 @@ public class ModuleController {
 	@PreAuthorize("@authorisationService.canEditModule(#patch.id)")
 	public ResponseEntity<Void> patchModule(SCModulePatchDTO patch) {
 		SCModule module = moduleRepository.findByIdOrThrow(patch.getId());
-//		moduleRepository.save(patch.apply(module));
+		//		moduleRepository.save(patch.apply(module));
 		return ResponseEntity.ok().build();
 	}
 
@@ -186,11 +184,11 @@ public class ModuleController {
 	@PreAuthorize("@authorisationService.canEditModule(#patch.id)")
 	public String patchModuleSetup(SCModulePatchDTO patch, Model model) {
 		SCModule module = moduleRepository.findByIdOrThrow(patch.getId());
-//		moduleRepository.save(patch.apply(module));
+		//		moduleRepository.save(patch.apply(module));
 
-        return "";
-//		return SpringContext.getBean(EditionController.class).getEditionPage(module.getEdition().getId(),
-//				"circuit", model);
+		return "";
+		//		return SpringContext.getBean(EditionController.class).getEditionPage(module.getEdition().getId(),
+		//				"circuit", model);
 	}
 
 	/**
@@ -217,11 +215,11 @@ public class ModuleController {
 	@GetMapping("{id}/skills")
 	@PreAuthorize("@authorisationService.canGetSkillsOfModule(#id)")
 	public @ResponseBody List<SkillSummaryDTO> getSkillsOfModule(@PathVariable Long id) {
-//		return View.convert(moduleRepository.findByIdOrThrow(id).getSubmodules().stream()
-//				.flatMap(s -> s.getSkills().stream())
-//				.sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList(),
-//				SkillSummaryDTO.class);
-        return Collections.emptyList();
+		//		return View.convert(moduleRepository.findByIdOrThrow(id).getSubmodules().stream()
+		//				.flatMap(s -> s.getSkills().stream())
+		//				.sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList(),
+		//				SkillSummaryDTO.class);
+		return Collections.emptyList();
 	}
 
 }

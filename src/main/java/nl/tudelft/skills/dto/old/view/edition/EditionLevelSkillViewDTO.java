@@ -21,7 +21,6 @@ import java.util.List;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
 import lombok.*;
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.old.view.module.TaskViewDTO;
@@ -42,15 +41,15 @@ public class EditionLevelSkillViewDTO extends View<Skill> {
 	private Boolean hidden;
 	@NotNull
 	private List<? extends TaskViewDTO<?>> tasks;
-//
-//	@Override
-//	public void postApply() {
-//		super.postApply();
-//		this.tasks = data.getTasks().stream().map(t -> {
-//			TaskViewDTO<?> dto = getMapper().map(t, t.viewClass());
-//			dto.postApply();
-//			return dto;
-//		}).toList();
-//	}
+	//
+	//	@Override
+	//	public void postApply() {
+	//		super.postApply();
+	//		this.tasks = data.getTasks().stream().map(t -> {
+	//			TaskViewDTO<?> dto = getMapper().map(t, t.viewClass());
+	//			dto.postApply();
+	//			return dto;
+	//		}).toList();
+	//	}
 
 }

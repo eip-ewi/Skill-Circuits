@@ -1,1 +1,0 @@
-export type Role = "TEACHER" | "HEAD_TA" | "TA" | "STUDENT"

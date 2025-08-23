@@ -20,16 +20,12 @@ package nl.tudelft.skills.repository;
 import java.util.Optional;
 import java.util.Set;
 
-import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.skills.model.SCPerson;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.model.TaskInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
-import nl.tudelft.skills.model.TaskCompletion;
+import nl.tudelft.skills.model.*;
 
 public interface TaskCompletionRepository extends JpaRepository<TaskCompletion, Long> {
 
@@ -38,30 +34,33 @@ public interface TaskCompletionRepository extends JpaRepository<TaskCompletion, 
 				.orElseThrow(() -> new ResourceNotFoundException("TaskCompletion was not found: " + id));
 	}
 
-    @Query("""
-           select completion from TaskCompletion completion
-           where completion.person.id = :#{#person.id}
-           order by completion.timestamp desc limit 1
-           """)
-    Optional<TaskCompletion> findLastTaskCompletedFor(@Param("person") SCPerson person);
+	@Query("""
+			select completion from TaskCompletion completion
+			where completion.person.id = :#{#person.id}
+			order by completion.timestamp desc limit 1
+			""")
+	Optional<TaskCompletion> findLastTaskCompletedFor(@Param("person") SCPerson person);
 
-    @Query("""
-           select case when count(completion) > 0 then true else false end
-           from TaskCompletion completion
-           where completion.task.id = :#{#task.id}
-           and completion.person.id = :#{#person.id}
-           """)
-    boolean hasCompleted(@Param("person") SCPerson person, @Param("task") TaskInfo task);
+	@Query("""
+			select completion.task.id from TaskCompletion completion
+			where completion.person.id = :#{#person.id}
+			""")
+	Set<Long> findAllCompletedTaskIdsForPerson(@Param("person") SCPerson person);
 
-    @Query("""
-           select completion.task.id from TaskCompletion completion
-           where completion.person.id = :#{#person.id} 
-           """)
-    Set<Long> findAllCompletedTaskIdsForPerson(@Param("person") SCPerson person);
+	void deleteByPersonAndTask(SCPerson person, TaskInfo task);
 
-    void deleteByPersonAndTask(SCPerson person, TaskInfo task);
+	@Query("""
+			select completion from TaskCompletion completion
+			where completion.person.id = :#{#person.id}
+			and completion.task.id in (
+			    select task.taskInfo.id from RegularTask task where task.skill.submodule.module.edition.id = :#{#edition.id}
+			    union
+			    select subtask.id from ChoiceTask choiceTask
+			    inner join choiceTask.tasks subtask
+			    where choiceTask.skill.submodule.module.edition.id = :#{#edition.id}
+			)
+			""")
+	Set<TaskCompletion> findAllByPersonAndEdition(@Param("person") SCPerson person,
+			@Param("edition") SCEdition edition);
 
-	Optional<TaskCompletion> getFirstByPersonIdAndTimestampNotNullOrderByTimestampDesc(Long id);
-
-	Set<TaskCompletion> getByPersonId(Long id);
 }

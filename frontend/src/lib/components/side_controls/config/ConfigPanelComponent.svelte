@@ -2,14 +2,20 @@
 
     import {canEditCircuit, getAuthorisation} from "../../../logic/authorisation.svelte";
     import EditorManageComponent from "./EditorManageComponent.svelte";
+    import {getEdition} from "../../../logic/edition/edition.svelte";
+    import Button from "../../util/Button.svelte";
+    import {setEditionVisibility} from "../../../logic/updates/edition_updates";
+    import CopyEditionComponent from "./CopyEditionComponent.svelte";
 
     let { open = $bindable() }: { open: boolean } = $props();
+
+    let copyDialogOpen: boolean = $state(false);
 
 </script>
 
 {#if canEditCircuit()}
     <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
-    <div class="panel" aria-expanded={open}>
+    <div class="scrollable glass panel" aria-expanded={open}>
         <div class="heading">
             <h2>Course configuration</h2>
             <div class="controls">
@@ -20,20 +26,50 @@
         </div>
 
         <div class="content">
+            <div class="section">
+                <h3>Visibility</h3>
+                {#if getEdition().published}
+                    <p>This course edition is visible to students.</p>
+                    <div>
+                        <Button type="caution" onclick={ () => setEditionVisibility(false) }>
+                            <span class="fa-solid fa-eye-slash"></span>
+                            <span>Unpublish</span>
+                        </Button>
+                    </div>
+                {:else}
+                    <p>This course edition is not visible to students.</p>
+                    <div>
+                        <Button onclick={ () => setEditionVisibility(true) } >
+                            <span class="fa-solid fa-eye"></span>
+                            <span>Publish</span>
+                        </Button>
+                    </div>
+                {/if}
+            </div>
+
             <EditorManageComponent></EditorManageComponent>
+
+            <div class="section">
+                <h3>Copy</h3>
+                <p>
+                    You can copy this course edition to another course edition that you manage.
+                </p>
+                <div>
+                    <Button onclick={ () => copyDialogOpen = true }>
+                        <span class="fa-solid fa-copy"></span>
+                        <span>Copy</span>
+                    </Button>
+                </div>
+            </div>
         </div>
     </div>
+
+    <CopyEditionComponent bind:open={copyDialogOpen}></CopyEditionComponent>
 {/if}
 
 <style>
     .panel {
-        backdrop-filter: blur(.5rem) saturate(180%);
-        background: color-mix(in srgb, white 25%, transparent);
-        border-radius: 24px 0 0 24px;
-        box-shadow:
-                .75rem 1.25rem 1.9rem 0 color-mix(in srgb, var(--shadow-colour) 4%, transparent),
-                inset 0.125rem 0.125rem 0.0625rem 0 rgba(255 255 255 / 0.6),
-                inset -0.0625rem -0.0625rem 0.0625rem rgba(255 255 255 / 0.4);
+        border-radius: var(--panel-border-radius) 0 0 var(--panel-border-radius);
         inset-block: 2rem;
         max-width: 32rem;
         overflow-y: auto;
@@ -55,7 +91,6 @@
 
     .heading {
         align-items: center;
-        color: var(--on-header-colour);
         display: flex;
         justify-content: space-between;
         gap: 2rem;
@@ -67,16 +102,25 @@
         font-weight: 700;
     }
 
+    h3 {
+        font-size: var(--font-size-400);
+        font-weight: 500;
+    }
+
     .controls {
         display: flex;
         gap: .25rem;
     }
 
+    .section {
+        display: grid;
+        gap: .5em;
+    }
+
     .button {
-        background: none;
+        background: var(--on-glass-surface-colour);
         border: none;
         border-radius: 8px;
-        color: var(--on-header-colour);
         cursor: pointer;
         display: grid;
         justify-items: center;
@@ -84,7 +128,7 @@
         text-decoration: none;
     }
     .button:focus-visible, .button:hover {
-        background: color-mix(in srgb, color-mix(in oklab, var(--primary-colour) 40%, white) 25%, transparent);
+        background: var(--on-glass-surface-active-colour);
     }
 
     .content {

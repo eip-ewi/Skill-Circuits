@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -28,9 +28,9 @@ import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.SCPerson;
+import nl.tudelft.skills.repository.PersonRepository;
 import nl.tudelft.skills.repository.SkillRepository;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
-import nl.tudelft.skills.repository.labracore.PersonRepository;
 
 public class TaskCompletionService {
 
@@ -63,10 +63,11 @@ public class TaskCompletionService {
 		SCPerson scperson = personRepository.findByIdOrThrow(person.getId());
 
 		// Also need to filter out null values due to migrated data
-		Optional<TaskCompletion> lastCompleted = taskCompletionRepository
-				.getFirstByPersonIdAndTimestampNotNullOrderByTimestampDesc(scperson.getId());
-
-		return lastCompleted.map(TaskCompletion::getTask).map(info -> info.getTask() == null ? info.getChoiceTask() : info.getTask()).orElse(null);
+		//		Optional<TaskCompletion> lastCompleted = taskCompletionRepository
+		//				.getFirstByPersonIdAndTimestampNotNullOrderByTimestampDesc(scperson.getId());
+		//
+		//		return lastCompleted.map(TaskCompletion::getTask).map(info -> info.getTask() == null ? info.getChoiceTask() : info.getTask()).orElse(null);
+		return null;
 	}
 
 	/**
@@ -101,12 +102,12 @@ public class TaskCompletionService {
 	 */
 	@Transactional
 	public TaskCompletion addTaskCompletion(SCPerson person, Task task) {
-//		TaskCompletion completion = taskCompletionRepository.save(TaskCompletion.builder()
-//				.task(task).person(person).build());
-//		person.getTaskCompletions().add(completion);
-//		task.getCompletedBy().add(completion);
-//		return completion;
-        return null;
+		//		TaskCompletion completion = taskCompletionRepository.save(TaskCompletion.builder()
+		//				.task(task).person(person).build());
+		//		person.getTaskCompletions().add(completion);
+		//		task.getCompletedBy().add(completion);
+		//		return completion;
+		return null;
 	}
 
 	/**
@@ -125,7 +126,7 @@ public class TaskCompletionService {
 		completion.ifPresent((TaskCompletion taskCompletion) -> {
 			taskCompletionRepository.delete(taskCompletion);
 			person.getTaskCompletions().remove(taskCompletion);
-//			task.getCompletedBy().remove(taskCompletion);
+			//			task.getCompletedBy().remove(taskCompletion);
 		});
 
 		return completion.orElse(null);
@@ -139,13 +140,13 @@ public class TaskCompletionService {
 	 */
 	@Transactional
 	public void deleteTaskCompletionsOfTask(Task task) {
-//		Set<TaskCompletion> taskCompletions = task.getCompletedBy();
-//		// Remove from taskCompletionRepository
-//		taskCompletionRepository.deleteAll(taskCompletions);
-//		// Remove from Person sets
-//		taskCompletions.forEach(tc -> tc.getPerson().getTaskCompletions().remove(tc));
-//		// In case the Task will be used later on, also clear its TaskCompletion set
-//		task.setCompletedBy(new HashSet<>());
+		//		Set<TaskCompletion> taskCompletions = task.getCompletedBy();
+		//		// Remove from taskCompletionRepository
+		//		taskCompletionRepository.deleteAll(taskCompletions);
+		//		// Remove from Person sets
+		//		taskCompletions.forEach(tc -> tc.getPerson().getTaskCompletions().remove(tc));
+		//		// In case the Task will be used later on, also clear its TaskCompletion set
+		//		task.setCompletedBy(new HashSet<>());
 	}
 
 	/**
@@ -156,11 +157,11 @@ public class TaskCompletionService {
 	 * @return           The set of completed tasks
 	 */
 	private Set<Task> getTasksDone(SCPerson scperson, long editionId) {
-//		return scperson.getTaskCompletions().stream().map(TaskCompletion::getTask)
-//				.filter(s -> Objects.equals(
-//						s.getSkill().getSubmodule().getModule().getEdition().getId(), editionId))
-//				.collect(Collectors.toSet());
-        return Collections.emptySet();
+		//		return scperson.getTaskCompletions().stream().map(TaskCompletion::getTask)
+		//				.filter(s -> Objects.equals(
+		//						s.getSkill().getSubmodule().getModule().getEdition().getId(), editionId))
+		//				.collect(Collectors.toSet());
+		return Collections.emptySet();
 	}
 
 	/**
@@ -215,32 +216,32 @@ public class TaskCompletionService {
 	public Set<Skill> determineEmptySkills(Set<Skill> ownSkillsWithTask,
 			List<PathPreference> personPathPreference,
 			SCPerson scPerson, long editionId) {
-		Set<Skill> ownSkills = scPerson.getSkillsModified().stream().filter(s -> Objects.equals(
-				s.getSubmodule().getModule().getEdition().getId(), editionId))
-				.collect(Collectors.toSet());
+		//		Set<Skill> ownSkills = scPerson.getSkillsModified().stream().filter(s -> Objects.equals(
+		//				s.getSubmodule().getModule().getEdition().getId(), editionId))
+		//				.collect(Collectors.toSet());
 
 		// Customized empty skills
-		Set<Skill> ownEmptySkills = ownSkills.stream()
-				.filter(s -> !ownSkillsWithTask.contains(s)).collect(Collectors.toSet());
-
-		// Non-customized empty skills based on chosen path
-		Set<Skill> emptySkills;
-		Set<Skill> notOwnSkills = skillRepository.findAll().stream()
-				.filter(s -> Objects.equals(s.getSubmodule().getModule().getEdition().getId(),
-						editionId))
-				.filter(s -> !ownSkills.contains(s)).collect(Collectors.toSet());
-
-		if (personPathPreference.isEmpty() || personPathPreference.get(0).getPath() == null) {
-			emptySkills = notOwnSkills.stream().filter(s -> s.getTasks().isEmpty())
-					.collect(Collectors.toSet());
-		} else {
-			Path personPath = personPathPreference.get(0).getPath();
-			emptySkills = notOwnSkills.stream().filter(s -> s.getTasks().stream()
-					.filter(t -> t.getPaths().contains(personPath)).collect(Collectors.toSet()).isEmpty())
-					.collect(Collectors.toSet());
-		}
-		emptySkills.addAll(ownEmptySkills);
-		return emptySkills;
+		//		Set<Skill> ownEmptySkills = ownSkills.stream()
+		//				.filter(s -> !ownSkillsWithTask.contains(s)).collect(Collectors.toSet());
+		//
+		//		// Non-customized empty skills based on chosen path
+		//		Set<Skill> emptySkills;
+		//		Set<Skill> notOwnSkills = skillRepository.findAll().stream()
+		//				.filter(s -> Objects.equals(s.getSubmodule().getModule().getEdition().getId(),
+		//						editionId))
+		//				.filter(s -> !ownSkills.contains(s)).collect(Collectors.toSet());
+		//
+		//		if (personPathPreference.isEmpty() || personPathPreference.get(0).getPath() == null) {
+		//			emptySkills = notOwnSkills.stream().filter(s -> s.getTasks().isEmpty())
+		//					.collect(Collectors.toSet());
+		//		} else {
+		//			Path personPath = personPathPreference.get(0).getPath();
+		//			emptySkills = notOwnSkills.stream().filter(s -> s.getTasks().stream()
+		//					.filter(t -> t.getPaths().contains(personPath)).collect(Collectors.toSet()).isEmpty())
+		//					.collect(Collectors.toSet());
+		//		}
+		//		emptySkills.addAll(ownEmptySkills);
+		return Collections.emptySet();
 	}
 
 	/**

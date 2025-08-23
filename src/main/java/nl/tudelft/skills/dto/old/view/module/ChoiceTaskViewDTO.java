@@ -18,11 +18,9 @@
 package nl.tudelft.skills.dto.view.module;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import nl.tudelft.skills.dto.old.view.module.RegularTaskViewDTO;
@@ -47,14 +45,14 @@ public class ChoiceTaskViewDTO extends TaskViewDTO<ChoiceTask> {
 
 	@Override
 	public void postApply() {
-//		super.postApply();
-//		tasks = data.getTasks().stream()
-//				.map(taskInfo -> {
-//					RegularTaskViewDTO dto = getMapper().map(taskInfo.getTask(), RegularTaskViewDTO.class);
-//					dto.postApply();
-//					dto.setIsInChoiceTask(true);
-//					return dto;
-//				})
-//				.collect(Collectors.toList());
+		//		super.postApply();
+		//		tasks = data.getTasks().stream()
+		//				.map(taskInfo -> {
+		//					RegularTaskViewDTO dto = getMapper().map(taskInfo.getTask(), RegularTaskViewDTO.class);
+		//					dto.postApply();
+		//					dto.setIsInChoiceTask(true);
+		//					return dto;
+		//				})
+		//				.collect(Collectors.toList());
 	}
 }

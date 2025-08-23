@@ -16,6 +16,6 @@
 
 <style>
     .task[data-completed="true"] {
-        color: var(--completed-task-colour);
+        color: var(--on-block-task-completed-colour);
     }
 </style>

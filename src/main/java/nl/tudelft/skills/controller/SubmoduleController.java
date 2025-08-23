@@ -1,6 +1,6 @@
 /*
  * Skill Circuits
- * Copyright (C) 2022 - Delft University of Technology
+ * Copyright (C) 2025 - Delft University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,58 +17,63 @@
  */
 package nl.tudelft.skills.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
 import lombok.AllArgsConstructor;
-import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
-import nl.tudelft.labracore.lib.security.user.Person;
 import nl.tudelft.librador.resolver.annotations.PathEntity;
 import nl.tudelft.skills.annotation.AuthenticatedSCPerson;
 import nl.tudelft.skills.dto.create.SubmoduleCreate;
 import nl.tudelft.skills.dto.patch.SubmodulePatch;
 import nl.tudelft.skills.dto.view.SubmoduleView;
 import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelSubmoduleView;
-import nl.tudelft.skills.dto.view.circuit.module.ModuleLevelModuleView;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.service.EditionCircuitService;
-import nl.tudelft.skills.service.ModuleCircuitService;
 import nl.tudelft.skills.service.SubmoduleService;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/submodules")
 public class SubmoduleController {
 
-    private final SubmoduleService submoduleService;
-    private final EditionCircuitService editionCircuitService;
+	private final SubmoduleService submoduleService;
+	private final EditionCircuitService editionCircuitService;
 
-    @GetMapping("{submodule}")
-    public SubmoduleView getSubmoduleInfo(@PathEntity Submodule submodule) {
-        return new SubmoduleView(submodule.getModule().getId());
-    }
+	@GetMapping("{submodule}")
+	@PreAuthorize("@authorisationService.canViewModuleCircuit(#submodule.module)")
+	public SubmoduleView getSubmoduleInfo(@PathEntity Submodule submodule) {
+		return new SubmoduleView(submodule.getModule().getId());
+	}
 
-    @PostMapping
-    public EditionLevelSubmoduleView createSubmodule(@AuthenticatedSCPerson SCPerson person, @RequestBody SubmoduleCreate create) {
-        return editionCircuitService.convertToSubmoduleView(submoduleService.createSubmodule(create), person);
-    }
+	@PostMapping
+	@PreAuthorize("@authorisationService.canEditModuleCircuit(#create.module)")
+	public EditionLevelSubmoduleView createSubmodule(@AuthenticatedSCPerson SCPerson person,
+			@RequestBody SubmoduleCreate create) {
+		return editionCircuitService.convertToSubmoduleView(submoduleService.createSubmodule(create), person);
+	}
 
-    @PatchMapping("{submodule}")
-    public void patchSubmodule(@PathEntity Submodule submodule, @RequestBody SubmodulePatch patch) {
-        submoduleService.patchSubmodule(submodule, patch);
-    }
+	@PatchMapping("{submodule}")
+	@PreAuthorize("@authorisationService.canEditModuleCircuit(#submodule.module)")
+	public void patchSubmodule(@PathEntity Submodule submodule, @RequestBody SubmodulePatch patch) {
+		submoduleService.patchSubmodule(submodule, patch);
+	}
 
-    @PatchMapping("{submodule}/position")
-    public void updatePosition(@PathEntity Submodule submodule, @RequestParam Integer column) {
-        submoduleService.updatePosition(submodule, column);
-    }
+	@PatchMapping("{submodule}/position")
+	@PreAuthorize("@authorisationService.canEditModuleCircuit(#submodule.module)")
+	public void updatePosition(@PathEntity Submodule submodule, @RequestParam Integer column) {
+		submoduleService.updatePosition(submodule, column);
+	}
 
-    @DeleteMapping("{submodule}/position")
-    public void removeSkillFromCircuit(@PathEntity Submodule submodule) {
-        submoduleService.updatePosition(submodule, null);
-    }
+	@DeleteMapping("{submodule}/position")
+	@PreAuthorize("@authorisationService.canEditModuleCircuit(#submodule.module)")
+	public void removeSubmoduleFromCircuit(@PathEntity Submodule submodule) {
+		submoduleService.updatePosition(submodule, null);
+	}
 
-    @DeleteMapping("{submodule}")
-    public void deleteSubmodule(@PathEntity Submodule submodule) {
-        submoduleService.deleteSubmodule(submodule);
-    }
+	@DeleteMapping("{submodule}")
+	@PreAuthorize("@authorisationService.canEditModuleCircuit(#submodule.module)")
+	public void deleteSubmodule(@PathEntity Submodule submodule) {
+		submoduleService.deleteSubmodule(submodule);
+	}
 
 }

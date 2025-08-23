@@ -8,9 +8,14 @@
     import SessionComponent from "./lib/components/SessionComponent.svelte";
     import HeaderComponent from "./lib/components/HeaderComponent.svelte";
     import {fetchAuthorisation} from "./lib/logic/authorisation.svelte";
+    import {getTheme} from "./lib/logic/theme.svelte";
+    import FooterComponent from "./lib/components/FooterComponent.svelte";
 
-    onMount(async () => {
-        await checkAuthentication();
+    $effect(() => {
+        const root = document.documentElement;
+        const theme = getTheme();
+        root.setAttribute("data-theme", theme.name);
+        root.setAttribute("data-colour-scheme", theme.colourScheme);
     });
 
     $effect(() => {
@@ -25,8 +30,6 @@
 {:then _}
     {#if isAuthenticated()}
         <Router></Router>
-        <SessionComponent></SessionComponent>
-        <HeaderComponent></HeaderComponent>
     {:else}
         {#if window.location.pathname.startsWith("/login")}
             <LoginPage></LoginPage>

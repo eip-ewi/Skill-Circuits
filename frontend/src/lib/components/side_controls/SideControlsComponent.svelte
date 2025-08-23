@@ -12,9 +12,11 @@
     import {BlockStates} from "../../data/block_state";
     import {isLevel} from "../../logic/circuit/level.svelte";
     import {EditionLevel} from "../../data/level";
+    import BookmarksPanelComponent from "./bookmarks/BookmarksPanelComponent.svelte";
 
-    let openPanel: "tray" | "checkpoints" | "paths" | "modules" | "config" | undefined = $state();
+    let openPanel: "bookmarks" | "tray" | "checkpoints" | "paths" | "modules" | "config" | undefined = $state();
 
+    let bookmarksOpen: boolean = $state(false);
     let trayOpen: boolean = $state(false);
     let checkpointsOpen: boolean = $state(false);
     let pathsOpen: boolean = $state(false);
@@ -22,7 +24,9 @@
     let configOpen: boolean = $state(false);
 
     $effect(() => {
-        if (trayOpen) {
+        if (bookmarksOpen) {
+            openPanel = "bookmarks";
+        } else if (trayOpen) {
             openPanel = "tray";
         } else if (checkpointsOpen) {
             openPanel = "checkpoints";
@@ -49,45 +53,55 @@
     }
 </script>
 
-<TrayComponent bind:open={trayOpen}></TrayComponent>
-<CheckpointsPanelComponent bind:open={checkpointsOpen}></CheckpointsPanelComponent>
-<PathsPanelComponent bind:open={pathsOpen}></PathsPanelComponent>
-{#if isLevel(EditionLevel)}
-    <ModulesPanelComponent bind:open={modulesOpen}></ModulesPanelComponent>
-    <ConfigPanelComponent bind:open={configOpen}></ConfigPanelComponent>
-{/if}
+<div class="panels">
+    <BookmarksPanelComponent bind:open={bookmarksOpen}></BookmarksPanelComponent>
+    <TrayComponent bind:open={trayOpen}></TrayComponent>
+    <CheckpointsPanelComponent bind:open={checkpointsOpen}></CheckpointsPanelComponent>
+    <PathsPanelComponent bind:open={pathsOpen}></PathsPanelComponent>
+    {#if isLevel(EditionLevel)}
+        <ModulesPanelComponent bind:open={modulesOpen}></ModulesPanelComponent>
+        <ConfigPanelComponent bind:open={configOpen}></ConfigPanelComponent>
+    {/if}
+</div>
 
 {#if openPanel === undefined}
 
     <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events, a11y_mouse_events_have_key_events -->
     <div class="controls" in:growHorizontal={{ delay: 150 }} out:growHorizontal={{}}>
+
+        <div class="glass surface">
+            <button class="button" aria-label="Open bookmarks panel" onclick={ () => bookmarksOpen = true }>
+                <span class="fa-solid fa-bookmark"></span>
+            </button>
+        </div>
+
         {#if canEditCircuit()}
-            <div class="surface" ondragenter={ () => trayOpen = true }>
+            <div class="glass surface" ondragenter={ () => trayOpen = true }>
                 <button class="button" aria-label="Open tray" onclick={ () => trayOpen = true }>
                     <span class="fa-solid fa-inbox"></span>
                 </button>
             </div>
 
-            <div class="surface">
+            <div class="glass surface">
                 <button class="button" aria-label="Open checkpoints panel" onclick={ () => checkpointsOpen = true }>
                     <span class="fa-solid fa-calendar-days"></span>
                 </button>
             </div>
 
-            <div class="surface">
+            <div class="glass surface">
                 <button class="button" aria-label="Open paths panel" onclick={ () => pathsOpen = true }>
                     <span class="fa-solid fa-shoe-prints" data-active={getBlocks().some(block => block.state === BlockStates.AssigningPaths)}></span>
                 </button>
             </div>
 
             {#if isLevel(EditionLevel)}
-                <div class="surface">
+                <div class="glass surface">
                     <button class="button" aria-label="Open modules panel" onclick={ () => modulesOpen = true }>
                         <span class="fa-solid fa-boxes-stacked"></span>
                     </button>
                 </div>
 
-                <div class="surface">
+                <div class="glass surface">
                     <button class="button" aria-label="Open config panel" onclick={ () => configOpen = true }>
                         <span class="fa-solid fa-cog"></span>
                     </button>
@@ -99,42 +113,44 @@
 {/if}
 
 <style>
+    .panels {
+        font-size: clamp(.75rem, calc(16 / 1732 * 100vw), 1rem);
+    }
+
     .controls {
+        font-size: clamp(.75rem, calc(16 / 1732 * 100vw), 1rem);
+
         position: fixed;
         display: grid;
-        gap: 1rem;
-        top: 2rem;
+        gap: 1em;
+        top: 2em;
         right: 0;
         transform-origin: right;
         z-index: 90;
     }
 
     .surface {
-        backdrop-filter: blur(.5rem) saturate(180%);
-        background: color-mix(in srgb, white 25%, transparent);
-        border-radius: 24px 0 0 24px;
-        box-shadow:
-                .75rem 1.25rem 1.9rem 0 color-mix(in srgb, var(--shadow-colour) 4%, transparent),
-                inset 0.125rem 0.125rem 0.0625rem 0 rgba(255 255 255 / 0.6),
-                inset -0.0625rem -0.0625rem 0.0625rem rgba(255 255 255 / 0.4);
+        border-radius: var(--panel-border-radius) 0 0 var(--panel-border-radius);
         display: grid;
-        place-items: center;
     }
 
     .button {
-        background: none;
+        background: var(--on-glass-surface-colour);
         border: none;
-        border-radius: 16px;
-        color: var(--on-header-colour);
+        border-radius: var(--panel-button-border-radius);
+        color: var(--on-glass-colour);
         cursor: pointer;
         display: grid;
         font-size: var(--font-size-600);
-        margin: .5rem;
-        padding: 1rem;
-        place-items: center;
+        margin: .5em;
+        padding: .5em;
     }
     .button:focus-visible, .button:hover {
-        background: color-mix(in srgb, color-mix(in oklab, var(--primary-colour) 40%, white) 25%, transparent);
+        background: var(--on-glass-surface-active-colour);
+    }
+
+    .button span {
+        text-align: center;
     }
 
     .button span[data-active="true"] {

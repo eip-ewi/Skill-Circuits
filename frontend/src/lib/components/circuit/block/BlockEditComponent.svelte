@@ -4,14 +4,16 @@
     import {getLevel} from "../../../logic/circuit/level.svelte";
     import {getCircuit, getGroup, getGroupForBlock} from "../../../logic/circuit/circuit.svelte";
     import ItemEditComponent from "../item/ItemEditComponent.svelte";
-    import Select from "../../form/Select.svelte";
-    import {editBlockCheckpoint, editBlockEssential, editBlockGroup, editBlockName} from "../../../logic/circuit/updates/block_updates";
+    import Select from "../../util/Select.svelte";
+    import {editBlockGroup, editBlockName} from "../../../logic/circuit/updates/block_updates";
     import {createItem} from "../../../logic/circuit/updates/item_updates";
     import moment from "moment";
-    import type {SkillBlock} from "../../../dto/circuit/module/skill";
+    import type {RegularSkillBlock, SkillBlock} from "../../../dto/circuit/module/skill";
     import {getCheckpoint, getSortedCheckpoints} from "../../../logic/edition/edition.svelte";
     import ItemsEditComponent from "../item/ItemsEditComponent.svelte";
     import {createChoiceTask} from "../../../logic/circuit/updates/task_updates";
+    import Button from "../../util/Button.svelte";
+    import {editSkillCheckpoint, editSkillEssential, editSkillHidden} from "../../../logic/circuit/updates/skill_updates";
 
     let { block }: { block: Block } = $props();
 
@@ -28,12 +30,17 @@
     async function editCheckpoint(event: Event) {
         const value = (event.target as HTMLSelectElement).value;
         const newCheckpoint = value === "" ? null : getCheckpoint(parseInt(value));
-        await editBlockCheckpoint(block as SkillBlock, newCheckpoint);
+        await editSkillCheckpoint(block as SkillBlock, newCheckpoint);
     }
 
-    async function editEssential(event: Event) {
-        const newEssential = (event.target as HTMLInputElement).checked;
-        await editBlockEssential(block as SkillBlock, !newEssential);
+    async function editOptional(event: Event) {
+        const newOptional = (event.target as HTMLInputElement).checked;
+        await editSkillEssential(block as SkillBlock, !newOptional);
+    }
+
+    async function editHidden(event: Event) {
+        const newHidden = (event.target as HTMLInputElement).checked;
+        await editSkillHidden(block as RegularSkillBlock, newHidden);
     }
 
     async function addItem() {
@@ -50,7 +57,7 @@
     <div class="heading">
         {#if block.blockType !== "skill" || !block.external}
 
-            <input class="name" value={block.name} onchange={editName}/>
+            <input class="name" name="name" value={block.name} onchange={editName}/>
             <Select onchange={editGroup}>
                 {#each getCircuit().groups as group}
                     {@const currentGroup = getGroupForBlock(block)}
@@ -73,9 +80,15 @@
 
         {#if block.blockType === "skill"}
             <div>
-                <input id="essential-{block.id}" type="checkbox" checked={!block.essential} onchange={editEssential}>
-                <label for="essential-{block.id}">Optional</label>
+                <input id="optional-{block.id}" name="optional" type="checkbox" checked={!block.essential} disabled={!block.external && block.hidden} onchange={editOptional}>
+                <label for="optional-{block.id}">Optional</label>
             </div>
+            {#if !block.external}
+                <div>
+                    <input id="hidden-{block.id}" name="hidden" type="checkbox" checked={block.hidden} onchange={editHidden}>
+                    <label for="hidden-{block.id}">Hidden</label>
+                </div>
+            {/if}
         {/if}
     </div>
 
@@ -87,15 +100,15 @@
                 <ItemsEditComponent {block}></ItemsEditComponent>
             {/if}
             <div class="new-task">
-                <button class="button" onclick={addItem}>
+                <Button primary onclick={addItem}>
                     <span class="fa-solid fa-plus-circle"></span>
                     <span>Create a new {getLevel().item}</span>
-                </button>
+                </Button>
                 {#if block.blockType === "skill"}
-                    <button class="button" onclick={addChoiceTask}>
+                    <Button primary onclick={addChoiceTask}>
                         <span class="fa-solid fa-list-check"></span>
                         <span>Create a new choice task</span>
-                    </button>
+                    </Button>
                 {/if}
             </div>
         </div>
@@ -105,23 +118,30 @@
 <style>
     .edit {
         display: grid;
-        gap: 1rem;
+        gap: 1em;
     }
 
     .heading {
         display: grid;
-        gap: 0.5rem;
+        gap: 0.5em;
     }
 
     span.name {
-        font-size: 1.25rem;
+        font-size: 1.25em;
         font-weight: 700;
     }
 
     input.name {
+        background-color: var(--neutral-surface-colour);
         border: 1px solid var(--on-block-divider-colour);
-        border-radius: 8px;
-        padding: .5rem 1rem;
+        border-radius: .5em;
+        color: var(--on-neutral-surface-colour);
+        padding: .5em 1em;
+    }
+
+    input[type="checkbox"] {
+        aspect-ratio: 1/1;
+        width: 0.875em;
     }
 
     .divider {
@@ -132,21 +152,12 @@
 
     .content {
         display: grid;
-        gap: 1rem;
+        gap: 1em;
     }
 
-    .button {
-        background-color: var(--primary-surface-colour);
-        border: none;
-        border-radius: 8px;
-        color: var(--on-primary-surface-colour);
-        cursor: pointer;
-        display: inline-block;
-        padding: .5rem 1rem;
-    }
-
-    .button:where(:hover, :focus-visible) {
-        background-color: var(--primary-surface-active-colour);
-        color: var(--on-primary-surface-colour);
+    .new-task {
+        display: flex;
+        gap: .5em;
+        flex-wrap: wrap;
     }
 </style>

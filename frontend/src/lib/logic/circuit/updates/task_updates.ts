@@ -5,15 +5,34 @@ import type {Block} from "../../../dto/circuit/block";
 import {getLevel} from "../level.svelte";
 import type {Item} from "../../../dto/circuit/item";
 import {getBlockForItem, getBlocks} from "../circuit.svelte";
+import {getBookmarks} from "../../bookmarks.svelte";
+import {addRevealedSkills} from "../unlocked_skills.svelte";
 
 export async function toggleTaskCompletion(task: TaskInfo) {
     task.completed = !task.completed;
     let response = await fetch(`/api/task-info/${task.infoId}/complete?completed=${task.completed}`, withCsrf({
         method: "POST",
     }));
-    if (!response.ok) {
+    if (response.ok) {
+        getBlocks().filter(block => block.blockType === "skill").flatMap(block => block.items)
+            .flatMap(t => t.taskType === "choice" ? t.tasks : [t as TaskInfo])
+            .filter(t => t.infoId === task.infoId)
+            .forEach(i => i.completed = task.completed);
+        getBookmarks().flatMap(list => list.tasks)
+            .flatMap(t => t.taskType === "choice" ? t.tasks : [t as TaskInfo])
+            .filter(t => t.infoId === task.infoId)
+            .forEach(i => i.completed = task.completed);
+        let body: { revealedSkills: number[] } = await response.json();
+        addRevealedSkills(body.revealedSkills);
+    } else {
         task.completed = !task.completed;
     }
+}
+
+export async function reportClickedLink(task: TaskInfo) {
+    await fetch(`/api/task-info/${task.infoId}/click`, withCsrf({
+        method: "POST",
+    }));
 }
 
 export async function createChoiceTask(skill: SkillBlock) {

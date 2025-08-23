@@ -17,15 +17,10 @@
  */
 package nl.tudelft.skills.model;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import nl.tudelft.skills.dto.old.view.module.TaskViewDTO;
 import nl.tudelft.skills.enums.TaskType;
 
 @Data
@@ -39,12 +34,12 @@ public class RegularTask extends Task {
 	@OneToOne(mappedBy = "task", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private TaskInfo taskInfo;
 
-    @Override
+	@Override
 	public String getName() {
 		return taskInfo.getName();
 	}
 
-    @Override
+	@Override
 	public void setName(String name) {
 		taskInfo.setName(name);
 	}

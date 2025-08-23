@@ -16,6 +16,6 @@
 <style>
     .tasks {
         display: flex;
-        gap: .25rem;
+        gap: .25em;
     }
 </style>

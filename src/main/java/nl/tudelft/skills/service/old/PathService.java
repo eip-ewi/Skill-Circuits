@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.old.patch.PathTasksPatchDTO;
 import nl.tudelft.skills.dto.old.view.edition.PathViewDTO;
 import nl.tudelft.skills.model.Path;
@@ -101,8 +100,8 @@ public class PathService {
 	public PathViewDTO getPath(Long pathId) {
 		if (pathId == null)
 			return null;
-//		return View.convert(pathRepository.getById(pathId), PathViewDTO.class);
-        return null;
+		//		return View.convert(pathRepository.getById(pathId), PathViewDTO.class);
+		return null;
 	}
 
 }

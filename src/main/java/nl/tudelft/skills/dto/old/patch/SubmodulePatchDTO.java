@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -65,7 +64,7 @@ public class SubmodulePatchDTO extends Patch<Submodule> {
 	protected void applyOneToMany() {
 		Map<Long, Skill> skills = data.getSkills().stream()
 				.collect(Collectors.toMap(AbstractSkill::getId, Function.identity()));
-//		items.forEach(p -> p.apply(skills.get(p.getId())));
+		//		items.forEach(p -> p.apply(skills.get(p.getId())));
 
 		data.getSkills().stream().filter(s -> removedItems.contains(s.getId())).toList()
 				.forEach(s -> data.getSkills().remove(s));

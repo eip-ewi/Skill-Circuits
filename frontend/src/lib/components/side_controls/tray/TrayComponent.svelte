@@ -20,7 +20,6 @@
         event.preventDefault();
         dragCounter++;
         open = true;
-        console.log(dragCounter)
     }
 
     function dragLeave(event: DragEvent) {
@@ -54,7 +53,7 @@
 
 {#if canEditCircuit()}
     <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
-    <div class="tray" aria-expanded={open}
+    <div class="scrollable glass panel" aria-expanded={open}
          ondragenter={dragEnter} ondragover={dragOver} ondragleave={dragLeave} ondrop={drop}>
         <div class="heading">
             <h2>Tray</h2>
@@ -76,18 +75,14 @@
 {/if}
 
 <style>
-    .tray {
-        backdrop-filter: blur(.5rem) saturate(180%);
-        background: color-mix(in srgb, white 25%, transparent);
-        border-radius: 24px 0 0 24px;
-        box-shadow:
-                .75rem 1.25rem 1.9rem 0 color-mix(in srgb, var(--shadow-colour) 4%, transparent),
-                inset 0.125rem 0.125rem 0.0625rem 0 rgba(255 255 255 / 0.6),
-                inset -0.0625rem -0.0625rem 0.0625rem rgba(255 255 255 / 0.4);
+    .panel {
+        border-radius: var(--panel-border-radius) 0 0 var(--panel-border-radius);
         display: flex;
         flex-direction: column;
         inset-block: 2rem;
         max-width: 32rem;
+        overflow-y: auto;
+        overscroll-behavior: contain;
         position: fixed;
         right: 0;
         top: 2rem;
@@ -96,16 +91,15 @@
         z-index: 91;
     }
 
-    .tray[aria-expanded="false"] {
+    .panel[aria-expanded="false"] {
         transform: scaleX(0);
     }
-    .tray[aria-expanded="true"] {
+    .panel[aria-expanded="true"] {
         transition-delay: 150ms;
     }
 
     .heading {
         align-items: center;
-        color: var(--on-header-colour);
         display: flex;
         justify-content: space-between;
         gap: 2rem;
@@ -134,10 +128,9 @@
     }
 
     .button {
-        background: none;
+        background: var(--on-glass-surface-colour);
         border: none;
         border-radius: 8px;
-        color: var(--on-header-colour);
         cursor: pointer;
         display: grid;
         justify-items: center;
@@ -145,6 +138,6 @@
         text-decoration: none;
     }
     .button:focus-visible, .button:hover {
-        background: color-mix(in srgb, color-mix(in oklab, var(--primary-colour) 40%, white) 25%, transparent);
+        background: var(--on-glass-surface-active-colour);
     }
 </style>

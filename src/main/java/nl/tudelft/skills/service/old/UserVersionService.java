@@ -20,7 +20,6 @@ package nl.tudelft.skills.service.old;
 import java.util.List;
 import java.util.Optional;
 
-import nl.tudelft.skills.service.GitLabClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
 
@@ -29,6 +28,7 @@ import nl.tudelft.skills.dto.old.view.ReleaseDTO;
 import nl.tudelft.skills.model.UserVersion;
 import nl.tudelft.skills.repository.UserVersionRepository;
 import nl.tudelft.skills.security.AuthorisationService;
+import nl.tudelft.skills.service.GitLabClient;
 
 public class UserVersionService {
 	private final UserVersionRepository userVersionRepository;

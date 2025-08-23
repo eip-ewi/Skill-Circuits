@@ -17,24 +17,7 @@
  */
 package nl.tudelft.skills.controller.old;
 
-import nl.tudelft.skills.dto.old.patch.PathNamePatchDTO;
-import nl.tudelft.skills.dto.old.patch.PathTasksPatchDTO;
-import nl.tudelft.skills.service.old.PathService;
-import nl.tudelft.skills.service.old.PersonService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
-
-import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
-import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.skills.model.*;
-import nl.tudelft.skills.repository.*;
-import nl.tudelft.skills.repository.labracore.PersonRepository;
-
-public class PathController {
+//public class PathController {
 
 //	private final PathRepository pathRepository;
 //	private final PersonRepository personRepository;
@@ -183,4 +166,4 @@ public class PathController {
 //		return ResponseEntity.ok().build();
 //	}
 
-}
+//}

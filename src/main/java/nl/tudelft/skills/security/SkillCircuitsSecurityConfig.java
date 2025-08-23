@@ -17,13 +17,18 @@
  */
 package nl.tudelft.skills.security;
 
-import nl.tudelft.labracore.lib.security.LabradorSecurityConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+
+import nl.tudelft.labracore.lib.security.LabradorSecurityConfig;
 
 @Order(22)
 @Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
 public class SkillCircuitsSecurityConfig extends LabradorSecurityConfig {
 
 	/**
@@ -37,9 +42,11 @@ public class SkillCircuitsSecurityConfig extends LabradorSecurityConfig {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/skill-circuits-frontend.*", "/webjars/**", "/font/**", "/img/**", "/favicon.ico").permitAll()
-                .requestMatchers("/", "/api/auth").permitAll()
-                .anyRequest().authenticated());
+				.requestMatchers("/skill-circuits-frontend.*", "/webjars/**", "/font/**", "/img/**",
+						"/favicon.ico")
+				.permitAll()
+				.requestMatchers("/", "/api/auth").permitAll()
+				.anyRequest().authenticated());
 
 	}
 }

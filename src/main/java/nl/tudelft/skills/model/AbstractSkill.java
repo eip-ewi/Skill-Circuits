@@ -24,11 +24,8 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
 
 @Data
 @Entity
@@ -43,13 +40,13 @@ public abstract class AbstractSkill {
 	private Long id;
 
 	@Min(0)
-    @Nullable
+	@Nullable
 	@Column(name = "xPos")
 	private Integer column;
 
-    @NotNull
-    @Builder.Default
-    private boolean essential = true;
+	@NotNull
+	@Builder.Default
+	private boolean essential = true;
 
 	@NotNull
 	@ManyToMany
@@ -66,5 +63,11 @@ public abstract class AbstractSkill {
 	private Set<AbstractSkill> children = new HashSet<>();
 
 	public abstract Submodule getSubmodule();
+
+	@PreRemove
+	public void removeFromParentsAndChildren() {
+		parents.forEach(parent -> parent.getChildren().remove(this));
+		children.forEach(child -> child.getParents().remove(this));
+	}
 
 }

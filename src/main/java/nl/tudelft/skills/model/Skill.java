@@ -19,17 +19,14 @@ package nl.tudelft.skills.model;
 
 import java.util.*;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
-
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-
-import javax.annotation.Nullable;
+import nl.tudelft.skills.model.bookmark.BookmarkList;
+import nl.tudelft.skills.model.bookmark.HiddenSkillBookmarkList;
 
 @Data
 @Entity
@@ -50,12 +47,11 @@ public class Skill extends AbstractSkill {
 	@Builder.Default
 	private boolean hidden = false;
 
-	@NotNull
-	@Builder.Default
+	@Nullable
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToMany(mappedBy = "requiredFor")
-	private Set<Task> requiredTasks = new HashSet<>();
+	@OneToOne(cascade = CascadeType.ALL)
+	private HiddenSkillBookmarkList requirements;
 
 	@Setter
 	@NotNull
@@ -63,8 +59,7 @@ public class Skill extends AbstractSkill {
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@Cascade(CascadeType.REMOVE)
-	@OneToMany(mappedBy = "skill")
+	@OneToMany(mappedBy = "skill", cascade = CascadeType.REMOVE)
 	private List<Task> tasks = new ArrayList<>();
 
 	@Nullable
@@ -77,13 +72,12 @@ public class Skill extends AbstractSkill {
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@Cascade(CascadeType.REMOVE)
-	@OneToMany(mappedBy = "skill")
+	@OneToMany(mappedBy = "skill", cascade = CascadeType.REMOVE)
 	private Set<ExternalSkill> externalSkills = new HashSet<>();
 
+	@ManyToOne
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToOne
 	private Skill previousEditionSkill;
 
 	@NotNull
@@ -93,15 +87,18 @@ public class Skill extends AbstractSkill {
 	@OneToMany(mappedBy = "previousEditionSkill")
 	private Set<Skill> futureEditionSkills = new HashSet<>();
 
+	@NotNull
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@ManyToMany(mappedBy = "skillsRevealed")
 	private Set<SCPerson> personRevealedSkill = new HashSet<>();
 
+	@NotNull
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@ManyToMany(mappedBy = "skillsModified")
-	private Set<SCPerson> personModifiedSkill = new HashSet<>();
+	@ManyToMany(mappedBy = "skills")
+	private Set<BookmarkList> onLists = new HashSet<>();
+
 }

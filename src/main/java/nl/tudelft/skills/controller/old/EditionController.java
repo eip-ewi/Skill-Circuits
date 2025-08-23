@@ -17,19 +17,16 @@
  */
 package nl.tudelft.skills.controller.old;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import jakarta.servlet.http.HttpSession;
-import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import nl.tudelft.librador.dto.view.View;
+import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 import nl.tudelft.skills.dto.old.view.SCModuleSummaryDTO;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.repository.EditionRepository;
@@ -68,9 +65,9 @@ public class EditionController {
 			Model model) {
 		editionService.configureEditionModel(id, model, session);
 
-		if (authorisationService.canEditEdition(id) && view == null) {
-			view = "circuit";
-		}
+		//		if (authorisationService.canEditEdition(id) && view == null) {
+		//			view = "circuit";
+		//		}
 		return "circuit".equals(view) ? "edition/view"
 				: "edition/modules";
 	}
@@ -85,7 +82,7 @@ public class EditionController {
 	@Transactional
 	@PreAuthorize("@authorisationService.canPublishEdition(#id)")
 	public String publishEdition(@PathVariable Long id) {
-		SCEdition edition = editionRepository.findByIdOrThrow(id);
+		SCEdition edition = editionRepository.getOrCreate(id);
 		edition.setVisible(true);
 		editionRepository.save(edition);
 
@@ -103,7 +100,7 @@ public class EditionController {
 	@Transactional
 	@PreAuthorize("@authorisationService.canPublishEdition(#id)")
 	public String unpublishEdition(@PathVariable Long id) {
-		SCEdition edition = editionRepository.findByIdOrThrow(id);
+		SCEdition edition = editionRepository.getOrCreate(id);
 
 		edition.setVisible(false);
 		editionRepository.save(edition);
@@ -149,10 +146,10 @@ public class EditionController {
 	@GetMapping("{id}/modules")
 	@PreAuthorize("@authorisationService.canGetModulesOfEdition(#id)")
 	public @ResponseBody List<SCModuleSummaryDTO> getModulesOfEdition(@PathVariable Long id) {
-//		return View.convert(new ArrayList<>(editionRepository.findByIdOrThrow(id).getModules()).stream()
-//				.sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList(),
-//				SCModuleSummaryDTO.class);
-        return Collections.emptyList();
+		//		return View.convert(new ArrayList<>(editionRepository.findByIdOrThrow(id).getModules()).stream()
+		//				.sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList(),
+		//				SCModuleSummaryDTO.class);
+		return Collections.emptyList();
 	}
 
 }

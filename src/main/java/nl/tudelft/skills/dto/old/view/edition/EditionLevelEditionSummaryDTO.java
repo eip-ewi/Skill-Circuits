@@ -18,7 +18,6 @@
 package nl.tudelft.skills.dto.old.view.edition;
 
 import jakarta.validation.constraints.NotNull;
-
 import lombok.*;
 
 @Data

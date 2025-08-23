@@ -2,6 +2,8 @@
 
     import type {Path} from "../../../dto/path";
     import {deletePath, editPathDescription, editPathName} from "../../../logic/updates/path_updates";
+    import Button from "../../util/Button.svelte";
+    import WithConfirmationDialog from "../../util/WithConfirmationDialog.svelte";
 
     let { path }: { path: Path } = $props();
 
@@ -13,10 +15,6 @@
     async function editDescription(event: Event) {
         const newDescription = (event.target as HTMLInputElement).value;
         await editPathDescription(path, newDescription);
-    }
-
-    async function remove() {
-        await deletePath(path);
     }
 
     async function stopEditing() {
@@ -38,16 +36,23 @@
     {/if}
     <div class="controls">
         {#if path.editing === true }
-            <button aria-label="Stop editing" class="button" onclick={stopEditing}>
+            <Button square aria-label="Stop editing" onclick={stopEditing}>
                 <span class="fa-solid fa-check"></span>
-            </button>
+            </Button>
         {:else}
-            <button aria-label="Edit path" class="button" onclick={ () => path.editing = true }>
+            <Button square aria-label="Edit path" onclick={ () => path.editing = true }>
                 <span class="fa-solid fa-pencil"></span>
-            </button>
-            <button aria-label="Delete path" class="danger button" onclick={remove}>
-                <span class="fa-solid fa-trash"></span>
-            </button>
+            </Button>
+            <WithConfirmationDialog onconfirm={ () => deletePath(path) } icon="fa-solid fa-trash" action="Delete">
+                {#snippet button(showDialog: () => void) }
+                    <Button square type="caution" aria-label="Delete path" onclick={showDialog}>
+                        <span class="fa-solid fa-trash"></span>
+                    </Button>
+                {/snippet}
+                <p>
+                    Are you sure you want to delete '{path.name}'?
+                </p>
+            </WithConfirmationDialog>
         {/if}
     </div>
 </div>
@@ -83,32 +88,10 @@
         gap: 0.5rem;
     }
 
-    .button {
-        aspect-ratio: 1 / 1;
-        background-color: var(--block-colour);
-        border: none;
-        border-radius: 8px;
-        color: var(--on-block-colour);
-        cursor: pointer;
-        display: grid;
-        min-width: 2rem;
-        place-items: center;
-    }
-
-    .button:where(:hover, :focus-visible) {
-        background-color: var(--primary-surface-active-colour);
-        color: var(--on-primary-surface-colour);
-    }
-
-    .button.danger:where(:hover, :focus-visible) {
-        background-color: var(--primary-error-active-colour);
-        color: var(--on-error-surface-colour);
-    }
-
     input, textarea {
         border: none;
         border-radius: 8px;
-        padding: .25rem .5rem;
+        padding: .5rem 1rem;
         resize: none;
     }
 </style>

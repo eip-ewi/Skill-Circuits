@@ -52,3 +52,7 @@ export function isEditorForCircuit() {
     }
     return false;
 }
+
+export function isEditorForAny() {
+    return authorisation.managedEditions.length > 0;
+}
