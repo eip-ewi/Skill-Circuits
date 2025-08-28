@@ -20,16 +20,21 @@ package nl.tudelft.skills.repository;
 import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import org.springframework.data.jpa.repository.Query;
 
 import nl.tudelft.skills.model.SCEdition;
 
 public interface EditionRepository extends JpaRepository<SCEdition, Long> {
 
-	default SCEdition findByIdOrThrow(Long id) {
-		return findById(id).orElseThrow(() -> new ResourceNotFoundException("Edition was not found: " + id));
+	default SCEdition getOrCreate(Long editionId) {
+		return findById(editionId).orElseGet(() -> save(SCEdition.builder().id(editionId).build()));
 	}
 
-	Set<SCEdition> findByIsVisible(boolean isVisible);
+	@Query("""
+			select edition from SCEdition edition
+			inner join edition.modules module
+			where edition.isVisible = true
+			""")
+	Set<SCEdition> findAllOpen();
 
 }

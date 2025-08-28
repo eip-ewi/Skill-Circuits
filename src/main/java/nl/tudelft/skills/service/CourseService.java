@@ -17,173 +17,32 @@
  */
 package nl.tudelft.skills.service;
 
-import static nl.tudelft.labracore.api.dto.RoleDetailsDTO.TypeEnum.*;
+import static java.util.Objects.requireNonNull;
 
-import java.util.Comparator;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.api.CourseControllerApi;
-import nl.tudelft.labracore.api.EditionControllerApi;
-import nl.tudelft.labracore.api.dto.CourseDetailsDTO;
-import nl.tudelft.labracore.api.dto.EditionSummaryDTO;
-import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.course.CourseLevelCourseViewDTO;
-import nl.tudelft.skills.dto.view.course.CourseLevelEditionViewDTO;
-import nl.tudelft.skills.model.SCCourse;
-import nl.tudelft.skills.model.SCEdition;
-import nl.tudelft.skills.repository.CourseRepository;
-import nl.tudelft.skills.repository.EditionRepository;
-import nl.tudelft.skills.security.AuthorisationService;
+import nl.tudelft.labracore.api.dto.CourseSummaryDTO;
+import nl.tudelft.labracore.lib.security.user.DefaultRole;
+import nl.tudelft.labracore.lib.security.user.Person;
 
 @Service
+@AllArgsConstructor
 public class CourseService {
 
 	private final CourseControllerApi courseApi;
-	private final EditionControllerApi editionApi;
-	private final CourseRepository courseRepository;
-	private final EditionRepository editionRepository;
-	private final AuthorisationService authorisationService;
 
-	@Autowired
-	public CourseService(CourseControllerApi courseApi, EditionControllerApi editionApi,
-			CourseRepository courseRepository,
-			EditionRepository editionRepository, AuthorisationService authorisationService) {
-		this.courseApi = courseApi;
-		this.editionApi = editionApi;
-		this.courseRepository = courseRepository;
-		this.authorisationService = authorisationService;
-		this.editionRepository = editionRepository;
-	}
-
-	/**
-	 * Return CourseViewDto for course with id, including course name from Labrador db and SCEditions.
-	 *
-	 * @param  id Course id.
-	 * @return    CourseViewDTO for course with id.
-	 */
-	@Transactional
-	public CourseLevelCourseViewDTO getCourseView(Long id) {
-		CourseDetailsDTO course = courseApi.getCourseById(id).block();
-
-		CourseLevelCourseViewDTO view = View.convert(getOrCreateSCCourse(id),
-				CourseLevelCourseViewDTO.class);
-
-		view.setName(course.getName());
-
-		view.setCode(course.getCode());
-
-		view.setEditions(course.getEditions().stream()
-				.map(e -> new CourseLevelEditionViewDTO(e.getId(), e.getName())).toList());
-
-		return view;
-	}
-
-	/**
-	 * Returns the most recent edition that is visible for a course with given DTO.
-	 *
-	 * @param  course The CourseDetailsDTO for the course.
-	 * @return        The id of the most recent edition for the course.
-	 */
-	public Long getLastEditionForCourse(CourseDetailsDTO course) {
-		// Safety check, should never occur
-		if (course == null || course.getEditions() == null) {
-			return null;
+	public Set<Long> getManagedCourseIds(Person person) {
+		if (person.getDefaultRole() == DefaultRole.ADMIN) {
+			return requireNonNull(courseApi.getAllCourses().map(CourseSummaryDTO::getId)
+					.collect(Collectors.toSet()).block());
 		}
-
-		return course.getEditions().stream()
-				.filter(e -> editionRepository.findById(e.getId()).map(SCEdition::isVisible).orElse(false))
-				.max(Comparator.comparing(EditionSummaryDTO::getStartDate))
-				.map(EditionSummaryDTO::getId)
-				.orElse(null);
+		return requireNonNull(courseApi.getAllCoursesByManager(person.getId()).map(CourseSummaryDTO::getId)
+				.collect(Collectors.toSet()).block());
 	}
 
-	/**
-	 * This method is used to get the default edition per course on the homepage. The course editions in the
-	 * given map are filtered as follows: - Kept, if the user is a head TA in the edition. - Kept, if the user
-	 * is a student/TA in the edition, and it is visible. - Discarded, otherwise. Returns: - If an edition
-	 * remains, the id of the latest of the filtered editions (by start date). - Otherwise: the id of the last
-	 * visible edition (by start date), or if there is none, null.
-	 *
-	 * @param  id The id of the course.
-	 * @return    The edition id by the above rules, or null if no edition meets the criteria.
-	 */
-	public Long getDefaultHomepageEditionCourse(Long id) {
-		CourseDetailsDTO course = courseApi.getCourseById(id).block();
-
-		// Safety check
-		if (course == null || course.getEditions() == null) {
-			return null;
-		}
-
-		boolean userIsAdmin = authorisationService.isAdmin();
-
-		// Filter the editions by the condition (in comments), and then consider the maximum (by starting date).
-		// Otherwise, calls getLastEditionForCourse to get the last edition (by starting date).
-		return course.getEditions().stream()
-				.filter(edition -> {
-					RoleDetailsDTO.TypeEnum role = authorisationService.getRoleInEdition(edition.getId());
-
-					// Discard, if the role is null
-					if (role == null) {
-						return false;
-					}
-
-					// If the user is at least a head TA, the edition does not have to be visible
-					if (userIsAdmin || role == HEAD_TA || role == TEACHER) {
-						return true;
-					}
-
-					// For TAs and students, the edition needs to be visible
-					if (role == STUDENT || role == TA) {
-						return editionRepository.findById(edition.getId()).map(SCEdition::isVisible)
-								.orElse(false);
-					}
-
-					// Otherwise, the user has an invalid role, so discard (here only BLOCKED)
-					return false;
-				})
-				.max(Comparator.comparing(EditionSummaryDTO::getStartDate))
-				.map(EditionSummaryDTO::getId)
-				.orElseGet(() -> getLastEditionForCourse(course));
-	}
-
-	/**
-	 * Returns whether the course has any visible editions.
-	 *
-	 * @param  id Id of the course.
-	 * @return    True if the course has any editions set to visible for students.
-	 */
-	public boolean hasAtLeastOneEditionVisibleToStudents(Long id) {
-		CourseDetailsDTO course = courseApi.getCourseById(id).block();
-
-		return course.getEditions().stream()
-				.filter(e -> editionRepository.findById(e.getId()).map(SCEdition::isVisible).orElse(false))
-				.toList().size() > 0;
-	}
-
-	/**
-	 * Returns a SCCourse by course id. If it doesn't exist, creates one.
-	 *
-	 * @param  id The id of the course
-	 * @return    The SCCourse with id.
-	 */
-	@Transactional
-	public SCCourse getOrCreateSCCourse(Long id) {
-		return courseRepository.findById(id)
-				.orElseGet(() -> courseRepository.save(SCCourse.builder().id(id).build()));
-	}
-
-	/**
-	 * Returns the number of editions in a course.
-	 *
-	 * @param  id Course id
-	 * @return    The number of editions in a course.
-	 */
-	public Integer getNumberOfEditions(Long id) {
-		return editionApi.getAllEditionsByCourse(id).count().block().intValue();
-	}
 }

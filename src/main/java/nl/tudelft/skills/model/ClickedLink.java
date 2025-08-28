@@ -19,11 +19,9 @@ package nl.tudelft.skills.model;
 
 import java.time.LocalDateTime;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import nl.tudelft.skills.model.labracore.SCPerson;
 
 @Data
 @Entity
@@ -32,12 +30,12 @@ import nl.tudelft.skills.model.labracore.SCPerson;
 @AllArgsConstructor
 public class ClickedLink {
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@NotNull
 	@ManyToOne
-	private RegularTask task;
+	private TaskInfo task;
 
 	@NotNull
 	@ManyToOne

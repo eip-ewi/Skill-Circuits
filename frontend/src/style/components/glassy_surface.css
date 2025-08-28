@@ -1,0 +1,31 @@
+.glass {
+    border: var(--glass-border);
+    box-shadow:
+            .75rem 1.25rem 1.9rem 0 color-mix(in srgb, var(--shadow-colour) 4%, transparent),
+            inset 0.125em 0.125em 0.0625em 0 color-mix(in srgb, var(--glass-glint-colour) 60%, transparent),
+            inset -0.0625em -0.0625em 0.0625em color-mix(in srgb, var(--glass-glint-colour) 40%, transparent);
+    color: var(--on-glass-colour);
+}
+
+.glass.scrollable {
+    backdrop-filter: blur(.5rem) saturate(180%);
+    background-color: var(--glass-colour);
+}
+
+.glass:not(.scrollable) {
+    background: none;
+    overflow: hidden;
+    position: relative;
+}
+
+.glass:not(.scrollable)::before {
+    backdrop-filter: blur(.5rem) saturate(180%);
+    background-color: var(--glass-colour);
+    content: "";
+    height: 200%;
+    left: -50%;
+    position: absolute;
+    top: -50%;
+    width: 200%;
+    z-index: -1;
+}

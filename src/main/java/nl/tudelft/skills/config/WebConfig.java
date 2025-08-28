@@ -17,19 +17,38 @@
  */
 package nl.tudelft.skills.config;
 
+import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.format.FormatterRegistry;
+import org.springframework.core.MethodParameter;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.support.WebDataBinderFactory;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 
+import lombok.AllArgsConstructor;
+import nl.tudelft.labracore.lib.security.LabradorUserDetails;
+import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
+import nl.tudelft.labracore.lib.security.user.NoAuthenticatedPersonException;
+import nl.tudelft.skills.annotation.AuthenticatedSCPerson;
+import nl.tudelft.skills.model.SCPerson;
+import nl.tudelft.skills.repository.PersonRepository;
+
 @Configuration
+@AllArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
+
+	private final PersonRepository personRepository;
 
 	@Bean
 	public LocaleResolver localeResolver() {
@@ -51,13 +70,44 @@ public class WebConfig implements WebMvcConfigurer {
 	}
 
 	@Override
-	public void addFormatters(FormatterRegistry registry) {
-		// Does not work with lambdas
-		//		registry.addConverter(new Converter<String, IdDTO>() {
-		//			public CourseIdDTO convert(@NotNull String source) {
-		//				return new IdDTO().id(Long.parseLong(source));
-		//			}
-		//		});
+	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+		resolvers.add(this.authenticatedSCPersonArgumentResolver());
+	}
+
+	@Bean
+	public AuthenticatedSCPersonArgumentResolver authenticatedSCPersonArgumentResolver() {
+		return new AuthenticatedSCPersonArgumentResolver(personRepository);
+	}
+
+	public static class AuthenticatedSCPersonArgumentResolver implements HandlerMethodArgumentResolver {
+
+		private final PersonRepository personRepository;
+
+		public AuthenticatedSCPersonArgumentResolver(PersonRepository personRepository) {
+			this.personRepository = personRepository;
+		}
+
+		public boolean supportsParameter(MethodParameter parameter) {
+			return parameter.hasParameterAnnotation(AuthenticatedSCPerson.class)
+					&& SCPerson.class.isAssignableFrom(parameter.getParameterType());
+		}
+
+		public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+				NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+			Object ud = auth == null ? null : auth.getPrincipal();
+			if (ud instanceof LabradorUserDetails) {
+				Long personId = ((LabradorUserDetails) ud).getUser().getId();
+				return personRepository.findById(personId)
+						.orElseGet(() -> personRepository.save(SCPerson.builder().id(personId).build()));
+			} else if (((AuthenticatedPerson) Objects.requireNonNull(
+					(AuthenticatedPerson) parameter.getParameterAnnotation(AuthenticatedPerson.class)))
+					.required()) {
+				throw new NoAuthenticatedPersonException("No authenticated person found for request.");
+			} else {
+				return null;
+			}
+		}
 	}
 
 }
