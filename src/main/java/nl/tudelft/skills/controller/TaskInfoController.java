@@ -59,7 +59,7 @@ public class TaskInfoController {
 	}
 
 	@PostMapping("{taskInfo}/complete")
-	@PreAuthorize("@authorisationService.canViewTaskInfo(#tayyskInfo)")
+	@PreAuthorize("@authorisationService.canViewTaskInfo(#taskInfo)")
 	public AfterTaskCompletionCircuitUpdate updateTaskCompletion(@AuthenticatedSCPerson SCPerson person,
 			@PathEntity TaskInfo taskInfo, @RequestParam boolean completed) {
 		if (completed) {
