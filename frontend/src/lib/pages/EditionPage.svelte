@@ -14,6 +14,7 @@
     import {fetchActivePath, fetchPathCustomisation} from "../logic/edition/active_path.svelte";
     import {fetchEdition, getEdition} from "../logic/edition/edition.svelte";
     import PageLayout from "./PageLayout.svelte";
+    import {getDevMode} from "../logic/dev_mode.svelte.js";
 
     let { editionId }: { editionId: number } = $props();
 
@@ -30,8 +31,7 @@
     }
 </script>
 
-<!-- TODO remove this-->
-<svelte:window onkeydown={ e => { if (e.altKey && e.key === "t") { toggleViewMode(); } } }></svelte:window>
+<svelte:window onkeydown={ e => { if (getDevMode() && e.altKey && e.key === "t") { toggleViewMode(); } } }></svelte:window>
 
 <svelte:head>
     {#if getCircuit() === undefined}

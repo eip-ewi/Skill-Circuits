@@ -37,7 +37,7 @@ import nl.tudelft.skills.service.SCPersonService;
 @AllArgsConstructor
 public class LoginUserHandler implements LabradorUserHandler {
 
-	private final SCPersonService sCPersonService;
+	private final SCPersonService scPersonService;
 
 	/**
 	 * Makes changes to the DB when someone logs in.
@@ -51,7 +51,7 @@ public class LoginUserHandler implements LabradorUserHandler {
 			user.setUsername(person.getUsername());
 			scope.setTag("DefaultRole", person.getDefaultRole().toString());
 		});
-		sCPersonService.getOrCreate(person.getId());
+		scPersonService.getOrCreate(person.getId());
 	}
 
 }

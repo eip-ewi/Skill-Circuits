@@ -15,7 +15,7 @@
     let completed: boolean = $derived(!canEditCircuit() && !skills.some(skill => !isCompleted(skill)));
     let passed: boolean = $derived(moment().isAfter(moment(checkpoint.deadline)));
     let focused: boolean = $derived(canEditCircuit() || passed || completed || getNextCheckpoint()?.id === checkpoint.id);
-    let warn: boolean = $derived(passed && !completed && getFirstUncompletedPastCheckpoint()?.id === checkpoint.id);
+    let warn: boolean = $derived(!canEditCircuit() && passed && !completed && getFirstUncompletedPastCheckpoint()?.id === checkpoint.id);
 
     let row: number = $derived(Math.max(...skills.map(skill => skill.row!)));
 
@@ -68,6 +68,7 @@
     }
 
     .content {
+        align-items: flex-start;
         display: flex;
         gap: 1em;
         margin-top: .5em;

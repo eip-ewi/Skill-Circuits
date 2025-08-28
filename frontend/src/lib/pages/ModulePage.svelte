@@ -34,8 +34,7 @@
     }
 </script>
 
-<!-- TODO remove this-->
-<svelte:window onkeydown={ e => { if (e.altKey && e.key === "t") { toggleViewMode(); } } }></svelte:window>
+<svelte:window onkeydown={ e => { if (getDevMode() && e.altKey && e.key === "t") { toggleViewMode(); } } }></svelte:window>
 
 <svelte:head>
     {#if circuitFetched()}
