@@ -37,6 +37,7 @@
     h3 {
         display: grid;
         justify-items: start;
+        text-align: start;
     }
 
     h3 span:first-child {
