@@ -11,7 +11,7 @@
     import ExpandedBlockComponent from "../../circuit/block/ExpandedBlockComponent.svelte";
     import {onMount} from "svelte";
     import {loadPage} from "../../../logic/routing.svelte";
-    import {isCompleted} from "../../../logic/circuit/display/completion";
+    import {isCompleted} from "../../../logic/circuit/skill_state/completion";
     import {getBlocks} from "../../../logic/circuit/circuit.svelte";
 
     let { skill }: { skill: SkillBlock } = $props();

@@ -4,7 +4,7 @@
     import type {RegularSkillBlock, SkillBlock} from "../../../dto/circuit/module/skill";
     import {getBlocks, getPlacedBlocks, getVisibleBlocks} from "../../../logic/circuit/circuit.svelte";
     import moment from "moment";
-    import {isCompleted} from "../../../logic/circuit/display/completion";
+    import {isCompleted} from "../../../logic/circuit/skill_state/completion";
     import {canEditCircuit} from "../../../logic/authorisation.svelte";
     import {getFirstUncompletedPastCheckpoint, getNextCheckpoint, getVisibleCheckpoints} from "../../../logic/edition/edition.svelte";
 

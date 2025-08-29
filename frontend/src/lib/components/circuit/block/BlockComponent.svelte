@@ -5,10 +5,10 @@
     import {onDestroy, onMount, tick} from "svelte";
     import type {Graph} from "../../../logic/circuit/graph";
     import type {TaskItem} from "../../../dto/circuit/module/task";
-    import {isUnlocked} from "../../../logic/circuit/display/unlock";
+    import {isUnlocked} from "../../../logic/circuit/skill_state/unlock";
     import {canEditCircuit, getAuthorisation} from "../../../logic/authorisation.svelte";
     import {getLevel, isLevel} from "../../../logic/circuit/level.svelte";
-    import {isCompleted} from "../../../logic/circuit/display/completion";
+    import {isCompleted} from "../../../logic/circuit/skill_state/completion";
     import {loadPage} from "../../../logic/routing.svelte";
     import {EditionLevel, ModuleLevel} from "../../../data/level";
     import TaskIconComponent from "../item/TaskIconComponent.svelte";

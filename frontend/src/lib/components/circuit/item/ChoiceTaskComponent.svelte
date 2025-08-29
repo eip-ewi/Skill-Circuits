@@ -9,6 +9,7 @@
     import {addChoiceTaskToBookmarkList, addTaskInfoToBookmarkList, removeChoiceTaskFromBookmarkList, removeTaskInfoFromBookmarkList} from "../../../logic/updates/bookmark_updates";
     import BookmarkMenuComponent from "../../bookmark/BookmarkMenuComponent.svelte";
     import Button from "../../util/Button.svelte";
+    import {isTaskCompleted} from "../../../logic/circuit/skill_state/completion";
 
     let { task, hideBookmark, hidePathCustomisation }: { task: ChoiceTaskItem, hideBookmark?: boolean, hidePathCustomisation?: boolean } = $props();
 
@@ -24,7 +25,7 @@
     }
 </script>
 
-<div class="task" class:with-bookmark={!hideBookmark} data-completed={task.tasks.filter(task => task.completed).length >= task.minTasks}>
+<div class="task" class:with-bookmark={!hideBookmark} data-completed={isTaskCompleted(task)}>
     <div class="heading">
         <div class="left">
             {#if hideBookmark !== true}

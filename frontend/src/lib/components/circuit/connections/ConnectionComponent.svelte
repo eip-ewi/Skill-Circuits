@@ -4,8 +4,8 @@
     import type {Block} from "../../../dto/circuit/block";
     import {createConnectionPath} from "../../../logic/circuit/connection.svelte";
     import {canEditCircuit, getAuthorisation} from "../../../logic/authorisation.svelte";
-    import {isUnlocked} from "../../../logic/circuit/display/unlock";
-    import {isCompleted} from "../../../logic/circuit/display/completion";
+    import {isUnlocked} from "../../../logic/circuit/skill_state/unlock";
+    import {isCompleted} from "../../../logic/circuit/skill_state/completion";
     import {getCircuit} from "../../../logic/circuit/circuit.svelte";
     import {onMount, tick} from "svelte";
     import {getTheme} from "../../../logic/theme.svelte";

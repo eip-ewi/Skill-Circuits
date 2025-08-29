@@ -4,7 +4,7 @@
     import type {SkillBlock} from "../../../dto/circuit/module/skill";
     import {cubicIn, cubicInOut, linear} from "svelte/easing";
     import TasksComponent from "../item/TasksComponent.svelte";
-    import {isCompleted} from "../../../logic/circuit/display/completion";
+    import {isCompleted} from "../../../logic/circuit/skill_state/completion";
     import {addTaskToPath, getItemsOnPath, removeTaskFromPath} from "../../../logic/edition/active_path.svelte";
     import type {Point} from "../../../data/point";
     import SideControlsComponent from "../../side_controls/SideControlsComponent.svelte";

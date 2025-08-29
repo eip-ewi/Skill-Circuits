@@ -6,7 +6,7 @@ import type {Edition} from "../../dto/edition";
 import moment from "moment";
 import type {Module} from "../../dto/module";
 import type {Path} from "../../dto/path";
-import {isCompleted} from "../circuit/display/completion";
+import {isCompleted} from "../circuit/skill_state/completion";
 import type {SkillBlock} from "../../dto/circuit/module/skill";
 
 let edition: Edition | undefined = $state();
