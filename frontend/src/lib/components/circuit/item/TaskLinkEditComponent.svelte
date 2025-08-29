@@ -24,7 +24,7 @@
         {#if expanded}
             <span class="fa-solid fa-check"></span>
         {:else}
-            <span class="fa-solid fa-link"></span>
+            <span class="fa-solid" class:fa-link={ taskInfo.link !== null } class:fa-link-slash={ taskInfo.link === null }></span>
         {/if}
     </Button>
     <input bind:this={input} name="link" type="text" placeholder="Task link..." onchange={editLink} value={taskInfo.link}/>

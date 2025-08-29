@@ -2669,3 +2669,22 @@ databaseChangeLog:
             referencedTableName: scperson
             validate: true
 
+  #
+  # Everyone gets a 'new bookmarks' list
+  #
+  - changeSet:
+      id: new-bookmarks-for-existing-users
+      author: ruben
+      changes:
+        - sql:
+            sql: insert into bookmark_list (person_id, name, dtype, last_modified) select id, 'My bookmarks', 'PersonalBookmarkList', NOW() from scperson;
+
+  #
+  # Reverse task ordering
+  #
+  - changeSet:
+      id: reverse-task-ordering
+      author: ruben
+      changes:
+        - sql:
+          - sql: update task join (select id, row_number() over (partition by skill_id order by idx desc) - 1 as idx from task) as updated on task.id = updated.id set task.idx = updated.idx;

@@ -13,10 +13,17 @@
     import TaskInfoEditComponent from "./TaskInfoEditComponent.svelte";
     import Button from "../../util/Button.svelte";
     import WithConfirmationDialog from "../../util/WithConfirmationDialog.svelte";
+    import {getBookmarks, isChoiceTaskBookmarked, isSkillBookmarked, isTaskInfoBookmarked} from "../../../logic/bookmarks.svelte";
+    import {addChoiceTaskToBookmarkList, addSkillToBookmarkList, addTaskInfoToBookmarkList, removeChoiceTaskFromBookmarkList, removeSkillFromBookmarkList, removeTaskInfoFromBookmarkList} from "../../../logic/updates/bookmark_updates";
+    import {BlockActions} from "../../../data/block_action";
+    import BookmarkMenuComponent from "../../bookmark/BookmarkMenuComponent.svelte";
+    import {getPaths} from "../../../logic/edition/edition.svelte";
 
     let { task }: { task: TaskItem } = $props();
 
     let draggable: boolean = $state(false);
+
+    let bookmarksOpen: boolean = $state(false);
 
     function dragStart(event: DragEvent) {
         event.dataTransfer!.effectAllowed = "move";
@@ -56,6 +63,14 @@
         </WithConfirmationDialog>
     {:else}
         <ChoiceTaskEditComponent {task}></ChoiceTaskEditComponent>
+
+        <BookmarkMenuComponent bind:open={bookmarksOpen} onLists={getBookmarks().filter(list => list.tasks.some(t => t.taskType === "choice" && t.id === task.id))}
+                               addToList={ list => addChoiceTaskToBookmarkList(task, list) } removeFromList={ list => removeChoiceTaskFromBookmarkList(task, list) }>
+            <Button square primary aria-label="Bookmark" onclick={ () => bookmarksOpen = true }>
+                <span class="fa-bookmark" class:fa-regular={!isChoiceTaskBookmarked(task)} class:fa-solid={isChoiceTaskBookmarked(task)}></span>
+            </Button>
+        </BookmarkMenuComponent>
+
         <TaskPathEditComponent task={task}></TaskPathEditComponent>
 
         <WithConfirmationDialog onconfirm={ () => deleteItem(task) } icon="fa-solid fa-trash" action="Delete">

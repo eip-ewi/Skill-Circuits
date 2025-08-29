@@ -38,9 +38,7 @@ export async function editSkillCheckpoint(skill: SkillBlock, newCheckpoint: Chec
     skill.checkpoint = newCheckpoint === null ? null : newCheckpoint.id;
 
     let patch: any = {};
-    if (newCheckpoint !== null) {
-        patch.checkpoint = { id: newCheckpoint.id };
-    }
+    patch.checkpoint = { id: newCheckpoint?.id };
     let response = await fetch(`/api/${getLevel().blocks}/${skill.id}`, withCsrf({
         method: "PATCH",
         headers: {

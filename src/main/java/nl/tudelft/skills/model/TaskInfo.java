@@ -69,14 +69,14 @@ public class TaskInfo {
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@OneToMany(mappedBy = "task")
+	@OneToMany(mappedBy = "task", cascade = CascadeType.REMOVE)
 	private Set<TaskCompletion> completedBy = new HashSet<>();
 
 	@NotNull
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	@OneToMany(mappedBy = "task")
+	@OneToMany(mappedBy = "task", cascade = CascadeType.REMOVE)
 	private Set<ClickedLink> clickedLinks = new HashSet<>();
 
 	@NotNull

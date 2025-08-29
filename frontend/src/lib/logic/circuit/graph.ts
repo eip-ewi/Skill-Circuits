@@ -1,4 +1,5 @@
 import type { Block } from "../../dto/circuit/block";
+import {getBlocks} from "./circuit.svelte";
 
 export class Graph {
 
@@ -23,6 +24,10 @@ export class Graph {
 
     size(): number {
         return this.nodes.size;
+    }
+
+    has(block: Block): boolean {
+        return this.nodes.has(block.id);
     }
 
     getNode(id: number): Block {

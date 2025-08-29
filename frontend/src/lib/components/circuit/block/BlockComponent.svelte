@@ -159,7 +159,7 @@
     </div>
 
     <div class="controls">
-        {#if block.blockType === "skill" && !block.external && (block.state === BlockStates.Hovering || isSkillBookmarked(block)) && !canEditCircuit()}
+        {#if block.blockType === "skill" && !block.external && (block.state === BlockStates.Hovering || isSkillBookmarked(block))}
             <BookmarkSkillButtonComponent bind:action skill={block}></BookmarkSkillButtonComponent>
         {/if}
         {#if block.state === BlockStates.Hovering && (block.blockType !== "skill" || block.external) && !canEditCircuit()}

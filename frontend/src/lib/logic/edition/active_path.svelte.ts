@@ -17,13 +17,16 @@ export function getActivePath(): Path | null {
 }
 
 export function getItemsOnPath<B extends Block>(block: B): B["items"] {
-    if (activePath === null || block.blockType !== "skill" || canEditCircuit()) {
+    if (block.blockType !== "skill" || canEditCircuit()) {
         return block.items;
     }
     return block.items.filter(item => isTaskOnPath(item));
 }
 
 export function isTaskOnPath(task: TaskItem): boolean {
+    if (activePath === null) {
+        return !tasksRemoved.includes(task.id);
+    }
     return !tasksRemoved.includes(task.id) && (task.paths.includes(activePath!.id) || tasksAdded.includes(task.id))
 }
 

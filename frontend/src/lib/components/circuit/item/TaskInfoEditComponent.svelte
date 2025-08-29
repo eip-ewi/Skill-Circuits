@@ -11,10 +11,15 @@
     import {deleteSubtask, editTaskInfoName, editTaskLink} from "../../../logic/circuit/updates/task_updates";
     import Button from "../../util/Button.svelte";
     import WithConfirmationDialog from "../../util/WithConfirmationDialog.svelte";
+    import {getBookmarks, isTaskInfoBookmarked} from "../../../logic/bookmarks.svelte";
+    import {addTaskInfoToBookmarkList, removeTaskInfoFromBookmarkList} from "../../../logic/updates/bookmark_updates";
+    import BookmarkMenuComponent from "../../bookmark/BookmarkMenuComponent.svelte";
 
     let { taskInfo, children }: { taskInfo: TaskInfo, children?: Snippet } = $props();
 
     let draggable: boolean = $state(false);
+
+    let bookmarksOpen: boolean = $state(false);
 
     async function editName(event: Event) {
         const newName = (event.target as HTMLInputElement).value;
@@ -41,6 +46,12 @@
     <TaskTypeEditComponent {taskInfo}></TaskTypeEditComponent>
     <input class="name" name="item-name" value={taskInfo.name} onchange={editName}/>
     <TaskTimeEditComponent {taskInfo}></TaskTimeEditComponent>
+    <BookmarkMenuComponent bind:open={bookmarksOpen} onLists={getBookmarks().filter(list => list.tasks.some(t => t.taskType === "regular" && t.infoId === taskInfo.infoId))}
+                           addToList={ list => addTaskInfoToBookmarkList(taskInfo, list) } removeFromList={ list => removeTaskInfoFromBookmarkList(taskInfo, list) }>
+        <Button primary square aria-label="Bookmark" onclick={ () => bookmarksOpen = true }>
+            <span class="fa-bookmark" class:fa-regular={!isTaskInfoBookmarked(taskInfo)} class:fa-solid={isTaskInfoBookmarked(taskInfo)}></span>
+        </Button>
+    </BookmarkMenuComponent>
     <TaskLinkEditComponent {taskInfo}></TaskLinkEditComponent>
     {@render children?.()}
     {#if taskInfo.taskType === "choice"}

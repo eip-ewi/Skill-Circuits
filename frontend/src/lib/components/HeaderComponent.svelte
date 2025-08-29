@@ -108,16 +108,26 @@
                 </button>
             {/if}
             {#if isLevel(EditionLevel)}
-                <button class="button">
-                    <span class="icon fa-solid fa-arrow-up"></span>
-                    <span>Go to track</span>
+                <button class="button" onclick={returnToLastLeftOf}>
+                    <span class="icon fa-solid fa-play"></span>
+                    <span>Continue</span>
                 </button>
+<!--            TODO add this back when there are more levels    -->
+<!--                <button class="button">-->
+<!--                    <span class="icon fa-solid fa-arrow-up"></span>-->
+<!--                    <span>Go to track</span>-->
+<!--                </button>-->
             {/if}
             {#if isLevel(TrackLevel)}
-                <button class="button">
-                    <span class="programme fa-solid fa-arrow-up"></span>
-                    <span>Go to track</span>
+                <button class="button" onclick={returnToLastLeftOf}>
+                    <span class="icon fa-solid fa-play"></span>
+                    <span>Continue</span>
                 </button>
+<!--            TODO add this back when there are more levels    -->
+<!--                <button class="button">-->
+<!--                    <span class="programme fa-solid fa-arrow-up"></span>-->
+<!--                    <span>Go to programme</span>-->
+<!--                </button>-->
             {/if}
 
             <button class="button" onclick={loadHomePage}>

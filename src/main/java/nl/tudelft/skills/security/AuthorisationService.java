@@ -195,7 +195,7 @@ public class AuthorisationService {
 			case PersonalBookmarkList personalBookmarkList ->
 				Objects.equals(personalBookmarkList.getPerson().getId(), person.getId());
 			case HiddenSkillBookmarkList hiddenSkillBookmarkList ->
-				canEditModuleCircuit(hiddenSkillBookmarkList.getSkill().getSubmodule().getModule());
+				isAdmin() || hasEditorRole(hiddenSkillBookmarkList.getSkill().getSubmodule().getModule().getEdition().getId());
 			default -> false; // Unreachable
 		});
 	}

@@ -13,6 +13,7 @@
     import {isLevel} from "../../logic/circuit/level.svelte";
     import {EditionLevel} from "../../data/level";
     import BookmarksPanelComponent from "./bookmarks/BookmarksPanelComponent.svelte";
+    import {getPaths} from "../../logic/edition/edition.svelte";
 
     let openPanel: "bookmarks" | "tray" | "checkpoints" | "paths" | "modules" | "config" | undefined = $state();
 

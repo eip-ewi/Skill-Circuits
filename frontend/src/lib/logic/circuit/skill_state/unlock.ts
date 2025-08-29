@@ -27,7 +27,7 @@ export function isUnlocked(block: Block, recursionCheck: number = 100): boolean 
         return true;
     }
 
-    let allEssentialParentsCompleted = !getGraph().getParents(block)
+    let allEssentialParentsCompleted = getGraph().has(block) && !getGraph().getParents(block)
         .filter(parent => parent.blockType !== "skill" || parent.essential)
         .some(parent => !isCompleted(parent, recursionCheck));
 
@@ -35,7 +35,7 @@ export function isUnlocked(block: Block, recursionCheck: number = 100): boolean 
         return false;
     }
 
-    let allParentsUnlocked = !getGraph().getParents(block).some(parent => !isUnlocked(parent, recursionCheck - 1));
+    let allParentsUnlocked = getGraph().has(block) && !getGraph().getParents(block).some(parent => !isUnlocked(parent, recursionCheck - 1));
 
     if (!allParentsUnlocked) {
         return false;

@@ -14,21 +14,23 @@
     }
 </script>
 
-<Select onchange={editPath} multiple>
-    {#snippet button(click: (event: MouseEvent) => void, focus: () => void, blur: () => void)}
-        <div class="button">
-            <Button square primary aria-label="Edit path" onmousedown={click} onfocus={focus} onblur={blur}>
-                <span class="fa-solid fa-shoe-prints"></span>
-                <div class="counter">
-                    <span>{task.paths.length}</span>
-                </div>
-            </Button>
-        </div>
-    {/snippet}
-    {#each getPaths() as path}
-        <option value={path.id} selected={task.paths.includes(path.id)}>{path.name}</option>
-    {/each}
-</Select>
+{#if getPaths().length > 0}
+    <Select onchange={editPath} multiple>
+        {#snippet button(click: (event: MouseEvent) => void, focus: () => void, blur: () => void)}
+            <div class="button">
+                <Button square primary aria-label="Edit path" onmousedown={click} onfocus={focus} onblur={blur}>
+                    <span class="fa-solid fa-shoe-prints"></span>
+                    <div class="counter">
+                        <span>{task.paths.length}</span>
+                    </div>
+                </Button>
+            </div>
+        {/snippet}
+        {#each getPaths() as path}
+            <option value={path.id} selected={task.paths.includes(path.id)}>{path.name}</option>
+        {/each}
+    </Select>
+{/if}
 
 <style>
     .button {

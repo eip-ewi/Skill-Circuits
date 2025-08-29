@@ -53,7 +53,7 @@
         <ul class="scrollable glass results">
             {#each searchResults as result}
                 {#if !getEdition().teachers.some(editor => editor.id === result.id) && !getEdition().editors.some(editor => editor.id === result.id)}
-                    <li><button aria-label="Add {result.displayName} as editor" onclick={ () => add(result) }>{result.displayName}</button></li>
+                    <li><button aria-label="Add {result.displayName} as editor" onclick={ () => add(result) }>{result.displayName} ({result.username})</button></li>
                 {/if}
             {/each}
         </ul>

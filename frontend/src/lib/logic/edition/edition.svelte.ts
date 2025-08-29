@@ -47,7 +47,7 @@ export function getNextCheckpoint(): Checkpoint | undefined {
 }
 
 export function getFirstUncompletedPastCheckpoint(): Checkpoint | undefined {
-    let uncompleted: Set<number> = new Set(getVisibleBlocks().filter(block => block.blockType === "skill" && block.checkpoint !== null)
+    let uncompleted: Set<number> = new Set(getVisibleBlocks().filter(block => block.blockType === "skill" && block.checkpoint !== null && block.essential)
         .filter(block => !isCompleted(block)).map(block => (block as SkillBlock).checkpoint!));
     return getVisibleCheckpoints().filter(c => moment().isAfter(moment(c.deadline))).find(c => uncompleted.has(c.id));
 }

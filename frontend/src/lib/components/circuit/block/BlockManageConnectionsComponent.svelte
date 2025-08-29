@@ -51,33 +51,21 @@
     function addParent() {
         let connectingTo = getBlocks().find(other => other.state === BlockStates.Connecting) as SkillBlock;
         connectSkills(connectingTo, skill);
-        getBlocks().forEach(b => {
-            b.state = BlockStates.Inactive;
-        });
     }
 
     function addChild() {
         let connectingTo = getBlocks().find(other => other.state === BlockStates.Connecting) as SkillBlock;
         connectSkills(skill, connectingTo);
-        getBlocks().forEach(b => {
-            b.state = BlockStates.Inactive;
-        });
     }
 
     function removeParent() {
         let disconnectingFrom = getBlocks().find(other => other.state === BlockStates.Connecting) as SkillBlock;
         disconnectSkills(disconnectingFrom, skill);
-        getBlocks().forEach(b => {
-            b.state = BlockStates.Inactive;
-        });
     }
 
     function removeChild() {
         let disconnectingFrom = getBlocks().find(other => other.state === BlockStates.Connecting) as SkillBlock;
         disconnectSkills(skill, disconnectingFrom);
-        getBlocks().forEach(b => {
-            b.state = BlockStates.Inactive;
-        });
     }
 
     function transition(element: HTMLElement) {
