@@ -7,6 +7,7 @@
     import PageTabs from "../components/util/PageTabs.svelte";
     import Tab from "../components/util/Tab.svelte";
     import PageLayout from "./PageLayout.svelte";
+    import {loadPage} from "../logic/routing.svelte";
 
     let editions: Editions | undefined = $state();
 
@@ -15,6 +16,10 @@
     async function load() {
         const response = await fetch("/api/editions");
         editions = await response.json();
+
+        if (editions!.archivedEditions.length + editions!.currentEditions.length + editions!.finishedEditions.length + editions!.upcomingEditions.length === 0) {
+            loadPage("/editions");
+        }
     }
 </script>
 
