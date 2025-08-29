@@ -56,7 +56,7 @@
     {@const path = createConnectionPath(from, to)}
     {#if path !== undefined}
         <path xmlns="http://www.w3.org/2000/svg" class="line" d={generatePathString(path, radius)}
-              data-locked={locked} data-preview={to.preview === true} bind:this={element} data-animate={animated}/>
+              data-locked={locked} data-preview={to.preview === true && locked} bind:this={element} data-animate={animated}/>
     {/if}
 {/if}
 
