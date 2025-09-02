@@ -62,7 +62,7 @@ export async function addSkillToBookmarkList(skill: SkillBlock, list: BookmarkLi
 }
 
 export async function removeSkillFromBookmarkList(skill: SkillBlock, list: BookmarkList) {
-    let removed = list.skills.splice(list.skills.findIndex(s => s.id === skill.id)!)[0]!;
+    let removed = list.skills.splice(list.skills.findIndex(s => s.id === skill.id)!, 1)[0]!;
 
     let response = await fetch(`/api/bookmarks/${list.id}/skills/${skill.id}`, withCsrf({
         method: "DELETE",
