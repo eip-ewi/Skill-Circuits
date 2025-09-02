@@ -17,6 +17,8 @@
  */
 package nl.tudelft.skills.controller;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,10 +26,15 @@ import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import com.opencsv.CSVWriter;
 
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.SCModuleSummaryDTO;
@@ -156,11 +163,35 @@ public class EditionController {
 				SCModuleSummaryDTO.class);
 	}
 
-	@GetMapping("{id}/teacher_stats")
+	@GetMapping(value = "{id}/teacher_stats", produces = "text/csv")
 	@ResponseBody
 	@PreAuthorize("@authorisationService.isAdmin()")
-	public List<TaskStatsDTO> showAllTaskStats(@PathVariable Long id) {
-		return editionService.teacherStatsTaskLevel(id);
+	public ResponseEntity<String> showAllTaskStats(@PathVariable Long id) throws IOException {
+		List<TaskStatsDTO> teacherStats = editionService.teacherStatsTaskLevel(id);
+		StringWriter sw = new StringWriter();
+		try (CSVWriter writer = new CSVWriter(sw)) {
+			// header
+			writer.writeNext(new String[] { "Task id", "Task name", "Skill name", "Checkpoint name",
+					"Submodule name", "Module name", "Student completions",
+					"Students with this task on their path", "Student link clicks",
+					"Unique student link clicks", "Students clicked the link and completed" });
+
+			// rows
+			for (TaskStatsDTO t : teacherStats) {
+				writer.writeNext(new String[] { String.valueOf(t.getId()), t.getTaskName(), t.getSkillName(),
+						t.getCheckpointName(), t.getSubModuleName(), t.getModuleName(),
+						String.valueOf(t.getNumOfStudentCompletions()),
+						String.valueOf(t.getNumOfStudentsHaveTaskOnPath()),
+						String.valueOf(t.getNumOfStudentLinkClicks()),
+						String.valueOf(t.getNumOfUniqueStudentsClickedLink()),
+						String.valueOf(t.getNumOfStudentsClickedLinkAndCompleted()) });
+			}
+		}
+
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"teacher_stats.csv\"")
+				.contentType(MediaType.valueOf("text/csv"))
+				.body(sw.toString());
 	}
 
 }
