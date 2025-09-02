@@ -46,6 +46,10 @@ public class SkillStateService {
     /// not the actual parents of an external skill's reference.
     ///
 	public boolean isSkillUnlocked(AbstractSkill abstractSkill, Set<Long> completedTaskIds, Set<Long> revealedSkillIds) {
+        if (abstractSkill.getColumn() == null) {
+            return false;
+        }
+
 		List<Task> tasks = switch (abstractSkill) {
 			case ExternalSkill externalSkill -> externalSkill.getSkill().getTasks();
 			case Skill skill -> skill.getTasks();
@@ -78,7 +82,7 @@ public class SkillStateService {
     /// External skills are evaluated in the context of the reference.
     ///
 	public boolean isSkillCompleted(AbstractSkill abstractSkill, Set<Long> completedTaskIds, Set<Long> revealedSkillIds) {
-		List<Task> tasks = switch (abstractSkill) {
+        List<Task> tasks = switch (abstractSkill) {
 			case ExternalSkill externalSkill -> externalSkill.getSkill().getTasks();
 			case Skill skill -> skill.getTasks();
 			default -> Collections.emptyList(); // Unreachable

@@ -34,7 +34,7 @@ export function getSortedCheckpoints(): Checkpoint[] {
 
 export function getVisibleCheckpoints(): Checkpoint[] {
     let usedCheckpoints: Set<number> = new Set(getPlacedBlocks()
-        .filter(block => block.blockType === "skill" && !block.external)
+        .filter(block => block.blockType === "skill")
         .filter(block => block.checkpoint != null)
         .map(block => block.checkpoint!));
     return getSortedCheckpoints().filter(checkpoint => usedCheckpoints.has(checkpoint.id));

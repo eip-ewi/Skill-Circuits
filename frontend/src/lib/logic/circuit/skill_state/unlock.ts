@@ -16,6 +16,10 @@ export function isUnlocked(block: Block, recursionCheck: number = 100): boolean 
         return items.some(item => !item.locked);
     }
 
+    if (block.column === null) {
+        return false;
+    }
+
     let anyTaskCompleted = items.some(item => {
         if (item.itemType !== "task" || item.taskType !== "choice") {
             return item.completed;

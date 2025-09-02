@@ -17,6 +17,9 @@
  */
 package nl.tudelft.skills.service;
 
+import java.util.Comparator;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
@@ -70,14 +73,33 @@ public class ModuleCircuitService {
 				abstractSkill.isEssential(),
 				abstractSkill instanceof Skill s && s.isHidden(),
 				abstractSkill instanceof ExternalSkill,
-				abstractSkill instanceof Skill s && s.getCheckpoint() != null ? s.getCheckpoint().getId()
-						: null,
+				getCheckpointIdInEdition(abstractSkill),
 				abstractSkill.getParents().stream().map(AbstractSkill::getId).toList(),
 				abstractSkill.getChildren().stream().map(AbstractSkill::getId).toList(),
 				skill.getTasks().stream()
 						.map(task -> convertToTaskView(task, completedTaskIds))
 						.toList());
 	}
+
+    public Long getCheckpointIdInEdition(AbstractSkill abstractSkill) {
+        SCEdition edition = abstractSkill.getSubmodule().getModule().getEdition();
+        return switch (abstractSkill) {
+            case Skill skill -> skill.getCheckpoint() == null ? null : skill.getCheckpoint().getId();
+            case ExternalSkill externalSkill -> findClosestNextCheckpoint(externalSkill, edition.getId()).map(Checkpoint::getId).orElse(null);
+            default -> null; // Unreachable
+        };
+    }
+
+    public Optional<Checkpoint> findClosestNextCheckpoint(AbstractSkill abstractSkill, Long editionId) {
+        if (abstractSkill instanceof ExternalSkill externalSkill) {
+            return findClosestNextCheckpoint(externalSkill.getSkill(), editionId);
+        }
+        Skill skill = (Skill) abstractSkill;
+        if (skill.getCheckpoint() != null && Objects.equals(skill.getCheckpoint().getEdition().getId(), editionId)) {
+            return Optional.of(skill.getCheckpoint());
+        }
+        return skill.getChildren().stream().map(child -> findClosestNextCheckpoint(child, editionId)).filter(Optional::isPresent).map(Optional::get).min(Comparator.comparing(Checkpoint::getDeadline));
+    }
 
 	public ModuleLevelTaskView convertToTaskView(Task task, SCPerson person) {
 		return convertToTaskView(task, taskCompletionRepository.findAllCompletedTaskIdsForPerson(person));

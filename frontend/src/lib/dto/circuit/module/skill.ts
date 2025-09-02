@@ -5,18 +5,17 @@ export interface ISkillBlock extends IBlock {
     essential: boolean;
     external: boolean;
     items: TaskItem[];
+    checkpoint: number | null;
 
     blockType: "skill";
 }
 
 export interface RegularSkillBlock extends ISkillBlock {
-    checkpoint: number | null;
     hidden: boolean;
     external: false;
 }
 
 export interface ExternalSkillBlock extends ISkillBlock {
-    checkpoint: null;
     hidden: undefined;
     external: true;
 }
