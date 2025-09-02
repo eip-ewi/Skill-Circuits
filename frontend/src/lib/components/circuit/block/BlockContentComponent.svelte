@@ -29,7 +29,7 @@
 {:else if canEditCircuit()}
     <span>{block.items.length} {getLevel().items}</span>
 {:else}
-    <span>{block.items.filter(item => item.completed).length}/{block.items.filter(item => item.itemType !== "skill" || !item.hidden || isSkillItemRevealed(item)).length} completed</span>
+    <span>{block.items.filter(item => item.completed).length}/{block.items.filter(item => item.itemType !== "skill" || (item.column !== null && (!item.hidden || isSkillItemRevealed(item)))).length} completed</span>
 {/if}
 
 <style>

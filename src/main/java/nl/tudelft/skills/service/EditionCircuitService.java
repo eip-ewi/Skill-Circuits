@@ -107,6 +107,7 @@ public class EditionCircuitService {
 		return new EditionLevelSkillView(
 				skill.getId(),
 				skill.getName(),
+                skill.getColumn(),
 				skill.isEssential(),
 				skill.isHidden(),
 				skillStateService.isSkillCompleted(skill, completedTaskIds, revealedSkillIds),
