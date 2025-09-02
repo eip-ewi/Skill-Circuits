@@ -85,7 +85,7 @@ export async function deleteBlock(block: Block) {
     if (response.ok) {
         if (block.blockType === "skill" && block.external) {
             let circuit = getCircuit() as ModuleCircuit;
-            circuit.externalSkills.splice(circuit.externalSkills.findIndex(s => s.id === block.id)!);
+            circuit.externalSkills.splice(circuit.externalSkills.findIndex(s => s.id === block.id)!, 1);
         } else {
             let group = getGroupForBlock(block);
             group.blocks.splice(group.blocks.findIndex(b => b.id === block.id), 1);
