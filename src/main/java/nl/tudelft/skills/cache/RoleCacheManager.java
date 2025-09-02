@@ -25,12 +25,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
 
 import nl.tudelft.labracore.api.RoleControllerApi;
-import nl.tudelft.labracore.api.dto.Id;
 import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
+import nl.tudelft.labracore.api.dto.RoleId;
 
 @Component
 @RequestScope
-public class RoleCacheManager extends CoreCacheManager<Id, RoleDetailsDTO> {
+public class RoleCacheManager extends CoreCacheManager<RoleId, RoleDetailsDTO> {
 
 	@Autowired
 	private RoleControllerApi api;
@@ -39,15 +39,15 @@ public class RoleCacheManager extends CoreCacheManager<Id, RoleDetailsDTO> {
 	private PersonCacheManager pCache;
 
 	@Override
-	protected List<RoleDetailsDTO> fetch(List<Id> ids) {
+	protected List<RoleDetailsDTO> fetch(List<RoleId> ids) {
 		return api.getRolesById(
-				ids.stream().map(Id::getEditionId).collect(Collectors.toSet()),
-				ids.stream().map(Id::getPersonId).collect(Collectors.toSet()))
+				ids.stream().map(RoleId::getEditionId).collect(Collectors.toSet()),
+				ids.stream().map(RoleId::getPersonId).collect(Collectors.toSet()))
 				.collectList().block();
 	}
 
 	@Override
-	protected Id getId(RoleDetailsDTO dto) {
+	protected RoleId getId(RoleDetailsDTO dto) {
 		return dto.getId();
 	}
 

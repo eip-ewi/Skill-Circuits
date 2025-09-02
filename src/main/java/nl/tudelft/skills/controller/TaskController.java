@@ -17,107 +17,81 @@
  */
 package nl.tudelft.skills.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.EditLinkDTO;
-import nl.tudelft.skills.dto.view.module.ChoiceTaskViewDTO;
-import nl.tudelft.skills.dto.view.module.RegularTaskViewDTO;
-import nl.tudelft.skills.model.ChoiceTask;
-import nl.tudelft.skills.model.RegularTask;
-import nl.tudelft.skills.model.Task;
-import nl.tudelft.skills.repository.RegularTaskRepository;
-import nl.tudelft.skills.repository.TaskRepository;
-import nl.tudelft.skills.security.AuthorisationService;
+import lombok.AllArgsConstructor;
+import nl.tudelft.librador.resolver.annotations.PathEntity;
+import nl.tudelft.skills.annotation.AuthenticatedSCPerson;
+import nl.tudelft.skills.dto.create.ChoiceTaskCreate;
+import nl.tudelft.skills.dto.create.RegularTaskCreate;
+import nl.tudelft.skills.dto.patch.ChoiceTaskPatch;
+import nl.tudelft.skills.dto.patch.TaskMove;
+import nl.tudelft.skills.dto.patch.TaskPatch;
+import nl.tudelft.skills.dto.view.circuit.module.ModuleLevelTaskView;
+import nl.tudelft.skills.model.*;
+import nl.tudelft.skills.service.ModuleCircuitService;
+import nl.tudelft.skills.service.TaskService;
 
-@Controller
-@RequestMapping("task")
+@RestController
+@AllArgsConstructor
+@RequestMapping("/api/tasks")
 public class TaskController {
-	private final RegularTaskRepository regularTaskRepository;
-	private final AuthorisationService authorisationService;
-	private final TaskRepository taskRepository;
 
-	@Autowired
-	public TaskController(RegularTaskRepository regularTaskRepository,
-			AuthorisationService authorisationService, TaskRepository taskRepository) {
-		this.regularTaskRepository = regularTaskRepository;
-		this.authorisationService = authorisationService;
-		this.taskRepository = taskRepository;
+	private final ModuleCircuitService moduleCircuitService;
+	private final TaskService taskService;
+
+	@PostMapping
+	@PreAuthorize("@authorisationService.canEditSkill(#create.skill)")
+	public ModuleLevelTaskView createTask(@AuthenticatedSCPerson SCPerson person,
+			@RequestBody RegularTaskCreate create) {
+		return moduleCircuitService.convertToTaskView(taskService.createTask(create), person);
 	}
 
-	/**
-	 * Update the link of a task.
-	 *
-	 * @param  editLinkDTO The DTO containing the task and the new link.
-	 * @return             Empty 200 OK response.
-	 */
-	@Transactional
-	@PatchMapping("change-link")
-	@PreAuthorize("@authorisationService.canEditTask(#editLinkDTO.taskId)")
-	public ResponseEntity<Void> updateTaskLink(@RequestBody EditLinkDTO editLinkDTO) {
-		RegularTask task = regularTaskRepository.findByIdOrThrow(editLinkDTO.getTaskId());
-		task.setLink(editLinkDTO.getNewLink());
-		regularTaskRepository.save(task);
-
-		return ResponseEntity.ok().build();
+	@PostMapping("choice")
+	@PreAuthorize("@authorisationService.canEditSkill(#create.skill)")
+	public ModuleLevelTaskView createChoiceTask(@AuthenticatedSCPerson SCPerson person,
+			@RequestBody ChoiceTaskCreate create) {
+		return moduleCircuitService.convertToTaskView(taskService.createTask(create), person);
 	}
 
-	/**
-	 * Returns a task view for a custom path.
-	 *
-	 * @param  taskId The id of the task.
-	 * @param  model  The model to configure.
-	 * @return        Html page with the task.
-	 */
-	@GetMapping("{taskId}")
-	@PreAuthorize("@authorisationService.canViewTask({#taskId})")
-	public String getTask(@PathVariable Long taskId, Model model) {
-		model.addAttribute("canEdit", false);
-		model.addAttribute("level", "module");
-
-		Task task = taskRepository.findByIdOrThrow(taskId);
-
-		// Return RegularTask
-		if (task instanceof RegularTask regularTask) {
-			model.addAttribute("item", View.convert(regularTask, RegularTaskViewDTO.class));
-			return "task/view";
-		}
-
-		// Return ChoiceTask
-		model.addAttribute("item", View.convert((ChoiceTask) task, ChoiceTaskViewDTO.class));
-		return "choice_task/view";
+	@PatchMapping("{task}")
+	@PreAuthorize("@authorisationService.canEditSkill(#task.skill)")
+	public void patchTask(@PathEntity Task task, @RequestBody TaskPatch patch) {
+		taskService.patchTask(task, patch);
 	}
 
-	/**
-	 * Returns task view paths overview in an exploded skill.
-	 *
-	 * @param  taskId The id of the task.
-	 * @param  model  The model to configure.
-	 * @return        Html page with the task.
-	 */
-	@GetMapping("{taskId}/preview")
-	@PreAuthorize("@authorisationService.canViewTask({#taskId})")
-	public String getTaskForCustomPath(@PathVariable Long taskId, Model model) {
-		model.addAttribute("canEdit", false);
-		model.addAttribute("level", "module");
+	@PatchMapping("choice/{task}")
+	@PreAuthorize("@authorisationService.canEditSkill(#task.skill)")
+	public void patchChoiceTask(@PathEntity ChoiceTask task, @RequestBody ChoiceTaskPatch patch) {
+		taskService.patchTask(task, patch);
+	}
 
-		Task task = taskRepository.findByIdOrThrow(taskId);
+	@PatchMapping("{task}/index")
+	@PreAuthorize("@authorisationService.canEditSkill(#task.skill)")
+	public void updateTaskIndex(@PathEntity Task task, @RequestParam Integer index) {
+		taskService.updateTaskIndex(task, index);
+	}
 
-		// Return RegularTask
-		if (task instanceof RegularTask regularTask) {
-			model.addAttribute("item", View.convert(regularTask, RegularTaskViewDTO.class));
-			return "task/inactiveview :: item";
-		}
+	@PatchMapping("{task}/skill")
+	@PreAuthorize("@authorisationService.canEditSkill(#task.skill) and @authorisationService.canEditSkill(#move.skill)")
+	public void moveTask(@PathEntity Task task, @RequestBody TaskMove move) {
+		taskService.moveTask(task, move);
+	}
 
-		// Return ChoiceTask
-		model.addAttribute("item", View.convert((ChoiceTask) task, ChoiceTaskViewDTO.class));
-		return "choice_task/inactiveview :: item";
+	@PostMapping("{choiceTask}/add-subtask/{subtask}")
+	@PreAuthorize("@authorisationService.canEditSkill(#choiceTask.skill) and @authorisationService.canEditSkill(#subtask.skill)")
+	public ModuleLevelTaskView.ChoiceTaskChoiceView moveTaskInsideChoiceTask(
+			@AuthenticatedSCPerson SCPerson person, @PathEntity ChoiceTask choiceTask,
+			@PathEntity RegularTask subtask) {
+		return moduleCircuitService
+				.convertToChoiceView(taskService.moveTaskInsideChoiceTask(choiceTask, subtask), person);
+	}
+
+	@DeleteMapping("{task}")
+	@PreAuthorize("@authorisationService.canEditSkill(#task.skill)")
+	public void deleteTask(@PathEntity Task task) {
+		taskService.deleteTask(task);
 	}
 
 }

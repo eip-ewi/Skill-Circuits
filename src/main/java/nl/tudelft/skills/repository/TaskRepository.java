@@ -22,8 +22,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
+import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.Task;
 
 public interface TaskRepository extends JpaRepository<Task, Long> {
@@ -33,8 +36,13 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 				.orElseThrow(() -> new ResourceNotFoundException("Task was not found: " + id));
 	}
 
+	@Query("""
+			select task from Task task
+			where task.skill.submodule.module.edition.id = :#{#edition.id}
+			""")
+	Set<Task> findAllByEdition(@Param("edition") SCEdition edition);
+
 	Set<Task> findAllByIdIn(Collection<Long> ids);
 
 	List<Task> findAllBySkillSubmoduleModuleEditionId(Long editionId);
-
 }

@@ -1,0 +1,135 @@
+<!--
+
+    Skill Circuits
+    Copyright (C) 2025 - Delft University of Technology
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <div
+        th:id="|checkpoint-${checkpoint.id}|"
+        th:data-deadline="${#temporals.formatISO(checkpoint.deadline)}"
+        th:data-name="${checkpoint.name}"
+        th:draggable="${canEdit}"
+        class="checkpoint"
+        layout:fragment="checkpoint">
+        <div class="checkpoint__body" th:id="|checkpoint-${checkpoint.id}-body|" tabindex="1">
+            <div th:id="|checkpoint-${checkpoint.id}-display|">
+                <span
+                    th:id="|checkpoint-${checkpoint.id}-name|"
+                    th:text="${checkpoint.name}"
+                    class="checkpoint__name"></span>
+                <span
+                    th:id="|checkpoint-${checkpoint.id}-deadline|"
+                    class="checkpoint__deadline"></span>
+            </div>
+            <div
+                th:if="${canEdit}"
+                class="checkpoint__buttons"
+                th:id="|checkpoint-${checkpoint.id}-buttons|">
+                <button
+                    th:class="'fa-solid fa-right-left checkpoint__change' +
+                              (${#lists.size(module.remainingCheckpointsInEdition) > 0} ? '' : ' hidden')"
+                    th:aria-hidden="${#lists.size(module.remainingCheckpointsInEdition) > 0} ? '' : 'true'"
+                    th:data-checkpoint="${checkpoint.id}"
+                    tabindex="1"></button>
+                <button
+                    class="fa-solid fa-pen checkpoint__edit"
+                    th:data-checkpoint="${checkpoint.id}"
+                    tabindex="1"></button>
+                <button
+                    class="fa-solid fa-trash checkpoint__delete"
+                    th:data-checkpoint="${checkpoint.id}"
+                    tabindex="1"></button>
+            </div>
+        </div>
+    </div>
+
+    <script th:if="${levelSvelte == 'module'}" layout:fragment="script">
+        function updateCheckpointPositions() {
+            const checkpointRows = new Map();
+            [...$(".block")].forEach(skill => {
+                const checkpoint = $(skill).attr("data-checkpoint");
+                const row = getRow(skill);
+                if (!checkpointRows.has(checkpoint) || checkpointRows.get(checkpoint) < row) {
+                    checkpointRows.set(checkpoint, row);
+                }
+            });
+            const checkpoints = $(".checkpoint:not(.ghost_checkpoint)");
+            checkpoints.each((i, cp) => {
+                const id = cp.id.split("-")[1];
+                if (!checkpointRows.has(id)) {
+                    // If there is a checkpoint without any skills (i.e., it is not mapped to any row in
+                    // checkpointRows), it should be removed and a ghost checkpoint should be added instead.
+                    const row = $(cp).css("grid-row");
+                    $(cp).remove();
+                    addGhostCheckpoint(row);
+
+                    // Since a previously valid checkpoint is now removed from the module,
+                    // - Make swap button visible for checkpoints
+                    // - Add checkpoint to the dropdown list
+                    const cpChangers = $(".checkpoint__change");
+                    cpChangers.removeAttr("aria-hidden");
+                    cpChangers.removeClass("hidden");
+                    $(".checkpoint__change__select").append(
+                        `<option value=${id}>${$(cp).data("name")}</option>`
+                    );
+                } else {
+                    // Else, update the CSS grid row of the checkpoint.
+                    $(cp).css("grid-row", checkpointRows.get(cp.id.split("-")[1]));
+                    $(cp).prop("draggable", true);
+                }
+            });
+            getLastCheckpoint()?.prop("draggable", false);
+        }
+        function formatDeadline(isoTime) {
+            const deadline = luxon.DateTime.fromISO(isoTime);
+            const fmtOptions = {
+                weekday: "short",
+                year: "numeric",
+                month: "long",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                hourCycle: "h23",
+            };
+
+            return deadline.toLocaleString(fmtOptions);
+        }
+        function updateCheckpointDeadlines() {
+            // Needed so that we always use the same format (after edit and on view)
+            $(".checkpoint").each(function () {
+                const deadline = formatDeadline($(this).data("deadline"));
+                $(this).find(".checkpoint__deadline").text(deadline);
+            });
+        }
+        function getLastCheckpoint() {
+            return [...$(".checkpoint:not(.ghost_checkpoint)")].reduce((acc, cp) => {
+                return acc == null || getRow(acc) < getRow(cp) ? $(cp) : acc;
+            }, null);
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            updateCheckpointPositions();
+            updateCheckpointDeadlines();
+            if (typeof updateGhostCheckpoints === "function") {
+                updateGhostCheckpoints();
+            }
+        });
+    </script>
+</html>

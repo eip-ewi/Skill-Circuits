@@ -1,0 +1,8 @@
+@font-face {
+    font-family: "Winky Sans";
+    src: url("/font/winky-sans.ttf") format("truetype");
+}
+
+:root {
+    --font-family: "Roboto", system-ui, sans-serif;
+}

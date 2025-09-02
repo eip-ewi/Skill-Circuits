@@ -17,93 +17,103 @@
  */
 package nl.tudelft.skills.service;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.patch.PathTasksPatchDTO;
-import nl.tudelft.skills.dto.view.edition.PathViewDTO;
-import nl.tudelft.skills.model.Path;
-import nl.tudelft.skills.model.Task;
+import lombok.AllArgsConstructor;
+import nl.tudelft.librador.dto.DTOConverter;
+import nl.tudelft.skills.dto.create.PathCreate;
+import nl.tudelft.skills.dto.patch.PathPatch;
+import nl.tudelft.skills.dto.view.PathCustomisationView;
+import nl.tudelft.skills.model.*;
+import nl.tudelft.skills.repository.PathPreferenceRepository;
 import nl.tudelft.skills.repository.PathRepository;
+import nl.tudelft.skills.repository.PersonRepository;
 import nl.tudelft.skills.repository.TaskRepository;
 
 @Service
+@AllArgsConstructor
 public class PathService {
 
-	private final TaskRepository taskRepository;
 	private final PathRepository pathRepository;
+	private final PathPreferenceRepository pathPreferenceRepository;
+	private final PersonRepository personRepository;
+	private final TaskRepository taskRepository;
 
-	@Autowired
-	public PathService(TaskRepository taskRepository, PathRepository pathRepository) {
-		this.taskRepository = taskRepository;
-		this.pathRepository = pathRepository;
+	private final DTOConverter dtoConverter;
+
+	public Path getActivePath(SCPerson person, SCEdition edition) {
+		return pathPreferenceRepository.findByPersonAndEdition(person, edition).map(PathPreference::getPath)
+				.orElse(null);
 	}
 
-	/**
-	 * Updates tasks in a path. If the patch has a moduleId this only creates or deletes tasks in that module.
-	 *
-	 * @param patch New path patch dto.
-	 * @param path  New path.
-	 */
 	@Transactional
-	public void updateTasksInPathManyToMany(PathTasksPatchDTO patch, Path path) {
-		Set<Task> oldTasks = taskRepository
-				.findAllByIdIn(path.getTasks().stream().map(Task::getId).toList());
+	public void setActivePath(SCPerson person, SCEdition edition, Path path) {
+		pathPreferenceRepository.findByPersonAndEdition(person, edition).ifPresentOrElse(preference -> {
+			preference.setPath(path);
+			pathPreferenceRepository.save(preference);
+		}, () -> {
+			pathPreferenceRepository.save(PathPreference.builder()
+					.person(person)
+					.edition(edition)
+					.path(path)
+					.build());
+		});
+	}
 
-		Set<Task> selectedTasks = new HashSet<>(
-				taskRepository.findAllByIdIn(patch.getTaskIds()));
+	public PathCustomisationView getPathCustomisation(SCPerson person, SCEdition edition) {
+		return new PathCustomisationView(
+				new ArrayList<>(personRepository.findAllTaskIdsAddedForPersonAndEdition(person, edition)),
+				new ArrayList<>(personRepository.findAllTaskIdsRemovedForPersonAndEdition(person, edition)));
+	}
 
-		// remove tasks that are not in path
-		// if the patch has a moduleId, remove only tasks that are in this module
-		Set<Task> removedTasks = oldTasks.stream().filter(t -> !patch.getTaskIds().contains(t.getId())
-				&& (patch.getModuleId() == null
-						|| t.getSkill().getSubmodule().getModule().getId().equals(patch.getModuleId())))
-				.collect(Collectors.toSet());
-		removedTasks
-				.forEach(t -> t.setPaths(t.getPaths().stream().filter(p -> !p.getId().equals(path.getId()))
-						.collect(Collectors.toSet())));
-		taskRepository.saveAllAndFlush(oldTasks);
+	@Transactional
+	public void addTaskToPath(SCPerson person, Task task) {
+		if (person.getTasksRemoved().stream().anyMatch(t -> Objects.equals(t.getId(), task.getId()))) {
+			person.getTasksRemoved().remove(task);
+		} else {
+			person.getTasksAdded().add(task);
+		}
+		personRepository.save(person);
+	}
 
-		// add tasks that were not previously in path
-		selectedTasks.forEach(t -> t.getPaths().add(path));
-		taskRepository.saveAllAndFlush(selectedTasks);
+	@Transactional
+	public void removeTaskFromPath(SCPerson person, Task task) {
+		if (person.getTasksAdded().stream().anyMatch(t -> Objects.equals(t.getId(), task.getId()))) {
+			person.getTasksAdded().remove(task);
+		} else {
+			person.getTasksRemoved().add(task);
+		}
+	}
 
-		Set<Task> newTasks = new HashSet<>(oldTasks);
-		newTasks.removeAll(removedTasks);
-		newTasks.addAll(selectedTasks);
-		path.setTasks(newTasks);
+	@Transactional
+	public Path createPath(PathCreate create) {
+		Path created = create.apply(dtoConverter);
+		created.setIdx(created.getEdition().getPaths().size());
+		Path path = pathRepository.save(created);
+
+		Set<Task> tasks = taskRepository.findAllByEdition(path.getEdition());
+		tasks.forEach(task -> task.getPaths().add(path));
+		taskRepository.saveAll(tasks);
+
+		return path;
+	}
+
+	@Transactional
+	public void patchPath(Path path, PathPatch patch) {
+		patch.apply(path, dtoConverter);
 		pathRepository.save(path);
 	}
 
-	/**
-	 * Checks if a task is in a certain path.
-	 *
-	 * @param  taskId Id of the task.
-	 * @param  pathId Id of the path.
-	 * @return        True if task belongs to this path, false otherwise.
-	 */
-	public boolean isTaskInPath(Long taskId, Long pathId) {
-		return pathRepository.findByIdOrThrow(pathId).getTasks().stream()
-				.map(Task::getId)
-				.anyMatch(taskId::equals);
-	}
+	@Transactional
+	public void deletePath(Path path) {
+		Set<Task> tasks = path.getTasks();
+		tasks.forEach(task -> task.getPaths().remove(path));
+		taskRepository.saveAll(tasks);
 
-	/**
-	 * Gets the PathViewDTO of a path, if the path id is not null. Otherwise, returns null.
-	 *
-	 * @param  pathId The path id, or null.
-	 * @return        The PathViewDTO of the path, if the path id is not null. Otherwise, null.
-	 */
-	public PathViewDTO getPath(Long pathId) {
-		if (pathId == null)
-			return null;
-		return View.convert(pathRepository.getById(pathId), PathViewDTO.class);
+		pathRepository.delete(path);
 	}
 
 }

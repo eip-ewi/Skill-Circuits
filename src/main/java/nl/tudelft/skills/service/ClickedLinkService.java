@@ -17,33 +17,27 @@
  */
 package nl.tudelft.skills.service;
 
-import java.util.Collection;
-
-import javax.transaction.Transactional;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import nl.tudelft.skills.model.RegularTask;
+import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+import nl.tudelft.skills.model.ClickedLink;
+import nl.tudelft.skills.model.SCPerson;
+import nl.tudelft.skills.model.TaskInfo;
 import nl.tudelft.skills.repository.ClickedLinkRepository;
 
 @Service
+@AllArgsConstructor
 public class ClickedLinkService {
+
 	private final ClickedLinkRepository clickedLinkRepository;
 
-	@Autowired
-	public ClickedLinkService(ClickedLinkRepository clickedLinkRepository) {
-		this.clickedLinkRepository = clickedLinkRepository;
+	@Transactional
+	public void reportClickedLink(SCPerson person, TaskInfo task) {
+		clickedLinkRepository.save(ClickedLink.builder()
+				.person(person)
+				.task(task)
+				.build());
 	}
 
-	/**
-	 * Deletes the clicked links belonging to specific tasks
-	 *
-	 * @param tasks The collection of tasks the clicked links should be deleted for
-	 */
-	@Transactional
-	public void deleteClickedLinksForTasks(Collection<RegularTask> tasks) {
-		var taskIds = tasks.stream().map(RegularTask::getId).toList();
-		clickedLinkRepository.deleteAllByTaskIdIn(taskIds);
-	}
 }

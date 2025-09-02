@@ -1,0 +1,18 @@
+[data-theme="light"] {
+    /* Buttons */
+    --surface-border-radius: .5em;
+
+    --neutral-surface-colour: hsl(0deg 0% 100%);
+    --neutral-surface-active-colour: var(--primary-surface-colour);
+    --on-neutral-surface-colour: hsl(0deg 0% 0%);
+    --on-neutral-surface-active-colour: var(--on-primary-surface-colour);
+    --neutral-surface-border: var(--primary-surface-border);
+    --neutral-surface-active-border-colour: var(--primary-surface-active-border-colour);
+
+    --primary-surface-colour: color-mix(in oklab, var(--primary-colour) 10%, white);
+    --primary-surface-active-colour: color-mix(in oklab, var(--primary-colour) 20%, white);
+    --on-primary-surface-colour: color-mix(in oklab, var(--primary-colour) 50%, black);
+    --on-primary-surface-active-colour: var(--on-primary-surface-colour);
+    --primary-surface-border: none;
+    --primary-surface-active-border-colour: transparent;
+}

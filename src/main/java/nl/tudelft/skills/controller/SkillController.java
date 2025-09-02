@@ -17,283 +17,99 @@
  */
 package nl.tudelft.skills.controller;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
 
-import javax.servlet.http.HttpSession;
-import javax.validation.Valid;
-
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.AllArgsConstructor;
-import nl.tudelft.labracore.lib.security.user.AuthenticatedPerson;
-import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.create.ExternalSkillCreateDTO;
-import nl.tudelft.skills.dto.create.SkillCreateDTO;
-import nl.tudelft.skills.dto.id.CheckpointIdDTO;
-import nl.tudelft.skills.dto.patch.SkillPatchDTO;
-import nl.tudelft.skills.dto.patch.SkillPositionPatchDTO;
-import nl.tudelft.skills.dto.view.module.*;
-import nl.tudelft.skills.model.*;
-import nl.tudelft.skills.repository.*;
-import nl.tudelft.skills.repository.labracore.PersonRepository;
-import nl.tudelft.skills.service.*;
+import nl.tudelft.librador.resolver.annotations.PathEntity;
+import nl.tudelft.skills.annotation.AuthenticatedSCPerson;
+import nl.tudelft.skills.dto.create.ExternalSkillCreate;
+import nl.tudelft.skills.dto.create.SkillCreate;
+import nl.tudelft.skills.dto.patch.SkillPatch;
+import nl.tudelft.skills.dto.view.circuit.module.ModuleLevelSkillView;
+import nl.tudelft.skills.model.AbstractSkill;
+import nl.tudelft.skills.model.SCPerson;
+import nl.tudelft.skills.service.ModuleCircuitService;
+import nl.tudelft.skills.service.SkillService;
+import nl.tudelft.skills.service.TaskCompletionService;
 
-@Controller
-@RequestMapping("skill")
+@RestController
 @AllArgsConstructor
+@RequestMapping("/api/skills")
 public class SkillController {
 
-	private final SkillRepository skillRepository;
-	private final ExternalSkillRepository externalSkillRepository;
-	private final AbstractSkillRepository abstractSkillRepository;
-	private final TaskRepository taskRepository;
-	private final RegularTaskRepository regularTaskRepository;
-	private final SubmoduleRepository submoduleRepository;
-	private final CheckpointRepository checkpointRepository;
-	private final PathRepository pathRepository;
-	private final PersonRepository personRepository;
+	private final ModuleCircuitService moduleCircuitService;
 	private final SkillService skillService;
-	private final ModuleService moduleService;
 	private final TaskCompletionService taskCompletionService;
-	private final ClickedLinkService clickedLinkService;
-	private final PersonService personService;
-	private final HttpSession session;
 
-	/**
-	 * Gets a single skill by id.
-	 *
-	 * @param  id The id of the skill
-	 * @return    The skill html element
-	 */
-	@GetMapping("{id}")
-	@PreAuthorize("@authorisationService.canViewSkill(#id)")
-	public String getSkill(@AuthenticatedPerson Person person, @PathVariable Long id, Model model) {
-		Skill skill = skillRepository.findByIdOrThrow(id);
-		Long editionId = skill.getSubmodule().getModule().getEdition().getId();
-		ModuleLevelSkillViewDTO view = View.convert(skill, ModuleLevelSkillViewDTO.class);
-		view.setCompletedRequiredTasks(true);
-
-		// Set completed tasks
-		Set<Long> completedTasks = personRepository.getById(person.getId()).getTaskCompletions().stream()
-				.map(tc -> tc.getTask().getId()).collect(Collectors.toSet());
-		view.getTasks().forEach(t -> {
-			// Only RegularTasks have a completion status
-			if (t instanceof RegularTaskViewDTO regularTaskViewDTO) {
-				regularTaskViewDTO.getTaskInfo().setCompleted(completedTasks.contains(t.getId()));
-			}
-		});
-
-		// Add general model attributes
-		model.addAttribute("level", "module");
-		model.addAttribute("groupType", "submodule");
-		model.addAttribute("block", view);
-		model.addAttribute("group", skill.getSubmodule());
-		model.addAttribute("circuit", buildCircuitFromSkill(skill));
-		model.addAttribute("canEdit", false);
-		model.addAttribute("canDelete", false);
-		Boolean studentMode = (Boolean) session.getAttribute("student-mode-" + editionId);
-		model.addAttribute("studentMode", studentMode != null && studentMode);
-
-		// Add information concerning personal path to model
-		Optional<Set<Long>> taskIdsInPath = personService.setPersonalPathAttributes(person.getId(), model,
-				editionId, skill);
-		taskIdsInPath.ifPresent(
-				taskIdsInner -> view.getTasks().forEach(t -> t.setVisible(taskIdsInner.contains(t.getId()))));
-
-		return "block/view";
+	@GetMapping("{skill}/module")
+	@PreAuthorize("@authorisationService.canViewSkill(#skill)")
+	public Long getModuleFromSkill(@PathEntity AbstractSkill skill) {
+		return skill.getSubmodule().getModule().getId();
 	}
 
-	/**
-	 * Creates a skill.
-	 *
-	 * @param  create The DTO with information to create the skill
-	 * @return        A new circuit html element
-	 */
+	@GetMapping("last-active")
+	public Long getLastActiveSkill(@AuthenticatedSCPerson SCPerson person) {
+		return taskCompletionService.getLastCompletedTask(person).map(task -> task.getSkill().getId())
+				.orElseThrow(ResourceNotFoundException::new);
+	}
+
+	@GetMapping("unlocked")
+	public List<Long> getUnlockedSkills(@AuthenticatedSCPerson SCPerson person) {
+		return person.getSkillsRevealed().stream().map(AbstractSkill::getId).toList();
+	}
+
 	@PostMapping
-	@Transactional
-	@PreAuthorize("@authorisationService.canCreateSkill(#create.submodule.id)")
-	public String createSkill(@AuthenticatedPerson Person person, @RequestBody SkillCreateDTO create,
-			Model model) {
-		if (create.getCheckpoint() == null) {
-			create.setCheckpoint(new CheckpointIdDTO(
-					checkpointRepository.saveAndFlush(create.getCheckpointCreate().apply()).getId()));
-		}
-
-		Skill skill = skillService.createSkill(create);
-
-		// Add skill to checkpoint
-		Checkpoint checkpoint = checkpointRepository.findBySkillsContains(skill);
-		checkpoint.getSkills().add(skill);
-		checkpointRepository.save(checkpoint);
-
-		moduleService.configureModuleModel(person, skill.getSubmodule().getModule().getId(), model, session);
-		return "module/view";
+	@PreAuthorize("@authorisationService.canEditSubmodule(#create.submodule)")
+	public ModuleLevelSkillView createSkill(@AuthenticatedSCPerson SCPerson person,
+			@RequestBody SkillCreate create) {
+		return moduleCircuitService.convertToSkillView(skillService.createSkill(create), person);
 	}
 
-	/**
-	 * Creates an external skill.
-	 *
-	 * @param  create The DTO with information to create the skill
-	 * @return        A new circuit html element
-	 */
-	@Transactional
 	@PostMapping("external")
-	@PreAuthorize("@authorisationService.canCreateSkillInModule(#create.module.id)")
-	public String createSkill(@AuthenticatedPerson Person person, @RequestBody ExternalSkillCreateDTO create,
-			Model model) {
-		ExternalSkill skill = externalSkillRepository.saveAndFlush(create.apply());
-		skill.setSkill(skillRepository.findByIdOrThrow(skill.getSkill().getId()));
-
-		moduleService.configureModuleModel(person, skill.getModule().getId(), model, session);
-		return "module/view";
+	@PreAuthorize("@authorisationService.canEditModuleCircuit(#create.module)")
+	public ModuleLevelSkillView createExternalSkill(@AuthenticatedSCPerson SCPerson person,
+			@RequestBody ExternalSkillCreate create) {
+		return moduleCircuitService.convertToSkillView(skillService.createSkill(create), person);
 	}
 
-	/**
-	 * Deletes a skill.
-	 *
-	 * @param  id The id of the skill to delete
-	 * @return    A redirect to the correct page
-	 */
-	@DeleteMapping
-	@Transactional
-	@PreAuthorize("@authorisationService.canDeleteSkill(#id)")
-	public String deleteSkill(@RequestParam Long id, @RequestParam String page) {
-		AbstractSkill skill = skillService.deleteSkill(id);
-		SCModule module = skill instanceof ExternalSkill s ? s.getModule() : skill.getSubmodule().getModule();
-		return page.equals("block") ? "redirect:/module/" + module.getId()
-				: "redirect:/edition/" + module.getEdition().getId();
+	@PatchMapping("{skill}")
+	@PreAuthorize("@authorisationService.canEditSkill(#skill)")
+	public void patchSkill(@PathEntity AbstractSkill skill, @RequestBody SkillPatch patch) {
+		skillService.patchSkill(skill, patch);
 	}
 
-	/**
-	 * Patches a skill.
-	 *
-	 * @param  patch The patch containing the new data in JSON format
-	 * @return       The HTML for the updated skill block
-	 */
-	@PatchMapping
-	@Transactional
-	@PreAuthorize("@authorisationService.canEditSkill(#patch.id)")
-	public String patchSkill(@Valid @RequestBody SkillPatchDTO patch, Model model) {
-		Skill skill = skillService.patchSkill(patch);
-
-		model.addAttribute("level", "module");
-		model.addAttribute("groupType", "submodule");
-		model.addAttribute("block", View.convert(skill, ModuleLevelSkillViewDTO.class));
-		model.addAttribute("group", skill.getSubmodule());
-		model.addAttribute("circuit", buildCircuitFromSkill(skill));
-		model.addAttribute("canEdit", true);
-		model.addAttribute("canDelete", true);
-		Boolean studentMode = (Boolean) session
-				.getAttribute("student-mode-" + skill.getSubmodule().getModule().getEdition().getId());
-		model.addAttribute("studentMode", studentMode != null && studentMode);
-
-		return "block/view";
+	@DeleteMapping("{skill}")
+	@PreAuthorize("@authorisationService.canEditSkill(#skill)")
+	public void deleteSkill(@PathEntity AbstractSkill skill) {
+		skillService.deleteSkill(skill);
 	}
 
-	/**
-	 * Creates a circuit view from a skill.
-	 *
-	 * @param  skill The skill
-	 * @return       The circuit view
-	 */
-	private ModuleLevelModuleViewDTO buildCircuitFromSkill(Skill skill) {
-		return ModuleLevelModuleViewDTO.builder()
-				.id(skill.getSubmodule().getModule().getId())
-				.submodules(submoduleRepository.findAllByModuleId(skill.getSubmodule().getModule().getId())
-						.stream()
-						.map(s -> ModuleLevelSubmoduleViewDTO.builder().id(s.getId()).name(s.getName())
-								.build())
-						.toList())
-				.edition(ModuleLevelEditionViewDTO.builder()
-						.id(skill.getSubmodule().getModule().getEdition().getId()).build())
-				.build();
+	@PatchMapping("{skill}/position")
+	@PreAuthorize("@authorisationService.canEditSkill(#skill)")
+	public void updatePosition(@PathEntity AbstractSkill skill, @RequestParam Integer column) {
+		skillService.updatePosition(skill, column);
 	}
 
-	/**
-	 * Updates a skill's position.
-	 *
-	 * @param  id    The id of the skill to update
-	 * @param  patch The patch containing the new position
-	 * @return       Empty 200 response
-	 */
-	@PatchMapping("{id}/position")
-	@Transactional
-	@PreAuthorize("@authorisationService.canEditSkill(#id)")
-	public ResponseEntity<Void> updateSkillPosition(@PathVariable Long id,
-			@RequestBody SkillPositionPatchDTO patch) {
-		AbstractSkill skill = abstractSkillRepository.findByIdOrThrow(id);
-		abstractSkillRepository.save(patch.apply(skill));
-		return ResponseEntity.ok().build();
+	@DeleteMapping("{skill}/position")
+	@PreAuthorize("@authorisationService.canEditSkill(#skill)")
+	public void removeSkillFromCircuit(@PathEntity AbstractSkill skill) {
+		skillService.updatePosition(skill, null);
 	}
 
-	/**
-	 * Connects a skill to another.
-	 *
-	 * @param  parentId The parent skill id
-	 * @param  childId  The child skill id
-	 * @return          Empty 200 response
-	 */
-	@Transactional
-	@PostMapping("connect/{parentId}/{childId}")
-	@PreAuthorize("@authorisationService.canEditSkill(#parentId) or @authorisationService.canEditSkill(#childId)")
-	public ResponseEntity<Void> connectSkill(@PathVariable Long parentId, @PathVariable Long childId) {
-		AbstractSkill parent = abstractSkillRepository.findByIdOrThrow(parentId);
-		AbstractSkill child = abstractSkillRepository.findByIdOrThrow(childId);
-		parent.getChildren().add(child);
-		child.getParents().add(parent);
-		abstractSkillRepository.save(parent);
-		abstractSkillRepository.save(child);
-		return ResponseEntity.ok().build();
+	@PostMapping("connections/{from}/{to}")
+	@PreAuthorize("@authorisationService.canEditSkill(#from) and @authorisationService.canEditSkill(#to)")
+	public void connect(@PathEntity AbstractSkill from, @PathEntity AbstractSkill to) {
+		skillService.connect(from, to);
 	}
 
-	/**
-	 * Disconnect a skill from another.
-	 *
-	 * @param  parentId The parent skill id
-	 * @param  childId  The child skill id
-	 * @return          Empty 200 response
-	 */
-	@Transactional
-	@PostMapping("disconnect/{parentId}/{childId}")
-	@PreAuthorize("@authorisationService.canEditSkill(#parentId) or @authorisationService.canEditSkill(#childId)")
-	public ResponseEntity<Void> disconnectSkill(@PathVariable Long parentId, @PathVariable Long childId) {
-		AbstractSkill parent = abstractSkillRepository.findByIdOrThrow(parentId);
-		AbstractSkill child = abstractSkillRepository.findByIdOrThrow(childId);
-		parent.getChildren().remove(child);
-		child.getParents().remove(parent);
-		abstractSkillRepository.save(parent);
-		abstractSkillRepository.save(child);
-		return ResponseEntity.ok().build();
+	@DeleteMapping("connections/{from}/{to}")
+	@PreAuthorize("@authorisationService.canEditSkill(#from) and @authorisationService.canEditSkill(#to)")
+	public void disconnect(@PathEntity AbstractSkill from, @PathEntity AbstractSkill to) {
+		skillService.disconnect(from, to);
 	}
 
-	/**
-	 * Redirects to the correct skill when an external skill is clicked. The link should redirect to the skill
-	 * in the most recent edition which the person has last worked on. If none such edition exists, the most
-	 * recent edition is chosen. If there is no skill that the person can view, the current skills view is
-	 * rendered.
-	 *
-	 * @param  skillId    The id of the external skill.
-	 * @param  authPerson The currently logged in person.
-	 * @return            The redirection link to the module in which the correct skill is.
-	 */
-	@GetMapping("external/{skillId}")
-	@PreAuthorize("@authorisationService.canViewSkill(#skillId)")
-	public String redirectToExternalSkill(@PathVariable Long skillId,
-			@AuthenticatedPerson Person authPerson) {
-		ExternalSkill externalSkill = externalSkillRepository.findByIdOrThrow(skillId);
-		Skill redirectedSkill = skillService.recentActiveEditionForSkillOrLatest(authPerson.getId(),
-				externalSkill);
-
-		// If there is no valid skill to link to, return to the initial page
-		return "redirect:/module/"
-				+ (redirectedSkill != null ? (redirectedSkill.getSubmodule().getModule().getId() +
-						"#block-" + redirectedSkill.getId() + "-name") : externalSkill.getModule().getId());
-	}
 }

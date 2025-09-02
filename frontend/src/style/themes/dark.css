@@ -1,0 +1,91 @@
+[data-theme="dark"] {
+    /* Background */
+    --background-colour: color-mix(in oklab, var(--primary-colour) 25%, black);
+    --on-background-colour: color-mix(in oklab, var(--background-colour) 60%, white);
+
+    /* Glassy surfaces */
+    --glass-colour: color-mix(in srgb, black 25%, transparent);
+    --on-glass-colour: color-mix(in oklab, var(--primary-colour) 20%, white);
+    --on-glass-surface-colour: transparent;
+    --on-glass-surface-active-colour: color-mix(in srgb, color-mix(in oklab, var(--primary-colour) 50%, white) 20%, transparent);
+    --glass-border: none;
+    --glass-glint-colour: hsl(0deg 0% 100% / 0.2);
+
+    /* Columns */
+    --column-colour: color-mix(in srgb, var(--secondary-colour) 35%, transparent);
+
+    /* Groups */
+    --group-colour: color-mix(in oklab, var(--background-colour) 80%, white);
+    --on-group-colour: color-mix(in oklab, var(--group-colour) 60%, white);
+
+    /* Checkpoints */
+    --checkpoint-line-colour: color-mix(in srgb, var(--on-background-colour) 75%, transparent);
+    --checkpoint-surface-colour: color-mix(in srgb, white 10%, transparent);
+    --on-checkpoint-surface-colour: color-mix(in srgb, white 80%, var(--checkpoint-surface-colour));
+
+    --checkpoint-completed-line-colour: color-mix(in oklab, var(--accept-colour) 30%, var(--checkpoint-line-colour));
+    --checkpoint-completed-surface-colour: color-mix(in oklab, var(--accept-colour) 20%, var(--checkpoint-surface-colour));
+    --on-checkpoint-completed-surface-colour: var(--on-checkpoint-surface-colour);
+
+    /* Connections */
+    --connection-colour: color-mix(in oklab, var(--background-colour) 50%, white);
+    --connection-highlighted-colour: color-mix(in oklab, var(--connection-colour) 10%, var(--secondary-colour));
+
+    /* Blocks */
+    --block-colour: color-mix(in oklab, color-mix(in oklab, var(--primary-colour) 70%, white) 60%, black);
+    --block-completed-colour: color-mix(in oklab, white 90%, var(--block-colour));
+    --on-block-colour: hsl(0deg 0% 100%);
+    --on-block-divider-colour: color-mix(in oklab, var(--on-block-colour) 30%, var(--block-colour));
+    --on-block-completed-colour: var(--block-colour);
+
+    /* Items */
+    --on-block-task-completed-colour: color-mix(in oklab, var(--accept-colour) 70%, black);
+    --task-drop-indication-colour: color-mix(in srgb, var(--secondary-colour) 35%, transparent);
+    --choice-task-outline-colour: var(--on-block-divider-colour);
+    --choice-task-completed-outline-colour: color-mix(in oklab, var(--accept-colour) 80%, black);
+
+    /* Links */
+    --link-colour: color-mix(in oklab, var(--primary-colour) 40%, white);
+    --link-active-colour: color-mix(in oklab, var(--primary-colour) 70%, white);
+
+    /* Buttons */
+    --surface-border-radius: .5em;
+
+    --neutral-surface-colour: color-mix(in oklab, color-mix(in oklab, var(--primary-colour) 70%, white) 60%, black);
+    --neutral-surface-active-colour: var(--primary-surface-colour);
+    --on-neutral-surface-colour: hsl(0deg 0% 100%);
+    --on-neutral-surface-active-colour: var(--on-primary-surface-colour);
+    --neutral-surface-border: var(--primary-surface-border);
+    --neutral-surface-active-border-colour: var(--primary-surface-active-border-colour);
+
+    --primary-surface-colour: color-mix(in oklab, var(--primary-colour) 40%, white);
+    --primary-surface-active-colour: color-mix(in oklab, var(--primary-colour) 20%, white);
+    --on-primary-surface-colour: color-mix(in oklab, var(--primary-colour) 50%, black);
+    --on-primary-surface-active-colour: var(--on-primary-surface-colour);
+    --primary-surface-border: none;
+    --primary-surface-active-border-colour: transparent;
+
+    --error-surface-colour: color-mix(in oklab, var(--error-colour) 40%, white);
+    --error-surface-active-colour: color-mix(in oklab, var(--error-colour) 20%, white);
+    --on-error-surface-colour: color-mix(in oklab, var(--error-colour) 50%, black);
+    --on-error-surface-active-colour: var(--on-error-surface-colour);
+    --error-surface-border: none;
+    --error-surface-active-border-colour: transparent;
+
+    /* Footer */
+    --footer-colour: color-mix(in oklab, var(--background-colour) 80%, white);
+    --on-footer-colour: white;
+
+    /* Checkboxes */
+    --checkbox-border-colour: color-mix(in oklab, black 20%, white);
+    --checkbox-checked-colour: color-mix(in oklab, var(--accept-colour) 80%, black);
+    --on-checkbox-checked-colour: hsl(0deg 0% 100%);
+
+    /* Info banners */
+    --info-banner-colour: color-mix(in srgb, var(--secondary-colour) 50%, transparent);
+    --on-info-banner-colour: color-mix(in oklab, var(--secondary-colour) 25%, white);
+
+    /* Warning banners */
+    --warning-banner-colour: color-mix(in srgb, var(--warning-colour) 50%, transparent);
+    --on-warning-banner-colour: color-mix(in oklab, var(--warning-colour) 25%, white);
+}

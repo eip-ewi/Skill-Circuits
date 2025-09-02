@@ -30,137 +30,100 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import lombok.AllArgsConstructor;
+import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
+import nl.tudelft.librador.resolver.annotations.PathEntity;
+import nl.tudelft.skills.annotation.AuthenticatedSCPerson;
+import nl.tudelft.skills.dto.patch.EditionPatch;
+import nl.tudelft.skills.dto.view.EditionView;
+import nl.tudelft.skills.dto.view.EditionsView;
+import nl.tudelft.skills.dto.view.ManagedEditionView;
+import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelEditionView;
 import com.opencsv.CSVWriter;
 
 import nl.tudelft.librador.dto.view.View;
 import nl.tudelft.skills.dto.view.SCModuleSummaryDTO;
 import nl.tudelft.skills.dto.view.TaskStatsDTO;
 import nl.tudelft.skills.model.SCEdition;
-import nl.tudelft.skills.repository.EditionRepository;
-import nl.tudelft.skills.security.AuthorisationService;
+import nl.tudelft.skills.model.SCPerson;
+import nl.tudelft.skills.service.CopyService;
+import nl.tudelft.skills.service.EditionCircuitService;
 import nl.tudelft.skills.service.EditionService;
+import nl.tudelft.skills.service.ProgressService;
 
-@Controller
-@RequestMapping("edition")
+@RestController
+@AllArgsConstructor
+@RequestMapping("/api/editions")
 public class EditionController {
-	private EditionRepository editionRepository;
-	private EditionService editionService;
-	private AuthorisationService authorisationService;
-	private HttpSession session;
 
-	@Autowired
-	public EditionController(EditionRepository editionRepository, EditionService editionService,
-			AuthorisationService authorisationService,
-			HttpSession session) {
-		this.editionRepository = editionRepository;
-		this.editionService = editionService;
-		this.authorisationService = authorisationService;
-		this.session = session;
+	private final CopyService copyService;
+	private final EditionService editionService;
+	private final EditionCircuitService editionCircuitService;
+	private final ProgressService progressService;
 
+	@GetMapping
+	public EditionsView getEditions(@AuthenticatedSCPerson SCPerson person) {
+		return editionService.getSortedEditions(person);
 	}
 
-	/**
-	 * Gets the page for a single edition. This page contains a list with all modules in the edition.
-	 *
-	 * @param  id    The id of the edition
-	 * @param  view  The view, either modules or circuit
-	 * @param  model The model to add data to
-	 * @return       The page to load
-	 */
-	@GetMapping("{id}")
-	@PreAuthorize("@authorisationService.isAuthenticated() and @authorisationService.canViewEdition(#id)")
-	public String getEditionPage(@PathVariable Long id, @RequestParam(required = false) String view,
-			Model model) {
-		editionService.configureEditionModel(id, model, session);
-
-		if (authorisationService.canEditEdition(id) && view == null) {
-			view = "circuit";
-		}
-		return "circuit".equals(view) ? "edition/view"
-				: "edition/modules";
+	@GetMapping("open")
+	public List<EditionDetailsDTO> getOpenEditions(@AuthenticatedSCPerson SCPerson person) {
+		return editionService.getOpenEditions(person);
 	}
 
-	/**
-	 * Sets the edition to visible for students.
-	 *
-	 * @param  id The id of the edition
-	 * @return    The page to load
-	 */
-	@PostMapping("{id}/publish")
-	@Transactional
-	@PreAuthorize("@authorisationService.canPublishEdition(#id)")
-	public String publishEdition(@PathVariable Long id) {
-		SCEdition edition = editionRepository.findByIdOrThrow(id);
-		edition.setVisible(true);
-		editionRepository.save(edition);
-
-		return "redirect:/edition/" + id.toString();
+	@GetMapping("managed")
+	public List<ManagedEditionView> getManagedEditions(@AuthenticatedSCPerson SCPerson person) {
+		return editionService.getManagedEditions(person, false);
 	}
 
-	/**
-	 * Sets the edition to invisible for students.
-	 *
-	 * @param  id The id of the edition
-	 * @return    The page to load
-	 */
-
-	@PostMapping("{id}/unpublish")
-	@Transactional
-	@PreAuthorize("@authorisationService.canPublishEdition(#id)")
-	public String unpublishEdition(@PathVariable Long id) {
-		SCEdition edition = editionRepository.findByIdOrThrow(id);
-
-		edition.setVisible(false);
-		editionRepository.save(edition);
-
-		return "redirect:/edition/" + id.toString();
+	@GetMapping("{editionId}")
+	@PreAuthorize("@authorisationService.canViewEdition(#editionId)")
+	public EditionView getEdition(@PathVariable Long editionId) {
+		return editionService.getEdition(editionId);
 	}
 
-	/**
-	 * Copies one edition (i.e., modules, submodules etc.) to another.
-	 *
-	 * @param  copyTo   The id of the edition to copy to.
-	 * @param  copyFrom The id of the edition to copy from.
-	 * @return          Redirect to the editions page that was copied to.
-	 */
-	@PostMapping("{copyTo}/copy/{copyFrom}")
-	@PreAuthorize("@authorisationService.canEditEdition(#copyTo) and @authorisationService.canViewEdition(#copyFrom)")
-	public String copyEdition(@PathVariable Long copyTo, @PathVariable Long copyFrom) {
-		editionService.copyEdition(copyTo, copyFrom);
-
-		return "redirect:/edition/" + copyTo.toString();
+	@GetMapping("{editionId}/circuit")
+	@PreAuthorize("@authorisationService.canViewEdition(#editionId)")
+	public EditionLevelEditionView getEditionCircuit(@AuthenticatedSCPerson SCPerson person,
+			@PathVariable Long editionId) {
+		return editionCircuitService.getEditionCircuit(editionId, person);
 	}
 
-	/**
-	 * Toggles student mode for a specific edition.
-	 *
-	 * @param  id The id of the edition
-	 * @return    The edition page
-	 */
-	@PostMapping("{id}/studentmode")
-	public String toggleStudentMode(@PathVariable Long id) {
-		Boolean currentStudentMode = (Boolean) session.getAttribute("student-mode-" + id);
-		session.setAttribute("student-mode-" + id,
-				currentStudentMode == null || !currentStudentMode);
-		return "redirect:/edition/{id}";
+	@PostMapping("{editionId}/join")
+	@PreAuthorize("@authorisationService.canViewEdition(#editionId)")
+	public void joinEdition(@AuthenticatedSCPerson SCPerson person, @PathVariable Long editionId) {
+		editionService.addPersonToEdition(person, editionId);
 	}
 
-	/**
-	 * Gets the modules of an edition.
-	 *
-	 * @param  id The id of the edition
-	 * @return    The list of modules
-	 */
-	@GetMapping("{id}/modules")
-	@PreAuthorize("@authorisationService.canGetModulesOfEdition(#id)")
-	public @ResponseBody List<SCModuleSummaryDTO> getModulesOfEdition(@PathVariable Long id) {
-		return View.convert(new ArrayList<>(editionRepository.findByIdOrThrow(id).getModules()).stream()
-				.sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).toList(),
-				SCModuleSummaryDTO.class);
+	@PatchMapping("{edition}")
+	@PreAuthorize("@authorisationService.canEditEditionCircuit(#edition.id)")
+	public void patchEdition(@PathEntity SCEdition edition, @RequestBody EditionPatch patch) {
+		editionService.patchEdition(edition, patch);
+	}
+
+	@PostMapping("{edition}/editors/{editorId}")
+	@PreAuthorize("@authorisationService.canManageEditionEditors(#edition.id)")
+	public void addEditor(@PathEntity SCEdition edition, @PathVariable Long editorId) {
+		editionService.addEditor(edition, editorId);
+	}
+
+	@DeleteMapping("{edition}/editors/{editor}")
+	@PreAuthorize("@authorisationService.canManageEditionEditors(#edition.id)")
+	public void removeEditor(@PathEntity SCEdition edition, @PathEntity SCPerson editor) {
+		editionService.removeEditor(edition, editor);
+	}
+
+	@PostMapping("{edition}/reset-progress")
+	public void resetProgress(@AuthenticatedSCPerson SCPerson person, @PathEntity SCEdition edition) {
+		progressService.resetProgress(edition, person);
+	}
+
+	@PostMapping("{original}/copy-to/{copy}")
+	@PreAuthorize("@authorisationService.canViewEdition(#original.id) and @authorisationService.canEditEditionCircuit(#copy.id)")
+	public void copyEditionTo(@PathEntity SCEdition original, @PathEntity SCEdition copy) {
+		copyService.copyEdition(original, copy);
 	}
 
 	@GetMapping(value = "{id}/teacher_stats", produces = "text/csv")

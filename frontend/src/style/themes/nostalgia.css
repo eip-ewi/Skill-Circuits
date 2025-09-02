@@ -1,0 +1,142 @@
+[data-theme="nostalgia"] {
+    --green: #2e8a00;
+    --green2: #8fbc8f;
+    --blue: #0000ff;
+    --red: #cc0000;
+    --orange: #cc6600;
+    --grey-500: #b3b3b3;
+    --grey-700: #d9d9d9;
+
+    --shadow-colour: transparent;
+
+    /* Background */
+    --background-colour: #f7f7f7;
+    --on-background-colour: black;
+
+    /* Glassy surfaces */
+    --glass-colour: white;
+    --on-glass-colour: black;
+    --on-glass-surface-colour: transparent;
+    --on-glass-surface-active-colour: var(--green);
+    --glass-border: 1px solid black;
+    --glass-glint-colour: transparent;
+
+    /* Columns */
+    --column-colour: color-mix(in srgb, var(--secondary-colour) 15%, transparent);
+
+    /* Groups */
+    --group-colour: white;
+    --group-border-colour: black;
+    --group-border-radius: 0;
+    --on-group-colour: var(--green2);
+
+    /* Checkpoints */
+    --checkpoint-surface-border: 1px solid black;
+    --checkpoint-surface-border-radius: 0;
+
+    --checkpoint-line-colour: transparent;
+    --checkpoint-line-thickness: 1px;
+    --checkpoint-line-border: 1px dashed black;
+    --checkpoint-line-border-radius: 0;
+
+    --checkpoint-surface-colour: white;
+    --on-checkpoint-surface-colour: black;
+
+    --checkpoint-completed-line-colour: var(--green);
+
+    --checkpoint-completed-surface-colour: var(--green);
+    --on-checkpoint-completed-surface-colour: white;
+
+    /* Connections */
+    --connection-colour: var(--grey-500);
+    --connection-radius: 0;
+    --connection-width: .125em;
+    --connection-highlighted-colour: var(--blue);
+    --connection-highlighted-width: .125em;
+
+    /* Blocks */
+    --block-colour: white;
+    --block-completed-colour: white;
+    --on-block-colour: black;
+    --on-block-divider-colour: var(--grey-700);
+    --on-block-completed-colour: black;
+    --block-border: 1px solid black;
+    --block-border-radius: 0;
+    --block-completed-border: 2px solid var(--green);
+    --expanded-block-border: 0;
+    --expanded-block-border-radius: 0;
+    --expanded-block-background-blur: 0.5rem;
+    --expanded-block-background-colour: rgba(0 0 0 / 0.5);
+
+    /* Items */
+    --on-block-task-completed-colour: var(--green);
+    --choice-task-outline-colour: var(--on-block-divider-colour);
+    --choice-task-completed-outline-colour: var(--green);
+    --choice-task-outline-radius: 0;
+    --task-drop-indication-colour: rgba(1 1 1 / 0.1);
+    --task-drop-indication-border: 1px dotted rgba(0 0 0 / 0.1);
+    --task-drop-indication-border-radius: 0;
+
+    /* Links */
+    --link-colour: color-mix(in oklab, var(--primary-colour) 90%, white);
+    --link-active-colour: color-mix(in oklab, var(--primary-colour) 80%, black);
+
+    /* Buttons */
+    --surface-border-radius: 0;
+
+    --neutral-surface-colour: white;
+    --neutral-surface-active-colour: var(--green);
+    --on-neutral-surface-colour: black;
+    --on-neutral-surface-active-colour: white;
+    --neutral-surface-border: var(--primary-surface-border);
+    --neutral-surface-active-border-colour: var(--primary-surface-active-border-colour);
+
+    --primary-surface-colour: white;
+    --primary-surface-active-colour: var(--green);
+    --on-primary-surface-colour: black;
+    --on-primary-surface-active-colour: white;
+    --primary-surface-border: 1px solid black;
+    --primary-surface-active-border-colour: black;
+
+    --error-surface-colour: white;
+    --error-surface-active-colour: var(--red);
+    --on-error-surface-colour: black;
+    --on-error-surface-active-colour: white;
+    --error-surface-border: 1px solid black;
+    --error-surface-active-border-colour: black;
+
+    /* Header */
+    --header-border-radius: 0;
+
+    /* Footer */
+    --footer-colour: white;
+    --on-footer-colour: black;
+    --footer-border-top: 1px solid black;
+
+    /* Panels */
+    --panel-border-radius: 0;
+    --panel-button-border-radius: 0;
+
+    /* Checkboxes */
+    --checkbox-border: 1px solid black;
+    --checkbox-border-radius: 0;
+    --checkbox-checked-colour: var(--green);
+    --on-checkbox-checked-colour: white;
+
+    /* Dropdowns */
+    --dropdown-border-radius: 0;
+
+    /* Selects */
+    --option-border-radius: 0;
+    --option-active-colour: var(--green);
+    --on-option-active-colour: white;
+
+    /* Warning banners */
+    --warning-banner-colour: var(--orange);
+    --on-warning-banner-colour: white;
+    --warning-banner-border: none;
+    --warning-banner-border-radius: 0;
+
+    /* Font */
+    --main-font-family: noto sans, system-ui, sans-serif;
+}

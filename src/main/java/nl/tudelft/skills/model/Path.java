@@ -20,10 +20,10 @@ package nl.tudelft.skills.model;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @Data
@@ -34,11 +34,21 @@ import lombok.*;
 public class Path {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@NotBlank
 	private String name;
+
+	@NotNull
+	@Builder.Default
+	private Integer idx = 0;
+
+	@Lob
+	@NotNull
+	@Size(max = 8096)
+	@Column(columnDefinition = "TEXT")
+	private String description;
 
 	@NotNull
 	@ManyToOne
@@ -51,5 +61,12 @@ public class Path {
 	@EqualsAndHashCode.Exclude
 	@ManyToMany(mappedBy = "paths")
 	private Set<Task> tasks = new HashSet<>();
+
+	@NotNull
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@OneToMany(mappedBy = "path", cascade = CascadeType.REMOVE)
+	private Set<PathPreference> preferences = new HashSet<>();
 
 }

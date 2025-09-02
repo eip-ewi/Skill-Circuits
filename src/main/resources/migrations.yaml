@@ -1719,6 +1719,7 @@ databaseChangeLog:
       changes:
         - dropTable:
             tableName: usage_data
+
 # Refactor tasks for introduction of choice tasks
   - changeSet:
       id: introduce-choice-tasks
@@ -1937,3 +1938,753 @@ databaseChangeLog:
             referencedColumnNames: id
             referencedTableName: regular_task
             validate: true
+
+
+  ####################
+  # Version 2526.0.0 #
+  ####################
+
+  #
+  # Remove inventories
+  #
+  - changeSet:
+      id: remove-inventories
+      author: ruben
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: inventory_inventory_items
+            constraintName: FK4gwfo42iccppofjxx7yndoh78 # inventory_inventory_items.inventory_id -> inventory.id
+        - dropForeignKeyConstraint:
+            baseTableName: inventory_inventory_items
+            constraintName: FKshbh4txmrh1choxhfe89hqqnq # inventory_inventory_items.items_id -> inventory_item.id
+        - dropForeignKeyConstraint:
+            baseTableName: scperson
+            constraintName: FKo3yf33nocqc5g4krhvo1oq8dy # scperson.inventory_id -> inventory.id
+        - dropColumn:
+            columnName: inventory_id
+            tableName: scperson
+        - dropTable:
+            tableName: inventory_inventory_items
+        - dropTable:
+            tableName: inventory
+        - dropTable:
+            tableName: inventory_item
+
+  #
+  # Remove default paths
+  #
+  - changeSet:
+      id: remove-default-paths
+      author: ruben
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: scedition
+            constraintName: FKmh9dharmdw9id0ky3sectj1c1 # scedition.default_path_id -> path.id
+        - dropColumn:
+            columnName: default_path_id
+            tableName: scedition
+
+  #
+  # Profiles get a 'View mode'
+  #
+  - changeSet:
+      id: add-view-mode
+      author: ruben
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  defaultValue: VIEWER
+                  name: view_mode
+                  type: ENUM('VIEWER', 'EDITOR', 'ADMIN')
+            tableName: scperson
+
+  #
+  # External skills can also be essential
+  #
+  - changeSet:
+      id: external-skills-essential
+      author: ruben
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: essential
+                  type: BIT
+                  defaultValueBoolean: false
+            tableName: abstract_skill
+        # move essentiality from skills to abstract skills
+        - sql:
+            dbms: mariadb,mysql
+            sql: update abstract_skill inner join skill on abstract_skill.id = skill.id set abstract_skill.essential = skill.essential;
+        - dropColumn:
+            columnName: essential
+            tableName: skill
+
+  #
+  # Paths get a description
+  #
+  - changeSet:
+      id: add-path-description
+      author: ruben
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: description
+                  type: TEXT
+            tableName: path
+
+  #
+  # Blocks do not specify their rows anymore
+  #
+  - changeSet:
+      id: remove-block-rows
+      author: ruben
+      changes:
+        - dropColumn:
+            columnName: y_pos
+            tableName: abstract_skill
+        - dropColumn:
+            columnName: y_pos
+            tableName: submodule
+
+  #
+  # Blocks can be unplaced by having a null column
+  #
+  - changeSet:
+      id: allow-null-columns
+      author: ruben
+      changes:
+        - dropNotNullConstraint:
+            columnDataType: int
+            columnName: x_pos
+            tableName: abstract_skill
+        - dropNotNullConstraint:
+            columnDataType: int
+            columnName: x_pos
+            tableName: submodule
+
+  #
+  # Checkpoints can be null
+  #
+  - changeSet:
+      id: allow-null-checkpoints
+      author: ruben
+      changes:
+        - dropNotNullConstraint:
+            columnDataType: bigint
+            columnName: checkpoint_id
+            tableName: skill
+
+  #
+  # Task types are now stored as strings
+  #
+  - changeSet:
+      id: store-task-type-as-strings
+      author: ruben
+      changes:
+        - renameColumn:
+            oldColumnName: type
+            newColumnName: type_index
+            columnDataType: int
+            tableName: task_info
+        - addColumn:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: type
+                  type: ENUM('READING', 'VIDEO', 'QUIZ', 'IMPLEMENTATION', 'EXERCISE', 'COLLABORATION', 'EXPERIMENT', 'CLASSROOM')
+                  defaultValue: READING
+            tableName: task_info
+        - sql:
+            sql: update task_info set type = 'READING' where type_index = 0;
+        - sql:
+            sql: update task_info set type = 'VIDEO' where type_index = 1;
+        - sql:
+            sql: update task_info set type = 'QUIZ' where type_index = 2;
+        - sql:
+            sql: update task_info set type = 'IMPLEMENTATION' where type_index = 3;
+        - sql:
+            sql: update task_info set type = 'EXERCISE' where type_index = 4;
+        - sql:
+            sql: update task_info set type = 'COLLABORATION' where type_index = 5;
+        - sql:
+            sql: update task_info set type = 'EXPERIMENT' where type_index = 6;
+        - sql:
+            sql: update task_info set type = 'CLASSROOM' where type_index = 7;
+        - dropColumn:
+            columnName: type_index
+            tableName: task_info
+
+  #
+  # Clicked links are linked to task info
+  #
+  - changeSet:
+      id: link-clicked-links-to-task-info
+      author: ruben
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: clicked_link
+            constraintName: FK6r0ixb6exd6dof00vqfpgeocw
+        - sql:
+            dbms: mysql,mariadb
+            sql: update clicked_link inner join regular_task on clicked_link.task_id = regular_task.id inner join task_info on task_info.task_id = regular_task.id set clicked_link.task_id = task_info.id;
+        - addForeignKeyConstraint:
+            baseColumnNames: task_id
+            baseTableName: clicked_link
+            constraintName: fk_clicked_link_to_task_info
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: task_info
+            validate: true
+
+  #
+  # Task completion is linked to task info
+  #
+  - changeSet:
+      id: link-task-completion-to-task-info
+      author: ruben
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: task_completion
+            constraintName: FKa6pqa4rvd2kxcrw2tfqeq9fwn
+        - sql:
+            dbms: mysql,mariadb
+            sql: update task_completion inner join regular_task on task_completion.task_id = regular_task.id inner join task_info on task_info.task_id = regular_task.id set task_completion.task_id = task_info.id;
+        - addForeignKeyConstraint:
+            baseColumnNames: task_id
+            baseTableName: task_completion
+            constraintName: fk_task_completion_to_task_info
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: task_info
+            validate: true
+
+  #
+  # No keeping track of skills modified anymore, only tasks
+  #
+  - changeSet:
+      id: remove-skills-modified
+      author: ruben
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: scperson_skills_modified
+            constraintName: FKeoxxf3njxk8axo1mjbfu3m7hp
+        - dropForeignKeyConstraint:
+            baseTableName: scperson_skills_modified
+            constraintName: FKsullxuw6a27c690fnuopkhape
+        - dropTable:
+            tableName: scperson_skills_modified
+
+  #
+  # Add bookmarks
+  #
+  - changeSet:
+      id: add-bookmarks
+      author: ruben
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  name: person_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: dtype
+                  type: VARCHAR(31)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: last_modified
+                  type: TIMESTAMP
+            tableName: bookmark_list
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                  name: skills_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                  name: on_lists_id
+                  type: BIGINT
+            tableName: bookmark_list_skills
+        - createIndex:
+            columns:
+              - column:
+                  name: skills_id
+            indexName: fk_bookmark_list_to_skills
+            tableName: bookmark_list_skills
+        - addForeignKeyConstraint:
+            baseColumnNames: skills_id
+            baseTableName: bookmark_list_skills
+            constraintName: fk_bookmark_list_to_skills
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: skill
+            validate: true
+        - createIndex:
+            columns:
+              - column:
+                  name: on_lists_id
+            indexName: fk_skill_to_on_bookmark_list
+            tableName: bookmark_list_skills
+        - addForeignKeyConstraint:
+            baseColumnNames: on_lists_id
+            baseTableName: bookmark_list_skills
+            constraintName: fk_skill_to_on_bookmark_list
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: bookmark_list
+            validate: true
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                  name: tasks_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                  name: on_lists_id
+                  type: BIGINT
+            tableName: bookmark_list_tasks
+        - createIndex:
+            columns:
+              - column:
+                  name: tasks_id
+            indexName: fk_bookmark_list_to_tasks
+            tableName: bookmark_list_tasks
+        - addForeignKeyConstraint:
+            baseColumnNames: tasks_id
+            baseTableName: bookmark_list_tasks
+            constraintName: fk_bookmark_list_to_tasks
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: task_info
+            validate: true
+        - createIndex:
+            columns:
+              - column:
+                  name: on_lists_id
+            indexName: fk_task_to_on_bookmark_list
+            tableName: bookmark_list_tasks
+        - addForeignKeyConstraint:
+            baseColumnNames: on_lists_id
+            baseTableName: bookmark_list_tasks
+            constraintName: fk_task_to_on_bookmark_list
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: bookmark_list
+            validate: true
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                  name: choice_tasks_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                  name: on_lists_id
+                  type: BIGINT
+            tableName: bookmark_list_choice_tasks
+        - createIndex:
+            columns:
+              - column:
+                  name: choice_tasks_id
+            indexName: fk_bookmark_list_to_choice_tasks
+            tableName: bookmark_list_choice_tasks
+        - addForeignKeyConstraint:
+            baseColumnNames: choice_tasks_id
+            baseTableName: bookmark_list_choice_tasks
+            constraintName: fk_bookmark_list_to_choice_tasks
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: choice_task
+            validate: true
+        - createIndex:
+            columns:
+              - column:
+                  name: on_lists_id
+            indexName: fk_choice_task_to_on_bookmark_list
+            tableName: bookmark_list_choice_tasks
+        - addForeignKeyConstraint:
+            baseColumnNames: on_lists_id
+            baseTableName: bookmark_list_choice_tasks
+            constraintName: fk_choice_task_to_on_bookmark_list
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: bookmark_list
+            validate: true
+
+  #
+  # Bookmark lists for hidden skills
+  #
+  - changeSet:
+      id: add-bookmark-lists-for-hidden-skills
+      author: ruben (generated)
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: requirements_id
+                  type: BIGINT
+            tableName: skill
+        - createIndex:
+            columns:
+              - column:
+                  name: requirements_id
+            indexName: fk_hidden_skill_to_requirements
+            tableName: skill
+        - addForeignKeyConstraint:
+            baseColumnNames: requirements_id
+            baseTableName: skill
+            constraintName: fk_hidden_skill_to_requirements
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: bookmark_list
+            validate: true
+        - dropForeignKeyConstraint:
+            baseTableName: task_required_for
+            constraintName: FKog5wjbi2d5d2f9i3kl7cyu58a
+        - dropForeignKeyConstraint:
+            baseTableName: task_required_for
+            constraintName: FKtjvvl1ice8hcviw4lstna196b
+        # Add a column to bookmark list, keeping track for which hidden skill it is
+        - addColumn:
+            columns:
+              - column:
+                  name: hidden_skill_id
+                  type: BIGINT
+            tableName: bookmark_list
+        # Add a bookmark list for every hidden skill
+        - sql:
+            sql: insert into bookmark_list (dtype, last_modified, hidden_skill_id) select 'HiddenSkillBookmarkList', NOW(), id from skill where skill.hidden = true;
+        # Connect the hidden skills to their lists
+        - sql:
+            dbms: mysql,mariadb
+            sql: update skill inner join bookmark_list on bookmark_list.hidden_skill_id = skill.id set skill.requirements_id = bookmark_list.id;
+        # Remove temporary column
+        - dropColumn:
+            columnName: hidden_skill_id
+            tableName: bookmark_list
+        # Update the old requirements table to use task info IDs
+        - sql:
+            dbms: mysql,mariadb
+            sql: update task_required_for inner join regular_task on regular_task.id = task_required_for.required_tasks_id inner join task_info on task_info.task_id = regular_task.id set task_required_for.required_tasks_id = task_info.id;
+        # Add all requirements to the correct list
+        - sql:
+            dbms: mysql,mariadb
+            sql: insert into bookmark_list_tasks select task_required_for.required_tasks_id, skill.requirements_id from task_required_for inner join skill on task_required_for.required_for_id = skill.id;
+        - dropTable:
+            tableName: task_required_for
+
+  #
+  # Add edition editor role
+  #
+  - changeSet:
+      id: add-edition-editors
+      author: ruben
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                  name: editors_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                  name: editor_in_editions_id
+                  type: BIGINT
+            tableName: scedition_editors
+        - createIndex:
+            columns:
+              - column:
+                  name: editor_in_editions_id
+            indexName: fk_edition_to_editors
+            tableName: scedition_editors
+        - addForeignKeyConstraint:
+            baseColumnNames: editor_in_editions_id
+            baseTableName: scedition_editors
+            constraintName: fk_edition_to_editors
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: scedition
+            validate: true
+        - createIndex:
+            columns:
+              - column:
+                  name: editors_id
+            indexName: fk_editor_to_editions
+            tableName: scedition_editors
+        - addForeignKeyConstraint:
+            baseColumnNames: editors_id
+            baseTableName: scedition_editors
+            constraintName: fk_editor_to_editions
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: scperson
+            validate: true
+
+  #
+  # Add ordering to paths
+  #
+  - changeSet:
+      id: order-paths
+      author: ruben
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: idx
+                  type: INT
+                  defaultValueNumeric: 0
+            tableName: path
+
+  #
+  # Task info can also be a subtask of a choice task, in which case it has no regular task
+  #
+  - changeSet:
+      id: connect-choice-task-to-task-info
+      author: ruben
+      changes:
+        - dropNotNullConstraint:
+            columnDataType: bigint
+            columnName: task_id
+            tableName: task_info
+        - addColumn:
+            columns:
+              - column:
+                  name: choice_task_id
+                  type: BIGINT
+            tableName: task_info
+        - createIndex:
+            columns:
+              - column:
+                  name: choice_task_id
+            indexName: fk_subtask_to_choice_task
+            tableName: task_info
+        - addForeignKeyConstraint:
+            baseColumnNames: choice_task_id
+            baseTableName: task_info
+            constraintName: fk_subtask_to_choice_task
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: choice_task
+            validate: true
+
+  #
+  # Choice task names are blank, not null
+  #
+  - changeSet:
+      id: disallow-null-task-names
+      author: ruben
+      changes:
+        - addNotNullConstraint:
+            columnDataType: varchar(255)
+            columnName: name
+            tableName: choice_task
+            validate: true
+
+  #
+  # Change sequence to auto increment ID generation
+  #
+  - changeSet:
+      id: use-auto-increment-ids
+      author: ruben (generated)
+      changes:
+        - sql:
+            sql: drop table if exists hibernate_sequence;
+        - sql:
+            dbms: mysql,mariadb
+            sql: SET FOREIGN_KEY_CHECKS=0;
+        - addAutoIncrement:
+            columnName: id
+            columnDataType: bigint
+            tableName: abstract_skill
+        - addAutoIncrement:
+            columnName: id
+            columnDataType: bigint
+            tableName: checkpoint
+        - addAutoIncrement:
+            columnName: id
+            columnDataType: bigint
+            tableName: clicked_link
+        - addAutoIncrement:
+            columnName: id
+            columnDataType: bigint
+            tableName: path
+        - addAutoIncrement:
+            columnName: id
+            columnDataType: bigint
+            tableName: path_preference
+        - addAutoIncrement:
+            columnName: id
+            columnDataType: bigint
+            tableName: scmodule
+        - addAutoIncrement:
+            columnName: id
+            columnDataType: bigint
+            tableName: submodule
+        - addAutoIncrement:
+            columnName: id
+            columnDataType: bigint
+            tableName: task
+        - addAutoIncrement:
+            columnName: id
+            columnDataType: bigint
+            tableName: track
+        - addAutoIncrement:
+            columnName: id
+            columnDataType: bigint
+            tableName: user_version
+        - sql:
+            dbms: mysql,mariadb
+            sql: SET FOREIGN_KEY_CHECKS=1;
+
+  #
+  # Add a tasks removed table
+  #
+  - changeSet:
+      id: add-tasks-removed
+      author: ruben
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                  name: persons_that_removed_task_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                  name: tasks_removed_id
+                  type: BIGINT
+            tableName: scperson_tasks_removed
+        - createIndex:
+            columns:
+              - column:
+                  name: tasks_removed_id
+            indexName: fk_person_to_removed_task
+            tableName: scperson_tasks_removed
+        - addForeignKeyConstraint:
+            baseColumnNames: tasks_removed_id
+            baseTableName: scperson_tasks_removed
+            constraintName: fk_person_to_removed_task
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: task
+            validate: true
+        - createIndex:
+            columns:
+              - column:
+                  name: persons_that_removed_task_id
+            indexName: fk_removed_task_to_person
+            tableName: scperson_tasks_removed
+        - addForeignKeyConstraint:
+            baseColumnNames: persons_that_removed_task_id
+            baseTableName: scperson_tasks_removed
+            constraintName: fk_removed_task_to_person
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: scperson
+            validate: true
+
+  #
+  # Everyone gets a 'new bookmarks' list
+  #
+  - changeSet:
+      id: new-bookmarks-for-existing-users
+      author: ruben
+      changes:
+        - sql:
+            sql: insert into bookmark_list (person_id, name, dtype, last_modified) select id, 'My bookmarks', 'PersonalBookmarkList', NOW() from scperson;
+
+  #
+  # Reverse task ordering
+  #
+  - changeSet:
+      id: reverse-task-ordering
+      author: ruben
+      changes:
+        - sql:
+          - sql: update task join (select id, row_number() over (partition by skill_id order by idx desc) - 1 as idx from task) as updated on task.id = updated.id set task.idx = updated.idx;
