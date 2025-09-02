@@ -9,6 +9,7 @@
     import TaskIconsComponent from "../item/TaskIconsComponent.svelte";
     import {getItemsOnPath} from "../../../logic/edition/active_path.svelte";
     import {isSkillItemRevealed} from "../../../logic/circuit/unlocked_skills.svelte";
+    import {getCheckpoint, getVisibleCheckpoints} from "../../../logic/edition/edition.svelte";
 
     let { block }: { block: Block } = $props();
 

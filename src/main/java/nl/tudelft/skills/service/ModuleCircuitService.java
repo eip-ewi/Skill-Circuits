@@ -82,10 +82,9 @@ public class ModuleCircuitService {
 	}
 
     public Long getCheckpointIdInEdition(AbstractSkill abstractSkill) {
-        SCEdition edition = abstractSkill.getSubmodule().getModule().getEdition();
         return switch (abstractSkill) {
             case Skill skill -> skill.getCheckpoint() == null ? null : skill.getCheckpoint().getId();
-            case ExternalSkill externalSkill -> findClosestNextCheckpoint(externalSkill, edition.getId()).map(Checkpoint::getId).orElse(null);
+            case ExternalSkill externalSkill -> findClosestNextCheckpoint(externalSkill, externalSkill.getModule().getEdition().getId()).map(Checkpoint::getId).orElse(null);
             default -> null; // Unreachable
         };
     }
