@@ -62,6 +62,7 @@ public class CopyService {
 				.collect(Collectors.toList()));
 		copy.setModules(original.getModules().stream().map(module -> copyModule(module, copy, copyInfo))
 				.collect(Collectors.toSet()));
+        copyExternalSkills(copyInfo);
 		copyConnections(copyInfo);
 		copyHiddenSkillRequirements(copyInfo);
 
@@ -97,14 +98,20 @@ public class CopyService {
 				.edition(toEdition)
 				.build();
 		final SCModule savedCopy = moduleRepository.save(copy);
+        copyInfo.setModuleCopy(original, savedCopy);
 		toEdition.getModules().add(savedCopy);
 		savedCopy.setSubmodules(original.getSubmodules().stream()
 				.map(submodule -> copySubmodule(submodule, savedCopy, copyInfo)).collect(Collectors.toSet()));
-		savedCopy.setExternalSkills(original.getExternalSkills().stream()
-				.map(externalSkill -> copyExternalSkill(externalSkill, savedCopy, copyInfo))
-				.collect(Collectors.toSet()));
 		return savedCopy;
 	}
+
+    private void copyExternalSkills(CopyInfo copyInfo) {
+        copyInfo.getCopiedModules().forEach((original, copy) -> {
+            copy.setExternalSkills(original.getExternalSkills().stream()
+                    .map(externalSkill -> copyExternalSkill(externalSkill, copy, copyInfo))
+                    .collect(Collectors.toSet()));
+        });
+    }
 
 	private Submodule copySubmodule(Submodule original, SCModule toModule, CopyInfo copyInfo) {
 		Submodule copy = Submodule.builder()
@@ -243,11 +250,20 @@ public class CopyService {
 
 	private static class CopyInfo {
 
+        private final Map<SCModule, SCModule> moduleMap = new HashMap<>();
 		private final Map<Checkpoint, Checkpoint> checkpointMap = new HashMap<>();
 		private final Map<Path, Path> pathMap = new HashMap<>();
 		private final Map<AbstractSkill, AbstractSkill> skillMap = new HashMap<>();
 		private final Map<Task, Task> taskMap = new HashMap<>();
 		private final Map<TaskInfo, TaskInfo> taskInfoMap = new HashMap<>();
+
+        public void setModuleCopy(SCModule original, SCModule copy) {
+            moduleMap.put(original, copy);
+        }
+
+        public Map<SCModule, SCModule> getCopiedModules() {
+            return moduleMap;
+        }
 
 		public void setCheckpointCopy(Checkpoint original, Checkpoint copy) {
 			checkpointMap.put(original, copy);
