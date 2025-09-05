@@ -1,0 +1,68 @@
+skill-circuits:
+  cache:
+    person-timeout: 300
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  liquibase:
+    change-log: "classpath:/changelog-master.yaml"
+    enabled: true
+  datasource:
+    url: jdbc:mysql://database:3306/skills
+    username: skills
+    password: skills
+  mail:
+    default-encoding: UTF-8
+    host: localhost
+    port: 25
+    username:
+    password:
+    protocol: smtp
+    test-connection: false
+    properties.mail.smtp:
+      auth: true
+      starttls.enable: true
+      ssl.trust: smtp.server
+
+server:
+  port: 8084
+
+logging:
+  level:
+    ROOT: info
+
+labrador:
+  core:
+    url: http://localhost:8082
+  sso:
+    type: in_memory
+    login-path: /login
+    logout-path: /logout
+    mem:
+      saved-request-aware: true
+      success-url: /
+
+otel:
+  exporter:
+    otlp:
+      endpoint: http://jaeger:4318
+  resource:
+    attributes:
+      deployment.environment: production
+      service:
+        name: skill-circuits
+        namespace: labrador
+  logs:
+    exporter: none
+  metrics:
+    exporter: none
+  traces:
+    sampler: traceidratio
+    sampler.arg: 1
+  sdk:
+    disabled: false
+
+sentry:
+  enabled: false

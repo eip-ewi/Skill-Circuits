@@ -21,8 +21,16 @@ skill-circuits:
     person-timeout: 300
 
 spring:
+  profiles:
+    active: test
+
   liquibase:
     change-log: "classpath:/changelog-master.yaml"
+    enabled: true
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
 
   h2:
     console:

@@ -23,11 +23,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import nl.tudelft.skills.model.AbstractSkill;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.AllArgsConstructor;
+import nl.tudelft.skills.model.AbstractSkill;
 import nl.tudelft.skills.model.SCPerson;
 import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.TaskInfo;
@@ -58,7 +58,8 @@ public class HiddenSkillRevealingService {
 		}
 
 		Set<Long> completedTaskIds = taskCompletionRepository.findAllCompletedTaskIdsForPerson(person);
-        Set<Long> revealedSkillIds = person.getSkillsRevealed().stream().map(AbstractSkill::getId).collect(Collectors.toSet());
+		Set<Long> revealedSkillIds = person.getSkillsRevealed().stream().map(AbstractSkill::getId)
+				.collect(Collectors.toSet());
 		Set<Skill> newRevealedSkills = candidates.stream()
 				.filter(candidate -> isListCompleted(candidate, completedTaskIds, revealedSkillIds))
 				.map(HiddenSkillBookmarkList::getSkill).collect(Collectors.toSet());
@@ -69,7 +70,8 @@ public class HiddenSkillRevealingService {
 		return newRevealedSkills;
 	}
 
-	public boolean isListCompleted(HiddenSkillBookmarkList list, Set<Long> completedTaskIds, Set<Long> revealedSkillIds) {
+	public boolean isListCompleted(HiddenSkillBookmarkList list, Set<Long> completedTaskIds,
+			Set<Long> revealedSkillIds) {
 		if (list.getTasks().stream().anyMatch(task -> !completedTaskIds.contains(task.getId()))) {
 			return false;
 		}
@@ -78,7 +80,8 @@ public class HiddenSkillRevealingService {
 			return false;
 		}
 		if (list.getSkills().stream()
-				.anyMatch(skill -> !skillStateService.isSkillCompleted(skill, completedTaskIds, revealedSkillIds))) {
+				.anyMatch(skill -> !skillStateService.isSkillCompleted(skill, completedTaskIds,
+						revealedSkillIds))) {
 			return false;
 		}
 		return true;

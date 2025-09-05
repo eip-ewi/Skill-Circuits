@@ -1,0 +1,44 @@
+services:
+  database:
+    image: mysql:9.0.1
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    volumes:
+      - ./src/test/resources/mysql/0_before_start:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+  jaeger:
+    image: cr.jaegertracing.io/jaegertracing/jaeger:2.10.0
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+      - "4318:4318"
+      - "5778:5778"
+      - "9411:9411"
+  skills:
+    image: skill-circuits:latest
+    ports:
+      - "8084:8084"
+    depends_on:
+      database:
+        condition: service_healthy
+    links:
+      - database
+      - jaeger
+    environment:
+      - TZ=Europe/Amsterdam
+      - SKILLS_PROFILE=e2e
+    volumes:
+      - ./src/test/resources/application.properties:/var/www/skills/application-e2e.properties
+      - ./src/test/resources/mysql/1_after_labracore:/initdb.d
+
+volumes:
+  database:
+    driver: local
+  skills:
+    driver: local
