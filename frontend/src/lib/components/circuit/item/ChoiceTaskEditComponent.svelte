@@ -22,7 +22,17 @@
     }
 
     async function editMinTasks(event: Event) {
-        const newMinTasks = parseInt((event.target as HTMLInputElement).value);
+        const input = event.target as HTMLInputElement;
+        let newMinTasks = parseInt(input.value);
+        const minValue = parseInt(input.min);
+        const maxValue = parseInt(input.max);
+
+        // Clamp input if it is outside the correct range
+        if (newMinTasks < minValue || newMinTasks > maxValue) {
+            newMinTasks = Math.max(minValue, Math.min(maxValue, newMinTasks));
+            input.value = newMinTasks.toString();
+        }
+
         await editChoiceTaskMinTasks(task, newMinTasks);
     }
 
