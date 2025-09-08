@@ -349,9 +349,19 @@ unit tests / H2:
       when: never
     # Run if MySQL tests don't run
     - if: $CI_PROJECT_NAMESPACE != "skill-circuits"
-    - if: ($CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH == "development") || ($CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "development")
+    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "development"
       changes:
         compare_to: "refs/heads/development"
+        paths:
+          - src/main/java/nl/tudelft/skills/model/**/*
+          - src/main/resources/changelog-master.yaml
+          - src/main/resources/table-setup.yaml
+          - src/main/resources/migrations.yaml
+          - src/test/resources/application-mysql.properties
+      when: never
+    - if: $CI_COMMIT_BRANCH == "development" && $CI_COMMIT_TITLE !~ "/^Merge branch/"
+      changes:
+        compare_to: "refs/heads/main"
         paths:
           - src/main/java/nl/tudelft/skills/model/**/*
           - src/main/resources/changelog-master.yaml
