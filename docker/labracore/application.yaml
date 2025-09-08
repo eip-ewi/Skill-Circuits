@@ -1,0 +1,50 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  liquibase:
+    change-log: "classpath:/changelog-master.yaml"
+    enabled: true
+  datasource:
+    url: jdbc:mysql://database:3306/labracore
+    username: labracore
+    password: labracore
+
+server:
+  port: 8082
+
+logging:
+  level:
+    ROOT: info
+
+springdoc:
+  api-docs:
+    path: "/api-docs"
+    enabled: true
+  swagger-ui:
+    path: "/swagger-ui"
+
+labracore:
+  db-api:
+    enabled: false
+    url: http://localhost:8087
+
+otel:
+  exporter:
+    otlp:
+      endpoint: http://jaeger:4318
+  resource:
+    attributes:
+      deployment.environment: production
+      service:
+        name: labracore
+        namespace: labrador
+  logs:
+    exporter: none
+  metrics:
+    exporter: none
+  traces:
+    sampler: parentbased_always_on
+    sampler.arg: 1
+  sdk:
+    disabled: false

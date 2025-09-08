@@ -10,7 +10,7 @@
 
     let { checkpoint }: { checkpoint: Checkpoint } = $props();
 
-    let skills: RegularSkillBlock[] = $derived(getVisibleBlocks().filter(block => block.blockType === "skill").filter(block => block.checkpoint === checkpoint.id));
+    let skills: SkillBlock[] = $derived(getVisibleBlocks().filter(block => block.blockType === "skill").filter(block => block.checkpoint === checkpoint.id));
 
     let completed: boolean = $derived(!canEditCircuit() && !skills.some(skill => !isCompleted(skill)));
     let passed: boolean = $derived(moment().isAfter(moment(checkpoint.deadline)));

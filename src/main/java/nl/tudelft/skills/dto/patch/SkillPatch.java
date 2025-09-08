@@ -48,13 +48,13 @@ public class SkillPatch extends Patch<AbstractSkill> {
 		if (data instanceof Skill skill) {
 			updateNonNull(name, skill::setName);
 			updateNonNullId(submodule, skill::setSubmodule);
-            if (checkpoint != null) {
-                if (checkpoint.getId() == null) {
-                    skill.setCheckpoint(null);
-                } else {
-                    updateNonNullId(checkpoint, skill::setCheckpoint);
-                }
-            }
+			if (checkpoint != null) {
+				if (checkpoint.getId() == null) {
+					skill.setCheckpoint(null);
+				} else {
+					updateNonNullId(checkpoint, skill::setCheckpoint);
+				}
+			}
 			updateNonNull(hidden, skill::setHidden);
 		}
 		updateNonNull(essential, data::setEssential);

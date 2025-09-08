@@ -56,7 +56,8 @@ public class SCPersonService {
 					.person(scPerson)
 					.build()));
 
-			return personRepository.save(scPerson);
+			// Attempt to find again in case the person was already created in the meantime
+			return personRepository.findById(personId).orElseGet(() -> personRepository.save(scPerson));
 		});
 	}
 

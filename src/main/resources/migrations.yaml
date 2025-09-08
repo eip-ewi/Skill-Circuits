@@ -2687,4 +2687,21 @@ databaseChangeLog:
       author: ruben
       changes:
         - sql:
-          - sql: update task join (select id, row_number() over (partition by skill_id order by idx desc) - 1 as idx from task) as updated on task.id = updated.id set task.idx = updated.idx;
+            dbms: mariadb,mysql
+            sql: update task join (select id, row_number() over (partition by skill_id order by idx desc) - 1 as idx from task) as updated on task.id = updated.id set task.idx = updated.idx;
+
+  #
+  # Booleans are bits now in MySQL
+  #
+  - changeSet:
+      id: booleans-to-bits-mysql
+      author: ruben
+      changes:
+        - modifyDataType:
+            tableName: scedition
+            columnName: is_visible
+            newDataType: bit
+        - modifyDataType:
+            tableName: skill
+            columnName: hidden
+            newDataType: bit
