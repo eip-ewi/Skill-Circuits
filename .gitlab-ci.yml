@@ -625,7 +625,7 @@ deploy to staging:
   interruptible: false
   image: getsentry/sentry-cli
   stage: deploy
-  dependencies:
+  needs:
     - publish jar
   before_script:
     - 'which ssh-agent || ( apk add --update openssh-client )'
@@ -657,7 +657,7 @@ deploy to production:
   interruptible: false
   image: getsentry/sentry-cli
   stage: deploy
-  dependencies:
+  needs:
     - publish jar
   before_script:
     - 'which ssh-agent || ( apk add --update openssh-client )'
