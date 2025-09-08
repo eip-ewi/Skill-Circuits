@@ -17,12 +17,16 @@
  */
 package nl.tudelft.skills.repository;
 
-import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
 import nl.tudelft.skills.model.PathPreference;
+import nl.tudelft.skills.model.SCEdition;
+import nl.tudelft.skills.model.SCPerson;
 
 public interface PathPreferenceRepository extends JpaRepository<PathPreference, Long> {
 
@@ -31,9 +35,13 @@ public interface PathPreferenceRepository extends JpaRepository<PathPreference, 
 				.orElseThrow(() -> new ResourceNotFoundException("PathPreference was not found: " + id));
 	}
 
-	List<PathPreference> findAllByPathId(Long pathId);
+	@Query("""
+			select pathPreference from PathPreference pathPreference
+			where pathPreference.person.id = :#{#person.id} and pathPreference.edition.id = :#{#edition.id}
+			""")
+	Optional<PathPreference> findByPersonAndEdition(@Param("person") SCPerson person,
+			@Param("edition") SCEdition edition);
 
-	List<PathPreference> findAllByPersonIdAndEditionId(Long personId, Long editionId);
+	void deleteByPersonAndEdition(SCPerson person, SCEdition edition);
 
-	boolean existsByPathId(Long pathId);
 }

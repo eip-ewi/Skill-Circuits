@@ -22,6 +22,9 @@ target/
 .springBeans
 
 src/main/resources/application.yaml
+src/main/resources/application.disabled.yaml
+/application.yaml
+/application.disabled.yaml
 log4j.properties
 sentry.properties
 

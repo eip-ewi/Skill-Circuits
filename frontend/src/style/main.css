@@ -1,0 +1,7 @@
+@import url("settings.css");
+@import url("reset.css");
+@import url("components.css");
+
+.fa-shoe-prints {
+    rotate: 270deg;
+}

@@ -1,0 +1,29 @@
+{
+  "extends": "@tsconfig/svelte/tsconfig.json",
+  "compilerOptions": {
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "alwaysStrict": true,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "noImplicitOverride": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    "strict": true,
+    "sourceMap": true,
+    "lib": ["ES2023", "DOM"],
+    "skipLibCheck": true,
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "resolveJsonModule": true,
+    "allowJs": false,
+    "isolatedModules": true,
+    "moduleDetection": "force"
+  },
+  "include": ["src/**/*.ts", "src/**/*.svelte"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

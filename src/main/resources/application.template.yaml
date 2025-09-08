@@ -22,7 +22,9 @@ skill-circuits:
 
 spring:
   profiles:
-    active: dev
+    active:
+     - development
+     - development-data
 
   jpa:
     hibernate:
@@ -55,6 +57,10 @@ spring:
       filter:
         enabled: true
 
+  web:
+    resources:
+      static-locations: classpath:/META-INF/resources/, classpath:/resources/, classpath:/static/, classpath:/public/
+
 logging:
   level:
     ROOT: info
@@ -69,9 +75,9 @@ labrador:
     apiSecret: MCpu0dKaUYTwrxHMWZKmO5NgTxOh2r3B0oA1L5odv7U0TlOuQvv1pqMAZFfxsrQe5iEBDQGgi39WJFaHdVfX1Qy9
   sso:
     type: in_memory
-    login-path: /auth/login
+    login-path: /login
     # logout-path should not be overridden in a controller! logout-path will logout the user and redirect to success-url.
-    logout-path: /auth/logout
+    logout-path: /logout
     mem:
       # If this field is true, it redirects you to last attempted page before login, otherwise to success-url.
       saved-request-aware: true
@@ -82,34 +88,39 @@ labrador:
 # For the SAML security configurations, we refer to documentation here:
 # https://github.com/ulisesbocchio/spring-boot-security-saml
 
-# The following configuration is taken from our test setup for LabraDoor:
 saml:
   sso:
-    authentication-provider:
-      force-principal-as-string: false
+    metadata-location: https://eipdev.ewi.tudelft.nl/saml/saml2/idp/metadata.php
+    login-processing-url: /saml/SSO
     metadata-generator:
-      entity-id: <eid>
+      entity-id: http://localhost:8084
+      endpoint: /saml/metadata.php
       entity-base-url: http://localhost:8084
-    key-manager:
-      store-location: classpath:/security/testKeystore.jks
-      default-key: 1
-      store-pass: <pwd>
-      key-passwords:
-        1: <pwd>
+    keystore:
+      location: classpath:/security/testKeystore.jks
+      password: <pwd>
+      key: 1
+      key-password: <pwd>
 
-    extended-delegate:
-      metadata-require-signature: false
-      metadata-trust-check: true
+otel:
+  exporter:
+    otlp:
+      endpoint: http://localhost:4318
+  resource:
+    attributes:
+      deployment.environment: dev
+      service:
+        name: skill-circuits
+        namespace: labrador
+  logs:
+    exporter: none
+  metrics:
+    exporter: none
+  traces:
+    sampler: traceidratio
+    sampler.arg: 1
+  sdk:
+    disabled: true
 
-    extended-metadata:
-      idp-discovery-enabled: false
-
-    idp:
-      metadata-location: https://eipdev.ewi.tudelft.nl/saml/saml2/idp/metadata.php
-
-    context-provider:
-      lb:
-        scheme: http
-        server-name: localhost
-        server-port: 8084
-        include-server-port-in-request-url: true
+sentry:
+  enabled: false

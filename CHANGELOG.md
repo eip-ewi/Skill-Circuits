@@ -12,10 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## Added
+- [Everyone] Functionality to add and complete choice tasks. Choice tasks contain a set of regular tasks, of which at least k need to be completed.
 
 ## Changed
 
 ## Fixed
+- [Everyone] If the new version information cannot be retrieved from GitLab, the what's new dialog is not shown. (@bbakos)
+- [Student] Fix hidden skills only appearing after page reload.
 
 ## [2.2.7]
 
