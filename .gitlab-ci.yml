@@ -81,7 +81,7 @@ build:
     - npm install
     - npm run build
     - cd ..
-    - gradle --build-cache build testClasses -x test -x licenseMain -x licenseTest -x spotlessJava -x spotlessCheck
+    - gradle --build-cache build testClasses -x test -x licenseMain -x licenseTest -x spotlessJava -x spotlessCheck -x end_to_end:license -x end_to_end:check
 
 # Build a LabraCore Docker image and push to registry, cache used images in the process
 labracore docker image:
@@ -321,7 +321,6 @@ cross check migrations / MySQL:
 
 # Run tests
 unit tests / H2:
-  extends: .cached
   interruptible: true
   stage: test
   needs:
@@ -364,7 +363,6 @@ unit tests / H2:
 
 # Run the unit tests on a mysql database
 unit tests / MySQL:
-  extends: .cached
   interruptible: true
   stage: test
   variables:
@@ -493,7 +491,6 @@ prepare end-to-end tests:
 
 # End-to-end test template
 .end-to-end test:
-  extends: .cached
   interruptible: true
   stage: test
   variables:
@@ -573,7 +570,7 @@ end_to_end_test / Safari:
 ###########
 
 # Publish jacoco test report
-coverage_report:
+coverage report:
   interruptible: true
   image: registry.gitlab.com/haynes/jacoco2cobertura:1.0.10
   stage: publish
