@@ -19,18 +19,15 @@ package nl.tudelft.skills.controller;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpSession;
-import javax.transaction.Transactional;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import com.opencsv.CSVWriter;
 
 import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
@@ -40,12 +37,8 @@ import nl.tudelft.skills.dto.patch.EditionPatch;
 import nl.tudelft.skills.dto.view.EditionView;
 import nl.tudelft.skills.dto.view.EditionsView;
 import nl.tudelft.skills.dto.view.ManagedEditionView;
-import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelEditionView;
-import com.opencsv.CSVWriter;
-
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.SCModuleSummaryDTO;
 import nl.tudelft.skills.dto.view.TaskStatsDTO;
+import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelEditionView;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.SCPerson;
 import nl.tudelft.skills.service.CopyService;
@@ -128,7 +121,7 @@ public class EditionController {
 
 	@GetMapping(value = "{id}/teacher_stats", produces = "text/csv")
 	@ResponseBody
-	@PreAuthorize("@authorisationService.isAdmin()")
+	@PreAuthorize("@authorisationService.isTeacher()")
 	public ResponseEntity<String> showAllTaskStats(@PathVariable Long id) throws IOException {
 		List<TaskStatsDTO> teacherStats = editionService.teacherStatsTaskLevel(id);
 		StringWriter sw = new StringWriter();

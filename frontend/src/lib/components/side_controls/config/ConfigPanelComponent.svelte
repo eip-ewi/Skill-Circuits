@@ -61,6 +61,21 @@
                     </Button>
                 </div>
             </div>
+
+            <div class="section">
+                <h3>Download statistics</h3>
+                <p>
+                    You can download statistics for tasks and students in this edition.
+                </p>
+                <a href="/api/editions/{getEdition().id}/teacher_stats" download>
+                    <div>
+                        <Button>
+                            <span class="fa-solid fa-download"></span>
+                            <span>Download</span>
+                        </Button>
+                    </div>
+                </a>
+            </div>
         </div>
     </div>
 

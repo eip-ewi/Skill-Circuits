@@ -28,23 +28,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.api.EditionControllerApi;
-import nl.tudelft.labracore.api.RoleControllerApi;
-import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
-import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
-import nl.tudelft.librador.dto.view.View;
-import nl.tudelft.skills.dto.view.TaskStatsDTO;
-import nl.tudelft.skills.dto.view.edition.*;
-import nl.tudelft.skills.model.*;
-import nl.tudelft.skills.repository.*;
-import nl.tudelft.skills.security.AuthorisationService;
 import nl.tudelft.labracore.api.PersonControllerApi;
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.*;
+import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
+import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
 import nl.tudelft.librador.dto.DTOConverter;
 import nl.tudelft.skills.dto.patch.EditionPatch;
 import nl.tudelft.skills.dto.view.*;
+import nl.tudelft.skills.dto.view.TaskStatsDTO;
+import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.SCPerson;
+import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.PersonRepository;
 
@@ -57,18 +53,9 @@ public class EditionService {
 	private final RoleControllerApi roleApi;
 
 	private final SCPersonService sCPersonService;
-	private final CheckpointRepository checkpointRepository;
-	private final PathRepository pathRepository;
-	private final ModuleRepository moduleRepository;
-	private final SubmoduleRepository submoduleRepository;
-	private final AbstractSkillRepository abstractSkillRepository;
-	private final SkillRepository skillRepository;
-	private final RegularTaskRepository regularTaskRepository;
-	private final ChoiceTaskRepository choiceTaskRepository;
 	private final TaskRepository taskRepository;
 	private final ClickedLinkRepository clickedLinkRepository;
 	private final PathPreferenceRepository pathPreferenceRepository;
-	private final AuthorisationService authorisationService;
 	private final RoleControllerApi roleControllerApi;
 
 	private final EditionRepository editionRepository;
@@ -111,7 +98,8 @@ public class EditionService {
 				.map(t -> (RegularTask) t).collect(Collectors.toList());
 
 		return regularTasks.stream().map(t -> {
-			Set<Long> usersCompletedTask = t.getCompletedBy().stream().map(c -> c.getPerson().getId())
+			Set<Long> usersCompletedTask = t.getTaskInfo().getCompletedBy().stream()
+					.map(c -> c.getPerson().getId())
 					.collect(Collectors.toSet());
 			Set<Long> studentsCompletedTask = usersCompletedTask.isEmpty() ? Set.of()
 					: roleControllerApi.getRolesById(Set.of(id), usersCompletedTask).toStream()
@@ -125,7 +113,7 @@ public class EditionService {
 					: roleControllerApi.getRolesById(Set.of(id), usersHaveTaskOnPath).toStream()
 							.filter(r -> r.getType().equals(RoleDetailsDTO.TypeEnum.STUDENT)).count();
 
-			List<Long> peopleClickedLink = clickedLinkRepository.getByTask(t).stream()
+			List<Long> peopleClickedLink = clickedLinkRepository.getByTask(t.getTaskInfo()).stream()
 					.map(c -> c.getPerson().getId()).collect(Collectors.toList());
 
 			Set<Long> studentsClickedLink = peopleClickedLink.isEmpty() ? Set.of()
@@ -142,7 +130,8 @@ public class EditionService {
 			return new TaskStatsDTO(t.getTaskInfo().getId(),
 					t.getTaskInfo().getName(),
 					t.getSkill().getName(),
-					t.getSkill().getCheckpoint().getName(),
+					t.getSkill().getCheckpoint() == null ? "No checkpoint"
+							: t.getSkill().getCheckpoint().getName(),
 					t.getSkill().getSubmodule().getName(),
 					t.getSkill().getSubmodule().getModule().getName(),
 					studentsCompletedTask.size(),
@@ -152,6 +141,7 @@ public class EditionService {
 					studentsClickedAndCompleted);
 		}).collect(Collectors.toList());
 	}
+
 	public Set<Long> getManagedEditionIds(SCPerson person, boolean includeStale) {
 		Set<Long> managedEditions = new HashSet<>();
 		personRepository.findById(person.getId()).ifPresent(scPerson -> scPerson.getEditorInEditions()
@@ -164,7 +154,7 @@ public class EditionService {
 				.collectList()
 				.block()));
 		return managedEditions;
-    }
+	}
 
 	public List<ManagedEditionView> getManagedEditions(SCPerson person, boolean includeStale) {
 		Set<Long> editionIds = getManagedEditionIds(person, includeStale);
