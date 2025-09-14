@@ -22,7 +22,7 @@ import nl.tudelft.skills.dto.view.circuit.ItemView;
 public record EditionLevelSkillView(
 		long id,
 		String name,
-        Integer column,
+		Integer column,
 		boolean essential,
 		boolean hidden,
 		boolean completed,

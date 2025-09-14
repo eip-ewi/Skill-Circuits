@@ -2,8 +2,6 @@ import com.diffplug.gradle.spotless.SpotlessExtension
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 import nl.javadude.gradle.plugins.license.DownloadLicensesExtension
 import nl.javadude.gradle.plugins.license.LicenseExtension
-import org.gradle.internal.fingerprint.classpath.impl.ClasspathFingerprintingStrategy.runtimeClasspath
-import java.nio.file.Files
 
 group = "nl.tudelft.skills"
 version = "2526.0.0"
@@ -95,7 +93,8 @@ configure<LicenseExtension> {
     excludes(listOf(
         "**/*.json",
         "**/*.css",
-        "**/labracore/api/**/*.java"
+        "**/labracore/api/**/*.java",
+        "**/banner.txt"
     ))
 }
 
@@ -174,10 +173,6 @@ publishing {
     }
 }
 
-task<Test>("integrationTest") {
-    useJUnitPlatform()
-    include("nl/tudelft/skills/integration/**")
-}
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
     minHeapSize = "256m"
@@ -189,7 +184,6 @@ tasks.withType<Test>().configureEach {
 
 tasks.getByName<Test>("test") {
     useJUnitPlatform()
-    exclude("nl/tudelft/skills/integration/**")
 }
 
 dependencyManagement {

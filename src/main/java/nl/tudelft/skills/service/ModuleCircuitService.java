@@ -81,24 +81,29 @@ public class ModuleCircuitService {
 						.toList());
 	}
 
-    public Long getCheckpointIdInEdition(AbstractSkill abstractSkill) {
-        return switch (abstractSkill) {
-            case Skill skill -> skill.getCheckpoint() == null ? null : skill.getCheckpoint().getId();
-            case ExternalSkill externalSkill -> findClosestNextCheckpoint(externalSkill, externalSkill.getModule().getEdition().getId()).map(Checkpoint::getId).orElse(null);
-            default -> null; // Unreachable
-        };
-    }
+	public Long getCheckpointIdInEdition(AbstractSkill abstractSkill) {
+		return switch (abstractSkill) {
+			case Skill skill -> skill.getCheckpoint() == null ? null : skill.getCheckpoint().getId();
+			case ExternalSkill externalSkill ->
+				findClosestNextCheckpoint(externalSkill, externalSkill.getModule().getEdition().getId())
+						.map(Checkpoint::getId).orElse(null);
+			default -> null; // Unreachable
+		};
+	}
 
-    public Optional<Checkpoint> findClosestNextCheckpoint(AbstractSkill abstractSkill, Long editionId) {
-        if (abstractSkill instanceof ExternalSkill externalSkill) {
-            return findClosestNextCheckpoint(externalSkill.getSkill(), editionId);
-        }
-        Skill skill = (Skill) abstractSkill;
-        if (skill.getCheckpoint() != null && Objects.equals(skill.getCheckpoint().getEdition().getId(), editionId)) {
-            return Optional.of(skill.getCheckpoint());
-        }
-        return skill.getChildren().stream().map(child -> findClosestNextCheckpoint(child, editionId)).filter(Optional::isPresent).map(Optional::get).min(Comparator.comparing(Checkpoint::getDeadline));
-    }
+	public Optional<Checkpoint> findClosestNextCheckpoint(AbstractSkill abstractSkill, Long editionId) {
+		if (abstractSkill instanceof ExternalSkill externalSkill) {
+			return findClosestNextCheckpoint(externalSkill.getSkill(), editionId);
+		}
+		Skill skill = (Skill) abstractSkill;
+		if (skill.getCheckpoint() != null
+				&& Objects.equals(skill.getCheckpoint().getEdition().getId(), editionId)) {
+			return Optional.of(skill.getCheckpoint());
+		}
+		return skill.getChildren().stream().map(child -> findClosestNextCheckpoint(child, editionId))
+				.filter(Optional::isPresent).map(Optional::get)
+				.min(Comparator.comparing(Checkpoint::getDeadline));
+	}
 
 	public ModuleLevelTaskView convertToTaskView(Task task, SCPerson person) {
 		return convertToTaskView(task, taskCompletionRepository.findAllCompletedTaskIdsForPerson(person));

@@ -57,7 +57,7 @@
     <div class="heading">
         {#if block.blockType !== "skill" || !block.external}
 
-            <input class="name" name="name" value={block.name} onchange={editName}/>
+            <input aria-label="Edit {getLevel().block} name" class="name" name="name" value={block.name} onchange={editName}/>
             <Select onchange={editGroup}>
                 {#each getCircuit().groups as group}
                     {@const currentGroup = getGroupForBlock(block)}

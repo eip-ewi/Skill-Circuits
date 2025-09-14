@@ -1,191 +1,619 @@
 # Skill Circuits
 
-image: gitlab.ewi.tudelft.nl:4242/skill-circuits/docker-image:master
+image: gitlab.ewi.tudelft.nl:4242/skill-circuits/docker-image:1.3.0
 
+workflow:
+  # Cancel on new changes
+  auto_cancel:
+    on_new_commit: interruptible
+  rules:
+    # No merge request pipelines from development to main
+    - if: $CI_MERGE_REQUEST_EVENT_TYPE && $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME == "development" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"
+      when: never
+    # No detached merge pipelines, only merged results
+    - if: $CI_MERGE_REQUEST_EVENT_TYPE == "detached"
+      when: never
+    # Otherwise always
+    - when: always
 
 variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: "/certs"
   GRADLE_USER_HOME: ".gradle"
   GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.caching=true"
-  SAST_JAVA_VERSION: 17
-
+  SAST_JAVA_VERSION: 21
+  LABRACORE_COMMIT: 918e6636
 
 # The names of the stages we use
 stages:
   - build
+  - static analysis
+  - migrations
   - test
-  - review
-  - accessibility
-  - gitlab reports
   - publish
   - deploy
-  - test2
-
-
-# Default build cache settings to extend from
-.build_cached:
-  cache:
-    key: "gradle-build"
-    paths:
-      - .gradle/
-      - frontend/node_modules/
-      - frontend/package-lock.json
-    policy: pull
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main" ||
-        $CI_COMMIT_BRANCH == "development" ||
-        $CI_MERGE_REQUEST_ID ||
-        $CI_PIPELINE_SOURCE == "push"
+  - live analysis
+  - gitlab reports
 
 
 # Setting globally that gitlab reports need gradle_build job
 .gitlab_reporter:
   stage: gitlab reports
   needs:
-    - gradle_build
+    - build
 
+.cached:
+  cache:
+    # NPM cache
+    - key:
+        files:
+          - frontend/package-lock.json
+      paths:
+        - frontend/node_modules/
+        - frontend/package-lock.json
+      policy: pull
+    # Gradle cache
+    - key: "gradle-build-$CI_PROJECT_PATH_SLUG"
+      paths:
+        - .gradle/
+        - build/classes/
+        - build/tmp/
+      policy: pull
+
+#########
+# Build #
+#########
 
 # Runs gradle build without tests or checks
-gradle_build:
-  extends: .build_cached
-  cache:
-    policy: pull-push
+build:
+  extends: .cached
+  interruptible: true
   stage: build
   artifacts:
     name: build
     expire_in: 6 hours
     paths:
       - build/
+  cache:
+    policy: pull-push
   script:
     - cd frontend
     - npm install
+    - npm run build
     - cd ..
-    - gradle --build-cache build testClasses -x test -x licenseMain -x licenseTest -x spotlessJava -x spotlessCheck
+    - gradle --build-cache build testClasses -x test -x licenseMain -x licenseTest -x spotlessJava -x spotlessCheck -x end_to_end:license -x end_to_end:check
+
+# Build a LabraCore Docker image and push to registry, cache used images in the process
+labracore docker image:
+  interruptible: true
+  stage: build
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_DRIVER: overlay2
+  services:
+    - name: docker:27.2.0-dind
+      command: ["--mtu", "1400", "--registry-mirror", "http://gitlab.ewi.tudelft.nl:4242", "--tls=false"]
+  needs: []
+  before_script:
+    - docker info
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    # Check if necessary images cached and re-pull if not
+    - if docker pull "$CI_REGISTRY_IMAGE/gradle:jdk21" ;
+        then echo "Gradle in cache, not pulling" && docker tag "$CI_REGISTRY_IMAGE/gradle:jdk21" gradle:jdk21 ;
+        else docker pull gradle:jdk21
+        && docker image tag gradle:jdk21 "$CI_REGISTRY_IMAGE/gradle:jdk21"
+        && docker push "$CI_REGISTRY_IMAGE/gradle:jdk21" ;
+        fi
+
+    # Build LabraCore image if it does not exist
+    - if docker pull "$CI_REGISTRY_IMAGE/labracore:$LABRACORE_COMMIT" ;
+        then echo "LabraCore image in cache, not building" ;
+        else docker build --build-arg commit="$LABRACORE_COMMIT" -t "$CI_REGISTRY_IMAGE/labracore:$LABRACORE_COMMIT" -f docker/labracore/Dockerfile docker/labracore 
+        && docker push "$CI_REGISTRY_IMAGE/labracore:$LABRACORE_COMMIT" ;
+        fi
+  tags:
+    - dockerrunner
+  rules:
+    # Don't run on forks
+    - if: $CI_PROJECT_NAMESPACE != "skill-circuits"
+      when: never
+    # Don't run on detached merge request pipelines
+    - if: $CI_MERGE_REQUEST_EVENT_TYPE == "detached"
+      when: never
+    # Run on merge requests to development
+    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "development"
+    # Run on development for non-merge commits
+    - if: $CI_COMMIT_BRANCH == "development" && $CI_COMMIT_TITLE !~ "/^Merge branch/"
+
+skill circuits docker image:
+  interruptible: true
+  stage: build
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_DRIVER: overlay2
+  services:
+    - name: docker:27.2.0-dind
+      command: ["--mtu", "1400", "--registry-mirror", "http://gitlab.ewi.tudelft.nl:4242", "--tls=false"]
+  needs:
+    - build
+    - labracore docker image
+  before_script:
+    - docker info
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker pull "$CI_REGISTRY_IMAGE/labracore:$LABRACORE_COMMIT"
+    - docker image tag "$CI_REGISTRY_IMAGE/labracore:$LABRACORE_COMMIT" labracore:latest
+
+    # Build our image
+    - docker build -t "$CI_REGISTRY_IMAGE:end-to-end-$CI_COMMIT_SHORT_SHA" -f docker/Dockerfile .
+    - docker push "$CI_REGISTRY_IMAGE:end-to-end-$CI_COMMIT_SHORT_SHA"
+  tags:
+    - dockerrunner
+  rules:
+    # Don't run on forks
+    - if: $CI_PROJECT_NAMESPACE != "skill-circuits"
+      when: never
+    # Don't run on detached merge request pipelines
+    - if: $CI_MERGE_REQUEST_EVENT_TYPE == "detached"
+      when: never
+    # Run on merge requests to development
+    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "development"
+    # Run on development for non-merge commits
+    - if: $CI_COMMIT_BRANCH == "development" && $CI_COMMIT_TITLE !~ "/^Merge branch/"
+
+
+###################
+# Static analysis #
+###################
+
+# Run svelte check
+svelte check:
+  extends: .cached
+  interruptible: true
+  stage: static analysis
+  needs: []
+  script:
+    - cd frontend
+    - npm install
+    - npm run svelte-check
+  rules:
+    # Don't run on detached merge request pipelines
+    - if: $CI_MERGE_REQUEST_EVENT_TYPE == "detached"
+      when: never
+    # Don't run on main
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: never
+    # Run on branches
+    - if: $CI_COMMIT_BRANCH
+    # Run on merge requests to development
+    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "development"
+
+# Run spotless
+spotless check:
+  interruptible: true
+  stage: static analysis
+  needs: []
+  script:
+    - gradle spotlessCheck
+  after_script:
+    - cp -r build/spotless-diagnose-java spotless-diagnose-java/
+  rules:
+    # Don't run on detached merge request pipelines
+    - if: $CI_MERGE_REQUEST_EVENT_TYPE == "detached"
+      when: never
+    # Run on merge requests to development
+    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "development"
+    # Run on development for non-merge commits
+    - if: $CI_COMMIT_BRANCH == "development" && $CI_COMMIT_TITLE !~ "/^Merge branch/"
+
+# Run license check
+license check:
+  interruptible: true
+  stage: static analysis
+  needs: []
+  script:
+    - gradle licenseMain licenseTest
+  rules:
+    # Don't run on detached merge request pipelines
+    - if: $CI_MERGE_REQUEST_EVENT_TYPE == "detached"
+      when: never
+    # Run on merge requests to development
+    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "development"
+    # Run on development for non-merge commits
+    - if: $CI_COMMIT_BRANCH == "development" && $CI_COMMIT_TITLE !~ "/^Merge branch/"
+
+
+##############
+# Migrations #
+##############
+
+# Test the migrations on MySQL
+check migrations / MySQL:
+  interruptible: true
+  stage: migrations
+  needs:
+    - build
+  variables:
+    MYSQL_DATABASE: "skills"
+    MYSQL_USER: "skills"
+    MYSQL_PASSWORD: "skills"
+    MYSQL_ROOT_PASSWORD: "root"
+  services:
+    - mysql:9.0.1
+  script:
+    - sleep 60 # Ensure mysql started
+    - cp build/libs/*.jar skill-circuits.jar
+    - java -cp skill-circuits.jar -Dloader.system=true -Dloader.main=liquibase.integration.commandline.Main org.springframework.boot.loader.launch.PropertiesLauncher --driver=com.mysql.cj.jdbc.Driver --changeLogFile=changelog-master.yaml --url="jdbc:mysql://mysql/skills?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8" --username="skills" --password="skills" --logLevel=debug update
+  rules:
+    # Don't run on forks
+    - if: $CI_PROJECT_NAMESPACE != "skill-circuits"
+      when: never
+    # Don't run on detached merge request pipelines
+    - if: $CI_MERGE_REQUEST_EVENT_TYPE == "detached"
+      when: never
+    # Run on merge requests to development if any of the model or migration files changed
+    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "development"
+      changes:
+        - src/main/java/nl/tudelft/skills/model/**/*
+        - src/main/resources/changelog-master.yaml
+        - src/main/resources/table-setup.yaml
+        - src/main/resources/migrations.yaml
+    # Run on development for non-merge commits
+    - if: $CI_COMMIT_BRANCH == "development" && $CI_COMMIT_TITLE !~ "/^Merge branch/"
+      changes:
+        compare_to: "refs/heads/main"
+        paths:
+          - src/main/java/nl/tudelft/skills/model/**/*
+          - src/main/resources/changelog-master.yaml
+          - src/main/resources/table-setup.yaml
+          - src/main/resources/migrations.yaml
+
+# Test the migrations on MySQL
+cross check migrations / MySQL:
+  extends: .cached
+  interruptible: true
+  stage: migrations
+  needs: []
+  variables:
+    MYSQL_DATABASE: "skills"
+    MYSQL_USER: "skills"
+    MYSQL_PASSWORD: "skills"
+    MYSQL_ROOT_PASSWORD: "root"
+  services:
+    - mysql:9.0.1
+  script:
+    - sleep 60 # Ensure mysql started
+    - echo "Switching to main"
+    - git fetch && git switch main && git pull --ff-only
+    - mv src/test/resources/application-mysql.properties src/test/resources/application-test.properties
+    - gradle test --build-cache --tests nl.tudelft.skills.SmokeTest
+    - echo "Switching back to $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME"
+    - git reset HEAD --hard && git switch $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
+    - mv src/test/resources/application-mysql.properties src/test/resources/application-test.properties
+    - gradle test --build-cache --tests nl.tudelft.skills.SmokeTest
+  rules:
+    # Don't run on forks
+    - if: $CI_PROJECT_NAMESPACE != "skill-circuits"
+      when: never
+    # Don't run on detached merge request pipelines
+    - if: $CI_MERGE_REQUEST_EVENT_TYPE == "detached"
+      when: never
+    # Run on merge requests to development if the migration files changed
+    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "development"
+      changes:
+        - src/main/resources/changelog-master.yaml
+        - src/main/resources/table-setup.yaml
+        - src/main/resources/migrations.yaml
+        - src/test/resources/application-mysql.properties
+    # Run on development for non-merge commits
+    - if: $CI_COMMIT_BRANCH == "development" && $CI_COMMIT_TITLE !~ "/^Merge branch/"
+      changes:
+        compare_to: "refs/heads/main"
+        paths:
+          - src/main/resources/changelog-master.yaml
+          - src/main/resources/table-setup.yaml
+          - src/main/resources/migrations.yaml
+          - src/test/resources/application-mysql.properties
+
+########
+# Test #
+########
 
 # Run tests
-gradle_test:
-  extends: .build_cached
+unit tests / H2:
+  interruptible: true
   stage: test
   needs:
-    - gradle_build
+    - build
   coverage: '/Code coverage: \d+\.\d+/'
   artifacts:
-     name: Coverage report
+     name: Test report
      expire_in: 6 hours
      paths:
        - codecov/
      reports:
        junit: build/test-results/test/TEST-*.xml
-       coverage_report:
-          coverage_format: cobertura
-          path: build/reports/jacoco/test/jacocoTestReport.xml
-  before_script:
-    - cd frontend
-    - npm install
-    - cd ..
   script:
-    - gradle --build-cache test
+    - gradle --build-cache test -x end_to_end:test
   after_script:
      # Rerun with none of the dependent tasks to ensure creation of the report
      # without having to recheck whether the code has compiled (it has in build cache).
      - gradle jacocoTestReport -x processResources -x compileJava -x classes --rerun-tasks
 
      # Print out the coverage percentage from the test report.
-     - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered, "/", instructions, " instructions covered"; print "Code coverage:", 100*covered/       instructions }' build/reports/jacoco/test/jacocoTestReport.csv || true
+     - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered, "/", instructions, " instructions covered"; print "Code coverage:", 100*covered/instructions }' build/reports/jacoco/test/jacocoTestReport.csv || true
      - cp -r build/reports codecov
-
-# Run integration tests
-gradle_integration_test:
-  extends: .build_cached
-  stage: test2
-  needs:
-    - gradle_build
-  script:
-    - cd frontend
-    - npm install
-    - cd ..
-    - echo base-url=https://skills.eiptest.ewi.tudelft.nl/>src/test/resources/integration.properties
-    - gradle --build-cache integrationTest
   rules:
-    - if: $CI_COMMIT_BRANCH == "development"
-      when: manual
+    # Don't run on detached merge request pipelines
+    - if: $CI_MERGE_REQUEST_EVENT_TYPE == "detached"
+      when: never
+    # Don't run on main
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: never
+    # Run if MySQL tests don't run
+    - if: $CI_PROJECT_NAMESPACE != "skill-circuits"
+    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "development"
+      changes:
+        compare_to: "refs/heads/development"
+        paths:
+          - src/main/java/nl/tudelft/skills/model/**/*
+          - src/main/resources/changelog-master.yaml
+          - src/main/resources/table-setup.yaml
+          - src/main/resources/migrations.yaml
+          - src/test/resources/application-mysql.properties
+      when: never
+    - if: $CI_COMMIT_BRANCH == "development" && $CI_COMMIT_TITLE !~ "/^Merge branch/"
+      changes:
+        compare_to: "refs/heads/main"
+        paths:
+          - src/main/java/nl/tudelft/skills/model/**/*
+          - src/main/resources/changelog-master.yaml
+          - src/main/resources/table-setup.yaml
+          - src/main/resources/migrations.yaml
+          - src/test/resources/application-mysql.properties
+      when: never
+    - if: $CI_COMMIT_BRANCH
 
-# Run js tests
-#gradle_js_test:
-#  extends: .build_cached
-#  stage: test
-#  needs:
-#    - gradle_build
-#  before_script:
-#    - cd frontend
-#    - npm install
-#    - cd ..
-#  script:
-#    - npm test
-
-# Run spotless
-gradle_spotless:
-  extends: .build_cached
-  stage: review
+# Run the unit tests on a mysql database
+unit tests / MySQL:
+  interruptible: true
+  stage: test
+  variables:
+    MYSQL_DATABASE: "skills"
+    MYSQL_USER: "skills"
+    MYSQL_PASSWORD: "skills"
+    MYSQL_ROOT_PASSWORD: "root"
   needs:
-    - gradle_build
+    - build
+    - job: check migrations / MySQL
+      optional: true
+  services:
+    - mysql:9.0.1
   artifacts:
-    name: spotless
-    expose_as: Spotless Diagnosis
-    expire_in: 7 days
-    paths:
-      - spotless-diagnose-java/
-  script:
-    - gradle --build-cache spotlessCheck
-  after_script:
-    - cp -r build/spotless-diagnose-java spotless-diagnose-java/
-
-
-# Run license check
-gradle_licenses:
-  extends: .build_cached
-  stage: review
-  needs:
-    - gradle_build
-  script:
-    - gradle --build-cache licenseMain
-    - gradle --build-cache licenseTest
-
-
-# Publish jacoco test report
-publish_jacoco_report:
-  extends: .build_cached
-  stage: publish
-  needs:
-    - gradle_test
-  coverage: '/Code coverage: \d+\.\d+/'
-  artifacts:
-    name: codecov
-    expose_as: Code coverage report
-    expire_in: 7 days
+    name: Test report
+    expire_in: 6 hours
     paths:
       - codecov/
+    reports:
+      junit: build/test-results/test/TEST-*.xml
+  before_script:
+    - mv src/test/resources/application-mysql.properties src/test/resources/application-test.properties
   script:
+    - sleep 60 # Ensure mysql started
+    - gradle --build-cache test -x end_to_end:test
+  after_script:
     # Rerun with none of the dependent tasks to ensure creation of the report
     # without having to recheck whether the code has compiled (it has in build cache).
     - gradle jacocoTestReport -x processResources -x compileJava -x classes --rerun-tasks
-  after_script:
+
     # Print out the coverage percentage from the test report.
-    - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered, "/", instructions, " instructions covered"; print "Code coverage:", 100*covered/instructions }' build/reports/jacoco/test/jacocoTestReport.csv
+    - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered, "/", instructions, " instructions covered"; print "Code coverage:", 100*covered/instructions }' build/reports/jacoco/test/jacocoTestReport.csv || true
     - cp -r build/reports codecov
-
-
-# Publish the JAR for Skill Circuits
-publish_jar:
-  extends: .build_cached
-  stage: publish
   rules:
-     - if: $CI_COMMIT_BRANCH == "main" ||
-         $CI_COMMIT_BRANCH == "development" ||
-         $CI_MERGE_REQUEST_ID ||
-         $CI_PIPELINE_SOURCE == "push" ||
-         $CI_PIPELINE_SOURCE == "trigger"
+    # Don't run on forks
+    - if: $CI_PROJECT_NAMESPACE != "skill-circuits"
+      when: never
+    # Don't run on detached merge request pipelines
+    - if: $CI_MERGE_REQUEST_EVENT_TYPE == "detached"
+      when: never
+    # Run on merge requests to development if any of the model or migration files changed
+    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "development"
+      changes:
+        - src/main/java/nl/tudelft/skills/model/**/*
+        - src/main/resources/changelog-master.yaml
+        - src/main/resources/table-setup.yaml
+        - src/main/resources/migrations.yaml
+        - src/test/resources/application-mysql.properties
+    # Run on development for non-merge commits
+    - if: $CI_COMMIT_BRANCH == "development" && $CI_COMMIT_TITLE !~ "/^Merge branch/"
+      changes:
+        compare_to: "refs/heads/main"
+        paths:
+          - src/main/java/nl/tudelft/skills/model/**/*
+          - src/main/resources/changelog-master.yaml
+          - src/main/resources/table-setup.yaml
+          - src/main/resources/migrations.yaml
+          - src/test/resources/application-mysql.properties
+
+# Prepare end-to-end tests
+prepare end-to-end tests:
+  interruptible: true
+  stage: test
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_DRIVER: overlay2
+  services:
+    - name: docker:27.2.0-dind
+      command: ["--mtu", "1400", "--registry-mirror", "http://gitlab.ewi.tudelft.nl:4242", "--tls=false"]
+  needs: []
+  before_script:
+    - docker info
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    # Check if necessary images cached and re-pull if not
+    - if docker pull "$CI_REGISTRY_IMAGE/mysql:9.0.1"; 
+        then echo "MySQL in cache, not pulling"; 
+        else docker pull mysql:9.0.1 
+        && docker image tag mysql:9.0.1 "$CI_REGISTRY_IMAGE/mysql:9.0.1" 
+        && docker push "$CI_REGISTRY_IMAGE/mysql:9.0.1" ;
+        fi
+    - if docker pull "$CI_REGISTRY_IMAGE/testcontainers:0.12.0";
+        then echo "Testcontainers in cache, not pulling";
+        else docker pull testcontainers/ryuk:0.12.0
+        && docker image tag testcontainers/ryuk:0.12.0 "$CI_REGISTRY_IMAGE/testcontainers:0.12.0"
+        && docker push "$CI_REGISTRY_IMAGE/testcontainers:0.12.0" ;
+        fi
+    - if docker pull "$CI_REGISTRY_IMAGE/jaeger:2.10.0";
+        then echo "Jaeger in cache, not pulling";
+        else docker pull cr.jaegertracing.io/jaegertracing/jaeger:2.10.0
+        && docker image tag cr.jaegertracing.io/jaegertracing/jaeger:2.10.0 "$CI_REGISTRY_IMAGE/jaeger:2.10.0"
+        && docker push "$CI_REGISTRY_IMAGE/jaeger:2.10.0" ;
+        fi
+    - if docker pull "$CI_REGISTRY_IMAGE/alpine-socat:1.7.4.3";
+        then echo "Alpine Socat in cache, not pulling";
+        else docker pull alpine/socat:1.7.4.3-r0
+        && docker image tag alpine/socat:1.7.4.3-r0 "$CI_REGISTRY_IMAGE/alpine-socat:1.7.4.3"
+        && docker push "$CI_REGISTRY_IMAGE/alpine-socat:1.7.4.3" ;
+        fi
+    - if docker pull "$CI_REGISTRY_IMAGE/alpine:3.17";
+        then echo "Alpine in cache, not pulling";
+        else docker pull alpine:3.17
+        && docker image tag alpine:3.17 "$CI_REGISTRY_IMAGE/alpine:3.17"
+        && docker push "$CI_REGISTRY_IMAGE/alpine:3.17" ;
+        fi
+    - if docker pull "$CI_REGISTRY_IMAGE/docker-compose:1.29.2";
+        then echo "Docker Compose in cache, not pulling";
+        else docker pull docker/compose:1.29.2
+        && docker image tag docker/compose:1.29.2 "$CI_REGISTRY_IMAGE/docker-compose:1.29.2"
+        && docker push "$CI_REGISTRY_IMAGE/docker-compose:1.29.2" ;
+        fi
+  tags:
+    - dockerrunner
+  rules:
+    # Don't run on forks
+    - if: $CI_PROJECT_NAMESPACE != "skill-circuits"
+      when: never
+    # Don't run on detached merge request pipelines
+    - if: $CI_MERGE_REQUEST_EVENT_TYPE == "detached"
+      when: never
+    # Run on merge requests to development
+    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "development"
+    # Run on development for non-merge commits
+    - if: $CI_COMMIT_BRANCH == "development" && $CI_COMMIT_TITLE !~ "/^Merge branch/"
+
+# End-to-end test template
+.end-to-end test:
+  interruptible: true
+  stage: test
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_DRIVER: overlay2
+    BASE_URL: http://docker:8084/
+    BROWSER_HEADLESS: true
+    USE_DOCKER: true
+    DEFAULT_TIMEOUT: 20000
+  services:
+    - name: docker:27.2.0-dind
+      command: ["--mtu", "1400", "--registry-mirror", "http://gitlab.ewi.tudelft.nl:4242", "--tls=false"]
+  needs:
+    - skill circuits docker image
+    - prepare end-to-end tests
+  before_script:
+    - docker info
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+
+    # Pull necessary images
+    - docker pull "$CI_REGISTRY_IMAGE/mysql:9.0.1"
+    - docker image tag "$CI_REGISTRY_IMAGE/mysql:9.0.1" mysql:9.0.1
+    - docker pull "$CI_REGISTRY_IMAGE/testcontainers:0.12.0"
+    - docker image tag "$CI_REGISTRY_IMAGE/testcontainers:0.12.0" testcontainers/ryuk:0.12.0
+    - docker pull "$CI_REGISTRY_IMAGE/jaeger:2.10.0"
+    - docker image tag "$CI_REGISTRY_IMAGE/jaeger:2.10.0" cr.jaegertracing.io/jaegertracing/jaeger:2.10.0
+    - docker pull "$CI_REGISTRY_IMAGE/alpine-socat:1.7.4.3"
+    - docker image tag "$CI_REGISTRY_IMAGE/alpine-socat:1.7.4.3" alpine/socat:1.7.4.3-r0
+    - docker pull "$CI_REGISTRY_IMAGE/alpine:3.17"
+    - docker image tag "$CI_REGISTRY_IMAGE/alpine:3.17" alpine:3.17
+    - docker pull "$CI_REGISTRY_IMAGE/docker-compose:1.29.2"
+    - docker image tag "$CI_REGISTRY_IMAGE/docker-compose:1.29.2" docker/compose:1.29.2
+    # Pull our own image
+    - docker pull "$CI_REGISTRY_IMAGE:end-to-end-$CI_COMMIT_SHORT_SHA"
+    - docker image tag "$CI_REGISTRY_IMAGE:end-to-end-$CI_COMMIT_SHORT_SHA" skill-circuits:latest
+
+    - docker images
+  script:
+    - gradle --build-cache end_to_end:test
+  artifacts:
+    name: Test report
+    expire_in: 6 hours
+    reports:
+      junit: end_to_end/build/test-results/test/TEST-*.xml
+  tags:
+    - dockerrunner
+  rules:
+    # Don't run on forks
+    - if: $CI_PROJECT_NAMESPACE != "skill-circuits"
+      when: never
+    # Don't run on detached merge request pipelines
+    - if: $CI_MERGE_REQUEST_EVENT_TYPE == "detached"
+      when: never
+    # Run only on merge requests to development
+    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "development"
+    # Run on development for non-merge commits
+    - if: $CI_COMMIT_BRANCH == "development" && $CI_COMMIT_TITLE !~ "/^Merge branch/"
+
+
+end-to-end test / Chrome:
+  extends: .end-to-end test
+  variables:
+    BROWSER_TYPE: Chrome
+end-to-end test / Firefox:
+  extends: .end-to-end test
+  variables:
+    BROWSER_TYPE: Firefox
+end_to_end_test / Safari:
+  extends: .end-to-end test
+  variables:
+    BROWSER_TYPE: Safari
+
+
+###########
+# Publish #
+###########
+
+# Publish jacoco test report
+coverage report:
+  interruptible: true
+  image: registry.gitlab.com/haynes/jacoco2cobertura:1.0.10
+  stage: publish
+  needs:
+    - job: unit tests / H2
+      optional: true
+    - job: unit tests / MySQL
+      optional: true
+  coverage: '/Code coverage: \d+\.\d+/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: cobertura.xml
+  script:
+    - python /opt/cover2cover.py $CI_PROJECT_DIR/codecov/jacoco/test/jacocoTestReport.xml $CI_PROJECT_DIR/src/main/java/ > cobertura.xml
+  rules:
+    # Don't run on main
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: never
+
+# Publish Skill Circuits jar
+publish jar:
+  interruptible: true
+  stage: publish
+  needs:
+    - build
   artifacts:
     name: skill_circuits
     expose_as: Skill Circuits JAR
@@ -194,100 +622,21 @@ publish_jar:
       - skill_circuits.jar
   script:
     - cp build/libs/*.jar ./skill_circuits.jar
-
-
-# Include templates for security scans and code quality reports
-include:
-  - template: Dependency-Scanning.gitlab-ci.yml
-  - template: Jobs/Code-Quality.gitlab-ci.yml
-  - template: Security/DAST.gitlab-ci.yml
-  - template: Security/SAST.gitlab-ci.yml
-  - template: Security/Secret-Detection.gitlab-ci.yml
-  - template: Verify/Accessibility.gitlab-ci.yml
-    #  - template: Verify/Browser-Performance.gitlab-ci.yml
-
-
-# Runs the code quality reporter
-code_quality:
-  extends:
-    - .gitlab_reporter
-  stage: gitlab reports
   rules:
-    - if: $CI_COMMIT_BRANCH == "main" ||
-        $CI_COMMIT_BRANCH == "development" ||
-        $CI_MERGE_REQUEST_ID
+    # Only on development and main
+    - if: $CI_COMMIT_BRANCH == "development" || $CI_COMMIT_BRANCH == "main"
 
-# Runs the SAST checks and reporter.
-spotbugs-sast:
-  stage: gitlab reports
-  needs:
-    - gradle_build
-  variables:
-    COMPILE: "false"
-  allow_failure: true
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "trigger" ||
-        $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
-      when: never
-    - if: $CI_COMMIT_BRANCH == "main" ||
-        $CI_COMMIT_BRANCH == "development" ||
-        $CI_MERGE_REQUEST_ID
 
-# Run the DAST security checks and reporter.
-# Currently set to manual as it requires a test environment to be up and running.
-dast:
-  extends:
-    - .build_cached
-    - .gitlab_reporter
-  stage: test2
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main" ||
-        $CI_COMMIT_BRANCH == "development" ||
-        $CI_MERGE_REQUEST_ID
-      when: manual
-  variables:
-    DAST_VERSION: latest
+##########
+# Deploy #
+##########
 
-# Accessibility testing
-a11y:
-  extends:
-    - .gitlab_reporter
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "trigger" ||
-        $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
-      when: never
-    - if: $CI_COMMIT_BRANCH == "main" ||
-        $CI_COMMIT_BRANCH == "development"
-      when: manual
-  stage: test2
-  variables:
-    a11y_urls: "https://skills.eiptest.ewi.tudelft.nl"
-
-# Dependency scanning reporter for checking dependencies of Queue.
-#dependency_scanning:
-#  extends:
-#    - .build_cached
-#    - .gitlab_reporter
-#  stage: gitlab reports
-#  rules:
-#    - if: $CI_COMMIT_BRANCH == "main" ||
-#        $CI_COMMIT_BRANCH == "development" ||
-#        $CI_MERGE_REQUEST_ID
-#  needs:
-#    - generate_pom
-#  dependencies:
-#    - generate_pom
-#  before_script:
-#    - rm build.gradle* gradlew gradlew.bat
-#    - cat pom.xml
-#  variables:
-#    MAVEN_CLI_OPTS: -q -Dmaven.main.skip -Dmaven.test.skip -DskipTests --batch-mode
-
-dev-deploy:
+deploy to staging:
+  interruptible: false
   image: getsentry/sentry-cli
   stage: deploy
-  dependencies:
-    - publish_jar
+  needs:
+    - publish jar
   before_script:
     - 'which ssh-agent || ( apk add --update openssh-client )'
     - eval $(ssh-agent -s)
@@ -306,21 +655,20 @@ dev-deploy:
     - scp skill_circuits.jar deployer-tam@eiptest.ewi.tudelft.nl:/var/www/skills/skills.jar
     - ssh deployer-tam@eiptest.ewi.tudelft.nl sudo /bin/systemctl restart skills
   environment:
-    name: test
+    name: staging
     url: https://skills.eiptest.ewi.tudelft.nl
   rules:
-    - if: $CI_PIPELINE_SOURCE == "trigger" ||
-        $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
+    # Don't run on forks
+    - if: $CI_PROJECT_NAMESPACE != "skill-circuits"
       when: never
-    - if: $CI_COMMIT_BRANCH == "development" && $CI_PROJECT_NAMESPACE == "skill-circuits"
-      when: on_success
+    - if: $CI_COMMIT_BRANCH == "development"
 
-# TODO CONFIGURE
-deploy:
+deploy to production:
+  interruptible: false
   image: getsentry/sentry-cli
   stage: deploy
-  dependencies:
-    - publish_jar
+  needs:
+    - publish jar
   before_script:
     - 'which ssh-agent || ( apk add --update openssh-client )'
     - eval $(ssh-agent -s)
@@ -345,8 +693,8 @@ deploy:
 #    - echo "proposed version is $SENTRY_RELEASE_VERSION"
 #    - sentry-cli releases set-commits $SENTRY_RELEASE_VERSION --auto
 #    - sentry-cli releases new $SENTRY_RELEASE_VERSION
-    - scp skill_circuits.jar deploy@skills.ewi.tudelft.nl:/var/www/skills/skills.jar
-    - ssh deploy@skills.ewi.tudelft.nl sudo /bin/systemctl restart skills
+    - scp skill_circuits.jar deploy@skills.ewi.tudelft.nl:/var/www/skills-new/skills.jar
+    - ssh deploy@skills.ewi.tudelft.nl sudo /bin/systemctl restart skills-new
 #    - sentry-cli releases finalize $SENTRY_RELEASE_VERSION
     - now=$(date +%s)
 #    - sentry-cli releases deploys $SENTRY_RELEASE_VERSION new -e production -t $((now-start))
@@ -354,9 +702,8 @@ deploy:
     name: production
     url: https://skills.ewi.tudelft.nl
   rules:
-    - if: $CI_PIPELINE_SOURCE == "trigger" ||
-        $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
+    # Don't run on forks
+    - if: $CI_PROJECT_NAMESPACE != "skill-circuits"
       when: never
-    - if: $CI_COMMIT_BRANCH == "main" && $CI_PROJECT_NAMESPACE == "skill-circuits"
-      when: on_success
+    - if: $CI_COMMIT_BRANCH == "main"
 
