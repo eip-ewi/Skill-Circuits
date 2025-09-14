@@ -225,6 +225,31 @@ export async function moveTaskInsideOfChoiceTask(choiceTask: ChoiceTaskItem, sub
     }
 }
 
+export async function moveTaskOutsideOfChoiceTask(choiceTask: ChoiceTaskItem, subtask: ChoiceTaskChoice, newIndex: number, newSkill: SkillBlock) {
+    let response = await fetch(`/api/task-info/${choiceTask.id}/move-subtask/${subtask.infoId}`, withCsrf({
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            skill: {
+                id: newSkill.id,
+            },
+            index: newIndex,
+        })
+    }));
+
+    if (response.ok) {
+        // Remove from old choice task
+        let oldIndex = choiceTask.tasks.findIndex(t => t.infoId === subtask.infoId)!;
+        choiceTask.tasks.splice(oldIndex, 1);
+
+        // Add to new skill
+        let newTask: RegularTaskItem = await response.json();
+        newSkill.items.splice(newIndex, 0, newTask);
+    }
+}
+
 export async function moveSubtask(subtask: ChoiceTaskChoice, newChoiceTask: ChoiceTaskItem, oldChoiceTask: ChoiceTaskItem) {
     oldChoiceTask.tasks.splice(oldChoiceTask.tasks.findIndex(t => t.infoId === subtask.infoId)!, 1);
     newChoiceTask.tasks.push(subtask);

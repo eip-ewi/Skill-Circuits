@@ -24,14 +24,22 @@ import lombok.AllArgsConstructor;
 import nl.tudelft.librador.dto.DTOConverter;
 import nl.tudelft.skills.dto.patch.SubtaskMove;
 import nl.tudelft.skills.dto.patch.TaskInfoPatch;
+import nl.tudelft.skills.dto.patch.TaskMove;
+import nl.tudelft.skills.model.ChoiceTask;
+import nl.tudelft.skills.model.RegularTask;
+import nl.tudelft.skills.model.Skill;
 import nl.tudelft.skills.model.TaskInfo;
+import nl.tudelft.skills.repository.RegularTaskRepository;
 import nl.tudelft.skills.repository.TaskInfoRepository;
+import nl.tudelft.skills.repository.TaskRepository;
 
 @Service
 @AllArgsConstructor
 public class TaskInfoService {
 
 	private final TaskInfoRepository taskInfoRepository;
+	private final TaskRepository taskRepository;
+	private final RegularTaskRepository regularTaskRepository;
 
 	private final DTOConverter dtoConverter;
 
@@ -45,6 +53,43 @@ public class TaskInfoService {
 	public void moveSubtask(TaskInfo subtask, SubtaskMove move) {
 		subtask.setChoiceTask(dtoConverter.apply(move.getChoiceTask()));
 		taskInfoRepository.save(subtask);
+	}
+
+	/**
+	 * Move a subtask outside a choice task. The subtask can be moved to the same or a different skill, but
+	 * not to a different choice task.
+	 *
+	 * @param  choiceTask The choice task.
+	 * @param  subtask    The subtask.
+	 * @param  move       The TaskMove, describing the new skill and the task index for the move.
+	 * @return            The new regular task, created from the subtask.
+	 */
+	@Transactional
+	public RegularTask moveSubtaskOutsideChoiceTask(ChoiceTask choiceTask, TaskInfo subtask, TaskMove move) {
+		Skill newSkill = dtoConverter.apply(move.getSkill());
+
+		// Update other indices
+		newSkill.getTasks().stream().filter(t -> t.getIdx() >= move.getIndex())
+				.forEach(t -> t.setIdx(t.getIdx() + 1));
+		taskRepository.saveAll(newSkill.getTasks());
+
+		// Create new regular task
+		RegularTask task = RegularTask.builder().skill(newSkill).idx(move.getIndex()).build();
+		task.setTaskInfo(subtask);
+
+		// Take over paths and additions/removals from choice task
+		task.getPaths().addAll(choiceTask.getPaths());
+		task.getPersonsThatAddedTask().addAll(choiceTask.getPersonsThatAddedTask());
+		task.getPersonsThatRemovedTask().addAll(choiceTask.getPersonsThatRemovedTask());
+
+		task = regularTaskRepository.save(task);
+
+		// Adjust task info
+		subtask.setTask(task);
+		subtask.setChoiceTask(null);
+		taskInfoRepository.save(subtask);
+
+		return task;
 	}
 
 	@Transactional
