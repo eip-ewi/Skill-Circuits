@@ -94,11 +94,18 @@ public class EditionService {
 	public List<TaskStatsDTO> teacherStatsTaskLevel(Long id) {
 		List<Task> tasks = taskRepository.findAllBySkillSubmoduleModuleEditionId(id);
 
-		List<RegularTask> regularTasks = tasks.stream().filter(t -> t instanceof RegularTask)
-				.map(t -> (RegularTask) t).collect(Collectors.toList());
+		List<TaskInfo> taskInfos = tasks.stream().flatMap(t -> {
+			List<TaskInfo> info = new ArrayList<>();
+			if (t instanceof RegularTask) {
+				info = List.of(((RegularTask) t).getTaskInfo());
+			} else if (t instanceof ChoiceTask) {
+				info = ((ChoiceTask) t).getTasks();
+			}
+			return info.stream();
+		}).collect(Collectors.toList());
 
-		return regularTasks.stream().map(t -> {
-			Set<Long> usersCompletedTask = t.getTaskInfo().getCompletedBy().stream()
+		return taskInfos.stream().map(t -> {
+			Set<Long> usersCompletedTask = t.getCompletedBy().stream()
 					.map(c -> c.getPerson().getId())
 					.collect(Collectors.toSet());
 			Set<Long> studentsCompletedTask = usersCompletedTask.isEmpty() ? Set.of()
@@ -106,14 +113,17 @@ public class EditionService {
 							.filter(r -> r.getType().equals(RoleDetailsDTO.TypeEnum.STUDENT))
 							.map(r -> r.getPerson().getId()).collect(Collectors.toSet());
 
-			Set<Long> usersHaveTaskOnPath = t.getPaths().stream().flatMap(p -> pathPreferenceRepository
-					.findAllByPathId(p.getId()).stream().map(x -> x.getPerson().getId()))
+			Task taskCategory = t.getChoiceTask() == null ? t.getTask() : t.getChoiceTask();
+
+			Set<Long> usersHaveTaskOnPath = taskCategory.getPaths().stream()
+					.flatMap(p -> pathPreferenceRepository
+							.findAllByPathId(p.getId()).stream().map(x -> x.getPerson().getId()))
 					.collect(Collectors.toSet());
 			long numOfStudentsHaveTaskOnPath = usersHaveTaskOnPath.isEmpty() ? 0
 					: roleControllerApi.getRolesById(Set.of(id), usersHaveTaskOnPath).toStream()
 							.filter(r -> r.getType().equals(RoleDetailsDTO.TypeEnum.STUDENT)).count();
 
-			List<Long> peopleClickedLink = clickedLinkRepository.getByTask(t.getTaskInfo()).stream()
+			List<Long> peopleClickedLink = clickedLinkRepository.getByTask(t).stream()
 					.map(c -> c.getPerson().getId()).collect(Collectors.toList());
 
 			Set<Long> studentsClickedLink = peopleClickedLink.isEmpty() ? Set.of()
@@ -127,13 +137,13 @@ public class EditionService {
 			long studentsClickedAndCompleted = studentsCompletedTask.stream()
 					.filter(studentsClickedLink::contains).count();
 
-			return new TaskStatsDTO(t.getTaskInfo().getId(),
-					t.getTaskInfo().getName(),
-					t.getSkill().getName(),
-					t.getSkill().getCheckpoint() == null ? "No checkpoint"
-							: t.getSkill().getCheckpoint().getName(),
-					t.getSkill().getSubmodule().getName(),
-					t.getSkill().getSubmodule().getModule().getName(),
+			return new TaskStatsDTO(t.getId(),
+					t.getName(),
+					taskCategory.getSkill().getName(),
+					taskCategory.getSkill().getCheckpoint() == null ? "No checkpoint"
+							: taskCategory.getSkill().getCheckpoint().getName(),
+					taskCategory.getSkill().getSubmodule().getName(),
+					taskCategory.getSkill().getSubmodule().getModule().getName(),
 					studentsCompletedTask.size(),
 					numOfStudentsHaveTaskOnPath,
 					numOfStudentsClickedLink,
