@@ -1,14 +1,17 @@
 <script lang="ts">
     import type {Warning} from "../data/warning";
+    import {getAuthorisation} from "../logic/authorisation.svelte";
 
     let { warnings }: { warnings: Warning[] } = $props();
 </script>
 
 {#each warnings as warning}
-    <div class="warning">
-        <span class="fa-solid fa-triangle-exclamation"></span>
-        <p>{warning.message}</p>
-    </div>
+    {#if warning.viewModes.includes(getAuthorisation().viewMode)}
+        <div class="warning">
+            <span class="fa-solid fa-triangle-exclamation"></span>
+            <p>{warning.message}</p>
+        </div>
+    {/if}
 {/each}
 
 <style>
