@@ -145,6 +145,7 @@
     --on-warning-banner-colour: color-mix(in oklab, var(--warning-colour) 40%, black);
     --warning-banner-border: none;
     --warning-banner-border-radius: 1em;
+    --warning-pop-up-color: color-mix(in srgb, var(--warning-colour) 25%, var(--background-colour));
 
     /* Font */
     --main-font-family: "Roboto", system-ui, sans-serif;
