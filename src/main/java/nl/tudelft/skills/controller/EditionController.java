@@ -19,6 +19,7 @@ package nl.tudelft.skills.controller;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.http.HttpHeaders;
@@ -34,10 +35,7 @@ import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.librador.resolver.annotations.PathEntity;
 import nl.tudelft.skills.annotation.AuthenticatedSCPerson;
 import nl.tudelft.skills.dto.patch.EditionPatch;
-import nl.tudelft.skills.dto.view.EditionView;
-import nl.tudelft.skills.dto.view.EditionsView;
-import nl.tudelft.skills.dto.view.ManagedEditionView;
-import nl.tudelft.skills.dto.view.TaskStatsDTO;
+import nl.tudelft.skills.dto.view.*;
 import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelEditionView;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.SCPerson;
@@ -119,12 +117,13 @@ public class EditionController {
 		copyService.copyEdition(original, copy);
 	}
 
-	@GetMapping(value = "{id}/teacher_stats", produces = "text/csv")
+	@GetMapping(value = "{editionId}/task_stats", produces = "text/csv")
 	@ResponseBody
-	@PreAuthorize("@authorisationService.isTeacher()")
-	public ResponseEntity<String> showAllTaskStats(@PathVariable Long id) throws IOException {
-		List<TaskStatsDTO> teacherStats = editionService.teacherStatsTaskLevel(id);
+	@PreAuthorize("@authorisationService.isTeacher(#editionId)")
+	public ResponseEntity<String> showEditionTaskStats(@PathVariable long editionId) throws IOException {
+		List<TaskStatsDTO> teacherStats = editionService.teacherStatsTaskLevel(editionId);
 		StringWriter sw = new StringWriter();
+		EditionDetailsDTO editionDetails = editionService.getEditionById(editionId);
 		try (CSVWriter writer = new CSVWriter(sw)) {
 			// header
 			writer.writeNext(new String[] { "Task id", "Task name", "Skill name", "Checkpoint name",
@@ -145,7 +144,41 @@ public class EditionController {
 		}
 
 		return ResponseEntity.ok()
-				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"teacher_stats.csv\"")
+				.header(HttpHeaders.CONTENT_DISPOSITION,
+						"attachment; filename=\"task_stats_" + editionDetails.getCourse().getName() + "_"
+								+ editionDetails.getName() + ".csv\"")
+				.contentType(MediaType.valueOf("text/csv"))
+				.body(sw.toString());
+	}
+
+	@GetMapping(value = "{editionId}/student_stats", produces = "text/csv")
+	@ResponseBody
+	@PreAuthorize("@authorisationService.isTeacher(#editionId)")
+	public ResponseEntity<String> showEditionStudentStats(@PathVariable long editionId) throws IOException {
+		List<StudentStatsDTO> studentStats = editionService.teacherStatsStudentLevel(editionId);
+		StringWriter sw = new StringWriter();
+		EditionDetailsDTO editionDetails = editionService.getEditionById(editionId);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+		try (CSVWriter writer = new CSVWriter(sw)) {
+			// header
+			writer.writeNext(new String[] { "Student id", "Username", "Time of last task completion",
+					"Last completed task",
+					"Furthest checkpoint" });
+
+			// rows
+			for (StudentStatsDTO t : studentStats) {
+				writer.writeNext(new String[] { String.valueOf(t.getId()), t.getUserName(),
+						t.getLastCompletedTaskTimestamp() == null ? "No activity"
+								: t.getLastCompletedTaskTimestamp().format(formatter),
+						t.getLastCompletedTask(), t.getFurthestCheckpoint() });
+			}
+		}
+
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION,
+						"attachment; filename=\"student_stats_" + editionDetails.getCourse().getName() + "_"
+								+ editionDetails.getName() + ".csv\"")
 				.contentType(MediaType.valueOf("text/csv"))
 				.body(sw.toString());
 	}

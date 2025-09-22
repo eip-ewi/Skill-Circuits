@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.api.EditionControllerApi;
@@ -59,8 +60,10 @@ public class EditionService {
 
 	private final EditionRepository editionRepository;
 	private final PersonRepository personRepository;
-
+	private final TaskCompletionRepository taskCompletionRepository;
 	private final DTOConverter dtoConverter;
+	private final PersonService personService;
+	private final PersonControllerApi personControllerApi;
 
 	public EditionView getEdition(Long editionId) {
 		EditionDetailsDTO edition = requireNonNull(editionApi.getEditionById(editionId).block());
@@ -175,6 +178,44 @@ public class EditionService {
 		}).collect(Collectors.toList());
 	}
 
+	public List<StudentStatsDTO> teacherStatsStudentLevel(Long id) {
+		List<SCPerson> users = personRepository.findAll();
+		List<SCPerson> studentsInEdition = users.stream()
+				.filter(u -> requireNonNull(
+						roleControllerApi.getRolesById(Set.of(id), Set.of(u.getId())).collectList()
+								.block())
+						.getFirst().getType().equals(RoleDetailsDTO.TypeEnum.STUDENT))
+				.toList();
+
+		return studentsInEdition.stream().map(s -> {
+			PersonDetailsDTO personSummary = null;
+			try {
+				personSummary = personControllerApi.getPersonById(s.getId()).block();
+			} catch (WebClientResponseException ignored) {
+			}
+
+			Optional<TaskCompletion> lastCompleted = taskCompletionRepository
+					.findLastTaskCompletedForInEdition(s, id);
+			Set<TaskCompletion> taskCompletions = taskCompletionRepository.findAllByPersonAndEditionId(s, id);
+			Set<Checkpoint> checkpointsWithActivity = taskCompletions.stream()
+					.map(t -> t.getTask().getChoiceTask() == null ? t.getTask().getTask()
+							: t.getTask().getChoiceTask())
+					.filter(Objects::nonNull).map(t -> t.getSkill().getCheckpoint()).filter(Objects::nonNull)
+					.collect(Collectors.toSet());
+
+			Optional<Checkpoint> furthestCheckpoint = checkpointsWithActivity.stream()
+					.max(Comparator.comparing(Checkpoint::getDeadline));
+
+			return new StudentStatsDTO(
+					s.getId(),
+					personSummary == null ? "Unknown" : personSummary.getUsername(),
+					lastCompleted.map(TaskCompletion::getTimestamp).orElse(null),
+					lastCompleted.isEmpty() ? "No activity" : lastCompleted.get().getTask().getName(),
+					furthestCheckpoint.isEmpty() ? "No checkpoint started"
+							: furthestCheckpoint.get().getName());
+		}).collect(Collectors.toList());
+	}
+
 	public Set<Long> getManagedEditionIds(SCPerson person, boolean includeStale) {
 		Set<Long> managedEditions = new HashSet<>();
 		personRepository.findById(person.getId()).ifPresent(scPerson -> scPerson.getEditorInEditions()
@@ -229,6 +270,10 @@ public class EditionService {
 		allEditionIds.addAll(roleInNonHiddenEditionIds);
 		allEditionIds.addAll(managedEditionIds);
 		return allEditionIds;
+	}
+
+	public EditionDetailsDTO getEditionById(Long editionId) {
+		return editionApi.getEditionById(editionId).block();
 	}
 
 	public EditionsView getSortedEditions(SCPerson person) {
