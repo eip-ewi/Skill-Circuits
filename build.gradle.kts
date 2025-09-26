@@ -277,10 +277,6 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     testAnnotationProcessor("org.projectlombok:lombok")
 
-    // Sentry
-    implementation("io.sentry:sentry-spring-boot-starter:5.6.0")
-    implementation("io.sentry:sentry-logback:5.6.0")
-
     // CSV
     implementation("com.opencsv:opencsv:5.7.1")
 

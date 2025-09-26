@@ -62,8 +62,6 @@ public class EditionService {
 	private final PersonRepository personRepository;
 	private final TaskCompletionRepository taskCompletionRepository;
 	private final DTOConverter dtoConverter;
-	private final PersonService personService;
-	private final PersonControllerApi personControllerApi;
 
 	public EditionView getEdition(Long editionId) {
 		EditionDetailsDTO edition = requireNonNull(editionApi.getEditionById(editionId).block());
@@ -190,13 +188,13 @@ public class EditionService {
 		return studentsInEdition.stream().map(s -> {
 			PersonDetailsDTO personSummary = null;
 			try {
-				personSummary = personControllerApi.getPersonById(s.getId()).block();
+				personSummary = personApi.getPersonById(s.getId()).block();
 			} catch (WebClientResponseException ignored) {
 			}
 
-			Optional<TaskCompletion> lastCompleted = taskCompletionRepository
-					.findLastTaskCompletedForInEdition(s, id);
 			Set<TaskCompletion> taskCompletions = taskCompletionRepository.findAllByPersonAndEditionId(s, id);
+			Optional<TaskCompletion> lastCompleted = taskCompletions.stream()
+					.max(Comparator.comparing(TaskCompletion::getTimestamp));
 			Set<Checkpoint> checkpointsWithActivity = taskCompletions.stream()
 					.map(t -> t.getTask().getChoiceTask() == null ? t.getTask().getTask()
 							: t.getTask().getChoiceTask())

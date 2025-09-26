@@ -42,21 +42,6 @@ public interface TaskCompletionRepository extends JpaRepository<TaskCompletion, 
 	Optional<TaskCompletion> findLastTaskCompletedFor(@Param("person") SCPerson person);
 
 	@Query("""
-			select completion from TaskCompletion completion
-			where completion.person.id = :#{#person.id}
-			and completion.task.id in (
-			    select task.taskInfo.id from RegularTask task where task.skill.submodule.module.edition.id = :#{#editionId}
-			    union
-			    select subtask.id from ChoiceTask choiceTask
-			    inner join choiceTask.tasks subtask
-			    where choiceTask.skill.submodule.module.edition.id = :#{#editionId}
-			)
-			order by completion.timestamp desc limit 1
-			""")
-	Optional<TaskCompletion> findLastTaskCompletedForInEdition(@Param("person") SCPerson person,
-			@Param("editionId") Long editionId);
-
-	@Query("""
 			select completion.task.id from TaskCompletion completion
 			where completion.person.id = :#{#person.id}
 			""")
