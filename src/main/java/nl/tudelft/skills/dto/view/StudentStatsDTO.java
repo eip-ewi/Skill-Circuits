@@ -36,6 +36,10 @@ public class StudentStatsDTO {
 	@NotNull
 	private String userName;
 
+	private String chosenPath;
+
+	private int numberOfCompletedTasks;
+
 	private LocalDateTime lastCompletedTaskTimestamp;
 
 	private String lastCompletedTask;

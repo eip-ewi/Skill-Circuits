@@ -162,13 +162,15 @@ public class EditionController {
 
 		try (CSVWriter writer = new CSVWriter(sw)) {
 			// header
-			writer.writeNext(new String[] { "Student id", "Username", "Time of last task completion",
+			writer.writeNext(new String[] { "Student id", "Username", "Chosen path", "Completed tasks",
+					"Time of last task completion",
 					"Last completed task",
 					"Furthest checkpoint" });
 
 			// rows
 			for (StudentStatsDTO t : studentStats) {
-				writer.writeNext(new String[] { String.valueOf(t.getId()), t.getUserName(),
+				writer.writeNext(new String[] { String.valueOf(t.getId()), t.getUserName(), t.getChosenPath(),
+						String.valueOf(t.getNumberOfCompletedTasks()),
 						t.getLastCompletedTaskTimestamp() == null ? "No activity"
 								: t.getLastCompletedTaskTimestamp().format(formatter),
 						t.getLastCompletedTask(), t.getFurthestCheckpoint() });

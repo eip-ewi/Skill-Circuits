@@ -192,6 +192,9 @@ public class EditionService {
 			} catch (WebClientResponseException ignored) {
 			}
 
+			Optional<PathPreference> pathPreference = s.getPathPreferences().stream()
+					.filter(p -> Objects.equals(p.getEdition().getId(), id)).findFirst();
+
 			Set<TaskCompletion> taskCompletions = taskCompletionRepository.findAllByPersonAndEditionId(s, id);
 			Optional<TaskCompletion> lastCompleted = taskCompletions.stream()
 					.max(Comparator.comparing(TaskCompletion::getTimestamp));
@@ -207,6 +210,8 @@ public class EditionService {
 			return new StudentStatsDTO(
 					s.getId(),
 					personSummary == null ? "Unknown" : personSummary.getUsername(),
+					pathPreference.isEmpty() ? "Path not chosen" : pathPreference.get().getPath().getName(),
+					taskCompletions.size(),
 					lastCompleted.map(TaskCompletion::getTimestamp).orElse(null),
 					lastCompleted.isEmpty() ? "No activity" : lastCompleted.get().getTask().getName(),
 					furthestCheckpoint.isEmpty() ? "No checkpoint started"
