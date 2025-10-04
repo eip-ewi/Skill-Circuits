@@ -5,6 +5,7 @@ import type {Authorisation} from "../dto/auth/authorisation";
 import {withCsrf} from "./csrf";
 import {getEdition} from "./edition/edition.svelte";
 import {EditionLevel, ModuleLevel} from "../data/level";
+import {getAuthenticatedPerson} from "./authentication.svelte";
 
 let authorisation: Authorisation = $state({ viewMode: "VIEWER", isAdmin: false, managedCourses: [], managedEditions: [] });
 
@@ -51,6 +52,14 @@ export function isEditorForCircuit() {
         return authorisation.managedEditions.includes(getEdition().id);
     }
     return false;
+}
+
+export function isTeacherForCircuit() {
+    const person = getAuthenticatedPerson();
+    if (!person) {
+        return false;
+    }
+    return getEdition().teachers.some(t => t.id === person.id);
 }
 
 export function isEditorForAny() {
