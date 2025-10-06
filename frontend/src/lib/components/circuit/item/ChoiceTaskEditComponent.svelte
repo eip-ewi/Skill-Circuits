@@ -98,7 +98,7 @@
         margin-bottom: .5em;
         margin-top: 1em;
         min-height: 2em;
-        min-width: 25rem;
+        min-width: 28em;
         width: 100%;
     }
 
