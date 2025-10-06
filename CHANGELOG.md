@@ -12,6 +12,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## Added
+
+## Changed
+- [Editor] On edit, the minTasks value of a choice task is clipped to be inside the correct bounds.
+- [Everyone] The action indicator is changed to in the "glass" style.
+- [Student] The cycle warning is not shown to students anymore.
+
+## Fixed
+
+## [2.2.8]
+
+## Added
 - [Everyone] Functionality to add and complete choice tasks. Choice tasks contain a set of regular tasks, of which at least k need to be completed.
 
 ## Changed
