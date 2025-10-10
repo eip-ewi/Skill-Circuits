@@ -125,13 +125,11 @@ public class EditionController {
 		StringWriter sw = new StringWriter();
 		EditionDetailsDTO editionDetails = editionService.getEditionById(editionId);
 		try (CSVWriter writer = new CSVWriter(sw)) {
-			// header
 			writer.writeNext(new String[] { "Task id", "Task name", "Skill name", "Checkpoint name",
 					"Submodule name", "Module name", "Student completions",
 					"Students with this task on their path", "Student link clicks",
 					"Unique student link clicks", "Students clicked the link and completed" });
 
-			// rows
 			for (TaskStatsDTO t : teacherStats) {
 				writer.writeNext(new String[] { String.valueOf(t.getId()), t.getTaskName(), t.getSkillName(),
 						t.getCheckpointName(), t.getSubModuleName(), t.getModuleName(),
@@ -161,13 +159,11 @@ public class EditionController {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 		try (CSVWriter writer = new CSVWriter(sw)) {
-			// header
 			writer.writeNext(new String[] { "Student id", "Username", "Chosen path", "Completed tasks",
 					"Time of last task completion",
 					"Last completed task",
 					"Furthest checkpoint" });
 
-			// rows
 			for (StudentStatsDTO t : studentStats) {
 				writer.writeNext(new String[] { String.valueOf(t.getId()), t.getUserName(), t.getChosenPath(),
 						String.valueOf(t.getNumberOfCompletedTasks()),

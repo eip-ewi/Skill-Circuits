@@ -97,7 +97,8 @@ public class EditionService {
 	 * inclusions.
 	 *
 	 * @param  id The id of the edition, the statistics needs to be collected for
-	 * @return    a list of TaskStatsDTO objects, containing the task level statistics for the given edition
+	 * @return    a list of {@link TaskStatsDTO} objects, containing the task level statistics for the given
+	 *            edition
 	 */
 	public List<TaskStatsDTO> teacherStatsTaskLevel(Long id) {
 		List<Task> tasks = taskRepository.findAllBySkillSubmoduleModuleEditionId(id);
@@ -176,8 +177,19 @@ public class EditionService {
 		}).collect(Collectors.toList());
 	}
 
+	/**
+	 * Collects statistics for each student in a given edition. The statistics contain information about the
+	 * username of the student, the chosen path, number of completed tasks by the student, time of last task
+	 * completion, name of last completed task, name of the furthest checkpoint in which the student completed
+	 * a task in.
+	 *
+	 * @param  id The id of the edition, the statistics needs to be collected for
+	 * @return    a list of {@link StudentStatsDTO} objects, containing the student level statistics for the
+	 *            given edition
+	 */
 	public List<StudentStatsDTO> teacherStatsStudentLevel(Long id) {
 		List<SCPerson> users = personRepository.findAll();
+		// Collect the students in the edition
 		List<SCPerson> studentsInEdition = users.stream()
 				.filter(u -> requireNonNull(
 						roleControllerApi.getRolesById(Set.of(id), Set.of(u.getId())).collectList()
@@ -192,12 +204,15 @@ public class EditionService {
 			} catch (WebClientResponseException ignored) {
 			}
 
+			// Path preference of the student in the given edition
 			Optional<PathPreference> pathPreference = s.getPathPreferences().stream()
 					.filter(p -> Objects.equals(p.getEdition().getId(), id)).findFirst();
 
 			Set<TaskCompletion> taskCompletions = taskCompletionRepository.findAllByPersonAndEditionId(s, id);
 			Optional<TaskCompletion> lastCompleted = taskCompletions.stream()
 					.max(Comparator.comparing(TaskCompletion::getTimestamp));
+
+			// Find checkpoints of the completed tasks
 			Set<Checkpoint> checkpointsWithActivity = taskCompletions.stream()
 					.map(t -> t.getTask().getChoiceTask() == null ? t.getTask().getTask()
 							: t.getTask().getChoiceTask())
