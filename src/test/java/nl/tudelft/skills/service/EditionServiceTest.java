@@ -377,7 +377,37 @@ public class EditionServiceTest {
 		List<StudentStatsDTO> studentStats = editionService.teacherStatsStudentLevel(1L);
 
 		assertThat(studentStats).isEqualTo(
-				List.of(new StudentStatsDTO(1L, "Unknown", null, "No activity", "No checkpoint started")));
+				List.of(new StudentStatsDTO(1L, "Unknown", "Path not chosen", 0, null, "No activity",
+						"No checkpoint started")));
+	}
+
+	@Test
+	public void pathChosenStudentStats() {
+		Path path1 = Path.builder().id(1L).name("Path 1").build();
+		Path path2 = Path.builder().id(2L).name("Path 2").build();
+
+		PathPreference pathPreference1 = PathPreference.builder().id(1L).path(path1)
+				.edition(SCEdition.builder().id(1L).build())
+				.build();
+		PathPreference pathPreference2 = PathPreference.builder().id(2L).path(path2)
+				.edition(SCEdition.builder().id(2L).build())
+				.build();
+		SCPerson student = SCPerson.builder().id(1L).pathPreferences(Set.of(pathPreference2, pathPreference1))
+				.build();
+
+		RoleDetailsDTO role1 = new RoleDetailsDTO();
+		role1.setType(RoleDetailsDTO.TypeEnum.STUDENT);
+
+		when(personRepository.findAll()).thenReturn(List.of(student));
+		when(roleControllerApi.getRolesById(Set.of(1L), Set.of(1L))).thenReturn(Flux.just(role1));
+		when(personControllerApi.getPersonById(1L)).thenThrow(WebClientResponseException.class);
+		when(taskCompletionRepository.findAllByPersonAndEditionId(any(), anyLong())).thenReturn(Set.of());
+
+		List<StudentStatsDTO> studentStats = editionService.teacherStatsStudentLevel(1L);
+
+		assertThat(studentStats).isEqualTo(
+				List.of(new StudentStatsDTO(1L, "Unknown", "Path 1", 0, null, "No activity",
+						"No checkpoint started")));
 	}
 
 	@Test
@@ -436,7 +466,7 @@ public class EditionServiceTest {
 
 		List<StudentStatsDTO> studentStats = editionService.teacherStatsStudentLevel(1L);
 
-		assertThat(studentStats).isEqualTo(List.of(new StudentStatsDTO(1L, "student",
+		assertThat(studentStats).isEqualTo(List.of(new StudentStatsDTO(1L, "student", "Path not chosen", 3,
 				LocalDateTime.of(2025, 2, 1, 10, 10), "Task 3", "Checkpoint 1")));
 	}
 
@@ -506,9 +536,10 @@ public class EditionServiceTest {
 
 		List<StudentStatsDTO> studentStats = editionService.teacherStatsStudentLevel(1L);
 
-		assertThat(studentStats).isEqualTo(List.of(new StudentStatsDTO(1L, "student1",
+		assertThat(studentStats).isEqualTo(List.of(new StudentStatsDTO(1L, "student1", "Path not chosen", 3,
 				LocalDateTime.of(2025, 8, 1, 10, 10), "Task 2", "Checkpoint 1"),
-				new StudentStatsDTO(2L, "student2", LocalDateTime.of(2024, 4, 1, 10, 10), "Task 3",
+				new StudentStatsDTO(2L, "student2", "Path not chosen", 1,
+						LocalDateTime.of(2024, 4, 1, 10, 10), "Task 3",
 						"No checkpoint started")));
 	}
 
