@@ -59,13 +59,12 @@ public class TaskInfoService {
 	 * Move a subtask outside a choice task. The subtask can be moved to the same or a different skill, but
 	 * not to a different choice task.
 	 *
-	 * @param  choiceTask The choice task.
-	 * @param  subtask    The subtask.
-	 * @param  move       The TaskMove, describing the new skill and the task index for the move.
-	 * @return            The new regular task, created from the subtask.
+	 * @param  subtask The subtask.
+	 * @param  move    The TaskMove, describing the new skill and the task index for the move.
+	 * @return         The new regular task, created from the subtask.
 	 */
 	@Transactional
-	public RegularTask moveSubtaskOutsideChoiceTask(ChoiceTask choiceTask, TaskInfo subtask, TaskMove move) {
+	public RegularTask moveSubtaskOutsideChoiceTask(TaskInfo subtask, TaskMove move) {
 		Skill newSkill = dtoConverter.apply(move.getSkill());
 
 		// Update other indices
@@ -78,6 +77,7 @@ public class TaskInfoService {
 		task.setTaskInfo(subtask);
 
 		// Take over paths and additions/removals from choice task
+		ChoiceTask choiceTask = subtask.getChoiceTask();
 		task.getPaths().addAll(choiceTask.getPaths());
 		task.getPersonsThatAddedTask().addAll(choiceTask.getPersonsThatAddedTask());
 		task.getPersonsThatRemovedTask().addAll(choiceTask.getPersonsThatRemovedTask());

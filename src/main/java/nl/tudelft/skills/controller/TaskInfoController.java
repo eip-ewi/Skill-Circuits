@@ -61,15 +61,15 @@ public class TaskInfoController {
 		taskInfoService.moveSubtask(subtask, move);
 	}
 
-	@PatchMapping("{choiceTask}/move-subtask/{subtask}")
+	@PatchMapping("{subtask}/skill")
 	@PreAuthorize("@authorisationService.canEditSkill(#move.skill) and @authorisationService.canEditSkill(#subtask.choiceTask.skill)"
 			+
-			"and @authorisationService.canEditTaskInfo(#subtask) and @authorisationService.canEditTask(#choiceTask)")
+			"and @authorisationService.canEditTaskInfo(#subtask) and @authorisationService.canEditTask(#subtask.choiceTask)")
 	public ModuleLevelTaskView.Regular moveSubtaskOutsideChoiceTask(
-			@AuthenticatedSCPerson SCPerson person, @PathEntity ChoiceTask choiceTask,
-			@PathEntity TaskInfo subtask, @RequestBody TaskMove move) {
+			@AuthenticatedSCPerson SCPerson person, @PathEntity TaskInfo subtask,
+			@RequestBody TaskMove move) {
 		return (ModuleLevelTaskView.Regular) moduleCircuitService
-				.convertToTaskView(taskInfoService.moveSubtaskOutsideChoiceTask(choiceTask, subtask, move),
+				.convertToTaskView(taskInfoService.moveSubtaskOutsideChoiceTask(subtask, move),
 						person);
 	}
 

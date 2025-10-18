@@ -226,7 +226,7 @@ export async function moveTaskInsideOfChoiceTask(choiceTask: ChoiceTaskItem, sub
 }
 
 export async function moveTaskOutsideOfChoiceTask(choiceTask: ChoiceTaskItem, subtask: ChoiceTaskChoice, newIndex: number, newSkill: SkillBlock) {
-    let response = await fetch(`/api/task-info/${choiceTask.id}/move-subtask/${subtask.infoId}`, withCsrf({
+    let response = await fetch(`/api/task-info/${subtask.infoId}/skill`, withCsrf({
         method: "PATCH",
         headers: {
             "Content-Type": "application/json",
