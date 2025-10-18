@@ -84,6 +84,11 @@
     }
 
     async function handleTaskDrop(event: DragEvent, newIndex: number) {
+        // Tasks can only be dropped into skills
+        if (block.blockType !== "skill") {
+            return;
+        }
+
         let itemId = parseInt(event.dataTransfer!.getData("skill-circuits/item"));
         let item = getItem(itemId!) as TaskItem;
 
@@ -96,11 +101,11 @@
                 newIndex--;
             }
 
-            await editTaskIndex(item, newIndex, (<SkillBlock> block).items);
+            await editTaskIndex(item, newIndex, block.items);
 
         } else {
 
-            await moveTask(item, <SkillBlock> block, newIndex, fromBlock as SkillBlock);
+            await moveTask(item, block, newIndex, fromBlock as SkillBlock);
 
         }
     }
