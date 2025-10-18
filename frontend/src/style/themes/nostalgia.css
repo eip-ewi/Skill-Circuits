@@ -136,7 +136,9 @@
     --on-warning-banner-colour: white;
     --warning-banner-border: none;
     --warning-banner-border-radius: 0;
-    --warning-pop-up-color: var(--warning-banner-colour);
+
+    /* Dialogs */
+    --dialog-border-radius: 0;
 
     /* Font */
     --main-font-family: noto sans, system-ui, sans-serif;

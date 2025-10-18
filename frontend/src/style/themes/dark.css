@@ -88,5 +88,4 @@
     /* Warning banners */
     --warning-banner-colour: color-mix(in srgb, var(--warning-colour) 50%, transparent);
     --on-warning-banner-colour: color-mix(in oklab, var(--warning-colour) 25%, white);
-    --warning-pop-up-color: color-mix(in srgb, var(--warning-colour) 50%, var(--background-colour));
 }
