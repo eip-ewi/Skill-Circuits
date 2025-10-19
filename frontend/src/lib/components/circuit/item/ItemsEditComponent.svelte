@@ -75,12 +75,17 @@
     }
 
     async function handleSubTaskDrop(event: DragEvent, newIndex: number) {
+        // Tasks can only be dropped into skills
+        if (block.blockType !== "skill") {
+            return;
+        }
+
         let taskInfoId = parseInt(event.dataTransfer!.getData("skill-circuits/task-info"));
         let oldChoiceTask = getBlocks().flatMap(block => block.items.filter(item => item.itemType === "task" && item.taskType === "choice"))
             .find(choiceTask => choiceTask.tasks.some(info => info.infoId === taskInfoId))!;
         let subtask = oldChoiceTask.tasks.find(info => info.infoId === taskInfoId)!;
 
-        await moveTaskOutsideOfChoiceTask(oldChoiceTask, subtask, newIndex, <SkillBlock> block);
+        await moveTaskOutsideOfChoiceTask(oldChoiceTask, subtask, newIndex, block);
     }
 
     async function handleTaskDrop(event: DragEvent, newIndex: number) {
