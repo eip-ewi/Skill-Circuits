@@ -146,6 +146,9 @@
     --warning-banner-border: none;
     --warning-banner-border-radius: 1em;
 
+    /* Dialogs */
+    --dialog-border-radius: 1em;
+
     /* Font */
     --main-font-family: "Roboto", system-ui, sans-serif;
 
