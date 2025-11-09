@@ -27,10 +27,6 @@
         }
     }
 
-    function openThemeDialog() {
-        (document.getElementById("theme-select") as HTMLDialogElement).showModal();
-    }
-
     function shrinkLeftMargin(node: HTMLElement, params: { delay?: number }) {
         return {
             delay: params.delay || 0,
@@ -159,9 +155,9 @@
                             <span>Log out</span>
                         </button>
                     </form>
-                    <button class="button" onclick={openThemeDialog}>
-                        <span class="icon fa-solid fa-palette"></span>
-                        <span>Theme</span>
+                    <button class="button" onclick={ () => loadPage(`/settings`) }>
+                        <span class="icon fa-solid fa-gear"></span>
+                        <span>Settings</span>
                     </button>
                     {#if !canEditCircuit() && isLevel(EditionLevel)}
                         <WithConfirmationDialog icon="fa-solid fa-repeat" action="Reset progress" onconfirm={ () => resetProgress() }>
@@ -208,8 +204,6 @@
             </div>
         {/if}
     </div>
-
-    <ThemeSelectComponent></ThemeSelectComponent>
 {/if}
 
 
