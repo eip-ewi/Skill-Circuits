@@ -48,13 +48,13 @@
 
 <style>
     .dialog {
-        border-radius: 1em;
+        border-radius: var(--dialog-border-radius);
         position: fixed;
         left: 50%;
         top: 40%;
         transform: translate(-50%, -50%);
         outline: none;
-        padding: 2rem 2rem 4rem;
+        padding: 2em 2em 4em;
         max-height: 70vh;
     }
 
@@ -64,7 +64,7 @@
     }
 
     .dialog::backdrop {
-        backdrop-filter: blur(.15rem);
+        backdrop-filter: blur(.15em);
         background-color: hsla(0deg 0% 0% / .05);
         -ms-transform: translate3d(0,0,0);
         transform: translate3d(0,0,0);
@@ -73,7 +73,7 @@
     #close_changelog {
         display: grid;
         place-items: center;
-        height: 4rem;
+        height: 4em;
     }
 
     #title {
@@ -88,15 +88,15 @@
     }
 
     .release_description{
-        margin-bottom: 2rem;
+        margin-bottom: 2em;
     }
 
     :global(.release_description ul) {
-        padding-left: 1.5rem;
+        padding-left: 1.5em;
     }
 
     :global(.release_description h2){
-        padding-top: 1rem;
+        padding-top: 1em;
         font-size: var(--font-size-500);
         font-weight: 700;
     }

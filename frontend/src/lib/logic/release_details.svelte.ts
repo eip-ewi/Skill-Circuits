@@ -13,16 +13,16 @@ export async function fetchReleaseDetails() {
     releaseDetails = await response.json();
 }
 
-export async function versionUpdate(){
+export async function versionUpdate() {
     await fetch(`/api/user-version`, withCsrf({
         method: "PATCH",
         headers: {
             "Content-Type": "application/json",
         },
     }));
-    releaseDetails = []
+    releaseDetails = [];
 }
 
-export function showChangelog():boolean{
-    return releaseDetails.length !== 0
+export function showChangelog(): boolean {
+    return releaseDetails.length !== 0;
 }
