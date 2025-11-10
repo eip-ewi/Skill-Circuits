@@ -29,6 +29,7 @@ import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.api.PersonControllerApi;
 import nl.tudelft.labracore.api.dto.PersonSummaryDTO;
 import nl.tudelft.skills.enums.ViewMode;
+import nl.tudelft.skills.model.PersonalPreferences;
 import nl.tudelft.skills.model.SCPerson;
 import nl.tudelft.skills.model.bookmark.PersonalBookmarkList;
 import nl.tudelft.skills.repository.PersonRepository;
@@ -49,12 +50,15 @@ public class SCPersonService {
 
 			boolean isEmployee = person.getDefaultRole() != PersonSummaryDTO.DefaultRoleEnum.STUDENT;
 			SCPerson scPerson = SCPerson.builder().id(person.getId())
-					.viewMode(isEmployee ? ViewMode.EDITOR : ViewMode.VIEWER).build();
+					.viewMode(isEmployee ? ViewMode.EDITOR : ViewMode.VIEWER)
+					.build();
 
 			scPerson.setBookmarkLists(Set.of(PersonalBookmarkList.builder()
 					.name("My bookmarks")
 					.person(scPerson)
 					.build()));
+
+			scPerson.setPreferences(PersonalPreferences.builder().person(scPerson).build());
 
 			// Attempt to find again in case the person was already created in the meantime
 			return personRepository.findById(personId).orElseGet(() -> personRepository.save(scPerson));

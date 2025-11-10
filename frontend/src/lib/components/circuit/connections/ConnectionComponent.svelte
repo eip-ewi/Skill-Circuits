@@ -8,7 +8,6 @@
     import {isCompleted} from "../../../logic/circuit/skill_state/completion";
     import {getCircuit} from "../../../logic/circuit/circuit.svelte";
     import {onMount, tick} from "svelte";
-    import {getTheme} from "../../../logic/theme.svelte";
 
     let { from, to }: { from: Block, to: Block } = $props();
 
@@ -30,7 +29,7 @@
     });
 
     $effect(() => {
-        getTheme();
+        // TODO: check if get theme is needed here
         tick().then(() => {
             radius = getDefinedRadius();
         });

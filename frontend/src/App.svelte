@@ -8,7 +8,6 @@
     import SessionComponent from "./lib/components/SessionComponent.svelte";
     import HeaderComponent from "./lib/components/HeaderComponent.svelte";
     import {fetchAuthorisation} from "./lib/logic/authorisation.svelte";
-    import {getTheme} from "./lib/logic/theme.svelte";
     import FooterComponent from "./lib/components/FooterComponent.svelte";
     import {fetchReleaseDetails} from "./lib/logic/release_details.svelte";
 
@@ -18,11 +17,17 @@
         root.setAttribute("data-theme", theme.name);
         root.setAttribute("data-colour-scheme", theme.colourScheme);
     });
+    import {fetchPreferences, getTheme, setThemeProperties} from "./lib/logic/preferences.svelte";
+    import {lightTheme} from "./lib/data/theme";
 
     $effect(() => {
         if (isAuthenticated()) {
             fetchAuthorisation().then(() => {});
             fetchReleaseDetails().then(() => {});
+            fetchPreferences().then(() => { setThemeProperties(getTheme()) });
+        } else {
+            // Light theme is default
+            setThemeProperties(lightTheme);
         }
     })
 </script>

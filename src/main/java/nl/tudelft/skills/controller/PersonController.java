@@ -20,14 +20,16 @@ package nl.tudelft.skills.controller;
 import java.util.List;
 
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.api.dto.PersonSummaryDTO;
+import nl.tudelft.skills.annotation.AuthenticatedSCPerson;
+import nl.tudelft.skills.dto.view.PersonalPreferencesView;
+import nl.tudelft.skills.enums.Theme;
+import nl.tudelft.skills.model.SCPerson;
 import nl.tudelft.skills.service.PersonService;
+import nl.tudelft.skills.service.PersonalPreferencesService;
 
 @RestController
 @AllArgsConstructor
@@ -35,6 +37,7 @@ import nl.tudelft.skills.service.PersonService;
 public class PersonController {
 
 	private final PersonService personService;
+	private final PersonalPreferencesService personalPreferencesService;
 
 	@GetMapping("search")
 	@PreAuthorize("@authorisationService.canSearchForPeople()")
@@ -42,4 +45,23 @@ public class PersonController {
 		return personService.searchForPeople(query);
 	}
 
+	@GetMapping("preferences")
+	public PersonalPreferencesView getPreferences(@AuthenticatedSCPerson SCPerson scPerson) {
+		return personalPreferencesService
+				.convertToPreferencesView(personalPreferencesService.getPreferencesOfPerson(scPerson));
+	}
+
+	@PatchMapping("preferences/blur")
+	public PersonalPreferencesView setBlurSkillsPreference(@AuthenticatedSCPerson SCPerson scPerson,
+			@RequestParam boolean blurSkills) {
+		return personalPreferencesService
+				.convertToPreferencesView(personalPreferencesService.setBlurSkills(scPerson, blurSkills));
+	}
+
+	@PatchMapping("preferences/theme")
+	public PersonalPreferencesView setTheme(@AuthenticatedSCPerson SCPerson scPerson,
+			@RequestParam Theme theme) {
+		return personalPreferencesService
+				.convertToPreferencesView(personalPreferencesService.setTheme(scPerson, theme));
+	}
 }

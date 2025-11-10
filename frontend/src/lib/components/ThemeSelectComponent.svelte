@@ -1,7 +1,7 @@
 <script lang="ts">
     import {availableThemes} from "../data/theme";
-    import {setTheme} from "../logic/theme.svelte";
     import Button from "./util/Button.svelte";
+    import {setTheme} from "../logic/preferences.svelte";
 </script>
 
 <div class="content">
@@ -15,16 +15,10 @@
 </div>
 
 <style>
-    h2 {
-        font-size: var(--font-size-500);
-        font-weight: 700;
-    }
-
     .content {
         display: grid;
         gap: 2em;
         min-width: 20em;
-        padding: 1em 0;
     }
 
     .themes {
