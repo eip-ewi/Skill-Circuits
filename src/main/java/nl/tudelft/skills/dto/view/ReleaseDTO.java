@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.old.view;
+package nl.tudelft.skills.dto.view;
 
 import java.time.Instant;
 

@@ -25,7 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import nl.tudelft.skills.dto.old.view.ReleaseDTO;
+import nl.tudelft.skills.dto.view.ReleaseDTO;
 
 @Service
 public class GitLabReleaseClient {

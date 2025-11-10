@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 
 import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.lib.security.user.Person;
-import nl.tudelft.skills.dto.old.view.ReleaseDTO;
+import nl.tudelft.skills.dto.view.ReleaseDTO;
 import nl.tudelft.skills.dto.view.ReleaseDetailsView;
 import nl.tudelft.skills.model.SCPerson;
 import nl.tudelft.skills.model.UserVersion;
