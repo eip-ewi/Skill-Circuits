@@ -5,7 +5,7 @@
     import {getBlocks, getPlacedBlocks, getVisibleBlocks} from "../../../logic/circuit/circuit.svelte";
     import moment from "moment";
     import {isCompleted} from "../../../logic/circuit/skill_state/completion";
-    import {canEditCircuit} from "../../../logic/authorisation.svelte";
+    import {hasEditorRights} from "../../../logic/authorisation.svelte";
     import {getFirstUncompletedPastCheckpoint, getNextCheckpoint, getVisibleCheckpoints} from "../../../logic/edition/edition.svelte";
     import Link from "../../util/Link.svelte";
 
@@ -13,10 +13,10 @@
 
     let skills: SkillBlock[] = $derived(getVisibleBlocks().filter(block => block.blockType === "skill").filter(block => block.checkpoint === checkpoint.id));
 
-    let completed: boolean = $derived(!canEditCircuit() && !skills.some(skill => !isCompleted(skill)));
+    let completed: boolean = $derived(!hasEditorRights() && !skills.some(skill => !isCompleted(skill)));
     let passed: boolean = $derived(moment().isAfter(moment(checkpoint.deadline)));
-    let focused: boolean = $derived(canEditCircuit() || passed || completed || getNextCheckpoint()?.id === checkpoint.id);
-    let warn: boolean = $derived(!canEditCircuit() && passed && !completed && getFirstUncompletedPastCheckpoint()?.id === checkpoint.id);
+    let focused: boolean = $derived(hasEditorRights() || passed || completed || getNextCheckpoint()?.id === checkpoint.id);
+    let warn: boolean = $derived(!hasEditorRights() && passed && !completed && getFirstUncompletedPastCheckpoint()?.id === checkpoint.id);
 
     let row: number = $derived(Math.max(...skills.map(skill => skill.row!)));
 

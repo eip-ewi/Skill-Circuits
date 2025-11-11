@@ -1,5 +1,5 @@
 import type {SimpleAuth} from "../dto/auth/simple";
-import {getLevel, isLevel} from "./circuit/level.svelte";
+import {getLevel, isLevel, isOnCircuit} from "./circuit/level.svelte";
 import {getCircuit} from "./circuit/circuit.svelte";
 import type {Authorisation} from "../dto/auth/authorisation";
 import {withCsrf} from "./csrf";
@@ -44,6 +44,17 @@ export function canEditCircuit() {
         return true;
     }
     return isEditorForCircuit();
+}
+
+export function hasEditorRights() {
+    if (isOnCircuit()) {
+        return canEditCircuit();
+    }
+    return isViewModeAuthorisedToEdit();
+}
+
+export function isViewModeAuthorisedToEdit() : boolean {
+    return authorisation.viewMode === "EDITOR" || authorisation.viewMode === "ADMIN";
 }
 
 export function isEditorForCircuit() {
