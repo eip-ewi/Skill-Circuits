@@ -17,18 +17,15 @@
  */
 package nl.tudelft.skills.service;
 
-import static java.util.Objects.requireNonNull;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.api.PersonControllerApi;
 import nl.tudelft.labracore.api.RoleControllerApi;
-import nl.tudelft.labracore.api.dto.PersonDetailsDTO;
+import nl.tudelft.labracore.api.dto.PersonSummaryDTO;
 import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
 import nl.tudelft.skills.dto.stats.StudentStatsDTO;
 import nl.tudelft.skills.dto.stats.TaskStatsDTO;
@@ -143,21 +140,15 @@ public class StatsService {
 	 *            given edition
 	 */
 	public List<StudentStatsDTO> teacherStatsStudentLevel(Long id) {
-		List<SCPerson> users = personRepository.findAll();
-		// Collect the students in the edition
-		List<SCPerson> studentsInEdition = users.stream()
-				.filter(u -> requireNonNull(
-						roleControllerApi.getRolesById(Set.of(id), Set.of(u.getId())).collectList()
-								.block())
-						.getFirst().getType().equals(RoleDetailsDTO.TypeEnum.STUDENT))
-				.toList();
+		List<PersonSummaryDTO> studentsInEdition = personApi.getPeopleByEditionAndRoleType(id, "STUDENT")
+				.collectList().block();
+		List<Long> studentIds = studentsInEdition.stream().map(PersonSummaryDTO::getId)
+				.collect(Collectors.toList());
+		List<SCPerson> studentsInEditionSCPerson = personRepository.findAllById(studentIds);
 
-		return studentsInEdition.stream().map(s -> {
-			PersonDetailsDTO personSummary = null;
-			try {
-				personSummary = personApi.getPersonById(s.getId()).block();
-			} catch (WebClientResponseException ignored) {
-			}
+		return studentsInEditionSCPerson.stream().map(s -> {
+			Optional<PersonSummaryDTO> personSummary = studentsInEdition.stream()
+					.filter(x -> x.getId().equals(s.getId())).findAny();
 
 			// Path preference of the student in the given edition
 			Optional<PathPreference> pathPreference = s.getPathPreferences().stream()
@@ -179,7 +170,7 @@ public class StatsService {
 
 			return new StudentStatsDTO(
 					s.getId(),
-					personSummary == null ? "Unknown" : personSummary.getUsername(),
+					personSummary.map(PersonSummaryDTO::getUsername).orElse("Unknown"),
 					pathPreference.isEmpty() ? "Path not chosen" : pathPreference.get().getPath().getName(),
 					taskCompletions.size(),
 					lastCompleted.map(TaskCompletion::getTimestamp).orElse(null),

@@ -29,11 +29,9 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import nl.tudelft.labracore.api.PersonControllerApi;
 import nl.tudelft.labracore.api.RoleControllerApi;
-import nl.tudelft.labracore.api.dto.PersonDetailsDTO;
 import nl.tudelft.labracore.api.dto.PersonSummaryDTO;
 import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
 import nl.tudelft.skills.dto.stats.StudentStatsDTO;
@@ -42,7 +40,6 @@ import nl.tudelft.skills.enums.TaskType;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.*;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @Transactional
 @SpringBootTest()
@@ -180,7 +177,11 @@ public class StatsServiceTest {
 	public void completionTaskStats() {
 		TaskInfo read12Info = TaskInfo.builder().id(1L).name("Read chapter 1.2")
 				.time(7).type(TaskType.READING)
-				.completedBy(Set.of(TaskCompletion.builder().person(new SCPerson()).build())).build();
+				.completedBy(
+						Set.of(TaskCompletion.builder().person(SCPerson.builder().id(1L).build()).build(),
+								TaskCompletion.builder().person(SCPerson.builder().id(2L).build()).build(),
+								TaskCompletion.builder().person(SCPerson.builder().id(3L).build()).build()))
+				.build();
 		RegularTask taskRead12 = RegularTask.builder().skill(skillBuilder()).taskInfo(read12Info)
 				.build();
 		read12Info.setTask(taskRead12);
@@ -217,11 +218,14 @@ public class StatsServiceTest {
 				.build();
 		read12Info.setTask(taskRead12);
 
-		PathPreference pathPreference1 = PathPreference.builder().person(SCPerson.builder().id(1L).build())
+		PathPreference pathPreference1 = PathPreference.builder().path(pathFinderPath)
+				.person(SCPerson.builder().id(1L).build())
 				.build();
-		PathPreference pathPreference2 = PathPreference.builder().person(SCPerson.builder().id(2L).build())
+		PathPreference pathPreference2 = PathPreference.builder().path(pathFinderPath)
+				.person(SCPerson.builder().id(2L).build())
 				.build();
-		PathPreference pathPreference3 = PathPreference.builder().person(SCPerson.builder().id(3L).build())
+		PathPreference pathPreference3 = PathPreference.builder().path(pathFinderPath)
+				.person(SCPerson.builder().id(3L).build())
 				.build();
 
 		RoleDetailsDTO role1 = new RoleDetailsDTO();
@@ -233,18 +237,13 @@ public class StatsServiceTest {
 		RoleDetailsDTO role3 = new RoleDetailsDTO();
 		role3.setType(RoleDetailsDTO.TypeEnum.STUDENT);
 		role3.setPerson(new PersonSummaryDTO().id(3L));
-		RoleDetailsDTO role4 = new RoleDetailsDTO();
-		role4.setType(RoleDetailsDTO.TypeEnum.STUDENT);
-		role4.setPerson(new PersonSummaryDTO().id(4L));
 
 		when(taskRepository.findAllBySkillSubmoduleModuleEditionId(anyLong()))
 				.thenReturn(List.of(taskRead12));
-		when(roleControllerApi.getRolesById(Set.of(1L), Set.of(1L, 2L)))
+		when(roleControllerApi.getRolesById(Set.of(1L), Set.of(1L, 2L, 3L)))
 				.thenReturn(Flux.just(role1, role2, role3));
-		when(roleControllerApi.getRolesById(Set.of(1L), Set.of(3L))).thenReturn(Flux.just(role4));
 		when(pathPreferenceRepository.findAllByPathId(1L))
-				.thenReturn(List.of(pathPreference1, pathPreference2));
-		when(pathPreferenceRepository.findAllByPathId(2L)).thenReturn(List.of(pathPreference3));
+				.thenReturn(List.of(pathPreference1, pathPreference2, pathPreference3));
 		when(clickedLinkRepository.getByTask(any())).thenReturn(
 				List.of());
 
@@ -346,7 +345,7 @@ public class StatsServiceTest {
 
 	@Test
 	public void noStudentsStudentStats() {
-		when(personRepository.findAll()).thenReturn(List.of());
+		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT")).thenReturn(Flux.just());
 		List<StudentStatsDTO> studentStats = statsService.teacherStatsStudentLevel(1L);
 
 		assertThat(studentStats).isEqualTo(List.of());
@@ -355,23 +354,19 @@ public class StatsServiceTest {
 	@Test
 	public void noCompletionStudentStats() {
 		SCPerson student = SCPerson.builder().id(1L).build();
-		SCPerson teacher = SCPerson.builder().id(2L).build();
+		PersonSummaryDTO personSummary = new PersonSummaryDTO();
+		personSummary.setUsername("student");
+		personSummary.setId(1L);
 
-		RoleDetailsDTO role1 = new RoleDetailsDTO();
-		role1.setType(RoleDetailsDTO.TypeEnum.STUDENT);
-		RoleDetailsDTO role2 = new RoleDetailsDTO();
-		role2.setType(RoleDetailsDTO.TypeEnum.TEACHER);
-
-		when(personRepository.findAll()).thenReturn(List.of(student, teacher));
-		when(roleControllerApi.getRolesById(Set.of(1L), Set.of(1L))).thenReturn(Flux.just(role1));
-		when(roleControllerApi.getRolesById(Set.of(1L), Set.of(2L))).thenReturn(Flux.just(role2));
-		when(personControllerApi.getPersonById(1L)).thenThrow(WebClientResponseException.class);
+		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT"))
+				.thenReturn(Flux.just(personSummary));
+		when(personRepository.findAllById(List.of(1L))).thenReturn(List.of(student));
 		when(taskCompletionRepository.findAllByPersonAndEditionId(any(), anyLong())).thenReturn(Set.of());
 
 		List<StudentStatsDTO> studentStats = statsService.teacherStatsStudentLevel(1L);
 
 		assertThat(studentStats).isEqualTo(
-				List.of(new StudentStatsDTO(1L, "Unknown", "Path not chosen", 0, null, "No activity",
+				List.of(new StudentStatsDTO(1L, "student", "Path not chosen", 0, null, "No activity",
 						"No checkpoint started")));
 	}
 
@@ -389,14 +384,13 @@ public class StatsServiceTest {
 		SCPerson student = SCPerson.builder().id(2L).pathPreferences(Set.of(pathPreference2, pathPreference1))
 				.build();
 
-		RoleDetailsDTO role1 = new RoleDetailsDTO();
-		role1.setType(RoleDetailsDTO.TypeEnum.STUDENT);
-		PersonDetailsDTO personSummary = new PersonDetailsDTO();
+		PersonSummaryDTO personSummary = new PersonSummaryDTO();
 		personSummary.setUsername("student");
+		personSummary.setId(2L);
 
-		when(personRepository.findAll()).thenReturn(List.of(student));
-		when(roleControllerApi.getRolesById(Set.of(1L), Set.of(2L))).thenReturn(Flux.just(role1));
-		when(personControllerApi.getPersonById(2L)).thenReturn(Mono.just(personSummary));
+		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT"))
+				.thenReturn(Flux.just(personSummary));
+		when(personRepository.findAllById(List.of(2L))).thenReturn(List.of(student));
 		when(taskCompletionRepository.findAllByPersonAndEditionId(any(), anyLong())).thenReturn(Set.of());
 
 		List<StudentStatsDTO> studentStats = statsService.teacherStatsStudentLevel(1L);
@@ -447,16 +441,13 @@ public class StatsServiceTest {
 		taskInfo3.setChoiceTask(task3);
 		taskCompletion3.setTask(taskInfo3);
 
-		PersonDetailsDTO personSummary = new PersonDetailsDTO();
+		PersonSummaryDTO personSummary = new PersonSummaryDTO();
 		personSummary.setUsername("student");
+		personSummary.setId(1L);
 
-		RoleDetailsDTO role1 = new RoleDetailsDTO();
-		role1.setType(RoleDetailsDTO.TypeEnum.STUDENT);
-
-		when(personRepository.findAll()).thenReturn(List.of(student));
-		when(roleControllerApi.getRolesById(Set.of(1L), Set.of(1L))).thenReturn(Flux.just(role1));
-		reset(personControllerApi);
-		when(personControllerApi.getPersonById(1L)).thenReturn(Mono.just(personSummary));
+		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT"))
+				.thenReturn(Flux.just(personSummary));
+		when(personRepository.findAllById(List.of(1L))).thenReturn(List.of(student));
 		when(taskCompletionRepository.findAllByPersonAndEditionId(any(), anyLong()))
 				.thenReturn(Set.of(taskCompletion1, taskCompletion2, taskCompletion3));
 
@@ -512,19 +503,16 @@ public class StatsServiceTest {
 		taskCompletion3.setTask(taskInfo3);
 		taskCompletion4.setTask(taskInfo3);
 
-		PersonDetailsDTO personSummary1 = new PersonDetailsDTO();
+		PersonSummaryDTO personSummary1 = new PersonSummaryDTO();
 		personSummary1.setUsername("student1");
-		PersonDetailsDTO personSummary2 = new PersonDetailsDTO();
+		personSummary1.setId(1L);
+		PersonSummaryDTO personSummary2 = new PersonSummaryDTO();
 		personSummary2.setUsername("student2");
+		personSummary2.setId(2L);
 
-		RoleDetailsDTO role1 = new RoleDetailsDTO();
-		role1.setType(RoleDetailsDTO.TypeEnum.STUDENT);
-
-		when(personRepository.findAll()).thenReturn(List.of(student1, student2));
-		when(roleControllerApi.getRolesById(Set.of(1L), Set.of(1L))).thenReturn(Flux.just(role1));
-		when(roleControllerApi.getRolesById(Set.of(1L), Set.of(2L))).thenReturn(Flux.just(role1));
-		when(personControllerApi.getPersonById(1L)).thenReturn(Mono.just(personSummary1));
-		when(personControllerApi.getPersonById(2L)).thenReturn(Mono.just(personSummary2));
+		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT"))
+				.thenReturn(Flux.just(personSummary1, personSummary2));
+		when(personRepository.findAllById(List.of(1L, 2L))).thenReturn(List.of(student1, student2));
 		when(taskCompletionRepository.findAllByPersonAndEditionId(student1, 1L))
 				.thenReturn(Set.of(taskCompletion1, taskCompletion2, taskCompletion3));
 		when(taskCompletionRepository.findAllByPersonAndEditionId(student2, 1L))
