@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view;
+package nl.tudelft.skills.dto.stats;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -47,7 +47,7 @@ public class TaskStatsDTO {
 	private String moduleName;
 
 	@NotNull
-	private int numOfStudentCompletions;
+	private long numOfStudentCompletions;
 
 	@NotNull
 	private long numOfStudentsHaveTaskOnPath;

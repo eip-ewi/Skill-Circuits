@@ -1,0 +1,191 @@
+/*
+ * Skill Circuits
+ * Copyright (C) 2025 - Delft University of Technology
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package nl.tudelft.skills.service;
+
+import static java.util.Objects.requireNonNull;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+
+import lombok.AllArgsConstructor;
+import nl.tudelft.labracore.api.PersonControllerApi;
+import nl.tudelft.labracore.api.RoleControllerApi;
+import nl.tudelft.labracore.api.dto.PersonDetailsDTO;
+import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
+import nl.tudelft.skills.dto.stats.StudentStatsDTO;
+import nl.tudelft.skills.dto.stats.TaskStatsDTO;
+import nl.tudelft.skills.model.*;
+import nl.tudelft.skills.repository.*;
+
+@Service
+@AllArgsConstructor
+public class StatsService {
+	private final TaskRepository taskRepository;
+	private final ClickedLinkRepository clickedLinkRepository;
+	private final PathPreferenceRepository pathPreferenceRepository;
+	private final TaskCompletionRepository taskCompletionRepository;
+	private final RoleControllerApi roleControllerApi;
+	private final PersonRepository personRepository;
+	private final PersonControllerApi personApi;
+
+	/**
+	 * Collects statistics for each task in a given edition. The statistics contain information about the name
+	 * of the tasks, skills, checkpoints, submodules and modules, counts of link clicks, completions and path
+	 * inclusions.
+	 *
+	 * @param  id The id of the edition, the statistics needs to be collected for
+	 * @return    a list of {@link TaskStatsDTO} objects, containing the task level statistics for the given
+	 *            edition
+	 */
+	public List<TaskStatsDTO> teacherStatsTaskLevel(Long id) {
+		List<Task> tasks = taskRepository.findAllBySkillSubmoduleModuleEditionId(id);
+
+		// Collect all the TaskInfo into a list from the existing tasks
+		List<TaskInfo> taskInfos = tasks.stream().flatMap(t -> {
+			List<TaskInfo> info = new ArrayList<>();
+			if (t instanceof RegularTask) {
+				info = List.of(((RegularTask) t).getTaskInfo());
+			} else if (t instanceof ChoiceTask) {
+				info = ((ChoiceTask) t).getTasks();
+			}
+			return info.stream();
+		}).collect(Collectors.toList());
+
+		return taskInfos.stream().map(t -> {
+			// Get the ids of the users who completed the current task
+			Set<Long> usersCompletedTask = t.getCompletedBy().stream()
+					.map(c -> c.getPerson().getId())
+					.collect(Collectors.toSet());
+
+			// Filter out the non-student users
+			Set<Long> studentsCompletedTask = usersCompletedTask.isEmpty() ? Set.of()
+					: roleControllerApi.getRolesById(Set.of(id), usersCompletedTask).toStream()
+							.filter(r -> r.getType().equals(RoleDetailsDTO.TypeEnum.STUDENT))
+							.map(r -> r.getPerson().getId()).collect(Collectors.toSet());
+
+			// The TaskInfo should belong to either a RegularTask or a ChoiceTask object
+			Task taskCategory = t.getChoiceTask() == null ? t.getTask() : t.getChoiceTask();
+
+			// Get the ids of the users who have the current task on their path
+			Set<Long> usersHaveTaskOnPath = taskCategory == null ? Set.of()
+					: taskCategory.getPaths().stream()
+							.flatMap(p -> pathPreferenceRepository
+									.findAllByPathId(p.getId()).stream().map(x -> x.getPerson().getId()))
+							.collect(Collectors.toSet());
+
+			// Filter out the non-student users and count th remaining users
+			long numOfStudentsHaveTaskOnPath = usersHaveTaskOnPath.isEmpty() ? 0
+					: roleControllerApi.getRolesById(Set.of(id), usersHaveTaskOnPath).toStream()
+							.filter(r -> r.getType().equals(RoleDetailsDTO.TypeEnum.STUDENT)).count();
+
+			// Get the ids of the people who clicked on the link for the current task
+			List<Long> peopleClickedLink = clickedLinkRepository.getByTask(t).stream()
+					.map(c -> c.getPerson().getId()).collect(Collectors.toList());
+
+			// Collect unique students from the people who clicked on the link
+			Set<Long> studentsClickedLink = peopleClickedLink.isEmpty() ? Set.of()
+					: roleControllerApi.getRolesById(Set.of(id),
+							new HashSet<>(peopleClickedLink)).toStream()
+							.filter(r -> r.getType().equals(RoleDetailsDTO.TypeEnum.STUDENT))
+							.map(x -> x.getPerson().getId()).collect(Collectors.toSet());
+
+			// Count all the clicks made by students on the current link
+			long numOfStudentsClickedLink = peopleClickedLink.stream().filter(studentsClickedLink::contains)
+					.count();
+
+			// Count students who clicked on the link and completed the task
+			long studentsClickedAndCompleted = studentsCompletedTask.stream()
+					.filter(studentsClickedLink::contains).count();
+
+			return new TaskStatsDTO(t.getId(),
+					t.getName(),
+					taskCategory == null ? "Unknown" : taskCategory.getSkill().getName(),
+					taskCategory == null ? "Unknown"
+							: taskCategory.getSkill().getCheckpoint() == null ? "No checkpoint"
+									: taskCategory.getSkill().getCheckpoint().getName(),
+					taskCategory == null ? "Unknown" : taskCategory.getSkill().getSubmodule().getName(),
+					taskCategory == null ? "Unknown"
+							: taskCategory.getSkill().getSubmodule().getModule().getName(),
+					studentsCompletedTask.size(),
+					numOfStudentsHaveTaskOnPath,
+					numOfStudentsClickedLink,
+					studentsClickedLink.size(),
+					studentsClickedAndCompleted);
+		}).collect(Collectors.toList());
+	}
+
+	/**
+	 * Collects statistics for each student in a given edition. The statistics contain information about the
+	 * username of the student, the chosen path, number of completed tasks by the student, time of last task
+	 * completion, name of last completed task, name of the furthest checkpoint in which the student completed
+	 * a task in.
+	 *
+	 * @param  id The id of the edition, the statistics needs to be collected for
+	 * @return    a list of {@link StudentStatsDTO} objects, containing the student level statistics for the
+	 *            given edition
+	 */
+	public List<StudentStatsDTO> teacherStatsStudentLevel(Long id) {
+		List<SCPerson> users = personRepository.findAll();
+		// Collect the students in the edition
+		List<SCPerson> studentsInEdition = users.stream()
+				.filter(u -> requireNonNull(
+						roleControllerApi.getRolesById(Set.of(id), Set.of(u.getId())).collectList()
+								.block())
+						.getFirst().getType().equals(RoleDetailsDTO.TypeEnum.STUDENT))
+				.toList();
+
+		return studentsInEdition.stream().map(s -> {
+			PersonDetailsDTO personSummary = null;
+			try {
+				personSummary = personApi.getPersonById(s.getId()).block();
+			} catch (WebClientResponseException ignored) {
+			}
+
+			// Path preference of the student in the given edition
+			Optional<PathPreference> pathPreference = s.getPathPreferences().stream()
+					.filter(p -> Objects.equals(p.getEdition().getId(), id)).findFirst();
+
+			Set<TaskCompletion> taskCompletions = taskCompletionRepository.findAllByPersonAndEditionId(s, id);
+			Optional<TaskCompletion> lastCompleted = taskCompletions.stream()
+					.max(Comparator.comparing(TaskCompletion::getTimestamp));
+
+			// Find checkpoints of the completed tasks
+			Set<Checkpoint> checkpointsWithActivity = taskCompletions.stream()
+					.map(t -> t.getTask().getChoiceTask() == null ? t.getTask().getTask()
+							: t.getTask().getChoiceTask())
+					.filter(Objects::nonNull).map(t -> t.getSkill().getCheckpoint()).filter(Objects::nonNull)
+					.collect(Collectors.toSet());
+
+			Optional<Checkpoint> furthestCheckpoint = checkpointsWithActivity.stream()
+					.max(Comparator.comparing(Checkpoint::getDeadline));
+
+			return new StudentStatsDTO(
+					s.getId(),
+					personSummary == null ? "Unknown" : personSummary.getUsername(),
+					pathPreference.isEmpty() ? "Path not chosen" : pathPreference.get().getPath().getName(),
+					taskCompletions.size(),
+					lastCompleted.map(TaskCompletion::getTimestamp).orElse(null),
+					lastCompleted.isEmpty() ? "No activity" : lastCompleted.get().getTask().getName(),
+					furthestCheckpoint.isEmpty() ? "No checkpoint started"
+							: furthestCheckpoint.get().getName());
+		}).collect(Collectors.toList());
+	}
+}

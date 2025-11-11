@@ -19,6 +19,7 @@ package nl.tudelft.skills.controller;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -35,14 +36,13 @@ import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.librador.resolver.annotations.PathEntity;
 import nl.tudelft.skills.annotation.AuthenticatedSCPerson;
 import nl.tudelft.skills.dto.patch.EditionPatch;
+import nl.tudelft.skills.dto.stats.StudentStatsDTO;
+import nl.tudelft.skills.dto.stats.TaskStatsDTO;
 import nl.tudelft.skills.dto.view.*;
 import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelEditionView;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.SCPerson;
-import nl.tudelft.skills.service.CopyService;
-import nl.tudelft.skills.service.EditionCircuitService;
-import nl.tudelft.skills.service.EditionService;
-import nl.tudelft.skills.service.ProgressService;
+import nl.tudelft.skills.service.*;
 
 @RestController
 @AllArgsConstructor
@@ -51,6 +51,7 @@ public class EditionController {
 
 	private final CopyService copyService;
 	private final EditionService editionService;
+	private final StatsService statsService;
 	private final EditionCircuitService editionCircuitService;
 	private final ProgressService progressService;
 
@@ -121,7 +122,7 @@ public class EditionController {
 	@ResponseBody
 	@PreAuthorize("@authorisationService.isTeacher(#editionId)")
 	public ResponseEntity<String> showEditionTaskStats(@PathVariable long editionId) throws IOException {
-		List<TaskStatsDTO> teacherStats = editionService.teacherStatsTaskLevel(editionId);
+		List<TaskStatsDTO> teacherStats = statsService.teacherStatsTaskLevel(editionId);
 		StringWriter sw = new StringWriter();
 		EditionDetailsDTO editionDetails = editionService.getEditionById(editionId);
 		try (CSVWriter writer = new CSVWriter(sw)) {
@@ -144,7 +145,9 @@ public class EditionController {
 		return ResponseEntity.ok()
 				.header(HttpHeaders.CONTENT_DISPOSITION,
 						"attachment; filename=\"task_stats_" + editionDetails.getCourse().getName() + "_"
-								+ editionDetails.getName() + ".csv\"")
+								+ editionDetails.getName() + "_"
+								+ LocalDateTime.now().format(DateTimeFormatter.ofPattern("ddMMyyyyHHmmss"))
+								+ ".csv\"")
 				.contentType(MediaType.valueOf("text/csv"))
 				.body(sw.toString());
 	}
@@ -153,7 +156,7 @@ public class EditionController {
 	@ResponseBody
 	@PreAuthorize("@authorisationService.isTeacher(#editionId)")
 	public ResponseEntity<String> showEditionStudentStats(@PathVariable long editionId) throws IOException {
-		List<StudentStatsDTO> studentStats = editionService.teacherStatsStudentLevel(editionId);
+		List<StudentStatsDTO> studentStats = statsService.teacherStatsStudentLevel(editionId);
 		StringWriter sw = new StringWriter();
 		EditionDetailsDTO editionDetails = editionService.getEditionById(editionId);
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -176,7 +179,9 @@ public class EditionController {
 		return ResponseEntity.ok()
 				.header(HttpHeaders.CONTENT_DISPOSITION,
 						"attachment; filename=\"student_stats_" + editionDetails.getCourse().getName() + "_"
-								+ editionDetails.getName() + ".csv\"")
+								+ editionDetails.getName() + "_"
+								+ LocalDateTime.now().format(DateTimeFormatter.ofPattern("ddMMyyyyHHmmss"))
+								+ ".csv\"")
 				.contentType(MediaType.valueOf("text/csv"))
 				.body(sw.toString());
 	}

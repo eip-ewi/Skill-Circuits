@@ -27,20 +27,17 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.PersonControllerApi;
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.PersonDetailsDTO;
 import nl.tudelft.labracore.api.dto.PersonSummaryDTO;
 import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
-import nl.tudelft.librador.dto.DTOConverter;
-import nl.tudelft.skills.dto.view.StudentStatsDTO;
-import nl.tudelft.skills.dto.view.TaskStatsDTO;
+import nl.tudelft.skills.dto.stats.StudentStatsDTO;
+import nl.tudelft.skills.dto.stats.TaskStatsDTO;
 import nl.tudelft.skills.enums.TaskType;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.*;
@@ -49,9 +46,9 @@ import reactor.core.publisher.Mono;
 
 @Transactional
 @SpringBootTest()
-public class EditionServiceTest {
+public class StatsServiceTest {
 
-	private final EditionService editionService;
+	private final StatsService statsService;
 	private final TaskRepository taskRepository;
 	private final RoleControllerApi roleControllerApi;
 
@@ -61,11 +58,7 @@ public class EditionServiceTest {
 	private final TaskCompletionRepository taskCompletionRepository;
 	private final PersonControllerApi personControllerApi;
 
-	@Autowired
-	public EditionServiceTest(EditionControllerApi editionApi, EditionRepository editionRepository,
-			SCPersonService scPersonService,
-			DTOConverter dtoConverter) {
-
+	public StatsServiceTest() {
 		this.taskRepository = mock(TaskRepository.class);
 		this.roleControllerApi = mock(RoleControllerApi.class);
 		this.pathPreferenceRepository = mock(PathPreferenceRepository.class);
@@ -74,16 +67,17 @@ public class EditionServiceTest {
 		this.taskCompletionRepository = mock(TaskCompletionRepository.class);
 		this.personControllerApi = mock(PersonControllerApi.class);
 
-		editionService = new EditionService(editionApi, this.personControllerApi, scPersonService,
+		statsService = new StatsService(
 				this.taskRepository, this.clickedLinkRepository, this.pathPreferenceRepository,
+				this.taskCompletionRepository,
 				this.roleControllerApi,
-				editionRepository, this.personRepository, this.taskCompletionRepository, dtoConverter);
+				this.personRepository, this.personControllerApi);
 	}
 
 	@Test
 	public void emptyTaskStats() {
 		when(taskRepository.findAllBySkillSubmoduleModuleEditionId(anyLong())).thenReturn(List.of());
-		List<TaskStatsDTO> taskStats = editionService.teacherStatsTaskLevel(1L);
+		List<TaskStatsDTO> taskStats = statsService.teacherStatsTaskLevel(1L);
 		assertThat(taskStats).isEmpty();
 	}
 
@@ -124,7 +118,7 @@ public class EditionServiceTest {
 				.thenReturn(List.of(taskRead12));
 		when(clickedLinkRepository.getByTask(any())).thenReturn(
 				List.of());
-		List<TaskStatsDTO> taskStats = editionService.teacherStatsTaskLevel(1L);
+		List<TaskStatsDTO> taskStats = statsService.teacherStatsTaskLevel(1L);
 
 		assertEquals(1, taskStats.size());
 		assertThat(taskStats).isEqualTo(List.of(new TaskStatsDTO(1L, "Read chapter 1.2", "Implication",
@@ -141,7 +135,7 @@ public class EditionServiceTest {
 				.thenReturn(List.of(taskRead12));
 		when(clickedLinkRepository.getByTask(any())).thenReturn(
 				List.of());
-		List<TaskStatsDTO> taskStats = editionService.teacherStatsTaskLevel(1L);
+		List<TaskStatsDTO> taskStats = statsService.teacherStatsTaskLevel(1L);
 
 		assertEquals(1, taskStats.size());
 		assertThat(taskStats).isEqualTo(List.of(new TaskStatsDTO(1L, "Read chapter 1.2", "Unknown", "Unknown",
@@ -169,7 +163,7 @@ public class EditionServiceTest {
 				.thenReturn(List.of(taskRead12, choiceTask));
 		when(clickedLinkRepository.getByTask(any())).thenReturn(
 				List.of());
-		List<TaskStatsDTO> taskStats = editionService.teacherStatsTaskLevel(1L);
+		List<TaskStatsDTO> taskStats = statsService.teacherStatsTaskLevel(1L);
 
 		assertEquals(3, taskStats.size());
 		assertThat(taskStats).isEqualTo(List.of(
@@ -206,7 +200,7 @@ public class EditionServiceTest {
 		when(clickedLinkRepository.getByTask(any())).thenReturn(
 				List.of());
 		when(roleControllerApi.getRolesById(anySet(), anySet())).thenReturn(Flux.just(role1, role2, role3));
-		List<TaskStatsDTO> taskStats = editionService.teacherStatsTaskLevel(1L);
+		List<TaskStatsDTO> taskStats = statsService.teacherStatsTaskLevel(1L);
 
 		assertEquals(1, taskStats.size());
 		assertThat(taskStats).isEqualTo(List.of(new TaskStatsDTO(1L, "Read chapter 1.2", "Implication",
@@ -254,7 +248,7 @@ public class EditionServiceTest {
 		when(clickedLinkRepository.getByTask(any())).thenReturn(
 				List.of());
 
-		List<TaskStatsDTO> taskStats = editionService.teacherStatsTaskLevel(1L);
+		List<TaskStatsDTO> taskStats = statsService.teacherStatsTaskLevel(1L);
 
 		assertEquals(1, taskStats.size());
 		assertThat(taskStats).isEqualTo(List.of(new TaskStatsDTO(1L, "Read chapter 1.2", "Implication",
@@ -294,7 +288,7 @@ public class EditionServiceTest {
 				List.of(clickedLink1person1, clickedLink2person1, clickedLink3person2, clickedLink4person3));
 		when(roleControllerApi.getRolesById(Set.of(1L), Set.of(1L, 2L, 3L)))
 				.thenReturn(Flux.just(role1, role2, role3));
-		List<TaskStatsDTO> taskStats = editionService.teacherStatsTaskLevel(1L);
+		List<TaskStatsDTO> taskStats = statsService.teacherStatsTaskLevel(1L);
 
 		assertEquals(1, taskStats.size());
 		assertThat(taskStats).isEqualTo(List.of(new TaskStatsDTO(1L, "Read chapter 1.2", "Implication",
@@ -343,7 +337,7 @@ public class EditionServiceTest {
 				.thenReturn(Flux.just(role1, role2, role3));
 		when(roleControllerApi.getRolesById(Set.of(1L), Set.of(1L, 3L, 4L)))
 				.thenReturn(Flux.just(role1, role3, role4));
-		List<TaskStatsDTO> taskStats = editionService.teacherStatsTaskLevel(1L);
+		List<TaskStatsDTO> taskStats = statsService.teacherStatsTaskLevel(1L);
 
 		assertEquals(1, taskStats.size());
 		assertThat(taskStats).isEqualTo(List.of(new TaskStatsDTO(1L, "Read chapter 1.2", "Implication",
@@ -353,7 +347,7 @@ public class EditionServiceTest {
 	@Test
 	public void noStudentsStudentStats() {
 		when(personRepository.findAll()).thenReturn(List.of());
-		List<StudentStatsDTO> studentStats = editionService.teacherStatsStudentLevel(1L);
+		List<StudentStatsDTO> studentStats = statsService.teacherStatsStudentLevel(1L);
 
 		assertThat(studentStats).isEqualTo(List.of());
 	}
@@ -374,7 +368,7 @@ public class EditionServiceTest {
 		when(personControllerApi.getPersonById(1L)).thenThrow(WebClientResponseException.class);
 		when(taskCompletionRepository.findAllByPersonAndEditionId(any(), anyLong())).thenReturn(Set.of());
 
-		List<StudentStatsDTO> studentStats = editionService.teacherStatsStudentLevel(1L);
+		List<StudentStatsDTO> studentStats = statsService.teacherStatsStudentLevel(1L);
 
 		assertThat(studentStats).isEqualTo(
 				List.of(new StudentStatsDTO(1L, "Unknown", "Path not chosen", 0, null, "No activity",
@@ -392,21 +386,23 @@ public class EditionServiceTest {
 		PathPreference pathPreference2 = PathPreference.builder().id(2L).path(path2)
 				.edition(SCEdition.builder().id(2L).build())
 				.build();
-		SCPerson student = SCPerson.builder().id(1L).pathPreferences(Set.of(pathPreference2, pathPreference1))
+		SCPerson student = SCPerson.builder().id(2L).pathPreferences(Set.of(pathPreference2, pathPreference1))
 				.build();
 
 		RoleDetailsDTO role1 = new RoleDetailsDTO();
 		role1.setType(RoleDetailsDTO.TypeEnum.STUDENT);
+		PersonDetailsDTO personSummary = new PersonDetailsDTO();
+		personSummary.setUsername("student");
 
 		when(personRepository.findAll()).thenReturn(List.of(student));
-		when(roleControllerApi.getRolesById(Set.of(1L), Set.of(1L))).thenReturn(Flux.just(role1));
-		when(personControllerApi.getPersonById(1L)).thenThrow(WebClientResponseException.class);
+		when(roleControllerApi.getRolesById(Set.of(1L), Set.of(2L))).thenReturn(Flux.just(role1));
+		when(personControllerApi.getPersonById(2L)).thenReturn(Mono.just(personSummary));
 		when(taskCompletionRepository.findAllByPersonAndEditionId(any(), anyLong())).thenReturn(Set.of());
 
-		List<StudentStatsDTO> studentStats = editionService.teacherStatsStudentLevel(1L);
+		List<StudentStatsDTO> studentStats = statsService.teacherStatsStudentLevel(1L);
 
 		assertThat(studentStats).isEqualTo(
-				List.of(new StudentStatsDTO(1L, "Unknown", "Path 1", 0, null, "No activity",
+				List.of(new StudentStatsDTO(2L, "student", "Path 1", 0, null, "No activity",
 						"No checkpoint started")));
 	}
 
@@ -464,7 +460,7 @@ public class EditionServiceTest {
 		when(taskCompletionRepository.findAllByPersonAndEditionId(any(), anyLong()))
 				.thenReturn(Set.of(taskCompletion1, taskCompletion2, taskCompletion3));
 
-		List<StudentStatsDTO> studentStats = editionService.teacherStatsStudentLevel(1L);
+		List<StudentStatsDTO> studentStats = statsService.teacherStatsStudentLevel(1L);
 
 		assertThat(studentStats).isEqualTo(List.of(new StudentStatsDTO(1L, "student", "Path not chosen", 3,
 				LocalDateTime.of(2025, 2, 1, 10, 10), "Task 3", "Checkpoint 1")));
@@ -534,7 +530,7 @@ public class EditionServiceTest {
 		when(taskCompletionRepository.findAllByPersonAndEditionId(student2, 1L))
 				.thenReturn(Set.of(taskCompletion4));
 
-		List<StudentStatsDTO> studentStats = editionService.teacherStatsStudentLevel(1L);
+		List<StudentStatsDTO> studentStats = statsService.teacherStatsStudentLevel(1L);
 
 		assertThat(studentStats).isEqualTo(List.of(new StudentStatsDTO(1L, "student1", "Path not chosen", 3,
 				LocalDateTime.of(2025, 8, 1, 10, 10), "Task 2", "Checkpoint 1"),

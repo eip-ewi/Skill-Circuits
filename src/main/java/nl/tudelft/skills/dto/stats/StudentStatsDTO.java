@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view;
+package nl.tudelft.skills.dto.stats;
 
 import java.time.LocalDateTime;
 
@@ -40,7 +40,7 @@ public class StudentStatsDTO {
 	private String chosenPath;
 
 	@NotNull
-	private int numberOfCompletedTasks;
+	private long numberOfCompletedTasks;
 
 	private LocalDateTime lastCompletedTaskTimestamp;
 
