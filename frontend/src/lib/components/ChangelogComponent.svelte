@@ -64,7 +64,7 @@
     }
 
     .dialog::backdrop {
-        backdrop-filter: blur(.15em);
+        backdrop-filter: blur(.15rem);
         background-color: hsla(0deg 0% 0% / .05);
         -ms-transform: translate3d(0,0,0);
         transform: translate3d(0,0,0);
