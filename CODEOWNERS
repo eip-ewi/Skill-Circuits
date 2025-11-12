@@ -1,0 +1,22 @@
+^[Developers] @eip/labrador/groups/all-developers
+*
+
+[Experienced developers] @eip/labrador/groups/experienced-developers
+*
+
+[Data model] @eip-core-team
+src/main/java/model/
+src/main/resources/migrations.yaml
+
+[Licences] @eip-core-team
+LICENSE
+LICENSE.header
+LICENSE.header.java
+
+[Configuration] @eip-core-team
+settings.gradle.kts
+build.gradle.kts
+.gitlab-ci.yml
+
+[Code owners] @eip-core-team
+CODEOWNERS
