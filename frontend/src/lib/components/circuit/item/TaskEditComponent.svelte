@@ -26,6 +26,11 @@
     let bookmarksOpen: boolean = $state(false);
 
     function dragStart(event: DragEvent) {
+        // Do not update the data transfer if a subtask is already being dragged
+        if (event.dataTransfer!.types.includes("skill-circuits/task-info")) {
+            return;
+        }
+
         event.dataTransfer!.effectAllowed = "move";
         event.dataTransfer!.setData("skill-circuits/item", task.id.toString());
         if (task.taskType === "regular") {

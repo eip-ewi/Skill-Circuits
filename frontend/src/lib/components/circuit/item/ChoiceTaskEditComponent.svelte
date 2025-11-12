@@ -64,6 +64,9 @@
         }
         event.preventDefault();
 
+        // Prevent the drop event from being handled multiple times
+        event.stopPropagation();
+
         if (event.dataTransfer!.types.includes("skill-circuits/regular-task")) {
             let taskId = parseInt(event.dataTransfer!.getData("skill-circuits/regular-task"));
             let subtask = getItem(taskId) as RegularTaskItem;

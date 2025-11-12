@@ -15,12 +15,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Everyone] A changelog is displayed to users after each new release. (@bbakos)
 
 ## Changed
-- [Editor] On edit, the minTasks value of a choice task is clipped to be inside the correct bounds.
-- [Everyone] The action indicator is changed to in the "glass" style.
-- [Student] The cycle warning is not shown to students anymore.
+
+- [Editor] On edit, the minTasks value of a choice task is clipped to be inside the correct bounds. (@ffiedrich)
+- [Everyone] The action indicator is changed to in the "glass" style. (@rwbackx)
+- [Student] The cycle warning is not shown to students anymore. (@ffiedrich)
 - [Student] The information about a checkpoint having passed is changed to a dialog. (@ffiedrich)
 
+
 ## Fixed
+- [Editor] Fixed moving subtasks outside choice tasks. (@ffiedrich)
 
 ## [2.2.8]
 
