@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## Added
+- [Everyone] A changelog is displayed to users after each new release. (@bbakos)
 
 ## Changed
 - [Editor] On edit, the minTasks value of a choice task is clipped to be inside the correct bounds.

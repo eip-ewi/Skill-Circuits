@@ -15,23 +15,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.old.view;
+package nl.tudelft.skills.dto.view;
 
-import java.time.Instant;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
-@Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class ReleaseDTO {
-	public String name;
-
-	public String description_html;
-
-	public Instant released_at;
+public record ReleaseDetailsView(
+		String title,
+		String descriptionHtml) {
 }
