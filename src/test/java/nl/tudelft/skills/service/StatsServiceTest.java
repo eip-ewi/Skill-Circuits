@@ -31,9 +31,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import nl.tudelft.labracore.api.PersonControllerApi;
-import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.PersonSummaryDTO;
-import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
 import nl.tudelft.skills.dto.stats.StudentStatsDTO;
 import nl.tudelft.skills.dto.stats.TaskStatsDTO;
 import nl.tudelft.skills.enums.TaskType;
@@ -47,8 +45,6 @@ public class StatsServiceTest {
 
 	private final StatsService statsService;
 	private final TaskRepository taskRepository;
-	private final RoleControllerApi roleControllerApi;
-
 	private final PathPreferenceRepository pathPreferenceRepository;
 	private final ClickedLinkRepository clickedLinkRepository;
 	private final PersonRepository personRepository;
@@ -57,7 +53,6 @@ public class StatsServiceTest {
 
 	public StatsServiceTest() {
 		this.taskRepository = mock(TaskRepository.class);
-		this.roleControllerApi = mock(RoleControllerApi.class);
 		this.pathPreferenceRepository = mock(PathPreferenceRepository.class);
 		this.clickedLinkRepository = mock(ClickedLinkRepository.class);
 		this.personRepository = mock(PersonRepository.class);
@@ -67,13 +62,13 @@ public class StatsServiceTest {
 		statsService = new StatsService(
 				this.taskRepository, this.clickedLinkRepository, this.pathPreferenceRepository,
 				this.taskCompletionRepository,
-				this.roleControllerApi,
 				this.personRepository, this.personControllerApi);
 	}
 
 	@Test
 	public void emptyTaskStats() {
 		when(taskRepository.findAllBySkillSubmoduleModuleEditionId(anyLong())).thenReturn(List.of());
+		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT")).thenReturn(Flux.empty());
 		List<TaskStatsDTO> taskStats = statsService.teacherStatsTaskLevel(1L);
 		assertThat(taskStats).isEmpty();
 	}
@@ -113,8 +108,9 @@ public class StatsServiceTest {
 		read12Info.setTask(taskRead12);
 		when(taskRepository.findAllBySkillSubmoduleModuleEditionId(anyLong()))
 				.thenReturn(List.of(taskRead12));
-		when(clickedLinkRepository.getByTask(any())).thenReturn(
-				List.of());
+		when(clickedLinkRepository.getByTask(any())).thenReturn(List.of());
+		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT")).thenReturn(Flux.empty());
+
 		List<TaskStatsDTO> taskStats = statsService.teacherStatsTaskLevel(1L);
 
 		assertEquals(1, taskStats.size());
@@ -132,6 +128,8 @@ public class StatsServiceTest {
 				.thenReturn(List.of(taskRead12));
 		when(clickedLinkRepository.getByTask(any())).thenReturn(
 				List.of());
+		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT")).thenReturn(Flux.empty());
+
 		List<TaskStatsDTO> taskStats = statsService.teacherStatsTaskLevel(1L);
 
 		assertEquals(1, taskStats.size());
@@ -160,6 +158,8 @@ public class StatsServiceTest {
 				.thenReturn(List.of(taskRead12, choiceTask));
 		when(clickedLinkRepository.getByTask(any())).thenReturn(
 				List.of());
+		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT")).thenReturn(Flux.empty());
+
 		List<TaskStatsDTO> taskStats = statsService.teacherStatsTaskLevel(1L);
 
 		assertEquals(3, taskStats.size());
@@ -186,21 +186,18 @@ public class StatsServiceTest {
 				.build();
 		read12Info.setTask(taskRead12);
 
-		RoleDetailsDTO role1 = new RoleDetailsDTO();
-		role1.setType(RoleDetailsDTO.TypeEnum.TEACHER);
-		role1.setPerson(new PersonSummaryDTO().id(1L));
-		RoleDetailsDTO role2 = new RoleDetailsDTO();
-		role2.setType(RoleDetailsDTO.TypeEnum.STUDENT);
-		role2.setPerson(new PersonSummaryDTO().id(2L));
-		RoleDetailsDTO role3 = new RoleDetailsDTO();
-		role3.setType(RoleDetailsDTO.TypeEnum.STUDENT);
-		role3.setPerson(new PersonSummaryDTO().id(3L));
+		PersonSummaryDTO personSummary1 = new PersonSummaryDTO();
+		personSummary1.setId(2L);
+		PersonSummaryDTO personSummary2 = new PersonSummaryDTO();
+		personSummary2.setId(3L);
 
 		when(taskRepository.findAllBySkillSubmoduleModuleEditionId(anyLong()))
 				.thenReturn(List.of(taskRead12));
 		when(clickedLinkRepository.getByTask(any())).thenReturn(
 				List.of());
-		when(roleControllerApi.getRolesById(anySet(), anySet())).thenReturn(Flux.just(role1, role2, role3));
+		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT"))
+				.thenReturn(Flux.just(personSummary1, personSummary2));
+
 		List<TaskStatsDTO> taskStats = statsService.teacherStatsTaskLevel(1L);
 
 		assertEquals(1, taskStats.size());
@@ -228,20 +225,15 @@ public class StatsServiceTest {
 				.person(SCPerson.builder().id(3L).build())
 				.build();
 
-		RoleDetailsDTO role1 = new RoleDetailsDTO();
-		role1.setType(RoleDetailsDTO.TypeEnum.TEACHER);
-		role1.setPerson(new PersonSummaryDTO().id(1L));
-		RoleDetailsDTO role2 = new RoleDetailsDTO();
-		role2.setType(RoleDetailsDTO.TypeEnum.STUDENT);
-		role2.setPerson(new PersonSummaryDTO().id(2L));
-		RoleDetailsDTO role3 = new RoleDetailsDTO();
-		role3.setType(RoleDetailsDTO.TypeEnum.STUDENT);
-		role3.setPerson(new PersonSummaryDTO().id(3L));
+		PersonSummaryDTO personSummary1 = new PersonSummaryDTO();
+		personSummary1.setId(2L);
+		PersonSummaryDTO personSummary2 = new PersonSummaryDTO();
+		personSummary2.setId(3L);
 
 		when(taskRepository.findAllBySkillSubmoduleModuleEditionId(anyLong()))
 				.thenReturn(List.of(taskRead12));
-		when(roleControllerApi.getRolesById(Set.of(1L), Set.of(1L, 2L, 3L)))
-				.thenReturn(Flux.just(role1, role2, role3));
+		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT"))
+				.thenReturn(Flux.just(personSummary1, personSummary2));
 		when(pathPreferenceRepository.findAllByPathId(1L))
 				.thenReturn(List.of(pathPreference1, pathPreference2, pathPreference3));
 		when(clickedLinkRepository.getByTask(any())).thenReturn(
@@ -271,22 +263,18 @@ public class StatsServiceTest {
 		ClickedLink clickedLink4person3 = ClickedLink.builder().person(SCPerson.builder().id(3L).build())
 				.build();
 
-		RoleDetailsDTO role1 = new RoleDetailsDTO();
-		role1.setType(RoleDetailsDTO.TypeEnum.STUDENT);
-		role1.setPerson(new PersonSummaryDTO().id(1L));
-		RoleDetailsDTO role2 = new RoleDetailsDTO();
-		role2.setType(RoleDetailsDTO.TypeEnum.STUDENT);
-		role2.setPerson(new PersonSummaryDTO().id(2L));
-		RoleDetailsDTO role3 = new RoleDetailsDTO();
-		role3.setType(RoleDetailsDTO.TypeEnum.TEACHER);
-		role3.setPerson(new PersonSummaryDTO().id(3L));
+		PersonSummaryDTO personSummary1 = new PersonSummaryDTO();
+		personSummary1.setId(1L);
+		PersonSummaryDTO personSummary2 = new PersonSummaryDTO();
+		personSummary2.setId(2L);
 
 		when(taskRepository.findAllBySkillSubmoduleModuleEditionId(anyLong()))
 				.thenReturn(List.of(taskRead12));
 		when(clickedLinkRepository.getByTask(any())).thenReturn(
 				List.of(clickedLink1person1, clickedLink2person1, clickedLink3person2, clickedLink4person3));
-		when(roleControllerApi.getRolesById(Set.of(1L), Set.of(1L, 2L, 3L)))
-				.thenReturn(Flux.just(role1, role2, role3));
+		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT"))
+				.thenReturn(Flux.just(personSummary1, personSummary2));
+
 		List<TaskStatsDTO> taskStats = statsService.teacherStatsTaskLevel(1L);
 
 		assertEquals(1, taskStats.size());
@@ -315,27 +303,20 @@ public class StatsServiceTest {
 		ClickedLink clickedLink4person3 = ClickedLink.builder().person(SCPerson.builder().id(3L).build())
 				.build();
 
-		RoleDetailsDTO role1 = new RoleDetailsDTO();
-		role1.setType(RoleDetailsDTO.TypeEnum.STUDENT);
-		role1.setPerson(new PersonSummaryDTO().id(1L));
-		RoleDetailsDTO role2 = new RoleDetailsDTO();
-		role2.setType(RoleDetailsDTO.TypeEnum.STUDENT);
-		role2.setPerson(new PersonSummaryDTO().id(2L));
-		RoleDetailsDTO role3 = new RoleDetailsDTO();
-		role3.setType(RoleDetailsDTO.TypeEnum.TEACHER);
-		role3.setPerson(new PersonSummaryDTO().id(3L));
-		RoleDetailsDTO role4 = new RoleDetailsDTO();
-		role4.setType(RoleDetailsDTO.TypeEnum.STUDENT);
-		role4.setPerson(new PersonSummaryDTO().id(4L));
+		PersonSummaryDTO personSummary1 = new PersonSummaryDTO();
+		personSummary1.setId(1L);
+		PersonSummaryDTO personSummary2 = new PersonSummaryDTO();
+		personSummary2.setId(2L);
+		PersonSummaryDTO personSummary3 = new PersonSummaryDTO();
+		personSummary3.setId(4L);
 
 		when(taskRepository.findAllBySkillSubmoduleModuleEditionId(anyLong()))
 				.thenReturn(List.of(taskRead12));
 		when(clickedLinkRepository.getByTask(any())).thenReturn(
 				List.of(clickedLink1person1, clickedLink2person1, clickedLink3person2, clickedLink4person3));
-		when(roleControllerApi.getRolesById(Set.of(1L), Set.of(1L, 2L, 3L)))
-				.thenReturn(Flux.just(role1, role2, role3));
-		when(roleControllerApi.getRolesById(Set.of(1L), Set.of(1L, 3L, 4L)))
-				.thenReturn(Flux.just(role1, role3, role4));
+		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT"))
+				.thenReturn(Flux.just(personSummary1, personSummary2, personSummary3));
+
 		List<TaskStatsDTO> taskStats = statsService.teacherStatsTaskLevel(1L);
 
 		assertEquals(1, taskStats.size());

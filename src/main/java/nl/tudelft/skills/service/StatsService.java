@@ -24,9 +24,7 @@ import org.springframework.stereotype.Service;
 
 import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.api.PersonControllerApi;
-import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.PersonSummaryDTO;
-import nl.tudelft.labracore.api.dto.RoleDetailsDTO;
 import nl.tudelft.skills.dto.stats.StudentStatsDTO;
 import nl.tudelft.skills.dto.stats.TaskStatsDTO;
 import nl.tudelft.skills.model.*;
@@ -39,7 +37,6 @@ public class StatsService {
 	private final ClickedLinkRepository clickedLinkRepository;
 	private final PathPreferenceRepository pathPreferenceRepository;
 	private final TaskCompletionRepository taskCompletionRepository;
-	private final RoleControllerApi roleControllerApi;
 	private final PersonRepository personRepository;
 	private final PersonControllerApi personApi;
 
@@ -55,6 +52,11 @@ public class StatsService {
 	public List<TaskStatsDTO> teacherStatsTaskLevel(Long id) {
 		List<Task> tasks = taskRepository.findAllBySkillSubmoduleModuleEditionId(id);
 
+		// Collect all students in the edition
+		List<Long> studentsInEditionIds = personApi.getPeopleByEditionAndRoleType(id, "STUDENT")
+				.map(PersonSummaryDTO::getId)
+				.collectList().block();
+
 		// Collect all the TaskInfo into a list from the existing tasks
 		List<TaskInfo> taskInfos = tasks.stream().flatMap(t -> {
 			List<TaskInfo> info = new ArrayList<>();
@@ -67,46 +69,25 @@ public class StatsService {
 		}).collect(Collectors.toList());
 
 		return taskInfos.stream().map(t -> {
-			// Get the ids of the users who completed the current task
-			Set<Long> usersCompletedTask = t.getCompletedBy().stream()
-					.map(c -> c.getPerson().getId())
+			// Get the ids of the students who completed the current task
+			Set<Long> studentsCompletedTask = t.getCompletedBy().stream()
+					.map(c -> c.getPerson().getId()).filter(studentsInEditionIds::contains)
 					.collect(Collectors.toSet());
-
-			// Filter out the non-student users
-			Set<Long> studentsCompletedTask = usersCompletedTask.isEmpty() ? Set.of()
-					: roleControllerApi.getRolesById(Set.of(id), usersCompletedTask).toStream()
-							.filter(r -> r.getType().equals(RoleDetailsDTO.TypeEnum.STUDENT))
-							.map(r -> r.getPerson().getId()).collect(Collectors.toSet());
 
 			// The TaskInfo should belong to either a RegularTask or a ChoiceTask object
 			Task taskCategory = t.getChoiceTask() == null ? t.getTask() : t.getChoiceTask();
 
-			// Get the ids of the users who have the current task on their path
-			Set<Long> usersHaveTaskOnPath = taskCategory == null ? Set.of()
+			// Count the number of the students who have the current task on their path
+			long numOfStudentsHaveTaskOnPath = taskCategory == null ? 0
 					: taskCategory.getPaths().stream()
 							.flatMap(p -> pathPreferenceRepository
 									.findAllByPathId(p.getId()).stream().map(x -> x.getPerson().getId()))
-							.collect(Collectors.toSet());
+							.distinct().filter(studentsInEditionIds::contains).count();
 
-			// Filter out the non-student users and count th remaining users
-			long numOfStudentsHaveTaskOnPath = usersHaveTaskOnPath.isEmpty() ? 0
-					: roleControllerApi.getRolesById(Set.of(id), usersHaveTaskOnPath).toStream()
-							.filter(r -> r.getType().equals(RoleDetailsDTO.TypeEnum.STUDENT)).count();
-
-			// Get the ids of the people who clicked on the link for the current task
-			List<Long> peopleClickedLink = clickedLinkRepository.getByTask(t).stream()
-					.map(c -> c.getPerson().getId()).collect(Collectors.toList());
-
-			// Collect unique students from the people who clicked on the link
-			Set<Long> studentsClickedLink = peopleClickedLink.isEmpty() ? Set.of()
-					: roleControllerApi.getRolesById(Set.of(id),
-							new HashSet<>(peopleClickedLink)).toStream()
-							.filter(r -> r.getType().equals(RoleDetailsDTO.TypeEnum.STUDENT))
-							.map(x -> x.getPerson().getId()).collect(Collectors.toSet());
-
-			// Count all the clicks made by students on the current link
-			long numOfStudentsClickedLink = peopleClickedLink.stream().filter(studentsClickedLink::contains)
-					.count();
+			// Get the ids of the students from all link clicks
+			List<Long> studentsClickedLink = clickedLinkRepository.getByTask(t).stream()
+					.map(c -> c.getPerson().getId()).filter(studentsInEditionIds::contains)
+					.collect(Collectors.toList());
 
 			// Count students who clicked on the link and completed the task
 			long studentsClickedAndCompleted = studentsCompletedTask.stream()
@@ -123,8 +104,8 @@ public class StatsService {
 							: taskCategory.getSkill().getSubmodule().getModule().getName(),
 					studentsCompletedTask.size(),
 					numOfStudentsHaveTaskOnPath,
-					numOfStudentsClickedLink,
 					studentsClickedLink.size(),
+					studentsClickedLink.stream().distinct().count(),
 					studentsClickedAndCompleted);
 		}).collect(Collectors.toList());
 	}
