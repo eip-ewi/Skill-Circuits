@@ -35,6 +35,7 @@
         if (hasCycle(getGraph())) {
             warnings = [ {
                 type: "cycles",
+                viewModes: ["EDITOR", "ADMIN"],
                 message: "Your circuit contains cycles! While Skill Circuit will continue to work, it is strongly recommended to remove all cycles."
             } ];
         }

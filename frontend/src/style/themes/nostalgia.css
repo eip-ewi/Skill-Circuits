@@ -137,6 +137,9 @@
     --warning-banner-border: none;
     --warning-banner-border-radius: 0;
 
+    /* Dialogs */
+    --dialog-border-radius: 0;
+
     /* Font */
     --main-font-family: noto sans, system-ui, sans-serif;
 }

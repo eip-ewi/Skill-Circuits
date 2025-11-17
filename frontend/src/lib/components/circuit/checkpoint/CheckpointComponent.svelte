@@ -7,6 +7,7 @@
     import {isCompleted} from "../../../logic/circuit/skill_state/completion";
     import {canEditCircuit} from "../../../logic/authorisation.svelte";
     import {getFirstUncompletedPastCheckpoint, getNextCheckpoint, getVisibleCheckpoints} from "../../../logic/edition/edition.svelte";
+    import Link from "../../util/Link.svelte";
 
     let { checkpoint }: { checkpoint: Checkpoint } = $props();
 
@@ -19,6 +20,28 @@
 
     let row: number = $derived(Math.max(...skills.map(skill => skill.row!)));
 
+    let openWarnDialog: boolean = $state(false);
+    let element: HTMLDialogElement | undefined = $state();
+
+    $effect(() => {
+        if (element === undefined) {
+            return;
+        }
+        if (openWarnDialog) {
+            element.showModal();
+        }
+    });
+
+    function showWarnDialog() {
+        openWarnDialog = true;
+    }
+
+    function checkForClose(event: MouseEvent) {
+        if (event.target === element) {
+            openWarnDialog = false;
+        }
+    }
+
 </script>
 
 <div class="checkpoint" style:grid-row={row + 1} data-completed={completed} data-focused={focused}>
@@ -28,13 +51,20 @@
             <span class="deadline">{moment(checkpoint.deadline).format("D MMMM YYYY HH:mm")}</span>
         </div>
         {#if warn}
-            <div class="warning">
+            <button class="warning" onclick={showWarnDialog}>
                 <span class="fa-solid fa-triangle-exclamation"></span>
-                <p>
-                    This checkpoint has passed. Some of the tasks in the skills before this point might not be completable anymore.
-                    Missing a checkpoint is no cause for concern, but if you are very far behind, we advice you talk to a teaching assistant, academic counselor, or lecturer.
-                </p>
-            </div>
+                This checkpoint has passed.
+            </button>
+            {#if openWarnDialog}
+                <dialog bind:this={element} onclick={checkForClose} class="dialog glass">
+                    <h2>What to do if you are behind</h2>
+                    <p>
+                        Missing a checkpoint is no cause for concern, but if you are very far behind, we advise you talk to a teaching assistant, academic counsellor, or lecturer.
+                        You can find more information about how to reach the academic counsellors
+                        <Link target="_blank" href="https://www.tudelft.nl/en/student/eemcs-student-portal/organisation/academic-counsellors">here</Link>.
+                    </p>
+                </dialog>
+            {/if}
         {/if}
     </div>
 </div>
@@ -109,6 +139,41 @@
         display: flex;
         gap: 1em;
         padding: .5em 1em;
+        cursor: pointer;
+        transition: transform ease-in-out 150ms;
+    }
+
+    .warning:hover {
+        transform: scale(1.05);
+    }
+
+    .dialog {
+        border-radius: var(--dialog-border-radius);
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        max-width: 43em;
+        padding: 2em;
+        border: none;
+    }
+
+    .dialog::backdrop {
+        backdrop-filter: blur(.15rem);
+    }
+
+    .dialog::before {
+        backdrop-filter: blur(1rem) saturate(180%);
+    }
+
+    .dialog > h2 {
+        font-size: 1.5em;
+        font-weight: bold;
+    }
+
+    .dialog > p {
+        margin-top: 1em;
+        font-size: 1.1em;
     }
 
     .warning .fa-solid {

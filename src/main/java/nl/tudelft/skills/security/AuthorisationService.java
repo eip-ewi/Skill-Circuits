@@ -205,6 +205,10 @@ public class AuthorisationService {
 		return canEditSkill(dtoConverter.apply(taskId).getSkill());
 	}
 
+	public boolean canEditTask(ChoiceTask choiceTask) {
+		return canEditSkill(choiceTask.getSkill());
+	}
+
 	public boolean canViewTaskInfo(TaskInfo taskInfo) {
 		if (taskInfo.getTask() != null) {
 			return canViewSkill(taskInfo.getTask().getSkill());

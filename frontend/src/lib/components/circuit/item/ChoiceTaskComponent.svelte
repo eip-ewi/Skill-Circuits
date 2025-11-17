@@ -72,6 +72,7 @@
         margin-bottom: .5rem;
         padding: 1.25rem 1rem 1rem 1rem;
         position: relative;
+        min-width: 21em;
     }
     .task.with-bookmark {
         grid-column: 1 / 5;

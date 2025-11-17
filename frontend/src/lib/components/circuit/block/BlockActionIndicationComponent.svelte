@@ -19,7 +19,7 @@
     }
 </script>
 
-<div class="indication" transition:transition>
+<div class="glass indication" transition:transition>
     {#if action === BlockActions.Goto}
         <span class="fa-solid fa-arrow-up-right-from-square" class:rotated={!isLevel(ModuleLevel)}></span>
         {#if isLevel(ModuleLevel)} <span>Go to source</span> {/if}
@@ -83,12 +83,8 @@
 
 <style>
     .indication {
-        background-color: var(--neutral-surface-colour);
-        border: var(--neutral-surface-border);
         border-radius: var(--surface-border-radius);
-        box-shadow: .75rem 1.25rem 1.625rem 0 color-mix(in srgb, var(--shadow-colour) 8%, transparent);
         bottom: -3em;
-        color: var(--on-neutral-surface-colour);
         cursor: pointer;
         left: 50%;
         padding: .5em 1em;

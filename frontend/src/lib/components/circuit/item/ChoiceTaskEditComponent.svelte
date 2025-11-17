@@ -22,7 +22,17 @@
     }
 
     async function editMinTasks(event: Event) {
-        const newMinTasks = parseInt((event.target as HTMLInputElement).value);
+        const input = event.target as HTMLInputElement;
+        let newMinTasks = parseInt(input.value);
+        const minValue = parseInt(input.min);
+        const maxValue = parseInt(input.max);
+
+        // Clamp input if it is outside the correct range
+        if (newMinTasks < minValue || newMinTasks > maxValue) {
+            newMinTasks = Math.max(minValue, Math.min(maxValue, newMinTasks));
+            input.value = newMinTasks.toString();
+        }
+
         await editChoiceTaskMinTasks(task, newMinTasks);
     }
 
@@ -53,6 +63,9 @@
             return;
         }
         event.preventDefault();
+
+        // Prevent the drop event from being handled multiple times
+        event.stopPropagation();
 
         if (event.dataTransfer!.types.includes("skill-circuits/regular-task")) {
             let taskId = parseInt(event.dataTransfer!.getData("skill-circuits/regular-task"));
@@ -98,6 +111,7 @@
         margin-bottom: .5em;
         margin-top: 1em;
         min-height: 2em;
+        min-width: 28em;
         width: 100%;
     }
 

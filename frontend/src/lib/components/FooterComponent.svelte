@@ -19,6 +19,7 @@
             {/if}
         </div>
         <div class="links">
+            <Link href="https://gitlab.ewi.tudelft.nl/skill-circuits/skill-circuits/-/releases" target="_blank">Releases</Link>
             <Link onclick={ () => loadPage("/privacy") }>Privacy statement</Link>
         </div>
     </footer>

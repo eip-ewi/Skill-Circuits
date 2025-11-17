@@ -183,6 +183,9 @@ svelte check:
     # Don't run on detached merge request pipelines
     - if: $CI_MERGE_REQUEST_EVENT_TYPE == "detached"
       when: never
+    # Don't run on main
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: never
     # Run on branches
     - if: $CI_COMMIT_BRANCH
     # Run on merge requests to development
@@ -346,6 +349,9 @@ unit tests / H2:
   rules:
     # Don't run on detached merge request pipelines
     - if: $CI_MERGE_REQUEST_EVENT_TYPE == "detached"
+      when: never
+    # Don't run on main
+    - if: $CI_COMMIT_BRANCH == "main"
       when: never
     # Run if MySQL tests don't run
     - if: $CI_PROJECT_NAMESPACE != "skill-circuits"
@@ -597,6 +603,10 @@ coverage report:
         path: cobertura.xml
   script:
     - python /opt/cover2cover.py $CI_PROJECT_DIR/codecov/jacoco/test/jacocoTestReport.xml $CI_PROJECT_DIR/src/main/java/ > cobertura.xml
+  rules:
+    # Don't run on main
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: never
 
 # Publish Skill Circuits jar
 publish jar:
