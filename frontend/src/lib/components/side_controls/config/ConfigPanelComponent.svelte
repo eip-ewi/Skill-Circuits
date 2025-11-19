@@ -1,6 +1,6 @@
 <script lang="ts">
 
-    import {canEditCircuit, getAuthorisation} from "../../../logic/authorisation.svelte";
+    import {canEditCircuit, getAuthorisation, isTeacherForCircuit} from "../../../logic/authorisation.svelte";
     import EditorManageComponent from "./EditorManageComponent.svelte";
     import {getEdition} from "../../../logic/edition/edition.svelte";
     import Button from "../../util/Button.svelte";
@@ -61,6 +61,24 @@
                     </Button>
                 </div>
             </div>
+            {#if isTeacherForCircuit()}
+                <div class="section">
+                    <h3>Download statistics</h3>
+                    <p>
+                        You can download statistics for tasks and students in this edition.
+                    </p>
+                    <div class="buttons">
+                        <Button href={`/api/editions/${getEdition().id}/statistics/tasks`}>
+                            <span class="fa-solid fa-list-check"></span>
+                            <span>Download task statistics</span>
+                        </Button>
+                        <Button href={`/api/editions/${getEdition().id}/statistics/students`}>
+                            <span class="fa-solid fa-users"></span>
+                            <span>Download student statistics</span>
+                        </Button>
+                    </div>
+                </div>
+            {/if}
         </div>
     </div>
 
@@ -115,6 +133,12 @@
     .section {
         display: grid;
         gap: .5em;
+    }
+
+    .buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5em;
     }
 
     .button {

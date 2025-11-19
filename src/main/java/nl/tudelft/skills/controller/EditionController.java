@@ -17,8 +17,15 @@
  */
 package nl.tudelft.skills.controller;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,16 +34,11 @@ import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.librador.resolver.annotations.PathEntity;
 import nl.tudelft.skills.annotation.AuthenticatedSCPerson;
 import nl.tudelft.skills.dto.patch.EditionPatch;
-import nl.tudelft.skills.dto.view.EditionView;
-import nl.tudelft.skills.dto.view.EditionsView;
-import nl.tudelft.skills.dto.view.ManagedEditionView;
+import nl.tudelft.skills.dto.view.*;
 import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelEditionView;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.SCPerson;
-import nl.tudelft.skills.service.CopyService;
-import nl.tudelft.skills.service.EditionCircuitService;
-import nl.tudelft.skills.service.EditionService;
-import nl.tudelft.skills.service.ProgressService;
+import nl.tudelft.skills.service.*;
 
 @RestController
 @AllArgsConstructor
@@ -45,6 +47,7 @@ public class EditionController {
 
 	private final CopyService copyService;
 	private final EditionService editionService;
+	private final EditionStatisticsService editionStatisticsService;
 	private final EditionCircuitService editionCircuitService;
 	private final ProgressService progressService;
 
@@ -109,6 +112,39 @@ public class EditionController {
 	@PreAuthorize("@authorisationService.canViewEdition(#original.id) and @authorisationService.canEditEditionCircuit(#copy.id)")
 	public void copyEditionTo(@PathEntity SCEdition original, @PathEntity SCEdition copy) {
 		copyService.copyEdition(original, copy);
+	}
+
+	@PreAuthorize("@authorisationService.canExportEditionStatistics(#edition.id)")
+	@GetMapping(value = "{edition}/statistics/tasks", produces = "text/csv")
+	public ResponseEntity<Resource> showEditionTaskStats(@PathEntity SCEdition edition) throws IOException {
+		EditionDetailsDTO editionDetails = editionService.getEditionById(edition.getId());
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION,
+						"attachment; filename=\""
+								+ LocalDateTime.now()
+										.format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"))
+								+ " " + editionDetails.getCourse().getName() + " - "
+								+ editionDetails.getName() + " - Task statistics"
+								+ ".csv\"")
+				.contentType(MediaType.valueOf("text/csv"))
+				.body(editionStatisticsService.getTaskStatisticsCSV(edition));
+	}
+
+	@PreAuthorize("@authorisationService.canExportEditionStatistics(#edition.id)")
+	@GetMapping(value = "{edition}/statistics/students", produces = "text/csv")
+	public ResponseEntity<Resource> showEditionStudentStats(@PathEntity SCEdition edition)
+			throws IOException {
+		EditionDetailsDTO editionDetails = editionService.getEditionById(edition.getId());
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION,
+						"attachment; filename=\""
+								+ LocalDateTime.now()
+										.format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"))
+								+ " " + editionDetails.getCourse().getName() + " - "
+								+ editionDetails.getName() + " - Student statistics"
+								+ ".csv\"")
+				.contentType(MediaType.valueOf("text/csv"))
+				.body(editionStatisticsService.getStudentStatisticsCSV(edition));
 	}
 
 }

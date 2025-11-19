@@ -15,27 +15,38 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.repository;
+package nl.tudelft.skills.dto.stats;
 
-import java.util.List;
-import java.util.Set;
+import java.time.LocalDateTime;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import nl.tudelft.skills.model.ClickedLink;
-import nl.tudelft.skills.model.TaskInfo;
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class StudentStatsDTO {
+	@NotNull
+	private Long id;
 
-public interface ClickedLinkRepository extends JpaRepository<ClickedLink, Long> {
+	@NotNull
+	private String userName;
 
-	default ClickedLink findByIdOrThrow(Long id) {
-		return findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("ClickedLink was not found: " + id));
-	}
+	@NotNull
+	private String chosenPath;
 
-	Set<ClickedLink> getByPersonId(Long id);
+	@NotNull
+	private long numberOfCompletedTasks;
 
-	List<ClickedLink> getByTask(TaskInfo task);
+	private LocalDateTime lastCompletedTaskTimestamp;
 
-	List<ClickedLink> deleteAllByTaskIdIn(List<Long> taskIds);
+	@NotNull
+	private String lastCompletedTask;
+
+	@NotNull
+	private String furthestCheckpoint;
 }
