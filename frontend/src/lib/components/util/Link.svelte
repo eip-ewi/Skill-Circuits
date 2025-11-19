@@ -15,7 +15,7 @@
 
 </script>
 
-<a href={props.href} target={props.target} onclick={props.onclick}>
+<a href={props.href} target={props.target} onmousedown={props.onclick}>
     {@render props.children() }
 </a>
 

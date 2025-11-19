@@ -18,7 +18,6 @@
 package nl.tudelft.skills.repository;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -43,6 +42,4 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 	Set<Task> findAllByEdition(@Param("edition") SCEdition edition);
 
 	Set<Task> findAllByIdIn(Collection<Long> ids);
-
-	List<Task> findAllBySkillSubmoduleModuleEditionId(Long editionId);
 }

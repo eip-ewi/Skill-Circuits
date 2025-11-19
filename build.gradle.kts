@@ -277,4 +277,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     testAnnotationProcessor("org.projectlombok:lombok")
 
+    // CSV
+    implementation("com.opencsv:opencsv:5.7.1")
+
 }

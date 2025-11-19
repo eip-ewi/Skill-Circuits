@@ -53,7 +53,7 @@ public interface TaskCompletionRepository extends JpaRepository<TaskCompletion, 
 			select completion from TaskCompletion completion
 			where completion.person.id = :#{#person.id}
 			and completion.task.id in (
-			    select task.taskInfo.id from RegularTask task where task.skill.submodule.module.edition.id = :#{#edition.id}
+			    select task.taskInfo.id from RegularTask task where task.skill.submodule.module.edition.id = :#{#editionId}
 			    union
 			    select subtask.id from ChoiceTask choiceTask
 			    inner join choiceTask.tasks subtask
