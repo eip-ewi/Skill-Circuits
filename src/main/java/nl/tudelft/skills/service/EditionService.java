@@ -48,9 +48,9 @@ public class EditionService {
 
 	private final EditionControllerApi editionApi;
 	private final PersonControllerApi personApi;
+	private final RoleControllerApi roleApi;
 
 	private final SCPersonService sCPersonService;
-	private final RoleControllerApi roleControllerApi;
 
 	private final EditionRepository editionRepository;
 	private final PersonRepository personRepository;
@@ -73,7 +73,7 @@ public class EditionService {
 				scEdition.getPaths().stream()
 						.map(path -> new PathView(path.getId(), path.getName(), path.getDescription()))
 						.toList(),
-				roleControllerApi.getRolesByEditions(Set.of(editionId))
+				roleApi.getRolesByEditions(Set.of(editionId))
 						.filter(role -> role.getType() == RolePersonDetailsDTO.TypeEnum.TEACHER)
 						.map(RolePersonDetailsDTO::getPerson)
 						.sort(Comparator.comparing(PersonSummaryDTO::getDisplayName)).collectList().block(),
@@ -182,7 +182,7 @@ public class EditionService {
 	}
 
 	public void addPersonToEdition(SCPerson person, Long editionId) {
-		roleControllerApi.addRole(new RoleCreateDTO().edition(new EditionIdDTO().id(editionId))
+		roleApi.addRole(new RoleCreateDTO().edition(new EditionIdDTO().id(editionId))
 				.person(new PersonIdDTO().id(person.getId())).type(RoleCreateDTO.TypeEnum.STUDENT)).block();
 	}
 

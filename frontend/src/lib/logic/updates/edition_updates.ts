@@ -30,24 +30,6 @@ export async function setEditionVisibility(newVisibility: boolean) {
     }
 }
 
-export async function downloadTeacherStats() {
-    const editionId = getEdition().id
-
-    const urls = [
-        `/api/editions/${editionId}/task_stats`,
-        `/api/editions/${editionId}/student_stats`
-    ];
-
-    urls.forEach(url => {
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-    });
-}
-
 export async function resetProgress() {
     let response = await fetch(`/api/editions/${getEdition().id}/reset-progress`, withCsrf({
         method: "POST",

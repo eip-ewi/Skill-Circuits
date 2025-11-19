@@ -57,10 +57,10 @@ public interface TaskCompletionRepository extends JpaRepository<TaskCompletion, 
 			    union
 			    select subtask.id from ChoiceTask choiceTask
 			    inner join choiceTask.tasks subtask
-			    where choiceTask.skill.submodule.module.edition.id = :#{#editionId}
+			    where choiceTask.skill.submodule.module.edition.id = :#{#edition.id}
 			)
 			""")
-	Set<TaskCompletion> findAllByPersonAndEditionId(@Param("person") SCPerson person,
-			@Param("editionId") Long editionId);
+	Set<TaskCompletion> findAllByPersonAndEdition(@Param("person") SCPerson person,
+			@Param("edition") SCEdition edition);
 
 }

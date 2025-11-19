@@ -39,7 +39,7 @@ public class ProgressService {
 	public void resetProgress(SCEdition edition, SCPerson person) {
 		pathPreferenceRepository.deleteByPersonAndEdition(person, edition);
 		taskCompletionRepository
-				.deleteAll(taskCompletionRepository.findAllByPersonAndEditionId(person, edition.getId()));
+				.deleteAll(taskCompletionRepository.findAllByPersonAndEdition(person, edition));
 
 		person.getTasksAdded().clear();
 		person.getTasksRemoved().clear();

@@ -150,6 +150,10 @@ public class AuthorisationService {
 		return isAdmin() || hasEditorRole(editionId) || editionRepository.getOrCreate(editionId).isVisible();
 	}
 
+	public boolean canExportEditionStatistics(Long editionId) {
+		return isAdmin() || isTeacher(editionId);
+	}
+
 	public boolean canEditModuleCircuit(SCModuleId moduleId) {
 		return canEditModuleCircuit(dtoConverter.apply(moduleId));
 	}

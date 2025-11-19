@@ -41,9 +41,9 @@ import reactor.core.publisher.Flux;
 
 @Transactional
 @SpringBootTest()
-public class StatsServiceTest {
+public class EditionStatisticsServiceTest {
 
-	private final StatsService statsService;
+	private final EditionStatisticsService editionStatisticsService;
 	private final TaskRepository taskRepository;
 	private final PathPreferenceRepository pathPreferenceRepository;
 	private final ClickedLinkRepository clickedLinkRepository;
@@ -51,7 +51,9 @@ public class StatsServiceTest {
 	private final TaskCompletionRepository taskCompletionRepository;
 	private final PersonControllerApi personControllerApi;
 
-	public StatsServiceTest() {
+	private final SCEdition edition = SCEdition.builder().id(1L).build();
+
+	public EditionStatisticsServiceTest() {
 		this.taskRepository = mock(TaskRepository.class);
 		this.pathPreferenceRepository = mock(PathPreferenceRepository.class);
 		this.clickedLinkRepository = mock(ClickedLinkRepository.class);
@@ -59,7 +61,7 @@ public class StatsServiceTest {
 		this.taskCompletionRepository = mock(TaskCompletionRepository.class);
 		this.personControllerApi = mock(PersonControllerApi.class);
 
-		statsService = new StatsService(
+		editionStatisticsService = new EditionStatisticsService(
 				this.taskRepository, this.clickedLinkRepository, this.pathPreferenceRepository,
 				this.taskCompletionRepository,
 				this.personRepository, this.personControllerApi);
@@ -67,9 +69,9 @@ public class StatsServiceTest {
 
 	@Test
 	public void emptyTaskStats() {
-		when(taskRepository.findAllBySkillSubmoduleModuleEditionId(anyLong())).thenReturn(List.of());
+		when(taskRepository.findAllByEdition(any())).thenReturn(Set.of());
 		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT")).thenReturn(Flux.empty());
-		List<TaskStatsDTO> taskStats = statsService.teacherStatsTaskLevel(1L);
+		List<TaskStatsDTO> taskStats = editionStatisticsService.teacherStatsTaskLevel(edition);
 		assertThat(taskStats).isEmpty();
 	}
 
@@ -106,12 +108,12 @@ public class StatsServiceTest {
 				.taskInfo(read12Info)
 				.build();
 		read12Info.setTask(taskRead12);
-		when(taskRepository.findAllBySkillSubmoduleModuleEditionId(anyLong()))
-				.thenReturn(List.of(taskRead12));
+		when(taskRepository.findAllByEdition(any()))
+				.thenReturn(Set.of(taskRead12));
 		when(clickedLinkRepository.getByTask(any())).thenReturn(List.of());
 		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT")).thenReturn(Flux.empty());
 
-		List<TaskStatsDTO> taskStats = statsService.teacherStatsTaskLevel(1L);
+		List<TaskStatsDTO> taskStats = editionStatisticsService.teacherStatsTaskLevel(edition);
 
 		assertEquals(1, taskStats.size());
 		assertThat(taskStats).isEqualTo(List.of(new TaskStatsDTO(1L, "Read chapter 1.2", "Implication",
@@ -124,13 +126,13 @@ public class StatsServiceTest {
 				.time(7).type(TaskType.READING).build();
 		RegularTask taskRead12 = RegularTask.builder().skill(skillBuilder()).taskInfo(read12Info)
 				.build();
-		when(taskRepository.findAllBySkillSubmoduleModuleEditionId(anyLong()))
-				.thenReturn(List.of(taskRead12));
+		when(taskRepository.findAllByEdition(any()))
+				.thenReturn(Set.of(taskRead12));
 		when(clickedLinkRepository.getByTask(any())).thenReturn(
 				List.of());
 		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT")).thenReturn(Flux.empty());
 
-		List<TaskStatsDTO> taskStats = statsService.teacherStatsTaskLevel(1L);
+		List<TaskStatsDTO> taskStats = editionStatisticsService.teacherStatsTaskLevel(edition);
 
 		assertEquals(1, taskStats.size());
 		assertThat(taskStats).isEqualTo(List.of(new TaskStatsDTO(1L, "Read chapter 1.2", "Unknown", "Unknown",
@@ -141,26 +143,26 @@ public class StatsServiceTest {
 	public void multipleTaskStats() {
 		TaskInfo read12Info = TaskInfo.builder().id(1L).name("Read chapter 1.2")
 				.time(7).type(TaskType.READING).build();
-		RegularTask taskRead12 = RegularTask.builder().skill(skillBuilder()).taskInfo(read12Info)
+		RegularTask taskRead12 = RegularTask.builder().id(1L).skill(skillBuilder()).taskInfo(read12Info)
 				.build();
 		read12Info.setTask(taskRead12);
 
 		TaskInfo do12aeInfo = TaskInfo.builder().id(2L).name("Do exercise 1.2a-e")
 				.time(10).type(TaskType.EXERCISE).build();
 		TaskInfo do11adInfo = TaskInfo.builder().id(3L).name("Do exercise 1.1a-d").time(10).build();
-		ChoiceTask choiceTask = ChoiceTask.builder().skill(skillBuilder())
+		ChoiceTask choiceTask = ChoiceTask.builder().id(2L).skill(skillBuilder())
 				.tasks(List.of(do12aeInfo, do11adInfo))
 				.build();
 		do12aeInfo.setChoiceTask(choiceTask);
 		do11adInfo.setChoiceTask(choiceTask);
 
-		when(taskRepository.findAllBySkillSubmoduleModuleEditionId(anyLong()))
-				.thenReturn(List.of(taskRead12, choiceTask));
+		when(taskRepository.findAllByEdition(any()))
+				.thenReturn(Set.of(taskRead12, choiceTask));
 		when(clickedLinkRepository.getByTask(any())).thenReturn(
 				List.of());
 		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT")).thenReturn(Flux.empty());
 
-		List<TaskStatsDTO> taskStats = statsService.teacherStatsTaskLevel(1L);
+		List<TaskStatsDTO> taskStats = editionStatisticsService.teacherStatsTaskLevel(edition);
 
 		assertEquals(3, taskStats.size());
 		assertThat(taskStats).isEqualTo(List.of(
@@ -191,14 +193,14 @@ public class StatsServiceTest {
 		PersonSummaryDTO personSummary2 = new PersonSummaryDTO();
 		personSummary2.setId(3L);
 
-		when(taskRepository.findAllBySkillSubmoduleModuleEditionId(anyLong()))
-				.thenReturn(List.of(taskRead12));
+		when(taskRepository.findAllByEdition(any()))
+				.thenReturn(Set.of(taskRead12));
 		when(clickedLinkRepository.getByTask(any())).thenReturn(
 				List.of());
 		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT"))
 				.thenReturn(Flux.just(personSummary1, personSummary2));
 
-		List<TaskStatsDTO> taskStats = statsService.teacherStatsTaskLevel(1L);
+		List<TaskStatsDTO> taskStats = editionStatisticsService.teacherStatsTaskLevel(edition);
 
 		assertEquals(1, taskStats.size());
 		assertThat(taskStats).isEqualTo(List.of(new TaskStatsDTO(1L, "Read chapter 1.2", "Implication",
@@ -230,8 +232,8 @@ public class StatsServiceTest {
 		PersonSummaryDTO personSummary2 = new PersonSummaryDTO();
 		personSummary2.setId(3L);
 
-		when(taskRepository.findAllBySkillSubmoduleModuleEditionId(anyLong()))
-				.thenReturn(List.of(taskRead12));
+		when(taskRepository.findAllByEdition(any()))
+				.thenReturn(Set.of(taskRead12));
 		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT"))
 				.thenReturn(Flux.just(personSummary1, personSummary2));
 		when(pathPreferenceRepository.findAllByPathId(1L))
@@ -239,7 +241,7 @@ public class StatsServiceTest {
 		when(clickedLinkRepository.getByTask(any())).thenReturn(
 				List.of());
 
-		List<TaskStatsDTO> taskStats = statsService.teacherStatsTaskLevel(1L);
+		List<TaskStatsDTO> taskStats = editionStatisticsService.teacherStatsTaskLevel(edition);
 
 		assertEquals(1, taskStats.size());
 		assertThat(taskStats).isEqualTo(List.of(new TaskStatsDTO(1L, "Read chapter 1.2", "Implication",
@@ -268,14 +270,14 @@ public class StatsServiceTest {
 		PersonSummaryDTO personSummary2 = new PersonSummaryDTO();
 		personSummary2.setId(2L);
 
-		when(taskRepository.findAllBySkillSubmoduleModuleEditionId(anyLong()))
-				.thenReturn(List.of(taskRead12));
+		when(taskRepository.findAllByEdition(any()))
+				.thenReturn(Set.of(taskRead12));
 		when(clickedLinkRepository.getByTask(any())).thenReturn(
 				List.of(clickedLink1person1, clickedLink2person1, clickedLink3person2, clickedLink4person3));
 		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT"))
 				.thenReturn(Flux.just(personSummary1, personSummary2));
 
-		List<TaskStatsDTO> taskStats = statsService.teacherStatsTaskLevel(1L);
+		List<TaskStatsDTO> taskStats = editionStatisticsService.teacherStatsTaskLevel(edition);
 
 		assertEquals(1, taskStats.size());
 		assertThat(taskStats).isEqualTo(List.of(new TaskStatsDTO(1L, "Read chapter 1.2", "Implication",
@@ -310,14 +312,14 @@ public class StatsServiceTest {
 		PersonSummaryDTO personSummary3 = new PersonSummaryDTO();
 		personSummary3.setId(4L);
 
-		when(taskRepository.findAllBySkillSubmoduleModuleEditionId(anyLong()))
-				.thenReturn(List.of(taskRead12));
+		when(taskRepository.findAllByEdition(any()))
+				.thenReturn(Set.of(taskRead12));
 		when(clickedLinkRepository.getByTask(any())).thenReturn(
 				List.of(clickedLink1person1, clickedLink2person1, clickedLink3person2, clickedLink4person3));
 		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT"))
 				.thenReturn(Flux.just(personSummary1, personSummary2, personSummary3));
 
-		List<TaskStatsDTO> taskStats = statsService.teacherStatsTaskLevel(1L);
+		List<TaskStatsDTO> taskStats = editionStatisticsService.teacherStatsTaskLevel(edition);
 
 		assertEquals(1, taskStats.size());
 		assertThat(taskStats).isEqualTo(List.of(new TaskStatsDTO(1L, "Read chapter 1.2", "Implication",
@@ -327,7 +329,7 @@ public class StatsServiceTest {
 	@Test
 	public void noStudentsStudentStats() {
 		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT")).thenReturn(Flux.just());
-		List<StudentStatsDTO> studentStats = statsService.teacherStatsStudentLevel(1L);
+		List<StudentStatsDTO> studentStats = editionStatisticsService.teacherStatsStudentLevel(edition);
 
 		assertThat(studentStats).isEqualTo(List.of());
 	}
@@ -342,9 +344,9 @@ public class StatsServiceTest {
 		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT"))
 				.thenReturn(Flux.just(personSummary));
 		when(personRepository.findAllById(List.of(1L))).thenReturn(List.of(student));
-		when(taskCompletionRepository.findAllByPersonAndEditionId(any(), anyLong())).thenReturn(Set.of());
+		when(taskCompletionRepository.findAllByPersonAndEdition(any(), any())).thenReturn(Set.of());
 
-		List<StudentStatsDTO> studentStats = statsService.teacherStatsStudentLevel(1L);
+		List<StudentStatsDTO> studentStats = editionStatisticsService.teacherStatsStudentLevel(edition);
 
 		assertThat(studentStats).isEqualTo(
 				List.of(new StudentStatsDTO(1L, "student", "Path not chosen", 0, null, "No activity",
@@ -372,9 +374,9 @@ public class StatsServiceTest {
 		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT"))
 				.thenReturn(Flux.just(personSummary));
 		when(personRepository.findAllById(List.of(2L))).thenReturn(List.of(student));
-		when(taskCompletionRepository.findAllByPersonAndEditionId(any(), anyLong())).thenReturn(Set.of());
+		when(taskCompletionRepository.findAllByPersonAndEdition(any(), any())).thenReturn(Set.of());
 
-		List<StudentStatsDTO> studentStats = statsService.teacherStatsStudentLevel(1L);
+		List<StudentStatsDTO> studentStats = editionStatisticsService.teacherStatsStudentLevel(edition);
 
 		assertThat(studentStats).isEqualTo(
 				List.of(new StudentStatsDTO(2L, "student", "Path 1", 0, null, "No activity",
@@ -429,10 +431,10 @@ public class StatsServiceTest {
 		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT"))
 				.thenReturn(Flux.just(personSummary));
 		when(personRepository.findAllById(List.of(1L))).thenReturn(List.of(student));
-		when(taskCompletionRepository.findAllByPersonAndEditionId(any(), anyLong()))
+		when(taskCompletionRepository.findAllByPersonAndEdition(any(), any()))
 				.thenReturn(Set.of(taskCompletion1, taskCompletion2, taskCompletion3));
 
-		List<StudentStatsDTO> studentStats = statsService.teacherStatsStudentLevel(1L);
+		List<StudentStatsDTO> studentStats = editionStatisticsService.teacherStatsStudentLevel(edition);
 
 		assertThat(studentStats).isEqualTo(List.of(new StudentStatsDTO(1L, "student", "Path not chosen", 3,
 				LocalDateTime.of(2025, 2, 1, 10, 10), "Task 3", "Checkpoint 1")));
@@ -494,12 +496,12 @@ public class StatsServiceTest {
 		when(personControllerApi.getPeopleByEditionAndRoleType(1L, "STUDENT"))
 				.thenReturn(Flux.just(personSummary1, personSummary2));
 		when(personRepository.findAllById(List.of(1L, 2L))).thenReturn(List.of(student1, student2));
-		when(taskCompletionRepository.findAllByPersonAndEditionId(student1, 1L))
+		when(taskCompletionRepository.findAllByPersonAndEdition(eq(student1), any()))
 				.thenReturn(Set.of(taskCompletion1, taskCompletion2, taskCompletion3));
-		when(taskCompletionRepository.findAllByPersonAndEditionId(student2, 1L))
+		when(taskCompletionRepository.findAllByPersonAndEdition(eq(student2), any()))
 				.thenReturn(Set.of(taskCompletion4));
 
-		List<StudentStatsDTO> studentStats = statsService.teacherStatsStudentLevel(1L);
+		List<StudentStatsDTO> studentStats = editionStatisticsService.teacherStatsStudentLevel(edition);
 
 		assertThat(studentStats).isEqualTo(List.of(new StudentStatsDTO(1L, "student1", "Path not chosen", 3,
 				LocalDateTime.of(2025, 8, 1, 10, 10), "Task 2", "Checkpoint 1"),

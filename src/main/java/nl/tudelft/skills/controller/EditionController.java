@@ -18,26 +18,22 @@
 package nl.tudelft.skills.controller;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import com.opencsv.CSVWriter;
-
 import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.librador.resolver.annotations.PathEntity;
 import nl.tudelft.skills.annotation.AuthenticatedSCPerson;
 import nl.tudelft.skills.dto.patch.EditionPatch;
-import nl.tudelft.skills.dto.stats.StudentStatsDTO;
-import nl.tudelft.skills.dto.stats.TaskStatsDTO;
 import nl.tudelft.skills.dto.view.*;
 import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelEditionView;
 import nl.tudelft.skills.model.SCEdition;
@@ -51,7 +47,7 @@ public class EditionController {
 
 	private final CopyService copyService;
 	private final EditionService editionService;
-	private final StatsService statsService;
+	private final EditionStatisticsService editionStatisticsService;
 	private final EditionCircuitService editionCircuitService;
 	private final ProgressService progressService;
 
@@ -118,72 +114,37 @@ public class EditionController {
 		copyService.copyEdition(original, copy);
 	}
 
-	@GetMapping(value = "{editionId}/task_stats", produces = "text/csv")
-	@ResponseBody
-	@PreAuthorize("@authorisationService.isTeacher(#editionId)")
-	public ResponseEntity<String> showEditionTaskStats(@PathVariable long editionId) throws IOException {
-		List<TaskStatsDTO> teacherStats = statsService.teacherStatsTaskLevel(editionId);
-		StringWriter sw = new StringWriter();
-		EditionDetailsDTO editionDetails = editionService.getEditionById(editionId);
-		try (CSVWriter writer = new CSVWriter(sw)) {
-			writer.writeNext(new String[] { "Task id", "Task name", "Skill name", "Checkpoint name",
-					"Submodule name", "Module name", "Student completions",
-					"Students with this task on their path", "Student link clicks",
-					"Unique student link clicks", "Students clicked the link and completed" });
-
-			for (TaskStatsDTO t : teacherStats) {
-				writer.writeNext(new String[] { String.valueOf(t.getId()), t.getTaskName(), t.getSkillName(),
-						t.getCheckpointName(), t.getSubModuleName(), t.getModuleName(),
-						String.valueOf(t.getNumOfStudentCompletions()),
-						String.valueOf(t.getNumOfStudentsHaveTaskOnPath()),
-						String.valueOf(t.getNumOfStudentLinkClicks()),
-						String.valueOf(t.getNumOfUniqueStudentsClickedLink()),
-						String.valueOf(t.getNumOfStudentsClickedLinkAndCompleted()) });
-			}
-		}
-
+	@PreAuthorize("@authorisationService.canExportEditionStatistics(#edition.id)")
+	@GetMapping(value = "{edition}/statistics/tasks", produces = "text/csv")
+	public ResponseEntity<Resource> showEditionTaskStats(@PathEntity SCEdition edition) throws IOException {
+		EditionDetailsDTO editionDetails = editionService.getEditionById(edition.getId());
 		return ResponseEntity.ok()
 				.header(HttpHeaders.CONTENT_DISPOSITION,
-						"attachment; filename=\"task_stats_" + editionDetails.getCourse().getName() + "_"
-								+ editionDetails.getName() + "_"
-								+ LocalDateTime.now().format(DateTimeFormatter.ofPattern("ddMMyyyyHHmmss"))
+						"attachment; filename=\""
+								+ LocalDateTime.now()
+										.format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"))
+								+ " " + editionDetails.getCourse().getName() + " - "
+								+ editionDetails.getName() + " - Task statistics"
 								+ ".csv\"")
 				.contentType(MediaType.valueOf("text/csv"))
-				.body(sw.toString());
+				.body(editionStatisticsService.getTaskStatisticsCSV(edition));
 	}
 
-	@GetMapping(value = "{editionId}/student_stats", produces = "text/csv")
-	@ResponseBody
-	@PreAuthorize("@authorisationService.isTeacher(#editionId)")
-	public ResponseEntity<String> showEditionStudentStats(@PathVariable long editionId) throws IOException {
-		List<StudentStatsDTO> studentStats = statsService.teacherStatsStudentLevel(editionId);
-		StringWriter sw = new StringWriter();
-		EditionDetailsDTO editionDetails = editionService.getEditionById(editionId);
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-		try (CSVWriter writer = new CSVWriter(sw)) {
-			writer.writeNext(new String[] { "Student id", "Username", "Chosen path", "Completed tasks",
-					"Time of last task completion",
-					"Last completed task",
-					"Furthest checkpoint" });
-
-			for (StudentStatsDTO t : studentStats) {
-				writer.writeNext(new String[] { String.valueOf(t.getId()), t.getUserName(), t.getChosenPath(),
-						String.valueOf(t.getNumberOfCompletedTasks()),
-						t.getLastCompletedTaskTimestamp() == null ? "No activity"
-								: t.getLastCompletedTaskTimestamp().format(formatter),
-						t.getLastCompletedTask(), t.getFurthestCheckpoint() });
-			}
-		}
-
+	@PreAuthorize("@authorisationService.canExportEditionStatistics(#edition.id)")
+	@GetMapping(value = "{edition}/statistics/students", produces = "text/csv")
+	public ResponseEntity<Resource> showEditionStudentStats(@PathEntity SCEdition edition)
+			throws IOException {
+		EditionDetailsDTO editionDetails = editionService.getEditionById(edition.getId());
 		return ResponseEntity.ok()
 				.header(HttpHeaders.CONTENT_DISPOSITION,
-						"attachment; filename=\"student_stats_" + editionDetails.getCourse().getName() + "_"
-								+ editionDetails.getName() + "_"
-								+ LocalDateTime.now().format(DateTimeFormatter.ofPattern("ddMMyyyyHHmmss"))
+						"attachment; filename=\""
+								+ LocalDateTime.now()
+										.format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"))
+								+ " " + editionDetails.getCourse().getName() + " - "
+								+ editionDetails.getName() + " - Student statistics"
 								+ ".csv\"")
 				.contentType(MediaType.valueOf("text/csv"))
-				.body(sw.toString());
+				.body(editionStatisticsService.getStudentStatisticsCSV(edition));
 	}
 
 }

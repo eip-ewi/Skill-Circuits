@@ -4,7 +4,7 @@
     import EditorManageComponent from "./EditorManageComponent.svelte";
     import {getEdition} from "../../../logic/edition/edition.svelte";
     import Button from "../../util/Button.svelte";
-    import {downloadTeacherStats, setEditionVisibility} from "../../../logic/updates/edition_updates";
+    import {setEditionVisibility} from "../../../logic/updates/edition_updates";
     import CopyEditionComponent from "./CopyEditionComponent.svelte";
 
     let { open = $bindable() }: { open: boolean } = $props();
@@ -67,10 +67,14 @@
                     <p>
                         You can download statistics for tasks and students in this edition.
                     </p>
-                    <div>
-                        <Button onclick={ () => downloadTeacherStats() }>
-                            <span class="fa-solid fa-download"></span>
-                            <span>Download</span>
+                    <div class="buttons">
+                        <Button href={`/api/editions/${getEdition().id}/statistics/tasks`}>
+                            <span class="fa-solid fa-list-check"></span>
+                            <span>Download task statistics</span>
+                        </Button>
+                        <Button href={`/api/editions/${getEdition().id}/statistics/students`}>
+                            <span class="fa-solid fa-users"></span>
+                            <span>Download student statistics</span>
                         </Button>
                     </div>
                 </div>
@@ -129,6 +133,12 @@
     .section {
         display: grid;
         gap: .5em;
+    }
+
+    .buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5em;
     }
 
     .button {
