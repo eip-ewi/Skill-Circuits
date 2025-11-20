@@ -1,14 +1,18 @@
 <script lang="ts">
     import {availableThemes} from "../data/theme";
     import Button from "./util/Button.svelte";
-    import {setTheme} from "../logic/preferences.svelte";
+    import {getTheme, setTheme} from "../logic/preferences.svelte";
 </script>
 
 <div class="content">
     <div class="themes">
         {#each availableThemes as theme}
             <div class="theme" data-theme={theme.name} data-colour-scheme={theme.colourScheme}>
-                <Button style="justify-content: center;" primary onclick={ () => setTheme(theme) }>{theme.displayName}</Button>
+                {#if getTheme().name === theme.name}
+                    <span class="theme-selection">Selected theme:</span>
+                {/if}
+
+                <Button style="justify-content: center; height: 3em; width: 100%;" primary onclick={ () => setTheme(theme) }>{theme.displayName}</Button>
             </div>
         {/each}
     </div>
@@ -30,11 +34,19 @@
         background-color: var(--block-colour);
         border: var(--block-border);
         border-radius: var(--surface-border-radius);
-        padding: 1em;
+        padding: 0.8em;
         width: fit-content;
     }
 
     .theme {
-        display: grid;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        justify-content: flex-end;
+    }
+
+    .theme-selection {
+        font-size: var(--font-size-200);
+        margin-bottom: 0.2em;
     }
 </style>
