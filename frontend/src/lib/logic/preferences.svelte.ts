@@ -2,11 +2,14 @@ import type {Preferences} from "../dto/preferences";
 import {lightTheme, type Theme} from "../data/theme";
 import {withCsrf} from "./csrf";
 
-// TODO: use default or add an "isFetched" function?
 let preferences: Preferences = $state({theme: lightTheme, blurSkills: true});
 
 export function getTheme() : Theme {
     return preferences.theme;
+}
+
+export function getBlurSkills() : boolean {
+    return preferences.blurSkills;
 }
 
 export async function setTheme(theme: Theme) {

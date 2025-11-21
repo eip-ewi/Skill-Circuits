@@ -2,8 +2,14 @@ import type {Block} from "../../../dto/circuit/block";
 import {isCompleted} from "./completion";
 import {getGraph} from "../circuit.svelte";
 import {getItemsOnPath} from "../../edition/active_path.svelte";
+import {getBlurSkills} from "../../preferences.svelte";
 
 export function isUnlocked(block: Block, recursionCheck: number = 100): boolean {
+
+    // If skills should not be blurred, the skill is always unlocked
+    if (!getBlurSkills()) {
+        return true;
+    }
 
     if (recursionCheck <= 0) {
         return false;

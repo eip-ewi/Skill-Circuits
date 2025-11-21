@@ -2,13 +2,11 @@
 
 import PageLayout from "./PageLayout.svelte";
 import ThemeSelectComponent from "../components/ThemeSelectComponent.svelte";
-import {setBlurSkills} from "../logic/preferences.svelte";
+import {getBlurSkills, setBlurSkills} from "../logic/preferences.svelte";
+import ExampleSkillComponent from "../components/circuit/block/ExampleSkillComponent.svelte";
 
-// TODO: maybe handle this differently
-let blurSkillsSetting = true;
-
-async function blurSkillsClicked() {
-    await setBlurSkills(blurSkillsSetting);
+async function updateBlurSkills(event: Event) {
+    await setBlurSkills((event.target as HTMLInputElement).checked);
 }
 
 </script>
@@ -21,13 +19,15 @@ async function blurSkillsClicked() {
         <p>Configure your theme for Skill Circuits.</p>
         <ThemeSelectComponent></ThemeSelectComponent>
 
-        <h2>Skill Blurring</h2>
-        <p>Configure whether or not skills you have not yet reached should be blurred.</p>
-        <span>
-            <input type="checkbox" bind:value={blurSkillsSetting} on:click={blurSkillsClicked} checked />
+        <h2>Block Blurring</h2>
+        <p>Configure whether skills and submodules you have not yet reached should be blurred.</p>
+        <div>
+            <input type="checkbox" checked={getBlurSkills()} onchange={e => updateBlurSkills(e)} />
 
-            Enable skill blurring
-        </span>
+            Enable block blurring
+        </div>
+
+        <ExampleSkillComponent locked={getBlurSkills()}></ExampleSkillComponent>
     </div>
 </PageLayout>
 
@@ -43,6 +43,9 @@ async function blurSkillsClicked() {
         margin-top: .8em;
     }
     p {
+        margin-bottom: .5em;
+    }
+    div {
         margin-bottom: .5em;
     }
     .content {
