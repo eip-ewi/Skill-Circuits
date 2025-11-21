@@ -20,11 +20,11 @@ async function updateBlurSkills(event: Event) {
         <ThemeSelectComponent></ThemeSelectComponent>
 
         <h2>Block Blurring</h2>
-        <p>Configure whether skills and submodules you have not yet reached should be blurred.</p>
+        <p>Configure whether blocks (i.e., skills and submodules) you have not yet reached should be blurred.</p>
         <div>
             <input type="checkbox" checked={getBlurSkills()} onchange={e => updateBlurSkills(e)} />
 
-            Enable block blurring
+            Enable block blurring (see example below)
         </div>
 
         <ExampleSkillComponent locked={getBlurSkills()}></ExampleSkillComponent>
