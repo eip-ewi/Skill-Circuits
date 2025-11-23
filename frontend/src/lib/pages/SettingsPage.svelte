@@ -2,11 +2,11 @@
 
 import PageLayout from "./PageLayout.svelte";
 import ThemeSelectComponent from "../components/ThemeSelectComponent.svelte";
-import {getBlurSkills, setBlurSkills} from "../logic/preferences.svelte";
+import {getBlurBlocks, setBlurBlocks} from "../logic/preferences.svelte";
 import ExampleSkillComponent from "../components/circuit/block/ExampleSkillComponent.svelte";
 
-async function updateBlurSkills(event: Event) {
-    await setBlurSkills((event.target as HTMLInputElement).checked);
+async function updateBlurBlocks(event: Event) {
+    await setBlurBlocks((event.target as HTMLInputElement).checked);
 }
 
 </script>
@@ -22,12 +22,12 @@ async function updateBlurSkills(event: Event) {
         <h2>Block Blurring</h2>
         <p>Configure whether blocks (i.e., skills and submodules) you have not yet reached should be blurred.</p>
         <div>
-            <input type="checkbox" checked={getBlurSkills()} onchange={e => updateBlurSkills(e)} />
+            <input type="checkbox" checked={getBlurBlocks()} onchange={e => updateBlurBlocks(e)} />
 
             Enable block blurring (see example below)
         </div>
 
-        <ExampleSkillComponent locked={getBlurSkills()}></ExampleSkillComponent>
+        <ExampleSkillComponent locked={getBlurBlocks()}></ExampleSkillComponent>
     </div>
 </PageLayout>
 

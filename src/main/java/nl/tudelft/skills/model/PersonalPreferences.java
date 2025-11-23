@@ -35,5 +35,5 @@ public class PersonalPreferences {
 
 	@NotNull
 	@Builder.Default
-	private boolean blurSkills = true;
+	private boolean blurBlocks = true;
 }

@@ -2,14 +2,14 @@ import type {Preferences} from "../dto/preferences";
 import {lightTheme, type Theme} from "../data/theme";
 import {withCsrf} from "./csrf";
 
-let preferences: Preferences = $state({theme: lightTheme, blurSkills: true});
+let preferences: Preferences = $state({theme: lightTheme, blurBlocks: true});
 
 export function getTheme() : Theme {
     return preferences.theme;
 }
 
-export function getBlurSkills() : boolean {
-    return preferences.blurSkills;
+export function getBlurBlocks() : boolean {
+    return preferences.blurBlocks;
 }
 
 export async function setTheme(theme: Theme) {
@@ -27,8 +27,8 @@ export function setThemeProperties(theme: Theme) {
     root.setAttribute("data-colour-scheme", theme.colourScheme);
 }
 
-export async function setBlurSkills(blurSkillsSetting: boolean) {
-    let response = await fetch(`/api/person/preferences/blur?blurSkills=${blurSkillsSetting}`, withCsrf({
+export async function setBlurBlocks(blurBlocksSetting: boolean) {
+    let response = await fetch(`/api/person/preferences/blur?blurBlocks=${blurBlocksSetting}`, withCsrf({
         method: "PATCH",
     }));
     preferences = await response.json();

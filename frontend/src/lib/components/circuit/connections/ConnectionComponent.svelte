@@ -8,7 +8,7 @@
     import {isCompleted} from "../../../logic/circuit/skill_state/completion";
     import {getCircuit} from "../../../logic/circuit/circuit.svelte";
     import {onMount, tick} from "svelte";
-    import {getBlurSkills} from "../../../logic/preferences.svelte";
+    import {getBlurBlocks} from "../../../logic/preferences.svelte";
 
     let { from, to }: { from: Block, to: Block } = $props();
 
@@ -56,7 +56,7 @@
     {@const path = createConnectionPath(from, to)}
     {#if path !== undefined}
         <path xmlns="http://www.w3.org/2000/svg" class="line" d={generatePathString(path, radius)}
-              data-locked={locked && getBlurSkills()} data-preview={to.preview === true && locked} bind:this={element} data-animate={animated}/>
+              data-locked={locked && getBlurBlocks()} data-preview={to.preview === true && locked} bind:this={element} data-animate={animated}/>
     {/if}
 {/if}
 

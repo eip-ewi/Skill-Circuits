@@ -35,15 +35,15 @@ public class PersonalPreferencesService {
 	private final PersonRepository personRepository;
 
 	/**
-	 * Sets the "blur skills" personal preference of a user.
+	 * Sets the "blur blocks" personal preference of a user.
 	 *
 	 * @param  scPerson   The person.
-	 * @param  blurSkills Whether to blur skills.
+	 * @param  blurBlocks Whether to blur blocks.
 	 * @return            The updated preferences of the person.
 	 */
 	@Transactional
-	public PersonalPreferences setBlurSkills(SCPerson scPerson, boolean blurSkills) {
-		scPerson.getPreferences().setBlurSkills(blurSkills);
+	public PersonalPreferences setBlurBlocks(SCPerson scPerson, boolean blurBlocks) {
+		scPerson.getPreferences().setBlurBlocks(blurBlocks);
 		return personRepository.save(scPerson).getPreferences();
 	}
 
@@ -69,7 +69,7 @@ public class PersonalPreferencesService {
 	public PersonalPreferencesView convertToPreferencesView(PersonalPreferences preferences) {
 		ThemeView themeView = new ThemeView(preferences.getTheme().getName(),
 				preferences.getTheme().getColourScheme(), preferences.getTheme().getDisplayName());
-		return new PersonalPreferencesView(themeView, preferences.isBlurSkills());
+		return new PersonalPreferencesView(themeView, preferences.isBlurBlocks());
 	}
 
 }

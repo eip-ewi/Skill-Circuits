@@ -51,10 +51,10 @@ public class PersonController {
 	}
 
 	@PatchMapping("preferences/blur")
-	public PersonalPreferencesView setBlurSkillsPreference(@AuthenticatedSCPerson SCPerson scPerson,
-			@RequestParam boolean blurSkills) {
+	public PersonalPreferencesView setBlurBlocks(@AuthenticatedSCPerson SCPerson scPerson,
+			@RequestParam boolean blurBlocks) {
 		return personalPreferencesService
-				.convertToPreferencesView(personalPreferencesService.setBlurSkills(scPerson, blurSkills));
+				.convertToPreferencesView(personalPreferencesService.setBlurBlocks(scPerson, blurBlocks));
 	}
 
 	@PatchMapping("preferences/theme")

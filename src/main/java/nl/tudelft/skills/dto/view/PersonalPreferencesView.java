@@ -19,5 +19,5 @@ package nl.tudelft.skills.dto.view;
 
 public record PersonalPreferencesView(
 		ThemeView theme,
-		boolean blurSkills) {
+		boolean blurBlocks) {
 }
