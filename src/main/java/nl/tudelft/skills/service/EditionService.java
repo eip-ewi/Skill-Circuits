@@ -31,11 +31,14 @@ import nl.tudelft.labracore.api.EditionControllerApi;
 import nl.tudelft.labracore.api.PersonControllerApi;
 import nl.tudelft.labracore.api.RoleControllerApi;
 import nl.tudelft.labracore.api.dto.*;
+import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.librador.dto.DTOConverter;
 import nl.tudelft.skills.dto.patch.EditionPatch;
 import nl.tudelft.skills.dto.view.*;
+import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.SCPerson;
+import nl.tudelft.skills.repository.*;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.PersonRepository;
 
@@ -51,7 +54,6 @@ public class EditionService {
 
 	private final EditionRepository editionRepository;
 	private final PersonRepository personRepository;
-
 	private final DTOConverter dtoConverter;
 
 	public EditionView getEdition(Long editionId) {
@@ -136,6 +138,10 @@ public class EditionService {
 		allEditionIds.addAll(roleInNonHiddenEditionIds);
 		allEditionIds.addAll(managedEditionIds);
 		return allEditionIds;
+	}
+
+	public EditionDetailsDTO getEditionById(Long editionId) {
+		return editionApi.getEditionById(editionId).block();
 	}
 
 	public EditionsView getSortedEditions(SCPerson person) {

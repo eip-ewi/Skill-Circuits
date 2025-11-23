@@ -5,6 +5,7 @@
     import FooterComponent from "../components/FooterComponent.svelte";
     import SessionComponent from "../components/SessionComponent.svelte";
     import {isAuthenticated} from "../logic/authentication.svelte";
+    import ChangelogComponent from "../components/ChangelogComponent.svelte";
 
     let { children, fullWidth }: { children: Snippet, fullWidth?: boolean } = $props();
 
@@ -24,6 +25,7 @@
     {#if isAuthenticated()}
         <FooterComponent {fullWidth}></FooterComponent>
         <SessionComponent></SessionComponent>
+        <ChangelogComponent></ChangelogComponent>
     {/if}
 </div>
 

@@ -15,23 +15,38 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.old.view;
+package nl.tudelft.skills.dto.stats;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Getter
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReleaseDTO {
-	public String name;
+public class StudentStatsDTO {
+	@NotNull
+	private Long id;
 
-	public String description_html;
+	@NotNull
+	private String userName;
 
-	public Instant released_at;
+	@NotNull
+	private String chosenPath;
+
+	@NotNull
+	private long numberOfCompletedTasks;
+
+	private LocalDateTime lastCompletedTaskTimestamp;
+
+	@NotNull
+	private String lastCompletedTask;
+
+	@NotNull
+	private String furthestCheckpoint;
 }

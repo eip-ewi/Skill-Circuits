@@ -35,7 +35,7 @@
 
 <style>
     .dialog {
-        border-radius: 1em;
+        border-radius: var(--dialog-border-radius);
         left: 50%;
         outline: none;
         position: fixed;

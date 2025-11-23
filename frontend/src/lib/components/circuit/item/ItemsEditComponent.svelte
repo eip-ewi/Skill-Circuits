@@ -2,12 +2,12 @@
 
     import ItemEditComponent from "./ItemEditComponent.svelte";
     import type {Item} from "../../../dto/circuit/item";
-    import {getBlock, getBlockForItem, getItem} from "../../../logic/circuit/circuit.svelte";
+    import {getBlock, getBlockForItem, getBlocks, getItem} from "../../../logic/circuit/circuit.svelte";
     import {updateBlockPosition} from "../../../logic/circuit/updates/position_updates.svelte";
     import {createBlock} from "../../../logic/circuit/updates/block_updates";
     import {getLevel} from "../../../logic/circuit/level.svelte";
     import {ModuleLevel} from "../../../data/level";
-    import {editTaskIndex, moveTask} from "../../../logic/circuit/updates/task_updates";
+    import {editTaskIndex, moveTask, moveTaskOutsideOfChoiceTask} from "../../../logic/circuit/updates/task_updates";
     import type {TaskItem} from "../../../dto/circuit/module/task";
     import type {Block} from "../../../dto/circuit/block";
     import type {SkillBlock} from "../../../dto/circuit/module/skill";
@@ -34,7 +34,8 @@
     }
 
     function dragEnter(event: DragEvent) {
-        if (!event.dataTransfer!.types.includes("skill-circuits/item") || block.blockType !== "skill") {
+        if (!(event.dataTransfer!.types.includes("skill-circuits/item") || event.dataTransfer!.types.includes("skill-circuits/task-info")) ||
+            block.blockType !== "skill") {
             return;
         }
         event.preventDefault();
@@ -45,7 +46,8 @@
     }
 
     function dragOver(event: DragEvent) {
-        if (!event.dataTransfer!.types.includes("skill-circuits/item") || block.blockType !== "skill") {
+        if (!(event.dataTransfer!.types.includes("skill-circuits/item") || event.dataTransfer!.types.includes("skill-circuits/task-info")) ||
+            block.blockType !== "skill") {
             return;
         }
         event.preventDefault();
@@ -54,15 +56,46 @@
     }
 
     async function drop(event: DragEvent) {
-        if (!event.dataTransfer!.types.includes("skill-circuits/item") || block.blockType !== "skill") {
+        if (!(event.dataTransfer!.types.includes("skill-circuits/item") || event.dataTransfer!.types.includes("skill-circuits/task-info")) ||
+            block.blockType !== "skill") {
             return;
         }
         event.preventDefault();
 
-        let itemId = parseInt(event.dataTransfer!.getData("skill-circuits/item"));
-        let item = getItem(itemId) as TaskItem;
-
         let newIndex = newIndexFromPosition(event);
+
+        if (event.dataTransfer!.types.includes("skill-circuits/task-info")) {
+            await handleSubTaskDrop(event, newIndex);
+        } else {
+            await handleTaskDrop(event, newIndex);
+        }
+
+        droppingIndex = undefined;
+
+    }
+
+    async function handleSubTaskDrop(event: DragEvent, newIndex: number) {
+        // Tasks can only be dropped into skills
+        if (block.blockType !== "skill") {
+            return;
+        }
+
+        let taskInfoId = parseInt(event.dataTransfer!.getData("skill-circuits/task-info"));
+        let oldChoiceTask = getBlocks().flatMap(block => block.items.filter(item => item.itemType === "task" && item.taskType === "choice"))
+            .find(choiceTask => choiceTask.tasks.some(info => info.infoId === taskInfoId))!;
+        let subtask = oldChoiceTask.tasks.find(info => info.infoId === taskInfoId)!;
+
+        await moveTaskOutsideOfChoiceTask(oldChoiceTask, subtask, newIndex, block);
+    }
+
+    async function handleTaskDrop(event: DragEvent, newIndex: number) {
+        // Tasks can only be dropped into skills
+        if (block.blockType !== "skill") {
+            return;
+        }
+
+        let itemId = parseInt(event.dataTransfer!.getData("skill-circuits/item"));
+        let item = getItem(itemId!) as TaskItem;
 
         let fromBlock = getBlockForItem(item);
 
@@ -80,9 +113,6 @@
             await moveTask(item, block, newIndex, fromBlock as SkillBlock);
 
         }
-
-        droppingIndex = undefined;
-
     }
 </script>
 

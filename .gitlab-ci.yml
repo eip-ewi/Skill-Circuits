@@ -117,7 +117,7 @@ labracore docker image:
     - dockerrunner
   rules:
     # Don't run on forks
-    - if: $CI_PROJECT_NAMESPACE != "skill-circuits"
+    - if: $CI_PROJECT_ID != "7331"
       when: never
     # Don't run on detached merge request pipelines
     - if: $CI_MERGE_REQUEST_EVENT_TYPE == "detached"
@@ -154,7 +154,7 @@ skill circuits docker image:
     - dockerrunner
   rules:
     # Don't run on forks
-    - if: $CI_PROJECT_NAMESPACE != "skill-circuits"
+    - if: $CI_PROJECT_ID != "7331"
       when: never
     # Don't run on detached merge request pipelines
     - if: $CI_MERGE_REQUEST_EVENT_TYPE == "detached"
@@ -249,7 +249,7 @@ check migrations / MySQL:
     - java -cp skill-circuits.jar -Dloader.system=true -Dloader.main=liquibase.integration.commandline.Main org.springframework.boot.loader.launch.PropertiesLauncher --driver=com.mysql.cj.jdbc.Driver --changeLogFile=changelog-master.yaml --url="jdbc:mysql://mysql/skills?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8" --username="skills" --password="skills" --logLevel=debug update
   rules:
     # Don't run on forks
-    - if: $CI_PROJECT_NAMESPACE != "skill-circuits"
+    - if: $CI_PROJECT_ID != "7331"
       when: never
     # Don't run on detached merge request pipelines
     - if: $CI_MERGE_REQUEST_EVENT_TYPE == "detached"
@@ -296,7 +296,7 @@ cross check migrations / MySQL:
     - gradle test --build-cache --tests nl.tudelft.skills.SmokeTest
   rules:
     # Don't run on forks
-    - if: $CI_PROJECT_NAMESPACE != "skill-circuits"
+    - if: $CI_PROJECT_ID != "7331"
       when: never
     # Don't run on detached merge request pipelines
     - if: $CI_MERGE_REQUEST_EVENT_TYPE == "detached"
@@ -354,7 +354,7 @@ unit tests / H2:
     - if: $CI_COMMIT_BRANCH == "main"
       when: never
     # Run if MySQL tests don't run
-    - if: $CI_PROJECT_NAMESPACE != "skill-circuits"
+    - if: $CI_PROJECT_ID != "7331"
     - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "development"
       changes:
         compare_to: "refs/heads/development"
@@ -414,7 +414,7 @@ unit tests / MySQL:
     - cp -r build/reports codecov
   rules:
     # Don't run on forks
-    - if: $CI_PROJECT_NAMESPACE != "skill-circuits"
+    - if: $CI_PROJECT_ID != "7331"
       when: never
     # Don't run on detached merge request pipelines
     - if: $CI_MERGE_REQUEST_EVENT_TYPE == "detached"
@@ -495,7 +495,7 @@ prepare end-to-end tests:
     - dockerrunner
   rules:
     # Don't run on forks
-    - if: $CI_PROJECT_NAMESPACE != "skill-circuits"
+    - if: $CI_PROJECT_ID != "7331"
       when: never
     # Don't run on detached merge request pipelines
     - if: $CI_MERGE_REQUEST_EVENT_TYPE == "detached"
@@ -556,7 +556,7 @@ prepare end-to-end tests:
     - dockerrunner
   rules:
     # Don't run on forks
-    - if: $CI_PROJECT_NAMESPACE != "skill-circuits"
+    - if: $CI_PROJECT_ID != "7331"
       when: never
     # Don't run on detached merge request pipelines
     - if: $CI_MERGE_REQUEST_EVENT_TYPE == "detached"
@@ -659,7 +659,7 @@ deploy to staging:
     url: https://skills.eiptest.ewi.tudelft.nl
   rules:
     # Don't run on forks
-    - if: $CI_PROJECT_NAMESPACE != "skill-circuits"
+    - if: $CI_PROJECT_ID != "7331"
       when: never
     - if: $CI_COMMIT_BRANCH == "development"
 
@@ -703,7 +703,7 @@ deploy to production:
     url: https://skills.ewi.tudelft.nl
   rules:
     # Don't run on forks
-    - if: $CI_PROJECT_NAMESPACE != "skill-circuits"
+    - if: $CI_PROJECT_ID != "7331"
       when: never
     - if: $CI_COMMIT_BRANCH == "main"
 

@@ -15,27 +15,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.repository;
+package nl.tudelft.skills.dto.view;
 
-import java.util.List;
-import java.util.Set;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
-
-import nl.tudelft.skills.model.ClickedLink;
-import nl.tudelft.skills.model.TaskInfo;
-
-public interface ClickedLinkRepository extends JpaRepository<ClickedLink, Long> {
-
-	default ClickedLink findByIdOrThrow(Long id) {
-		return findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("ClickedLink was not found: " + id));
-	}
-
-	Set<ClickedLink> getByPersonId(Long id);
-
-	List<ClickedLink> getByTask(TaskInfo task);
-
-	List<ClickedLink> deleteAllByTaskIdIn(List<Long> taskIds);
+public record ReleaseDetailsView(
+		String title,
+		String descriptionHtml) {
 }

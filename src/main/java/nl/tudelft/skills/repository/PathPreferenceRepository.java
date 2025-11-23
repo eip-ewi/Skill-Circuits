@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -43,5 +44,7 @@ public interface PathPreferenceRepository extends JpaRepository<PathPreference, 
 			@Param("edition") SCEdition edition);
 
 	void deleteByPersonAndEdition(SCPerson person, SCEdition edition);
+
+	List<PathPreference> findAllByPathId(Long pathId);
 
 }

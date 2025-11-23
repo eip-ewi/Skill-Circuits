@@ -15,27 +15,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.repository;
+package nl.tudelft.skills.dto.view;
 
-import java.util.List;
-import java.util.Set;
+import java.time.Instant;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import nl.tudelft.skills.model.ClickedLink;
-import nl.tudelft.skills.model.TaskInfo;
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class ReleaseDTO {
+	public String name;
 
-public interface ClickedLinkRepository extends JpaRepository<ClickedLink, Long> {
+	public String description_html;
 
-	default ClickedLink findByIdOrThrow(Long id) {
-		return findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("ClickedLink was not found: " + id));
-	}
-
-	Set<ClickedLink> getByPersonId(Long id);
-
-	List<ClickedLink> getByTask(TaskInfo task);
-
-	List<ClickedLink> deleteAllByTaskIdIn(List<Long> taskIds);
+	public Instant released_at;
 }

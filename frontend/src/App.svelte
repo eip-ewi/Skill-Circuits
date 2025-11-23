@@ -10,6 +10,7 @@
     import {fetchAuthorisation} from "./lib/logic/authorisation.svelte";
     import {getTheme} from "./lib/logic/theme.svelte";
     import FooterComponent from "./lib/components/FooterComponent.svelte";
+    import {fetchReleaseDetails} from "./lib/logic/release_details.svelte";
 
     $effect(() => {
         const root = document.documentElement;
@@ -21,6 +22,7 @@
     $effect(() => {
         if (isAuthenticated()) {
             fetchAuthorisation().then(() => {});
+            fetchReleaseDetails().then(() => {});
         }
     })
 </script>

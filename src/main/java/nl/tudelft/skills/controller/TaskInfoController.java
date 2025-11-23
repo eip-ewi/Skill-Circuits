@@ -28,6 +28,8 @@ import nl.tudelft.skills.annotation.AuthenticatedSCPerson;
 import nl.tudelft.skills.dto.AfterTaskCompletionCircuitUpdate;
 import nl.tudelft.skills.dto.patch.SubtaskMove;
 import nl.tudelft.skills.dto.patch.TaskInfoPatch;
+import nl.tudelft.skills.dto.patch.TaskMove;
+import nl.tudelft.skills.dto.view.circuit.module.ModuleLevelTaskView;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.service.*;
 
@@ -39,6 +41,7 @@ public class TaskInfoController {
 	private final ClickedLinkService clickedLinkService;
 	private final TaskCompletionService taskCompletionService;
 	private final TaskInfoService taskInfoService;
+	private final ModuleCircuitService moduleCircuitService;
 
 	@PostMapping("{taskInfo}/click")
 	@PreAuthorize("@authorisationService.canViewTaskInfo(#taskInfo)")
@@ -56,6 +59,18 @@ public class TaskInfoController {
 	@PreAuthorize("@authorisationService.canEditTaskInfo(#subtask) and @authorisationService.canEditTask(#move.choiceTask)")
 	public void moveSubtask(@PathEntity TaskInfo subtask, @RequestBody SubtaskMove move) {
 		taskInfoService.moveSubtask(subtask, move);
+	}
+
+	@PatchMapping("{subtask}/skill")
+	@PreAuthorize("@authorisationService.canEditSkill(#move.skill) and @authorisationService.canEditSkill(#subtask.choiceTask.skill)"
+			+
+			"and @authorisationService.canEditTaskInfo(#subtask) and @authorisationService.canEditTask(#subtask.choiceTask)")
+	public ModuleLevelTaskView.Regular moveSubtaskOutsideChoiceTask(
+			@AuthenticatedSCPerson SCPerson person, @PathEntity TaskInfo subtask,
+			@RequestBody TaskMove move) {
+		return (ModuleLevelTaskView.Regular) moduleCircuitService
+				.convertToTaskView(taskInfoService.moveSubtaskOutsideChoiceTask(subtask, move),
+						person);
 	}
 
 	@PostMapping("{taskInfo}/complete")

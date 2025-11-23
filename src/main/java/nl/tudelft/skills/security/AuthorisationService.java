@@ -150,6 +150,10 @@ public class AuthorisationService {
 		return isAdmin() || hasEditorRole(editionId) || editionRepository.getOrCreate(editionId).isVisible();
 	}
 
+	public boolean canExportEditionStatistics(Long editionId) {
+		return isAdmin() || isTeacher(editionId);
+	}
+
 	public boolean canEditModuleCircuit(SCModuleId moduleId) {
 		return canEditModuleCircuit(dtoConverter.apply(moduleId));
 	}
@@ -203,6 +207,10 @@ public class AuthorisationService {
 
 	public boolean canEditTask(ChoiceTaskId taskId) {
 		return canEditSkill(dtoConverter.apply(taskId).getSkill());
+	}
+
+	public boolean canEditTask(ChoiceTask choiceTask) {
+		return canEditSkill(choiceTask.getSkill());
 	}
 
 	public boolean canViewTaskInfo(TaskInfo taskInfo) {
