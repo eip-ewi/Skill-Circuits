@@ -2717,7 +2717,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: blur_blocks
-                  type: BOOLEAN # TODO: should this be "bit" now?
+                  type: bit # TODO: should this be "bit" or "BOOLEAN"?
             tableName: scperson
         - addColumn:
             columns:
