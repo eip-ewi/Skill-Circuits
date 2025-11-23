@@ -47,8 +47,7 @@ public class PersonController {
 
 	@GetMapping("preferences")
 	public PersonalPreferencesView getPreferences(@AuthenticatedSCPerson SCPerson scPerson) {
-		return personalPreferencesService
-				.convertToPreferencesView(personalPreferencesService.getPreferencesOfPerson(scPerson));
+		return personalPreferencesService.convertToPreferencesView(scPerson.getPreferences());
 	}
 
 	@PatchMapping("preferences/blur")

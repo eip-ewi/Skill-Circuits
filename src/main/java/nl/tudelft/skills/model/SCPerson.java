@@ -41,7 +41,7 @@ public class SCPerson {
 	private ViewMode viewMode;
 
 	@NotNull
-	@OneToOne(cascade = CascadeType.ALL)
+	@Embedded
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	private PersonalPreferences preferences;

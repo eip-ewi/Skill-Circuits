@@ -23,19 +23,11 @@ import lombok.*;
 import nl.tudelft.skills.enums.Theme;
 
 @Data
-@Entity
+@Embeddable
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PersonalPreferences {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-
-	@OneToOne(mappedBy = "preferences")
-	@EqualsAndHashCode.Exclude
-	private SCPerson person;
-
 	@NotNull
 	@Builder.Default
 	@Enumerated(EnumType.STRING)

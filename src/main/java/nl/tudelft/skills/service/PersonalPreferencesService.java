@@ -26,13 +26,13 @@ import nl.tudelft.skills.dto.view.ThemeView;
 import nl.tudelft.skills.enums.Theme;
 import nl.tudelft.skills.model.PersonalPreferences;
 import nl.tudelft.skills.model.SCPerson;
-import nl.tudelft.skills.repository.PersonalPreferencesRepository;
+import nl.tudelft.skills.repository.PersonRepository;
 
 @Service
 @AllArgsConstructor
 public class PersonalPreferencesService {
 
-	private final PersonalPreferencesRepository personalPreferencesRepository;
+	private final PersonRepository personRepository;
 
 	/**
 	 * Sets the "blur skills" personal preference of a user.
@@ -43,9 +43,8 @@ public class PersonalPreferencesService {
 	 */
 	@Transactional
 	public PersonalPreferences setBlurSkills(SCPerson scPerson, boolean blurSkills) {
-		PersonalPreferences preferences = scPerson.getPreferences();
-		preferences.setBlurSkills(blurSkills);
-		return personalPreferencesRepository.save(preferences);
+		scPerson.getPreferences().setBlurSkills(blurSkills);
+		return personRepository.save(scPerson).getPreferences();
 	}
 
 	/**
@@ -57,9 +56,8 @@ public class PersonalPreferencesService {
 	 */
 	@Transactional
 	public PersonalPreferences setTheme(SCPerson scPerson, Theme theme) {
-		PersonalPreferences preferences = scPerson.getPreferences();
-		preferences.setTheme(theme);
-		return personalPreferencesRepository.save(preferences);
+		scPerson.getPreferences().setTheme(theme);
+		return personRepository.save(scPerson).getPreferences();
 	}
 
 	/**
@@ -74,14 +72,4 @@ public class PersonalPreferencesService {
 		return new PersonalPreferencesView(themeView, preferences.isBlurSkills());
 	}
 
-	/**
-	 * Get the personal preferences of a person.
-	 *
-	 * @param  scPerson The person.
-	 * @return          The personal preferences of the person.
-	 */
-	@Transactional
-	public PersonalPreferences getPreferencesOfPerson(SCPerson scPerson) {
-		return personalPreferencesRepository.findByPersonId(scPerson.getId());
-	}
 }

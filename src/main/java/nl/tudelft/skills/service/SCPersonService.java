@@ -58,7 +58,7 @@ public class SCPersonService {
 					.person(scPerson)
 					.build()));
 
-			scPerson.setPreferences(PersonalPreferences.builder().person(scPerson).build());
+			scPerson.setPreferences(PersonalPreferences.builder().build());
 
 			// Attempt to find again in case the person was already created in the meantime
 			return personRepository.findById(personId).orElseGet(() -> personRepository.save(scPerson));
