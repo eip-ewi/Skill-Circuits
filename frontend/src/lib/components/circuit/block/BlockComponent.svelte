@@ -47,6 +47,25 @@
 
     let element: HTMLElement;
 
+    let pulsingBlockElement: HTMLElement | null = $state(null);
+
+    $effect(() => {
+        if (block.state === BlockStates.Connecting) {
+            pulsingBlockElement = element;
+        } else if (pulsingBlockElement === element) {
+            pulsingBlockElement = null;
+        }
+    });
+
+    function scrollToPulsing() {
+        if (!pulsingBlockElement) return;
+        const rect = pulsingBlockElement.getBoundingClientRect();
+        window.scrollTo({
+            top: rect.top + window.scrollY - 80,
+            behavior: "smooth"
+        });
+    }
+
     $effect(() => {
         // Recalculate when any of the following change
         block.column;
@@ -139,6 +158,17 @@
 
 <svelte:window onresize={recalculateBounds}/>
 
+{#if pulsingBlockElement}
+    <div class="scroll-to-pulse-container">
+        <span class="scroll-to-pulse-text">
+            Skill being edited: {block.name}
+        </span>
+        <button class="scroll-to-pulse-button" onclick={scrollToPulsing}>
+            Go to skill
+        </button>
+    </div>
+{/if}
+
 <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 <div id="block-{block.id}" class="block-wrapper" style:grid-column={block.column! + 1} style:grid-row={block.row === undefined ? undefined : block.row + 1}
      draggable={draggable} ondragstart={dragStart} ondragend={dragEnd} data-clickable={clickable}
@@ -230,11 +260,38 @@
         color: var(--on-block-completed-colour);
     }
 
-    .block-wrapper[data-clickable="true"]:hover {
+    .block-wrapper[data-clickable="true"]:hover .block:not([data-pulse="true"]) {
         transform: scale(1.05);
         box-shadow: .75rem 1.25rem 1.8rem 0 color-mix(in srgb, var(--shadow-colour) 8%, transparent);
     }
     .block[data-clickable="true"] {
+        cursor: pointer;
+    }
+
+    .scroll-to-pulse-container {
+        position: fixed;
+        top: 1.25rem;
+        left: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        z-index: 99;
+        font-weight: 500;
+    }
+
+    .scroll-to-pulse-text {
+        padding: 0.4rem 0.75rem;
+        border-radius: var(--surface-border-radius);
+        background-color: var(--background-colour);
+        color: var(--on-background-colour);
+    }
+
+    .scroll-to-pulse-button {
+        padding: 0.4rem 0.75rem;
+        border-radius: var(--surface-border-radius);
+        border: var(--neutral-surface-border);
+        background: var(--neutral-surface-colour);
+        color: var(--on-neutral-surface-colour);
         cursor: pointer;
     }
 
@@ -258,10 +315,10 @@
             transform: scale(1);
         }
         25% {
-            transform: scale(1.015);
+            transform: scale(1.03);
         }
         75% {
-            transform: scale(0.985);
+            transform: scale(0.97);
         }
         100% {
             transform: scale(1);
