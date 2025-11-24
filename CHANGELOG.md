@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Added
 
 ## Changed
+- [Editor] Scroll to the skill or submodule which has been newly added. (@ralani)
 
 ## Fixed
 
