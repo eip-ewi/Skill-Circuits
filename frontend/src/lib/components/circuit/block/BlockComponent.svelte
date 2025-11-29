@@ -48,6 +48,15 @@
     let element: HTMLElement;
 
     let pulsingBlockElement: HTMLElement | null = $state(null);
+    let scrollToPulsingHovered: boolean = $state(false);
+
+    function onButtonMouseEnter() {
+        scrollToPulsingHovered = true;
+    }
+
+    function onButtonMouseLeave() {
+        scrollToPulsingHovered = false;
+    }
 
     $effect(() => {
         if (block.state === BlockStates.Connecting) {
@@ -160,11 +169,14 @@
 
 {#if pulsingBlockElement}
     <div class="scroll-to-pulse-container">
-        <span class="scroll-to-pulse-text">
-            Skill being edited: {block.name}
-        </span>
-        <button class="scroll-to-pulse-button" onclick={scrollToPulsing}>
-            Go to skill
+        <button class="scroll-to-pulse-button"
+                onclick={scrollToPulsing}
+                onmouseenter={onButtonMouseEnter}
+                onmouseleave={onButtonMouseLeave}>
+            <span class="icon fa-solid fa-location-dot"></span>
+            <span class="text" class:expanded={scrollToPulsingHovered}>
+                Go to skill{scrollToPulsingHovered ? ` "${block.name}"` : ""}
+            </span>
         </button>
     </div>
 {/if}
@@ -270,29 +282,39 @@
 
     .scroll-to-pulse-container {
         position: fixed;
-        top: 1.25rem;
-        left: 1.25rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+        bottom: 2rem;
+        right: 2rem;
         z-index: 99;
-        font-weight: 500;
-    }
-
-    .scroll-to-pulse-text {
-        padding: 0.4rem 0.75rem;
-        border-radius: var(--surface-border-radius);
-        background-color: var(--background-colour);
-        color: var(--on-background-colour);
+        border: var(--glass-border);
+        border-radius: var(--header-border-radius);
+        padding: 1em;
+        backdrop-filter: blur(.5rem) saturate(180%);
+        background: var(--glass-colour);
+        box-shadow:
+                .75rem 1.25rem 1.9rem 0 color-mix(in srgb, var(--shadow-colour) 4%, transparent),
+                inset 0.125em 0.125em 0.0625em 0 color-mix(in srgb, var(--glass-glint-colour) 60%, transparent),
+                inset -0.0625em -0.0625em 0.0625em color-mix(in srgb, var(--glass-glint-colour) 40%, transparent);
     }
 
     .scroll-to-pulse-button {
-        padding: 0.4rem 0.75rem;
-        border-radius: var(--surface-border-radius);
-        border: var(--neutral-surface-border);
-        background: var(--neutral-surface-colour);
-        color: var(--on-neutral-surface-colour);
+        display: flex;
+        flex-direction: column;
+        justify-items: center;
+        gap: 0.5em;
+        background: var(--on-glass-surface-colour);
+        border-radius: var(--header-border-radius);
+        color: var(--on-glass-colour);
+        border: none;
         cursor: pointer;
+        padding: 1em;
+    }
+
+    .scroll-to-pulse-button:hover {
+        background: var(--on-glass-surface-active-colour);
+    }
+
+    .scroll-to-pulse-button .icon {
+        font-size: 1.5em;
     }
 
     @keyframes wiggle {
@@ -322,6 +344,27 @@
         }
         100% {
             transform: scale(1);
+        }
+    }
+
+    @keyframes pulseReduced {
+        0% {
+            transform: scale(1);
+        }
+        25% {
+            transform: scale(1.015);
+        }
+        75% {
+            transform: scale(0.985);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .block[data-pulse="true"] {
+            animation: pulseReduced 2s linear infinite;
         }
     }
 </style>
