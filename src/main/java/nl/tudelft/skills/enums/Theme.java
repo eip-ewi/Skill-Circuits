@@ -24,6 +24,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum Theme {
 
+	SYSTEM(
+		"system", "system", "System default"
+	),
 	LIGHT(
 		"light", "light", "Light"
 	),

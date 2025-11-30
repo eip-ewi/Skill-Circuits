@@ -31,7 +31,7 @@ public class PersonalPreferences {
 	@NotNull
 	@Builder.Default
 	@Enumerated(EnumType.STRING)
-	private Theme theme = Theme.LIGHT;
+	private Theme theme = Theme.SYSTEM;
 
 	@NotNull
 	@Builder.Default
