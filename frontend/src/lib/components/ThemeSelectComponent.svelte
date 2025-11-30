@@ -8,10 +8,6 @@
     <div class="themes">
         {#each availableThemes as theme}
             <div class="theme" data-theme={theme.name} data-colour-scheme={theme.colourScheme}>
-                {#if getTheme().name === theme.name}
-                    <span class="theme-selection">Selected theme:</span>
-                {/if}
-
                 <Button style="justify-content: center; height: 3em; width: 100%;" primary onclick={ () => setTheme(theme) }>{theme.displayName}</Button>
             </div>
         {/each}
