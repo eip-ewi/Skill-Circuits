@@ -11,12 +11,11 @@
     import FooterComponent from "./lib/components/FooterComponent.svelte";
     import {fetchReleaseDetails} from "./lib/logic/release_details.svelte";
     import {
-        addSystemColorSchemeEventListener,
         fetchPreferences,
         getTheme,
-        setThemeProperties
     } from "./lib/logic/preferences.svelte";
     import {systemTheme} from "./lib/data/theme";
+    import {addSystemColorSchemeEventListener, setThemeProperties} from "./lib/logic/theme.svelte";
 
     $effect(() => {
         if (isAuthenticated()) {

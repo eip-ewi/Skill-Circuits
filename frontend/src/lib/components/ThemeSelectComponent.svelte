@@ -1,7 +1,8 @@
 <script lang="ts">
     import {availableThemes} from "../data/theme";
     import Button from "./util/Button.svelte";
-    import {getThemeColorScheme, getThemeName, setTheme} from "../logic/preferences.svelte";
+    import {setTheme} from "../logic/preferences.svelte";
+    import {getThemeColorScheme, getThemeName} from "../logic/theme.svelte";
 </script>
 
 <div class="content">
