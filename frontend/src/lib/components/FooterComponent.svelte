@@ -4,6 +4,7 @@
     import Link from "./util/Link.svelte";
     import {loadPage} from "../logic/routing.svelte";
     import {getTheme} from "../logic/preferences.svelte";
+    import {getThemeColorScheme} from "../logic/theme.svelte";
 
     let { fullWidth }: { fullWidth?: boolean | undefined } = $props();
 </script>
@@ -11,7 +12,7 @@
 <div class="footer-wrapper" class:full-width={fullWidth}>
     <footer>
         <div>
-            {#if getTheme().colourScheme === "light"}
+            {#if getThemeColorScheme(getTheme()) === "light"}
                 <img width="64" alt="TU Delft" src={logoDark}/>
             {:else}
                 <img width="64" alt="TU Delft" src={logoLight}/>

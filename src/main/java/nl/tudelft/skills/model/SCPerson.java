@@ -42,8 +42,6 @@ public class SCPerson {
 
 	@NotNull
 	@Embedded
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
 	private PersonalPreferences preferences;
 
 	@NotNull
