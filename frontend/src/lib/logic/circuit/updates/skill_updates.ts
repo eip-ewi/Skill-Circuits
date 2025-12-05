@@ -1,12 +1,12 @@
-import { getLevel } from "../level.svelte";
-import { withCsrf } from "../../csrf";
-import type { ExternalSkillBlock, RegularSkillBlock, SkillBlock } from "../../../dto/circuit/module/skill";
-import type { Checkpoint } from "../../../dto/checkpoint";
-import { getCircuit } from "../circuit.svelte";
-import type { Block } from "../../../dto/circuit/block";
-import { BlockStates } from "../../../data/block_state";
-import type { ModuleCircuit } from "../../../dto/circuit/module/module";
-import { setScrollTarget } from "../scroll_target.svelte";
+import {getLevel} from "../level.svelte";
+import {withCsrf} from "../../csrf";
+import type {ExternalSkillBlock, RegularSkillBlock, SkillBlock} from "../../../dto/circuit/module/skill";
+import type {Checkpoint} from "../../../dto/checkpoint";
+import {getCircuit} from "../circuit.svelte";
+import type {Block} from "../../../dto/circuit/block";
+import {BlockStates} from "../../../data/block_state";
+import type {ModuleCircuit} from "../../../dto/circuit/module/module";
+import {setScrollTarget} from "../scroll_target.svelte";
 
 export async function createExternalSkill(originalSkillId: number, column: number) {
     let response = await fetch(`/api/skills/external`, withCsrf({
