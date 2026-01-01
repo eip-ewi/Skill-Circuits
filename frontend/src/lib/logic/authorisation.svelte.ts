@@ -65,3 +65,7 @@ export function isTeacherForCircuit() {
 export function isEditorForAny() {
     return authorisation.managedEditions.length > 0;
 }
+
+export function isViewer() {
+    return authorisation.viewMode === "VIEWER";
+}

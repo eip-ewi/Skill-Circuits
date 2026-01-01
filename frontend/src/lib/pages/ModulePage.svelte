@@ -5,7 +5,13 @@
     import type {Warning} from "../data/warning";
     import {setLevel} from "../logic/circuit/level.svelte";
     import {EditionLevel, ModuleLevel} from "../data/level";
-    import {fetchAuthorisation, getAuthorisation, toggleViewMode} from "../logic/authorisation.svelte";
+    import {
+        canEditCircuit,
+        fetchAuthorisation,
+        getAuthorisation,
+        isEditorForAny, isViewer,
+        toggleViewMode
+    } from "../logic/authorisation.svelte";
     import type {ModuleCircuit} from "../dto/circuit/module/module";
     import {fetchDevMode, getDevMode} from "../logic/dev_mode.svelte";
     import {circuitFetched, fetchCircuit, getBlocks, getCircuit} from "../logic/circuit/circuit.svelte";
@@ -15,22 +21,30 @@
     import ChoosePathComponent from "../components/ChoosePathComponent.svelte";
     import {fetchActivePath, fetchPathCustomisation} from "../logic/edition/active_path.svelte";
     import {fetchEdition} from "../logic/edition/edition.svelte";
-    import {fetchRevealedSkills} from "../logic/circuit/unlocked_skills.svelte";
+    import {fetchRevealedSkills, scrollToFirstIncomplete} from "../logic/circuit/unlocked_skills.svelte";
     import PageLayout from "./PageLayout.svelte";
+    import type {SkillBlock} from "../dto/circuit/module/skill";
+    import {onMount} from "svelte";
+    import {isCompleted} from "../logic/circuit/skill_state/completion";
 
     let { moduleId }: { moduleId: number } = $props();
 
     setLevel(ModuleLevel);
 
     let warnings: Warning[] = $state([]);
+    let loadComplete = $state(false);
 
     async function load() {
         await fetchCircuit(`/api/modules/${moduleId}/circuit`);
+        await fetchAuthorisation();
         await fetchEdition((getCircuit() as ModuleCircuit).editionId);
         await fetchActivePath();
         await fetchPathCustomisation();
         await fetchRevealedSkills();
         await fetchDevMode();
+        if (isViewer()) {
+            setTimeout(() => scrollToFirstIncomplete(), 500);
+        }
     }
 </script>
 
