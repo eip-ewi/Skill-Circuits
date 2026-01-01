@@ -47,6 +47,11 @@ public class ModuleCircuitService {
 						.map(submodule -> convertToSubmoduleView(submodule, completedTaskIds)).toList());
 	}
 
+	public ModuleLevelSubmoduleView convertToSubmoduleView(Submodule submodule, SCPerson person) {
+		return convertToSubmoduleView(submodule,
+				taskCompletionRepository.findAllCompletedTaskIdsForPerson(person));
+	}
+
 	private ModuleLevelSubmoduleView convertToSubmoduleView(Submodule submodule, Set<Long> completedTaskIds) {
 		return new ModuleLevelSubmoduleView(
 				submodule.getId(),

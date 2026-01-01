@@ -27,8 +27,10 @@ import nl.tudelft.skills.dto.create.SubmoduleCreate;
 import nl.tudelft.skills.dto.patch.SubmodulePatch;
 import nl.tudelft.skills.dto.view.SubmoduleView;
 import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelSubmoduleView;
+import nl.tudelft.skills.dto.view.circuit.module.ModuleLevelSubmoduleView;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.service.EditionCircuitService;
+import nl.tudelft.skills.service.ModuleCircuitService;
 import nl.tudelft.skills.service.SubmoduleService;
 
 @RestController
@@ -38,8 +40,16 @@ public class SubmoduleController {
 
 	private final SubmoduleService submoduleService;
 	private final EditionCircuitService editionCircuitService;
+	private final ModuleCircuitService moduleCircuitService;
 
 	@GetMapping("{submodule}")
+	@PreAuthorize("@authorisationService.canViewSubmodule(#submodule)")
+	public ModuleLevelSubmoduleView getSubmodule(@AuthenticatedSCPerson SCPerson person,
+			@PathEntity Submodule submodule) {
+		return moduleCircuitService.convertToSubmoduleView(submodule, person);
+	}
+
+	@GetMapping("{submodule}/info")
 	@PreAuthorize("@authorisationService.canViewModuleCircuit(#submodule.module)")
 	public SubmoduleView getSubmoduleInfo(@PathEntity Submodule submodule) {
 		return new SubmoduleView(submodule.getModule().getId());

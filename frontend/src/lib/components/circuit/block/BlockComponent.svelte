@@ -29,6 +29,8 @@
     import {disableColumns, enableColumns} from "../../../dto/columns.svelte";
     import BookmarkSkillButtonComponent from "./BookmarkSkillButtonComponent.svelte";
     import {isSkillBookmarked} from "../../../logic/bookmarks.svelte";
+    import ExpandedSubmoduleComponent from "../../expanded_submodule/ExpandedSubmoduleComponent.svelte";
+    import type {SubmoduleBlock} from "../../../dto/circuit/edition/submodule";
 
     let { block }: { block: Block } = $props();
 
@@ -162,8 +164,14 @@
         {#if block.blockType === "skill" && !block.external && (block.state === BlockStates.Hovering || isSkillBookmarked(block))}
             <BookmarkSkillButtonComponent bind:action skill={block}></BookmarkSkillButtonComponent>
         {/if}
-        {#if block.state === BlockStates.Hovering && (block.blockType !== "skill" || block.external) && !canEditCircuit()}
-            <ExpandedViewOpenButtonComponent bind:action bind:open={expanded}></ExpandedViewOpenButtonComponent>
+        {#if (block.blockType !== "skill" || block.external) && !canEditCircuit()}
+            {#if block.state === BlockStates.Hovering}
+                <ExpandedViewOpenButtonComponent bind:action bind:open={expanded}></ExpandedViewOpenButtonComponent>
+            {/if}
+
+            {#if block.blockType === "submodule"}
+                <ExpandedSubmoduleComponent submoduleBlock={block as SubmoduleBlock} bind:open={expanded}></ExpandedSubmoduleComponent>
+            {/if}
         {/if}
         {#if canEditCircuit() && (draggable || block.state === BlockStates.Hovering || block.state === BlockStates.Connecting || block.state === BlockStates.Editing)}
             <BlockControlsComponent {block} bind:action bind:draggable></BlockControlsComponent>

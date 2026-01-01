@@ -63,7 +63,7 @@ export function placeBlocksWithCheckpoints(graph: Graph, checkpoints: Checkpoint
     placeSkills(skills.filter(skill => !placed.has(skill.id)), minHeight);
 }
 
-function topologicalSort<B extends Block>(graph: Graph, blocks: B[]): B[] {
+export function topologicalSort<B extends Block>(graph: Graph, blocks: B[]): B[] {
     let result: B[] = [];
 
     let toInclude: Set<number> = new Set(blocks.map(block => block.id));

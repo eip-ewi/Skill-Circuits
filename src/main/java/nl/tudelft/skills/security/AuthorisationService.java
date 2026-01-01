@@ -174,6 +174,10 @@ public class AuthorisationService {
 		return canEditModuleCircuit(submodule.getModule());
 	}
 
+	public boolean canViewSubmodule(Submodule submodule) {
+		return canViewModuleCircuit(submodule.getModule());
+	}
+
 	public boolean canViewSkill(AbstractSkill abstractSkill) {
 		return switch (abstractSkill) {
 			case Skill skill -> canViewEdition(skill.getSubmodule().getModule().getEdition().getId());

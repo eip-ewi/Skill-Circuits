@@ -4,7 +4,7 @@
     let { submoduleId }: { submoduleId: number } = $props();
 
     async function load() {
-        const editionResponse = await fetch(`/api/submodules/${submoduleId}`);
+        const editionResponse = await fetch(`/api/submodules/${submoduleId}/info`);
         let submodule: { moduleId: number } = await editionResponse.json();
         loadPage(`/modules/${submodule.moduleId}`, true);
     }
