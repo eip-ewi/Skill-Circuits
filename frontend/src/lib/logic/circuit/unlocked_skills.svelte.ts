@@ -1,6 +1,5 @@
 import type {SkillBlock} from "../../dto/circuit/module/skill";
 import type {SkillItem} from "../../dto/circuit/edition/skill";
-import {tick} from "svelte";
 import {getBlocks} from "./circuit.svelte";
 import {isCompleted} from "./skill_state/completion";
 
