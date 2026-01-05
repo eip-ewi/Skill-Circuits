@@ -16,6 +16,7 @@
     import WIthConfirmationDialog from "./util/WithConfirmationDialog.svelte";
     import WithConfirmationDialog from "./util/WithConfirmationDialog.svelte";
     import {resetProgress} from "../logic/updates/edition_updates";
+    import {editingBlocks} from "../logic/circuit/updates/block_updates";
 
     let userMenuOpen: boolean = $state(false);
 
@@ -177,10 +178,23 @@
                     {/if}
                     {#if isEditorForAny()}
                         {#if canEditCircuit()}
-                            <button class="button" onclick={ () => toggleViewMode() }>
-                                <span class="icon fa-solid fa-eye"></span>
-                                <span>Student view</span>
-                            </button>
+                            <WithConfirmationDialog icon="fa-solid fa-eye" action="Switch to student view" onconfirm={() => { toggleViewMode();}}>
+                                {#snippet button(showDialog: () => void)}
+                                    <button class="button" onclick={() => {
+                                        if (editingBlocks()) {
+                                        showDialog();
+                                       } else {
+                                           toggleViewMode();
+                                       }
+                                    }}>
+                                        <span class="icon fa-solid fa-eye"></span>
+                                        <span>Student view</span>
+                                    </button>
+                                {/snippet}
+                                <p>
+                                    Incomplete edits will be discarded.
+                                </p>
+                            </WithConfirmationDialog>
                         {:else}
                             <button class="button" onclick={ () => toggleViewMode() }>
                                 <span class="icon fa-solid fa-eye"></span>
