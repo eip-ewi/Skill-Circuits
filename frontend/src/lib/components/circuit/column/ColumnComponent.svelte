@@ -66,7 +66,7 @@
 
 <style>
     .column-wrapper {
-        border-radius: 16px;
+        border-radius: var(--column-radius);
         height: 100%;
         position: relative;
     }

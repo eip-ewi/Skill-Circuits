@@ -8,6 +8,8 @@
     import {cubicInOut, linear} from "svelte/easing";
     import type {Point} from "../../data/point";
     import {BlockStates} from "../../data/block_state";
+    import {isCompleted} from "../../logic/circuit/skill_state/completion";
+    import SkillNameComponent from "./SkillNameComponent.svelte";
 
     let { submoduleBlock, open = $bindable() }: { submoduleBlock: SubmoduleBlock, open: boolean } = $props();
     let skills: SkillBlock[] | undefined = $state();
@@ -77,7 +79,8 @@
 {#if open}
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
     <dialog bind:this={element} onclick={checkForClose}>
-        {#if skills !== undefined}
+        <!-- TODO: handle case where there are no skills -->
+        {#if skills !== undefined && selectedSkill !== undefined}
             <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 
             <div class="expanded-block" transition:transition>
@@ -87,7 +90,7 @@
                     <div class="wrapper">
                         <div class="skill-list">
                             {#each skills as skill}
-                                <span>{skill.name}</span>
+                                <SkillNameComponent block={skill} bind:selectedSkill></SkillNameComponent>
                             {/each}
                         </div>
                         <div class="selected-skill-container">
@@ -103,8 +106,6 @@
 
 <style>
     .expanded-block {
-        font-size: clamp(.75rem, calc(16 / 1732 * 100vw), 1rem);
-
         border: var(--expanded-block-border);
         border-radius: var(--expanded-block-border-radius);
         left: 0;
@@ -128,10 +129,14 @@
         color: var(--on-block-colour);
         display: grid;
         gap: 1em;
+        min-width: 40em;
         max-height: calc(100vh - 12em);
+        max-width: calc(100vw - 12em);
         overflow-y: auto;
         padding: 2em;
         place-items: center;
+
+        font-size: var(--font-size-500);
     }
 
     .name {
@@ -150,11 +155,12 @@
         display: flex;
         flex-direction: column;
         align-items: flex-start;
-        padding-right: 2em;
-        border-right: solid 0.25em white;
+        padding: 0.4em 1em 0.4em 0;
+        border-right: solid 0.08em var(--submodule-overview-line-colour);
+        gap: 0.3em;
     }
 
     .selected-skill-container {
-        margin-left: 2em;
+        margin-left: 2.5em;
     }
 </style>
