@@ -23,7 +23,6 @@
         align-items: center;
         column-gap: 0.6em;
         display: grid;
-        font-size: var(--font-size-500);
         grid-template-columns: repeat(var(--columns, 4), auto);
         justify-content: start;
         row-gap: 0.2em;

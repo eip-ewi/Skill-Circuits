@@ -147,6 +147,7 @@
         overflow-y: auto;
         padding: 2em;
         place-items: center;
+        font-size: var(--font-size-500);
     }
 
     .name {

@@ -10,6 +10,8 @@
     import {BlockStates} from "../../data/block_state";
     import {isCompleted} from "../../logic/circuit/skill_state/completion";
     import SkillNameComponent from "./SkillNameComponent.svelte";
+    import SelectedSkillComponent from "./SelectedSkillComponent.svelte";
+    import StudentTrayComponent from "../side_controls/student_tray/StudentTrayComponent.svelte";
 
     let { submoduleBlock, open = $bindable() }: { submoduleBlock: SubmoduleBlock, open: boolean } = $props();
     let skills: SkillBlock[] | undefined = $state();
@@ -83,29 +85,28 @@
         {#if skills !== undefined && selectedSkill !== undefined}
             <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 
-            <div class="expanded-block" transition:transition>
-                <!-- TODO drag and drop -->
+            <div class="expanded-submodule" transition:transition>
                 <div class="content">
                     <h1 class="name">{submoduleBlock.name}</h1>
                     <div class="wrapper">
                         <div class="skill-list">
                             {#each skills as skill}
+                                <!-- TODO: completion of empty skill not handled correctly -->
                                 <SkillNameComponent block={skill} bind:selectedSkill></SkillNameComponent>
                             {/each}
                         </div>
-                        <div class="selected-skill-container">
-                            <h2>{selectedSkill.name}</h2>
-                        </div>
+                        <SelectedSkillComponent block={selectedSkill}></SelectedSkillComponent>
                     </div>
                 </div>
             </div>
-            <!-- TODO: link tray to active skill <StudentTrayComponent {block}></StudentTrayComponent> -->
+
+            <StudentTrayComponent block={selectedSkill}></StudentTrayComponent>
         {/if}
     </dialog>
 {/if}
 
 <style>
-    .expanded-block {
+    .expanded-submodule {
         border: var(--expanded-block-border);
         border-radius: var(--expanded-block-border-radius);
         left: 0;
@@ -158,9 +159,6 @@
         padding: 0.4em 1em 0.4em 0;
         border-right: solid 0.08em var(--submodule-overview-line-colour);
         gap: 0.3em;
-    }
-
-    .selected-skill-container {
-        margin-left: 2.5em;
+        font-size: var(--font-size-400);
     }
 </style>
