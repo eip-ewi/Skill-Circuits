@@ -8,6 +8,7 @@
     import type {Point} from "../../../data/point";
     import StudentTrayComponent from "../../side_controls/student_tray/StudentTrayComponent.svelte";
     import {getDragging, dragEnter, dragOver, dragLeave, drop} from "../../../logic/circuit/drag_and_drop_items.svelte";
+    import {openExpandedBlockTransition} from "../../../logic/transitions";
 
     let { block, open = $bindable() }: { block: Block, open: boolean } = $props();
 
@@ -33,36 +34,13 @@
             open = false;
         }
     }
-
-    function transition(element: Element) {
-        return {
-            duration: 300,
-            easing: linear,
-            css: (t: number) => {
-                let t3 = cubicInOut(t);
-                let start: Point = {
-                    x: block.boundingRect!().left + block.boundingRect!().width / 2,
-                    y: block.boundingRect!().top + block.boundingRect!().height / 2,
-                };
-                let position = {
-                    x: `calc(${start.x * (1 - t3)}px + ${50 * t3}vw - ${50 * t3}%)`,
-                    y: `calc(${start.y * (1 - t3)}px + ${50 * t3}vh - ${50 * t3}%)`,
-                }
-                return `
-                   --blur: ${t * 0.5}rem;
-                   opacity: ${t3};
-                   transform: translate(${position.x}, ${position.y}) scale(${t3 * 0.9 + 0.1}) ;
-                `;
-            }
-        }
-    }
 </script>
 
 {#if open}
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
     <dialog bind:this={element} onclick={checkForClose}>
         <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
-        <div class="expanded-block" transition:transition data-dragging={getDragging()}
+        <div class="expanded-block" transition:openExpandedBlockTransition={{ block: block }} data-dragging={getDragging()}
              ondragenter={dragEnter} ondragover={dragOver} ondragleave={dragLeave} ondrop={drop}>
             <div class="content">
                 <h2 class="name">{block.name}</h2>

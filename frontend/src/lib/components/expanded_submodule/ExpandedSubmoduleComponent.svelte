@@ -5,13 +5,11 @@
     import type {SubmoduleGroup} from "../../dto/circuit/module/submodule";
     import {Graph} from "../../logic/circuit/graph";
     import {topologicalSort} from "../../logic/circuit/block_placement";
-    import {cubicInOut, linear} from "svelte/easing";
-    import type {Point} from "../../data/point";
     import {BlockStates} from "../../data/block_state";
-    import {isCompleted} from "../../logic/circuit/skill_state/completion";
     import SkillNameComponent from "./SkillNameComponent.svelte";
     import SelectedSkillComponent from "./SelectedSkillComponent.svelte";
     import StudentTrayComponent from "../side_controls/student_tray/StudentTrayComponent.svelte";
+    import {openExpandedBlockTransition} from "../../logic/transitions";
 
     let { submoduleBlock, open = $bindable() }: { submoduleBlock: SubmoduleBlock, open: boolean } = $props();
     let skills: SkillBlock[] | undefined = $state();
@@ -52,30 +50,6 @@
             element.showModal();
         }
     });
-
-    // TODO: move duplicated code
-    function transition(element: Element) {
-        return {
-            duration: 300,
-            easing: linear,
-            css: (t: number) => {
-                let t3 = cubicInOut(t);
-                let start: Point = {
-                    x: submoduleBlock.boundingRect!().left + submoduleBlock.boundingRect!().width / 2,
-                    y: submoduleBlock.boundingRect!().top + submoduleBlock.boundingRect!().height / 2,
-                };
-                let position = {
-                    x: `calc(${start.x * (1 - t3)}px + ${50 * t3}vw - ${50 * t3}%)`,
-                    y: `calc(${start.y * (1 - t3)}px + ${50 * t3}vh - ${50 * t3}%)`,
-                }
-                return `
-                   --blur: ${t * 0.5}rem;
-                   opacity: ${t3};
-                   transform: translate(${position.x}, ${position.y}) scale(${t3 * 0.9 + 0.1}) ;
-                `;
-            }
-        }
-    }
 </script>
 
 {#if open}
@@ -85,13 +59,14 @@
         {#if skills !== undefined && selectedSkill !== undefined}
             <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 
-            <div class="expanded-submodule" transition:transition>
-                <div class="content">
-                    <h1 class="name">{submoduleBlock.name}</h1>
-                    <div class="wrapper">
-                        <div class="skill-list">
-                            {#each skills as skill}
-                                <!-- TODO: completion of empty skill not handled correctly -->
+             <!-- TODO: apply transition also after first time opening -->
+             <div class="expanded-submodule" transition:openExpandedBlockTransition={{ block: submoduleBlock }}>
+                 <div class="content">
+                     <h1 class="name">{submoduleBlock.name}</h1>
+                     <div class="wrapper">
+                         <div class="skill-list">
+                             {#each skills as skill}
+                                 <!-- TODO: completion of empty skill not handled correctly -->
                                 <SkillNameComponent block={skill} bind:selectedSkill></SkillNameComponent>
                             {/each}
                         </div>
