@@ -55,27 +55,32 @@
 {#if open}
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
     <dialog bind:this={element} onclick={checkForClose}>
-        <!-- TODO: handle case where there are no skills -->
-        {#if skills !== undefined && selectedSkill !== undefined}
+        {#if skills !== undefined}
             <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 
              <!-- TODO: apply transition also after first time opening -->
              <div class="expanded-submodule" transition:openExpandedBlockTransition={{ block: submoduleBlock }}>
                  <div class="content">
                      <h1 class="name">{submoduleBlock.name}</h1>
-                     <div class="wrapper">
-                         <div class="skill-list">
-                             {#each skills as skill}
-                                 <!-- TODO: completion of empty skill not handled correctly -->
-                                <SkillNameComponent block={skill} bind:selectedSkill></SkillNameComponent>
-                            {/each}
+                     {#if selectedSkill !== undefined}
+                         <div class="wrapper">
+                             <div class="skill-list">
+                                 {#each skills as skill}
+                                     <!-- TODO: completion of empty skill not handled correctly -->
+                                    <SkillNameComponent block={skill} bind:selectedSkill></SkillNameComponent>
+                                {/each}
+                            </div>
+                            <SelectedSkillComponent block={selectedSkill}></SelectedSkillComponent>
                         </div>
-                        <SelectedSkillComponent block={selectedSkill}></SelectedSkillComponent>
-                    </div>
+                     {:else if skills.length === 0}
+                        There are no skills in this submodule.
+                     {/if}
                 </div>
             </div>
 
-            <StudentTrayComponent block={selectedSkill}></StudentTrayComponent>
+             {#if selectedSkill !== undefined}
+                <StudentTrayComponent block={selectedSkill}></StudentTrayComponent>
+             {/if}
         {/if}
     </dialog>
 {/if}
