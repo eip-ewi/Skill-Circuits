@@ -1,23 +1,17 @@
 <script lang="ts">
 
     import type {Block} from "../../../dto/circuit/block";
-    import type {SkillBlock} from "../../../dto/circuit/module/skill";
-    import {cubicIn, cubicInOut, linear} from "svelte/easing";
+    import {cubicInOut, linear} from "svelte/easing";
     import TasksComponent from "../item/TasksComponent.svelte";
     import {isCompleted} from "../../../logic/circuit/skill_state/completion";
-    import {addTaskToPath, getItemsOnPath, removeTaskFromPath} from "../../../logic/edition/active_path.svelte";
+    import {getItemsOnPath} from "../../../logic/edition/active_path.svelte";
     import type {Point} from "../../../data/point";
-    import SideControlsComponent from "../../side_controls/SideControlsComponent.svelte";
     import StudentTrayComponent from "../../side_controls/student_tray/StudentTrayComponent.svelte";
-    import {getBlockForItem, getItem} from "../../../logic/circuit/circuit.svelte";
-    import type {TaskItem} from "../../../dto/circuit/module/task";
-    import {editTaskIndex, moveTask} from "../../../logic/circuit/updates/task_updates";
+    import {getDragging, dragEnter, dragOver, dragLeave, drop} from "../../../logic/circuit/drag_and_drop_items.svelte";
 
     let { block, open = $bindable() }: { block: Block, open: boolean } = $props();
 
     let element: HTMLDialogElement | undefined = $state();
-
-    let dragging: boolean = $state(false);
 
     $effect(() => {
         if (element === undefined) {
@@ -38,40 +32,6 @@
         if (event.target === element) {
             open = false;
         }
-    }
-
-    function dragEnter(event: DragEvent) {
-        if (!event.dataTransfer!.types.includes("skill-circuits/item")) {
-            return;
-        }
-        event.preventDefault();
-        dragging = true;
-    }
-
-    function dragLeave() {
-        dragging = false;
-    }
-
-    function dragOver(event: DragEvent) {
-        if (!event.dataTransfer!.types.includes("skill-circuits/item")) {
-            return;
-        }
-        event.preventDefault();
-        dragging = true;
-    }
-
-    async function drop(event: DragEvent) {
-        if (!event.dataTransfer!.types.includes("skill-circuits/item")) {
-            return;
-        }
-        event.preventDefault();
-
-        let itemId = parseInt(event.dataTransfer!.getData("skill-circuits/item"));
-        let item = getItem(itemId) as TaskItem;
-
-        await addTaskToPath(item);
-
-        dragging = false;
     }
 
     function transition(element: Element) {
@@ -102,7 +62,7 @@
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
     <dialog bind:this={element} onclick={checkForClose}>
         <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
-        <div class="expanded-block" transition:transition data-dragging={dragging}
+        <div class="expanded-block" transition:transition data-dragging={getDragging()}
              ondragenter={dragEnter} ondragover={dragOver} ondragleave={dragLeave} ondrop={drop}>
             <div class="content">
                 <h2 class="name">{block.name}</h2>

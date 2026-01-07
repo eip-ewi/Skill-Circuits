@@ -1,55 +1,14 @@
 <script lang="ts">
     import type {SkillBlock} from "../../dto/circuit/module/skill";
-    import {isCompleted} from "../../logic/circuit/skill_state/completion";
-    import {addTaskToPath, getItemsOnPath} from "../../logic/edition/active_path.svelte";
+    import {getItemsOnPath} from "../../logic/edition/active_path.svelte";
     import TasksComponent from "../circuit/item/TasksComponent.svelte";
-    import StudentTrayComponent from "../side_controls/student_tray/StudentTrayComponent.svelte";
-    import {getItem} from "../../logic/circuit/circuit.svelte";
-    import type {TaskItem} from "../../dto/circuit/module/task";
+    import {getDragging, dragEnter, dragOver, dragLeave, drop} from "../../logic/circuit/drag_and_drop_items.svelte";
 
     let { block }: { block: SkillBlock } = $props();
-
-    let dragging: boolean = $state(false);
-
-    // TODO: move duplicated code
-
-    function dragEnter(event: DragEvent) {
-        if (!event.dataTransfer!.types.includes("skill-circuits/item")) {
-            return;
-        }
-        event.preventDefault();
-        dragging = true;
-    }
-
-    function dragLeave() {
-        dragging = false;
-    }
-
-    function dragOver(event: DragEvent) {
-        if (!event.dataTransfer!.types.includes("skill-circuits/item")) {
-            return;
-        }
-        event.preventDefault();
-        dragging = true;
-    }
-
-    async function drop(event: DragEvent) {
-        if (!event.dataTransfer!.types.includes("skill-circuits/item")) {
-            return;
-        }
-        event.preventDefault();
-
-        let itemId = parseInt(event.dataTransfer!.getData("skill-circuits/item"));
-        let item = getItem(itemId) as TaskItem;
-
-        await addTaskToPath(item);
-
-        dragging = false;
-    }
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="content" data-dragging={dragging} ondragenter={dragEnter} ondragover={dragOver} ondragleave={dragLeave} ondrop={drop}>
+<div class="content" data-dragging={getDragging()} ondragenter={dragEnter} ondragover={dragOver} ondragleave={dragLeave} ondrop={drop}>
     <h2 class="name">{block.name}</h2>
     <TasksComponent tasks={getItemsOnPath(block)}></TasksComponent>
     <div class="drop-indicator"></div>
