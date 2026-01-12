@@ -44,6 +44,19 @@ public final class BasicScripts {
 		locators.label("Username").fill(user.username());
 		locators.label("Password").fill(user.password());
 		locators.button("Log in").click();
+
+		locators.query(".header").waitFor();
+		locators.page().waitForTimeout(500);
+		closeChangelog();
+	}
+
+	private void closeChangelog() {
+		LocatorLocators okayButton = locators.button("OK");
+		if (okayButton.isVisible()) {
+			okayButton.click();
+			okayButton.waitForDetach();
+		}
+
 	}
 
 	public void logOut() {
