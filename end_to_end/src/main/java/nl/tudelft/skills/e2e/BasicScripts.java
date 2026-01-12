@@ -46,7 +46,7 @@ public final class BasicScripts {
 		locators.button("Log in").click();
 
 		locators.query(".header").waitFor();
-		locators.page().waitForTimeout(500);
+		locators.page().waitForTimeout(2000);
 		closeChangelog();
 	}
 
