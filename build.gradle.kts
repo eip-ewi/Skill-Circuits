@@ -124,6 +124,14 @@ configure<SpotlessExtension> {
             "htmlWhitespaceSensitivity" to "ignore"))
         toggleOffOn()
     }
+
+    format("frontend") {
+        target("frontend/src/**/*.svelte", "frontend/src/**/*.ts", "frontend/src/**/*.html", "frontend/src/**/*.css", "frontend/src/**/*.js")
+        prettier(mapOf(
+            "prettier" to "3.4.2",
+            "prettier-plugin-svelte" to "3.3.3"
+        )).configFile(file("frontend/.prettierrc"))
+    }
 }
 
 val jacocoTestReport by tasks.getting(JacocoReport::class) {
