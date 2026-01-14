@@ -3,6 +3,9 @@
     "semi": true,
     "singleQuote": false,
     "printWidth": 100,
+    "bracketSameLine": true,
+    "arrowParens": "avoid",
+    "htmlWhitespaceSensitivity": "ignore",
     "plugins": [
         "prettier-plugin-svelte"
     ],
