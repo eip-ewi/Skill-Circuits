@@ -178,23 +178,10 @@
                     {/if}
                     {#if isEditorForAny()}
                         {#if canEditCircuit()}
-                            <WithConfirmationDialog icon="fa-solid fa-eye" action="Switch to student view" onconfirm={() => { toggleViewMode();}}>
-                                {#snippet button(showDialog: () => void)}
-                                    <button class="button" onclick={() => {
-                                        if (editingBlocks()) {
-                                        showDialog();
-                                       } else {
-                                           toggleViewMode();
-                                       }
-                                    }}>
-                                        <span class="icon fa-solid fa-eye"></span>
-                                        <span>Student view</span>
-                                    </button>
-                                {/snippet}
-                                <p>
-                                    Incomplete edits will be discarded.
-                                </p>
-                            </WithConfirmationDialog>
+                            <button class="button" onclick={ () => toggleViewMode() }>
+                                <span class="icon fa-solid fa-eye"></span>
+                                <span>Student view</span>
+                            </button>
                         {:else}
                             <button class="button" onclick={ () => toggleViewMode() }>
                                 <span class="icon fa-solid fa-eye"></span>

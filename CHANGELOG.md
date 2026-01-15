@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 
 ## Fixed
+- [Editor] When switching to student view, block editing closes and makes the edit.(@ogangalic)
 
 
 ## [2526.0.1]
