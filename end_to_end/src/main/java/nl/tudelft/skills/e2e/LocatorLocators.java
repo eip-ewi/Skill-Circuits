@@ -79,6 +79,10 @@ public record LocatorLocators(Locator locator) implements Locators {
 		locator.waitFor(new Locator.WaitForOptions().setState(WaitForSelectorState.DETACHED));
 	}
 
+	public void waitForHidden() {
+		locator.waitFor(new Locator.WaitForOptions().setState(WaitForSelectorState.HIDDEN));
+	}
+
 	@Override
 	public Locator getByCss(String css) {
 		return locator.locator(css);
