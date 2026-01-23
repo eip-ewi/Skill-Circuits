@@ -47,28 +47,9 @@
 
     let element: HTMLElement;
 
-    let pulsingBlockElement: HTMLElement | null = $state(null);
-    let scrollToPulsingHovered: boolean = $state(false);
-
-    function onButtonMouseEnter() {
-        scrollToPulsingHovered = true;
-    }
-
-    function onButtonMouseLeave() {
-        scrollToPulsingHovered = false;
-    }
-
-    $effect(() => {
-        if (block.state === BlockStates.Connecting) {
-            pulsingBlockElement = element;
-        } else if (pulsingBlockElement === element) {
-            pulsingBlockElement = null;
-        }
-    });
-
     function scrollToPulsing() {
-        if (!pulsingBlockElement) return;
-        const rect = pulsingBlockElement.getBoundingClientRect();
+        if (block.state !== BlockStates.Connecting) return;
+        const rect = element.getBoundingClientRect();
         window.scrollTo({
             top: rect.top + window.scrollY - 80,
             behavior: "smooth"
@@ -167,15 +148,12 @@
 
 <svelte:window onresize={recalculateBounds}/>
 
-{#if pulsingBlockElement}
-    <div class="scroll-to-pulse-container">
-        <button class="scroll-to-pulse-button"
-                onclick={scrollToPulsing}
-                onmouseenter={onButtonMouseEnter}
-                onmouseleave={onButtonMouseLeave}>
+{#if block.state === BlockStates.Connecting}
+    <div class="glass scroll-to-pulse-container">
+        <button class="scroll-to-pulse-button" onclick={scrollToPulsing}>
             <span class="icon fa-solid fa-location-dot"></span>
-            <span class="text" class:expanded={scrollToPulsingHovered}>
-                Go to skill{scrollToPulsingHovered ? ` "${block.name}"` : ""}
+            <span>
+                Go to skill<span class="scroll-to-name">{' '}"{block.name}"</span>
             </span>
         </button>
     </div>
@@ -289,11 +267,6 @@
         border-radius: var(--header-border-radius);
         padding: 1em;
         backdrop-filter: blur(.5rem) saturate(180%);
-        background: var(--glass-colour);
-        box-shadow:
-                .75rem 1.25rem 1.9rem 0 color-mix(in srgb, var(--shadow-colour) 4%, transparent),
-                inset 0.125em 0.125em 0.0625em 0 color-mix(in srgb, var(--glass-glint-colour) 60%, transparent),
-                inset -0.0625em -0.0625em 0.0625em color-mix(in srgb, var(--glass-glint-colour) 40%, transparent);
     }
 
     .scroll-to-pulse-button {
@@ -315,6 +288,14 @@
 
     .scroll-to-pulse-button .icon {
         font-size: 1.5em;
+    }
+
+    .scroll-to-name {
+        display: none;
+    }
+
+    .scroll-to-pulse-button:hover .scroll-to-name {
+        display: inline;
     }
 
     @keyframes wiggle {
