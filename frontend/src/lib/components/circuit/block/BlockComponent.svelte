@@ -149,13 +149,15 @@
 <svelte:window onresize={recalculateBounds}/>
 
 {#if block.state === BlockStates.Connecting}
-    <div class="glass scroll-to-pulse-container">
-        <button class="scroll-to-pulse-button" onclick={scrollToPulsing}>
-            <span class="icon fa-solid fa-location-dot"></span>
-            <span>
-                Go to skill<span class="scroll-to-name">{' '}"{block.name}"</span>
-            </span>
-        </button>
+    <div class="scroll-to-pulse-container">
+        <div class="glass surface">
+            <button class="scroll-to-pulse-button" onclick={scrollToPulsing}>
+                <span class="icon fa-solid fa-location-dot"></span>
+                <span>
+                    Go to skill<span class="scroll-to-name">{' '}"{block.name}"</span>
+                </span>
+            </button>
+        </div>
     </div>
 {/if}
 
@@ -263,10 +265,11 @@
         bottom: 2rem;
         right: 2rem;
         z-index: 99;
-        border: var(--glass-border);
+    }
+
+    .surface {
         border-radius: var(--header-border-radius);
         padding: 1em;
-        backdrop-filter: blur(.5rem) saturate(180%);
     }
 
     .scroll-to-pulse-button {
