@@ -36,8 +36,15 @@
 
         <link rel="stylesheet" href="/webjars/font-awesome/css/all.css" />
 
-        <script th:src="@{/skill-circuits-frontend.js}" type="module"></script>
-        <link th:href="@{/skill-circuits-frontend.css}" rel="stylesheet" type="text/css" />
+        <th:block th:unless="${#arrays.contains(@environment.getActiveProfiles(), 'development')}">
+            <script th:src="@{/skill-circuits-frontend.js}" type="module"></script>
+            <link th:href="@{/skill-circuits-frontend.css}" rel="stylesheet" type="text/css" />
+        </th:block>
+
+        <th:block th:if="${#arrays.contains(@environment.getActiveProfiles(), 'development')}">
+            <script type="module" src="http://localhost:5173/@vite/client"></script>
+            <script type="module" src="http://localhost:5173/src/main.ts"></script>
+        </th:block>
     </head>
     <body>
         <div id="app"></div>
