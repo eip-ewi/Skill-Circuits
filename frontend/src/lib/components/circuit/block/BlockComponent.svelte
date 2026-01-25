@@ -285,7 +285,7 @@
         padding: 1em;
     }
 
-    .scroll-to-pulse-button:hover {
+    .scroll-to-pulse-button:where(:focus-visible, :hover) {
         background: var(--on-glass-surface-active-colour);
     }
 
@@ -297,7 +297,7 @@
         display: none;
     }
 
-    .scroll-to-pulse-button:hover .scroll-to-name {
+    .scroll-to-pulse-button:where(:focus-visible, :hover) .scroll-to-name {
         display: inline;
     }
 
