@@ -55,11 +55,9 @@
 {#if open}
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
     <dialog bind:this={element} onclick={checkForClose}>
-        {#if skills !== undefined}
-            <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
-
-             <!-- TODO: apply transition also after first time opening -->
-             <div class="expanded-submodule" transition:openExpandedBlockTransition={{ block: submoduleBlock }}>
+        <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
+         <div class="expanded-submodule" transition:openExpandedBlockTransition={{ block: submoduleBlock }}>
+             {#if skills !== undefined}
                  <div class="content">
                      <h1 class="name">{submoduleBlock.name}</h1>
                      {#if selectedSkill !== undefined}
@@ -67,6 +65,7 @@
                              <div class="skill-list">
                                  {#each skills as skill}
                                      <!-- TODO: completion of empty skill not handled correctly -->
+                                     <!-- TODO: handle scrolling correctly -->
                                     <SkillNameComponent block={skill} bind:selectedSkill></SkillNameComponent>
                                 {/each}
                             </div>
@@ -76,12 +75,12 @@
                         There are no skills in this submodule.
                      {/if}
                 </div>
-            </div>
-
-             {#if selectedSkill !== undefined}
-                <StudentTrayComponent block={selectedSkill}></StudentTrayComponent>
              {/if}
-        {/if}
+        </div>
+
+         {#if skills !== undefined && selectedSkill !== undefined}
+            <StudentTrayComponent block={selectedSkill}></StudentTrayComponent>
+         {/if}
     </dialog>
 {/if}
 
