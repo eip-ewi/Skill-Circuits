@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## Added
+ - [Editor] Can scroll to the skill whose connections they are editing via a button. (@rgiedryte)
 
 ## Changed
 

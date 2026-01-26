@@ -47,6 +47,15 @@
 
     let element: HTMLElement;
 
+    function scrollToPulsing() {
+        if (block.state !== BlockStates.Connecting) return;
+        const rect = element.getBoundingClientRect();
+        window.scrollTo({
+            top: rect.top + window.scrollY - 80,
+            behavior: "smooth"
+        });
+    }
+
     $effect(() => {
         // Recalculate when any of the following change
         block.column;
@@ -139,6 +148,19 @@
 
 <svelte:window onresize={recalculateBounds}/>
 
+{#if block.state === BlockStates.Connecting}
+    <div class="scroll-to-pulse-container">
+        <div class="glass surface">
+            <button class="scroll-to-pulse-button" onclick={scrollToPulsing}>
+                <span class="icon fa-solid fa-location-dot"></span>
+                <span>
+                    Go to skill<span class="scroll-to-name">{' '}"{block.name}"</span>
+                </span>
+            </button>
+        </div>
+    </div>
+{/if}
+
 <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 <div id="block-{block.id}" class="block-wrapper" style:grid-column={block.column! + 1} style:grid-row={block.row === undefined ? undefined : block.row + 1}
      draggable={draggable} ondragstart={dragStart} ondragend={dragEnd} data-clickable={clickable}
@@ -230,12 +252,53 @@
         color: var(--on-block-completed-colour);
     }
 
-    .block-wrapper[data-clickable="true"]:hover {
+    .block-wrapper[data-clickable="true"]:hover .block:not([data-pulse="true"]) {
         transform: scale(1.05);
         box-shadow: .75rem 1.25rem 1.8rem 0 color-mix(in srgb, var(--shadow-colour) 8%, transparent);
     }
     .block[data-clickable="true"] {
         cursor: pointer;
+    }
+
+    .scroll-to-pulse-container {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        z-index: 99;
+    }
+
+    .surface {
+        border-radius: var(--header-border-radius);
+        padding: 1em;
+    }
+
+    .scroll-to-pulse-button {
+        display: flex;
+        flex-direction: column;
+        justify-items: center;
+        gap: 0.5em;
+        background: var(--on-glass-surface-colour);
+        border-radius: var(--header-border-radius);
+        color: var(--on-glass-colour);
+        border: none;
+        cursor: pointer;
+        padding: 1em;
+    }
+
+    .scroll-to-pulse-button:where(:focus-visible, :hover) {
+        background: var(--on-glass-surface-active-colour);
+    }
+
+    .scroll-to-pulse-button .icon {
+        font-size: 1.5em;
+    }
+
+    .scroll-to-name {
+        display: none;
+    }
+
+    .scroll-to-pulse-button:where(:focus-visible, :hover) .scroll-to-name {
+        display: inline;
     }
 
     @keyframes wiggle {
@@ -258,6 +321,21 @@
             transform: scale(1);
         }
         25% {
+            transform: scale(1.03);
+        }
+        75% {
+            transform: scale(0.97);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    @keyframes pulseReduced {
+        0% {
+            transform: scale(1);
+        }
+        25% {
             transform: scale(1.015);
         }
         75% {
@@ -265,6 +343,12 @@
         }
         100% {
             transform: scale(1);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .block[data-pulse="true"] {
+            animation: pulseReduced 2s linear infinite;
         }
     }
 </style>
