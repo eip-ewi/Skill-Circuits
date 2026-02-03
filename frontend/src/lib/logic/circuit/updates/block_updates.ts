@@ -98,3 +98,16 @@ export async function deleteBlock(block: Block) {
         getBlocks().filter(b => b.children.includes(block.id)).forEach(b => b.children.splice(b.children.indexOf(block.id), 1));
     }
 }
+
+export function editingBlocks() {
+    return getBlocks().filter(b => b.state === BlockStates.Editing).length > 0;
+}
+
+
+export function makeBlocksInactive() {
+    getBlocks().forEach(b => {
+        if (b.state === BlockStates.Editing) {
+            b.state = BlockStates.Inactive;
+        }
+    });
+}
