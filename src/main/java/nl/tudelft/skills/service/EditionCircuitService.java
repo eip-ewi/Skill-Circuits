@@ -22,6 +22,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import nl.tudelft.skills.dto.view.circuit.module.ModuleLevelModuleView;
 import org.springframework.stereotype.Service;
 
 import lombok.AllArgsConstructor;
@@ -48,8 +49,9 @@ public class EditionCircuitService {
 	private final SubmoduleDependencyService submoduleDependencyService;
 
 	private final TaskCompletionRepository taskCompletionRepository;
+    private final ModuleCircuitService moduleCircuitService;
 
-	public EditionLevelEditionView getEditionCircuit(Long editionId, SCPerson person) {
+    public EditionLevelEditionView getEditionCircuit(Long editionId, SCPerson person) {
 		SCEdition edition = editionRepository.getOrCreate(editionId);
 		EditionDetailsDTO editionDetails = requireNonNull(editionApi.getEditionById(editionId).block());
 		Set<Long> completedTaskIds = taskCompletionRepository.findAllCompletedTaskIdsForPerson(person);
@@ -80,13 +82,15 @@ public class EditionCircuitService {
 
 	private EditionLevelModuleView convertToModuleView(SCModule module, Set<Long> completedTaskIds,
 			Set<Long> revealedSkillIds) {
+        ModuleLevelModuleView moduleCircuit = moduleCircuitService.getModuleCircuit(module, completedTaskIds);
 		return new EditionLevelModuleView(
 				module.getId(),
 				module.getName(),
 				module.getSubmodules().stream()
 						.map(submodule -> convertToSubmoduleView(submodule, completedTaskIds,
 								revealedSkillIds))
-						.toList());
+						.toList(),
+                moduleCircuit);
 	}
 
 	public EditionLevelSubmoduleView convertToSubmoduleView(Submodule submodule, SCPerson person) {

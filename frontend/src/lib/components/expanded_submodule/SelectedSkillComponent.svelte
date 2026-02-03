@@ -3,8 +3,18 @@
     import {getItemsOnPath} from "../../logic/edition/active_path.svelte";
     import TasksComponent from "../circuit/item/TasksComponent.svelte";
     import {getDragging, dragEnter, dragOver, dragLeave, drop} from "../../logic/circuit/drag_and_drop_items.svelte";
+    import {getGroupForItem, getItem} from "../../logic/circuit/circuit.svelte";
+    import {isCompleted} from "../../logic/circuit/skill_state/completion";
+    import type {SkillItem} from "../../dto/circuit/edition/skill";
+    import type {ModuleGroup} from "../../dto/circuit/edition/module";
 
     let { block }: { block: SkillBlock } = $props();
+    let item: SkillItem = $derived(getItem(block.id) as SkillItem);
+    let module: ModuleGroup = $derived(getGroupForItem(item) as ModuleGroup);
+
+    $effect(() => {
+        item.completed = isCompleted(block, module.moduleGraph);
+    })
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->

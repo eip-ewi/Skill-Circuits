@@ -8,6 +8,10 @@ import {canEditCircuit, getAuthorisation} from "../authorisation.svelte";
 import {ModuleLevel} from "../../data/level";
 import {isSkillRevealed} from "./unlocked_skills.svelte";
 import {BlockStates} from "../../data/block_state";
+import type {EditionCircuit} from "../../dto/circuit/edition/edition";
+import type {SubmoduleBlock} from "../../dto/circuit/edition/submodule";
+import type {SubmoduleGroup} from "../../dto/circuit/module/submodule";
+import type {ModuleGroup} from "../../dto/circuit/edition/module";
 
 let circuit: Circuit | undefined = $state(undefined);
 // @ts-ignore
@@ -61,7 +65,8 @@ export function getVisibleBlocks(): Block[] {
 }
 
 export function isBlockVisible(block: Block) {
-    return block.column !== null && (!isLevel(ModuleLevel) || canEditCircuit() || block.blockType !== "skill" || block.external || !block.hidden || isSkillRevealed(block));
+    // TODO: I removed !isLevel(ModuleLevel): This should also be handled by the !== skill block check?
+    return block.column !== null && (canEditCircuit() || block.blockType !== "skill" || block.external || !block.hidden || isSkillRevealed(block));
 }
 
 export function getGroupForBlock(block: Block): Group {
@@ -76,6 +81,10 @@ export function getBlockForItem(item: Item): Block {
     return itemToBlockMap!.get(item.id)!;
 }
 
+export function getGroupForItem(item: Item): Group {
+    return getGroupForBlock(getBlockForItem(item));
+}
+
 export function getItem(id: number): Item {
     return blocks!.flatMap(block => block.items as Item[]).find(item => item.id === id)!;
 }
@@ -87,4 +96,8 @@ export function getGraph(): Graph {
 export async function fetchCircuit(url: string) {
     let response = await fetch(url);
     circuit = await response.json();
+}
+
+export function initModuleGraphs(editionCircuit: EditionCircuit) {
+    editionCircuit.groups.forEach(module => module.moduleGraph = new Graph(blocksFromCircuit(module.moduleCircuit).filter(block => isBlockVisible(block))));
 }

@@ -2,8 +2,9 @@ import type {Block} from "../../../dto/circuit/block";
 import {isCompleted} from "./completion";
 import {getGraph} from "../circuit.svelte";
 import {getItemsOnPath} from "../../edition/active_path.svelte";
+import type {Graph} from "../graph";
 
-export function isUnlocked(block: Block, recursionCheck: number = 100): boolean {
+export function isUnlocked(block: Block, graph: Graph = getGraph(), recursionCheck: number = 100): boolean {
 
     if (recursionCheck <= 0) {
         return false;
@@ -31,15 +32,15 @@ export function isUnlocked(block: Block, recursionCheck: number = 100): boolean 
         return true;
     }
 
-    let allEssentialParentsCompleted = getGraph().has(block) && !getGraph().getParents(block)
+    let allEssentialParentsCompleted = graph.has(block) && !graph.getParents(block)
         .filter(parent => parent.blockType !== "skill" || parent.essential)
-        .some(parent => !isCompleted(parent, recursionCheck));
+        .some(parent => !isCompleted(parent, graph, recursionCheck));
 
     if (!allEssentialParentsCompleted) {
         return false;
     }
 
-    let allParentsUnlocked = getGraph().has(block) && !getGraph().getParents(block).some(parent => !isUnlocked(parent, recursionCheck - 1));
+    let allParentsUnlocked = graph.has(block) && !graph.getParents(block).some(parent => !isUnlocked(parent, graph, recursionCheck - 1));
 
     if (!allParentsUnlocked) {
         return false;

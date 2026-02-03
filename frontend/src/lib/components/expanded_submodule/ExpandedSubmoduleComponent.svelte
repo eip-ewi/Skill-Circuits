@@ -12,6 +12,7 @@
     import {openExpandedBlockTransition} from "../../logic/transitions";
 
     let { submoduleBlock, open = $bindable() }: { submoduleBlock: SubmoduleBlock, open: boolean } = $props();
+
     let skills: SkillBlock[] | undefined = $state();
 
     let selectedSkill: SkillBlock | undefined = $state();
@@ -64,7 +65,6 @@
                          <div class="wrapper">
                              <div class="skill-list">
                                  {#each skills as skill}
-                                     <!-- TODO: completion of empty skill not handled correctly -->
                                      <!-- TODO: handle scrolling correctly -->
                                     <SkillNameComponent block={skill} bind:selectedSkill></SkillNameComponent>
                                 {/each}

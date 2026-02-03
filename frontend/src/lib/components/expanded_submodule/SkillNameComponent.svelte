@@ -1,14 +1,14 @@
 <script lang="ts">
     import type {SkillBlock} from "../../dto/circuit/module/skill";
     import {isCompleted} from "../../logic/circuit/skill_state/completion";
+    import type {SkillItem} from "../../dto/circuit/edition/skill";
+    import {getGroupForItem, getItem} from "../../logic/circuit/circuit.svelte";
+    import type {ModuleGroup} from "../../dto/circuit/edition/module";
 
     let { block, selectedSkill = $bindable() }: { block: SkillBlock, selectedSkill: SkillBlock } = $props();
-
-    let completed : boolean = $state(isCompleted(block));
-
-    $effect(() => {
-        completed = isCompleted(block);
-    });
+    let item: SkillItem = $derived(getItem(block.id) as SkillItem);
+    let module: ModuleGroup = $derived(getGroupForItem(item) as ModuleGroup);
+    let completed : boolean = $derived(isCompleted(block, module.moduleGraph));
 </script>
 
 <button class="skill-name" class:completed={completed} class:selected={selectedSkill === block} onclick={() => {selectedSkill = block}} aria-label="Select skill">
