@@ -16,6 +16,7 @@
     import WIthConfirmationDialog from "./util/WithConfirmationDialog.svelte";
     import WithConfirmationDialog from "./util/WithConfirmationDialog.svelte";
     import {resetProgress} from "../logic/updates/edition_updates";
+    import {editingBlocks} from "../logic/circuit/updates/block_updates";
 
     let userMenuOpen: boolean = $state(false);
 
