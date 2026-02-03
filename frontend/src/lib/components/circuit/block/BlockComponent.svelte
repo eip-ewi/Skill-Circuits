@@ -16,7 +16,7 @@
     import BlockActionIndicationComponent from "./BlockActionIndicationComponent.svelte";
     import ExpandedViewOpenButtonComponent from "./ExpandedViewOpenButtonComponent.svelte";
     import ExpandedBlockComponent from "./ExpandedBlockComponent.svelte";
-    import {getBlock, getBlocks, getCircuit, getGraph} from "../../../logic/circuit/circuit.svelte";
+import {getBlock, getBlocks, getCircuit, getGraph} from "../../../logic/circuit/circuit.svelte";
     import BlockControlsComponent from "./BlockControlsComponent.svelte";
     import {type BlockAction, BlockActions} from "../../../data/block_action";
     import {type BlockState, BlockStates} from "../../../data/block_state";
@@ -29,6 +29,7 @@
     import {disableColumns, enableColumns} from "../../../dto/columns.svelte";
     import BookmarkSkillButtonComponent from "./BookmarkSkillButtonComponent.svelte";
     import {isSkillBookmarked} from "../../../logic/bookmarks.svelte";
+import {clearScrollTarget, getScrollTarget} from "../../../logic/circuit/scroll_target.svelte";
 
     let { block }: { block: Block } = $props();
 
@@ -67,6 +68,30 @@
         });
 
         recalculateBounds();
+    });
+
+    $effect(() => {
+        let target = getScrollTarget();
+        if (target?.kind !== "block" || target.id !== block.id) {
+            return;
+        }
+        (async () => {
+            await tick();
+            element?.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+            element.animate([
+                { transform: 'scale(1)' },
+                { transform: 'scale(1.015)', offset: 0.25 },
+                { transform: 'scale(0.985)', offset: 0.75 },
+                { transform: 'scale(1)' }
+            ], {
+                delay: 300,
+                duration: 6000,
+                easing: 'linear',
+                iterations: 1
+            });
+
+            clearScrollTarget();
+        })();
     });
 
     function recalculateBounds() {

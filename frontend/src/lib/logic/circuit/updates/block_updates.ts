@@ -7,6 +7,7 @@ import {getBlocks, getCircuit, getGroupForBlock} from "../circuit.svelte";
 import {BlockStates} from "../../../data/block_state";
 import type {Checkpoint} from "../../../dto/checkpoint";
 import type {ModuleCircuit} from "../../../dto/circuit/module/module";
+import {setScrollTarget} from "../scroll_target.svelte";
 
 export async function createBlock(column: number) {
     let firstGroup = getCircuit().groups[0]!;
@@ -31,6 +32,7 @@ export async function createBlock(column: number) {
         block.blockType = getLevel().block;
         block.state = BlockStates.Editing;
         (firstGroup.blocks as Block[]).push(block);
+        setScrollTarget({ kind: "block", id: block.id });
     }
 }
 
@@ -71,6 +73,8 @@ export async function editBlockGroup(block: Block, newGroup: Group) {
     if (!response.ok) {
         newGroup.blocks.pop();
         (oldGroup.blocks as Block[]).push(block);
+    } else {
+        setScrollTarget({ kind: "block", id: block.id });
     }
 }
 
