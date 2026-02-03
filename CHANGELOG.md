@@ -18,7 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Editor] Scroll to the skill or submodule which has been newly added. (@ralani)
 
 ## Fixed
-- [Editor] When switching to student view, block editing closes and makes the edit.(@ogangalic)
+ - [Editor] Fixed bug where dependency indicator remain. (@ogangalic)
+ - [Editor] When switching to student view, block editing closes and makes the edit.(@ogangalic)
+
 
 
 ## [2526.0.1]
