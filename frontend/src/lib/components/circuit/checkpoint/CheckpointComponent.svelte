@@ -1,8 +1,9 @@
 <script lang="ts">
 
     import type {Checkpoint} from "../../../dto/checkpoint";
-    import type {RegularSkillBlock, SkillBlock} from "../../../dto/circuit/module/skill";
-    import {getBlocks, getPlacedBlocks, getVisibleBlocks} from "../../../logic/circuit/circuit.svelte";
+    import type {SkillBlock} from "../../../dto/circuit/module/skill";
+    import type {TaskItem} from "../../../dto/circuit/module/task";
+    import {getVisibleBlocks} from "../../../logic/circuit/circuit.svelte";
     import moment from "moment";
     import {isCompleted} from "../../../logic/circuit/skill_state/completion";
     import {canEditCircuit} from "../../../logic/authorisation.svelte";
@@ -22,6 +23,60 @@
 
     let openWarnDialog: boolean = $state(false);
     let element: HTMLDialogElement | undefined = $state();
+
+    function totalTime(): string {
+        const allCheckpoints = getVisibleCheckpoints();
+        const currentIndex = allCheckpoints.findIndex(cp => cp.id === checkpoint.id);
+
+        const previousCheckpoint = currentIndex > 0 ? allCheckpoints[currentIndex - 1] : null;
+
+        const allSkills: SkillBlock[] = getVisibleBlocks()
+            .filter((block: any) => block.blockType === "skill") as SkillBlock[];
+
+        const relevantSkills = allSkills.filter(skill => {
+            if (skill.checkpoint === checkpoint.id) {
+                return true;
+            }
+
+            if (skill.checkpoint === null) {
+                if (!previousCheckpoint) {
+                    return true;
+                }
+                return false;
+            }
+
+            return false;
+        });
+
+        const totalMinutes = relevantSkills.reduce((total, skill) => {
+            if (!skill.items || skill.items.length === 0) {
+                return total;
+            }
+
+            const skillTime = skill.items.reduce((taskTotal: number, task: TaskItem) => {
+                if (task.taskType === "regular") {
+                    return taskTotal + (task.time || 0);
+                } else if (task.taskType === "choice" && task.tasks) {
+                    return taskTotal + task.tasks.reduce((choiceTotal, choiceTask) => choiceTotal + (choiceTask.time || 0), 0);
+                }
+                return taskTotal;
+            }, 0);
+            return total + skillTime;
+        }, 0);
+
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+
+        if (totalMinutes === 0) {
+            return "0m";
+        }
+
+        if (hours > 0) {
+            return `${hours}h${minutes > 0 ? ` ${minutes}m` : ''}`;
+        } else {
+            return `${minutes}m`;
+        }
+    }
 
     $effect(() => {
         if (element === undefined) {
@@ -49,6 +104,9 @@
         <div class="info">
             <span class="label">{checkpoint.name}</span>
             <span class="deadline">{moment(checkpoint.deadline).format("D MMMM YYYY HH:mm")}</span>
+            {#if canEditCircuit()}
+                <span class="time-estimate">⏰ {totalTime()}</span>
+            {/if}
         </div>
         {#if warn}
             <button class="warning" onclick={showWarnDialog}>
@@ -125,6 +183,11 @@
     }
 
     .deadline {
+        font-size: var(--font-size-200);
+        white-space: nowrap;
+    }
+
+    .time-estimate {
         font-size: var(--font-size-200);
         white-space: nowrap;
     }
