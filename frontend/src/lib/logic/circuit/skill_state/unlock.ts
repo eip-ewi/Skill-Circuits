@@ -6,11 +6,6 @@ import {getBlurBlocks} from "../../preferences.svelte";
 
 export function isUnlocked(block: Block, recursionCheck: number = 100): boolean {
 
-    // If skills should not be blurred, the skill is always unlocked
-    if (!getBlurBlocks()) {
-        return true;
-    }
-
     if (recursionCheck <= 0) {
         return false;
     }

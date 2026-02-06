@@ -30,6 +30,7 @@ import {getBlock, getBlocks, getCircuit, getGraph} from "../../../logic/circuit/
     import BookmarkSkillButtonComponent from "./BookmarkSkillButtonComponent.svelte";
     import {isSkillBookmarked} from "../../../logic/bookmarks.svelte";
 import {clearScrollTarget, getScrollTarget} from "../../../logic/circuit/scroll_target.svelte";
+    import { getBlurBlocks } from "../../../logic/preferences.svelte";
 
     let { block }: { block: Block } = $props();
 
@@ -192,7 +193,7 @@ import {clearScrollTarget, getScrollTarget} from "../../../logic/circuit/scroll_
      data-editing={block.state === BlockStates.Editing}
      onmouseenter={mouseEnter} onmouseleave={mouseLeave}>
     <div bind:this={element} class="block"
-         data-locked={locked} data-completed={completed} data-clickable={clickable} data-wiggle={block.state === BlockStates.Dragging}
+         data-locked={locked && getBlurBlocks()} data-completed={completed} data-clickable={clickable} data-wiggle={block.state === BlockStates.Dragging}
          data-unfocus={unfocused} data-pulse={block.state === BlockStates.Connecting}
          data-hidden={hidden}
          onclick={click} onmouseenter={mouseEnterBlock} onmouseleave={mouseLeaveBlock}>
