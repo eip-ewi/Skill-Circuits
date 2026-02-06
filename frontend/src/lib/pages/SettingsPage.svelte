@@ -4,6 +4,10 @@ import PageLayout from "./PageLayout.svelte";
 import ThemeSelectComponent from "../components/ThemeSelectComponent.svelte";
 import {getBlurBlocks, getTheme, setBlurBlocks} from "../logic/preferences.svelte";
 import ExampleSkillComponent from "../components/circuit/block/ExampleSkillComponent.svelte";
+import {clearLevel, setLevel} from "../logic/circuit/level.svelte";
+import {ModuleLevel} from "../data/level";
+
+clearLevel();
 
 async function updateBlurBlocks(event: Event) {
     await setBlurBlocks((event.target as HTMLInputElement).checked);
