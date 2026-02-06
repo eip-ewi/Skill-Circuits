@@ -11,6 +11,7 @@
     import ErrorPage from "./pages/ErrorPage.svelte";
     import CatalogPage from "./pages/CatalogPage.svelte";
     import PrivacyPage from "./pages/PrivacyPage.svelte";
+    import SettingsPage from "./pages/SettingsPage.svelte";
 </script>
 
 <svelte:window onpopstate={reloadPageFromUrl}></svelte:window>
@@ -32,6 +33,9 @@
 
 {:else if pageMatches(/\/skills\/(\d+)/)}
     <SkillPage skillId={parseInt(extractPathVariable(/\/skills\/(\d+)/))}></SkillPage>
+
+{:else if pageMatches(/^\/settings/)}
+    <SettingsPage></SettingsPage>
 
 {:else if pageMatches(/^\/privacy/)}
     <PrivacyPage></PrivacyPage>
