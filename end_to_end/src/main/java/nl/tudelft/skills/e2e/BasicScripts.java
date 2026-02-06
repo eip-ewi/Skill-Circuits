@@ -44,6 +44,25 @@ public final class BasicScripts {
 		locators.label("Username").fill(user.username());
 		locators.label("Password").fill(user.password());
 		locators.button("Log in").click();
+
+		locators.query(".header").waitFor();
+		closeChangelogBoxIfOpen();
+	}
+
+	private void closeChangelogBoxIfOpen() {
+		LocatorLocators okayButtonLocator = locators.button("OK");
+		LocatorLocators whatsNewHeader = locators.heading("What's new");
+
+		okayButtonLocator.tryWaitFor();
+		whatsNewHeader.tryWaitFor();
+
+		if (okayButtonLocator.isVisible() && whatsNewHeader.isVisible()) {
+			okayButtonLocator.click();
+
+			// Wait until the box is hidden
+			whatsNewHeader.waitForHidden();
+			okayButtonLocator.waitForHidden();
+		}
 	}
 
 	public void logOut() {

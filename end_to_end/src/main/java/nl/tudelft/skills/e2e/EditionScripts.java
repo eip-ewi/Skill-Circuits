@@ -61,7 +61,7 @@ public final class EditionScripts {
 		session.navigate("/");
 
 		LocatorLocators editions = locators.query(".editions").apply(Locator::first);
-		editions.query(".edition").waitFor();
+		editions.query(".edition").apply(Locator::first).waitFor();
 		List<LocatorLocators> managing = editions.query(".edition").all();
 
 		return managing.stream()

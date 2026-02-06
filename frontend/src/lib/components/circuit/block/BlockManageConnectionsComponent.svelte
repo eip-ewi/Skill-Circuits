@@ -50,21 +50,30 @@
 
     function addParent() {
         let connectingTo = getBlocks().find(other => other.state === BlockStates.Connecting) as SkillBlock;
+        // Simulate hover effect
+        action = BlockActions.AddParent;
+        setTimeout(() => action = undefined, 150);
         connectSkills(connectingTo, skill);
     }
 
     function addChild() {
         let connectingTo = getBlocks().find(other => other.state === BlockStates.Connecting) as SkillBlock;
+        action = BlockActions.AddChild;
+        setTimeout(() => action = undefined, 150);
         connectSkills(skill, connectingTo);
     }
 
     function removeParent() {
         let disconnectingFrom = getBlocks().find(other => other.state === BlockStates.Connecting) as SkillBlock;
+        action = BlockActions.RemoveParent;
+        setTimeout(() => action = undefined, 150);
         disconnectSkills(disconnectingFrom, skill);
     }
 
     function removeChild() {
         let disconnectingFrom = getBlocks().find(other => other.state === BlockStates.Connecting) as SkillBlock;
+        action = BlockActions.RemoveChild;
+        setTimeout(() => action = undefined, 150);
         disconnectSkills(skill, disconnectingFrom);
     }
 

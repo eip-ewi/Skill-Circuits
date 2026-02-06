@@ -73,7 +73,8 @@ public class UserVersionServiceTest {
 		Person person = Person.builder().id(1L).build();
 		when(authorisationService.getAuthenticatedPerson()).thenReturn(person);
 
-		SCPerson scPerson = SCPerson.builder().id(1L).viewMode(ViewMode.VIEWER).build();
+		SCPerson scPerson = SCPerson.builder().id(1L).viewMode(ViewMode.VIEWER)
+				.preferences(PersonalPreferences.builder().build()).build();
 		UserVersion userVersion = UserVersion.builder().person(scPerson).version("2.1.0").build();
 		scPersonRepository.save(scPerson);
 		userVersionRepository.save(userVersion);
@@ -90,7 +91,8 @@ public class UserVersionServiceTest {
 		Person person = Person.builder().id(1L).build();
 		when(authorisationService.getAuthenticatedPerson()).thenReturn(person);
 
-		SCPerson scPerson = SCPerson.builder().id(1L).viewMode(ViewMode.VIEWER).build();
+		SCPerson scPerson = SCPerson.builder().id(1L).viewMode(ViewMode.VIEWER)
+				.preferences(PersonalPreferences.builder().build()).build();
 		UserVersion userVersion = UserVersion.builder().person(scPerson).version("2.1.0").build();
 		scPersonRepository.save(scPerson);
 		userVersionRepository.save(userVersion);
@@ -123,7 +125,8 @@ public class UserVersionServiceTest {
 	public void versionUpdateNotPresent() {
 		Person person = Person.builder().id(1L).build();
 		when(authorisationService.getAuthenticatedPerson()).thenReturn(person);
-		SCPerson scPerson = SCPerson.builder().id(person.getId()).viewMode(ViewMode.VIEWER).build();
+		SCPerson scPerson = SCPerson.builder().id(person.getId()).viewMode(ViewMode.VIEWER)
+				.preferences(PersonalPreferences.builder().build()).build();
 		scPersonRepository.save(scPerson);
 
 		when(buildProperties.getVersion()).thenReturn("2.1.0");
@@ -139,7 +142,8 @@ public class UserVersionServiceTest {
 	public void versionUpdatePresent() {
 		Person person = Person.builder().id(1L).build();
 		when(authorisationService.getAuthenticatedPerson()).thenReturn(person);
-		SCPerson scPerson = SCPerson.builder().id(person.getId()).viewMode(ViewMode.VIEWER).build();
+		SCPerson scPerson = SCPerson.builder().id(person.getId()).viewMode(ViewMode.VIEWER)
+				.preferences(PersonalPreferences.builder().build()).build();
 		UserVersion userVersionOld = UserVersion.builder().person(scPerson).version("2.1.0").build();
 		scPersonRepository.save(scPerson);
 		userVersionRepository.save(userVersionOld);
@@ -163,7 +167,8 @@ public class UserVersionServiceTest {
 		Person person = Person.builder().id(1L).build();
 		when(authorisationService.getAuthenticatedPerson()).thenReturn(person);
 
-		SCPerson scPerson = SCPerson.builder().id(1L).viewMode(ViewMode.VIEWER).build();
+		SCPerson scPerson = SCPerson.builder().id(1L).viewMode(ViewMode.VIEWER)
+				.preferences(PersonalPreferences.builder().build()).build();
 		UserVersion userVersion = UserVersion.builder().person(scPerson).version("2.1.0").build();
 		scPersonRepository.save(scPerson);
 		userVersionRepository.save(userVersion);
@@ -181,7 +186,8 @@ public class UserVersionServiceTest {
 		when(authorisationService.getAuthenticatedPerson()).thenReturn(person);
 		when(buildProperties.getVersion()).thenReturn("2.1.0");
 
-		SCPerson scPerson = SCPerson.builder().id(1L).viewMode(ViewMode.VIEWER).build();
+		SCPerson scPerson = SCPerson.builder().id(1L).viewMode(ViewMode.VIEWER)
+				.preferences(PersonalPreferences.builder().build()).build();
 		scPersonRepository.save(scPerson);
 
 		ReleaseDTO r0 = ReleaseDTO.builder().name("2.1.0").description_html("<p>desc0</p>")
@@ -205,7 +211,8 @@ public class UserVersionServiceTest {
 		when(authorisationService.getAuthenticatedPerson()).thenReturn(person);
 		when(buildProperties.getVersion()).thenReturn("2.1.0");
 
-		SCPerson scPerson = SCPerson.builder().id(1L).viewMode(ViewMode.VIEWER).build();
+		SCPerson scPerson = SCPerson.builder().id(1L).viewMode(ViewMode.VIEWER)
+				.preferences(PersonalPreferences.builder().build()).build();
 		UserVersion userVersion = UserVersion.builder().person(scPerson).version("1.1.0").build();
 		scPersonRepository.save(scPerson);
 		userVersionRepository.save(userVersion);
@@ -232,7 +239,8 @@ public class UserVersionServiceTest {
 		when(authorisationService.getAuthenticatedPerson()).thenReturn(person);
 		when(buildProperties.getVersion()).thenReturn("2.1.0");
 
-		SCPerson scPerson = SCPerson.builder().id(1L).viewMode(ViewMode.VIEWER).build();
+		SCPerson scPerson = SCPerson.builder().id(1L).viewMode(ViewMode.VIEWER)
+				.preferences(PersonalPreferences.builder().build()).build();
 		UserVersion userVersion = UserVersion.builder().person(scPerson).version("1.3.0").build();
 		scPersonRepository.save(scPerson);
 		userVersionRepository.save(userVersion);
@@ -258,7 +266,8 @@ public class UserVersionServiceTest {
 		when(authorisationService.getAuthenticatedPerson()).thenReturn(person);
 		when(buildProperties.getVersion()).thenReturn("2.3.0");
 
-		SCPerson scPerson = SCPerson.builder().id(1L).viewMode(ViewMode.VIEWER).build();
+		SCPerson scPerson = SCPerson.builder().id(1L).viewMode(ViewMode.VIEWER)
+				.preferences(PersonalPreferences.builder().build()).build();
 		scPersonRepository.save(scPerson);
 
 		ReleaseDTO r0 = ReleaseDTO.builder().name("2.1.0").description_html("<p>desc0</p>")

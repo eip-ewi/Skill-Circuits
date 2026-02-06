@@ -16,6 +16,7 @@
     import WIthConfirmationDialog from "./util/WithConfirmationDialog.svelte";
     import WithConfirmationDialog from "./util/WithConfirmationDialog.svelte";
     import {resetProgress} from "../logic/updates/edition_updates";
+    import {editingBlocks} from "../logic/circuit/updates/block_updates";
 
     let userMenuOpen: boolean = $state(false);
 
@@ -24,10 +25,6 @@
         if (response.ok) {
             loadPage(`/skills/${parseInt(await response.text())}`);
         }
-    }
-
-    function openThemeDialog() {
-        (document.getElementById("theme-select") as HTMLDialogElement).showModal();
     }
 
     function shrinkLeftMargin(node: HTMLElement, params: { delay?: number }) {
@@ -158,9 +155,9 @@
                             <span>Log out</span>
                         </button>
                     </form>
-                    <button class="button" onclick={openThemeDialog}>
-                        <span class="icon fa-solid fa-palette"></span>
-                        <span>Theme</span>
+                    <button class="button" onclick={ () => loadPage(`/settings`) }>
+                        <span class="icon fa-solid fa-gear"></span>
+                        <span>Settings</span>
                     </button>
                     {#if !canEditCircuit() && isLevel(EditionLevel)}
                         <WithConfirmationDialog icon="fa-solid fa-repeat" action="Reset progress" onconfirm={ () => resetProgress() }>
@@ -207,8 +204,6 @@
             </div>
         {/if}
     </div>
-
-    <ThemeSelectComponent></ThemeSelectComponent>
 {/if}
 
 

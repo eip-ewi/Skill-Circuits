@@ -6,6 +6,7 @@ import {withCsrf} from "./csrf";
 import {getEdition} from "./edition/edition.svelte";
 import {EditionLevel, ModuleLevel} from "../data/level";
 import {getAuthenticatedPerson} from "./authentication.svelte";
+import {makeBlocksInactive} from "./circuit/updates/block_updates";
 
 let authorisation: Authorisation = $state({ viewMode: "VIEWER", isAdmin: false, managedCourses: [], managedEditions: [] });
 
@@ -28,6 +29,7 @@ export async function toggleViewMode() {
     if (authorisation.viewMode === "VIEWER") {
         await setViewMode("EDITOR");
     } else {
+        makeBlocksInactive();
         await setViewMode("VIEWER");
     }
 }
