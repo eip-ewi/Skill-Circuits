@@ -12,6 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## Added
+
+## Changed
+
+## Fixed
+
+
+## [2526.1.0]
+
+## Added
  - [Editor] Can scroll to the skill whose connections they are editing via a button. (@rgiedryte)
  - [Everyone] Add a personal preferences page where users can set their theme and whether unreached blocks should be blurred.
 
@@ -21,7 +30,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Fixed
  - [Editor] Fixed bug where dependency indicator remain. (@ogangalic)
  - [Editor] When switching to student view, block editing closes and makes the edit.(@ogangalic)
-
 
 
 ## [2526.0.1]
