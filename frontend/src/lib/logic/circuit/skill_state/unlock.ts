@@ -2,6 +2,7 @@ import type {Block} from "../../../dto/circuit/block";
 import {isCompleted} from "./completion";
 import {getGraph} from "../circuit.svelte";
 import {getItemsOnPath} from "../../edition/active_path.svelte";
+import {getBlurBlocks} from "../../preferences.svelte";
 import type {Graph} from "../graph";
 
 export function isUnlocked(block: Block, graph: Graph = getGraph(), recursionCheck: number = 100): boolean {
