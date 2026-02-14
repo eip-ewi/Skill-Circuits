@@ -1,6 +1,6 @@
 <script lang="ts">
     import type {RegularSkillBlock, SkillBlock} from "../../dto/circuit/module/skill";
-    import {isBlockVisible} from "../../logic/circuit/circuit.svelte";
+    import {getGroupForBlock, isBlockVisible} from "../../logic/circuit/circuit.svelte";
     import type {SubmoduleBlock} from "../../dto/circuit/edition/submodule";
     import type {SubmoduleGroup} from "../../dto/circuit/module/submodule";
     import {Graph} from "../../logic/circuit/graph";
@@ -10,12 +10,15 @@
     import SelectedSkillComponent from "./SelectedSkillComponent.svelte";
     import StudentTrayComponent from "../side_controls/student_tray/StudentTrayComponent.svelte";
     import {openExpandedBlockTransition} from "../../logic/transitions";
+    import type {ModuleCircuit} from "../../dto/circuit/module/module";
+    import type {ModuleGroup} from "../../dto/circuit/edition/module";
 
     let { submoduleBlock, open = $bindable() }: { submoduleBlock: SubmoduleBlock, open: boolean } = $props();
 
-    let submoduleGroup: SubmoduleGroup | undefined = $state();
-    let skills: SkillBlock[] | undefined = $state();
+    let moduleGroup: ModuleGroup = $derived(getGroupForBlock(submoduleBlock) as ModuleGroup);
+    let submoduleGroup: SubmoduleGroup = $derived(moduleGroup.moduleCircuit.groups.find(group => group.id === submoduleBlock.id)!);
 
+    let visibleSkills: SkillBlock[] | undefined = $state();
     let selectedSkill: SkillBlock | undefined = $state();
 
     let element: HTMLDialogElement | undefined = $state();
@@ -27,45 +30,29 @@
         }
     }
 
-    async function fetchSubmoduleData() {
-        const response = await fetch(`/api/submodules/${submoduleBlock.id}`);
-        submoduleGroup = await response.json();
-    }
-
     $effect(() => {
-        if (element === undefined) {
-            return;
-        }
-        if (open) {
-            if (skills === undefined) {
-                fetchSubmoduleData();
-            }
+        if (element !== undefined && open) {
             element.showModal();
         }
     });
 
-    function setSubmoduleSkills() {
-        let visibleBlocks = submoduleGroup!.blocks.filter(block => isBlockVisible(block));
-        let graph = new Graph(visibleBlocks);
-
-        // TODO: check if function has desired behavior for this component
-        // TODO: use ModuleGraph here instead
-        skills = topologicalSort(graph, visibleBlocks);
-    }
-
     $effect(() => {
-        // Update the skills of the submodule, filtered by visibility
-        if (submoduleGroup !== undefined) {
-            setSubmoduleSkills();
+        if (moduleGroup.moduleGraph !== undefined) {
+            // Update the skills of the submodule, filtered by visibility and sorted topologically
+            let visibleBlocks = submoduleGroup.blocks.filter(block => isBlockVisible(block));
+            // TODO: check if function has desired behavior for this component
+            visibleSkills = topologicalSort(moduleGroup.moduleGraph, visibleBlocks);
         }
     });
 
     $effect(() => {
         // Select the first skill, if none is selected and there is at least one skill
-        if (skills !== undefined && selectedSkill === undefined && skills.length > 0) {
-            selectedSkill = skills[0];
+        if (visibleSkills !== undefined && selectedSkill === undefined && visibleSkills.length > 0) {
+            selectedSkill = visibleSkills[0];
         }
     });
+
+    // TODO: (un)locked state of submodule blocks is not updated
 </script>
 
 {#if open}
@@ -73,27 +60,27 @@
     <dialog bind:this={element} onclick={checkForClose}>
         <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
          <div class="expanded-submodule" transition:openExpandedBlockTransition={{ block: submoduleBlock }}>
-             {#if skills !== undefined}
+             {#if visibleSkills !== undefined && moduleGroup.moduleGraph !== undefined}
                  <div class="content">
                      <h1 class="name">{submoduleBlock.name}</h1>
                      {#if selectedSkill !== undefined}
                          <div class="wrapper">
                              <div class="skill-list">
-                                 {#each skills as skill}
+                                 {#each visibleSkills as skill}
                                      <!-- TODO: handle scrolling correctly -->
-                                    <SkillNameComponent block={skill} bind:selectedSkill></SkillNameComponent>
+                                    <SkillNameComponent block={skill} moduleGraph={moduleGroup.moduleGraph} bind:selectedSkill></SkillNameComponent>
                                 {/each}
                             </div>
                             <SelectedSkillComponent block={selectedSkill}></SelectedSkillComponent>
                         </div>
-                     {:else if skills.length === 0}
+                     {:else if visibleSkills.length === 0}
                         There are no skills in this submodule.
                      {/if}
                 </div>
              {/if}
         </div>
 
-         {#if skills !== undefined && selectedSkill !== undefined}
+         {#if visibleSkills !== undefined && selectedSkill !== undefined}
             <StudentTrayComponent block={selectedSkill}></StudentTrayComponent>
          {/if}
     </dialog>
