@@ -42,13 +42,6 @@ public class SubmoduleController {
 	private final EditionCircuitService editionCircuitService;
 	private final ModuleCircuitService moduleCircuitService;
 
-	@GetMapping("{submodule}")
-	@PreAuthorize("@authorisationService.canViewSubmodule(#submodule)")
-	public ModuleLevelSubmoduleView getSubmodule(@AuthenticatedSCPerson SCPerson person,
-			@PathEntity Submodule submodule) {
-		return moduleCircuitService.convertToSubmoduleView(submodule, person);
-	}
-
 	@GetMapping("{submodule}/info")
 	@PreAuthorize("@authorisationService.canViewModuleCircuit(#submodule.module)")
 	public SubmoduleView getSubmoduleInfo(@PathEntity Submodule submodule) {
