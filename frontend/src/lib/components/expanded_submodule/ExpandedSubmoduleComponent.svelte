@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type {SkillBlock} from "../../dto/circuit/module/skill";
+    import type {RegularSkillBlock, SkillBlock} from "../../dto/circuit/module/skill";
     import {isBlockVisible} from "../../logic/circuit/circuit.svelte";
     import type {SubmoduleBlock} from "../../dto/circuit/edition/submodule";
     import type {SubmoduleGroup} from "../../dto/circuit/module/submodule";
@@ -13,6 +13,7 @@
 
     let { submoduleBlock, open = $bindable() }: { submoduleBlock: SubmoduleBlock, open: boolean } = $props();
 
+    let submoduleGroup: SubmoduleGroup | undefined = $state();
     let skills: SkillBlock[] | undefined = $state();
 
     let selectedSkill: SkillBlock | undefined = $state();
@@ -28,16 +29,7 @@
 
     async function fetchSubmoduleData() {
         const response = await fetch(`/api/submodules/${submoduleBlock.id}`);
-        const submoduleGroup: SubmoduleGroup = await response.json();
-
-        let graph = new Graph(submoduleGroup.blocks.filter(block => isBlockVisible(block)));
-        // TODO: check if function has desired behavior for this component
-        skills = topologicalSort(graph, submoduleGroup.blocks);
-
-        // Select the first skill, if there is at least one
-        if (skills.length > 0) {
-            selectedSkill = skills[0];
-        }
+        submoduleGroup = await response.json();
     }
 
     $effect(() => {
@@ -49,6 +41,29 @@
                 fetchSubmoduleData();
             }
             element.showModal();
+        }
+    });
+
+    function setSubmoduleSkills() {
+        let visibleBlocks = submoduleGroup!.blocks.filter(block => isBlockVisible(block));
+        let graph = new Graph(visibleBlocks);
+
+        // TODO: check if function has desired behavior for this component
+        // TODO: use ModuleGraph here instead
+        skills = topologicalSort(graph, visibleBlocks);
+    }
+
+    $effect(() => {
+        // Update the skills of the submodule, filtered by visibility
+        if (submoduleGroup !== undefined) {
+            setSubmoduleSkills();
+        }
+    });
+
+    $effect(() => {
+        // Select the first skill, if none is selected and there is at least one skill
+        if (skills !== undefined && selectedSkill === undefined && skills.length > 0) {
+            selectedSkill = skills[0];
         }
     });
 </script>
