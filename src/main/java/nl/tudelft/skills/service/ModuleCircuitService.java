@@ -39,16 +39,16 @@ public class ModuleCircuitService {
 		return getModuleCircuit(module, taskCompletionRepository.findAllCompletedTaskIdsForPerson(person));
 	}
 
-    public ModuleLevelModuleView getModuleCircuit(SCModule module, Set<Long> completedTaskIds) {
-        return new ModuleLevelModuleView(
-                module.getId(),
-                module.getName(),
-                module.getEdition().getId(),
-                module.getExternalSkills().stream().map(skill -> convertToSkillView(skill, completedTaskIds))
-                        .toList(),
-                module.getSubmodules().stream()
-                        .map(submodule -> convertToSubmoduleView(submodule, completedTaskIds)).toList());
-    }
+	public ModuleLevelModuleView getModuleCircuit(SCModule module, Set<Long> completedTaskIds) {
+		return new ModuleLevelModuleView(
+				module.getId(),
+				module.getName(),
+				module.getEdition().getId(),
+				module.getExternalSkills().stream().map(skill -> convertToSkillView(skill, completedTaskIds))
+						.toList(),
+				module.getSubmodules().stream()
+						.map(submodule -> convertToSubmoduleView(submodule, completedTaskIds)).toList());
+	}
 
 	public ModuleLevelSubmoduleView convertToSubmoduleView(Submodule submodule, SCPerson person) {
 		return convertToSubmoduleView(submodule,

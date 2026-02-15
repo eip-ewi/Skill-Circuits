@@ -23,10 +23,10 @@ import nl.tudelft.skills.dto.view.circuit.GroupView;
 import nl.tudelft.skills.dto.view.circuit.module.ModuleLevelModuleView;
 
 public record EditionLevelModuleView(
-        long id,
-        String name,
-        List<EditionLevelSubmoduleView> blocks,
-        ModuleLevelModuleView moduleCircuit) implements GroupView {
+		long id,
+		String name,
+		List<EditionLevelSubmoduleView> blocks,
+		ModuleLevelModuleView moduleCircuit) implements GroupView {
 	@Override
 	public String getGroupType() {
 		return "module";

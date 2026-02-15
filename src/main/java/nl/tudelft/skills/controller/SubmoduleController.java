@@ -27,7 +27,6 @@ import nl.tudelft.skills.dto.create.SubmoduleCreate;
 import nl.tudelft.skills.dto.patch.SubmodulePatch;
 import nl.tudelft.skills.dto.view.SubmoduleView;
 import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelSubmoduleView;
-import nl.tudelft.skills.dto.view.circuit.module.ModuleLevelSubmoduleView;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.service.EditionCircuitService;
 import nl.tudelft.skills.service.ModuleCircuitService;

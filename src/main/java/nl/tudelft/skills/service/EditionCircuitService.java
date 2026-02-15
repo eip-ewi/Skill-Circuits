@@ -22,7 +22,6 @@ import static java.util.Objects.requireNonNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import nl.tudelft.skills.dto.view.circuit.module.ModuleLevelModuleView;
 import org.springframework.stereotype.Service;
 
 import lombok.AllArgsConstructor;
@@ -34,6 +33,7 @@ import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelEditionView;
 import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelModuleView;
 import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelSkillView;
 import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelSubmoduleView;
+import nl.tudelft.skills.dto.view.circuit.module.ModuleLevelModuleView;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
@@ -49,9 +49,9 @@ public class EditionCircuitService {
 	private final SubmoduleDependencyService submoduleDependencyService;
 
 	private final TaskCompletionRepository taskCompletionRepository;
-    private final ModuleCircuitService moduleCircuitService;
+	private final ModuleCircuitService moduleCircuitService;
 
-    public EditionLevelEditionView getEditionCircuit(Long editionId, SCPerson person) {
+	public EditionLevelEditionView getEditionCircuit(Long editionId, SCPerson person) {
 		SCEdition edition = editionRepository.getOrCreate(editionId);
 		EditionDetailsDTO editionDetails = requireNonNull(editionApi.getEditionById(editionId).block());
 		Set<Long> completedTaskIds = taskCompletionRepository.findAllCompletedTaskIdsForPerson(person);
@@ -82,7 +82,7 @@ public class EditionCircuitService {
 
 	private EditionLevelModuleView convertToModuleView(SCModule module, Set<Long> completedTaskIds,
 			Set<Long> revealedSkillIds) {
-        ModuleLevelModuleView moduleCircuit = moduleCircuitService.getModuleCircuit(module, completedTaskIds);
+		ModuleLevelModuleView moduleCircuit = moduleCircuitService.getModuleCircuit(module, completedTaskIds);
 		return new EditionLevelModuleView(
 				module.getId(),
 				module.getName(),
@@ -90,7 +90,7 @@ public class EditionCircuitService {
 						.map(submodule -> convertToSubmoduleView(submodule, completedTaskIds,
 								revealedSkillIds))
 						.toList(),
-                moduleCircuit);
+				moduleCircuit);
 	}
 
 	public EditionLevelSubmoduleView convertToSubmoduleView(Submodule submodule, SCPerson person) {
