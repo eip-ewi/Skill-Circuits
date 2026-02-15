@@ -9,12 +9,6 @@
     import type {ModuleGroup} from "../../dto/circuit/edition/module";
 
     let { block }: { block: SkillBlock } = $props();
-    let item: SkillItem = $derived(getItem(block.id) as SkillItem);
-    let module: ModuleGroup = $derived(getGroupForItem(item) as ModuleGroup);
-
-    $effect(() => {
-        item.completed = isCompleted(block, module.moduleGraph);
-    })
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->

@@ -1,6 +1,6 @@
 <script lang="ts">
     import type {RegularSkillBlock, SkillBlock} from "../../dto/circuit/module/skill";
-    import {getGroupForBlock, isBlockVisible} from "../../logic/circuit/circuit.svelte";
+    import {getGroupForBlock, getItem, isBlockVisible} from "../../logic/circuit/circuit.svelte";
     import type {SubmoduleBlock} from "../../dto/circuit/edition/submodule";
     import type {SubmoduleGroup} from "../../dto/circuit/module/submodule";
     import {Graph} from "../../logic/circuit/graph";
@@ -12,11 +12,15 @@
     import {openExpandedBlockTransition} from "../../logic/transitions";
     import type {ModuleCircuit} from "../../dto/circuit/module/module";
     import type {ModuleGroup} from "../../dto/circuit/edition/module";
+    import type {Item} from "../../dto/circuit/item";
+    import {isCompleted} from "../../logic/circuit/skill_state/completion";
+    import {isUnlocked} from "../../logic/circuit/skill_state/unlock";
 
     let { submoduleBlock, open = $bindable() }: { submoduleBlock: SubmoduleBlock, open: boolean } = $props();
 
     let moduleGroup: ModuleGroup = $derived(getGroupForBlock(submoduleBlock) as ModuleGroup);
     let submoduleGroup: SubmoduleGroup = $derived(moduleGroup.moduleCircuit.groups.find(group => group.id === submoduleBlock.id)!);
+    let skillBlockToSkillItem: [SkillBlock, Item][] = $derived(submoduleGroup.blocks.map(skillBlock => [skillBlock, getItem(skillBlock.id)]));
 
     let visibleSkills: SkillBlock[] | undefined = $state();
     let selectedSkill: SkillBlock | undefined = $state();
@@ -52,7 +56,18 @@
         }
     });
 
-    // TODO: (un)locked state of submodule blocks is not updated
+    $effect(() => {
+        // Update completion and locked states for the skill items according to the state of the
+        // skill blocks within the module graph
+
+        skillBlockToSkillItem.forEach(skill => {
+            const skillBlock = skill[0];
+            const skillItem = skill[1];
+
+            skillItem.completed = isCompleted(skillBlock, moduleGroup.moduleGraph);
+            skillItem.locked = !isUnlocked(skillBlock, moduleGroup.moduleGraph);
+        });
+    });
 </script>
 
 {#if open}
