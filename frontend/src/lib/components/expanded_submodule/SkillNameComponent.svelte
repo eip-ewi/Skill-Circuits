@@ -23,12 +23,11 @@
     background: none;
     border: none;
     padding: 0.3em 0.5em;
+    margin-top: 0.3em;
     color: var(--on-block-colour);
     cursor: pointer;
     transition: filter ease-in-out 150ms, background-color ease-in-out 150ms;
-    /* TODO: text wrapping
-    text-overflow: ellipsis;
-    white-space: nowrap; */
+    white-space: nowrap;
 }
 
 .skill-name::before {

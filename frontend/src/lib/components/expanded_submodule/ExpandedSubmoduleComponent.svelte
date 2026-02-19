@@ -79,15 +79,14 @@
                  <div class="content">
                      <h1 class="name">{submoduleBlock.name}</h1>
                      {#if selectedSkill !== undefined}
-                         <div class="wrapper">
-                             <div class="skill-list">
-                                 {#each visibleSkills as skill}
-                                     <!-- TODO: handle scrolling correctly -->
-                                    <SkillNameComponent block={skill} moduleGraph={moduleGroup.moduleGraph} bind:selectedSkill></SkillNameComponent>
-                                {/each}
-                            </div>
-                            <SelectedSkillComponent block={selectedSkill}></SelectedSkillComponent>
+                         <div class="skill-list">
+                             {#each visibleSkills as skill}
+                                <SkillNameComponent block={skill} moduleGraph={moduleGroup.moduleGraph} bind:selectedSkill></SkillNameComponent>
+                            {/each}
                         </div>
+                         <div class="selected-skill-wrapper">
+                             <SelectedSkillComponent block={selectedSkill}></SelectedSkillComponent>
+                         </div>
                      {:else if visibleSkills.length === 0}
                         There are no skills in this submodule.
                      {/if}
@@ -124,37 +123,41 @@
         background-color: var(--block-colour);
         box-shadow: 2rem 2rem 4rem color-mix(in srgb, var(--shadow-colour) 8%, transparent);
         color: var(--on-block-colour);
-        display: grid;
-        gap: 1em;
+        font-size: var(--font-size-500);
+
+        padding: 2em;
+        max-height: calc(100vh - 10em);
         min-width: 40em;
-        max-height: calc(100vh - 12em);
         max-width: calc(100vw - 12em);
         overflow-y: auto;
-        padding: 2em;
-        place-items: center;
 
-        font-size: var(--font-size-500);
+        display: grid;
+        grid-template-columns: fit-content(18em) minmax(25em, auto);
+        grid-template-rows: auto 1fr;
+        gap: 1em;
     }
 
     .name {
         font-size: var(--font-size-700);
         font-weight: 700;
         text-align: center;
-    }
-
-    .wrapper {
-        display: flex;
-        flex-direction: row;
-        width: 100%;
+        grid-column: span 2;
     }
 
     .skill-list {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
-        padding: 0.4em 1em 0.4em 0;
         border-right: solid 0.08em var(--submodule-overview-line-colour);
         gap: 0.3em;
         font-size: var(--font-size-400);
+        padding-right: 1em;
+        grid-row-start: 2;
+        overflow: auto;
+    }
+
+    .selected-skill-wrapper {
+        grid-row-start: 2;
+        overflow: auto;
     }
 </style>
