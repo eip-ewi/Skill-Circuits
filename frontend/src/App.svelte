@@ -8,22 +8,35 @@
     import SessionComponent from "./lib/components/SessionComponent.svelte";
     import HeaderComponent from "./lib/components/HeaderComponent.svelte";
     import {fetchAuthorisation} from "./lib/logic/authorisation.svelte";
-    import {getTheme} from "./lib/logic/theme.svelte";
     import FooterComponent from "./lib/components/FooterComponent.svelte";
     import {fetchReleaseDetails} from "./lib/logic/release_details.svelte";
-
-    $effect(() => {
-        const root = document.documentElement;
-        const theme = getTheme();
-        root.setAttribute("data-theme", theme.name);
-        root.setAttribute("data-colour-scheme", theme.colourScheme);
-    });
+    import {
+        fetchPreferences,
+        getTheme,
+    } from "./lib/logic/preferences.svelte";
+    import {systemTheme} from "./lib/data/theme";
+    import {addSystemColorSchemeEventListener, setThemeProperties} from "./lib/logic/theme.svelte";
 
     $effect(() => {
         if (isAuthenticated()) {
             fetchAuthorisation().then(() => {});
             fetchReleaseDetails().then(() => {});
+            fetchPreferences().then(() => {});
+        } else {
+            // System theme is default
+            setThemeProperties(systemTheme);
         }
+    })
+
+    $effect(() => {
+        // If the theme changes, the theme properties need to be updated
+        setThemeProperties(getTheme());
+    })
+
+    onMount(() => {
+        // Since the color scheme is retrieved via a media query, adding an event
+        // listener is necessary
+        addSystemColorSchemeEventListener();
     })
 </script>
 
