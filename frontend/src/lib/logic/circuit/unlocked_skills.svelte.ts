@@ -1,7 +1,8 @@
 import type {SkillBlock} from "../../dto/circuit/module/skill";
 import type {SkillItem} from "../../dto/circuit/edition/skill";
-import {getBlocks} from "./circuit.svelte";
+import {getBlocks, getVisibleBlocks} from "./circuit.svelte";
 import {isCompleted} from "./skill_state/completion";
+import type {Block} from "../../dto/circuit/block";
 
 let unlockedSkills: number[] = $state([]);
 let unlockedSkillSet: Set<number> = $derived(new Set(unlockedSkills));
@@ -26,9 +27,7 @@ export async function fetchRevealedSkills() {
 }
 
 export async function scrollToFirstIncomplete() {
-    const skillBlocks = getBlocks().filter((block): block is SkillBlock =>
-        ('skillId' in block || 'external' in block) && !isCompleted(block)
-    );
+    const skillBlocks = getVisibleBlocks().filter(a => !isCompleted(a) && a.blockType === "skill" && a.essential) as SkillBlock[];
     const firstIncomplete = getFirstByYPosition(skillBlocks);
 
     if (firstIncomplete) {

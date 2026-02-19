@@ -5,7 +5,7 @@
     import type {Warning} from "../data/warning";
     import {setLevel} from "../logic/circuit/level.svelte";
     import {EditionLevel, ModuleLevel} from "../data/level";
-    import {isViewer, toggleViewMode} from "../logic/authorisation.svelte";
+    import {canEditCircuit, toggleViewMode} from "../logic/authorisation.svelte";
     import type {ModuleCircuit} from "../dto/circuit/module/module";
     import {fetchDevMode, getDevMode} from "../logic/dev_mode.svelte";
     import {circuitFetched, fetchCircuit, getBlocks, getCircuit} from "../logic/circuit/circuit.svelte";
@@ -29,7 +29,7 @@
         await fetchPathCustomisation();
         await fetchRevealedSkills();
         await fetchDevMode();
-        if (isViewer()) {
+        if (!canEditCircuit()) {
             setTimeout(() => scrollToFirstIncomplete(), 500);
         }
     }
