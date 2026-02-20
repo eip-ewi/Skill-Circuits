@@ -289,11 +289,11 @@ cross check migrations / MySQL:
     - echo "Switching to main"
     - git fetch && git switch main && git pull --ff-only
     - mv src/test/resources/application-mysql.properties src/test/resources/application-test.properties
-    - gradle test --build-cache --tests nl.tudelft.skills.SmokeTest
+    - gradle :test --build-cache --tests nl.tudelft.skills.SmokeTest
     - echo "Switching back to $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME"
     - git reset HEAD --hard && git switch $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
     - mv src/test/resources/application-mysql.properties src/test/resources/application-test.properties
-    - gradle test --build-cache --tests nl.tudelft.skills.SmokeTest
+    - gradle :test --build-cache --tests nl.tudelft.skills.SmokeTest
   rules:
     # Don't run on forks
     - if: $CI_PROJECT_ID != "7331"

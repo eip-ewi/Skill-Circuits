@@ -134,7 +134,6 @@ public class DevDatabaseLoader {
 				.forEach(e -> roleControllerApi.addRole(new RoleCreateDTO()
 						.edition(new EditionIdDTO().id(e.getId()))
 						.type(RoleCreateDTO.TypeEnum.TEACHER).person(new PersonIdDTO().id(3L))).block());
-
 	}
 
 	private void initCourse() {

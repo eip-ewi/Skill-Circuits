@@ -41,6 +41,10 @@ public class SCPerson {
 	private ViewMode viewMode;
 
 	@NotNull
+	@Embedded
+	private PersonalPreferences preferences;
+
+	@NotNull
 	@Builder.Default
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
