@@ -41,7 +41,7 @@ public class SubmoduleController {
 	private final EditionCircuitService editionCircuitService;
 	private final ModuleCircuitService moduleCircuitService;
 
-	@GetMapping("{submodule}/info")
+	@GetMapping("{submodule}")
 	@PreAuthorize("@authorisationService.canViewModuleCircuit(#submodule.module)")
 	public SubmoduleView getSubmoduleInfo(@PathEntity Submodule submodule) {
 		return new SubmoduleView(submodule.getModule().getId());
