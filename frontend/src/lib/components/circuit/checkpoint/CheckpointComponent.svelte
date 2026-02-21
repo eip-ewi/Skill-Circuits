@@ -46,7 +46,7 @@
             }
 
             return false;
-        });
+        }).filter(a => a.essential === true);
 
         const totalMinutes = relevantSkills.reduce((total, skill) => {
             if (!skill.items || skill.items.length === 0) {
@@ -55,9 +55,13 @@
 
             const skillTime = skill.items.reduce((taskTotal: number, task: TaskItem) => {
                 if (task.taskType === "regular") {
-                    return taskTotal + (task.time || 0);
+                    return taskTotal + task.time;
                 } else if (task.taskType === "choice" && task.tasks) {
-                    return taskTotal + task.tasks.reduce((choiceTotal, choiceTask) => choiceTotal + (choiceTask.time || 0), 0);
+                    const sortedTimes = task.tasks
+                        .map(choiceTask => choiceTask.time)
+                        .sort((a, b) => b - a);
+                    const topTimes = sortedTimes.slice(0, task.minTasks);
+                    return taskTotal + topTimes.reduce((sum, t) => sum + t, 0);
                 }
                 return taskTotal;
             }, 0);
@@ -105,7 +109,10 @@
             <span class="label">{checkpoint.name}</span>
             <span class="deadline">{moment(checkpoint.deadline).format("D MMMM YYYY HH:mm")}</span>
             {#if canEditCircuit()}
-                <span class="time-estimate">⏰ {totalTime()}</span>
+                <span class="time-row">
+                    <i class="fa-regular fa-clock time-icon"></i>
+                    <span class="time-estimate">{totalTime()}</span>
+                </span>
             {/if}
         </div>
         {#if warn}
@@ -190,6 +197,16 @@
     .time-estimate {
         font-size: var(--font-size-200);
         white-space: nowrap;
+    }
+
+    .time-row {
+        display: flex;
+        align-items: center;
+        gap: 0.3em;
+    }
+
+    .time-icon {
+        font-size: var(--font-size-100, 0.75em);
     }
 
     .warning {
