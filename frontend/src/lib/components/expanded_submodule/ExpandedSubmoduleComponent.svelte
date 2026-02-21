@@ -151,7 +151,7 @@
         border-right: solid 0.08em var(--submodule-overview-line-colour);
         gap: 0.3em;
         font-size: var(--font-size-400);
-        padding-right: 1em;
+        padding: 0 1em 0 0.3em;
         grid-row-start: 2;
         overflow: auto;
     }

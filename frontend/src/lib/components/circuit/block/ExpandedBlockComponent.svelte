@@ -4,11 +4,19 @@
     import {cubicInOut, linear} from "svelte/easing";
     import TasksComponent from "../item/TasksComponent.svelte";
     import {isCompleted} from "../../../logic/circuit/skill_state/completion";
-    import {getItemsOnPath} from "../../../logic/edition/active_path.svelte";
+    import {addTaskToPath, getItemsOnPath} from "../../../logic/edition/active_path.svelte";
     import type {Point} from "../../../data/point";
     import StudentTrayComponent from "../../side_controls/student_tray/StudentTrayComponent.svelte";
-    import {getDragging, dragEnter, dragOver, dragLeave, drop} from "../../../logic/circuit/drag_and_drop_items.svelte";
+    import {
+        getDragging,
+        dragEnter,
+        dragOver,
+        dragLeave,
+        setDragging
+    } from "../../../logic/circuit/drag_and_drop_items.svelte";
     import {openExpandedBlockTransition} from "../../../logic/transitions";
+    import {getItem} from "../../../logic/circuit/circuit.svelte";
+    import type {TaskItem} from "../../../dto/circuit/module/task";
 
     let { block, open = $bindable() }: { block: Block, open: boolean } = $props();
 
@@ -33,6 +41,20 @@
         if (event.target === element) {
             open = false;
         }
+    }
+
+    async function drop(event: DragEvent) {
+        if (!event.dataTransfer!.types.includes("skill-circuits/item")) {
+            return;
+        }
+        event.preventDefault();
+
+        let itemId = parseInt(event.dataTransfer!.getData("skill-circuits/item"));
+        let item = getItem(itemId) as TaskItem;
+
+        await addTaskToPath(item);
+
+        setDragging(false);
     }
 </script>
 

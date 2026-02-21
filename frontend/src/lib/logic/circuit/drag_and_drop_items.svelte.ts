@@ -24,20 +24,10 @@ export function dragOver(event: DragEvent) {
     dragging = true;
 }
 
-export async function drop(event: DragEvent) {
-    if (!event.dataTransfer!.types.includes("skill-circuits/item")) {
-        return;
-    }
-    event.preventDefault();
-
-    let itemId = parseInt(event.dataTransfer!.getData("skill-circuits/item"));
-    let item = getItem(itemId) as TaskItem;
-
-    await addTaskToPath(item);
-
-    dragging = false;
-}
-
 export function getDragging() {
     return dragging;
+}
+
+export function setDragging(value: boolean) {
+    dragging = value;
 }

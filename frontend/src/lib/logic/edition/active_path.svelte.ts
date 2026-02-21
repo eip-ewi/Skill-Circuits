@@ -61,6 +61,11 @@ export async function fetchPathCustomisation() {
 }
 
 export async function addTaskToPath(task: TaskItem) {
+    // Exit early if it is already on the path
+    if (isTaskOnPath(task)) {
+        return;
+    }
+
     let response = await fetch(`/api/paths/tasks/${task.id}`, withCsrf({
         method: "POST",
     }));
@@ -74,6 +79,11 @@ export async function addTaskToPath(task: TaskItem) {
 }
 
 export async function removeTaskFromPath(task: TaskItem) {
+    // Exit early if it is already not on the path
+    if (!isTaskOnPath(task)) {
+        return;
+    }
+
     let response = await fetch(`/api/paths/tasks/${task.id}`, withCsrf({
         method: "DELETE",
     }));

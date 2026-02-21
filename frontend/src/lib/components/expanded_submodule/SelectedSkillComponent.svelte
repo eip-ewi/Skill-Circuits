@@ -1,14 +1,36 @@
 <script lang="ts">
     import type {SkillBlock} from "../../dto/circuit/module/skill";
-    import {getItemsOnPath} from "../../logic/edition/active_path.svelte";
+    import {
+        addTaskToPath,
+        getItemsOnPath,
+        isTaskOnPath,
+        removeTaskFromPath
+    } from "../../logic/edition/active_path.svelte";
     import TasksComponent from "../circuit/item/TasksComponent.svelte";
-    import {getDragging, dragEnter, dragOver, dragLeave, drop} from "../../logic/circuit/drag_and_drop_items.svelte";
-    import {getGroupForItem, getItem} from "../../logic/circuit/circuit.svelte";
-    import {isCompleted} from "../../logic/circuit/skill_state/completion";
-    import type {SkillItem} from "../../dto/circuit/edition/skill";
-    import type {ModuleGroup} from "../../dto/circuit/edition/module";
+    import {
+        getDragging,
+        dragEnter,
+        dragOver,
+        dragLeave, setDragging,
+    } from "../../logic/circuit/drag_and_drop_items.svelte";
+    import type {TaskItem} from "../../dto/circuit/module/task";
 
     let { block }: { block: SkillBlock } = $props();
+    let itemMap: Map<number, TaskItem> = $derived(new Map(block.items.map(item => [item.id, item as TaskItem])));
+
+    async function drop(event: DragEvent) {
+        if (!event.dataTransfer!.types.includes("skill-circuits/item")) {
+            return;
+        }
+        event.preventDefault();
+
+        let itemId = parseInt(event.dataTransfer!.getData("skill-circuits/item"));
+        let item = itemMap.get(itemId)!;
+
+        await addTaskToPath(item);
+
+        setDragging(false);
+    }
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -20,7 +42,7 @@
 
 <style>
     .content {
-        margin-left: 1.5em;
+        margin: 0.5em 1em;
         font-size: var(--font-size-300);
         position: relative;
     }

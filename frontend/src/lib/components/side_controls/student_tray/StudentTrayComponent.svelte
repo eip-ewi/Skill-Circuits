@@ -6,8 +6,11 @@
     import {getItem} from "../../../logic/circuit/circuit.svelte";
     import type {TaskItem} from "../../../dto/circuit/module/task";
     import {addTaskToPath, isTaskOnPath, removeTaskFromPath} from "../../../logic/edition/active_path.svelte";
+    import {setDragging} from "../../../logic/circuit/drag_and_drop_items.svelte";
 
     let { block }: { block: Block } = $props();
+    let availableTasks: TaskItem[] = $derived(block.blockType === "skill" ? block.items.filter(task => !isTaskOnPath(task)) : []);
+    let itemMap: Map<number, TaskItem> = $derived(new Map(block.items.map(item => [item.id, item as TaskItem])));
 
     let open: boolean = $state(false);
 
@@ -35,7 +38,7 @@
         event.preventDefault();
 
         let itemId = parseInt(event.dataTransfer!.getData("skill-circuits/item"));
-        let item = getItem(itemId) as TaskItem;
+        let item = itemMap.get(itemId)!;
 
         await removeTaskFromPath(item);
     }
@@ -84,7 +87,6 @@
                 </p>
             </div>
             {#if block.blockType === "skill"}
-                {@const availableTasks = block.items.filter(task => !isTaskOnPath(task))}
                 {#if availableTasks.length === 0}
                     <p>
                         There are no available tasks.
