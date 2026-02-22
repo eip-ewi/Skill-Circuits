@@ -29,7 +29,6 @@ import nl.tudelft.skills.dto.view.SubmoduleView;
 import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelSubmoduleView;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.service.EditionCircuitService;
-import nl.tudelft.skills.service.ModuleCircuitService;
 import nl.tudelft.skills.service.SubmoduleService;
 
 @RestController
@@ -39,7 +38,6 @@ public class SubmoduleController {
 
 	private final SubmoduleService submoduleService;
 	private final EditionCircuitService editionCircuitService;
-	private final ModuleCircuitService moduleCircuitService;
 
 	@GetMapping("{submodule}")
 	@PreAuthorize("@authorisationService.canViewModuleCircuit(#submodule.module)")

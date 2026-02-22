@@ -1,18 +1,16 @@
 <script lang="ts">
 
     import type {Block} from "../../../dto/circuit/block";
-    import {cubicInOut, linear} from "svelte/easing";
     import TasksComponent from "../item/TasksComponent.svelte";
     import {isCompleted} from "../../../logic/circuit/skill_state/completion";
     import {addTaskToPath, getItemsOnPath} from "../../../logic/edition/active_path.svelte";
-    import type {Point} from "../../../data/point";
     import StudentTrayComponent from "../../side_controls/student_tray/StudentTrayComponent.svelte";
     import {
-        getDragging,
-        dragEnter,
-        dragOver,
-        dragLeave,
-        setDragging
+        getDraggingItem,
+        dragItemEnter,
+        dragItemOver,
+        dragItemLeave,
+        setDraggingItem,
     } from "../../../logic/circuit/drag_and_drop_items.svelte";
     import {openExpandedBlockTransition} from "../../../logic/transitions";
     import {getItem} from "../../../logic/circuit/circuit.svelte";
@@ -54,7 +52,7 @@
 
         await addTaskToPath(item);
 
-        setDragging(false);
+        setDraggingItem(false);
     }
 </script>
 
@@ -62,8 +60,8 @@
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
     <dialog bind:this={element} onclick={checkForClose}>
         <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
-        <div class="expanded-block" transition:openExpandedBlockTransition={{ block: block }} data-dragging={getDragging()}
-             ondragenter={dragEnter} ondragover={dragOver} ondragleave={dragLeave} ondrop={drop}>
+        <div class="expanded-block" transition:openExpandedBlockTransition={{ block: block }} data-dragging={getDraggingItem()}
+             ondragenter={dragItemEnter} ondragover={dragItemOver} ondragleave={dragItemLeave} ondrop={drop}>
             <div class="content">
                 <h2 class="name">{block.name}</h2>
                 {#if block.blockType === "skill"}

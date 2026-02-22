@@ -1,16 +1,14 @@
 <script lang="ts">
-    import type {RegularSkillBlock, SkillBlock} from "../../dto/circuit/module/skill";
+    import type {SkillBlock} from "../../dto/circuit/module/skill";
     import {getGroupForBlock, getItem, isBlockVisible} from "../../logic/circuit/circuit.svelte";
     import type {SubmoduleBlock} from "../../dto/circuit/edition/submodule";
     import type {SubmoduleGroup} from "../../dto/circuit/module/submodule";
-    import {Graph} from "../../logic/circuit/graph";
     import {topologicalSort} from "../../logic/circuit/block_placement";
     import {BlockStates} from "../../data/block_state";
     import SkillNameComponent from "./SkillNameComponent.svelte";
     import SelectedSkillComponent from "./SelectedSkillComponent.svelte";
     import StudentTrayComponent from "../side_controls/student_tray/StudentTrayComponent.svelte";
     import {openExpandedBlockTransition} from "../../logic/transitions";
-    import type {ModuleCircuit} from "../../dto/circuit/module/module";
     import type {ModuleGroup} from "../../dto/circuit/edition/module";
     import type {Item} from "../../dto/circuit/item";
     import {isCompleted} from "../../logic/circuit/skill_state/completion";
@@ -44,7 +42,6 @@
         if (moduleGroup.moduleGraph !== undefined) {
             // Update the skills of the submodule, filtered by visibility and sorted topologically
             let visibleBlocks = submoduleGroup.blocks.filter(block => isBlockVisible(block));
-            // TODO: check if function has desired behavior for this component
             visibleSkills = topologicalSort(moduleGroup.moduleGraph, visibleBlocks);
         }
     });

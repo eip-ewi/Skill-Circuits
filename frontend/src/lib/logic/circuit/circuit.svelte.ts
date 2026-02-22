@@ -81,10 +81,6 @@ export function getBlockForItem(item: Item): Block {
     return itemToBlockMap!.get(item.id)!;
 }
 
-export function getGroupForItem(item: Item): Group {
-    return getGroupForBlock(getBlockForItem(item));
-}
-
 export function getItem(id: number): Item {
     return blocks!.flatMap(block => block.items as Item[]).find(item => item.id === id)!;
 }

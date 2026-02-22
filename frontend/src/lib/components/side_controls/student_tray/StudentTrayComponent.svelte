@@ -3,10 +3,8 @@
     import {cubicInOut} from "svelte/easing";
     import type {Block} from "../../../dto/circuit/block";
     import StudentTrayTaskComponent from "./StudentTrayTaskComponent.svelte";
-    import {getItem} from "../../../logic/circuit/circuit.svelte";
     import type {TaskItem} from "../../../dto/circuit/module/task";
-    import {addTaskToPath, isTaskOnPath, removeTaskFromPath} from "../../../logic/edition/active_path.svelte";
-    import {setDragging} from "../../../logic/circuit/drag_and_drop_items.svelte";
+    import {isTaskOnPath, removeTaskFromPath} from "../../../logic/edition/active_path.svelte";
 
     let { block }: { block: Block } = $props();
     let availableTasks: TaskItem[] = $derived(block.blockType === "skill" ? block.items.filter(task => !isTaskOnPath(task)) : []);

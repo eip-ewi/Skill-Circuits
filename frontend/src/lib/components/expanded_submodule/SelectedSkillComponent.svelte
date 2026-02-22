@@ -1,17 +1,13 @@
 <script lang="ts">
     import type {SkillBlock} from "../../dto/circuit/module/skill";
-    import {
-        addTaskToPath,
-        getItemsOnPath,
-        isTaskOnPath,
-        removeTaskFromPath
-    } from "../../logic/edition/active_path.svelte";
+    import {addTaskToPath, getItemsOnPath} from "../../logic/edition/active_path.svelte";
     import TasksComponent from "../circuit/item/TasksComponent.svelte";
     import {
-        getDragging,
-        dragEnter,
-        dragOver,
-        dragLeave, setDragging,
+        getDraggingItem,
+        dragItemEnter,
+        dragItemOver,
+        dragItemLeave,
+        setDraggingItem,
     } from "../../logic/circuit/drag_and_drop_items.svelte";
     import type {TaskItem} from "../../dto/circuit/module/task";
 
@@ -29,12 +25,12 @@
 
         await addTaskToPath(item);
 
-        setDragging(false);
+        setDraggingItem(false);
     }
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="content" data-dragging={getDragging()} ondragenter={dragEnter} ondragover={dragOver} ondragleave={dragLeave} ondrop={drop}>
+<div class="content" data-dragging={getDraggingItem()} ondragenter={dragItemEnter} ondragover={dragItemOver} ondragleave={dragItemLeave} ondrop={drop}>
     <h2 class="name">{block.name}</h2>
     <TasksComponent tasks={getItemsOnPath(block)}></TasksComponent>
     <div class="drop-indicator"></div>
