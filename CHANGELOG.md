@@ -12,10 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## Added
+- [Student] Add expanded views for submodules that can be accessed from the edition page by clicking "open here". (@ffiedrich)
 
 ## Changed
 
 ## Fixed
+- [Student] Dragging and dropping a task from a skill to itself, and from the tray to itself no longer breaks subsequent dragging/dropping. (@ffiedrich)
 
 
 ## [2526.1.0]
