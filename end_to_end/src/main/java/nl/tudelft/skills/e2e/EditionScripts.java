@@ -71,6 +71,24 @@ public final class EditionScripts {
 				.findAny().orElseThrow();
 	}
 
+	public Edition findEditionByName(String courseName, String editionName) {
+		session.navigate("/");
+
+		LocatorLocators editions = locators.query(".editions").apply(Locator::first);
+		editions.query(".edition").apply(Locator::first).waitFor();
+		List<LocatorLocators> allEditions = editions.query(".edition").all();
+
+		return allEditions.stream()
+				.filter(edition -> {
+					String course = edition.query("h3 > :first-child").text();
+					String name = edition.query("h3 > :last-child").text();
+					return course.equals(courseName) && name.equals(editionName);
+				})
+				.map(edition -> new Edition(edition.query("h3 > :last-child").text(),
+						new Course(edition.query("h3 > :first-child").text(), null)))
+				.findAny().orElseThrow();
+	}
+
 	public void navigateTo(Edition edition) {
 		session.navigate("/");
 
@@ -137,6 +155,37 @@ public final class EditionScripts {
 
 		return locators.query(".block-wrapper").all().stream()
 				.map(submodule -> submodule.query(".heading").text().trim()).toList();
+	}
+
+	public void enterFirstSubmodule(Edition edition) {
+		navigateTo(edition);
+		locators.query(".circuit").waitFor();
+
+		LocatorLocators firstSubmodule = locators.query(".block-wrapper").apply(Locator::first);
+		firstSubmodule.waitFor();
+		firstSubmodule.click();
+	}
+
+	public void addCheckpoint(String name) {
+		// Open the checkpoints panel
+		locators.button("Open checkpoints panel").click();
+
+		// Wait for panel to open and click Add checkpoint button
+		LocatorLocators checkpointsPanel = locators.query(".panel").withChild(locators.heading("Checkpoints"));
+		checkpointsPanel.waitFor();
+		
+		checkpointsPanel.button("Add checkpoint").click();
+
+		// Wait for the editing form to appear and fill in the name
+		LocatorLocators nameInput = locators.query(".checkpoint .edit input[aria-label='Name']").apply(Locator::first);
+		nameInput.waitFor();
+		nameInput.fill(name);
+
+		// Click Stop editing
+		locators.button("Stop editing").click();
+
+		// Close the panel
+		checkpointsPanel.button("Close panel").click();
 	}
 
 	public void addSubmodule(Edition edition, String name) {
