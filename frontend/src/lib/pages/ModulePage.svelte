@@ -5,17 +5,15 @@
     import type {Warning} from "../data/warning";
     import {setLevel} from "../logic/circuit/level.svelte";
     import {EditionLevel, ModuleLevel} from "../data/level";
-    import {fetchAuthorisation, getAuthorisation, toggleViewMode} from "../logic/authorisation.svelte";
+    import {canEditCircuit, toggleViewMode} from "../logic/authorisation.svelte";
     import type {ModuleCircuit} from "../dto/circuit/module/module";
     import {fetchDevMode, getDevMode} from "../logic/dev_mode.svelte";
     import {circuitFetched, fetchCircuit, getBlocks, getCircuit} from "../logic/circuit/circuit.svelte";
-    import HeaderComponent from "../components/HeaderComponent.svelte";
-    import TrayComponent from "../components/side_controls/tray/TrayComponent.svelte";
     import SideControlsComponent from "../components/side_controls/SideControlsComponent.svelte";
     import ChoosePathComponent from "../components/ChoosePathComponent.svelte";
     import {fetchActivePath, fetchPathCustomisation} from "../logic/edition/active_path.svelte";
     import {fetchEdition} from "../logic/edition/edition.svelte";
-    import {fetchRevealedSkills} from "../logic/circuit/unlocked_skills.svelte";
+    import {fetchRevealedSkills, scrollToFirstIncomplete} from "../logic/circuit/unlocked_skills.svelte";
     import PageLayout from "./PageLayout.svelte";
 
     let { moduleId }: { moduleId: number } = $props();
@@ -31,6 +29,9 @@
         await fetchPathCustomisation();
         await fetchRevealedSkills();
         await fetchDevMode();
+        if (!canEditCircuit()) {
+            setTimeout(() => scrollToFirstIncomplete(), 500);
+        }
     }
 </script>
 
