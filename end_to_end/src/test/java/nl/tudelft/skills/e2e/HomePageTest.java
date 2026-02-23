@@ -74,7 +74,7 @@ public class HomePageTest extends EndToEndTest
 
 	@Test
 	@DisplayName("Checkpoint total time updates when a task's time is changed")
-	public void checkpointTimeUpdatesWhenTaskTimeChanges() {
+	public void checkpointadding() {
 		basic().logIn(cseteacher1);
 
 		Edition edition = edition().findAnyManagingEdition();
@@ -88,5 +88,23 @@ public class HomePageTest extends EndToEndTest
 		edition().addCheckpoint("Test Checkpoint");
 
 	}
+//
+//	@Test
+//	@DisplayName("Checkpoint total time updates when a task's time is changed")
+//	public void checkpointTimeUpdatesWhenTaskTimeChanges() {
+//		basic().logIn(cseteacher1);
+//
+//		Edition edition = edition().findEditionByName("Object-Oriented Programming", "2025/2026 Q1");
+//
+//		if (edition().submodules(edition).isEmpty()) {
+//			edition().addSubmodule(edition, "Test submodule");
+//		}
+//
+//		basic().makeEditor();
+//		edition().enterFirstSubmodule(edition);
+//		int initialTotalTime = edition().checkCheckpointTime();
+//		edition().changeCheckpointTime("Implication");
+//
+//	}
 
 }

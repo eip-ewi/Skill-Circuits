@@ -173,7 +173,7 @@ public final class EditionScripts {
 		// Wait for panel to open and click Add checkpoint button
 		LocatorLocators checkpointsPanel = locators.query(".panel").withChild(locators.heading("Checkpoints"));
 		checkpointsPanel.waitFor();
-		
+
 		checkpointsPanel.button("Add checkpoint").click();
 
 		// Wait for the editing form to appear and fill in the name
@@ -182,10 +182,41 @@ public final class EditionScripts {
 		nameInput.fill(name);
 
 		// Click Stop editing
-		locators.button("Stop editing").click();
+		checkpointsPanel.button("Stop editing").click();
+		checkpointsPanel.waitFor();
 
 		// Close the panel
 		checkpointsPanel.button("Close panel").click();
+		checkpointsPanel.waitFor();
+	}
+
+	public int checkCheckpointTime() {
+		String time = locators.query(".checkpoint .time-estimate")
+				.apply(Locator::first)
+				.text();
+		String[] numbers = time.split(" ");
+
+		return Integer.parseInt(numbers[0].substring(0, numbers[0].length() - 1)) * 60 + Integer.parseInt(numbers[1]);
+	}
+
+	public void changeCheckpointTime(String skill) {
+		LocatorLocators wrapper = locators.query(".block-wrapper")
+				.withChild(locators.heading(skill));
+		wrapper.hover();
+		wrapper.query(".controls").button("Edit").click();
+
+		// Find the first task's time input and increase it by 1
+		LocatorLocators timeInput = locators.query(".task").apply(Locator::first)
+				.query("input[name='time']");
+		timeInput.waitFor();
+
+		String currentValue = timeInput.locator().inputValue();
+		int currentTime = currentValue.isEmpty() ? 0 : Integer.parseInt(currentValue);
+		timeInput.fill(String.valueOf(currentTime + 1));
+
+		// Click Stop editing to save changes
+		wrapper.hover();
+		wrapper.query(".controls").button("Stop editing").click();
 	}
 
 	public void addSubmodule(Edition edition, String name) {
