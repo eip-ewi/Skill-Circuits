@@ -6,7 +6,8 @@
   "scripts": {
     "build": "vite build",
     "watch": "vite build --watch",
-    "svelte-check": "svelte-check"
+    "svelte-check": "svelte-check",
+    "dev": "vite"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^6.1.2",

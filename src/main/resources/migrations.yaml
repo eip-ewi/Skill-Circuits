@@ -2705,3 +2705,25 @@ databaseChangeLog:
             tableName: skill
             columnName: hidden
             newDataType: bit
+
+  #
+  # Store personal preferences for theme and blurring
+  #
+  - changeSet:
+      id: setup-personal-preferences
+      author: fanni
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: blur_blocks
+                  type: BIT
+                  defaultValueBoolean: true
+            tableName: scperson
+        - addColumn:
+            columns:
+              - column:
+                  name: theme
+                  type: ENUM('DARK', 'LIGHT', 'NOSTALGIA', 'SYSTEM')
+                  defaultValue: SYSTEM
+            tableName: scperson

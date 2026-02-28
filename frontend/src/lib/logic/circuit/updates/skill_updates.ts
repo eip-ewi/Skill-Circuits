@@ -6,6 +6,7 @@ import {getCircuit} from "../circuit.svelte";
 import type {Block} from "../../../dto/circuit/block";
 import {BlockStates} from "../../../data/block_state";
 import type {ModuleCircuit} from "../../../dto/circuit/module/module";
+import {setScrollTarget} from "../scroll_target.svelte";
 
 export async function createExternalSkill(originalSkillId: number, column: number) {
     let response = await fetch(`/api/skills/external`, withCsrf({
@@ -30,6 +31,7 @@ export async function createExternalSkill(originalSkillId: number, column: numbe
         externalSkill.blockType = "skill";
         externalSkill.state = BlockStates.Editing;
         (getCircuit() as ModuleCircuit).externalSkills.push(externalSkill);
+        setScrollTarget({ kind: "block", id: externalSkill.id });
     }
 }
 
@@ -49,6 +51,9 @@ export async function editSkillCheckpoint(skill: SkillBlock, newCheckpoint: Chec
 
     if (!response.ok) {
         skill.checkpoint = oldCheckpoint;
+    }
+    else {
+        setScrollTarget({ kind: "block", id: skill.id });
     }
 }
 
