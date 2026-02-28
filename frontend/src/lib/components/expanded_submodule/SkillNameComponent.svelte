@@ -24,28 +24,22 @@
     border: none;
     padding: 0.3em 0.5em;
     margin-top: 0.3em;
+    border-radius: var(--submodule-overview-selection-border-radius);
     color: var(--on-block-colour);
     cursor: pointer;
     transition: filter ease-in-out 150ms, background-color ease-in-out 150ms;
     white-space: nowrap;
 }
 
-.skill-name::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: var(--submodule-overview-selection-border-radius);
-}
-
 .skill-name[data-completed="true"] {
     color: var(--submodule-overview-skill-completed-colour);
 }
 
-.skill-name:hover::before {
+.skill-name:hover {
     background-color: color-mix(in srgb, var(--column-colour) 50%, transparent);
 }
 
-.skill-name[data-selected="true"]::before {
+.skill-name[data-selected="true"] {
     background-color: var(--column-colour);
 }
 
@@ -54,12 +48,7 @@
 }
 
 .skill-name:hover[data-locked="true"], .skill-name[data-selected="true"][data-locked="true"] {
-    /* If the skill is locked and hovered over/selected, do not blur the name */
+    /* If the skill is locked and hovered over/selected, do not blur */
     filter: none;
-}
-
-.skill-name:hover[data-locked="true"]::before, .skill-name[data-selected="true"][data-locked="true"]::before {
-    /* If the skill is locked and hovered over/selected, only blur the background color */
-    filter: blur(.175em);
 }
 </style>
