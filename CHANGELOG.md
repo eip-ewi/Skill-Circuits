@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 
 ## Fixed
+- [Student] The active path and the task removals/additions are taken into account for skill completion and (un)locking. (@ffiedrich)
 
 
 ## [2526.1.0]
