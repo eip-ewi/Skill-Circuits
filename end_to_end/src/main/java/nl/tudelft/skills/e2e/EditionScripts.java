@@ -181,11 +181,9 @@ public final class EditionScripts {
 		nameInput.waitFor();
 		nameInput.fill(name);
 
-		// Click Stop editing
 		checkpointsPanel.button("Stop editing").click();
 		checkpointsPanel.waitFor();
 
-		// Close the panel
 		checkpointsPanel.button("Close panel").click();
 		checkpointsPanel.waitFor();
 	}
@@ -241,6 +239,24 @@ public final class EditionScripts {
 		created.hover(1, 1);
 		created.query(".controls").button("Edit").click();
 		locators.label("Edit submodule name").fill(name);
+		locators.query(".controls").button("Stop editing").click();
+	}
+
+	public void addSkillToSubmodule(String skill) {
+		LocatorLocators skillInTray = locators.query(".panel").withChild(locators.heading("Tray"))
+				.query(".block").heading(skill);
+
+		skillInTray.hover();
+
+		session.page().mouse().down();
+		locators.query(".header").hover();
+		locators.query(".column").hover();
+		session.page().mouse().up();
+		LocatorLocators created = locators.query(".block-wrapper").withChild(locators.text("New skill"));
+		created.hover();
+		created.hover(1, 1);
+		created.query(".controls").button("Edit").click();
+		locators.label("Edit submodule name").fill(skill);
 		locators.query(".controls").button("Stop editing").click();
 	}
 
