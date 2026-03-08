@@ -1,23 +1,17 @@
 <script lang="ts">
     import {getActivePath, selectPath} from "../logic/edition/active_path.svelte";
-    import {onMount} from "svelte";
     import {canEditCircuit, getAuthorisation} from "../logic/authorisation.svelte.js";
     import {getPaths} from "../logic/edition/edition.svelte";
-    import type {Path} from "../dto/path";
     import {isOnCircuit} from "../logic/circuit/level.svelte";
     import Button from "./util/Button.svelte";
 
-    let dialog: HTMLDialogElement | undefined = $state();
-
-    $effect(() => {
-        if (dialog !== undefined) {
-            dialog.showModal();
-        }
-    });
+    function autoShow(node: HTMLDialogElement) {
+        node.showModal();
+    }
 </script>
 
 {#if getActivePath() === null && !canEditCircuit() && getPaths().length > 0}
-    <dialog bind:this={dialog} class="dialog">
+    <dialog use:autoShow class="dialog">
         <div class="content">
             <h2 class="title">Which of these best describes you?</h2>
             <div class="paths">

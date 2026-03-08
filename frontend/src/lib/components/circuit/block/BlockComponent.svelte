@@ -16,7 +16,7 @@
     import BlockActionIndicationComponent from "./BlockActionIndicationComponent.svelte";
     import ExpandedViewOpenButtonComponent from "./ExpandedViewOpenButtonComponent.svelte";
     import ExpandedBlockComponent from "./ExpandedBlockComponent.svelte";
-import {getBlock, getBlocks, getCircuit, getGraph} from "../../../logic/circuit/circuit.svelte";
+    import {getBlock, getBlocks, getCircuit, getGraph, updateBlock} from "../../../logic/circuit/circuit.svelte";
     import BlockControlsComponent from "./BlockControlsComponent.svelte";
     import {type BlockAction, BlockActions} from "../../../data/block_action";
     import {type BlockState, BlockStates} from "../../../data/block_state";
@@ -29,14 +29,14 @@ import {getBlock, getBlocks, getCircuit, getGraph} from "../../../logic/circuit/
     import {disableColumns, enableColumns} from "../../../dto/columns.svelte";
     import BookmarkSkillButtonComponent from "./BookmarkSkillButtonComponent.svelte";
     import {isSkillBookmarked} from "../../../logic/bookmarks.svelte";
-import {clearScrollTarget, getScrollTarget} from "../../../logic/circuit/scroll_target.svelte";
+    import {clearScrollTarget, getScrollTarget} from "../../../logic/circuit/scroll_target.svelte";
     import { getBlurBlocks } from "../../../logic/preferences.svelte";
 
     let { block }: { block: Block } = $props();
 
     let locked: boolean = $derived(!canEditCircuit() && !isUnlocked(block));
     let completed: boolean = $derived(!canEditCircuit() && isCompleted(block));
-    let clickable: boolean = $derived((!canEditCircuit() || getLevel() !== ModuleLevel) && (block.state !== BlockStates.Editing && block.state !== BlockStates.AssigningPaths));
+    let clickable: boolean = $derived((!canEditCircuit() || !isLevel(ModuleLevel)) && (block.state !== BlockStates.Editing && block.state !== BlockStates.AssigningPaths));
     let hidden: boolean = $derived(block.state === BlockStates.Inactive && canEditCircuit() && block.blockType === "skill" && !block.external && block.hidden)
 
     let draggable: boolean = $state(false);
@@ -96,7 +96,7 @@ import {clearScrollTarget, getScrollTarget} from "../../../logic/circuit/scroll_
     });
 
     function recalculateBounds() {
-        block.boundingRect = () => element?.getBoundingClientRect?.();
+        updateBlock(block, { boundingRect: () => element?.getBoundingClientRect?.() });
     }
 
     onMount(async () => {
@@ -112,14 +112,14 @@ import {clearScrollTarget, getScrollTarget} from "../../../logic/circuit/scroll_
         if (block.state !== BlockStates.Inactive) {
             return;
         }
-        block.state = BlockStates.Hovering;
+        updateBlock(block, { state: BlockStates.Hovering });
     }
 
     function mouseLeave() {
         if (block.state !== BlockStates.Hovering) {
             return;
         }
-        block.state = BlockStates.Inactive;
+        updateBlock(block, { state: BlockStates.Inactive });
     }
 
     function mouseEnterBlock() {
@@ -137,7 +137,7 @@ import {clearScrollTarget, getScrollTarget} from "../../../logic/circuit/scroll_
     }
 
     $effect(() => {
-        block.preview = !canEditCircuit() && block.state === BlockStates.Hovering;
+        updateBlock(block, { preview: !canEditCircuit() && block.state === BlockStates.Hovering });
     })
 
     function click() {
@@ -156,7 +156,7 @@ import {clearScrollTarget, getScrollTarget} from "../../../logic/circuit/scroll_
         if (!(event.target as HTMLElement).classList.contains("block-wrapper")) {
             return;
         }
-        block.state = BlockStates.Dragging;
+        updateBlock(block, { state: BlockStates.Dragging });
         event.dataTransfer!.setDragImage(element, 32, 24);
         event.dataTransfer!.effectAllowed = "move";
         event.dataTransfer!.setData("skill-circuits/block", block.id.toString());
@@ -167,7 +167,7 @@ import {clearScrollTarget, getScrollTarget} from "../../../logic/circuit/scroll_
         if (!(event.target as HTMLElement).classList.contains("block-wrapper")) {
             return;
         }
-        block.state = BlockStates.Inactive;
+        updateBlock(block, { state: BlockStates.Inactive });
         disableColumns();
     }
 </script>
