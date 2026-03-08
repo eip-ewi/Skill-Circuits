@@ -36,6 +36,7 @@ import nl.tudelft.skills.annotation.AuthenticatedSCPerson;
 import nl.tudelft.skills.dto.patch.EditionPatch;
 import nl.tudelft.skills.dto.view.*;
 import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelEditionView;
+import nl.tudelft.skills.dto.view.circuit.module.ModuleLevelTaskView;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.SCPerson;
 import nl.tudelft.skills.service.*;
@@ -77,6 +78,13 @@ public class EditionController {
 	public EditionLevelEditionView getEditionCircuit(@AuthenticatedSCPerson SCPerson person,
 			@PathVariable Long editionId) {
 		return editionCircuitService.getEditionCircuit(editionId, person);
+	}
+
+	@GetMapping("{editionId}/tasks")
+	@PreAuthorize("@authorisationService.canViewEdition(#editionId)")
+	public List<ModuleLevelTaskView> getTasksOfEdition(@AuthenticatedSCPerson SCPerson person,
+			@PathVariable Long editionId) {
+		return editionService.getTasksOfEdition(person, editionId);
 	}
 
 	@PostMapping("{editionId}/join")
