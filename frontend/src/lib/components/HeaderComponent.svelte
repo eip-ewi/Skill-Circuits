@@ -1,19 +1,20 @@
 <script lang="ts">
 
     import {getAuthenticatedPerson} from "../logic/authentication.svelte";
-    import {getLevel, isLevel, isOnCircuit} from "../logic/circuit/level.svelte";
-    import {type ModuleCircuit} from "../dto/circuit/module/module";
-    import {EditionLevel, ModuleLevel, ProgrammeLevel, TrackLevel} from "../data/level";
-    import {getCircuit} from "../logic/circuit/circuit.svelte";
-    import {cubicInOut, linear} from "svelte/easing";
-    import type {Attachment} from "svelte/attachments";
-    import {canEditCircuit, getAuthorisation, isEditorForAny, isEditorForCircuit, setViewMode, toggleViewMode} from "../logic/authorisation.svelte";
+    import {isLevel, isOnCircuit} from "../logic/circuit/level.svelte";
+    import {EditionLevel, ModuleLevel, TrackLevel} from "../data/level";
+    import {cubicInOut} from "svelte/easing";
+    import {
+        hasEditorRights,
+        getAuthorisation,
+        isEditorForAny, isViewModeAuthorisedToEdit,
+        setViewMode,
+        toggleViewMode, isEditorForCircuit
+    } from "../logic/authorisation.svelte";
     import Csrf from "./Csrf.svelte";
     import {loadHomePage, loadPage, pageMatches} from "../logic/routing.svelte";
-    import {fade} from "svelte/transition";
     import {getEdition} from "../logic/edition/edition.svelte";
     import ThemeSelectComponent from "./ThemeSelectComponent.svelte";
-    import WIthConfirmationDialog from "./util/WithConfirmationDialog.svelte";
     import WithConfirmationDialog from "./util/WithConfirmationDialog.svelte";
     import {resetProgress} from "../logic/updates/edition_updates";
     import {editingBlocks} from "../logic/circuit/updates/block_updates";
@@ -159,7 +160,7 @@
                         <span class="icon fa-solid fa-gear"></span>
                         <span>Settings</span>
                     </button>
-                    {#if !canEditCircuit() && isLevel(EditionLevel)}
+                    {#if !hasEditorRights() && isLevel(EditionLevel)}
                         <WithConfirmationDialog icon="fa-solid fa-repeat" action="Reset progress" onconfirm={ () => resetProgress() }>
                             {#snippet button(openConfirmationDialog: () => void) }
                                 <button class="button" onclick={openConfirmationDialog}>
@@ -173,7 +174,7 @@
                         </WithConfirmationDialog>
                     {/if}
                     {#if isEditorForAny()}
-                        {#if canEditCircuit()}
+                        {#if hasEditorRights()}
                             <button class="button" onclick={ () => toggleViewMode() }>
                                 <span class="icon fa-solid fa-eye"></span>
                                 <span>Student view</span>

@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 
 ## Fixed
+- [Editor] Clicking on the "Student/Editor View" button on non-circuit pages now toggles between the modes correctly.
 
 
 ## [2526.1.0]

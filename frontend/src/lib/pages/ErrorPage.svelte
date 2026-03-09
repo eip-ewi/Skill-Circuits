@@ -1,5 +1,7 @@
 <script lang="ts">
 import PageLayout from "./PageLayout.svelte";
+import {clearLevel} from "../logic/circuit/level.svelte";
+clearLevel();
 </script>
 
 <svelte:head>

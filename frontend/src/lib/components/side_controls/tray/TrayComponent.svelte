@@ -7,7 +7,7 @@
     import PlacableBlockComponent from "./PlacableBlockComponent.svelte";
     import {removeBlockFromCircuit, updateBlockPosition} from "../../../logic/circuit/updates/position_updates.svelte";
     import {createBlock} from "../../../logic/circuit/updates/block_updates";
-    import {canEditCircuit} from "../../../logic/authorisation.svelte.js";
+    import {hasEditorRights} from "../../../logic/authorisation.svelte.js";
 
     let { open = $bindable() }: { open: boolean } = $props();
 
@@ -51,7 +51,7 @@
     }
 </script>
 
-{#if canEditCircuit()}
+{#if hasEditorRights()}
     <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
     <div class="scrollable glass panel" aria-expanded={open}
          ondragenter={dragEnter} ondragover={dragOver} ondragleave={dragLeave} ondrop={drop}>
