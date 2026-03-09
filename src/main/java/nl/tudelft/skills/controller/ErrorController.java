@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -39,6 +40,17 @@ public class ErrorController {
 
 	@ExceptionHandler(ResourceNotFoundException.class)
 	public ResponseEntity<Void> handle404(ResourceNotFoundException e) {
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+	}
+
+	@ExceptionHandler(NoResourceFoundException.class)
+	public ResponseEntity<Void> handleNoResourceFound(NoResourceFoundException e) {
+		logger.debug("No resource found: {}", e.getResourcePath());
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+	}
+
+	@GetMapping("/.well-known/appspecific/com.chrome.devtools.json")
+	public ResponseEntity<Void> chromeDevTools() {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 	}
 
