@@ -65,7 +65,6 @@ export function getVisibleBlocks(): Block[] {
 }
 
 export function isBlockVisible(block: Block) {
-    // TODO: I removed !isLevel(ModuleLevel): This should also be handled by the !== skill block check?
     return block.column !== null && (canEditCircuit() || block.blockType !== "skill" || block.external || !block.hidden || isSkillRevealed(block));
 }
 
