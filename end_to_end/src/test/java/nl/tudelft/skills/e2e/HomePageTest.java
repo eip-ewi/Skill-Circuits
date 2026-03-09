@@ -87,7 +87,11 @@ public class HomePageTest extends EndToEndTest
 		edition().enterFirstSubmodule(edition);
 		edition().addCheckpoint("Test Checkpoint");
 
+		edition().addColumn();
 		edition().addSkillToSubmodule("Test skill");
+		edition().createTask("Test skill", "Test task", 15);
+		edition().editCheckpoint("Test skill", "Test Checkpoint");
+		assertEquals(15, edition().checkCheckpointTime());
 
 	}
 
