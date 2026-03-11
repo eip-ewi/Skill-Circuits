@@ -5,7 +5,7 @@
     import {cubicIn, cubicInOut, linear} from "svelte/easing";
     import TasksComponent from "../item/TasksComponent.svelte";
     import {isCompleted} from "../../../logic/circuit/skill_state/completion";
-    import {addTaskToPath, getItemsOnPath, removeTaskFromPath} from "../../../logic/edition/active_path.svelte";
+    import {pathState, addTaskToPath, getItemsOnPath, removeTaskFromPath} from "../../../logic/edition/active_path.svelte";
     import type {Point} from "../../../data/point";
     import SideControlsComponent from "../../side_controls/SideControlsComponent.svelte";
     import StudentTrayComponent from "../../side_controls/student_tray/StudentTrayComponent.svelte";
@@ -18,6 +18,13 @@
     let element: HTMLDialogElement | undefined = $state();
 
     let dragging: boolean = $state(false);
+
+    let visibleTasks: TaskItem[] = $derived.by(() => {
+        //if unchecked task is of type SkillItem|TaskItem
+        if (block.blockType !== "skill") return [];
+
+        return getItemsOnPath(block);
+    })
 
     $effect(() => {
         if (element === undefined) {
@@ -107,7 +114,7 @@
             <div class="content">
                 <h2 class="name">{block.name}</h2>
                 {#if block.blockType === "skill"}
-                    <TasksComponent tasks={getItemsOnPath(block)}></TasksComponent>
+                    <TasksComponent tasks={visibleTasks}></TasksComponent>
                 {/if}
                 <div class="drop-indicator"></div>
             </div>

@@ -5,12 +5,18 @@
     import StudentTrayTaskComponent from "./StudentTrayTaskComponent.svelte";
     import {getItem} from "../../../logic/circuit/circuit.svelte";
     import type {TaskItem} from "../../../dto/circuit/module/task";
-    import {addTaskToPath, isTaskOnPath, removeTaskFromPath} from "../../../logic/edition/active_path.svelte";
+    import {pathState, isTaskOnPath, removeTaskFromPath} from "../../../logic/edition/active_path.svelte";
 
     let { block }: { block: Block } = $props();
 
     let open: boolean = $state(false);
 
+    let availableTasks = $derived.by(() => {
+        //if unchecked task is of type SkillItem|TaskItem
+        if (block.blockType !== "skill") return [];
+
+        return block.items.filter(task => !isTaskOnPath(task));
+    })
     function dragEnter(event: DragEvent) {
         if (!event.dataTransfer!.types.includes("skill-circuits/item")) {
             return;
@@ -84,7 +90,7 @@
                 </p>
             </div>
             {#if block.blockType === "skill"}
-                {@const availableTasks = block.items.filter(task => !isTaskOnPath(task))}
+                <!--{@const availableTasks = block.items.filter(task => !isTaskOnPath(task))}-->
                 {#if availableTasks.length === 0}
                     <p>
                         There are no available tasks.
