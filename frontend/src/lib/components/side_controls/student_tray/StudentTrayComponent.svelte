@@ -90,7 +90,6 @@
                 </p>
             </div>
             {#if block.blockType === "skill"}
-                <!--{@const availableTasks = block.items.filter(task => !isTaskOnPath(task))}-->
                 {#if availableTasks.length === 0}
                     <p>
                         There are no available tasks.
