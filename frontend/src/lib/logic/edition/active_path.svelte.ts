@@ -87,9 +87,12 @@ export async function fetchPathCustomisation() {
 }
 
 export async function addTaskToPath(task: TaskItem) {
+    if (isTaskOnPath(task)) return;
+
     let response = await fetch(`/api/paths/tasks/${task.id}`, withCsrf({
         method: "POST",
     }));
+
     if (response.ok) {
         // the task being in tasksAdded or tasksRemoved is relative to its default state on that path
         if (isTaskOnActivePathByDefault(task)) {
@@ -103,9 +106,12 @@ export async function addTaskToPath(task: TaskItem) {
 }
 
 export async function removeTaskFromPath(task: TaskItem) {
+    if (!isTaskOnPath(task)) return;
+
     let response = await fetch(`/api/paths/tasks/${task.id}`, withCsrf({
         method: "DELETE",
     }));
+
     if (response.ok) {
         // the task being in tasksAdded or tasksRemoved is relative to its default state on that path
         if (isTaskOnActivePathByDefault(task)) {
