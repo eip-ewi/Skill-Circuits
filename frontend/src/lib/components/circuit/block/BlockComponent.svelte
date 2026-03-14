@@ -63,7 +63,7 @@
         block.column;
         block.row;
         block.state;
-        canEditCircuit();
+        hasEditorRights();
         getBlocks().filter(upperBlock => upperBlock.row! < block.row!).forEach(upperBlock => {
             upperBlock.state;
         });
