@@ -3,34 +3,67 @@ import type {Circuit} from "../../dto/circuit/circuit";
 import {Graph} from "./graph";
 import type {Group} from "../../dto/circuit/group";
 import type {Item} from "../../dto/circuit/item";
-import {getLevel, isLevel} from "./level.svelte";
-import {canEditCircuit, getAuthorisation} from "../authorisation.svelte";
+import {isLevel} from "./level.svelte";
+import {canEditCircuit} from "../authorisation.svelte";
 import {ModuleLevel} from "../../data/level";
 import {isSkillRevealed} from "./unlocked_skills.svelte";
 import {BlockStates} from "../../data/block_state";
 import {untrack} from "svelte";
 
 let circuit: Circuit | undefined = $state(undefined);
-let blocks: Block[] = $state([]);
-// @ts-ignore
-let graph: Graph | undefined = $derived(circuit === undefined ? undefined : new Graph(blocks.filter(block => isBlockVisible(block))));
-// @ts-ignore
-let blockToGroupMap: Map<number, Group> | undefined = $derived(circuit === undefined ? undefined : new Map(circuit!.groups.flatMap(group => group.blocks.map(block => [block.id, group]))));
-// @ts-ignore
-let itemToBlockMap: Map<number, Block> | undefined = $derived(circuit === undefined ? undefined : new Map(blocks.flatMap(block => block.items.map(item => [item.id, block]))));
 
-function blocksFromCircuit(circuit: Circuit): Block[] {
-    let result: Block[];
-    if (circuit.circuitType === "module") {
-        result = [
-            ...circuit.groups.flatMap(group => group.blocks),
-            ...circuit.externalSkills,
-        ];
-    } else {
-        result = circuit.groups.flatMap(group => group.blocks);
+function blocksFromCircuit(current: Circuit): Block[] {
+    if (current.circuitType === "module") {
+        return [...current.groups.flatMap(group => group.blocks), ...current.externalSkills];
     }
-    result.forEach(block => block.state = BlockStates.Inactive);
-    return result;
+    return current.groups.flatMap(group => group.blocks);
+}
+
+// Derived from circuit so add/delete inside groups is reflected without a reload.
+let blocks: Block[] = $derived.by(() => {
+    const current = circuit;
+    if (current === undefined) {
+        return [];
+    }
+
+    // Touch nested collection lengths so push/splice operations retrigger this derivation.
+    current.groups.length;
+    for (const group of current.groups) {
+        group.blocks.length;
+    }
+    if (current.circuitType === "module") {
+        current.externalSkills.length;
+    }
+
+    return blocksFromCircuit(current);
+});
+
+let graph: Graph | undefined = $derived.by(() => {
+    const current = circuit;
+    return current === undefined ? undefined : new Graph(blocks.filter(block => isBlockVisible(block)));
+});
+
+let blockToGroupMap: Map<number, Group> | undefined = $derived.by(() => {
+    const current = circuit;
+    return current === undefined
+        ? undefined
+        : new Map(current.groups.flatMap(group => group.blocks.map(block => [block.id, group] as const)));
+});
+
+let itemToBlockMap: Map<number, Block> | undefined = $derived.by(() => {
+    const current = circuit;
+    return current === undefined
+        ? undefined
+        : new Map(blocks.flatMap(block => block.items.map(item => [item.id, block] as const)));
+});
+
+// Initialise block states on the raw JSON before it is assigned to circuit,
+// so the derived `blocks` array is never responsible for mutation on first load.
+function initBlockStates(circuit: Circuit): void {
+    const all = circuit.circuitType === "module"
+        ? [...circuit.groups.flatMap(group => group.blocks), ...(circuit.externalSkills ?? [])]
+        : circuit.groups.flatMap(group => group.blocks);
+    all.forEach(block => block.state = BlockStates.Inactive);
 }
 
 export function circuitFetched(): boolean {
@@ -91,6 +124,7 @@ export function updateBlock(block: Block, update: Partial<Block>): void {
 
 export async function fetchCircuit(url: string) {
     let response = await fetch(url);
-    circuit = await response.json();
-    blocks = blocksFromCircuit(circuit!);
+    let fetched: Circuit = await response.json();
+    initBlockStates(fetched);
+    circuit = fetched;
 }
