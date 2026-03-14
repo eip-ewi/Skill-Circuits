@@ -1,6 +1,6 @@
 <script lang="ts">
 
-    import {canEditCircuit, getAuthorisation} from "../../../logic/authorisation.svelte";
+    import {hasEditorRights, getAuthorisation} from "../../../logic/authorisation.svelte";
     import PathListItemComponent from "./PathListItemComponent.svelte";
     import {createPath} from "../../../logic/updates/path_updates";
     import {getPaths} from "../../../logic/edition/edition.svelte";
@@ -31,7 +31,7 @@
     }
 </script>
 
-{#if canEditCircuit()}
+{#if hasEditorRights()}
     <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
     <div class="scrollable glass panel" aria-expanded={open}>
         <div class="heading">

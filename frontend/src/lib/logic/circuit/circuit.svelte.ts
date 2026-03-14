@@ -4,7 +4,7 @@ import {Graph} from "./graph";
 import type {Group} from "../../dto/circuit/group";
 import type {Item} from "../../dto/circuit/item";
 import {isLevel} from "./level.svelte";
-import {canEditCircuit} from "../authorisation.svelte";
+import { hasEditorRights} from "../authorisation.svelte";
 import {ModuleLevel} from "../../data/level";
 import {isSkillRevealed} from "./unlocked_skills.svelte";
 import {BlockStates} from "../../data/block_state";
@@ -95,7 +95,7 @@ export function getVisibleBlocks(): Block[] {
 }
 
 export function isBlockVisible(block: Block) {
-    return block.column !== null && (!isLevel(ModuleLevel) || canEditCircuit() || block.blockType !== "skill" || block.external || !block.hidden || isSkillRevealed(block));
+    return block.column !== null && (!isLevel(ModuleLevel) || hasEditorRights() || block.blockType !== "skill" || block.external || !block.hidden || isSkillRevealed(block));
 }
 
 export function getGroupForBlock(block: Block): Group {

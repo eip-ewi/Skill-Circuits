@@ -5,7 +5,7 @@ import type {Block} from "../../dto/circuit/block";
 import type {Item} from "../../dto/circuit/item";
 import {getLevel} from "../circuit/level.svelte";
 import {ModuleLevel} from "../../data/level";
-import {canEditCircuit, getAuthorisation} from "../authorisation.svelte";
+import {hasEditorRights, getAuthorisation} from "../authorisation.svelte";
 import type {TaskItem} from "../../dto/circuit/module/task";
 
 let activePath: Path | null = $state(null);
@@ -17,7 +17,7 @@ export function getActivePath(): Path | null {
 }
 
 export function getItemsOnPath<B extends Block>(block: B): B["items"] {
-    if (block.blockType !== "skill" || canEditCircuit()) {
+    if (block.blockType !== "skill" || hasEditorRights()) {
         return block.items;
     }
     return block.items.filter(item => isTaskOnPath(item));

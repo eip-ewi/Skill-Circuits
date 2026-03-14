@@ -3,7 +3,7 @@
     import {generatePathString} from "../../../logic/line_segments";
     import type {Block} from "../../../dto/circuit/block";
     import {createConnectionPath} from "../../../logic/circuit/connection.svelte";
-    import {canEditCircuit, getAuthorisation} from "../../../logic/authorisation.svelte";
+    import {hasEditorRights, getAuthorisation} from "../../../logic/authorisation.svelte";
     import {isUnlocked} from "../../../logic/circuit/skill_state/unlock";
     import {isCompleted} from "../../../logic/circuit/skill_state/completion";
     import {getCircuit} from "../../../logic/circuit/circuit.svelte";
@@ -12,7 +12,7 @@
 
     let { from, to }: { from: Block, to: Block } = $props();
 
-    let locked: boolean = $derived(!canEditCircuit() && !(isCompleted(from) || (isUnlocked(from) && from.blockType === "skill" && !from.essential)));
+    let locked: boolean = $derived(!hasEditorRights() && !(isCompleted(from) || (isUnlocked(from) && from.blockType === "skill" && !from.essential)));
     let animated: boolean = $state(false);
 
     let element: SVGPathElement | undefined = $state();
@@ -24,7 +24,7 @@
     });
 
     $effect(() => {
-        if (element !== undefined && !locked && !canEditCircuit()) {
+        if (element !== undefined && !locked && !hasEditorRights()) {
             animate();
         }
     });

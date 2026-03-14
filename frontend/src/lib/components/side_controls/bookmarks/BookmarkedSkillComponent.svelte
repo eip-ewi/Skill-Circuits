@@ -5,7 +5,7 @@
     import {BlockStates} from "../../../data/block_state";
     import {disableColumns, enableColumns} from "../../../dto/columns.svelte";
     import type {SkillBlock} from "../../../dto/circuit/module/skill";
-    import {canEditCircuit} from "../../../logic/authorisation.svelte";
+    import {hasEditorRights} from "../../../logic/authorisation.svelte";
     import ExpandedViewOpenButtonComponent from "../../circuit/block/ExpandedViewOpenButtonComponent.svelte";
     import {ModuleLevel} from "../../../data/level";
     import ExpandedBlockComponent from "../../circuit/block/ExpandedBlockComponent.svelte";
@@ -27,7 +27,7 @@
     });
 
     function click() {
-        if (!canEditCircuit()) {
+        if (!hasEditorRights()) {
             loadPage(`/skills/${skill.id}`);
         }
     }
@@ -45,13 +45,13 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 <div class="block-wrapper" onmouseenter={ () => hovering = true } onmouseleave={ () => hovering = false }>
-    <div bind:this={element} class="block" draggable={canEditCircuit() && isLevel(ModuleLevel) && !getBlocks().some(b => b.id === skill.id)} ondragstart={dragStart} ondragend={dragEnd}
-         data-clickable={!canEditCircuit()}
+    <div bind:this={element} class="block" draggable={hasEditorRights() && isLevel(ModuleLevel) && !getBlocks().some(b => b.id === skill.id)} ondragstart={dragStart} ondragend={dragEnd}
+         data-clickable={!hasEditorRights()}
          onclick={click}
-         data-completed={!canEditCircuit() && isCompleted(skill)}>
+         data-completed={!hasEditorRights() && isCompleted(skill)}>
         <BlockContentComponent block={skill}></BlockContentComponent>
     </div>
-    {#if hovering && !canEditCircuit()}
+    {#if hovering && !hasEditorRights()}
         <ExpandedViewOpenButtonComponent action={undefined} bind:open={expanded}></ExpandedViewOpenButtonComponent>
     {/if}
     <ExpandedBlockComponent block={skill} bind:open={expanded}></ExpandedBlockComponent>

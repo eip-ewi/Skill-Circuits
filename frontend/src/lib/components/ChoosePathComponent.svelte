@@ -1,6 +1,7 @@
 <script lang="ts">
     import {getActivePath, selectPath} from "../logic/edition/active_path.svelte";
-    import {canEditCircuit, getAuthorisation} from "../logic/authorisation.svelte.js";
+    import {hasEditorRights, getAuthorisation} from "../logic/authorisation.svelte.js";
+    import {onMount} from "svelte";
     import {getPaths} from "../logic/edition/edition.svelte";
     import {isOnCircuit} from "../logic/circuit/level.svelte";
     import Button from "./util/Button.svelte";
@@ -10,7 +11,7 @@
     }
 </script>
 
-{#if getActivePath() === null && !canEditCircuit() && getPaths().length > 0}
+{#if getActivePath() === null && !hasEditorRights() && getPaths().length > 0}
     <dialog use:autoShow class="dialog">
         <div class="content">
             <h2 class="title">Which of these best describes you?</h2>

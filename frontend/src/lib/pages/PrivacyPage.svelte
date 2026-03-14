@@ -2,6 +2,9 @@
 
 import PageLayout from "./PageLayout.svelte";
 import Link from "../components/util/Link.svelte";
+import {clearLevel} from "../logic/circuit/level.svelte";
+
+clearLevel();
 </script>
 
 <PageLayout>
