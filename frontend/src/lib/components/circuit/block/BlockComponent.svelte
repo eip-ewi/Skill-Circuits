@@ -6,7 +6,7 @@
     import type {Graph} from "../../../logic/circuit/graph";
     import type {TaskItem} from "../../../dto/circuit/module/task";
     import {isUnlocked} from "../../../logic/circuit/skill_state/unlock";
-    import {canEditCircuit, getAuthorisation} from "../../../logic/authorisation.svelte";
+    import {hasEditorRights, getAuthorisation} from "../../../logic/authorisation.svelte";
     import {getLevel, isLevel} from "../../../logic/circuit/level.svelte";
     import {isCompleted} from "../../../logic/circuit/skill_state/completion";
     import {loadPage} from "../../../logic/routing.svelte";
@@ -36,10 +36,10 @@ import {clearScrollTarget, getScrollTarget} from "../../../logic/circuit/scroll_
 
     let { block }: { block: Block } = $props();
 
-    let locked: boolean = $derived(!canEditCircuit() && !isUnlocked(block));
-    let completed: boolean = $derived(!canEditCircuit() && isCompleted(block));
-    let clickable: boolean = $derived((!canEditCircuit() || getLevel() !== ModuleLevel) && (block.state !== BlockStates.Editing && block.state !== BlockStates.AssigningPaths));
-    let hidden: boolean = $derived(block.state === BlockStates.Inactive && canEditCircuit() && block.blockType === "skill" && !block.external && block.hidden)
+    let locked: boolean = $derived(!hasEditorRights() && !isUnlocked(block));
+    let completed: boolean = $derived(!hasEditorRights() && isCompleted(block));
+    let clickable: boolean = $derived((!hasEditorRights() || getLevel() !== ModuleLevel) && (block.state !== BlockStates.Editing && block.state !== BlockStates.AssigningPaths));
+    let hidden: boolean = $derived(block.state === BlockStates.Inactive && hasEditorRights() && block.blockType === "skill" && !block.external && block.hidden)
 
     let draggable: boolean = $state(false);
     let action: BlockAction | undefined = $state();
@@ -65,7 +65,7 @@ import {clearScrollTarget, getScrollTarget} from "../../../logic/circuit/scroll_
         block.column;
         block.row;
         block.state;
-        canEditCircuit();
+        hasEditorRights();
         getBlocks().filter(upperBlock => upperBlock.row! < block.row!).forEach(upperBlock => {
             upperBlock.state;
         });
@@ -127,9 +127,9 @@ import {clearScrollTarget, getScrollTarget} from "../../../logic/circuit/scroll_
     function mouseEnterBlock() {
         // on every level except module level, the action is go to
         // on module level it is expand, but only in view mode
-        if ((block.blockType !== "skill" || (block.external && !canEditCircuit())) && block.state !== BlockStates.Editing) {
+        if ((block.blockType !== "skill" || (block.external && !hasEditorRights())) && block.state !== BlockStates.Editing) {
             action = BlockActions.Goto;
-        } else if (!canEditCircuit()) {
+        } else if (!hasEditorRights()) {
             action = BlockActions.Expand;
         }
     }
@@ -139,7 +139,7 @@ import {clearScrollTarget, getScrollTarget} from "../../../logic/circuit/scroll_
     }
 
     $effect(() => {
-        block.preview = !canEditCircuit() && block.state === BlockStates.Hovering;
+        block.preview = !hasEditorRights() && block.state === BlockStates.Hovering;
     })
 
     function click() {
@@ -212,7 +212,7 @@ import {clearScrollTarget, getScrollTarget} from "../../../logic/circuit/scroll_
         {#if block.blockType === "skill" && !block.external && (block.state === BlockStates.Hovering || isSkillBookmarked(block))}
             <BookmarkSkillButtonComponent bind:action skill={block}></BookmarkSkillButtonComponent>
         {/if}
-        {#if (block.blockType !== "skill" || block.external) && !canEditCircuit()}
+        {#if (block.blockType !== "skill" || block.external) && !hasEditorRights()}
             {#if block.state === BlockStates.Hovering}
                 <ExpandedViewOpenButtonComponent bind:action bind:open={expanded}></ExpandedViewOpenButtonComponent>
             {/if}
@@ -221,7 +221,7 @@ import {clearScrollTarget, getScrollTarget} from "../../../logic/circuit/scroll_
                 <ExpandedSubmoduleComponent submoduleBlock={block as SubmoduleBlock} bind:open={expanded}></ExpandedSubmoduleComponent>
             {/if}
         {/if}
-        {#if canEditCircuit() && (draggable || block.state === BlockStates.Hovering || block.state === BlockStates.Connecting || block.state === BlockStates.Editing)}
+        {#if hasEditorRights() && (draggable || block.state === BlockStates.Hovering || block.state === BlockStates.Connecting || block.state === BlockStates.Editing)}
             <BlockControlsComponent {block} bind:action bind:draggable></BlockControlsComponent>
         {/if}
         {#if block.state === BlockStates.WaitingForConnection}
@@ -232,7 +232,7 @@ import {clearScrollTarget, getScrollTarget} from "../../../logic/circuit/scroll_
         {/if}
     </div>
 
-    {#if isLevel(ModuleLevel) && !canEditCircuit()}
+    {#if isLevel(ModuleLevel) && !hasEditorRights()}
         <ExpandedBlockComponent {block} bind:open={expanded}></ExpandedBlockComponent>
     {/if}
 </div>

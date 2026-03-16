@@ -7,8 +7,13 @@
     import {isTaskOnPath, removeTaskFromPath} from "../../../logic/edition/active_path.svelte";
 
     let { block }: { block: Block } = $props();
-    let availableTasks: TaskItem[] = $derived(block.blockType === "skill" ? block.items.filter(task => !isTaskOnPath(task)) : []);
     let itemMap: Map<number, TaskItem> = $derived(new Map(block.items.map(item => [item.id, item as TaskItem])));
+    let availableTasks = $derived.by(() => {
+        //if unchecked task is of type SkillItem|TaskItem
+        if (block.blockType !== "skill") return [];
+
+        return block.items.filter(task => !isTaskOnPath(task));
+    })
 
     let open: boolean = $state(false);
 

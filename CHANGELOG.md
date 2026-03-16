@@ -18,8 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 
 ## Fixed
-- [Student] Dragging and dropping a task from a skill to itself, and from the tray to itself no longer breaks subsequent dragging/dropping. (@ffiedrich)
-
+- [Editor] Clicking on the "Student/Editor View" button on non-circuit pages now toggles between the modes correctly.
+- [Teacher] Upcoming courses are displayed in the course overview. @ralani
+- [Student] Dragging and dropping the task in the same skill or the Tray does not break drag and drop functionality afterwards. @ralani
 
 ## [2526.1.0]
 
