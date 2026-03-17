@@ -35,7 +35,6 @@ import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.librador.dto.DTOConverter;
 import nl.tudelft.skills.dto.patch.EditionPatch;
 import nl.tudelft.skills.dto.view.*;
-import nl.tudelft.skills.dto.view.circuit.module.ModuleLevelTaskView;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.SCPerson;
@@ -52,12 +51,11 @@ public class EditionService {
 	private final RoleControllerApi roleApi;
 
 	private final SCPersonService sCPersonService;
-	private final ModuleCircuitService moduleCircuitService;
 
 	private final EditionRepository editionRepository;
 	private final PersonRepository personRepository;
-	private final TaskCompletionRepository taskCompletionRepository;
 	private final DTOConverter dtoConverter;
+	private final TaskService taskService;
 
 	public EditionView getEdition(Long editionId) {
 		EditionDetailsDTO edition = requireNonNull(editionApi.getEditionById(editionId).block());
@@ -207,16 +205,14 @@ public class EditionService {
 		editionRepository.save(edition);
 	}
 
-	@Transactional
-	public List<ModuleLevelTaskView> getTasksOfEdition(SCPerson person, Long editionId) {
+	public List<TaskListTaskView> getTasksOfEdition(Long editionId) {
 		SCEdition scEdition = editionRepository.getOrCreate(editionId);
-		Set<Long> completedTaskIds = taskCompletionRepository.findAllCompletedTaskIdsForPerson(person);
 
 		return scEdition.getModules().stream()
 				.flatMap(m -> m.getSubmodules().stream())
 				.flatMap(sm -> sm.getSkills().stream())
 				.flatMap(s -> s.getTasks().stream())
-				.map(t -> moduleCircuitService.convertToTaskView(t, completedTaskIds))
+				.flatMap(t -> taskService.convertToTaskListTaskView(t).stream())
 				.toList();
 	}
 }

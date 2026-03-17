@@ -19,6 +19,7 @@ package nl.tudelft.skills.service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +31,7 @@ import nl.tudelft.skills.dto.create.RegularTaskCreate;
 import nl.tudelft.skills.dto.patch.ChoiceTaskPatch;
 import nl.tudelft.skills.dto.patch.TaskMove;
 import nl.tudelft.skills.dto.patch.TaskPatch;
+import nl.tudelft.skills.dto.view.TaskListTaskView;
 import nl.tudelft.skills.enums.TaskType;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.TaskInfoRepository;
@@ -124,5 +126,34 @@ public class TaskService {
 	@Transactional
 	public void deleteTask(Task task) {
 		taskRepository.delete(task);
+	}
+
+	public List<TaskListTaskView> convertToTaskListTaskView(Task task) {
+		return switch (task) {
+			case RegularTask regularTask -> List.of(convertToTaskListTaskView(regularTask.getTaskInfo(), null,
+					regularTask.getSkill(), regularTask.getPaths()));
+			case ChoiceTask choiceTask -> convertToTaskListTaskView(choiceTask);
+			default -> null; // Unreachable
+		};
+	}
+
+	protected List<TaskListTaskView> convertToTaskListTaskView(ChoiceTask choiceTask) {
+		return choiceTask.getTasks().stream().map(taskInfo -> convertToTaskListTaskView(taskInfo,
+				choiceTask.getName(), choiceTask.getSkill(), choiceTask.getPaths())).toList();
+	}
+
+	protected TaskListTaskView convertToTaskListTaskView(TaskInfo task, String choiceTaskName, Skill skill,
+			Set<Path> paths) {
+		return new TaskListTaskView(
+				task.getId(),
+				task.getName(),
+				task.getType(),
+				task.getTime(),
+				task.getLink(),
+				choiceTaskName,
+				skill.getName(),
+				skill.getSubmodule().getName(),
+				skill.getSubmodule().getModule().getName(),
+				paths.stream().map(Path::getId).toList());
 	}
 }
