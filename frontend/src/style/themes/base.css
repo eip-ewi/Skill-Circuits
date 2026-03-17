@@ -32,6 +32,7 @@
     --group-border-colour: transparent;
     --group-border-radius: 1.5em;
     --on-group-colour: color-mix(in oklab, var(--group-colour) 80%, black);
+    --on-group-colour-higher-contrast: color-mix(in oklab, var(--group-colour) 30%, black);
 
     /* Checkpoints */
     --checkpoint-surface-border: none;

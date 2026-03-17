@@ -12,6 +12,7 @@
     import CatalogPage from "./pages/CatalogPage.svelte";
     import PrivacyPage from "./pages/PrivacyPage.svelte";
     import SettingsPage from "./pages/SettingsPage.svelte";
+    import EditionTasksPage from "./pages/EditionTasksPage.svelte";
 </script>
 
 <svelte:window onpopstate={reloadPageFromUrl}></svelte:window>
@@ -24,6 +25,9 @@
 
 {:else if pageMatches(/\/editions\/(\d+)/)}
     <EditionPage editionId={parseInt(extractPathVariable(/\/editions\/(\d+)/))}></EditionPage>
+
+{:else if pageMatches(/\/editions\/tasks\/(\d+)/)}
+    <EditionTasksPage editionId={parseInt(extractPathVariable(/\/editions\/tasks\/(\d+)/))}></EditionTasksPage>
 
 {:else if pageMatches(/\/modules\/(\d+)/)}
     <ModulePage moduleId={parseInt(extractPathVariable(/\/modules\/(\d+)/))}></ModulePage>

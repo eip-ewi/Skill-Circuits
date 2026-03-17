@@ -1,29 +1,23 @@
 <script lang="ts">
-    import CircuitComponent from "../components/circuit/CircuitComponent.svelte";
-    import WarningsComponent from "../components/WarningsComponent.svelte";
-    import type {Warning} from "../data/warning";
     import {setLevel} from "../logic/circuit/level.svelte";
     import {EditionLevel} from "../data/level";
     import {fetchCircuit, getCircuit} from "../logic/circuit/circuit.svelte";
-    import {fetchAuthorisation, getAuthorisation, toggleViewMode} from "../logic/authorisation.svelte";
+    import {toggleViewMode} from "../logic/authorisation.svelte";
     import {fetchDevMode} from "../logic/dev_mode.svelte";
-    import HeaderComponent from "../components/HeaderComponent.svelte";
-    import TrayComponent from "../components/side_controls/tray/TrayComponent.svelte";
-    import SideControlsComponent from "../components/side_controls/SideControlsComponent.svelte";
-    import ChoosePathComponent from "../components/ChoosePathComponent.svelte";
     import {fetchActivePath, fetchPathCustomisation} from "../logic/edition/active_path.svelte";
     import {fetchEdition, getEdition} from "../logic/edition/edition.svelte";
     import PageLayout from "./PageLayout.svelte";
     import {getDevMode} from "../logic/dev_mode.svelte.js";
     import PageTabs from "../components/util/PageTabs.svelte";
     import Tab from "../components/util/Tab.svelte";
-    import {getPage} from "../logic/routing.svelte";
+    import TaskTable from "../components/task_table/TaskTable.svelte";
+    import type {TaskInTaskList} from "../dto/task_in_task_list";
 
     let { editionId }: { editionId: number } = $props();
 
-    setLevel(EditionLevel);
+    let tasks : TaskInTaskList[] = $state([]);
 
-    let warnings: Warning[] = $state([]);
+    setLevel(EditionLevel);
 
     async function load() {
         await fetchEdition(editionId);
@@ -31,6 +25,12 @@
         await fetchActivePath();
         await fetchPathCustomisation();
         await fetchDevMode();
+        await fetchEditionTasks();
+    }
+
+    async function fetchEditionTasks() {
+        const response = await fetch(`/api/editions/${editionId}/tasks`);
+        tasks = await response.json();
     }
 </script>
 
@@ -52,14 +52,20 @@
     </PageTabs>
 
     {#await load() then _}
+        <h1>{getCircuit().name}</h1>
 
-        <WarningsComponent {warnings}></WarningsComponent>
-        {#key getCircuit()}
-            <CircuitComponent bind:warnings={warnings}></CircuitComponent>
-        {/key}
-        <SideControlsComponent></SideControlsComponent>
-        <ChoosePathComponent></ChoosePathComponent>
-
+        <TaskTable tasks={tasks}></TaskTable>
     {/await}
 
 </PageLayout>
+
+<style>
+
+    h1 {
+        color: var(--on-background-colour);
+        font-size: var(--font-size-700);
+        font-weight: 500;
+        text-align: center;
+    }
+
+</style>
