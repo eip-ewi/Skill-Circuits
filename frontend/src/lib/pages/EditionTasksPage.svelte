@@ -2,7 +2,7 @@
     import {setLevel} from "../logic/circuit/level.svelte";
     import {EditionLevel} from "../data/level";
     import {fetchCircuit, getCircuit} from "../logic/circuit/circuit.svelte";
-    import {toggleViewMode} from "../logic/authorisation.svelte";
+    import {canEditCircuit, toggleViewMode} from "../logic/authorisation.svelte";
     import {fetchDevMode} from "../logic/dev_mode.svelte";
     import {fetchActivePath, fetchPathCustomisation} from "../logic/edition/active_path.svelte";
     import {fetchEdition, getEdition} from "../logic/edition/edition.svelte";
@@ -12,6 +12,7 @@
     import Tab from "../components/util/Tab.svelte";
     import TaskTable from "../components/task_table/TaskTable.svelte";
     import type {TaskInTaskList} from "../dto/task_in_task_list";
+    import {loadPage} from "../logic/routing.svelte";
 
     let { editionId }: { editionId: number } = $props();
 
@@ -27,6 +28,12 @@
         await fetchDevMode();
         await fetchEditionTasks();
     }
+
+    $effect(() => {
+        if (!canEditCircuit()) {
+            loadPage(`/editions/${editionId}`, true);
+        }
+    })
 
     async function fetchEditionTasks() {
         const response = await fetch(`/api/editions/${editionId}/tasks`);
@@ -45,19 +52,21 @@
 
 </svelte:head>
 
-<PageLayout fullWidth>
-    <PageTabs>
-        <Tab page={`/editions/${editionId}`}>Circuit</Tab>
-        <Tab page={`/editions/tasks/${editionId}`}>Task list</Tab>
-    </PageTabs>
+{#if canEditCircuit()}
+    <PageLayout fullWidth>
+        <PageTabs>
+            <Tab page={`/editions/${editionId}`}>Circuit</Tab>
+            <Tab page={`/editions/tasks/${editionId}`}>Task list</Tab>
+        </PageTabs>
 
-    {#await load() then _}
-        <h1>{getCircuit().name}</h1>
+        {#await load() then _}
+            <h1>{getCircuit().name}</h1>
 
-        <TaskTable tasks={tasks}></TaskTable>
-    {/await}
+            <TaskTable tasks={tasks}></TaskTable>
+        {/await}
 
-</PageLayout>
+    </PageLayout>
+{/if}
 
 <style>
 

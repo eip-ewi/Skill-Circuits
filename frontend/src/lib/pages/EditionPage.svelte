@@ -5,7 +5,7 @@
     import {setLevel} from "../logic/circuit/level.svelte";
     import {EditionLevel} from "../data/level";
     import {fetchCircuit, getCircuit} from "../logic/circuit/circuit.svelte";
-    import {fetchAuthorisation, getAuthorisation, toggleViewMode} from "../logic/authorisation.svelte";
+    import {canEditCircuit, fetchAuthorisation, getAuthorisation, toggleViewMode} from "../logic/authorisation.svelte";
     import {fetchDevMode} from "../logic/dev_mode.svelte";
     import HeaderComponent from "../components/HeaderComponent.svelte";
     import TrayComponent from "../components/side_controls/tray/TrayComponent.svelte";
@@ -46,10 +46,12 @@
 </svelte:head>
 
 <PageLayout fullWidth>
-    <PageTabs>
-        <Tab page={`/editions/${editionId}`}>Circuit</Tab>
-        <Tab page={`/editions/tasks/${editionId}`}>Task list</Tab>
-    </PageTabs>
+    {#if canEditCircuit()}
+        <PageTabs>
+            <Tab page={`/editions/${editionId}`}>Circuit</Tab>
+            <Tab page={`/editions/tasks/${editionId}`}>Task list</Tab>
+        </PageTabs>
+    {/if}
 
     {#await load() then _}
 
