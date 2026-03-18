@@ -21,15 +21,57 @@ import java.util.List;
 
 import nl.tudelft.skills.enums.TaskType;
 
-public record TaskListTaskView(
-		Long infoId,
-		String name,
-		TaskType type,
-		int time,
-		String link,
-		String choiceTaskName,
-		String skillName,
-		String submoduleName,
-		String moduleName,
-		List<Long> paths) {
+public sealed interface TaskListTaskView {
+
+    record Regular(
+            long id,
+            long infoId,
+            String name,
+            TaskType type,
+            int time,
+            String link,
+            String skillName,
+            String submoduleName,
+            String moduleName,
+            List<Long> paths) implements TaskListTaskView {
+        @Override
+        public String getTaskType() {
+            return "regular";
+        }
+    }
+
+    record Choice(
+            long id,
+            String name,
+            int minTasks,
+            String skillName,
+            String submoduleName,
+            String moduleName,
+            List<ChoiceTaskChoiceView> tasks,
+            List<Long> paths) implements TaskListTaskView {
+        @Override
+        public String getTaskType() {
+            return "choice";
+        }
+    }
+
+    record ChoiceTaskChoiceView(
+            long infoId,
+            String name,
+            TaskType type,
+            int time,
+            String link) {
+        public String getTaskType() {
+            return "choice";
+        }
+    }
+
+    List<Long> paths();
+
+    String getTaskType();
+
+    default String getItemType() {
+        return "task";
+    }
+
 }

@@ -128,32 +128,47 @@ public class TaskService {
 		taskRepository.delete(task);
 	}
 
-	public List<TaskListTaskView> convertToTaskListTaskView(Task task) {
+	public TaskListTaskView convertToTaskListTaskView(Task task) {
 		return switch (task) {
-			case RegularTask regularTask -> List.of(convertToTaskListTaskView(regularTask.getTaskInfo(), null,
-					regularTask.getSkill(), regularTask.getPaths()));
+			case RegularTask regularTask -> convertToTaskListTaskView(regularTask);
 			case ChoiceTask choiceTask -> convertToTaskListTaskView(choiceTask);
 			default -> null; // Unreachable
 		};
 	}
-
-	protected List<TaskListTaskView> convertToTaskListTaskView(ChoiceTask choiceTask) {
-		return choiceTask.getTasks().stream().map(taskInfo -> convertToTaskListTaskView(taskInfo,
-				choiceTask.getName(), choiceTask.getSkill(), choiceTask.getPaths())).toList();
-	}
-
-	protected TaskListTaskView convertToTaskListTaskView(TaskInfo task, String choiceTaskName, Skill skill,
-			Set<Path> paths) {
-		return new TaskListTaskView(
+	protected TaskListTaskView convertToTaskListTaskView(RegularTask task) {
+		return new TaskListTaskView.Regular(
 				task.getId(),
+                task.getTaskInfo().getId(),
 				task.getName(),
 				task.getType(),
 				task.getTime(),
 				task.getLink(),
-				choiceTaskName,
-				skill.getName(),
-				skill.getSubmodule().getName(),
-				skill.getSubmodule().getModule().getName(),
-				paths.stream().map(Path::getId).toList());
+                task.getSkill().getName(),
+                task.getSkill().getSubmodule().getName(),
+                task.getSkill().getSubmodule().getModule().getName(),
+				task.getPaths().stream().map(Path::getId).toList());
 	}
+
+    protected TaskListTaskView convertToTaskListTaskView(ChoiceTask task) {
+        return new TaskListTaskView.Choice(
+                task.getId(),
+                task.getName(),
+                task.getMinTasks(),
+                task.getSkill().getName(),
+                task.getSkill().getSubmodule().getName(),
+                task.getSkill().getSubmodule().getModule().getName(),
+                task.getTasks().stream().map(this::convertToTaskListChoiceView).toList(),
+                task.getPaths().stream().map(Path::getId).toList()
+        );
+    }
+
+    protected TaskListTaskView.ChoiceTaskChoiceView convertToTaskListChoiceView(TaskInfo taskInfo) {
+        return new TaskListTaskView.ChoiceTaskChoiceView(
+            taskInfo.getId(),
+            taskInfo.getName(),
+            taskInfo.getType(),
+            taskInfo.getTime(),
+            taskInfo.getLink()
+        );
+    }
 }

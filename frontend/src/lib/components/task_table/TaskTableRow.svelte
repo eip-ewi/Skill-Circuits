@@ -1,14 +1,28 @@
 <script lang="ts">
-    import type {TaskInTaskList} from "../../dto/task_in_task_list";
+    import type {TaskInfoInTaskList, TaskInTaskList} from "../../dto/task_in_task_list";
+    import {TaskIcons} from "../../dto/task_icons";
+    import Link from "../util/Link.svelte";
 
-    let { task } : { task: TaskInTaskList } = $props();
+    let { task, taskInfo } : { task: TaskInTaskList, taskInfo: TaskInfoInTaskList } = $props();
 </script>
 
 <tr>
-    <th>{task.name}</th>
+    <th>{taskInfo.name}</th>
+    <th> <span class="icon fa-solid fa-{TaskIcons[taskInfo.type]}"></span> </th>
+    <th>{taskInfo.time}</th>
     <th>{task.skillName}</th>
     <th>{task.submoduleName}</th>
-    <th>{task.link ?? "-"}</th>
+    <th>{task.moduleName}</th>
+    <th>
+        {#if taskInfo.link === null}
+            -
+        {:else}
+            <Link href={taskInfo.link} target="_blank">
+                <span>{taskInfo.link}</span>
+            </Link>
+        {/if}
+    </th>
+    <th>TODO</th>
 </tr>
 
 <style>

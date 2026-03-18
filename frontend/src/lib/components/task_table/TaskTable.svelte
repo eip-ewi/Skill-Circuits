@@ -9,14 +9,25 @@
     <thead class="table_header">
         <tr>
             <th>Task</th>
+            <th>Type</th>
+            <th>Time</th>
             <th>Skill</th>
             <th>Submodule</th>
+            <th>Module</th>
             <th>Link</th>
+            <th>Paths</th>
         </tr>
     </thead>
     <tbody>
         {#each tasks as task}
-            <TaskTableRow task={task}></TaskTableRow>
+            {#if task.taskType === "regular"}
+                <TaskTableRow task={task} taskInfo={task}></TaskTableRow>
+            {/if}
+            {#if task.taskType === "choice"}
+                {#each task.tasks as subtask}
+                    <TaskTableRow task={task} taskInfo={subtask}></TaskTableRow>
+                {/each}
+            {/if}
         {/each}
     </tbody>
 </table>
@@ -28,7 +39,7 @@
         margin-right: auto;
         text-align: left;
         padding: 1em;
-        font-size: var(--font-size-500);
+        font-size: var(--font-size-300);
         background-color: var(--group-colour);
         color: var(--on-group-colour-higher-contrast);
         border-radius: var(--group-border-radius);

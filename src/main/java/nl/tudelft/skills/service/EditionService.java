@@ -212,7 +212,7 @@ public class EditionService {
 				.flatMap(m -> m.getSubmodules().stream())
 				.flatMap(sm -> sm.getSkills().stream())
 				.flatMap(s -> s.getTasks().stream())
-				.flatMap(t -> taskService.convertToTaskListTaskView(t).stream())
+				.map(taskService::convertToTaskListTaskView)
 				.toList();
 	}
 }
