@@ -147,19 +147,23 @@ public final class EditionScripts {
 		navigateTo(edition);
 
 		locators.button("Open tray").click();
+		LocatorLocators trayPanel = locators.query(".panel[aria-expanded='true']")
+				.withChild(locators.heading("Tray"));
+		trayPanel.waitFor();
 
-		LocatorLocators newSubmodule = locators.query(".panel").withChild(locators.heading("Tray"))
-				.query(".block").heading("New submodule");
-		newSubmodule.hover();
-		session.page().mouse().down();
-		locators.query(".header").hover();
-		locators.query(".column").hover();
-		session.page().mouse().up();
+		LocatorLocators newSubmodule = trayPanel.query(".block").withChild(locators.text("New submodule"));
+		newSubmodule.waitFor();
+		LocatorLocators firstColumn = locators.query(".column").apply(Locator::first);
+		firstColumn.waitFor();
+		newSubmodule.locator().dragTo(firstColumn.locator());
 
 		LocatorLocators created = locators.query(".block-wrapper").withChild(locators.text("New submodule"));
+		created.waitFor();
 		created.hover();
 		created.hover(1, 1);
-		created.query(".controls").button("Edit").click();
+		LocatorLocators editButton = created.query(".controls").button("Edit");
+		editButton.waitFor();
+		editButton.click();
 		locators.label("Edit submodule name").fill(name);
 		locators.query(".controls").button("Stop editing").click();
 	}
