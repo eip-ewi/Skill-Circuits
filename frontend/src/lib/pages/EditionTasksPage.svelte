@@ -54,12 +54,12 @@
 
 {#if canEditCircuit()}
     <PageLayout fullWidth>
-        <PageTabs>
-            <Tab page={`/editions/${editionId}`}>Circuit</Tab>
-            <Tab page={`/editions/tasks/${editionId}`}>Task list</Tab>
-        </PageTabs>
-
         {#await load() then _}
+            <PageTabs>
+                <Tab page={`/editions/${editionId}`}>Circuit</Tab>
+                <Tab page={`/editions/tasks/${editionId}`}>Task list</Tab>
+            </PageTabs>
+
             <h1>{getCircuit().name}</h1>
 
             <TaskTable tasks={tasks}></TaskTable>

@@ -46,14 +46,14 @@
 </svelte:head>
 
 <PageLayout fullWidth>
-    {#if canEditCircuit()}
-        <PageTabs>
-            <Tab page={`/editions/${editionId}`}>Circuit</Tab>
-            <Tab page={`/editions/tasks/${editionId}`}>Task list</Tab>
-        </PageTabs>
-    {/if}
-
     {#await load() then _}
+        {#if canEditCircuit()}
+            <PageTabs>
+                <Tab page={`/editions/${editionId}`}>Circuit</Tab>
+                <Tab page={`/editions/tasks/${editionId}`}>Task list</Tab>
+            </PageTabs>
+        {/if}
+
 
         <WarningsComponent {warnings}></WarningsComponent>
         {#key getCircuit()}
