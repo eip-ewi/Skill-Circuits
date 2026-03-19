@@ -5,12 +5,38 @@ import type {Block} from "../../dto/circuit/block";
 import {getAuthorisation, hasEditorRights, isTeacherForCircuit} from "../authorisation.svelte";
 import type {TaskItem} from "../../dto/circuit/module/task";
 
-let activePath: Path | null = $state(null);
-let tasksAdded: number[] = $state([]);
-let tasksRemoved: number[] = $state([]);
+export const pathState: {activePath: Path | null, tasksAdded: number[], tasksRemoved: number[]} = $state(
+    {
+        activePath: null,
+        tasksAdded: [],
+        tasksRemoved: []
+    }
+)
+
+function removeTaskId(id: number, tasks: number[]): void {
+    let index = tasks.indexOf(id);
+    while (index !== -1) {
+        tasks.splice(index, 1);
+        index = tasks.indexOf(id);
+    }
+}
+
+function addTaskId (id: number, tasks: number[]): void {
+    if (!tasks.includes(id))
+        tasks.push(id);
+}
+
+function isTaskOnActivePathByDefault(task: TaskItem): boolean {
+    //for courses that don't have paths
+    if (pathState.activePath == null)
+        return true;
+
+    return task.paths.includes(pathState.activePath.id);
+}
+
 
 export function getActivePath(): Path | null {
-    return activePath;
+    return pathState.activePath;
 }
 
 function isTeacherPreviewMode(): boolean {
@@ -29,18 +55,18 @@ export function isTaskOnPath(task: TaskItem): boolean {
     const teacherPreview = isTeacherPreviewMode();
 
     // Teacher preview should not be affected by teacher-specific customisation.
-    if (!teacherPreview && tasksRemoved.includes(task.id)) {
+    if (!teacherPreview && pathState.tasksRemoved.includes(task.id)) {
         return false;
     }
-    if (!teacherPreview && tasksAdded.includes(task.id)) {
+    if (!teacherPreview && pathState.tasksAdded.includes(task.id)) {
         return true;
     }
 
-    if (activePath === null) {
+    if (pathState.activePath === null) {
         return true;
     }
 
-    return task.paths.length === 0 || task.paths.includes(activePath.id);
+    return task.paths.length === 0 || task.paths.includes(pathState.activePath.id);
 }
 
 export async function selectPath(path: Path) {
@@ -52,7 +78,7 @@ export async function selectPath(path: Path) {
     }));
 
     if (response.ok) {
-        activePath = path;
+        pathState.activePath = path;
     }
 }
 
@@ -60,41 +86,53 @@ export async function fetchActivePath() {
     let response = await fetch(`/api/paths/active?edition=${getEdition().id}`);
     let body = await response.text();
     if (body === "") {
-        activePath = null;
+        pathState.activePath = null;
     } else {
-        activePath = JSON.parse(body);
+        pathState.activePath = JSON.parse(body);
     }
 }
 
 export async function fetchPathCustomisation() {
     let response = await fetch(`/api/paths/customisation?edition=${getEdition().id}`);
     let customisation: { tasksAdded: number[], tasksRemoved: number[] } = await response.json();
-    tasksAdded = customisation.tasksAdded;
-    tasksRemoved = customisation.tasksRemoved;
+    pathState.tasksAdded = customisation.tasksAdded;
+    pathState.tasksRemoved = customisation.tasksRemoved;
 }
 
 export async function addTaskToPath(task: TaskItem) {
+    if (isTaskOnPath(task)) return;
+
     let response = await fetch(`/api/paths/tasks/${task.id}`, withCsrf({
         method: "POST",
     }));
+
     if (response.ok) {
-        if (tasksRemoved.includes(task.id)) {
-            tasksRemoved.splice(tasksRemoved.indexOf(task.id), 1);
+        // the task being in tasksAdded or tasksRemoved is relative to its default state on that path
+        if (isTaskOnActivePathByDefault(task)) {
+            removeTaskId(task.id, pathState.tasksRemoved);
+            removeTaskId(task.id, pathState.tasksAdded);
         } else {
-            tasksAdded.push(task.id);
+            addTaskId(task.id, pathState.tasksAdded);
+            removeTaskId(task.id, pathState.tasksRemoved);
         }
     }
 }
 
 export async function removeTaskFromPath(task: TaskItem) {
+    if (!isTaskOnPath(task)) return;
+
     let response = await fetch(`/api/paths/tasks/${task.id}`, withCsrf({
         method: "DELETE",
     }));
+
     if (response.ok) {
-        if (tasksAdded.includes(task.id)) {
-            tasksAdded.splice(tasksAdded.indexOf(task.id), 1);
+        // the task being in tasksAdded or tasksRemoved is relative to its default state on that path
+        if (isTaskOnActivePathByDefault(task)) {
+            removeTaskId(task.id, pathState.tasksAdded);
+            addTaskId(task.id, pathState.tasksRemoved);
         } else {
-            tasksRemoved.push(task.id);
+            removeTaskId(task.id, pathState.tasksAdded);
+            removeTaskId(task.id, pathState.tasksRemoved);
         }
     }
 }
