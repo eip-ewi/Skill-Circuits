@@ -1,16 +1,24 @@
 <script lang="ts">
-    import type {TaskInfoInTaskList, TaskInTaskList} from "../../dto/task_in_task_list";
+    import type {TaskInTaskList} from "../../dto/task_in_task_list";
     import {TaskIcons} from "../../dto/task_icons";
     import Link from "../util/Link.svelte";
     import TaskPathEditComponent from "../circuit/item/TaskPathEditComponent.svelte";
+    import type {TaskInfo} from "../../dto/circuit/module/task";
 
-    let { task, taskInfo } : { task: TaskInTaskList, taskInfo: TaskInfoInTaskList } = $props();
+    let { task, taskInfo } : { task: TaskInTaskList, taskInfo: TaskInfo } = $props();
 </script>
 
 <tr>
     <th>{taskInfo.name}</th>
     <th> <span class="icon fa-solid fa-{TaskIcons[taskInfo.type]}"></span> </th>
     <th>{taskInfo.time}</th>
+    <th>
+        {#if task.taskItem.taskType === "regular"}
+            No
+        {:else}
+            Yes
+        {/if}
+    </th>
     <th>{task.skillName}</th>
     <th>{task.submoduleName}</th>
     <th>{task.moduleName}</th>
@@ -24,8 +32,8 @@
         {/if}
     </th>
     <th>
-        {#if task.taskType === "regular"}
-            <TaskPathEditComponent task={task}></TaskPathEditComponent>
+        {#if task.taskItem.taskType === "regular"}
+            <TaskPathEditComponent task={task.taskItem}></TaskPathEditComponent>
         {:else}
             -
         {/if}

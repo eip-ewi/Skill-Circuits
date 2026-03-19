@@ -11,6 +11,7 @@
             <th>Task</th>
             <th>Type</th>
             <th>Time</th>
+            <th>Subtask?</th>
             <th>Skill</th>
             <th>Submodule</th>
             <th>Module</th>
@@ -20,11 +21,11 @@
     </thead>
     <tbody>
         {#each tasks as task}
-            {#if task.taskType === "regular"}
-                <TaskTableRow task={task} taskInfo={task}></TaskTableRow>
+            {#if task.taskItem.taskType === "regular"}
+                <TaskTableRow task={task} taskInfo={task.taskItem}></TaskTableRow>
             {/if}
-            {#if task.taskType === "choice"}
-                {#each task.tasks as subtask}
+            {#if task.taskItem.taskType === "choice"}
+                {#each task.taskItem.tasks as subtask}
                     <TaskTableRow task={task} taskInfo={subtask}></TaskTableRow>
                 {/each}
             {/if}
@@ -34,9 +35,7 @@
 
 <style>
     .task_table {
-        margin-top: 2em;
-        margin-left: auto;
-        margin-right: auto;
+        margin: 2em auto 4em;
         text-align: left;
         padding: 1em;
         font-size: var(--font-size-300);

@@ -54,6 +54,7 @@ public class EditionService {
 
 	private final EditionRepository editionRepository;
 	private final PersonRepository personRepository;
+	private final TaskCompletionRepository taskCompletionRepository;
 	private final DTOConverter dtoConverter;
 	private final TaskService taskService;
 
@@ -205,14 +206,15 @@ public class EditionService {
 		editionRepository.save(edition);
 	}
 
-	public List<TaskListTaskView> getTasksOfEdition(Long editionId) {
+	public List<TaskListTaskView> getTasksOfEdition(Long editionId, SCPerson person) {
 		SCEdition scEdition = editionRepository.getOrCreate(editionId);
+		Set<Long> completedTaskIds = taskCompletionRepository.findAllCompletedTaskIdsForPerson(person);
 
 		return scEdition.getModules().stream()
 				.flatMap(m -> m.getSubmodules().stream())
 				.flatMap(sm -> sm.getSkills().stream())
 				.flatMap(s -> s.getTasks().stream())
-				.map(taskService::convertToTaskListTaskView)
+				.map(t -> taskService.convertToTaskListTaskView(t, completedTaskIds))
 				.toList();
 	}
 }

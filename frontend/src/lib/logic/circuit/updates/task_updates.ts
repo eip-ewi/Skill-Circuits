@@ -131,7 +131,7 @@ export async function editTaskLink(task: TaskInfo, newLink: string) {
     }
 }
 
-export async function editTaskPaths(task: TaskItem | TaskInTaskList, newPaths: number[]) {
+export async function editTaskPaths(task: TaskItem, newPaths: number[]) {
     let oldPaths = task.paths;
     task.paths = newPaths;
 

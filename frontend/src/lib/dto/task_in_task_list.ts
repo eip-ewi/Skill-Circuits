@@ -1,22 +1,13 @@
-export interface ITaskInTaskList {
-    id: number;
-    paths: number[];
+import type {TaskItem} from "./circuit/module/task";
+
+export interface TaskInTaskList {
+    taskItem: TaskItem;
     skillName: string;
     submoduleName: string;
     moduleName: string;
-
-    itemType: "task";
 }
 
-export interface ITaskInfoInTaskList {
-    infoId: number;
-    name: string;
-    type: string;
-    time: number;
-    link: string | null;
-}
-
-export interface RegularTaskInTaskList extends ITaskInTaskList, ITaskInfoInTaskList {
+/* export interface RegularTaskInTaskList extends ITaskInTaskList, ITaskInfoInTaskList {
     taskType: "regular";
 }
 
@@ -29,7 +20,7 @@ export interface ChoiceTaskInTaskList extends ITaskInTaskList {
     tasks: ChoiceTaskChoiceInTaskList[];
 
     taskType: "choice";
-}
+} */
 
-export type TaskInTaskList = RegularTaskInTaskList | ChoiceTaskInTaskList;
-export type TaskInfoInTaskList = ITaskInfoInTaskList | ChoiceTaskChoiceInTaskList;
+// export type TaskInTaskList = RegularTaskInTaskList | ChoiceTaskInTaskList;
+// export type TaskInfoInTaskList = ITaskInfoInTaskList | ChoiceTaskChoiceInTaskList;

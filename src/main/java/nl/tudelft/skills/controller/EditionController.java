@@ -81,8 +81,9 @@ public class EditionController {
 
 	@GetMapping("{editionId}/tasks")
 	@PreAuthorize("@authorisationService.canViewEdition(#editionId)")
-	public List<TaskListTaskView> getTasksOfEdition(@PathVariable Long editionId) {
-		return editionService.getTasksOfEdition(editionId);
+	public List<TaskListTaskView> getTasksOfEdition(@AuthenticatedSCPerson SCPerson person,
+			@PathVariable Long editionId) {
+		return editionService.getTasksOfEdition(editionId, person);
 	}
 
 	@PostMapping("{editionId}/join")
