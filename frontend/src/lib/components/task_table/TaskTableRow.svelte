@@ -2,6 +2,7 @@
     import type {TaskInfoInTaskList, TaskInTaskList} from "../../dto/task_in_task_list";
     import {TaskIcons} from "../../dto/task_icons";
     import Link from "../util/Link.svelte";
+    import TaskPathEditComponent from "../circuit/item/TaskPathEditComponent.svelte";
 
     let { task, taskInfo } : { task: TaskInTaskList, taskInfo: TaskInfoInTaskList } = $props();
 </script>
@@ -22,12 +23,18 @@
             </Link>
         {/if}
     </th>
-    <th>TODO</th>
+    <th>
+        {#if task.taskType === "regular"}
+            <TaskPathEditComponent task={task}></TaskPathEditComponent>
+        {:else}
+            -
+        {/if}
+    </th>
 </tr>
 
 <style>
     th {
-        padding: 0.2em 1em;
+        padding: 0.6em 1em;
     }
 
     th:not(:first-child) {

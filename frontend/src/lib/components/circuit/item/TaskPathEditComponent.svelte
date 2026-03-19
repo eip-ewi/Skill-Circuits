@@ -5,8 +5,9 @@
     import {editTaskPaths} from "../../../logic/circuit/updates/task_updates";
     import {getPaths} from "../../../logic/edition/edition.svelte";
     import Button from "../../util/Button.svelte";
+    import type {TaskInTaskList} from "../../../dto/task_in_task_list";
 
-    let { task }: { task: TaskItem } = $props();
+    let { task }: { task: TaskItem | TaskInTaskList } = $props();
 
     async function editPath(event: Event) {
         let newPaths = Array.from((event.target as HTMLSelectElement).selectedOptions).map(option => parseInt(option.value));

@@ -7,6 +7,7 @@ import type {Item} from "../../../dto/circuit/item";
 import {getBlockForItem, getBlocks} from "../circuit.svelte";
 import {getBookmarks} from "../../bookmarks.svelte";
 import {addRevealedSkills} from "../unlocked_skills.svelte";
+import type {TaskInTaskList} from "../../../dto/task_in_task_list";
 
 export async function toggleTaskCompletion(task: TaskInfo) {
     task.completed = !task.completed;
@@ -130,7 +131,7 @@ export async function editTaskLink(task: TaskInfo, newLink: string) {
     }
 }
 
-export async function editTaskPaths(task: TaskItem, newPaths: number[]) {
+export async function editTaskPaths(task: TaskItem | TaskInTaskList, newPaths: number[]) {
     let oldPaths = task.paths;
     task.paths = newPaths;
 

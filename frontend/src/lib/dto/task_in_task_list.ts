@@ -1,4 +1,5 @@
 export interface ITaskInTaskList {
+    id: number;
     paths: number[];
     skillName: string;
     submoduleName: string;
