@@ -10,15 +10,13 @@
 
 <tr>
     <th>{taskInfo.name}</th>
-    <th> <span class="icon fa-solid fa-{TaskIcons[taskInfo.type]}"></span> </th>
-    <th>{taskInfo.time}</th>
     <th>
-        {#if task.taskItem.taskType === "regular"}
-            No
-        {:else}
-            Yes
+        <span class="icon fa-solid fa-{TaskIcons[taskInfo.type]}"></span>
+        {#if task.taskItem.taskType === "choice"}
+            {' '}&#8712; <span class="icon fa-solid fa-shapes"></span>
         {/if}
     </th>
+    <th>{taskInfo.time}</th>
     <th>{task.skillName}</th>
     <th>{task.submoduleName}</th>
     <th>{task.moduleName}</th>

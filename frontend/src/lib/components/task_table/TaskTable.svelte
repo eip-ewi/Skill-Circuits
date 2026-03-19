@@ -11,7 +11,6 @@
             <th>Task</th>
             <th>Type</th>
             <th>Time</th>
-            <th>Subtask?</th>
             <th>Skill</th>
             <th>Submodule</th>
             <th>Module</th>
