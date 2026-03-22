@@ -1,33 +1,57 @@
 <script lang="ts">
     import TaskTableRow from "./TaskTableRow.svelte";
     import type {TaskInTaskList} from "../../dto/task_in_task_list";
+    import Button from "../util/Button.svelte";
+    import {getColumns} from "../../logic/task_table.svelte";
+    import type {TaskTableColumn} from "../../data/task_table_column";
 
     let { tasks } : { tasks: TaskInTaskList[] } = $props();
+
+    function sortByColumn(columnIdx: number, order: -1 | 1) {
+        let column: TaskTableColumn = getColumns()[columnIdx]!;
+        tasks.sort(((a: TaskInTaskList, b: TaskInTaskList) => column.sortAsc(a, b) * order));
+
+        getColumns().forEach((col, idx) => {
+            if (!col.sortable) return;
+
+            if (idx == columnIdx) {
+                col.sortStatus = order;
+            } else {
+                col.sortStatus = 0;
+            }
+
+        });
+    }
 </script>
 
 <table class="task_table">
     <thead class="table_header">
         <tr>
-            <th>Task</th>
-            <th>Type</th>
-            <th>Time</th>
-            <th>Skill</th>
-            <th>Submodule</th>
-            <th>Module</th>
-            <th>Link</th>
-            <th>Paths</th>
+            {#each getColumns() as column, index}
+                <th>
+                    <div class="cell-wrapper">
+                        {column.name}
+                        {#if column.sortStatus === -1}
+                            <Button aria-label="Sort ascendingly by {column.name}" onclick={() => {sortByColumn(index, 1)}} square={true} style="margin-left: 1em; font-size: var(--font-size-100)">
+                                <i class="fa-solid fa-caret-down"></i>
+                            </Button>
+                        {:else if column.sortStatus === 0}
+                            <Button aria-label="Sort by {column.name}" onclick={() => {sortByColumn(index, -1)}} square={true} style="margin-left: 1em; font-size: var(--font-size-100)">
+                                <i class="fa-solid fa-sort"></i>
+                            </Button>
+                        {:else if column.sortStatus === 1}
+                            <Button aria-label="Sort descendingly by {column.name}" onclick={() => {sortByColumn(index, -1)}} square={true} style="margin-left: 1em; font-size: var(--font-size-100)">
+                                <i class="fa-solid fa-caret-up"></i>
+                            </Button>
+                        {/if}
+                    </div>
+                </th>
+            {/each}
         </tr>
     </thead>
     <tbody>
         {#each tasks as task}
-            {#if task.taskItem.taskType === "regular"}
-                <TaskTableRow task={task} taskInfo={task.taskItem}></TaskTableRow>
-            {/if}
-            {#if task.taskItem.taskType === "choice"}
-                {#each task.taskItem.tasks as subtask}
-                    <TaskTableRow task={task} taskInfo={subtask}></TaskTableRow>
-                {/each}
-            {/if}
+            <TaskTableRow task={task}></TaskTableRow>
         {/each}
     </tbody>
 </table>
@@ -56,5 +80,10 @@
 
     th:not(:first-child) {
         border-left: 2px solid var(--on-group-colour);
+    }
+
+    .cell-wrapper {
+        display: flex;
+        justify-content: space-between;
     }
 </style>
