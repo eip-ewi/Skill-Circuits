@@ -41,7 +41,8 @@
 
 <style>
     th {
-        padding: 0.6em 1em;
+        padding: 0 1em;
+        height: 3.2em;
     }
 
     th:not(:first-child) {

@@ -3,23 +3,21 @@
     import type {TaskInTaskList} from "../../dto/task_in_task_list";
     import Button from "../util/Button.svelte";
     import {getColumns} from "../../logic/task_table.svelte";
-    import type {TaskTableColumn} from "../../data/task_table_column";
+    import type {SortableTaskTableColumn} from "../../data/task_table_column";
 
     let { tasks } : { tasks: TaskInTaskList[] } = $props();
 
-    function sortByColumn(columnIdx: number, order: -1 | 1) {
-        let column: TaskTableColumn = getColumns()[columnIdx]!;
+    function sortByColumn(column: SortableTaskTableColumn, order: -1 | 1) {
         tasks.sort(((a: TaskInTaskList, b: TaskInTaskList) => column.sortAsc(a, b) * order));
 
-        getColumns().forEach((col, idx) => {
-            if (!col.sortable) return;
-
-            if (idx == columnIdx) {
-                col.sortStatus = order;
-            } else {
-                col.sortStatus = 0;
+        getColumns().forEach(col => {
+            if (col.sortable) {
+                if (col === column) {
+                    col.sortStatus = order;
+                } else {
+                    col.sortStatus = 0;
+                }
             }
-
         });
     }
 </script>
@@ -27,22 +25,24 @@
 <table class="task_table">
     <thead class="table_header">
         <tr>
-            {#each getColumns() as column, index}
+            {#each getColumns() as column}
                 <th>
                     <div class="cell-wrapper">
                         {column.name}
-                        {#if column.sortStatus === -1}
-                            <Button aria-label="Sort ascendingly by {column.name}" onclick={() => {sortByColumn(index, 1)}} square={true} style="margin-left: 1em; font-size: var(--font-size-100)">
-                                <i class="fa-solid fa-caret-down"></i>
-                            </Button>
-                        {:else if column.sortStatus === 0}
-                            <Button aria-label="Sort by {column.name}" onclick={() => {sortByColumn(index, -1)}} square={true} style="margin-left: 1em; font-size: var(--font-size-100)">
-                                <i class="fa-solid fa-sort"></i>
-                            </Button>
-                        {:else if column.sortStatus === 1}
-                            <Button aria-label="Sort descendingly by {column.name}" onclick={() => {sortByColumn(index, -1)}} square={true} style="margin-left: 1em; font-size: var(--font-size-100)">
-                                <i class="fa-solid fa-caret-up"></i>
-                            </Button>
+                        {#if column.sortable}
+                            {#if column.sortStatus === -1}
+                                <Button aria-label="Sort ascendingly by {column.name}" onclick={() => {sortByColumn(column, 1)}} square={true} style="margin-left: 1em; font-size: var(--font-size-100)">
+                                    <i class="fa-solid fa-caret-down"></i>
+                                </Button>
+                            {:else if column.sortStatus === 0}
+                                <Button aria-label="Sort by {column.name}" onclick={() => {sortByColumn(column, -1)}} square={true} style="margin-left: 1em; font-size: var(--font-size-100)">
+                                    <i class="fa-solid fa-sort"></i>
+                                </Button>
+                            {:else if column.sortStatus === 1}
+                                <Button aria-label="Sort descendingly by {column.name}" onclick={() => {sortByColumn(column, -1)}} square={true} style="margin-left: 1em; font-size: var(--font-size-100)">
+                                    <i class="fa-solid fa-caret-up"></i>
+                                </Button>
+                            {/if}
                         {/if}
                     </div>
                 </th>

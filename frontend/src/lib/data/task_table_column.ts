@@ -1,15 +1,17 @@
 import type {TaskInTaskList} from "../dto/task_in_task_list";
 
-export interface TaskTableColumn {
+export interface ITaskTableColumn {
     name: string;
 }
 
-export interface SortableTaskTableColumn extends TaskTableColumn {
+export interface SortableTaskTableColumn extends ITaskTableColumn {
     sortable: true;
-    sortStatus: -1 | 0 | 1 | undefined;
-    sortAsc: undefined | ((a: TaskInTaskList, b: TaskInTaskList) => number);
+    sortStatus: -1 | 0 | 1;
+    sortAsc: ((a: TaskInTaskList, b: TaskInTaskList) => number);
 }
 
-export interface UnsortableTaskTableColumn extends TaskTableColumn {
+export interface UnsortableTaskTableColumn extends ITaskTableColumn {
     sortable: false;
 }
+
+export type TaskTableColumn = SortableTaskTableColumn | UnsortableTaskTableColumn;
