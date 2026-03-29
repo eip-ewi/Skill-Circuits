@@ -30,7 +30,7 @@
     }
 
     $effect(() => {
-        if (!canEditCircuit()) {
+        if (getCircuit() !== undefined && !canEditCircuit()) {
             loadPage(`/editions/${editionId}`, true);
         }
     })
@@ -52,21 +52,20 @@
 
 </svelte:head>
 
-{#if canEditCircuit()}
-    <PageLayout fullWidth>
-        {#await load() then _}
-            <PageTabs>
-                <Tab page={`/editions/${editionId}`}>Circuit</Tab>
-                <Tab page={`/editions/tasks/${editionId}`}>Task list</Tab>
-            </PageTabs>
+{#await load() then _}
+    {#if canEditCircuit()}
+        <PageLayout fullWidth>
+                <PageTabs>
+                    <Tab page={`/editions/${editionId}`}>Circuit</Tab>
+                    <Tab page={`/editions/tasks/${editionId}`}>Task list</Tab>
+                </PageTabs>
 
-            <h1>{getCircuit().name}</h1>
+                <h1>{getCircuit().name}</h1>
 
-            <TaskTable tasks={tasks}></TaskTable>
-        {/await}
-
-    </PageLayout>
-{/if}
+                <TaskTable tasks={tasks}></TaskTable>
+        </PageLayout>
+    {/if}
+{/await}
 
 <style>
 
