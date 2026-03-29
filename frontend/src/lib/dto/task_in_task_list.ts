@@ -1,8 +1,8 @@
-import type {ITaskInfo, ITaskItem, TaskInfo, TaskItem} from "./circuit/module/task";
+import type {TaskInfo, TaskItem} from "./circuit/module/task";
 
 export interface TaskInTaskList {
     taskItem: TaskItem;
-    taskInfo: TaskInfo | undefined;
+    taskInfo: TaskInfo;
     skillName: string;
     submoduleName: string;
     moduleName: string;

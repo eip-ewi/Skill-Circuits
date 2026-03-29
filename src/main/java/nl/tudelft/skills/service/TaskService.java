@@ -20,6 +20,7 @@ package nl.tudelft.skills.service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +32,10 @@ import nl.tudelft.skills.dto.create.RegularTaskCreate;
 import nl.tudelft.skills.dto.patch.ChoiceTaskPatch;
 import nl.tudelft.skills.dto.patch.TaskMove;
 import nl.tudelft.skills.dto.patch.TaskPatch;
-import nl.tudelft.skills.dto.view.TaskListTaskView;
+import nl.tudelft.skills.dto.view.circuit.module.ModuleLevelTaskView;
+import nl.tudelft.skills.dto.view.tasklist.TaskListChoiceView;
+import nl.tudelft.skills.dto.view.tasklist.TaskListRegularView;
+import nl.tudelft.skills.dto.view.tasklist.TaskListTaskView;
 import nl.tudelft.skills.enums.TaskType;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.TaskInfoRepository;
@@ -129,11 +133,32 @@ public class TaskService {
 		taskRepository.delete(task);
 	}
 
-	public TaskListTaskView convertToTaskListTaskView(Task task, Set<Long> completedTaskIds) {
-		return new TaskListTaskView(
-				moduleCircuitService.convertToTaskView(task, completedTaskIds),
+	public Set<TaskListTaskView> convertToTaskListTaskView(Task task, Set<Long> completedTaskIds) {
+		return switch (task) {
+			case RegularTask regularTask -> Set.of(convertToTaskListTaskView(regularTask, completedTaskIds));
+			case ChoiceTask choiceTask -> convertToTaskListTaskView(choiceTask, completedTaskIds);
+			default -> null; // Unreachable
+		};
+	}
+
+	public TaskListTaskView convertToTaskListTaskView(RegularTask task, Set<Long> completedTaskIds) {
+		ModuleLevelTaskView taskView = moduleCircuitService.convertToTaskView(task, completedTaskIds);
+		return new TaskListRegularView(
+				taskView,
+				taskView,
 				task.getSkill().getName(),
 				task.getSkill().getSubmodule().getName(),
 				task.getSkill().getSubmodule().getModule().getName());
+	}
+
+	public Set<TaskListTaskView> convertToTaskListTaskView(ChoiceTask task, Set<Long> completedTaskIds) {
+		ModuleLevelTaskView.Choice choiceTaskView = (ModuleLevelTaskView.Choice) moduleCircuitService
+				.convertToTaskView(task, completedTaskIds);
+		return choiceTaskView.tasks().stream().map(choice -> new TaskListChoiceView(
+				choiceTaskView,
+				choice,
+				task.getSkill().getName(),
+				task.getSkill().getSubmodule().getName(),
+				task.getSkill().getSubmodule().getModule().getName())).collect(Collectors.toSet());
 	}
 }

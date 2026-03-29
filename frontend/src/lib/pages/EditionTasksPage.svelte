@@ -38,16 +38,6 @@
     async function fetchEditionTasks() {
         const response = await fetch(`/api/editions/${editionId}/tasks`);
         tasks = await response.json();
-        tasks = tasks.flatMap((task) => {
-            if (task.taskItem.taskType === "regular") {
-                task.taskInfo = task.taskItem;
-                return [task];
-            }
-            return task.taskItem.tasks.map((choice) => {
-                task.taskInfo = choice;
-                return task;
-            });
-        });
     }
 </script>
 

@@ -15,13 +15,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.dto.view;
+package nl.tudelft.skills.dto.view.tasklist;
 
 import nl.tudelft.skills.dto.view.circuit.module.ModuleLevelTaskView;
 
-public record TaskListTaskView(
+public record TaskListChoiceView(
 		ModuleLevelTaskView taskItem,
+		ModuleLevelTaskView.ChoiceTaskChoiceView taskInfo,
 		String skillName,
 		String submoduleName,
-		String moduleName) {
+		String moduleName) implements TaskListTaskView {
 }

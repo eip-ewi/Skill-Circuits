@@ -35,7 +35,7 @@ import nl.tudelft.labracore.api.dto.EditionDetailsDTO;
 import nl.tudelft.librador.dto.DTOConverter;
 import nl.tudelft.skills.dto.patch.EditionPatch;
 import nl.tudelft.skills.dto.view.*;
-import nl.tudelft.skills.model.*;
+import nl.tudelft.skills.dto.view.tasklist.TaskListTaskView;
 import nl.tudelft.skills.model.SCEdition;
 import nl.tudelft.skills.model.SCPerson;
 import nl.tudelft.skills.repository.*;
@@ -214,7 +214,7 @@ public class EditionService {
 				.flatMap(m -> m.getSubmodules().stream())
 				.flatMap(sm -> sm.getSkills().stream())
 				.flatMap(s -> s.getTasks().stream())
-				.map(t -> taskService.convertToTaskListTaskView(t, completedTaskIds))
+				.flatMap(t -> taskService.convertToTaskListTaskView(t, completedTaskIds).stream())
 				.toList();
 	}
 }
