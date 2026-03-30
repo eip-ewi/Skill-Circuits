@@ -243,13 +243,17 @@ public final class EditionScripts {
 		skillWrapper.waitFor();
 		skillWrapper.hover();
 		skillWrapper.query(".controls").locator().locator("button[aria-label='Edit']").click();
+		Locator editingBlock = session.page().locator(".circuit .block-wrapper[data-editing='true']").first();
 
-		Locator checkpointDropdown = skillWrapper
-				.locator()
-				.locator(".select")
-				.filter(new Locator.FilterOptions().setHasText("checkpoint"));
+		Locator checkpointDropdown = editingBlock.locator(".heading div[role='listbox']").nth(1);
 
-		checkpointDropdown.locator("button.button").click();
+		checkpointDropdown.locator("button.button")
+				.click(new com.microsoft.playwright.Locator.ClickOptions().setForce(true));
+
+		Locator targetOption = checkpointDropdown.locator(".options button[role='option']")
+				.filter(new Locator.FilterOptions().setHasText(checkpoint));
+
+		targetOption.evaluate("node => node.click()");
 
 		locators.query(".controls").button("Stop editing").click();
 	}
@@ -258,10 +262,60 @@ public final class EditionScripts {
 		Locator lectureInfoBlock = session.page().locator(".info")
 				.filter(new Locator.FilterOptions().setHasText(checkpoint))
 				.locator(".time-estimate");
+		lectureInfoBlock.waitFor();
+		String time = lectureInfoBlock.textContent().trim();
 
-		String time = lectureInfoBlock.textContent();
-		int hours  = Integer.parseInt(time.split(" ")[0].substring(0,time.split(" ")[0].length()-1));
-		int minutes = Integer.parseInt(time.split(" ")[1].substring(0,time.split(" ")[1].length()-1));
-		return hours * 60 + minutes;
+		int totalMinutes = 0;
+		String[] parts = time.split(" ");
+		for (String part : parts) {
+			if (part.endsWith("h")) {
+				int hours = Integer.parseInt(part.substring(0, part.length() - 1));
+				totalMinutes += hours * 60;
+			} else if (part.endsWith("m")) {
+				int minutes = Integer.parseInt(part.substring(0, part.length() - 1));
+				totalMinutes += minutes;
+			}
+		}
+
+		return totalMinutes;
+	}
+
+	public void deleteSkill(String skill) {
+		LocatorLocators skillWrapper = locators.query(".circuit .block-wrapper")
+				.withChild(locators.query(".name").text(skill))
+				.apply(Locator::first);
+
+		skillWrapper.waitFor();
+		skillWrapper.hover();
+		skillWrapper.query(".controls").locator().locator("button[aria-label='Delete']").click();
+		Locator dialog = session.page().locator("dialog[open]");
+
+		// 4. Click the final "Delete" button to confirm
+		dialog.locator("button")
+				.filter(new Locator.FilterOptions().setHasText("Delete"))
+				.click();
+	}
+
+	public void deleteCheckpoint(String checkpoint) {
+		locators.button("Open checkpoints panel").click();
+		Locator checkpointRow = session.page().locator(".checkpoint")
+				.filter(new Locator.FilterOptions().setHasText(checkpoint))
+				.first();
+
+		// 2. Click the initial "Delete checkpoint" trash icon
+		checkpointRow.locator("button[aria-label='Delete checkpoint']").click();
+
+		// 3. Locate the confirmation dialog that appears inside that specific row
+		Locator dialog = session.page().locator("dialog[open]");
+
+		// 4. Click the final "Delete" button to confirm
+		dialog.locator("button")
+				.filter(new Locator.FilterOptions().setHasText("Delete"))
+				.click();
+
+		session.page().locator(".panel")
+				.filter(new Locator.FilterOptions().setHasText("Checkpoints"))
+				.locator("button[aria-label='Close panel']")
+				.click();
 	}
 }
