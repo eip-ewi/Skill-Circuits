@@ -94,7 +94,7 @@ public class HomePageTest extends EndToEndTest
 		edition().addCheckpoint("Test checkpoint");
 		edition().addCheckpointToSkill("Test checkpoint", "Test skill");
 		int time = edition().getCheckpointTime("Test checkpoint");
-        assertEquals(30, time);
+		assertEquals(30, time);
 		edition().deleteSkill("Test skill");
 		edition().deleteCheckpoint("Test checkpoint");
 	}

@@ -20,7 +20,6 @@ package nl.tudelft.skills.e2e;
 import java.util.List;
 
 import com.microsoft.playwright.Locator;
-import com.microsoft.playwright.options.AriaRole;
 
 public final class EditionScripts {
 
@@ -149,8 +148,6 @@ public final class EditionScripts {
 		firstSubmodule.click();
 	}
 
-
-
 	public void addSubmodule(Edition edition, String name) {
 		if (modules(edition).isEmpty()) {
 			addModule(edition, "Test module");
@@ -188,8 +185,8 @@ public final class EditionScripts {
 
 		Locator targetColumn = locators.query(".column").apply(Locator::first).locator();
 
-		newSkillBlock.locator().dragTo(targetColumn, new com.microsoft.playwright.Locator.DragToOptions().setForce(true));
-
+		newSkillBlock.locator().dragTo(targetColumn,
+				new com.microsoft.playwright.Locator.DragToOptions().setForce(true));
 
 		LocatorLocators newlyCreated = locators.query(".block-wrapper").withChild(locators.text("New skill"));
 		newlyCreated.hover();
