@@ -6,7 +6,7 @@
     import {getAuthorisation} from "../../logic/authorisation.svelte";
     import PathsPanelComponent from "./paths/PathsPanelComponent.svelte";
     import ModulesPanelComponent from "./modules/ModulesPanelComponent.svelte";
-    import {canEditCircuit} from "../../logic/authorisation.svelte.js";
+    import {hasEditorRights} from "../../logic/authorisation.svelte.js";
     import ConfigPanelComponent from "./config/ConfigPanelComponent.svelte";
     import {getBlocks} from "../../logic/circuit/circuit.svelte";
     import {BlockStates} from "../../data/block_state";
@@ -76,7 +76,7 @@
             </button>
         </div>
 
-        {#if canEditCircuit()}
+        {#if hasEditorRights()}
             <div class="glass surface" ondragenter={ () => trayOpen = true }>
                 <button class="button" aria-label="Open tray" onclick={ () => trayOpen = true }>
                     <span class="fa-solid fa-inbox"></span>

@@ -1,7 +1,7 @@
 <script lang="ts">
 
     import type {TaskItem} from "../../../dto/circuit/module/task";
-    import {canEditCircuit, getAuthorisation} from "../../../logic/authorisation.svelte";
+    import {hasEditorRights, getAuthorisation} from "../../../logic/authorisation.svelte";
     import {TaskIcons} from "../../../dto/task_icons.js";
     import {isTaskCompleted} from "../../../logic/circuit/skill_state/completion";
 
@@ -10,9 +10,9 @@
 </script>
 
 {#if task.taskType === "regular"}
-    <span class="task fa-solid fa-{TaskIcons[task.type]}" data-completed={task.completed && !canEditCircuit()}></span>
+    <span class="task fa-solid fa-{TaskIcons[task.type]}" data-completed={task.completed && !hasEditorRights()}></span>
 {:else}
-    <span class="task fa-solid fa-shapes" data-completed={isTaskCompleted(task) && !canEditCircuit()}></span>
+    <span class="task fa-solid fa-shapes" data-completed={isTaskCompleted(task) && !hasEditorRights()}></span>
 {/if}
 
 <style>

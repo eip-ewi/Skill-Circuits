@@ -6,7 +6,7 @@
     import type {TaskItem} from "../../../dto/circuit/module/task";
     import type {Path} from "../../../dto/path";
     import {editTaskPaths} from "../../../logic/circuit/updates/task_updates";
-    import {canEditCircuit} from "../../../logic/authorisation.svelte";
+    import {hasEditorRights} from "../../../logic/authorisation.svelte";
 
     let { skill }: { skill: SkillBlock } = $props();
 

@@ -3,6 +3,7 @@
     import {clearLevel} from "../logic/circuit/level.svelte";
     import PageLayout from "./PageLayout.svelte";
 
+    clearLevel();
 </script>
 
 <PageLayout>

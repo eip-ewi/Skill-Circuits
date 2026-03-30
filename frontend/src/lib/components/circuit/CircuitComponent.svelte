@@ -12,7 +12,7 @@
     import {getBlocks, getCircuit, getGraph, getVisibleBlocks} from "../../logic/circuit/circuit.svelte";
     import GroupComponent from "./group/GroupComponent.svelte";
     import GroupsComponent from "./group/GroupsComponent.svelte";
-    import {canEditCircuit, getAuthorisation} from "../../logic/authorisation.svelte";
+    import {hasEditorRights, getAuthorisation} from "../../logic/authorisation.svelte";
     import ColumnComponent from "./column/ColumnComponent.svelte";
     import {getPlacedBlocks} from "../../logic/circuit/circuit.svelte.js";
     import {ModuleLevel} from "../../data/level";
@@ -50,7 +50,7 @@
     });
 
     $effect(() => {
-        canEditCircuit();
+        hasEditorRights();
         getCircuit().width;
         getPlacedBlocks().forEach(block => block.column = Math.min(getCircuit().width! - 1, block.column!))
         recalculateBounds();
@@ -93,7 +93,7 @@
 
 </div>
 
-{#if canEditCircuit()}
+{#if hasEditorRights()}
     <div>
         <button onclick={() => getCircuit().width = (getCircuit().width ?? 0) + 1 }>+Column</button>
         <button onclick={() => getCircuit().width = (getCircuit().width ?? 0) - 1 }>-Column</button>

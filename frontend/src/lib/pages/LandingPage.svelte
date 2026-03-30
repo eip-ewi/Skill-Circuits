@@ -53,7 +53,7 @@
                 {#if editions.upcomingEditions.length > 0}
                     <div class="editions">
                         <h2>Upcoming editions</h2>
-                        {#each editions.currentEditions as editionView}
+                        {#each editions.upcomingEditions as editionView}
                             <EditionCardComponent edition={editionView}></EditionCardComponent>
                         {/each}
                     </div>

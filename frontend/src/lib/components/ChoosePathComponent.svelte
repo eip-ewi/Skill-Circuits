@@ -1,7 +1,7 @@
 <script lang="ts">
     import {getActivePath, selectPath} from "../logic/edition/active_path.svelte";
     import {onMount} from "svelte";
-    import {canEditCircuit, getAuthorisation} from "../logic/authorisation.svelte.js";
+    import {hasEditorRights, getAuthorisation} from "../logic/authorisation.svelte.js";
     import {getPaths} from "../logic/edition/edition.svelte";
     import type {Path} from "../dto/path";
     import {isOnCircuit} from "../logic/circuit/level.svelte";
@@ -16,7 +16,7 @@
     });
 </script>
 
-{#if getActivePath() === null && !canEditCircuit() && getPaths().length > 0}
+{#if getActivePath() === null && !hasEditorRights() && getPaths().length > 0}
     <dialog bind:this={dialog} class="dialog">
         <div class="content">
             <h2 class="title">Which of these best describes you?</h2>

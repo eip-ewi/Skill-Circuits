@@ -3,7 +3,7 @@
     import {updateBlockPosition} from "../../../logic/circuit/updates/position_updates.svelte.js";
     import {BlockStates} from "../../../data/block_state";
     import {createBlock} from "../../../logic/circuit/updates/block_updates";
-    import {canEditCircuit, getAuthorisation} from "../../../logic/authorisation.svelte";
+    import {hasEditorRights, getAuthorisation} from "../../../logic/authorisation.svelte";
     import {areColumnsEnabled} from "../../../dto/columns.svelte";
     import {createExternalSkill} from "../../../logic/circuit/updates/skill_updates";
 
@@ -55,7 +55,7 @@
     }
 </script>
 
-{#if canEditCircuit()}
+{#if hasEditorRights()}
     <div class="column-wrapper" style:grid-column={column + 1} style:grid-row="1 / span {height}" data-dragging={dragging} data-interactible={areColumnsEnabled()}>
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div class="column"
