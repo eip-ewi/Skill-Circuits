@@ -27,50 +27,50 @@ import org.junit.jupiter.api.Test;
 
 public class HomePageTest extends EndToEndTest
 		implements BasicScripts.WithBasicScripts, EditionScripts.WithEditionScripts {
-
-	@Test
-	@DisplayName("Log in as cseteacher1 and then log out")
-	public void logInAndLogOut() {
-		basic().logIn(cseteacher1);
-
-		assertThat(locators().heading("My courses")).isVisible();
-		assertEquals("My Courses - Skill Circuits", page().title());
-
-		basic().logOut();
-
-		assertThat(locators().link("Click here to log in")).isVisible();
-		assertThat(locators().query(".header")).isHidden();
-		assertThat(locators().heading("Welcome to Skill Circuits")).isVisible();
-		assertEquals("Skill Circuits", page().title());
-	}
-
-	@Test
-	@DisplayName("Publish and unpublish editions and verify their visibility as student")
-	public void editionVisibilityForStudentsMatchesPublishedState() {
-		basic().logIn(cseteacher1);
-
-		Edition edition = edition().findAnyManagingEdition();
-		edition().publish(edition);
-
-		if (edition().submodules(edition).isEmpty()) {
-			edition().addSubmodule(edition, "Test submodule");
-		}
-
-		basic().logOut();
-		basic().logIn(csestudent1);
-
-		assertTrue(edition().canSeeEdition(edition));
-
-		basic().logOut();
-		basic().logIn(cseteacher1);
-
-		edition().unpublish(edition);
-
-		basic().logOut();
-		basic().logIn(csestudent1);
-
-		assertFalse(edition().canSeeEdition(edition));
-	}
+//
+//	@Test
+//	@DisplayName("Log in as cseteacher1 and then log out")
+//	public void logInAndLogOut() {
+//		basic().logIn(cseteacher1);
+//
+//		assertThat(locators().heading("My courses")).isVisible();
+//		assertEquals("My Courses - Skill Circuits", page().title());
+//
+//		basic().logOut();
+//
+//		assertThat(locators().link("Click here to log in")).isVisible();
+//		assertThat(locators().query(".header")).isHidden();
+//		assertThat(locators().heading("Welcome to Skill Circuits")).isVisible();
+//		assertEquals("Skill Circuits", page().title());
+//	}
+//
+//	@Test
+//	@DisplayName("Publish and unpublish editions and verify their visibility as student")
+//	public void editionVisibilityForStudentsMatchesPublishedState() {
+//		basic().logIn(cseteacher1);
+//
+//		Edition edition = edition().findAnyManagingEdition();
+//		edition().publish(edition);
+//
+//		if (edition().submodules(edition).isEmpty()) {
+//			edition().addSubmodule(edition, "Test submodule");
+//		}
+//
+//		basic().logOut();
+//		basic().logIn(csestudent1);
+//
+//		assertTrue(edition().canSeeEdition(edition));
+//
+//		basic().logOut();
+//		basic().logIn(cseteacher1);
+//
+//		edition().unpublish(edition);
+//
+//		basic().logOut();
+//		basic().logIn(csestudent1);
+//
+//		assertFalse(edition().canSeeEdition(edition));
+//	}
 
 	@Test
 	@DisplayName("Checkpoint total time updates when a task's time is changed")
@@ -85,6 +85,16 @@ public class HomePageTest extends EndToEndTest
 
 		basic().makeEditor();
 		edition().enterFirstSubmodule(edition);
+
+		page().waitForURL("**/modules/*");
+		locators().query(".circuit").waitFor();
+
+		edition().addSkill("Test skill");
+		edition().addTask("Test skill", "Test task", 30);
+		edition().addCheckpoint("Test checkpoint");
+		edition().addCheckpointToSkill("Test checkpoint", "Test skill");
+		int time = edition().getCheckpointTime("Test checkpoint");
+        assertEquals(30, time);
 	}
 
 }

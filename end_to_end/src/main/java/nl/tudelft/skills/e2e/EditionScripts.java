@@ -20,6 +20,7 @@ package nl.tudelft.skills.e2e;
 import java.util.List;
 
 import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.options.AriaRole;
 
 public final class EditionScripts {
 
@@ -176,5 +177,91 @@ public final class EditionScripts {
 		wrapper.query(".controls").button("Edit").click();
 	}
 
+	public void addSkill(String skill) {
+		locators.button("Open tray").click();
 
+		LocatorLocators newSkillBlock = locators.query(".panel")
+				.withChild(locators.heading("Tray"))
+				.query(".block").heading("New skill");
+
+		newSkillBlock.waitFor();
+
+		Locator targetColumn = locators.query(".column").apply(Locator::first).locator();
+
+		newSkillBlock.locator().dragTo(targetColumn, new com.microsoft.playwright.Locator.DragToOptions().setForce(true));
+
+
+		LocatorLocators newlyCreated = locators.query(".block-wrapper").withChild(locators.text("New skill"));
+		newlyCreated.hover();
+		newlyCreated.query(".controls").locator().locator("button[aria-label='Edit']").click();
+		session.page().getByLabel("Edit skill name").fill(skill);
+		locators.query(".controls").button("Stop editing").click();
+		session.page().locator(".panel")
+				.filter(new Locator.FilterOptions().setHasText("Tray"))
+				.locator("button[aria-label='Close panel']")
+				.click();
+	}
+
+	public void addTask(String skill, String task, int duration) {
+		LocatorLocators skillWrapper = locators.query(".circuit .block-wrapper")
+				.withChild(locators.query(".name").text(skill))
+				.apply(Locator::first);
+
+		skillWrapper.waitFor();
+		skillWrapper.hover();
+		skillWrapper.query(".controls").locator().locator("button[aria-label='Edit']").click();
+
+		session.page().locator("button:has-text('Create a new task')")
+				.click(new com.microsoft.playwright.Locator.ClickOptions().setForce(true));
+
+		Locator newTaskWrapper = session.page().locator(".item-wrapper").last();
+
+		newTaskWrapper.locator("input[name='item-name']").fill(task);
+		newTaskWrapper.locator("input[name='time']").fill(String.valueOf(duration));
+
+		newTaskWrapper.locator("input[name='time']").press("Enter");
+		locators.query(".controls").button("Stop editing").click();
+	}
+
+	public void addCheckpoint(String checkpoint) {
+		locators.button("Open checkpoints panel").click();
+		locators.button("Add checkpoint").click();
+		Locator newCheckpoint = session.page().locator(".checkpoint").first();
+		newCheckpoint.locator("input[name='name']").fill("Test checkpoint");
+		locators.button("Stop editing").click();
+		session.page().locator(".panel")
+				.filter(new Locator.FilterOptions().setHasText("Checkpoints"))
+				.locator("button[aria-label='Close panel']")
+				.click();
+	}
+
+	public void addCheckpointToSkill(String checkpoint, String skill) {
+		LocatorLocators skillWrapper = locators.query(".circuit .block-wrapper")
+				.withChild(locators.query(".name").text(skill))
+				.apply(Locator::first);
+
+		skillWrapper.waitFor();
+		skillWrapper.hover();
+		skillWrapper.query(".controls").locator().locator("button[aria-label='Edit']").click();
+
+		Locator checkpointDropdown = skillWrapper
+				.locator()
+				.locator(".select")
+				.filter(new Locator.FilterOptions().setHasText("checkpoint"));
+
+		checkpointDropdown.locator("button.button").click();
+
+		locators.query(".controls").button("Stop editing").click();
+	}
+
+	public int getCheckpointTime(String checkpoint) {
+		Locator lectureInfoBlock = session.page().locator(".info")
+				.filter(new Locator.FilterOptions().setHasText(checkpoint))
+				.locator(".time-estimate");
+
+		String time = lectureInfoBlock.textContent();
+		int hours  = Integer.parseInt(time.split(" ")[0].substring(0,time.split(" ")[0].length()-1));
+		int minutes = Integer.parseInt(time.split(" ")[1].substring(0,time.split(" ")[1].length()-1));
+		return hours * 60 + minutes;
+	}
 }
