@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Fixed
 - [Student] The active path and the task removals/additions are taken into account for skill completion and (un)locking. (@ffiedrich)
 - [Editor] Clicking on the "Student/Editor View" button on non-circuit pages now toggles between the modes correctly.
+- [Everyone] Exiting the extended view of a skill using "Escape" works as intended.
 - [Teacher] Upcoming courses are displayed in the course overview. @ralani
 - [Student] Dragging and dropping the task in the same skill or the Tray does not break drag and drop functionality afterwards. @ralani
 
