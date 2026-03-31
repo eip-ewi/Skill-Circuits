@@ -7,6 +7,7 @@ import type {Block} from "../../../dto/circuit/block";
 import {BlockStates} from "../../../data/block_state";
 import type {ModuleCircuit} from "../../../dto/circuit/module/module";
 import {setScrollTarget} from "../scroll_target.svelte";
+import {fetchBookmarks} from "../../bookmarks.svelte";
 
 export async function createExternalSkill(originalSkillId: number, column: number) {
     let response = await fetch(`/api/skills/external`, withCsrf({
@@ -93,7 +94,9 @@ export async function editSkillHidden(skill: RegularSkillBlock, newHidden: boole
         }),
     }));
 
-    if (!response.ok) {
+    if (response.ok) {
+        await fetchBookmarks();
+    } else {
         skill.hidden = oldHidden;
         skill.essential = oldEssential;
     }
