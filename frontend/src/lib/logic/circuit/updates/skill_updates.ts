@@ -94,11 +94,11 @@ export async function editSkillHidden(skill: RegularSkillBlock, newHidden: boole
         }),
     }));
 
-    if (!response.ok) {
+    if (response.ok) {
+        await fetchBookmarks();
+    } else {
         skill.hidden = oldHidden;
         skill.essential = oldEssential;
-    } else {
-        await fetchBookmarks()
     }
 }
 
