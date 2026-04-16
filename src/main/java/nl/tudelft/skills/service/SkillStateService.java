@@ -46,23 +46,20 @@ public class SkillStateService {
     /// not the actual parents of an external skill's reference.
     ///
 	public boolean isSkillUnlocked(AbstractSkill abstractSkill, Set<Long> completedTaskIds,
-			Set<Long> revealedSkillIds) {
+			Set<Long> revealedSkillIds, Path activePath, Set<Task> tasksAdded, Set<Task> tasksRemoved) {
 		if (abstractSkill.getColumn() == null) {
 			return false;
 		}
 
-		List<Task> tasks = switch (abstractSkill) {
-			case ExternalSkill externalSkill -> externalSkill.getSkill().getTasks();
-			case Skill skill -> skill.getTasks();
-			default -> Collections.emptyList(); // Unreachable
-		};
+		List<Task> tasks = getTasksOnPath(abstractSkill, activePath, tasksAdded, tasksRemoved);
 		if (tasks.stream().anyMatch(task -> isTaskOrAnySubtaskCompleted(task, completedTaskIds))) {
 			return true;
 		}
 
 		boolean allEssentialParentsCompleted = abstractSkill.getParents().stream()
 				.filter(AbstractSkill::isEssential)
-				.allMatch(parent -> isSkillCompleted(parent, completedTaskIds, revealedSkillIds));
+				.allMatch(parent -> isSkillCompleted(parent, completedTaskIds, revealedSkillIds, activePath,
+						tasksAdded, tasksRemoved));
 		if (!allEssentialParentsCompleted) {
 			return false;
 		}
@@ -73,7 +70,8 @@ public class SkillStateService {
 		}
 
 		return abstractSkill.getParents().stream()
-				.allMatch(parent -> isSkillUnlocked(parent, completedTaskIds, revealedSkillIds));
+				.allMatch(parent -> isSkillUnlocked(parent, completedTaskIds, revealedSkillIds, activePath,
+						tasksAdded, tasksRemoved));
 	}
 
 	///
@@ -84,14 +82,11 @@ public class SkillStateService {
     /// External skills are evaluated in the context of the reference.
     ///
 	public boolean isSkillCompleted(AbstractSkill abstractSkill, Set<Long> completedTaskIds,
-			Set<Long> revealedSkillIds) {
-		List<Task> tasks = switch (abstractSkill) {
-			case ExternalSkill externalSkill -> externalSkill.getSkill().getTasks();
-			case Skill skill -> skill.getTasks();
-			default -> Collections.emptyList(); // Unreachable
-		};
+			Set<Long> revealedSkillIds, Path activePath, Set<Task> tasksAdded, Set<Task> tasksRemoved) {
+		List<Task> tasks = getTasksOnPath(abstractSkill, activePath, tasksAdded, tasksRemoved);
 		if (tasks.isEmpty()) {
-			return isSkillUnlocked(abstractSkill, completedTaskIds, revealedSkillIds);
+			return isSkillUnlocked(abstractSkill, completedTaskIds, revealedSkillIds, activePath, tasksAdded,
+					tasksRemoved);
 		}
 		return tasks.stream().allMatch(task -> isTaskCompleted(task, completedTaskIds));
 	}
@@ -113,6 +108,25 @@ public class SkillStateService {
 						.count() >= choiceTask.getMinTasks();
 			default -> false; // Unreachable
 		};
+	}
+
+	protected List<Task> getTasksOnPath(AbstractSkill abstractSkill, Path activePath, Set<Task> tasksAdded,
+			Set<Task> tasksRemoved) {
+		List<Task> tasks = switch (abstractSkill) {
+			case ExternalSkill externalSkill -> externalSkill.getSkill().getTasks();
+			case Skill skill -> skill.getTasks();
+			default -> Collections.emptyList(); // Unreachable
+		};
+		return tasks.stream().filter(task -> isTaskOnPath(task, activePath, tasksAdded, tasksRemoved))
+				.toList();
+	}
+
+	protected boolean isTaskOnPath(Task task, Path activePath, Set<Task> tasksAdded, Set<Task> tasksRemoved) {
+		if (activePath == null) {
+			return !tasksRemoved.contains(task);
+		}
+		return !tasksRemoved.contains(task)
+				&& (task.getPaths().contains(activePath) || tasksAdded.contains(task));
 	}
 
 }

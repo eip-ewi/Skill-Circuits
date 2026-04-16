@@ -42,8 +42,15 @@
         }
     });
 
-    function checkForClose(event: MouseEvent) {
-        if (event.target === element) {
+    function checkForClose(event: MouseEvent|KeyboardEvent) {
+        if(event instanceof MouseEvent && event.target === element){
+            open = false;
+            return;
+        }
+
+        if(event instanceof KeyboardEvent && event.key === "Escape") {
+            // prevent default behaviour of instantly closing the dialogue
+            event.preventDefault();
             open = false;
         }
     }
@@ -65,7 +72,7 @@
 
 {#if open}
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
-    <dialog bind:this={element} onclick={checkForClose}>
+    <dialog bind:this={element} onclick={checkForClose} onkeydown={checkForClose}>
         <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
         <div class="expanded-block" transition:openExpandedBlockTransition={{ block: block }} data-dragging={getDraggingItem()}
              ondragenter={dragItemEnter} ondragover={dragItemOver} ondragleave={dragItemLeave} ondrop={drop}>
