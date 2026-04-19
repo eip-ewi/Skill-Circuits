@@ -3,15 +3,10 @@ import type {Circuit} from "../../dto/circuit/circuit";
 import {Graph} from "./graph";
 import type {Group} from "../../dto/circuit/group";
 import type {Item} from "../../dto/circuit/item";
-import {getLevel, isLevel} from "./level.svelte";
-import {hasEditorRights, getAuthorisation} from "../authorisation.svelte";
-import {ModuleLevel} from "../../data/level";
+import {hasEditorRights} from "../authorisation.svelte";
 import {isSkillRevealed} from "./unlocked_skills.svelte";
 import {BlockStates} from "../../data/block_state";
 import type {EditionCircuit} from "../../dto/circuit/edition/edition";
-import type {SubmoduleBlock} from "../../dto/circuit/edition/submodule";
-import type {SubmoduleGroup} from "../../dto/circuit/module/submodule";
-import type {ModuleGroup} from "../../dto/circuit/edition/module";
 
 let circuit: Circuit | undefined = $state(undefined);
 // @ts-ignore
@@ -94,5 +89,6 @@ export async function fetchCircuit(url: string) {
 }
 
 export function initModuleGraphs(editionCircuit: EditionCircuit) {
+    // Only consider visible blocks to be consistent with handling of completion/unlocking on module pages
     editionCircuit.groups.forEach(module => module.moduleGraph = new Graph(blocksFromCircuit(module.moduleCircuit).filter(block => isBlockVisible(block))));
 }

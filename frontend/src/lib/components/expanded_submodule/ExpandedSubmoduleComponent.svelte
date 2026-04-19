@@ -13,6 +13,7 @@
     import type {Item} from "../../dto/circuit/item";
     import {isCompleted} from "../../logic/circuit/skill_state/completion";
     import {isUnlocked} from "../../logic/circuit/skill_state/unlock";
+    import {untrack} from "svelte";
 
     let { submoduleBlock, open = $bindable() }: { submoduleBlock: SubmoduleBlock, open: boolean } = $props();
 
@@ -46,15 +47,22 @@
 
     $effect(() => {
         if (moduleGroup.moduleGraph !== undefined) {
-            // Update the skills of the submodule, filtered by visibility and sorted topologically
-            let visibleBlocks = submoduleGroup.blocks.filter(block => isBlockVisible(block));
-            visibleSkills = topologicalSort(moduleGroup.moduleGraph, visibleBlocks);
+            // Do not call this effect as soon as block visibilities change, by then the update of the moduleGraph
+            // will not have propagated from the edition page yet. Only call this effect if the moduleGraph itself changed.
+
+            untrack(() => {
+                // Update the skills of the submodule, filtered by visibility and sorted topologically
+                let visibleBlocks = submoduleGroup.blocks.filter(block => isBlockVisible(block));
+                visibleSkills = topologicalSort(moduleGroup.moduleGraph!, visibleBlocks);
+            });
         }
     });
 
     $effect(() => {
         // Select the first skill, if none is selected and there is at least one skill
-        if (visibleSkills !== undefined && selectedSkill === undefined && visibleSkills.length > 0) {
+        // Set it when the submodule is first opened: This makes it possible for recently revealed hidden skills
+        // to be considered in the ordering
+        if (visibleSkills !== undefined && open && selectedSkill === undefined && visibleSkills.length > 0) {
             selectedSkill = visibleSkills[0];
         }
     });

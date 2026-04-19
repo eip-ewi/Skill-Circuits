@@ -22,6 +22,7 @@
     setLevel(EditionLevel);
 
     let warnings: Warning[] = $state([]);
+    let finishedLoad: boolean = $state(false);
 
     async function load() {
         await fetchEdition(editionId);
@@ -31,8 +32,15 @@
         await fetchRevealedSkills();
         await fetchDevMode();
 
-        initModuleGraphs(getCircuit());
+        finishedLoad = true;
     }
+
+    $effect(() => {
+        if (getCircuit() !== undefined && finishedLoad) {
+            // Update the module graphs when (1) The page is first loaded and (2) Block visibilities change
+            initModuleGraphs(getCircuit());
+        }
+    });
 </script>
 
 <svelte:window onkeydown={ e => { if (getDevMode() && e.altKey && e.key === "t") { toggleViewMode(); } } }></svelte:window>
