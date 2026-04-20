@@ -25,6 +25,7 @@
     --glass-glint-colour: hsl(0deg 0% 100%);
 
     /* Columns */
+    --column-radius: 1em;
     --column-colour: color-mix(in srgb, var(--secondary-colour) 15%, transparent);
 
     /* Groups */
@@ -79,6 +80,11 @@
     --task-drop-indication-colour: color-mix(in srgb, var(--secondary-colour) 15%, transparent);
     --task-drop-indication-border: none;
     --task-drop-indication-border-radius: .5em;
+
+    /* Submodule overview */
+    --submodule-overview-selection-border-radius: 0.5em;
+    --submodule-overview-skill-completed-colour: color-mix(in oklab, var(--accept-colour) 65%, black);
+    --submodule-overview-line-colour: color-mix(in oklab, var(--block-colour) 40%, black);
 
     /* Links */
     --link-colour: color-mix(in oklab, var(--primary-colour) 90%, white);

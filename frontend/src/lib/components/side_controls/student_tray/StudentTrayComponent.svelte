@@ -3,20 +3,20 @@
     import {cubicInOut} from "svelte/easing";
     import type {Block} from "../../../dto/circuit/block";
     import StudentTrayTaskComponent from "./StudentTrayTaskComponent.svelte";
-    import {getItem} from "../../../logic/circuit/circuit.svelte";
     import type {TaskItem} from "../../../dto/circuit/module/task";
-    import {pathState, isTaskOnPath, removeTaskFromPath} from "../../../logic/edition/active_path.svelte";
+    import {isTaskOnPath, removeTaskFromPath} from "../../../logic/edition/active_path.svelte";
 
     let { block }: { block: Block } = $props();
-
-    let open: boolean = $state(false);
-
+    let itemMap: Map<number, TaskItem> = $derived(new Map(block.items.map(item => [item.id, item as TaskItem])));
     let availableTasks = $derived.by(() => {
         //if unchecked task is of type SkillItem|TaskItem
         if (block.blockType !== "skill") return [];
 
         return block.items.filter(task => !isTaskOnPath(task));
     })
+
+    let open: boolean = $state(false);
+
     function dragEnter(event: DragEvent) {
         if (!event.dataTransfer!.types.includes("skill-circuits/item")) {
             return;
@@ -41,7 +41,7 @@
         event.preventDefault();
 
         let itemId = parseInt(event.dataTransfer!.getData("skill-circuits/item"));
-        let item = getItem(itemId) as TaskItem;
+        let item = itemMap.get(itemId)!;
 
         await removeTaskFromPath(item);
     }

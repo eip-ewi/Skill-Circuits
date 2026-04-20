@@ -36,7 +36,10 @@ public class ModuleCircuitService {
 	private final TaskCompletionRepository taskCompletionRepository;
 
 	public ModuleLevelModuleView getModuleCircuit(SCModule module, SCPerson person) {
-		Set<Long> completedTaskIds = taskCompletionRepository.findAllCompletedTaskIdsForPerson(person);
+		return getModuleCircuit(module, taskCompletionRepository.findAllCompletedTaskIdsForPerson(person));
+	}
+
+	public ModuleLevelModuleView getModuleCircuit(SCModule module, Set<Long> completedTaskIds) {
 		return new ModuleLevelModuleView(
 				module.getId(),
 				module.getName(),

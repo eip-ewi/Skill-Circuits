@@ -31,6 +31,8 @@ import {getBlock, getBlocks, getCircuit, getGraph} from "../../../logic/circuit/
     import {isSkillBookmarked} from "../../../logic/bookmarks.svelte";
 import {clearScrollTarget, getScrollTarget} from "../../../logic/circuit/scroll_target.svelte";
     import { getBlurBlocks } from "../../../logic/preferences.svelte";
+    import ExpandedSubmoduleComponent from "../../expanded_submodule/ExpandedSubmoduleComponent.svelte";
+    import type {SubmoduleBlock} from "../../../dto/circuit/edition/submodule";
 
     let { block }: { block: Block } = $props();
 
@@ -210,8 +212,14 @@ import {clearScrollTarget, getScrollTarget} from "../../../logic/circuit/scroll_
         {#if block.blockType === "skill" && !block.external && (block.state === BlockStates.Hovering || isSkillBookmarked(block))}
             <BookmarkSkillButtonComponent bind:action skill={block}></BookmarkSkillButtonComponent>
         {/if}
-        {#if block.state === BlockStates.Hovering && (block.blockType !== "skill" || block.external) && !hasEditorRights()}
-            <ExpandedViewOpenButtonComponent bind:action bind:open={expanded}></ExpandedViewOpenButtonComponent>
+        {#if (block.blockType !== "skill" || block.external) && !hasEditorRights()}
+            {#if block.state === BlockStates.Hovering}
+                <ExpandedViewOpenButtonComponent bind:action bind:open={expanded}></ExpandedViewOpenButtonComponent>
+            {/if}
+
+            {#if block.blockType === "submodule"}
+                <ExpandedSubmoduleComponent submoduleBlock={block as SubmoduleBlock} bind:open={expanded}></ExpandedSubmoduleComponent>
+            {/if}
         {/if}
         {#if hasEditorRights() && (draggable || block.state === BlockStates.Hovering || block.state === BlockStates.Connecting || block.state === BlockStates.Editing)}
             <BlockControlsComponent {block} bind:action bind:draggable></BlockControlsComponent>

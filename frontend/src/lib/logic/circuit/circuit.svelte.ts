@@ -3,11 +3,10 @@ import type {Circuit} from "../../dto/circuit/circuit";
 import {Graph} from "./graph";
 import type {Group} from "../../dto/circuit/group";
 import type {Item} from "../../dto/circuit/item";
-import {getLevel, isLevel} from "./level.svelte";
-import {hasEditorRights, getAuthorisation} from "../authorisation.svelte";
-import {ModuleLevel} from "../../data/level";
+import {hasEditorRights} from "../authorisation.svelte";
 import {isSkillRevealed} from "./unlocked_skills.svelte";
 import {BlockStates} from "../../data/block_state";
+import type {EditionCircuit} from "../../dto/circuit/edition/edition";
 
 let circuit: Circuit | undefined = $state(undefined);
 // @ts-ignore
@@ -61,7 +60,7 @@ export function getVisibleBlocks(): Block[] {
 }
 
 export function isBlockVisible(block: Block) {
-    return block.column !== null && (!isLevel(ModuleLevel) || hasEditorRights() || block.blockType !== "skill" || block.external || !block.hidden || isSkillRevealed(block));
+    return block.column !== null && (hasEditorRights() || block.blockType !== "skill" || block.external || !block.hidden || isSkillRevealed(block));
 }
 
 export function getGroupForBlock(block: Block): Group {
@@ -87,4 +86,9 @@ export function getGraph(): Graph {
 export async function fetchCircuit(url: string) {
     let response = await fetch(url);
     circuit = await response.json();
+}
+
+export function initModuleGraphs(editionCircuit: EditionCircuit) {
+    // Only consider visible blocks to be consistent with handling of completion/unlocking on module pages
+    editionCircuit.groups.forEach(module => module.moduleGraph = new Graph(blocksFromCircuit(module.moduleCircuit).filter(block => isBlockVisible(block))));
 }

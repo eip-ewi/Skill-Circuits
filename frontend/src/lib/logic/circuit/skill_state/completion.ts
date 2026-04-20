@@ -3,8 +3,10 @@ import {isUnlocked} from "./unlock";
 import {getItemsOnPath} from "../../edition/active_path.svelte";
 import type {SkillBlock} from "../../../dto/circuit/module/skill";
 import type {TaskItem} from "../../../dto/circuit/module/task";
+import type {Graph} from "../graph";
+import {getGraph} from "../circuit.svelte";
 
-export function isCompleted(block: Block, recursionCheck: number = 100): boolean {
+export function isCompleted(block: Block, graph: Graph = getGraph(), recursionCheck: number = 100): boolean {
 
     if (recursionCheck <= 0) {
         return false;
@@ -29,7 +31,7 @@ export function isCompleted(block: Block, recursionCheck: number = 100): boolean
     let isEmpty = items.length === 0;
 
     if (isEmpty) {
-        return isUnlocked(block, recursionCheck);
+        return isUnlocked(block, graph, recursionCheck);
     }
 
     return true;

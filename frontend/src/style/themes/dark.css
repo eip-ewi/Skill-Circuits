@@ -44,6 +44,10 @@
     --choice-task-outline-colour: var(--on-block-divider-colour);
     --choice-task-completed-outline-colour: color-mix(in oklab, var(--accept-colour) 80%, black);
 
+    /* Submodule overview */
+    --submodule-overview-line-colour: color-mix(in oklab, var(--block-colour) 40%, white);
+    --submodule-overview-skill-completed-colour: color-mix(in oklab, var(--accept-colour) 85%, black);
+
     /* Links */
     --link-colour: color-mix(in oklab, var(--primary-colour) 40%, white);
     --link-active-colour: color-mix(in oklab, var(--primary-colour) 70%, white);

@@ -4,7 +4,7 @@
     import type {Warning} from "../data/warning";
     import {setLevel} from "../logic/circuit/level.svelte";
     import {EditionLevel} from "../data/level";
-    import {fetchCircuit, getCircuit} from "../logic/circuit/circuit.svelte";
+    import {fetchCircuit, getCircuit, initModuleGraphs} from "../logic/circuit/circuit.svelte";
     import {fetchAuthorisation, getAuthorisation, toggleViewMode} from "../logic/authorisation.svelte";
     import {fetchDevMode} from "../logic/dev_mode.svelte";
     import HeaderComponent from "../components/HeaderComponent.svelte";
@@ -15,20 +15,32 @@
     import {fetchEdition, getEdition} from "../logic/edition/edition.svelte";
     import PageLayout from "./PageLayout.svelte";
     import {getDevMode} from "../logic/dev_mode.svelte.js";
+    import {fetchRevealedSkills} from "../logic/circuit/unlocked_skills.svelte";
 
     let { editionId }: { editionId: number } = $props();
 
     setLevel(EditionLevel);
 
     let warnings: Warning[] = $state([]);
+    let finishedLoad: boolean = $state(false);
 
     async function load() {
         await fetchEdition(editionId);
         await fetchCircuit(`/api/editions/${editionId}/circuit`);
         await fetchActivePath();
         await fetchPathCustomisation();
+        await fetchRevealedSkills();
         await fetchDevMode();
+
+        finishedLoad = true;
     }
+
+    $effect(() => {
+        if (getCircuit() !== undefined && finishedLoad) {
+            // Update the module graphs when (1) The page is first loaded and (2) Block visibilities change
+            initModuleGraphs(getCircuit());
+        }
+    });
 </script>
 
 <svelte:window onkeydown={ e => { if (getDevMode() && e.altKey && e.key === "t") { toggleViewMode(); } } }></svelte:window>

@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added 
 - [Student] When entering the module view it scrolls to top unfinished skill. (@ogangalic)
+- [Student] Add expanded views for submodules that can be accessed from the edition page by clicking "open here". (@ffiedrich)
 
 ## Changed
 
