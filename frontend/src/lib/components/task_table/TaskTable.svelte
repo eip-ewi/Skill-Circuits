@@ -58,15 +58,16 @@
 
 <style>
     .task_table {
+        font-size: clamp(0.5rem, calc(16 / 1732 * 100vw * 1.2), 1.5rem);
         margin: 2em auto 4em;
         text-align: left;
         padding: 1em;
-        font-size: var(--font-size-300);
         background-color: var(--group-colour);
         color: var(--on-group-colour-higher-contrast);
         border-radius: var(--group-border-radius);
-        border: 1px solid var(--group-border-colour);
+        border: 0.05em solid var(--group-border-colour);
         border-spacing: 0;
+        overflow: auto;
     }
 
     .table_header {
@@ -74,12 +75,12 @@
     }
 
     th {
-        padding: 0.2em 1em;
-        border-bottom: 2px solid var(--on-group-colour);
+        padding: 0.3em 0.5em;
+        border-bottom: .18em solid var(--on-group-colour);
     }
 
     th:not(:first-child) {
-        border-left: 2px solid var(--on-group-colour);
+        border-left: .18em solid var(--on-group-colour);
     }
 
     .cell-wrapper {
