@@ -1,14 +1,14 @@
 <script lang="ts">
     import TaskTableRow from "./TaskTableRow.svelte";
-    import type {TaskInTaskList} from "../../dto/task_in_task_list";
+    import type { TaskInTaskList } from "../../dto/task_in_task_list";
     import Button from "../util/Button.svelte";
-    import {getColumns} from "../../logic/task_table.svelte";
-    import type {SortableTaskTableColumn} from "../../data/task_table_column";
+    import { getColumns } from "../../logic/task_table.svelte";
+    import type { SortableTaskTableColumn } from "../../data/task_table_column";
 
-    let { tasks } : { tasks: TaskInTaskList[] } = $props();
+    let { tasks }: { tasks: TaskInTaskList[] } = $props();
 
     function sortByColumn(column: SortableTaskTableColumn, order: -1 | 1) {
-        tasks.sort(((a: TaskInTaskList, b: TaskInTaskList) => column.sortAsc(a, b) * order));
+        tasks.sort((a: TaskInTaskList, b: TaskInTaskList) => column.sortAsc(a, b) * order);
 
         getColumns().forEach(col => {
             if (col.sortable) {
@@ -31,15 +31,33 @@
                         {column.name}
                         {#if column.sortable}
                             {#if column.sortStatus === -1}
-                                <Button aria-label="Sort ascendingly by {column.name}" onclick={() => {sortByColumn(column, 1)}} square={true} style="margin-left: 1em; font-size: var(--font-size-100)">
+                                <Button
+                                    aria-label="Sort ascendingly by {column.name}"
+                                    onclick={() => {
+                                        sortByColumn(column, 1);
+                                    }}
+                                    square={true}
+                                    style="margin-left: 1em; font-size: var(--font-size-100)">
                                     <i class="fa-solid fa-caret-down"></i>
                                 </Button>
                             {:else if column.sortStatus === 0}
-                                <Button aria-label="Sort by {column.name}" onclick={() => {sortByColumn(column, -1)}} square={true} style="margin-left: 1em; font-size: var(--font-size-100)">
+                                <Button
+                                    aria-label="Sort by {column.name}"
+                                    onclick={() => {
+                                        sortByColumn(column, -1);
+                                    }}
+                                    square={true}
+                                    style="margin-left: 1em; font-size: var(--font-size-100)">
                                     <i class="fa-solid fa-sort"></i>
                                 </Button>
                             {:else if column.sortStatus === 1}
-                                <Button aria-label="Sort descendingly by {column.name}" onclick={() => {sortByColumn(column, -1)}} square={true} style="margin-left: 1em; font-size: var(--font-size-100)">
+                                <Button
+                                    aria-label="Sort descendingly by {column.name}"
+                                    onclick={() => {
+                                        sortByColumn(column, -1);
+                                    }}
+                                    square={true}
+                                    style="margin-left: 1em; font-size: var(--font-size-100)">
                                     <i class="fa-solid fa-caret-up"></i>
                                 </Button>
                             {/if}
@@ -51,7 +69,7 @@
     </thead>
     <tbody>
         {#each tasks as task}
-            <TaskTableRow task={task}></TaskTableRow>
+            <TaskTableRow {task}></TaskTableRow>
         {/each}
     </tbody>
 </table>
@@ -76,11 +94,11 @@
 
     th {
         padding: 0.3em 0.5em;
-        border-bottom: .18em solid var(--on-group-colour);
+        border-bottom: 0.18em solid var(--on-group-colour);
     }
 
     th:not(:first-child) {
-        border-left: .18em solid var(--on-group-colour);
+        border-left: 0.18em solid var(--on-group-colour);
     }
 
     .cell-wrapper {

@@ -1,10 +1,10 @@
 <script lang="ts">
-    import type {TaskInTaskList} from "../../dto/task_in_task_list";
-    import {TaskIcons} from "../../dto/task_icons";
+    import type { TaskInTaskList } from "../../dto/task_in_task_list";
+    import { TaskIcons } from "../../dto/task_icons";
     import Link from "../util/Link.svelte";
     import TaskPathEditComponent from "../circuit/item/TaskPathEditComponent.svelte";
 
-    let { task } : { task: TaskInTaskList } = $props();
+    let { task }: { task: TaskInTaskList } = $props();
 </script>
 
 {#if task.taskInfo !== undefined}
@@ -20,7 +20,8 @@
         <th style="max-width: 7em">
             <span class="icon fa-solid fa-{TaskIcons[task.taskInfo.type]}"></span>
             {#if task.taskItem.taskType === "choice"}
-                {' '}in <span class="icon fa-solid fa-shapes"></span>
+                {" "}in
+                <span class="icon fa-solid fa-shapes"></span>
             {/if}
         </th>
         <th style="max-width: 4em">{task.taskInfo.time}</th>
@@ -53,6 +54,6 @@
     }
 
     th:not(:first-child) {
-        border-left: .18em solid var(--on-group-colour);
+        border-left: 0.18em solid var(--on-group-colour);
     }
 </style>

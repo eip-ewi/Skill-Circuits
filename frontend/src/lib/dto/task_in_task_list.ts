@@ -1,4 +1,4 @@
-import type {TaskInfo, TaskItem} from "./circuit/module/task";
+import type { TaskInfo, TaskItem } from "./circuit/module/task";
 
 export interface TaskInTaskList {
     taskItem: TaskItem;

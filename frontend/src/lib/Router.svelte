@@ -29,7 +29,8 @@
 {:else if pageMatches(/\/editions\/(\d+)/)}
     <EditionPage editionId={parseInt(extractPathVariable(/\/editions\/(\d+)/))}></EditionPage>
 {:else if pageMatches(/\/editions\/tasks\/(\d+)/)}
-    <EditionTasksPage editionId={parseInt(extractPathVariable(/\/editions\/tasks\/(\d+)/))}></EditionTasksPage>
+    <EditionTasksPage editionId={parseInt(extractPathVariable(/\/editions\/tasks\/(\d+)/))}
+    ></EditionTasksPage>
 {:else if pageMatches(/\/modules\/(\d+)/)}
     <ModulePage moduleId={parseInt(extractPathVariable(/\/modules\/(\d+)/))}></ModulePage>
 {:else if pageMatches(/\/submodules\/(\d+)/)}
