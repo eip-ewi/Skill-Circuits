@@ -1,6 +1,6 @@
 <script lang="ts">
-    import type {SkillBlock} from "../../dto/circuit/module/skill";
-    import {addTaskToPath, getItemsOnPath} from "../../logic/edition/active_path.svelte";
+    import type { SkillBlock } from "../../dto/circuit/module/skill";
+    import { addTaskToPath, getItemsOnPath } from "../../logic/edition/active_path.svelte";
     import TasksComponent from "../circuit/item/TasksComponent.svelte";
     import {
         getDraggingItem,
@@ -9,10 +9,12 @@
         dragItemLeave,
         setDraggingItem,
     } from "../../logic/circuit/drag_and_drop_items.svelte";
-    import type {TaskItem} from "../../dto/circuit/module/task";
+    import type { TaskItem } from "../../dto/circuit/module/task";
 
     let { block }: { block: SkillBlock } = $props();
-    let itemMap: Map<number, TaskItem> = $derived(new Map(block.items.map(item => [item.id, item as TaskItem])));
+    let itemMap: Map<number, TaskItem> = $derived(
+        new Map(block.items.map(item => [item.id, item as TaskItem])),
+    );
 
     async function drop(event: DragEvent) {
         if (!event.dataTransfer!.types.includes("skill-circuits/item")) {
@@ -30,7 +32,13 @@
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="content" data-dragging={getDraggingItem()} ondragenter={dragItemEnter} ondragover={dragItemOver} ondragleave={dragItemLeave} ondrop={drop}>
+<div
+    class="content"
+    data-dragging={getDraggingItem()}
+    ondragenter={dragItemEnter}
+    ondragover={dragItemOver}
+    ondragleave={dragItemLeave}
+    ondrop={drop}>
     <h2 class="name">{block.name}</h2>
     <TasksComponent tasks={getItemsOnPath(block)}></TasksComponent>
     <div class="drop-indicator"></div>

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {loadPage} from "../logic/routing.svelte";
+    import { loadPage } from "../logic/routing.svelte";
 
     let { submoduleId }: { submoduleId: number } = $props();
 
@@ -11,11 +11,9 @@
 </script>
 
 <main>
-
     {#await load()}
         <div></div>
     {:then _}
         Redirecting...
     {/await}
-
 </main>

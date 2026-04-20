@@ -1,19 +1,19 @@
 import type { Block } from "../dto/circuit/block";
-import type {Group} from "../dto/circuit/group";
-import type {Point} from "./point";
+import type { Group } from "../dto/circuit/group";
+import type { Point } from "./point";
 
 export interface Blob {
-    group: Group,
-    min: Point,
-    max: Point,
-    allocations: Allocation[],
+    group: Group;
+    min: Point;
+    max: Point;
+    allocations: Allocation[];
 }
 
 export interface Allocation {
-    point: Point,
-    neighbours: Neighbours,
-    showName: boolean,
-    block: Block | undefined,
+    point: Point;
+    neighbours: Neighbours;
+    showName: boolean;
+    block: Block | undefined;
 }
 
 export interface Neighbours {

@@ -1,16 +1,18 @@
 <script lang="ts">
-
-    import {hasEditorRights, getAuthorisation, isTeacherForCircuit} from "../../../logic/authorisation.svelte";
+    import {
+        hasEditorRights,
+        getAuthorisation,
+        isTeacherForCircuit,
+    } from "../../../logic/authorisation.svelte";
     import EditorManageComponent from "./EditorManageComponent.svelte";
-    import {getEdition} from "../../../logic/edition/edition.svelte";
+    import { getEdition } from "../../../logic/edition/edition.svelte";
     import Button from "../../util/Button.svelte";
-    import {setEditionVisibility} from "../../../logic/updates/edition_updates";
+    import { setEditionVisibility } from "../../../logic/updates/edition_updates";
     import CopyEditionComponent from "./CopyEditionComponent.svelte";
 
     let { open = $bindable() }: { open: boolean } = $props();
 
     let copyDialogOpen: boolean = $state(false);
-
 </script>
 
 {#if hasEditorRights()}
@@ -19,7 +21,7 @@
         <div class="heading">
             <h2>Course configuration</h2>
             <div class="controls">
-                <button class="button" aria-label="Close panel" onclick={ () => open = false }>
+                <button class="button" aria-label="Close panel" onclick={() => (open = false)}>
                     <span class="fa-solid fa-arrow-right"></span>
                 </button>
             </div>
@@ -31,7 +33,7 @@
                 {#if getEdition().published}
                     <p>This course edition is visible to students.</p>
                     <div>
-                        <Button type="caution" onclick={ () => setEditionVisibility(false) }>
+                        <Button type="caution" onclick={() => setEditionVisibility(false)}>
                             <span class="fa-solid fa-eye-slash"></span>
                             <span>Unpublish</span>
                         </Button>
@@ -39,7 +41,7 @@
                 {:else}
                     <p>This course edition is not visible to students.</p>
                     <div>
-                        <Button onclick={ () => setEditionVisibility(true) } >
+                        <Button onclick={() => setEditionVisibility(true)}>
                             <span class="fa-solid fa-eye"></span>
                             <span>Publish</span>
                         </Button>
@@ -51,11 +53,9 @@
 
             <div class="section">
                 <h3>Copy</h3>
-                <p>
-                    You can copy this course edition to another course edition that you manage.
-                </p>
+                <p>You can copy this course edition to another course edition that you manage.</p>
                 <div>
-                    <Button onclick={ () => copyDialogOpen = true }>
+                    <Button onclick={() => (copyDialogOpen = true)}>
                         <span class="fa-solid fa-copy"></span>
                         <span>Copy</span>
                     </Button>
@@ -64,9 +64,7 @@
             {#if isTeacherForCircuit()}
                 <div class="section">
                     <h3>Download statistics</h3>
-                    <p>
-                        You can download statistics for tasks and students in this edition.
-                    </p>
+                    <p>You can download statistics for tasks and students in this edition.</p>
                     <div class="buttons">
                         <Button href={`/api/editions/${getEdition().id}/statistics/tasks`}>
                             <span class="fa-solid fa-list-check"></span>
@@ -127,12 +125,12 @@
 
     .controls {
         display: flex;
-        gap: .25rem;
+        gap: 0.25rem;
     }
 
     .section {
         display: grid;
-        gap: .5em;
+        gap: 0.5em;
     }
 
     .buttons {
@@ -151,7 +149,8 @@
         padding: 0.5rem;
         text-decoration: none;
     }
-    .button:focus-visible, .button:hover {
+    .button:focus-visible,
+    .button:hover {
         background: var(--on-glass-surface-active-colour);
     }
 

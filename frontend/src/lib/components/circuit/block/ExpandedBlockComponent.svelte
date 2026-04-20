@@ -1,9 +1,8 @@
 <script lang="ts">
-
-    import type {Block} from "../../../dto/circuit/block";
+    import type { Block } from "../../../dto/circuit/block";
     import TasksComponent from "../item/TasksComponent.svelte";
-    import {isCompleted} from "../../../logic/circuit/skill_state/completion";
-    import {addTaskToPath, getItemsOnPath} from "../../../logic/edition/active_path.svelte";
+    import { isCompleted } from "../../../logic/circuit/skill_state/completion";
+    import { addTaskToPath, getItemsOnPath } from "../../../logic/edition/active_path.svelte";
     import StudentTrayComponent from "../../side_controls/student_tray/StudentTrayComponent.svelte";
     import {
         getDraggingItem,
@@ -12,11 +11,11 @@
         dragItemLeave,
         setDraggingItem,
     } from "../../../logic/circuit/drag_and_drop_items.svelte";
-    import {openExpandedBlockTransition} from "../../../logic/transitions";
-    import {getItem} from "../../../logic/circuit/circuit.svelte";
-    import type {TaskItem} from "../../../dto/circuit/module/task";
+    import { openExpandedBlockTransition } from "../../../logic/transitions";
+    import { getItem } from "../../../logic/circuit/circuit.svelte";
+    import type { TaskItem } from "../../../dto/circuit/module/task";
 
-    let { block, open = $bindable() }: { block: Block, open: boolean } = $props();
+    let { block, open = $bindable() }: { block: Block; open: boolean } = $props();
 
     let element: HTMLDialogElement | undefined = $state();
 
@@ -25,7 +24,7 @@
         if (block.blockType !== "skill") return [];
 
         return getItemsOnPath(block);
-    })
+    });
 
     $effect(() => {
         if (element === undefined) {
@@ -42,13 +41,13 @@
         }
     });
 
-    function checkForClose(event: MouseEvent|KeyboardEvent) {
-        if(event instanceof MouseEvent && event.target === element){
+    function checkForClose(event: MouseEvent | KeyboardEvent) {
+        if (event instanceof MouseEvent && event.target === element) {
             open = false;
             return;
         }
 
-        if(event instanceof KeyboardEvent && event.key === "Escape") {
+        if (event instanceof KeyboardEvent && event.key === "Escape") {
             // prevent default behaviour of instantly closing the dialogue
             event.preventDefault();
             open = false;
@@ -74,8 +73,14 @@
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
     <dialog bind:this={element} onclick={checkForClose} onkeydown={checkForClose}>
         <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
-        <div class="expanded-block" transition:openExpandedBlockTransition={{ block: block }} data-dragging={getDraggingItem()}
-             ondragenter={dragItemEnter} ondragover={dragItemOver} ondragleave={dragItemLeave} ondrop={drop}>
+        <div
+            class="expanded-block"
+            transition:openExpandedBlockTransition={{ block: block }}
+            data-dragging={getDraggingItem()}
+            ondragenter={dragItemEnter}
+            ondragover={dragItemOver}
+            ondragleave={dragItemLeave}
+            ondrop={drop}>
             <div class="content">
                 <h2 class="name">{block.name}</h2>
                 {#if block.blockType === "skill"}
@@ -90,7 +95,7 @@
 
 <style>
     .expanded-block {
-        font-size: clamp(.75rem, calc(16 / 1732 * 100vw), 1rem);
+        font-size: clamp(0.75rem, calc(16 / 1732 * 100vw), 1rem);
 
         border: var(--expanded-block-border);
         border-radius: var(--expanded-block-border-radius);

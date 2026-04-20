@@ -1,4 +1,4 @@
-import type {ModuleLevel} from "./level";
+import type { ModuleLevel } from "./level";
 
 export namespace BlockStates {
     export let Inactive: "inactive" = "inactive";
@@ -10,6 +10,11 @@ export namespace BlockStates {
     export let AssigningPaths: "assigning paths" = "assigning paths";
 }
 
-export type BlockState = typeof BlockStates.Inactive | typeof BlockStates.Hovering | typeof BlockStates.Dragging
-    | typeof BlockStates.Editing | typeof BlockStates.Connecting | typeof BlockStates.WaitingForConnection
-    | typeof BlockStates.AssigningPaths ;
+export type BlockState =
+    | typeof BlockStates.Inactive
+    | typeof BlockStates.Hovering
+    | typeof BlockStates.Dragging
+    | typeof BlockStates.Editing
+    | typeof BlockStates.Connecting
+    | typeof BlockStates.WaitingForConnection
+    | typeof BlockStates.AssigningPaths;

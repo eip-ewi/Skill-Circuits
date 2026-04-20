@@ -1,20 +1,19 @@
-import {getEdition} from "./edition.svelte";
-import type {Path} from "../../dto/path";
-import {withCsrf} from "../csrf";
-import type {Block} from "../../dto/circuit/block";
-import type {Item} from "../../dto/circuit/item";
-import {getLevel} from "../circuit/level.svelte";
-import {ModuleLevel} from "../../data/level";
-import {hasEditorRights, getAuthorisation} from "../authorisation.svelte";
-import type {TaskItem} from "../../dto/circuit/module/task";
+import { getEdition } from "./edition.svelte";
+import type { Path } from "../../dto/path";
+import { withCsrf } from "../csrf";
+import type { Block } from "../../dto/circuit/block";
+import type { Item } from "../../dto/circuit/item";
+import { getLevel } from "../circuit/level.svelte";
+import { ModuleLevel } from "../../data/level";
+import { hasEditorRights, getAuthorisation } from "../authorisation.svelte";
+import type { TaskItem } from "../../dto/circuit/module/task";
 
-export const pathState: {activePath: Path | null, tasksAdded: number[], tasksRemoved: number[]} = $state(
-    {
+export const pathState: { activePath: Path | null; tasksAdded: number[]; tasksRemoved: number[] } =
+    $state({
         activePath: null,
         tasksAdded: [],
-        tasksRemoved: []
-    }
-)
+        tasksRemoved: [],
+    });
 
 function removeTaskId(id: number, tasks: number[]): void {
     let index = tasks.indexOf(id);
@@ -24,19 +23,16 @@ function removeTaskId(id: number, tasks: number[]): void {
     }
 }
 
-function addTaskId (id: number, tasks: number[]): void {
-    if (!tasks.includes(id))
-        tasks.push(id);
+function addTaskId(id: number, tasks: number[]): void {
+    if (!tasks.includes(id)) tasks.push(id);
 }
 
 function isTaskOnActivePathByDefault(task: TaskItem): boolean {
     //for courses that don't have paths
-    if (pathState.activePath == null)
-        return true;
+    if (pathState.activePath == null) return true;
 
     return task.paths.includes(pathState.activePath.id);
 }
-
 
 export function getActivePath(): Path | null {
     return pathState.activePath;
@@ -53,16 +49,22 @@ export function isTaskOnPath(task: TaskItem): boolean {
     if (pathState.activePath === null) {
         return !pathState.tasksRemoved.includes(task.id);
     }
-    return !pathState.tasksRemoved.includes(task.id) && (task.paths.includes(pathState.activePath!.id) || pathState.tasksAdded.includes(task.id))
+    return (
+        !pathState.tasksRemoved.includes(task.id) &&
+        (task.paths.includes(pathState.activePath!.id) || pathState.tasksAdded.includes(task.id))
+    );
 }
 
 export async function selectPath(path: Path) {
-    let response = await fetch(`/api/paths/active?edition=${getEdition().id}&path=${path.id}`, withCsrf({
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-        },
-    }));
+    let response = await fetch(
+        `/api/paths/active?edition=${getEdition().id}&path=${path.id}`,
+        withCsrf({
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }),
+    );
 
     if (response.ok) {
         pathState.activePath = path;
@@ -81,7 +83,7 @@ export async function fetchActivePath() {
 
 export async function fetchPathCustomisation() {
     let response = await fetch(`/api/paths/customisation?edition=${getEdition().id}`);
-    let customisation: { tasksAdded: number[], tasksRemoved: number[] } = await response.json();
+    let customisation: { tasksAdded: number[]; tasksRemoved: number[] } = await response.json();
     pathState.tasksAdded = customisation.tasksAdded;
     pathState.tasksRemoved = customisation.tasksRemoved;
 }
@@ -89,9 +91,12 @@ export async function fetchPathCustomisation() {
 export async function addTaskToPath(task: TaskItem) {
     if (isTaskOnPath(task)) return;
 
-    let response = await fetch(`/api/paths/tasks/${task.id}`, withCsrf({
-        method: "POST",
-    }));
+    let response = await fetch(
+        `/api/paths/tasks/${task.id}`,
+        withCsrf({
+            method: "POST",
+        }),
+    );
 
     if (response.ok) {
         // the task being in tasksAdded or tasksRemoved is relative to its default state on that path
@@ -108,9 +113,12 @@ export async function addTaskToPath(task: TaskItem) {
 export async function removeTaskFromPath(task: TaskItem) {
     if (!isTaskOnPath(task)) return;
 
-    let response = await fetch(`/api/paths/tasks/${task.id}`, withCsrf({
-        method: "DELETE",
-    }));
+    let response = await fetch(
+        `/api/paths/tasks/${task.id}`,
+        withCsrf({
+            method: "DELETE",
+        }),
+    );
 
     if (response.ok) {
         // the task being in tasksAdded or tasksRemoved is relative to its default state on that path

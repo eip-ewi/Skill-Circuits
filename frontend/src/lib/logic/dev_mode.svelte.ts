@@ -1,4 +1,4 @@
-let devMode: boolean = $state(false)
+let devMode: boolean = $state(false);
 
 export function getDevMode() {
     return devMode;
@@ -6,5 +6,5 @@ export function getDevMode() {
 
 export async function fetchDevMode() {
     let response = await fetch("/dev-mode");
-    devMode = await response.text() === "true";
+    devMode = (await response.text()) === "true";
 }

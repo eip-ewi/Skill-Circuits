@@ -1,6 +1,6 @@
-import type {ReleaseDetails} from "../dto/release_details";
-import {getLevel} from "./circuit/level.svelte";
-import {withCsrf} from "./csrf";
+import type { ReleaseDetails } from "../dto/release_details";
+import { getLevel } from "./circuit/level.svelte";
+import { withCsrf } from "./csrf";
 
 let releaseDetails: ReleaseDetails[] = $state([]);
 
@@ -14,12 +14,15 @@ export async function fetchReleaseDetails() {
 }
 
 export async function versionUpdate() {
-    await fetch(`/api/user-version`, withCsrf({
-        method: "PATCH",
-        headers: {
-            "Content-Type": "application/json",
-        },
-    }));
+    await fetch(
+        `/api/user-version`,
+        withCsrf({
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }),
+    );
     releaseDetails = [];
 }
 

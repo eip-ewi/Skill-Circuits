@@ -1,18 +1,20 @@
 <script lang="ts">
-
-    import {hasEditorRights, getAuthorisation} from "../../../logic/authorisation.svelte";
+    import { hasEditorRights, getAuthorisation } from "../../../logic/authorisation.svelte";
     import PathListItemComponent from "./PathListItemComponent.svelte";
-    import {createPath} from "../../../logic/updates/path_updates";
-    import {getPaths} from "../../../logic/edition/edition.svelte";
-    import {getLevel, isLevel} from "../../../logic/circuit/level.svelte";
-    import {ModuleLevel} from "../../../data/level";
-    import {getBlocks} from "../../../logic/circuit/circuit.svelte";
-    import {BlockStates} from "../../../data/block_state";
+    import { createPath } from "../../../logic/updates/path_updates";
+    import { getPaths } from "../../../logic/edition/edition.svelte";
+    import { getLevel, isLevel } from "../../../logic/circuit/level.svelte";
+    import { ModuleLevel } from "../../../data/level";
+    import { getBlocks } from "../../../logic/circuit/circuit.svelte";
+    import { BlockStates } from "../../../data/block_state";
     import Button from "../../util/Button.svelte";
 
     let { open = $bindable() }: { open: boolean } = $props();
 
-    let bulkEditing: boolean = $derived(isLevel(ModuleLevel) && getBlocks().some(block => block.state === BlockStates.AssigningPaths));
+    let bulkEditing: boolean = $derived(
+        isLevel(ModuleLevel) &&
+            getBlocks().some(block => block.state === BlockStates.AssigningPaths),
+    );
 
     async function addPath() {
         let path = await createPath();
@@ -23,9 +25,9 @@
 
     function bulkEdit() {
         if (bulkEditing) {
-            getBlocks().forEach(block => block.state = BlockStates.Inactive);
+            getBlocks().forEach(block => (block.state = BlockStates.Inactive));
         } else {
-            getBlocks().forEach(block => block.state = BlockStates.AssigningPaths);
+            getBlocks().forEach(block => (block.state = BlockStates.AssigningPaths));
             open = false;
         }
     }
@@ -40,7 +42,7 @@
                 <button class="button" aria-label="Add path" onclick={addPath}>
                     <span class="fa-solid fa-plus"></span>
                 </button>
-                <button class="button" aria-label="Close panel" onclick={ () => open = false }>
+                <button class="button" aria-label="Close panel" onclick={() => (open = false)}>
                     <span class="fa-solid fa-arrow-right"></span>
                 </button>
             </div>
@@ -103,7 +105,7 @@
 
     .controls {
         display: flex;
-        gap: .25rem;
+        gap: 0.25rem;
     }
 
     .extra-controls {
@@ -127,7 +129,8 @@
         padding: 0.5rem;
         text-decoration: none;
     }
-    .button:focus-visible, .button:hover {
+    .button:focus-visible,
+    .button:hover {
         background: var(--on-glass-surface-active-colour);
     }
 </style>

@@ -2,9 +2,9 @@
     import logoDark from "/img/tudelft_logo_dark.png";
     import logoLight from "/img/tudelft_logo_light.png";
     import Link from "./util/Link.svelte";
-    import {loadPage} from "../logic/routing.svelte";
-    import {getTheme} from "../logic/preferences.svelte";
-    import {getThemeColorScheme} from "../logic/theme.svelte";
+    import { loadPage } from "../logic/routing.svelte";
+    import { getTheme } from "../logic/preferences.svelte";
+    import { getThemeColorScheme } from "../logic/theme.svelte";
 
     let { fullWidth }: { fullWidth?: boolean | undefined } = $props();
 </script>
@@ -13,14 +13,18 @@
     <footer>
         <div>
             {#if getThemeColorScheme(getTheme()) === "light"}
-                <img width="64" alt="TU Delft" src={logoDark}/>
+                <img width="64" alt="TU Delft" src={logoDark} />
             {:else}
-                <img width="64" alt="TU Delft" src={logoLight}/>
+                <img width="64" alt="TU Delft" src={logoLight} />
             {/if}
         </div>
         <div class="links">
-            <Link href="https://gitlab.ewi.tudelft.nl/skill-circuits/skill-circuits/-/releases" target="_blank">Releases</Link>
-            <Link onclick={ () => loadPage("/privacy") }>Privacy statement</Link>
+            <Link
+                href="https://gitlab.ewi.tudelft.nl/skill-circuits/skill-circuits/-/releases"
+                target="_blank">
+                Releases
+            </Link>
+            <Link onclick={() => loadPage("/privacy")}>Privacy statement</Link>
         </div>
     </footer>
 </div>

@@ -1,14 +1,12 @@
 <script lang="ts">
-
-    import type {Snippet} from "svelte";
+    import type { Snippet } from "svelte";
 
     let { children }: { children: Snippet } = $props();
-
 </script>
 
 <div class="tabs-wrapper">
     <nav class="glass">
-        {@render children() }
+        {@render children()}
     </nav>
 </div>
 

@@ -1,18 +1,16 @@
 <script lang="ts">
-
-    import type {Block} from "../../../dto/circuit/block";
-    import type {SkillBlock} from "../../../dto/circuit/module/skill";
-    import type {TaskItem} from "../../../dto/circuit/module/task";
-    import {hasEditorRights, getAuthorisation} from "../../../logic/authorisation.svelte";
-    import {getLevel} from "../../../logic/circuit/level.svelte";
-    import {ModuleLevel} from "../../../data/level";
+    import type { Block } from "../../../dto/circuit/block";
+    import type { SkillBlock } from "../../../dto/circuit/module/skill";
+    import type { TaskItem } from "../../../dto/circuit/module/task";
+    import { hasEditorRights, getAuthorisation } from "../../../logic/authorisation.svelte";
+    import { getLevel } from "../../../logic/circuit/level.svelte";
+    import { ModuleLevel } from "../../../data/level";
     import TaskIconsComponent from "../item/TaskIconsComponent.svelte";
-    import {getItemsOnPath} from "../../../logic/edition/active_path.svelte";
-    import {isSkillItemRevealed} from "../../../logic/circuit/unlocked_skills.svelte";
-    import {getCheckpoint, getVisibleCheckpoints} from "../../../logic/edition/edition.svelte";
+    import { getItemsOnPath } from "../../../logic/edition/active_path.svelte";
+    import { isSkillItemRevealed } from "../../../logic/circuit/unlocked_skills.svelte";
+    import { getCheckpoint, getVisibleCheckpoints } from "../../../logic/edition/edition.svelte";
 
     let { block }: { block: Block } = $props();
-
 </script>
 
 <div class="heading">
@@ -30,7 +28,15 @@
 {:else if hasEditorRights()}
     <span>{block.items.length} {getLevel().items}</span>
 {:else}
-    <span>{block.items.filter(item => item.completed && (item.itemType !== "skill" || item.column !== null)).length}/{block.items.filter(item => item.itemType !== "skill" || (item.column !== null && (!item.hidden || isSkillItemRevealed(item)))).length} completed</span>
+    <span>
+        {block.items.filter(
+            item => item.completed && (item.itemType !== "skill" || item.column !== null),
+        ).length}/{block.items.filter(
+            item =>
+                item.itemType !== "skill" ||
+                (item.column !== null && (!item.hidden || isSkillItemRevealed(item))),
+        ).length} completed
+    </span>
 {/if}
 
 <style>
@@ -48,6 +54,6 @@
     .label {
         font-style: italic;
         opacity: 35%;
-        margin-top: -.25em;
+        margin-top: -0.25em;
     }
 </style>

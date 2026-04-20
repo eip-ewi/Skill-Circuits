@@ -1,20 +1,20 @@
-import type {ChoiceTaskItem, TaskItem} from "./circuit/module/task";
-import type {RegularSkillBlock, SkillBlock} from "./circuit/module/skill";
+import type { ChoiceTaskItem, TaskItem } from "./circuit/module/task";
+import type { RegularSkillBlock, SkillBlock } from "./circuit/module/skill";
 
 export interface IBookmarkList {
     id: number;
     name: string;
     lastModified: string;
 
-    skills: BookmarkListSkill[]
-    tasks: BookmarkListTask[],
+    skills: BookmarkListSkill[];
+    tasks: BookmarkListTask[];
 
-    editing: boolean | undefined,
-    collapsed: boolean | undefined,
+    editing: boolean | undefined;
+    collapsed: boolean | undefined;
 }
 
 export interface PersonalBookmarkList extends IBookmarkList {
-    skill: null,
+    skill: null;
 }
 
 export interface HiddenSkillBookmarkList extends IBookmarkList {

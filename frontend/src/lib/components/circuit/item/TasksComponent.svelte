@@ -1,11 +1,9 @@
 <script lang="ts">
-
-    import type {TaskItem} from "../../../dto/circuit/module/task";
+    import type { TaskItem } from "../../../dto/circuit/module/task";
     import TaskComponent from "./TaskComponent.svelte";
     import ChoiceTaskComponent from "./ChoiceTaskComponent.svelte";
 
-    let { tasks, hideBookmark }: { tasks: TaskItem[], hideBookmark?: boolean } = $props();
-
+    let { tasks, hideBookmark }: { tasks: TaskItem[]; hideBookmark?: boolean } = $props();
 </script>
 
 <div class="tasks" style="--columns: {hideBookmark === true ? 3 : 4}">

@@ -1,6 +1,6 @@
-import {cubicInOut, linear} from "svelte/easing";
-import type {Point} from "../data/point";
-import type {Block} from "../dto/circuit/block";
+import { cubicInOut, linear } from "svelte/easing";
+import type { Point } from "../data/point";
+import type { Block } from "../dto/circuit/block";
 
 export function openExpandedBlockTransition(element: Element, params: { block: Block }) {
     return {
@@ -15,12 +15,12 @@ export function openExpandedBlockTransition(element: Element, params: { block: B
             let position = {
                 x: `calc(${start.x * (1 - t3)}px + ${50 * t3}vw - ${50 * t3}%)`,
                 y: `calc(${start.y * (1 - t3)}px + ${50 * t3}vh - ${50 * t3}%)`,
-            }
+            };
             return `
                    --blur: ${t * 0.5}rem;
                    opacity: ${t3};
                    transform: translate(${position.x}, ${position.y}) scale(${t3 * 0.9 + 0.1}) ;
                 `;
-        }
-    }
+        },
+    };
 }
