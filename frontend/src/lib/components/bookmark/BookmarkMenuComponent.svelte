@@ -1,22 +1,39 @@
 <script lang="ts">
-    import {getBookmarks, isTaskInfoBookmarked} from "../../logic/bookmarks.svelte";
+    import { getBookmarks, isTaskInfoBookmarked } from "../../logic/bookmarks.svelte";
     import Dropdown from "../util/Dropdown.svelte";
-    import type {Snippet} from "svelte";
-    import type {BookmarkList} from "../../dto/bookmark";
+    import type { Snippet } from "svelte";
+    import type { BookmarkList } from "../../dto/bookmark";
 
-    let { open = $bindable(), onLists, children, addToList, removeFromList }:
-        { open: boolean, onLists: BookmarkList[], children: Snippet, addToList?: (list: BookmarkList) => void, removeFromList?: (list: BookmarkList) => void } = $props();
+    let {
+        open = $bindable(),
+        onLists,
+        children,
+        addToList,
+        removeFromList,
+    }: {
+        open: boolean;
+        onLists: BookmarkList[];
+        children: Snippet;
+        addToList?: (list: BookmarkList) => void;
+        removeFromList?: (list: BookmarkList) => void;
+    } = $props();
 </script>
 
-<Dropdown bind:open={open}>
-    {@render children() }
+<Dropdown bind:open>
+    {@render children()}
 
-    {#snippet dropdown() }
+    {#snippet dropdown()}
         <div class="lists">
             {#each getBookmarks() as list}
                 {@const included = onLists.some(l => l.id === list.id)}
-                <button class="bookmark" onclick={ () => included ? removeFromList?.(list) : addToList?.(list) }>
-                    <span class="fa-bookmark" class:fa-regular={!included} class:fa-solid={included}></span>
+                <button
+                    class="bookmark"
+                    onclick={() => (included ? removeFromList?.(list) : addToList?.(list))}>
+                    <span
+                        class="fa-bookmark"
+                        class:fa-regular={!included}
+                        class:fa-solid={included}>
+                    </span>
                     <span>{list.name}</span>
                 </button>
             {/each}
@@ -27,7 +44,7 @@
 <style>
     .lists {
         display: grid;
-        gap: .5em;
+        gap: 0.5em;
     }
 
     .lists .bookmark {
@@ -39,7 +56,7 @@
         cursor: pointer;
         display: flex;
         padding: 0.5em 1em;
-        gap: .5em;
+        gap: 0.5em;
         white-space: nowrap;
     }
     .lists .bookmark:where(:hover, :focus-visible) {

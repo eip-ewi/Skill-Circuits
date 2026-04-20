@@ -1,5 +1,5 @@
 import type { Block } from "../../dto/circuit/block";
-import type {Graph} from "../circuit/graph";
+import type { Graph } from "../circuit/graph";
 
 export function hasCycle(graph: Graph) {
     let toVisit: Block[] = graph.getNodes();
@@ -17,7 +17,6 @@ export function hasCycle(graph: Graph) {
 }
 
 function dfs(graph: Graph, current: Block, visited: Set<number>, stack: Set<number>): boolean {
-
     if (stack.has(current.id)) {
         return true;
     }

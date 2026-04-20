@@ -1,12 +1,12 @@
 <script lang="ts">
-    import {onMount, type Snippet} from "svelte";
-    import type {ClassValue} from "svelte/elements";
+    import { onMount, type Snippet } from "svelte";
+    import type { ClassValue } from "svelte/elements";
 
     interface Properties {
         children: Snippet;
 
         multiple?: boolean;
-        button?: Snippet<[ (event: MouseEvent) => void, () => void, () => void ]>;
+        button?: Snippet<[(event: MouseEvent) => void, () => void, () => void]>;
         style?: string;
         onchange?: (event: Event) => void;
     }
@@ -16,7 +16,7 @@
     let select: HTMLSelectElement;
     let element: HTMLElement;
 
-    let options: { html: string, value: string }[] = $state([]);
+    let options: { html: string; value: string }[] = $state([]);
 
     let open: boolean = $state(false);
     let selected: number[] = $state([]);
@@ -25,8 +25,12 @@
     let enableOpenOnFocus: boolean = true;
 
     onMount(() => {
-        selected = Array.from(select.options).filter(option => option.hasAttribute("selected")).map(option => option.index);
-        options = Array.from(select.options).map(option => { return { html: option.innerHTML, value: option.value }; });
+        selected = Array.from(select.options)
+            .filter(option => option.hasAttribute("selected"))
+            .map(option => option.index);
+        options = Array.from(select.options).map(option => {
+            return { html: option.innerHTML, value: option.value };
+        });
 
         if (onchange !== undefined) {
             select.addEventListener("change", onchange);
@@ -41,7 +45,9 @@
 
     $effect(() => {
         let selectedSet: Set<number> = new Set(selected);
-        let changed: boolean = Array.from(select.options).some(option => option.selected !== selectedSet.has(option.index));
+        let changed: boolean = Array.from(select.options).some(
+            option => option.selected !== selectedSet.has(option.index),
+        );
 
         if (changed) {
             if (selected.length === 0) {
@@ -60,7 +66,7 @@
         if (!multiple) {
             closeDropdown();
         }
-    })
+    });
 
     function click(event: MouseEvent) {
         event.preventDefault();
@@ -166,7 +172,7 @@
     }
 </script>
 
-<select bind:this={select} multiple={multiple}>
+<select bind:this={select} {multiple}>
     {@render children()}
 </select>
 
@@ -189,9 +195,16 @@
 
     <div class="scrollable glass options" tabindex="-1">
         {#each options as option, i}
-            <button tabindex="-1" class="option" role="option" aria-selected={selected.includes(i)} value={option.value} onclick={ () => selectOption(i) } onblur={blurOption}>
+            <button
+                tabindex="-1"
+                class="option"
+                role="option"
+                aria-selected={selected.includes(i)}
+                value={option.value}
+                onclick={() => selectOption(i)}
+                onblur={blurOption}>
                 <span>{@html option.html}</span>
-                <span class="check">{'\u2713'}</span>
+                <span class="check">{"\u2713"}</span>
             </button>
         {/each}
     </div>
@@ -211,13 +224,13 @@
         align-items: center;
         background: var(--block-colour);
         border: 1px solid var(--on-block-divider-colour);
-        border-radius: .5em;
+        border-radius: 0.5em;
         color: var(--on-block-colour);
         cursor: pointer;
         display: flex;
-        gap: .5em;
+        gap: 0.5em;
         justify-content: space-between;
-        padding: .5em 1em;
+        padding: 0.5em 1em;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
@@ -225,11 +238,11 @@
     .options {
         border-radius: var(--option-border-radius);
         display: grid;
-        gap: .5em;
+        gap: 0.5em;
         min-width: 100%;
         max-height: 24em;
         overflow-y: auto;
-        padding: .5em .5em;
+        padding: 0.5em 0.5em;
         position: absolute;
         overscroll-behavior: contain;
         top: 100%;
@@ -251,10 +264,11 @@
         display: flex;
         justify-content: space-between;
         padding: 0.5em 1em;
-        gap: .5em;
+        gap: 0.5em;
         white-space: nowrap;
     }
-    .option:hover, .option:focus-visible {
+    .option:hover,
+    .option:focus-visible {
         background-color: var(--option-active-colour);
         color: var(--on-option-active-colour);
     }

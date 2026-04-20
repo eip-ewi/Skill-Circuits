@@ -1,13 +1,20 @@
 <script lang="ts">
-
-    import {cubicInOut} from "svelte/easing";
-    import type {Block} from "../../../dto/circuit/block";
+    import { cubicInOut } from "svelte/easing";
+    import type { Block } from "../../../dto/circuit/block";
     import StudentTrayTaskComponent from "./StudentTrayTaskComponent.svelte";
-    import {getItem} from "../../../logic/circuit/circuit.svelte";
-    import type {TaskItem} from "../../../dto/circuit/module/task";
-    import {addTaskToPath, isTaskOnPath, removeTaskFromPath} from "../../../logic/edition/active_path.svelte";
+    import type { TaskItem } from "../../../dto/circuit/module/task";
+    import { isTaskOnPath, removeTaskFromPath } from "../../../logic/edition/active_path.svelte";
 
     let { block }: { block: Block } = $props();
+    let itemMap: Map<number, TaskItem> = $derived(
+        new Map(block.items.map(item => [item.id, item as TaskItem])),
+    );
+    let availableTasks = $derived.by(() => {
+        //if unchecked task is of type SkillItem|TaskItem
+        if (block.blockType !== "skill") return [];
+
+        return block.items.filter(task => !isTaskOnPath(task));
+    });
 
     let open: boolean = $state(false);
 
@@ -18,8 +25,7 @@
         event.preventDefault();
     }
 
-    function dragLeave() {
-    }
+    function dragLeave() {}
 
     function dragOver(event: DragEvent) {
         if (!event.dataTransfer!.types.includes("skill-circuits/item")) {
@@ -35,7 +41,7 @@
         event.preventDefault();
 
         let itemId = parseInt(event.dataTransfer!.getData("skill-circuits/item"));
-        let item = getItem(itemId) as TaskItem;
+        let item = itemMap.get(itemId)!;
 
         await removeTaskFromPath(item);
     }
@@ -48,28 +54,35 @@
             css: (t: number) => `
                 transform: scaleX(${t});
             `,
-        }
+        };
     }
 </script>
 
 {#if !open}
-
     <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events, a11y_mouse_events_have_key_events -->
-    <div class="scrollable side glass open-button" ondragenter={ () => open = true } in:growHorizontal={{ delay: 150 }} out:growHorizontal={{}}>
-        <button class="button" aria-label="Open tray" onclick={ () => open = true }>
+    <div
+        class="scrollable side glass open-button"
+        ondragenter={() => (open = true)}
+        in:growHorizontal={{ delay: 150 }}
+        out:growHorizontal={{}}>
+        <button class="button" aria-label="Open tray" onclick={() => (open = true)}>
             <span class="fa-solid fa-inbox"></span>
         </button>
     </div>
-
 {/if}
 
 <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
-<div class="scrollable glass side panel" aria-expanded={open}
-     ondragenter={dragEnter} ondragover={dragOver} ondragleave={dragLeave} ondrop={drop}>
+<div
+    class="scrollable glass side panel"
+    aria-expanded={open}
+    ondragenter={dragEnter}
+    ondragover={dragOver}
+    ondragleave={dragLeave}
+    ondrop={drop}>
     <div class="heading">
         <h2>Tray</h2>
         <div class="controls">
-            <button class="button" aria-label="Close panel" onclick={ () => open = false }>
+            <button class="button" aria-label="Close panel" onclick={() => (open = false)}>
                 <span class="fa-solid fa-arrow-right"></span>
             </button>
         </div>
@@ -79,16 +92,14 @@
             <div class="banner">
                 <span class="fa-solid fa-info-circle"></span>
                 <p>
-                    Here you can find tasks that might not right be for you, but if you want to do them anyway, you can drag them to the skill.
-                    Similarly, you can drag tasks from the skill here that you do not want to do.
+                    Here you can find tasks that might not right be for you, but if you want to do
+                    them anyway, you can drag them to the skill. Similarly, you can drag tasks from
+                    the skill here that you do not want to do.
                 </p>
             </div>
             {#if block.blockType === "skill"}
-                {@const availableTasks = block.items.filter(task => !isTaskOnPath(task))}
                 {#if availableTasks.length === 0}
-                    <p>
-                        There are no available tasks.
-                    </p>
+                    <p>There are no available tasks.</p>
                 {/if}
                 {#each availableTasks as task}
                     <StudentTrayTaskComponent {task}></StudentTrayTaskComponent>
@@ -100,7 +111,7 @@
 
 <style>
     .side {
-        font-size: clamp(.75rem, calc(16 / 1732 * 100vw), 1rem);
+        font-size: clamp(0.75rem, calc(16 / 1732 * 100vw), 1rem);
 
         position: fixed;
         right: 0;
@@ -120,8 +131,8 @@
         cursor: pointer;
         display: grid;
         font-size: var(--font-size-600);
-        margin: .5em;
-        padding: .5em;
+        margin: 0.5em;
+        padding: 0.5em;
     }
     .open-button button:where(:focus-visible, :hover) {
         background: var(--on-glass-surface-active-colour);
@@ -164,7 +175,7 @@
 
     .controls {
         display: flex;
-        gap: .25em;
+        gap: 0.25em;
     }
 
     .content {
@@ -176,20 +187,21 @@
     .button {
         background: var(--on-glass-surface-colour);
         border: none;
-        border-radius: .5em;
+        border-radius: 0.5em;
         cursor: pointer;
         display: grid;
         justify-items: center;
         padding: 0.5em;
         text-decoration: none;
     }
-    .button:focus-visible, .button:hover {
+    .button:focus-visible,
+    .button:hover {
         background: var(--on-glass-surface-active-colour);
     }
 
     .tasks {
         display: grid;
-        gap: .5em;
+        gap: 0.5em;
     }
 
     .banner {
@@ -201,7 +213,7 @@
         display: flex;
         gap: 1em;
         margin-bottom: 1em;
-        padding: .5em 1em;
+        padding: 0.5em 1em;
     }
     .banner .fa-solid {
         font-size: var(--font-size-500);

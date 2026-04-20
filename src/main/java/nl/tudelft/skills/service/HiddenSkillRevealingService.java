@@ -27,10 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.AllArgsConstructor;
-import nl.tudelft.skills.model.AbstractSkill;
-import nl.tudelft.skills.model.SCPerson;
-import nl.tudelft.skills.model.Skill;
-import nl.tudelft.skills.model.TaskInfo;
+import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.bookmark.HiddenSkillBookmarkList;
 import nl.tudelft.skills.repository.PersonRepository;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
@@ -45,6 +42,7 @@ public class HiddenSkillRevealingService {
 	private final SkillStateService skillStateService;
 
 	private final PersonRepository personRepository;
+	private final PathService pathService;
 
 	@Transactional
 	public Set<Skill> revealSkillsAfterTaskCompletion(TaskInfo task, SCPerson person) {
@@ -60,8 +58,14 @@ public class HiddenSkillRevealingService {
 		Set<Long> completedTaskIds = taskCompletionRepository.findAllCompletedTaskIdsForPerson(person);
 		Set<Long> revealedSkillIds = person.getSkillsRevealed().stream().map(AbstractSkill::getId)
 				.collect(Collectors.toSet());
+		Task taskOfTaskInfo = requireNonNull(task.getTask() == null ? task.getChoiceTask() : task.getTask());
+		Path activePath = pathService.getActivePath(person,
+				taskOfTaskInfo.getSkill().getSubmodule().getModule().getEdition());
+		Set<Task> tasksAdded = person.getTasksAdded();
+		Set<Task> tasksRemoved = person.getTasksRemoved();
 		Set<Skill> newRevealedSkills = candidates.stream()
-				.filter(candidate -> isListCompleted(candidate, completedTaskIds, revealedSkillIds))
+				.filter(candidate -> isListCompleted(candidate, completedTaskIds, revealedSkillIds,
+						activePath, tasksAdded, tasksRemoved))
 				.map(HiddenSkillBookmarkList::getSkill).collect(Collectors.toSet());
 
 		person.getSkillsRevealed().addAll(newRevealedSkills);
@@ -71,7 +75,7 @@ public class HiddenSkillRevealingService {
 	}
 
 	public boolean isListCompleted(HiddenSkillBookmarkList list, Set<Long> completedTaskIds,
-			Set<Long> revealedSkillIds) {
+			Set<Long> revealedSkillIds, Path activePath, Set<Task> tasksAdded, Set<Task> tasksRemoved) {
 		if (list.getTasks().stream().anyMatch(task -> !completedTaskIds.contains(task.getId()))) {
 			return false;
 		}
@@ -81,7 +85,7 @@ public class HiddenSkillRevealingService {
 		}
 		if (list.getSkills().stream()
 				.anyMatch(skill -> !skillStateService.isSkillCompleted(skill, completedTaskIds,
-						revealedSkillIds))) {
+						revealedSkillIds, activePath, tasksAdded, tasksRemoved))) {
 			return false;
 		}
 		return true;

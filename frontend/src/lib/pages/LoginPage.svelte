@@ -1,9 +1,7 @@
 <script lang="ts">
-
     import Csrf from "../components/Csrf.svelte";
-    import {onMount} from "svelte";
+    import { onMount } from "svelte";
     import PageLayout from "./PageLayout.svelte";
-
 </script>
 
 <PageLayout>
@@ -15,12 +13,12 @@
         <div class="groups">
             <div class="group">
                 <label for="username">Username</label>
-                <input type="text" name="username" id="username"/>
+                <input type="text" name="username" id="username" />
             </div>
 
             <div class="group">
                 <label for="password">Password</label>
-                <input type="password" name="password" id="password"/>
+                <input type="password" name="password" id="password" />
             </div>
         </div>
 
@@ -29,7 +27,6 @@
 </PageLayout>
 
 <style>
-
     form {
         display: grid;
         gap: 1rem;
@@ -47,9 +44,10 @@
         background-color: var(--block-colour);
         border: none;
         border-radius: 16px;
-        box-shadow: .75rem 1.25rem 1.625rem 0 color-mix(in srgb, var(--shadow-colour) 8%, transparent);
+        box-shadow: 0.75rem 1.25rem 1.625rem 0
+            color-mix(in srgb, var(--shadow-colour) 8%, transparent);
         display: grid;
-        gap: .5rem;
+        gap: 0.5rem;
         place-items: center;
         padding: 1rem;
     }
@@ -61,7 +59,7 @@
 
     label {
         font-size: var(--font-size-200);
-        color: var(--on-block-colour)
+        color: var(--on-block-colour);
     }
 
     input {
@@ -69,21 +67,23 @@
         border: 1px solid var(--on-block-divider-colour);
         color: var(--on-neutral-surface-colour);
         border-radius: 8px;
-        padding: .5rem 1rem;
+        padding: 0.5rem 1rem;
     }
 
     button {
         background-color: var(--block-colour);
         border: 1px solid var(--on-block-divider-colour);
         border-radius: 8px;
-        box-shadow: .75rem 1.25rem 1.625rem 0 color-mix(in srgb, var(--shadow-colour) 8%, transparent);
+        box-shadow: 0.75rem 1.25rem 1.625rem 0
+            color-mix(in srgb, var(--shadow-colour) 8%, transparent);
         cursor: pointer;
         display: grid;
         place-items: center;
-        padding: .5rem 1rem;
+        padding: 0.5rem 1rem;
     }
     button:where(:hover, :focus-visible) {
         transform: scale(1.05);
-        box-shadow: .75rem 1.25rem 1.8rem 0 color-mix(in srgb, var(--shadow-colour) 8%, transparent);
+        box-shadow: 0.75rem 1.25rem 1.8rem 0
+            color-mix(in srgb, var(--shadow-colour) 8%, transparent);
     }
 </style>

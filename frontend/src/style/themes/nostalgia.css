@@ -22,7 +22,8 @@
     --glass-glint-colour: transparent;
 
     /* Columns */
-    --column-colour: color-mix(in srgb, var(--secondary-colour) 15%, transparent);
+    --column-radius: 0;
+    --column-colour: color-mix(in srgb, var(--green) 15%, transparent);
 
     /* Groups */
     --group-colour: white;
@@ -50,9 +51,9 @@
     /* Connections */
     --connection-colour: var(--grey-500);
     --connection-radius: 0;
-    --connection-width: .125em;
+    --connection-width: 0.125em;
     --connection-highlighted-colour: var(--blue);
-    --connection-highlighted-width: .125em;
+    --connection-highlighted-width: 0.125em;
 
     /* Blocks */
     --block-colour: white;
@@ -76,6 +77,9 @@
     --task-drop-indication-colour: rgba(1 1 1 / 0.1);
     --task-drop-indication-border: 1px dotted rgba(0 0 0 / 0.1);
     --task-drop-indication-border-radius: 0;
+
+    /* Submodule overview */
+    --submodule-overview-selection-border-radius: 0em;
 
     /* Links */
     --link-colour: color-mix(in oklab, var(--primary-colour) 90%, white);

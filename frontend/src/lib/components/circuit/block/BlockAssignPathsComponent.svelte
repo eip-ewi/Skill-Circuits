@@ -1,12 +1,15 @@
 <script lang="ts">
-
-    import type {SkillBlock} from "../../../dto/circuit/module/skill";
-    import {getCheckpoint, getPaths, getSortedCheckpoints} from "../../../logic/edition/edition.svelte";
-    import {TaskIcons} from "../../../dto/task_icons";
-    import type {TaskItem} from "../../../dto/circuit/module/task";
-    import type {Path} from "../../../dto/path";
-    import {editTaskPaths} from "../../../logic/circuit/updates/task_updates";
-    import {canEditCircuit} from "../../../logic/authorisation.svelte";
+    import type { SkillBlock } from "../../../dto/circuit/module/skill";
+    import {
+        getCheckpoint,
+        getPaths,
+        getSortedCheckpoints,
+    } from "../../../logic/edition/edition.svelte";
+    import { TaskIcons } from "../../../dto/task_icons";
+    import type { TaskItem } from "../../../dto/circuit/module/task";
+    import type { Path } from "../../../dto/path";
+    import { editTaskPaths } from "../../../logic/circuit/updates/task_updates";
+    import { hasEditorRights } from "../../../logic/authorisation.svelte";
 
     let { skill }: { skill: SkillBlock } = $props();
 
@@ -20,7 +23,6 @@
         }
         await editTaskPaths(task, newPaths);
     }
-
 </script>
 
 <div class="block">
@@ -50,7 +52,10 @@
                     {#each getPaths() as path}
                         <td>
                             <div class="cell">
-                                <input type="checkbox" checked={task.paths.includes(path.id)} onchange={ e => updatePath(e, task, path) }/>
+                                <input
+                                    type="checkbox"
+                                    checked={task.paths.includes(path.id)}
+                                    onchange={e => updatePath(e, task, path)} />
                             </div>
                         </td>
                     {/each}
@@ -87,12 +92,12 @@
     }
     th:not(:first-child) {
         border-block: 1px solid var(--on-block-divider-colour);
-        padding-inline: .375em;
+        padding-inline: 0.375em;
     }
 
     td:first-child {
         border-block: 1px solid var(--on-block-divider-colour);
-        padding-inline: .375em;
+        padding-inline: 0.375em;
     }
     td:not(:first-child) {
         border: 1px solid var(--on-block-divider-colour);
@@ -101,7 +106,7 @@
     .cell {
         display: grid;
         place-items: center;
-        padding: .375em;
+        padding: 0.375em;
     }
 
     input[type="checkbox"] {

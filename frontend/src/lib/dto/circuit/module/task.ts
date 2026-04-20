@@ -1,4 +1,4 @@
-import type {IItem} from "../item";
+import type { IItem } from "../item";
 
 export interface ITaskItem extends IItem {
     paths: number[];

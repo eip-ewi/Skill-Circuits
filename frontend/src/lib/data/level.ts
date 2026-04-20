@@ -7,7 +7,7 @@ export const ModuleLevel = {
     blocks: "skills",
     item: "task",
     items: "tasks",
-}
+};
 
 export const EditionLevel = {
     circuit: "edition",
@@ -18,7 +18,7 @@ export const EditionLevel = {
     blocks: "submodules",
     item: "skill",
     items: "skills",
-}
+};
 
 export const TrackLevel = {
     circuit: "track",
@@ -29,7 +29,7 @@ export const TrackLevel = {
     blocks: "modules",
     item: "submodule",
     items: "submodules",
-}
+};
 
 export const ProgrammeLevel = {
     circuit: "programme",
@@ -40,6 +40,10 @@ export const ProgrammeLevel = {
     blocks: "editions",
     item: "module",
     items: "modules",
-}
+};
 
-export type Level = typeof ModuleLevel | typeof EditionLevel | typeof TrackLevel | typeof ProgrammeLevel;
+export type Level =
+    | typeof ModuleLevel
+    | typeof EditionLevel
+    | typeof TrackLevel
+    | typeof ProgrammeLevel;
