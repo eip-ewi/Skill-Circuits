@@ -1,12 +1,12 @@
 <script lang="ts">
-    import {onMount} from "svelte";
-    import {checkSession} from "../logic/session";
+    import { onMount } from "svelte";
+    import { checkSession } from "../logic/session";
     import Button from "./util/Button.svelte";
 
     let dialog: HTMLDialogElement;
 
-    const CHECK_SESSION_TIME = 15 * 60 * 1_000 /*ms*/;
-    const CHECK_RELOGIN_TIME = 5_000 /*ms*/;
+    const CHECK_SESSION_TIME = 15 * 60 * 1_000; /*ms*/
+    const CHECK_RELOGIN_TIME = 5_000; /*ms*/
 
     function startCheckingExpiry() {
         setTimeout(async () => {
@@ -67,7 +67,7 @@
 
     .dialog::backdrop {
         background: none;
-        backdrop-filter: blur(.5rem);
+        backdrop-filter: blur(0.5rem);
     }
 
     .dialog h2 {

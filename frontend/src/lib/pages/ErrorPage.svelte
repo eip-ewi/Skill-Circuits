@@ -1,5 +1,7 @@
 <script lang="ts">
-import PageLayout from "./PageLayout.svelte";
+    import PageLayout from "./PageLayout.svelte";
+    import { clearLevel } from "../logic/circuit/level.svelte";
+    clearLevel();
 </script>
 
 <svelte:head>
@@ -8,11 +10,9 @@ import PageLayout from "./PageLayout.svelte";
 
 <PageLayout>
     <div class="content">
-
         <h1>Error</h1>
 
         <p>Oops something went wrong :(</p>
-
     </div>
 </PageLayout>
 

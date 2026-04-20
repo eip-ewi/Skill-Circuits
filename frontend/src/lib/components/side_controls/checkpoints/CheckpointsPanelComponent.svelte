@@ -1,9 +1,8 @@
 <script lang="ts">
-
-    import {canEditCircuit, getAuthorisation} from "../../../logic/authorisation.svelte";
+    import { hasEditorRights, getAuthorisation } from "../../../logic/authorisation.svelte";
     import CheckpointListItemComponent from "./CheckpointListItemComponent.svelte";
-    import {createCheckpoint} from "../../../logic/updates/checkpoint_updates";
-    import {getSortedCheckpoints} from "../../../logic/edition/edition.svelte";
+    import { createCheckpoint } from "../../../logic/updates/checkpoint_updates";
+    import { getSortedCheckpoints } from "../../../logic/edition/edition.svelte";
 
     let { open = $bindable() }: { open: boolean } = $props();
 
@@ -15,7 +14,7 @@
     }
 </script>
 
-{#if canEditCircuit()}
+{#if hasEditorRights()}
     <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
     <div class="scrollable glass panel" aria-expanded={open}>
         <div class="heading">
@@ -24,7 +23,7 @@
                 <button class="button" aria-label="Add checkpoint" onclick={addCheckpoint}>
                     <span class="fa-solid fa-plus"></span>
                 </button>
-                <button class="button" aria-label="Close panel" onclick={ () => open = false }>
+                <button class="button" aria-label="Close panel" onclick={() => (open = false)}>
                     <span class="fa-solid fa-arrow-right"></span>
                 </button>
             </div>
@@ -74,7 +73,7 @@
 
     .controls {
         display: flex;
-        gap: .25rem;
+        gap: 0.25rem;
     }
 
     .checkpoints {
@@ -93,7 +92,8 @@
         padding: 0.5rem;
         text-decoration: none;
     }
-    .button:focus-visible, .button:hover {
+    .button:focus-visible,
+    .button:hover {
         background: var(--on-glass-surface-active-colour);
     }
 </style>

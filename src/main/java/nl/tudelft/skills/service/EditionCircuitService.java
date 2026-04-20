@@ -33,6 +33,7 @@ import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelEditionView;
 import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelModuleView;
 import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelSkillView;
 import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelSubmoduleView;
+import nl.tudelft.skills.dto.view.circuit.module.ModuleLevelModuleView;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
@@ -48,6 +49,8 @@ public class EditionCircuitService {
 	private final SubmoduleDependencyService submoduleDependencyService;
 
 	private final TaskCompletionRepository taskCompletionRepository;
+	private final PathService pathService;
+	private final ModuleCircuitService moduleCircuitService;
 
 	public EditionLevelEditionView getEditionCircuit(Long editionId, SCPerson person) {
 		SCEdition edition = editionRepository.getOrCreate(editionId);
@@ -55,12 +58,16 @@ public class EditionCircuitService {
 		Set<Long> completedTaskIds = taskCompletionRepository.findAllCompletedTaskIdsForPerson(person);
 		Set<Long> revealedSkillIds = person.getSkillsRevealed().stream().map(AbstractSkill::getId)
 				.collect(Collectors.toSet());
+		Path activePath = pathService.getActivePath(person, edition);
+		Set<Task> tasksAdded = person.getTasksAdded();
+		Set<Task> tasksRemoved = person.getTasksRemoved();
 
 		return new EditionLevelEditionView(
 				edition.getId(),
 				editionDetails.getCourse().getName() + " - " + editionDetails.getName(),
 				edition.getModules().stream()
-						.map(module -> convertToModuleView(module, completedTaskIds, revealedSkillIds))
+						.map(module -> convertToModuleView(module, completedTaskIds, revealedSkillIds,
+								activePath, tasksAdded, tasksRemoved))
 						.toList(),
 				edition.getCheckpoints().stream()
 						.map(checkpoint -> new CheckpointView(checkpoint.getId(), checkpoint.getName(),
@@ -75,29 +82,40 @@ public class EditionCircuitService {
 		Set<Long> completedTaskIds = taskCompletionRepository.findAllCompletedTaskIdsForPerson(person);
 		Set<Long> revealedSkillIds = person.getSkillsRevealed().stream().map(AbstractSkill::getId)
 				.collect(Collectors.toSet());
-		return convertToModuleView(module, completedTaskIds, revealedSkillIds);
+		Path activePath = pathService.getActivePath(person, module.getEdition());
+		Set<Task> tasksAdded = person.getTasksAdded();
+		Set<Task> tasksRemoved = person.getTasksRemoved();
+		return convertToModuleView(module, completedTaskIds, revealedSkillIds, activePath, tasksAdded,
+				tasksRemoved);
 	}
 
 	private EditionLevelModuleView convertToModuleView(SCModule module, Set<Long> completedTaskIds,
-			Set<Long> revealedSkillIds) {
+			Set<Long> revealedSkillIds, Path activePath, Set<Task> tasksAdded, Set<Task> tasksRemoved) {
+		ModuleLevelModuleView moduleCircuit = moduleCircuitService.getModuleCircuit(module, completedTaskIds);
 		return new EditionLevelModuleView(
 				module.getId(),
 				module.getName(),
 				module.getSubmodules().stream()
 						.map(submodule -> convertToSubmoduleView(submodule, completedTaskIds,
-								revealedSkillIds))
-						.toList());
+								revealedSkillIds, activePath, tasksAdded, tasksRemoved))
+						.toList(),
+				moduleCircuit);
 	}
 
 	public EditionLevelSubmoduleView convertToSubmoduleView(Submodule submodule, SCPerson person) {
 		Set<Long> completedTaskIds = taskCompletionRepository.findAllCompletedTaskIdsForPerson(person);
 		Set<Long> revealedSkillIds = person.getSkillsRevealed().stream().map(AbstractSkill::getId)
 				.collect(Collectors.toSet());
-		return convertToSubmoduleView(submodule, completedTaskIds, revealedSkillIds);
+		Path activePath = pathService.getActivePath(person, submodule.getModule().getEdition());
+		Set<Task> tasksAdded = person.getTasksAdded();
+		Set<Task> tasksRemoved = person.getTasksRemoved();
+		return convertToSubmoduleView(submodule, completedTaskIds, revealedSkillIds, activePath, tasksAdded,
+				tasksRemoved);
 	}
 
 	private EditionLevelSubmoduleView convertToSubmoduleView(Submodule submodule,
-			Set<Long> completedTaskIds, Set<Long> revealedSkillIds) {
+			Set<Long> completedTaskIds, Set<Long> revealedSkillIds, Path activePath, Set<Task> tasksAdded,
+			Set<Task> tasksRemoved) {
 		return new EditionLevelSubmoduleView(
 				submodule.getId(),
 				submodule.getName(),
@@ -107,20 +125,23 @@ public class EditionCircuitService {
 				submoduleDependencyService.getSubmoduleChildren(submodule).stream().map(Submodule::getId)
 						.toList(),
 				submodule.getSkills().stream()
-						.map(skill -> convertToSkillView(skill, completedTaskIds, revealedSkillIds))
+						.map(skill -> convertToSkillView(skill, completedTaskIds, revealedSkillIds,
+								activePath, tasksAdded, tasksRemoved))
 						.toList());
 	}
 
 	private EditionLevelSkillView convertToSkillView(Skill skill, Set<Long> completedTaskIds,
-			Set<Long> revealedSkillIds) {
+			Set<Long> revealedSkillIds, Path activePath, Set<Task> tasksAdded, Set<Task> tasksRemoved) {
 		return new EditionLevelSkillView(
 				skill.getId(),
 				skill.getName(),
 				skill.getColumn(),
 				skill.isEssential(),
 				skill.isHidden(),
-				skillStateService.isSkillCompleted(skill, completedTaskIds, revealedSkillIds),
-				!skillStateService.isSkillUnlocked(skill, completedTaskIds, revealedSkillIds));
+				skillStateService.isSkillCompleted(skill, completedTaskIds, revealedSkillIds, activePath,
+						tasksAdded, tasksRemoved),
+				!skillStateService.isSkillUnlocked(skill, completedTaskIds, revealedSkillIds, activePath,
+						tasksAdded, tasksRemoved));
 	}
 
 }

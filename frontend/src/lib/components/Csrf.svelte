@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {onMount} from "svelte";
+    import { onMount } from "svelte";
 
     let csrfToken: string = $state("");
 
@@ -8,4 +8,4 @@
     });
 </script>
 
-<input type="hidden" name="_csrf" value="{csrfToken}">
+<input type="hidden" name="_csrf" value={csrfToken} />

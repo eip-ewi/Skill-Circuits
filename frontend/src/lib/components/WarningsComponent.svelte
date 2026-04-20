@@ -1,6 +1,6 @@
 <script lang="ts">
-    import type {Warning} from "../data/warning";
-    import {getAuthorisation} from "../logic/authorisation.svelte";
+    import type { Warning } from "../data/warning";
+    import { getAuthorisation } from "../logic/authorisation.svelte";
 
     let { warnings }: { warnings: Warning[] } = $props();
 </script>

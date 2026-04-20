@@ -1,19 +1,22 @@
 <script lang="ts">
-
-    import type {Block} from "../../../dto/circuit/block";
-    import {getLevel} from "../../../logic/circuit/level.svelte";
-    import {getCircuit, getGroup, getGroupForBlock} from "../../../logic/circuit/circuit.svelte";
+    import type { Block } from "../../../dto/circuit/block";
+    import { getLevel } from "../../../logic/circuit/level.svelte";
+    import { getCircuit, getGroup, getGroupForBlock } from "../../../logic/circuit/circuit.svelte";
     import ItemEditComponent from "../item/ItemEditComponent.svelte";
     import Select from "../../util/Select.svelte";
-    import {editBlockGroup, editBlockName} from "../../../logic/circuit/updates/block_updates";
-    import {createItem} from "../../../logic/circuit/updates/item_updates";
+    import { editBlockGroup, editBlockName } from "../../../logic/circuit/updates/block_updates";
+    import { createItem } from "../../../logic/circuit/updates/item_updates";
     import moment from "moment";
-    import type {RegularSkillBlock, SkillBlock} from "../../../dto/circuit/module/skill";
-    import {getCheckpoint, getSortedCheckpoints} from "../../../logic/edition/edition.svelte";
+    import type { RegularSkillBlock, SkillBlock } from "../../../dto/circuit/module/skill";
+    import { getCheckpoint, getSortedCheckpoints } from "../../../logic/edition/edition.svelte";
     import ItemsEditComponent from "../item/ItemsEditComponent.svelte";
-    import {createChoiceTask} from "../../../logic/circuit/updates/task_updates";
+    import { createChoiceTask } from "../../../logic/circuit/updates/task_updates";
     import Button from "../../util/Button.svelte";
-    import {editSkillCheckpoint, editSkillEssential, editSkillHidden} from "../../../logic/circuit/updates/skill_updates";
+    import {
+        editSkillCheckpoint,
+        editSkillEssential,
+        editSkillHidden,
+    } from "../../../logic/circuit/updates/skill_updates";
 
     let { block }: { block: Block } = $props();
 
@@ -44,48 +47,70 @@
     }
 
     async function addItem() {
-        await createItem(block)
+        await createItem(block);
     }
 
     async function addChoiceTask() {
         await createChoiceTask(block as SkillBlock);
     }
-
 </script>
 
 <div class="edit">
     <div class="heading">
         {#if block.blockType !== "skill" || !block.external}
-
-            <input aria-label="Edit {getLevel().block} name" class="name" name="name" value={block.name} onchange={editName}/>
+            <input
+                aria-label="Edit {getLevel().block} name"
+                class="name"
+                name="name"
+                value={block.name}
+                onchange={editName} />
             <Select onchange={editGroup}>
                 {#each getCircuit().groups as group}
                     {@const currentGroup = getGroupForBlock(block)}
-                    <option selected={group.id === currentGroup.id} value={group.id}>{group.name}</option>
+                    <option selected={group.id === currentGroup.id} value={group.id}>
+                        {group.name}
+                    </option>
                 {/each}
             </Select>
             {#if block.blockType === "skill"}
                 <Select onchange={editCheckpoint}>
                     <option selected={block.checkpoint === null} value="">No checkpoint</option>
                     {#each getSortedCheckpoints() as checkpoint}
-                        {@const currentCheckpoint = block.checkpoint === null ? null : getCheckpoint(block.checkpoint)}
-                        <option selected={checkpoint.id === currentCheckpoint?.id} value={checkpoint.id}>{checkpoint.name} ({moment(checkpoint.deadline).format("D MMMM YYYY HH:mm")})</option>
+                        {@const currentCheckpoint =
+                            block.checkpoint === null ? null : getCheckpoint(block.checkpoint)}
+                        <option
+                            selected={checkpoint.id === currentCheckpoint?.id}
+                            value={checkpoint.id}>
+                            {checkpoint.name} ({moment(checkpoint.deadline).format(
+                                "D MMMM YYYY HH:mm",
+                            )})
+                        </option>
                     {/each}
                 </Select>
             {/if}
-
         {:else}
             <span class="name">{block.name}</span>
         {/if}
 
         {#if block.blockType === "skill"}
             <div>
-                <input id="optional-{block.id}" name="optional" type="checkbox" checked={!block.essential} disabled={!block.external && block.hidden} onchange={editOptional}>
+                <input
+                    id="optional-{block.id}"
+                    name="optional"
+                    type="checkbox"
+                    checked={!block.essential}
+                    disabled={!block.external && block.hidden}
+                    onchange={editOptional} />
                 <label for="optional-{block.id}">Optional</label>
             </div>
             {#if !block.external}
                 <div>
-                    <input id="hidden-{block.id}" name="hidden" type="checkbox" checked={block.hidden} onchange={editHidden}>
+                    <input
+                        id="hidden-{block.id}"
+                        name="hidden"
+                        type="checkbox"
+                        checked={block.hidden}
+                        onchange={editHidden} />
                     <label for="hidden-{block.id}">Hidden</label>
                 </div>
             {/if}
@@ -134,9 +159,9 @@
     input.name {
         background-color: var(--neutral-surface-colour);
         border: 1px solid var(--on-block-divider-colour);
-        border-radius: .5em;
+        border-radius: 0.5em;
         color: var(--on-neutral-surface-colour);
-        padding: .5em 1em;
+        padding: 0.5em 1em;
     }
 
     input[type="checkbox"] {
@@ -157,7 +182,7 @@
 
     .new-task {
         display: flex;
-        gap: .5em;
+        gap: 0.5em;
         flex-wrap: wrap;
     }
 </style>
