@@ -1,11 +1,9 @@
 <script lang="ts">
-
-
-    import type {ManagedEdition} from "../../../dto/edition";
+    import type { ManagedEdition } from "../../../dto/edition";
     import Button from "../../util/Button.svelte";
     import Select from "../../util/Select.svelte";
-    import {getEdition} from "../../../logic/edition/edition.svelte";
-    import {copyEdition} from "../../../logic/updates/edition_updates";
+    import { getEdition } from "../../../logic/edition/edition.svelte";
+    import { copyEdition } from "../../../logic/updates/edition_updates";
 
     let { open = $bindable() }: { open: boolean } = $props();
 
@@ -20,7 +18,7 @@
         } else {
             dialog.close();
         }
-    })
+    });
 
     function selectEdition(event: Event) {
         let editionId = parseInt((event.target as HTMLSelectElement).value);
@@ -36,7 +34,6 @@
         await copyEdition(selectedEdition!.id);
         open = false;
     }
-
 </script>
 
 <dialog bind:this={dialog} class="scrollable glass dialog">
@@ -49,7 +46,9 @@
                 <Select onchange={selectEdition}>
                     {#each editions as edition}
                         {#if getEdition().id !== edition.id}
-                            <option value={edition.id}>{edition.course.name} - {edition.name}</option>
+                            <option value={edition.id}>
+                                {edition.course.name} - {edition.name}
+                            </option>
                         {/if}
                     {/each}
                 </Select>
@@ -60,14 +59,14 @@
             <div class="warning">
                 <span class="fa-solid fa-triangle-exclamation"></span>
                 <p>
-                    The course edition you have selected already contains a circuit.
-                    Copying to this course edition will overwrite all its content.
+                    The course edition you have selected already contains a circuit. Copying to this
+                    course edition will overwrite all its content.
                 </p>
             </div>
         {/if}
 
         <div class="buttons">
-            <Button onclick={ () => open = false }>
+            <Button onclick={() => (open = false)}>
                 <span class="fa-solid fa-xmark"></span>
                 <span>Cancel</span>
             </Button>
@@ -92,8 +91,8 @@
     }
 
     .dialog::backdrop {
-        backdrop-filter: blur(.15rem);
-        background-color: hsla(0deg 0% 0% / .05);
+        backdrop-filter: blur(0.15rem);
+        background-color: hsla(0deg 0% 0% / 0.05);
     }
 
     h2 {
@@ -115,14 +114,14 @@
 
     .warning {
         align-items: center;
-        backdrop-filter: blur(.25rem);
+        backdrop-filter: blur(0.25rem);
         background-color: var(--warning-banner-colour);
         border: var(--warning-banner-border);
         border-radius: var(--warning-banner-border-radius);
         color: var(--on-warning-banner-colour);
         display: flex;
         gap: 1em;
-        padding: .5em 1em;
+        padding: 0.5em 1em;
     }
 
     .warning .fa-solid {

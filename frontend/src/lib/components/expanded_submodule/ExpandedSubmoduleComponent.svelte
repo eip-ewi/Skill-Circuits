@@ -1,25 +1,30 @@
 <script lang="ts">
-    import type {SkillBlock} from "../../dto/circuit/module/skill";
-    import {getGroupForBlock, getItem, isBlockVisible} from "../../logic/circuit/circuit.svelte";
-    import type {SubmoduleBlock} from "../../dto/circuit/edition/submodule";
-    import type {SubmoduleGroup} from "../../dto/circuit/module/submodule";
-    import {topologicalSort} from "../../logic/circuit/block_placement";
-    import {BlockStates} from "../../data/block_state";
+    import type { SkillBlock } from "../../dto/circuit/module/skill";
+    import { getGroupForBlock, getItem, isBlockVisible } from "../../logic/circuit/circuit.svelte";
+    import type { SubmoduleBlock } from "../../dto/circuit/edition/submodule";
+    import type { SubmoduleGroup } from "../../dto/circuit/module/submodule";
+    import { topologicalSort } from "../../logic/circuit/block_placement";
+    import { BlockStates } from "../../data/block_state";
     import SkillNameComponent from "./SkillNameComponent.svelte";
     import SelectedSkillComponent from "./SelectedSkillComponent.svelte";
     import StudentTrayComponent from "../side_controls/student_tray/StudentTrayComponent.svelte";
-    import {openExpandedBlockTransition} from "../../logic/transitions";
-    import type {ModuleGroup} from "../../dto/circuit/edition/module";
-    import type {Item} from "../../dto/circuit/item";
-    import {isCompleted} from "../../logic/circuit/skill_state/completion";
-    import {isUnlocked} from "../../logic/circuit/skill_state/unlock";
-    import {untrack} from "svelte";
+    import { openExpandedBlockTransition } from "../../logic/transitions";
+    import type { ModuleGroup } from "../../dto/circuit/edition/module";
+    import type { Item } from "../../dto/circuit/item";
+    import { isCompleted } from "../../logic/circuit/skill_state/completion";
+    import { isUnlocked } from "../../logic/circuit/skill_state/unlock";
+    import { untrack } from "svelte";
 
-    let { submoduleBlock, open = $bindable() }: { submoduleBlock: SubmoduleBlock, open: boolean } = $props();
+    let { submoduleBlock, open = $bindable() }: { submoduleBlock: SubmoduleBlock; open: boolean } =
+        $props();
 
     let moduleGroup: ModuleGroup = $derived(getGroupForBlock(submoduleBlock) as ModuleGroup);
-    let submoduleGroup: SubmoduleGroup = $derived(moduleGroup.moduleCircuit.groups.find(group => group.id === submoduleBlock.id)!);
-    let skillBlockToSkillItem: [SkillBlock, Item][] = $derived(submoduleGroup.blocks.map(skillBlock => [skillBlock, getItem(skillBlock.id)]));
+    let submoduleGroup: SubmoduleGroup = $derived(
+        moduleGroup.moduleCircuit.groups.find(group => group.id === submoduleBlock.id)!,
+    );
+    let skillBlockToSkillItem: [SkillBlock, Item][] = $derived(
+        submoduleGroup.blocks.map(skillBlock => [skillBlock, getItem(skillBlock.id)]),
+    );
 
     let visibleSkills: SkillBlock[] | undefined = $state();
     let selectedSkill: SkillBlock | undefined = $state();
@@ -27,7 +32,7 @@
     let element: HTMLDialogElement | undefined = $state();
 
     function checkForClose(event: MouseEvent | KeyboardEvent) {
-        if (event instanceof MouseEvent && event.target === element){
+        if (event instanceof MouseEvent && event.target === element) {
             open = false;
             return;
         }
@@ -62,7 +67,12 @@
         // Select the first skill, if none is selected and there is at least one skill
         // Set it when the submodule is first opened: This makes it possible for recently revealed hidden skills
         // to be considered in the ordering
-        if (visibleSkills !== undefined && open && selectedSkill === undefined && visibleSkills.length > 0) {
+        if (
+            visibleSkills !== undefined &&
+            open &&
+            selectedSkill === undefined &&
+            visibleSkills.length > 0
+        ) {
             selectedSkill = visibleSkills[0];
         }
     });
@@ -85,29 +95,34 @@
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
     <dialog bind:this={element} onclick={checkForClose} onkeydown={checkForClose}>
         <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
-         <div class="expanded-submodule" transition:openExpandedBlockTransition={{ block: submoduleBlock }}>
-             {#if visibleSkills !== undefined && moduleGroup.moduleGraph !== undefined}
-                 <div class="content">
-                     <h1 class="name">{submoduleBlock.name}</h1>
-                     {#if selectedSkill !== undefined}
-                         <div class="skill-list">
-                             {#each visibleSkills as skill}
-                                <SkillNameComponent block={skill} moduleGraph={moduleGroup.moduleGraph} bind:selectedSkill></SkillNameComponent>
+        <div
+            class="expanded-submodule"
+            transition:openExpandedBlockTransition={{ block: submoduleBlock }}>
+            {#if visibleSkills !== undefined && moduleGroup.moduleGraph !== undefined}
+                <div class="content">
+                    <h1 class="name">{submoduleBlock.name}</h1>
+                    {#if selectedSkill !== undefined}
+                        <div class="skill-list">
+                            {#each visibleSkills as skill}
+                                <SkillNameComponent
+                                    block={skill}
+                                    moduleGraph={moduleGroup.moduleGraph}
+                                    bind:selectedSkill></SkillNameComponent>
                             {/each}
                         </div>
-                         <div class="selected-skill-wrapper">
-                             <SelectedSkillComponent block={selectedSkill}></SelectedSkillComponent>
-                         </div>
-                     {:else if visibleSkills.length === 0}
+                        <div class="selected-skill-wrapper">
+                            <SelectedSkillComponent block={selectedSkill}></SelectedSkillComponent>
+                        </div>
+                    {:else if visibleSkills.length === 0}
                         There are no skills in this submodule.
-                     {/if}
+                    {/if}
                 </div>
-             {/if}
+            {/if}
         </div>
 
-         {#if visibleSkills !== undefined && selectedSkill !== undefined}
+        {#if visibleSkills !== undefined && selectedSkill !== undefined}
             <StudentTrayComponent block={selectedSkill}></StudentTrayComponent>
-         {/if}
+        {/if}
     </dialog>
 {/if}
 

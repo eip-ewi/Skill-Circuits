@@ -1,9 +1,9 @@
 <script lang="ts">
-    import {getLevel} from "../../../logic/circuit/level.svelte";
+    import { getLevel } from "../../../logic/circuit/level.svelte";
     import BlockContentComponent from "../../circuit/block/BlockContentComponent.svelte";
-    import type {Block} from "../../../dto/circuit/block";
-    import {BlockStates} from "../../../data/block_state";
-    import {disableColumns, enableColumns} from "../../../dto/columns.svelte";
+    import type { Block } from "../../../dto/circuit/block";
+    import { BlockStates } from "../../../data/block_state";
+    import { disableColumns, enableColumns } from "../../../dto/columns.svelte";
 
     let { block }: { block: Block } = $props();
 
@@ -32,15 +32,18 @@
         background-color: var(--block-colour);
         border: var(--block-border);
         border-radius: var(--block-border-radius);
-        box-shadow: 0.25rem 0.25rem 0.5rem 0 color-mix(in srgb, var(--shadow-colour) 8%, transparent);
+        box-shadow: 0.25rem 0.25rem 0.5rem 0
+            color-mix(in srgb, var(--shadow-colour) 8%, transparent);
         color: var(--on-block-colour);
         cursor: grab;
         display: flex;
         flex-direction: column;
-        gap: .5rem;
+        gap: 0.5rem;
         padding: 1rem;
         position: relative;
-        transition: filter ease-in-out 150ms, box-shadow ease-in-out 150ms;
+        transition:
+            filter ease-in-out 150ms,
+            box-shadow ease-in-out 150ms;
     }
 
     .description {

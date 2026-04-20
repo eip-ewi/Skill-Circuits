@@ -1,6 +1,4 @@
-export type ScrollTarget =
-    | { kind: "block"; id: number }
-    | { kind: "group"; id: number };
+export type ScrollTarget = { kind: "block"; id: number } | { kind: "group"; id: number };
 
 let scrollTarget: ScrollTarget | undefined = $state(undefined);
 
@@ -15,4 +13,3 @@ export function getScrollTarget(): ScrollTarget | undefined {
 export function clearScrollTarget() {
     scrollTarget = undefined;
 }
-

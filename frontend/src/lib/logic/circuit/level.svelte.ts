@@ -1,4 +1,4 @@
-import type {Level} from "../../data/level";
+import type { Level } from "../../data/level";
 
 let level: Level | undefined = $state();
 

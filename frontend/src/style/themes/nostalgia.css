@@ -51,9 +51,9 @@
     /* Connections */
     --connection-colour: var(--grey-500);
     --connection-radius: 0;
-    --connection-width: .125em;
+    --connection-width: 0.125em;
     --connection-highlighted-colour: var(--blue);
-    --connection-highlighted-width: .125em;
+    --connection-highlighted-width: 0.125em;
 
     /* Blocks */
     --block-colour: white;

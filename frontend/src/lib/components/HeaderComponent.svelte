@@ -1,23 +1,24 @@
 <script lang="ts">
-
-    import {getAuthenticatedPerson} from "../logic/authentication.svelte";
-    import {isLevel, isOnCircuit} from "../logic/circuit/level.svelte";
-    import {EditionLevel, ModuleLevel, TrackLevel} from "../data/level";
-    import {cubicInOut} from "svelte/easing";
+    import { getAuthenticatedPerson } from "../logic/authentication.svelte";
+    import { isLevel, isOnCircuit } from "../logic/circuit/level.svelte";
+    import { EditionLevel, ModuleLevel, TrackLevel } from "../data/level";
+    import { cubicInOut } from "svelte/easing";
     import {
         hasEditorRights,
         getAuthorisation,
-        isEditorForAny, isViewModeAuthorisedToEdit,
+        isEditorForAny,
+        isViewModeAuthorisedToEdit,
         setViewMode,
-        toggleViewMode, isEditorForCircuit
+        toggleViewMode,
+        isEditorForCircuit,
     } from "../logic/authorisation.svelte";
     import Csrf from "./Csrf.svelte";
-    import {loadHomePage, loadPage, pageMatches} from "../logic/routing.svelte";
-    import {getEdition} from "../logic/edition/edition.svelte";
+    import { loadHomePage, loadPage, pageMatches } from "../logic/routing.svelte";
+    import { getEdition } from "../logic/edition/edition.svelte";
     import ThemeSelectComponent from "./ThemeSelectComponent.svelte";
     import WithConfirmationDialog from "./util/WithConfirmationDialog.svelte";
-    import {resetProgress} from "../logic/updates/edition_updates";
-    import {editingBlocks} from "../logic/circuit/updates/block_updates";
+    import { resetProgress } from "../logic/updates/edition_updates";
+    import { editingBlocks } from "../logic/circuit/updates/block_updates";
 
     let userMenuOpen: boolean = $state(false);
 
@@ -34,7 +35,7 @@
             duration: 200,
             easing: cubicInOut,
             css: (t: number) => `
-                margin-left: calc(${(1-t) / 3} * var(--spacing) + var(--spacing) / 3 * 2);
+                margin-left: calc(${(1 - t) / 3} * var(--spacing) + var(--spacing) / 3 * 2);
             `,
         };
     }
@@ -45,7 +46,7 @@
             duration: 200,
             easing: cubicInOut,
             css: (t: number) => `
-                margin-left: calc(${t / 48  * 17} * var(--spacing) + var(--spacing) / 48 * 31);
+                margin-left: calc(${(t / 48) * 17} * var(--spacing) + var(--spacing) / 48 * 31);
                 opacity: ${t};
             `,
         };
@@ -57,7 +58,7 @@
             duration: 200,
             easing: cubicInOut,
             css: (t: number) => `
-                transform: translateX(calc(${(1-t) * -100}% - ${(1-t) * 2}em));
+                transform: translateX(calc(${(1 - t) * -100}% - ${(1 - t) * 2}em));
             `,
         };
     }
@@ -100,7 +101,7 @@
                 </button>
             {/if}
             {#if isLevel(ModuleLevel)}
-                <button class="button" onclick={ () => loadPage(`/editions/${getEdition().id}`) }>
+                <button class="button" onclick={() => loadPage(`/editions/${getEdition().id}`)}>
                     <span class="icon fa-solid fa-arrow-up"></span>
                     <span>Go to course</span>
                 </button>
@@ -110,22 +111,22 @@
                     <span class="icon fa-solid fa-play"></span>
                     <span>Continue</span>
                 </button>
-<!--            TODO add this back when there are more levels    -->
-<!--                <button class="button">-->
-<!--                    <span class="icon fa-solid fa-arrow-up"></span>-->
-<!--                    <span>Go to track</span>-->
-<!--                </button>-->
+                <!--            TODO add this back when there are more levels    -->
+                <!--                <button class="button">-->
+                <!--                    <span class="icon fa-solid fa-arrow-up"></span>-->
+                <!--                    <span>Go to track</span>-->
+                <!--                </button>-->
             {/if}
             {#if isLevel(TrackLevel)}
                 <button class="button" onclick={returnToLastLeftOf}>
                     <span class="icon fa-solid fa-play"></span>
                     <span>Continue</span>
                 </button>
-<!--            TODO add this back when there are more levels    -->
-<!--                <button class="button">-->
-<!--                    <span class="programme fa-solid fa-arrow-up"></span>-->
-<!--                    <span>Go to programme</span>-->
-<!--                </button>-->
+                <!--            TODO add this back when there are more levels    -->
+                <!--                <button class="button">-->
+                <!--                    <span class="programme fa-solid fa-arrow-up"></span>-->
+                <!--                    <span>Go to programme</span>-->
+                <!--                </button>-->
             {/if}
 
             <button class="button" onclick={loadHomePage}>
@@ -134,12 +135,18 @@
             </button>
 
             {#if userMenuOpen}
-                <div in:shrinkLeftMargin={{}} style="opacity: 0; margin-left: calc(var(--spacing) / 3 * 2);" aria-hidden="true">
+                <div
+                    in:shrinkLeftMargin={{}}
+                    style="opacity: 0; margin-left: calc(var(--spacing) / 3 * 2);"
+                    aria-hidden="true">
                     <span class="icon fa-solid fa-user-circle"></span>
                     <span>{getAuthenticatedPerson()!.displayName}</span>
                 </div>
             {:else}
-                <button in:growLeftMargin={{delay: 350}} class="button" onclick={ () => userMenuOpen = true }>
+                <button
+                    in:growLeftMargin={{ delay: 350 }}
+                    class="button"
+                    onclick={() => (userMenuOpen = true)}>
                     <span class="icon fa-solid fa-user-circle"></span>
                     <span>{getAuthenticatedPerson()!.displayName}</span>
                 </button>
@@ -147,8 +154,8 @@
         </div>
 
         {#if userMenuOpen}
-            <div class="user-menu" in:moveRight={{}} out:moveRight={{delay: 200}}>
-                <div class="glass surface" in:growVertical={{delay: 200}} out:growVertical={{}}>
+            <div class="user-menu" in:moveRight={{}} out:moveRight={{ delay: 200 }}>
+                <div class="glass surface" in:growVertical={{ delay: 200 }} out:growVertical={{}}>
                     <form action="/logout" method="post">
                         <Csrf></Csrf>
                         <button class="button">
@@ -156,47 +163,54 @@
                             <span>Log out</span>
                         </button>
                     </form>
-                    <button class="button" onclick={ () => loadPage(`/settings`) }>
+                    <button class="button" onclick={() => loadPage(`/settings`)}>
                         <span class="icon fa-solid fa-gear"></span>
                         <span>Settings</span>
                     </button>
                     {#if !hasEditorRights() && isLevel(EditionLevel)}
-                        <WithConfirmationDialog icon="fa-solid fa-repeat" action="Reset progress" onconfirm={ () => resetProgress() }>
-                            {#snippet button(openConfirmationDialog: () => void) }
+                        <WithConfirmationDialog
+                            icon="fa-solid fa-repeat"
+                            action="Reset progress"
+                            onconfirm={() => resetProgress()}>
+                            {#snippet button(openConfirmationDialog: () => void)}
                                 <button class="button" onclick={openConfirmationDialog}>
                                     <span class="icon fa-solid fa-repeat"></span>
                                     <span>Reset progress</span>
                                 </button>
                             {/snippet}
                             <p>
-                                Are you sure you want to reset all your progress in '{getEdition().name}'?
+                                Are you sure you want to reset all your progress in '{getEdition()
+                                    .name}'?
                             </p>
                         </WithConfirmationDialog>
                     {/if}
                     {#if isEditorForAny()}
                         {#if hasEditorRights()}
-                            <button class="button" onclick={ () => toggleViewMode() }>
+                            <button class="button" onclick={() => toggleViewMode()}>
                                 <span class="icon fa-solid fa-eye"></span>
                                 <span>Student view</span>
                             </button>
                         {:else}
-                            <button class="button" onclick={ () => toggleViewMode() }>
+                            <button class="button" onclick={() => toggleViewMode()}>
                                 <span class="icon fa-solid fa-eye"></span>
                                 <span>Editor view</span>
                             </button>
                         {/if}
                     {/if}
                     {#if getAuthorisation().isAdmin}
-                        <button class="button" onclick={ () => setViewMode("ADMIN") }>
+                        <button class="button" onclick={() => setViewMode("ADMIN")}>
                             <span class="icon fa-solid fa-wrench"></span>
                             <span>Admin view</span>
                         </button>
                     {/if}
-                    <button aria-label="Close menu" class="button" onclick={ () => userMenuOpen = false }>
+                    <button
+                        aria-label="Close menu"
+                        class="button"
+                        onclick={() => (userMenuOpen = false)}>
                         <span class="icon fa-solid fa-chevron-down"></span>
                     </button>
                 </div>
-                <div class="glass surface" in:becomeSurface={{}} out:becomeSurface={{delay: 200}}>
+                <div class="glass surface" in:becomeSurface={{}} out:becomeSurface={{ delay: 200 }}>
                     <button class="button">
                         <span class="icon fa-solid fa-user-circle"></span>
                         <span>Profile</span>
@@ -206,7 +220,6 @@
         {/if}
     </div>
 {/if}
-
 
 <style>
     .header-wrapper {
@@ -274,7 +287,8 @@
         padding: 1em;
         text-decoration: none;
     }
-    .button:focus-visible, .button:hover {
+    .button:focus-visible,
+    .button:hover {
         background: var(--on-glass-surface-active-colour);
     }
 

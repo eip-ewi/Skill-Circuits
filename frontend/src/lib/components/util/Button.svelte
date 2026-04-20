@@ -1,7 +1,6 @@
 <script lang="ts">
-
-    import type {Snippet} from "svelte";
-    import type {HTMLStyleAttributes} from "svelte/elements";
+    import type { Snippet } from "svelte";
+    import type { HTMLStyleAttributes } from "svelte/elements";
 
     interface Properties {
         children: Snippet;
@@ -25,26 +24,41 @@
     }
 
     let props: Properties = $props();
-
 </script>
 
 {#if props.href !== undefined}
-    <a class="button" href={props.href} target={props.target} style={props.style}
-       data-primary={props.primary} data-type={props.type ?? "regular"} data-square={props.square}
-       onclick={ e => props?.onclick?.(e) } onmouseenter={ e => props.onmouseenter?.(e) } onmouseleave={ e => props.onmouseleave?.(e) }
-       onmousedown={ e => props?.onmousedown?.(e) }
-       onfocus={ e => props?.onfocus?.(e) } onblur={ e => props?.onblur?.(e) }
-    >
-        {@render props.children() }
+    <a
+        class="button"
+        href={props.href}
+        target={props.target}
+        style={props.style}
+        data-primary={props.primary}
+        data-type={props.type ?? "regular"}
+        data-square={props.square}
+        onclick={e => props?.onclick?.(e)}
+        onmouseenter={e => props.onmouseenter?.(e)}
+        onmouseleave={e => props.onmouseleave?.(e)}
+        onmousedown={e => props?.onmousedown?.(e)}
+        onfocus={e => props?.onfocus?.(e)}
+        onblur={e => props?.onblur?.(e)}>
+        {@render props.children()}
     </a>
 {:else}
-    <button class="button" style={props.style} data-primary={props.primary} data-type={props.type ?? "regular"} data-square={props.square}
-            aria-label={props["aria-label"]} aria-pressed={props["aria-pressed"]}
-            onclick={ e => props?.onclick?.(e) } onmouseenter={ e => props.onmouseenter?.(e) } onmouseleave={ e => props.onmouseleave?.(e) }
-            onmousedown={ e => props?.onmousedown?.(e) }
-            onfocus={ e => props?.onfocus?.(e) } onblur={ e => props?.onblur?.(e) }
-    >
-        {@render props.children() }
+    <button
+        class="button"
+        style={props.style}
+        data-primary={props.primary}
+        data-type={props.type ?? "regular"}
+        data-square={props.square}
+        aria-label={props["aria-label"]}
+        aria-pressed={props["aria-pressed"]}
+        onclick={e => props?.onclick?.(e)}
+        onmouseenter={e => props.onmouseenter?.(e)}
+        onmouseleave={e => props.onmouseleave?.(e)}
+        onmousedown={e => props?.onmousedown?.(e)}
+        onfocus={e => props?.onfocus?.(e)}
+        onblur={e => props?.onblur?.(e)}>
+        {@render props.children()}
     </button>
 {/if}
 
@@ -57,11 +71,12 @@
         cursor: pointer;
         color: var(--on-inactive-colour);
         display: flex;
-        gap: .25em;
-        padding: .5em 1em;
+        gap: 0.25em;
+        padding: 0.5em 1em;
         text-decoration: none;
     }
-    .button:hover, .button:focus-visible {
+    .button:hover,
+    .button:focus-visible {
         background-color: var(--active-colour);
         border-color: var(--active-border-colour);
         color: var(--on-active-colour);

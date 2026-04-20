@@ -1,15 +1,23 @@
 <script lang="ts">
-    import {availableThemes} from "../data/theme";
+    import { availableThemes } from "../data/theme";
     import Button from "./util/Button.svelte";
-    import {setTheme} from "../logic/preferences.svelte";
-    import {getThemeColorScheme, getThemeName} from "../logic/theme.svelte";
+    import { setTheme } from "../logic/preferences.svelte";
+    import { getThemeColorScheme, getThemeName } from "../logic/theme.svelte";
 </script>
 
 <div class="content">
     <div class="themes">
         {#each availableThemes as theme}
-            <div class="theme" data-theme={getThemeName(theme)} data-colour-scheme={getThemeColorScheme(theme)}>
-                <Button style="justify-content: center; height: 3em; width: 100%;" primary onclick={ () => setTheme(theme) }>{theme.displayName}</Button>
+            <div
+                class="theme"
+                data-theme={getThemeName(theme)}
+                data-colour-scheme={getThemeColorScheme(theme)}>
+                <Button
+                    style="justify-content: center; height: 3em; width: 100%;"
+                    primary
+                    onclick={() => setTheme(theme)}>
+                    {theme.displayName}
+                </Button>
             </div>
         {/each}
     </div>

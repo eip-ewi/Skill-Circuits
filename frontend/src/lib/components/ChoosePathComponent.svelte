@@ -1,10 +1,10 @@
 <script lang="ts">
-    import {getActivePath, selectPath} from "../logic/edition/active_path.svelte";
-    import {onMount} from "svelte";
-    import {hasEditorRights, getAuthorisation} from "../logic/authorisation.svelte.js";
-    import {getPaths} from "../logic/edition/edition.svelte";
-    import type {Path} from "../dto/path";
-    import {isOnCircuit} from "../logic/circuit/level.svelte";
+    import { getActivePath, selectPath } from "../logic/edition/active_path.svelte";
+    import { onMount } from "svelte";
+    import { hasEditorRights, getAuthorisation } from "../logic/authorisation.svelte.js";
+    import { getPaths } from "../logic/edition/edition.svelte";
+    import type { Path } from "../dto/path";
+    import { isOnCircuit } from "../logic/circuit/level.svelte";
     import Button from "./util/Button.svelte";
 
     let dialog: HTMLDialogElement | undefined = $state();
@@ -26,7 +26,7 @@
                         <h3 class="path-name">{path.name}</h3>
                         <p class="path-description">{path.description}</p>
                         <div class="path-select">
-                            <Button primary onclick={ () => selectPath(path) }>
+                            <Button primary onclick={() => selectPath(path)}>
                                 Select '{path.name}'
                             </Button>
                         </div>
@@ -80,7 +80,7 @@
 
     .path {
         display: grid;
-        gap: .5rem;
+        gap: 0.5rem;
     }
 
     .path-name {

@@ -1,13 +1,13 @@
 <script lang="ts">
-    import {getBlock, getBlocks} from "../../../logic/circuit/circuit.svelte";
-    import {updateBlockPosition} from "../../../logic/circuit/updates/position_updates.svelte.js";
-    import {BlockStates} from "../../../data/block_state";
-    import {createBlock} from "../../../logic/circuit/updates/block_updates";
-    import {hasEditorRights, getAuthorisation} from "../../../logic/authorisation.svelte";
-    import {areColumnsEnabled} from "../../../dto/columns.svelte";
-    import {createExternalSkill} from "../../../logic/circuit/updates/skill_updates";
+    import { getBlock, getBlocks } from "../../../logic/circuit/circuit.svelte";
+    import { updateBlockPosition } from "../../../logic/circuit/updates/position_updates.svelte.js";
+    import { BlockStates } from "../../../data/block_state";
+    import { createBlock } from "../../../logic/circuit/updates/block_updates";
+    import { hasEditorRights, getAuthorisation } from "../../../logic/authorisation.svelte";
+    import { areColumnsEnabled } from "../../../dto/columns.svelte";
+    import { createExternalSkill } from "../../../logic/circuit/updates/skill_updates";
 
-    let { column, height }: { column: number, height: number } = $props();
+    let { column, height }: { column: number; height: number } = $props();
 
     let dragging: boolean = $state(false);
 
@@ -56,10 +56,20 @@
 </script>
 
 {#if hasEditorRights()}
-    <div class="column-wrapper" style:grid-column={column + 1} style:grid-row="1 / span {height}" data-dragging={dragging} data-interactible={areColumnsEnabled()}>
+    <div
+        class="column-wrapper"
+        style:grid-column={column + 1}
+        style:grid-row="1 / span {height}"
+        data-dragging={dragging}
+        data-interactible={areColumnsEnabled()}>
         <!-- svelte-ignore a11y_no_static_element_interactions -->
-        <div class="column"
-             ondragenter={dragEnter} ondragover={dragOver} ondragleave={dragLeave} ondrop={drop}></div>
+        <div
+            class="column"
+            ondragenter={dragEnter}
+            ondragover={dragOver}
+            ondragleave={dragLeave}
+            ondrop={drop}>
+        </div>
         <div class="background"></div>
     </div>
 {/if}

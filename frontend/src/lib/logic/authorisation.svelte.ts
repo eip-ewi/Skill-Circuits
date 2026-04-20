@@ -1,14 +1,19 @@
-import type {SimpleAuth} from "../dto/auth/simple";
-import {getLevel, isLevel, isOnCircuit} from "./circuit/level.svelte";
-import {getCircuit} from "./circuit/circuit.svelte";
-import type {Authorisation} from "../dto/auth/authorisation";
-import {withCsrf} from "./csrf";
-import {getEdition} from "./edition/edition.svelte";
-import {EditionLevel, ModuleLevel} from "../data/level";
-import {getAuthenticatedPerson} from "./authentication.svelte";
-import {makeBlocksInactive} from "./circuit/updates/block_updates";
+import type { SimpleAuth } from "../dto/auth/simple";
+import { getLevel, isLevel, isOnCircuit } from "./circuit/level.svelte";
+import { getCircuit } from "./circuit/circuit.svelte";
+import type { Authorisation } from "../dto/auth/authorisation";
+import { withCsrf } from "./csrf";
+import { getEdition } from "./edition/edition.svelte";
+import { EditionLevel, ModuleLevel } from "../data/level";
+import { getAuthenticatedPerson } from "./authentication.svelte";
+import { makeBlocksInactive } from "./circuit/updates/block_updates";
 
-let authorisation: Authorisation = $state({ viewMode: "VIEWER", isAdmin: false, managedCourses: [], managedEditions: [] });
+let authorisation: Authorisation = $state({
+    viewMode: "VIEWER",
+    isAdmin: false,
+    managedCourses: [],
+    managedEditions: [],
+});
 
 export function getAuthorisation(): Authorisation {
     return authorisation;
@@ -20,9 +25,12 @@ export async function fetchAuthorisation() {
 }
 
 async function sendNewViewMode(viewMode: "VIEWER" | "EDITOR" | "ADMIN") {
-    await fetch(`/api/auth/view-mode?viewMode=${viewMode}`, withCsrf({
-        method: "POST",
-    }));
+    await fetch(
+        `/api/auth/view-mode?viewMode=${viewMode}`,
+        withCsrf({
+            method: "POST",
+        }),
+    );
 }
 
 export async function toggleViewMode() {
@@ -56,7 +64,7 @@ export function hasEditorRights() {
     return isViewModeAuthorisedToEdit();
 }
 
-export function isViewModeAuthorisedToEdit() : boolean {
+export function isViewModeAuthorisedToEdit(): boolean {
     return authorisation.viewMode === "EDITOR" || authorisation.viewMode === "ADMIN";
 }
 

@@ -1,12 +1,12 @@
 <script lang="ts">
-    import {cubicInOut} from "svelte/easing";
-    import {EditionLevel, ModuleLevel, ProgrammeLevel, TrackLevel} from "../../../data/level";
-    import {getLevel, isLevel} from "../../../logic/circuit/level.svelte";
-    import type {Action} from "svelte/action";
-    import {type BlockAction, BlockActions} from "../../../data/block_action";
-    import type {Block} from "../../../dto/circuit/block";
+    import { cubicInOut } from "svelte/easing";
+    import { EditionLevel, ModuleLevel, ProgrammeLevel, TrackLevel } from "../../../data/level";
+    import { getLevel, isLevel } from "../../../logic/circuit/level.svelte";
+    import type { Action } from "svelte/action";
+    import { type BlockAction, BlockActions } from "../../../data/block_action";
+    import type { Block } from "../../../dto/circuit/block";
 
-    let { action, block }: { action: BlockAction | undefined, block: Block } = $props();
+    let { action, block }: { action: BlockAction | undefined; block: Block } = $props();
 
     function transition(element: Element) {
         return {
@@ -21,11 +21,20 @@
 
 <div class="glass indication" transition:transition>
     {#if action === BlockActions.Goto}
-        <span class="fa-solid fa-arrow-up-right-from-square" class:rotated={!isLevel(ModuleLevel)}></span>
-        {#if isLevel(ModuleLevel)} <span>Go to source</span> {/if}
-        {#if isLevel(EditionLevel)} <span>Go to module</span> {/if}
-        {#if isLevel(TrackLevel)} <span>Go to course</span> {/if}
-        {#if isLevel(ProgrammeLevel)} <span>Go to track</span> {/if}
+        <span class="fa-solid fa-arrow-up-right-from-square" class:rotated={!isLevel(ModuleLevel)}>
+        </span>
+        {#if isLevel(ModuleLevel)}
+            <span>Go to source</span>
+        {/if}
+        {#if isLevel(EditionLevel)}
+            <span>Go to module</span>
+        {/if}
+        {#if isLevel(TrackLevel)}
+            <span>Go to course</span>
+        {/if}
+        {#if isLevel(ProgrammeLevel)}
+            <span>Go to track</span>
+        {/if}
     {/if}
     {#if action === BlockActions.Expand}
         <span class="fa-solid fa-expand"></span>
@@ -87,7 +96,7 @@
         bottom: -3em;
         cursor: pointer;
         left: 50%;
-        padding: .5em 1em;
+        padding: 0.5em 1em;
         position: absolute;
         transform-origin: top;
         translate: -50% 0;
