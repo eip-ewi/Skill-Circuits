@@ -2,15 +2,55 @@
     import TaskTableRow from "./TaskTableRow.svelte";
     import type { TaskInTaskList } from "../../dto/task_in_task_list";
     import Button from "../util/Button.svelte";
-    import { getColumns } from "../../logic/task_table.svelte";
-    import type { SortableTaskTableColumn } from "../../data/task_table_column";
+    import type { SortableTaskTableColumn, TaskTableColumn } from "../../data/task_table_column";
+    import { sortAscByLink, sortAscByString, sortAscByType } from "../../logic/task_table.svelte";
 
     let { tasks }: { tasks: TaskInTaskList[] } = $props();
+
+    let columns: TaskTableColumn[] = $state([
+        {
+            name: "Task",
+            sortable: true,
+            sortStatus: 0,
+            sortAsc: (a: TaskInTaskList, b: TaskInTaskList) =>
+                sortAscByString(a.taskInfo.name, b.taskInfo.name),
+        },
+        { name: "Paths", sortable: false },
+        { name: "Type", sortable: true, sortStatus: 0, sortAsc: sortAscByType },
+        {
+            name: "Time",
+            sortable: true,
+            sortStatus: 0,
+            sortAsc: (a: TaskInTaskList, b: TaskInTaskList) => a.taskInfo.time - b.taskInfo.time,
+        },
+        {
+            name: "Skill",
+            sortable: true,
+            sortStatus: 0,
+            sortAsc: (a: TaskInTaskList, b: TaskInTaskList) =>
+                sortAscByString(a.skillName, b.skillName),
+        },
+        {
+            name: "Submodule",
+            sortable: true,
+            sortStatus: 0,
+            sortAsc: (a: TaskInTaskList, b: TaskInTaskList) =>
+                sortAscByString(a.submoduleName, b.submoduleName),
+        },
+        {
+            name: "Module",
+            sortable: true,
+            sortStatus: 0,
+            sortAsc: (a: TaskInTaskList, b: TaskInTaskList) =>
+                sortAscByString(a.moduleName, b.moduleName),
+        },
+        { name: "Link", sortable: true, sortStatus: 0, sortAsc: sortAscByLink },
+    ]);
 
     function sortByColumn(column: SortableTaskTableColumn, order: -1 | 1) {
         tasks.sort((a: TaskInTaskList, b: TaskInTaskList) => column.sortAsc(a, b) * order);
 
-        getColumns().forEach(col => {
+        columns.forEach(col => {
             if (col.sortable) {
                 if (col === column) {
                     col.sortStatus = order;
@@ -25,7 +65,7 @@
 <table class="task_table">
     <thead class="table_header">
         <tr>
-            {#each getColumns() as column}
+            {#each columns as column}
                 <th>
                     <div class="cell-wrapper">
                         {column.name}
