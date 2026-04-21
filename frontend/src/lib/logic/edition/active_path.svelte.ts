@@ -2,7 +2,7 @@ import {getEdition} from "./edition.svelte";
 import type {Path} from "../../dto/path";
 import {withCsrf} from "../csrf";
 import type {Block} from "../../dto/circuit/block";
-import {getAuthorisation, hasEditorRights, isTeacherForCircuit} from "../authorisation.svelte";
+import {hasEditorRights} from "../authorisation.svelte";
 import type {TaskItem} from "../../dto/circuit/module/task";
 
 export const pathState: {activePath: Path | null, tasksAdded: number[], tasksRemoved: number[]} = $state(
@@ -39,26 +39,19 @@ export function getActivePath(): Path | null {
     return pathState.activePath;
 }
 
-function isTeacherPreviewMode(): boolean {
-    return getAuthorisation().viewMode === "VIEWER" && isTeacherForCircuit();
-}
 
 export function getItemsOnPath<B extends Block>(block: B): B["items"] {
-    // In teacher preview mode we show the same full task list as editor mode.
-    if (block.blockType !== "skill" || hasEditorRights() || isTeacherPreviewMode()) {
+    if (block.blockType !== "skill" || hasEditorRights()) {
         return block.items;
     }
     return block.items.filter(item => isTaskOnPath(item));
 }
 
 export function isTaskOnPath(task: TaskItem): boolean {
-    const teacherPreview = isTeacherPreviewMode();
-
-    // Teacher preview should not be affected by teacher-specific customisation.
-    if (!teacherPreview && pathState.tasksRemoved.includes(task.id)) {
+    if (pathState.tasksRemoved.includes(task.id)) {
         return false;
     }
-    if (!teacherPreview && pathState.tasksAdded.includes(task.id)) {
+    if (pathState.tasksAdded.includes(task.id)) {
         return true;
     }
 
