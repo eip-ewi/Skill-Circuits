@@ -64,18 +64,7 @@
                 <Tab page={`/editions/tasks/${editionId}`}>Task list</Tab>
             </PageTabs>
 
-            <h1>{getCircuit().name}</h1>
-
             <TaskTable {tasks}></TaskTable>
         </PageLayout>
     {/if}
 {/await}
-
-<style>
-    h1 {
-        color: var(--on-background-colour);
-        font-size: var(--font-size-700);
-        font-weight: 500;
-        text-align: center;
-    }
-</style>
