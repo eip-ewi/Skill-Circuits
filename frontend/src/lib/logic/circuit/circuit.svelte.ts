@@ -1,14 +1,13 @@
 import type { Block } from "../../dto/circuit/block";
-import type {Circuit} from "../../dto/circuit/circuit";
-import {Graph} from "./graph";
-import type {Group} from "../../dto/circuit/group";
-import type {Item} from "../../dto/circuit/item";
-import {isLevel} from "./level.svelte";
-import { hasEditorRights} from "../authorisation.svelte";
-import {ModuleLevel} from "../../data/level";
-import {isSkillRevealed} from "./unlocked_skills.svelte";
-import {BlockStates} from "../../data/block_state";
-import {untrack} from "svelte";
+import type { Circuit } from "../../dto/circuit/circuit";
+import type { EditionCircuit } from "../../dto/circuit/edition/edition";
+import type { Group } from "../../dto/circuit/group";
+import type { Item } from "../../dto/circuit/item";
+import { BlockStates } from "../../data/block_state";
+import { untrack } from "svelte";
+import { hasEditorRights } from "../authorisation.svelte";
+import { Graph } from "./graph";
+import { isSkillRevealed } from "./unlocked_skills.svelte";
 
 let circuit: Circuit | undefined = $state(undefined);
 
@@ -39,31 +38,29 @@ let blocks: Block[] = $derived.by(() => {
 });
 
 let graph: Graph | undefined = $derived.by(() => {
-    const current = circuit;
-    return current === undefined ? undefined : new Graph(blocks.filter(block => isBlockVisible(block)));
+    return circuit === undefined ? undefined : new Graph(blocks.filter(block => isBlockVisible(block)));
 });
 
 let blockToGroupMap: Map<number, Group> | undefined = $derived.by(() => {
-    const current = circuit;
-    return current === undefined
+    return circuit === undefined
         ? undefined
-        : new Map(current.groups.flatMap(group => group.blocks.map(block => [block.id, group] as const)));
+        : new Map(circuit.groups.flatMap(group => group.blocks.map(block => [block.id, group] as const)));
 });
 
 let itemToBlockMap: Map<number, Block> | undefined = $derived.by(() => {
-    const current = circuit;
-    return current === undefined
+    return circuit === undefined
         ? undefined
         : new Map(blocks.flatMap(block => block.items.map(item => [item.id, block] as const)));
 });
 
 // Initialise block states on the raw JSON before it is assigned to circuit,
 // so the derived `blocks` array is never responsible for mutation on first load.
-function initBlockStates(circuit: Circuit): void {
-    const all = circuit.circuitType === "module"
-        ? [...circuit.groups.flatMap(group => group.blocks), ...(circuit.externalSkills ?? [])]
-        : circuit.groups.flatMap(group => group.blocks);
-    all.forEach(block => block.state = BlockStates.Inactive);
+function initBlockStates(current: Circuit): void {
+    const all =
+        current.circuitType === "module"
+            ? [...current.groups.flatMap(group => group.blocks), ...(current.externalSkills ?? [])]
+            : current.groups.flatMap(group => group.blocks);
+    all.forEach(block => (block.state = BlockStates.Inactive));
 }
 
 export function circuitFetched(): boolean {
@@ -95,7 +92,14 @@ export function getVisibleBlocks(): Block[] {
 }
 
 export function isBlockVisible(block: Block) {
-    return block.column !== null && (!isLevel(ModuleLevel) || hasEditorRights() || block.blockType !== "skill" || block.external || !block.hidden || isSkillRevealed(block));
+    return (
+        block.column !== null &&
+        (hasEditorRights() ||
+            block.blockType !== "skill" ||
+            block.external ||
+            !block.hidden ||
+            isSkillRevealed(block))
+    );
 }
 
 export function getGroupForBlock(block: Block): Group {
@@ -127,4 +131,14 @@ export async function fetchCircuit(url: string) {
     let fetched: Circuit = await response.json();
     initBlockStates(fetched);
     circuit = fetched;
+}
+
+export function initModuleGraphs(editionCircuit: EditionCircuit) {
+    // Only consider visible blocks to be consistent with handling of completion/unlocking on module pages
+    editionCircuit.groups.forEach(
+        module =>
+            (module.moduleGraph = new Graph(
+                blocksFromCircuit(module.moduleCircuit).filter(block => isBlockVisible(block)),
+            )),
+    );
 }

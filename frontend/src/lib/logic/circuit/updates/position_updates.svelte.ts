@@ -7,14 +7,16 @@ import { setScrollTarget } from "../scroll_target.svelte";
 export async function updateBlockPosition(block: Block, newColumn: number) {
     let oldColumn = block.column;
     block.column = newColumn;
-    let response = await fetch(`/api/${getLevel().blocks}/${block.id}/position?column=${newColumn}`, withCsrf({
-        method: "PATCH",
-    }));
+    let response = await fetch(
+        `/api/${getLevel().blocks}/${block.id}/position?column=${newColumn}`,
+        withCsrf({
+            method: "PATCH",
+        }),
+    );
     if (!response.ok) {
         block.column = oldColumn;
         block.state = BlockStates.Inactive;
-    }
-    else {
+    } else {
         setScrollTarget({ kind: "block", id: block.id });
     }
 }
@@ -22,9 +24,12 @@ export async function updateBlockPosition(block: Block, newColumn: number) {
 export async function removeBlockFromCircuit(block: Block) {
     let oldColumn = block.column;
     block.column = null;
-    let response = await fetch(`/api/${getLevel().blocks}/${block.id}/position`, withCsrf({
-        method: "DELETE",
-    }));
+    let response = await fetch(
+        `/api/${getLevel().blocks}/${block.id}/position`,
+        withCsrf({
+            method: "DELETE",
+        }),
+    );
     if (!response.ok) {
         block.column = oldColumn;
         block.state = BlockStates.Inactive;

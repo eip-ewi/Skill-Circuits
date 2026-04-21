@@ -1,7 +1,10 @@
 <script lang="ts">
-
-    import type {Path} from "../../../dto/path";
-    import {deletePath, editPathDescription, editPathName} from "../../../logic/updates/path_updates";
+    import type { Path } from "../../../dto/path";
+    import {
+        deletePath,
+        editPathDescription,
+        editPathName,
+    } from "../../../logic/updates/path_updates";
     import Button from "../../util/Button.svelte";
     import WithConfirmationDialog from "../../util/WithConfirmationDialog.svelte";
 
@@ -23,10 +26,22 @@
 </script>
 
 <div class="path">
-    {#if path.editing === true }
+    {#if path.editing === true}
         <div class="edit">
-            <input aria-label="Name" type="text" name="name" value={path.name} onchange={editName}/>
-            <textarea aria-label="Description" name="description" rows="4" placeholder="Enter a description..." onchange={editDescription}>{path.description}</textarea>
+            <input
+                aria-label="Name"
+                type="text"
+                name="name"
+                value={path.name}
+                onchange={editName} />
+            <textarea
+                aria-label="Description"
+                name="description"
+                rows="4"
+                placeholder="Enter a description..."
+                onchange={editDescription}>
+                {path.description}
+            </textarea>
         </div>
     {:else}
         <div class="info">
@@ -35,16 +50,19 @@
         </div>
     {/if}
     <div class="controls">
-        {#if path.editing === true }
+        {#if path.editing === true}
             <Button square aria-label="Stop editing" onclick={stopEditing}>
                 <span class="fa-solid fa-check"></span>
             </Button>
         {:else}
-            <Button square aria-label="Edit path" onclick={ () => path.editing = true }>
+            <Button square aria-label="Edit path" onclick={() => (path.editing = true)}>
                 <span class="fa-solid fa-pencil"></span>
             </Button>
-            <WithConfirmationDialog onconfirm={ () => deletePath(path) } icon="fa-solid fa-trash" action="Delete">
-                {#snippet button(showDialog: () => void) }
+            <WithConfirmationDialog
+                onconfirm={() => deletePath(path)}
+                icon="fa-solid fa-trash"
+                action="Delete">
+                {#snippet button(showDialog: () => void)}
                     <Button square type="caution" aria-label="Delete path" onclick={showDialog}>
                         <span class="fa-solid fa-trash"></span>
                     </Button>
@@ -88,10 +106,11 @@
         gap: 0.5rem;
     }
 
-    input, textarea {
+    input,
+    textarea {
         border: none;
         border-radius: 8px;
-        padding: .5rem 1rem;
+        padding: 0.5rem 1rem;
         resize: none;
     }
 </style>

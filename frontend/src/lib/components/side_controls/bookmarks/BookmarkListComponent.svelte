@@ -1,15 +1,22 @@
 <script lang="ts">
-
     import moment from "moment";
-    import type {BookmarkList, BookmarkListSkill} from "../../../dto/bookmark";
+    import type { BookmarkList, BookmarkListSkill } from "../../../dto/bookmark";
     import TaskComponent from "../../circuit/item/TaskComponent.svelte";
-    import {editBookmarkListName, loadBookmarkListCollapsed, removeBookmarkList, removeChoiceTaskFromBookmarkList, removeSkillFromBookmarkList, removeTaskInfoFromBookmarkList, toggleBookmarkListCollapse} from "../../../logic/updates/bookmark_updates";
-    import {groupBookmarkListItems} from "../../../logic/bookmark_list.js";
+    import {
+        editBookmarkListName,
+        loadBookmarkListCollapsed,
+        removeBookmarkList,
+        removeChoiceTaskFromBookmarkList,
+        removeSkillFromBookmarkList,
+        removeTaskInfoFromBookmarkList,
+        toggleBookmarkListCollapse,
+    } from "../../../logic/updates/bookmark_updates";
+    import { groupBookmarkListItems } from "../../../logic/bookmark_list.js";
     import ChoiceTaskComponent from "../../circuit/item/ChoiceTaskComponent.svelte";
     import Button from "../../util/Button.svelte";
-    import {editCheckpointName} from "../../../logic/updates/checkpoint_updates";
+    import { editCheckpointName } from "../../../logic/updates/checkpoint_updates";
     import BookmarkedSkillComponent from "./BookmarkedSkillComponent.svelte";
-    import {cubicInOut} from "svelte/easing";
+    import { cubicInOut } from "svelte/easing";
     import WithConfirmationDialog from "../../util/WithConfirmationDialog.svelte";
 
     let { list }: { list: BookmarkList } = $props();
@@ -38,16 +45,21 @@
             easing: cubicInOut,
             css: (t: number) => `
                transform: scaleY(${t});
-            `
-        }
+            `,
+        };
     }
 </script>
 
 <div class="list">
     <div class="heading">
-        {#if list.editing === true }
+        {#if list.editing === true}
             <div class="edit">
-                <input aria-label="Name" type="text" name="name" value={list.name} onchange={editName}/>
+                <input
+                    aria-label="Name"
+                    type="text"
+                    name="name"
+                    value={list.name}
+                    onchange={editName} />
             </div>
         {:else}
             <div class="name">
@@ -57,32 +69,47 @@
                     {/if}
                     <span>{list.name}</span>
                 </h3>
-                <button class="button" aria-label="Toggle bookmark list collapse" onclick={ () => toggleBookmarkListCollapse(list) }>
-                    <span class="fa-solid" class:fa-chevron-down={collapsed} class:fa-chevron-up={!collapsed}></span>
+                <button
+                    class="button"
+                    aria-label="Toggle bookmark list collapse"
+                    onclick={() => toggleBookmarkListCollapse(list)}>
+                    <span
+                        class="fa-solid"
+                        class:fa-chevron-down={collapsed}
+                        class:fa-chevron-up={!collapsed}>
+                    </span>
                 </button>
             </div>
         {/if}
         <div class="controls">
-            {#if list.editing === true }
+            {#if list.editing === true}
                 <Button square aria-label="Stop editing" onclick={stopEditing}>
                     <span class="fa-solid fa-check"></span>
                 </Button>
-            {:else}
-                {#if list.skill === null}
-                    <Button square aria-label="Edit bookmark list" onclick={ () => list.editing = true }>
-                        <span class="fa-solid fa-pencil"></span>
-                    </Button>
-                    <WithConfirmationDialog onconfirm={ () => removeBookmarkList(list) } icon="fa-solid fa-trash" action="Delete">
-                        {#snippet button(showDialog: () => void) }
-                            <Button square type="caution" aria-label="Delete bookmark list" onclick={showDialog}>
-                                <span class="fa-solid fa-trash"></span>
-                            </Button>
-                        {/snippet}
-                        <p>
-                            Are you sure you want to delete '{list.name}'?
-                        </p>
-                    </WithConfirmationDialog>
-                {/if}
+            {:else if list.skill === null}
+                <Button
+                    square
+                    aria-label="Edit bookmark list"
+                    onclick={() => (list.editing = true)}>
+                    <span class="fa-solid fa-pencil"></span>
+                </Button>
+                <WithConfirmationDialog
+                    onconfirm={() => removeBookmarkList(list)}
+                    icon="fa-solid fa-trash"
+                    action="Delete">
+                    {#snippet button(showDialog: () => void)}
+                        <Button
+                            square
+                            type="caution"
+                            aria-label="Delete bookmark list"
+                            onclick={showDialog}>
+                            <span class="fa-solid fa-trash"></span>
+                        </Button>
+                    {/snippet}
+                    <p>
+                        Are you sure you want to delete '{list.name}'?
+                    </p>
+                </WithConfirmationDialog>
             {/if}
         </div>
     </div>
@@ -100,7 +127,11 @@
                                 <BookmarkedSkillComponent {skill}></BookmarkedSkillComponent>
                             </div>
                             <div class="controls">
-                                <Button square type="caution" aria-label="Remove from {list.name}" onclick={ () => removeSkillFromBookmarkList(skill, list) }>
+                                <Button
+                                    square
+                                    type="caution"
+                                    aria-label="Remove from {list.name}"
+                                    onclick={() => removeSkillFromBookmarkList(skill, list)}>
                                     <span class="fa-solid fa-trash"></span>
                                 </Button>
                             </div>
@@ -114,17 +145,30 @@
                         <span class="group-name">{group.title}</span>
                         {#each group.items as task}
                             {#if task.taskType === "regular"}
-                                <TaskComponent {task} hideBookmark={true} hidePathCustomisation={true}></TaskComponent>
+                                <TaskComponent
+                                    {task}
+                                    hideBookmark={true}
+                                    hidePathCustomisation={true}></TaskComponent>
                                 <div class="controls">
-                                    <Button square type="caution" aria-label="Remove from {list.name}" onclick={ () => removeTaskInfoFromBookmarkList(task, list) }>
+                                    <Button
+                                        square
+                                        type="caution"
+                                        aria-label="Remove from {list.name}"
+                                        onclick={() => removeTaskInfoFromBookmarkList(task, list)}>
                                         <span class="fa-solid fa-trash"></span>
                                     </Button>
                                 </div>
                             {/if}
                             {#if task.taskType === "choice"}
-                                <ChoiceTaskComponent {task} hideBookmark={true}></ChoiceTaskComponent>
+                                <ChoiceTaskComponent {task} hideBookmark={true}
+                                ></ChoiceTaskComponent>
                                 <div class="controls">
-                                    <Button square type="caution" aria-label="Remove from {list.name}" onclick={ () => removeChoiceTaskFromBookmarkList(task, list) }>
+                                    <Button
+                                        square
+                                        type="caution"
+                                        aria-label="Remove from {list.name}"
+                                        onclick={() =>
+                                            removeChoiceTaskFromBookmarkList(task, list)}>
                                         <span class="fa-solid fa-trash"></span>
                                     </Button>
                                 </div>
@@ -157,7 +201,7 @@
     .list .name {
         align-items: center;
         display: flex;
-        gap: .5em;
+        gap: 0.5em;
     }
 
     .list h3 {
@@ -196,8 +240,8 @@
     .group-name {
         font-size: var(--font-size-100);
         grid-column: 1 / -1;
-        margin-top: .5em;
-        opacity: .5;
+        margin-top: 0.5em;
+        opacity: 0.5;
     }
 
     .tasks .controls {
@@ -206,14 +250,14 @@
 
     input {
         border: none;
-        border-radius: .5em;
-        padding: .5em 1em;
+        border-radius: 0.5em;
+        padding: 0.5em 1em;
     }
 
     .button {
         background: var(--on-glass-surface-colour);
         border: none;
-        border-radius: .5em;
+        border-radius: 0.5em;
         color: var(--on-glass-colour);
         cursor: pointer;
         display: grid;
@@ -221,7 +265,8 @@
         padding: 0.5em;
         text-decoration: none;
     }
-    .button:focus-visible, .button:hover {
+    .button:focus-visible,
+    .button:hover {
         background: var(--on-glass-surface-active-colour);
     }
 </style>

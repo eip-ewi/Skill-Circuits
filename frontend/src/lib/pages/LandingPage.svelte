@@ -1,13 +1,13 @@
 <script lang="ts">
-    import type {Editions} from "../dto/editions";
+    import type { Editions } from "../dto/editions";
     import EditionCardComponent from "../components/edition/EditionCardComponent.svelte";
     import HeaderComponent from "../components/HeaderComponent.svelte";
-    import {clearLevel} from "../logic/circuit/level.svelte";
-    import {getAuthorisation} from "../logic/authorisation.svelte";
+    import { clearLevel } from "../logic/circuit/level.svelte";
+    import { getAuthorisation } from "../logic/authorisation.svelte";
     import PageTabs from "../components/util/PageTabs.svelte";
     import Tab from "../components/util/Tab.svelte";
     import PageLayout from "./PageLayout.svelte";
-    import {loadPage} from "../logic/routing.svelte";
+    import { loadPage } from "../logic/routing.svelte";
 
     let editions: Editions | undefined = $state();
 
@@ -17,7 +17,13 @@
         const response = await fetch("/api/editions");
         editions = await response.json();
 
-        if (editions!.archivedEditions.length + editions!.currentEditions.length + editions!.finishedEditions.length + editions!.upcomingEditions.length === 0) {
+        if (
+            editions!.archivedEditions.length +
+                editions!.currentEditions.length +
+                editions!.finishedEditions.length +
+                editions!.upcomingEditions.length ===
+            0
+        ) {
             loadPage("/editions");
         }
     }
@@ -29,7 +35,6 @@
 
 <PageLayout>
     <div class="content">
-
         <PageTabs>
             <Tab page="/">My courses</Tab>
             <Tab page="/editions">Course catalog</Tab>
@@ -38,9 +43,7 @@
         <h1>My Courses</h1>
 
         {#await load() then _}
-
             {#if editions !== undefined}
-
                 {#if editions.currentEditions.length > 0}
                     <div class="editions">
                         <h2>Current editions</h2>
@@ -76,12 +79,9 @@
                         {/each}
                     </div>
                 {/if}
-
             {/if}
         {/await}
-
     </div>
-
 </PageLayout>
 
 <style>

@@ -1,28 +1,29 @@
 <script lang="ts">
+    import type { Group } from "../../../dto/circuit/group";
+    import type { Blob } from "../../../data/blob";
 
-   import type {Group} from "../../../dto/circuit/group";
-   import type {Blob} from "../../../data/blob";
-
-   let { blob }: { blob: Blob } = $props();
-
+    let { blob }: { blob: Blob } = $props();
 </script>
 
 {#each blob.allocations as alloc}
-    <div class="group-wrapper" style:grid-column={alloc.point.x + 1} style:grid-row={alloc.point.y + 1}>
+    <div
+        class="group-wrapper"
+        style:grid-column={alloc.point.x + 1}
+        style:grid-row={alloc.point.y + 1}>
         {#if alloc.showName}
             <span class="name">{blob.group.name}</span>
         {/if}
 
-        <div class="group"
-             data-connect-top={alloc.neighbours.top}
-             data-connect-right={alloc.neighbours.right}
-             data-connect-bottom={alloc.neighbours.bottom}
-             data-connect-left={alloc.neighbours.left}
-             data-connect-top-right={alloc.neighbours.topRight}
-             data-connect-bottom-right={alloc.neighbours.bottomRight}
-             data-connect-bottom-left={alloc.neighbours.bottomLeft}
-             data-connect-top-left={alloc.neighbours.topLeft}
-        >
+        <div
+            class="group"
+            data-connect-top={alloc.neighbours.top}
+            data-connect-right={alloc.neighbours.right}
+            data-connect-bottom={alloc.neighbours.bottom}
+            data-connect-left={alloc.neighbours.left}
+            data-connect-top-right={alloc.neighbours.topRight}
+            data-connect-bottom-right={alloc.neighbours.bottomRight}
+            data-connect-bottom-left={alloc.neighbours.bottomLeft}
+            data-connect-top-left={alloc.neighbours.topLeft}>
             <div class="connector" data-connect="top"></div>
             <div class="connector" data-connect="right"></div>
             <div class="connector" data-connect="bottom"></div>
@@ -140,7 +141,8 @@
         width: 1em;
     }
 
-    .group[data-connect-top="true"][data-connect-right="true"][data-connect-top-right="true"] .connector[data-connect="top-right"] {
+    .group[data-connect-top="true"][data-connect-right="true"][data-connect-top-right="true"]
+        .connector[data-connect="top-right"] {
         border: none;
         display: initial;
         height: 2em;
@@ -148,7 +150,8 @@
         top: -2em;
         width: 1em;
     }
-    .group[data-connect-bottom="true"][data-connect-right="true"][data-connect-bottom-right="true"] .connector[data-connect="bottom-right"] {
+    .group[data-connect-bottom="true"][data-connect-right="true"][data-connect-bottom-right="true"]
+        .connector[data-connect="bottom-right"] {
         border: none;
         bottom: -2em;
         display: initial;
@@ -156,7 +159,8 @@
         right: -1em;
         width: 1em;
     }
-    .group[data-connect-bottom="true"][data-connect-left="true"][data-connect-bottom-left="true"] .connector[data-connect="bottom-left"] {
+    .group[data-connect-bottom="true"][data-connect-left="true"][data-connect-bottom-left="true"]
+        .connector[data-connect="bottom-left"] {
         border: none;
         bottom: -2em;
         display: initial;
@@ -164,7 +168,8 @@
         left: -1em;
         width: 1em;
     }
-    .group[data-connect-top="true"][data-connect-left="true"][data-connect-top-left="true"] .connector[data-connect="top-left"] {
+    .group[data-connect-top="true"][data-connect-left="true"][data-connect-top-left="true"]
+        .connector[data-connect="top-left"] {
         border: none;
         display: initial;
         height: 2em;
@@ -175,9 +180,9 @@
 
     .outer-corner {
         background-image: radial-gradient(
-                circle at 100% 100%,
-                transparent var(--group-border-radius),
-                var(--group-colour) calc(var(--group-border-radius) + 1px)
+            circle at 100% 100%,
+            transparent var(--group-border-radius),
+            var(--group-colour) calc(var(--group-border-radius) + 1px)
         );
         display: none;
         height: var(--group-border-radius);
@@ -185,25 +190,29 @@
         width: var(--group-border-radius);
     }
 
-    .group[data-connect-top="true"][data-connect-right="true"][data-connect-top-right="false"] .outer-corner[data-connect="top-right"] {
+    .group[data-connect-top="true"][data-connect-right="true"][data-connect-top-right="false"]
+        .outer-corner[data-connect="top-right"] {
         display: initial;
         right: calc(-1 * var(--group-border-radius));
         top: calc(-1 * var(--group-border-radius));
         transform: rotate(270deg);
     }
-    .group[data-connect-bottom="true"][data-connect-right="true"][data-connect-bottom-right="false"] .outer-corner[data-connect="bottom-right"] {
+    .group[data-connect-bottom="true"][data-connect-right="true"][data-connect-bottom-right="false"]
+        .outer-corner[data-connect="bottom-right"] {
         bottom: calc(-1 * var(--group-border-radius));
         display: initial;
         right: calc(-1 * var(--group-border-radius));
         transform: rotate(0);
     }
-    .group[data-connect-bottom="true"][data-connect-left="true"][data-connect-bottom-left="false"] .outer-corner[data-connect="bottom-left"] {
+    .group[data-connect-bottom="true"][data-connect-left="true"][data-connect-bottom-left="false"]
+        .outer-corner[data-connect="bottom-left"] {
         bottom: calc(-1 * var(--group-border-radius));
         display: initial;
         left: calc(-1 * var(--group-border-radius));
         transform: rotate(90deg);
     }
-    .group[data-connect-top="true"][data-connect-left="true"][data-connect-top-left="false"] .outer-corner[data-connect="top-left"] {
+    .group[data-connect-top="true"][data-connect-left="true"][data-connect-top-left="false"]
+        .outer-corner[data-connect="top-left"] {
         display: initial;
         left: calc(-1 * var(--group-border-radius));
         top: calc(-1 * var(--group-border-radius));

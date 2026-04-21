@@ -1,15 +1,16 @@
 <script lang="ts">
-
-    import type {TaskItem} from "../../../dto/circuit/module/task";
+    import type { TaskItem } from "../../../dto/circuit/module/task";
     import Select from "../../util/Select.svelte";
-    import {editTaskPaths} from "../../../logic/circuit/updates/task_updates";
-    import {getPaths} from "../../../logic/edition/edition.svelte";
+    import { editTaskPaths } from "../../../logic/circuit/updates/task_updates";
+    import { getPaths } from "../../../logic/edition/edition.svelte";
     import Button from "../../util/Button.svelte";
 
     let { task }: { task: TaskItem } = $props();
 
     async function editPath(event: Event) {
-        let newPaths = Array.from((event.target as HTMLSelectElement).selectedOptions).map(option => parseInt(option.value));
+        let newPaths = Array.from((event.target as HTMLSelectElement).selectedOptions).map(option =>
+            parseInt(option.value),
+        );
         await editTaskPaths(task, newPaths);
     }
 </script>
@@ -18,7 +19,13 @@
     <Select onchange={editPath} multiple>
         {#snippet button(click: (event: MouseEvent) => void, focus: () => void, blur: () => void)}
             <div class="button">
-                <Button square primary aria-label="Edit path" onmousedown={click} onfocus={focus} onblur={blur}>
+                <Button
+                    square
+                    primary
+                    aria-label="Edit path"
+                    onmousedown={click}
+                    onfocus={focus}
+                    onblur={blur}>
                     <span class="fa-solid fa-shoe-prints"></span>
                     <div class="counter">
                         <span>{task.paths.length}</span>
@@ -47,8 +54,8 @@
         outline: var(--primary-surface-border);
         place-items: center;
         position: absolute;
-        right: -.5em;
-        top: -.5em;
+        right: -0.5em;
+        top: -0.5em;
         width: 1.5em;
     }
 </style>

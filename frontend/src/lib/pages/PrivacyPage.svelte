@@ -1,10 +1,9 @@
 <script lang="ts">
+    import PageLayout from "./PageLayout.svelte";
+    import Link from "../components/util/Link.svelte";
+    import { clearLevel } from "../logic/circuit/level.svelte";
 
-import PageLayout from "./PageLayout.svelte";
-import Link from "../components/util/Link.svelte";
-import {clearLevel} from "../logic/circuit/level.svelte";
-
-clearLevel();
+    clearLevel();
 </script>
 
 <PageLayout>
@@ -14,17 +13,16 @@ clearLevel();
         </div>
         <p>
             <strong class="fw-500">
-                This privacy statement is a first version. Some aspects in this privacy
-                statement might be changed in the future to be in line with the law and best
-                practices
+                This privacy statement is a first version. Some aspects in this privacy statement
+                might be changed in the future to be in line with the law and best practices
             </strong>
         </p>
 
         <p>
-            The Skill Circuits Project is a project from the TU Delft. In this privacy
-            statement, it will be explained what personal data the Skill Circuits collects when
-            using the website. In this document the term Labrador will also be mentioned.
-            Labrador is a project of the TU Delft, which will include the Skill Circuits.
+            The Skill Circuits Project is a project from the TU Delft. In this privacy statement, it
+            will be explained what personal data the Skill Circuits collects when using the website.
+            In this document the term Labrador will also be mentioned. Labrador is a project of the
+            TU Delft, which will include the Skill Circuits.
         </p>
         <h2 id="topics">Topics</h2>
         <ul>
@@ -36,11 +34,11 @@ clearLevel();
         </ul>
         <h2 id="what-data-do-we-collect">What data do we collect</h2>
         <p>
-            To support your education at the Delft University of Technology , the university has
-            a legal ground to store your data. To be more specific, it is a contractual
-            necessity: the data processing is necessary for the performance of the contract
-            between the student and Delft University of Technology . Because of this, the Skill
-            Circuits collects the following data:
+            To support your education at the Delft University of Technology , the university has a
+            legal ground to store your data. To be more specific, it is a contractual necessity: the
+            data processing is necessary for the performance of the contract between the student and
+            Delft University of Technology . Because of this, the Skill Circuits collects the
+            following data:
         </p>
         <ul>
             <li>Name</li>
@@ -79,8 +77,8 @@ clearLevel();
         <h2 id="how-will-we-use-your-data">How will we use your data</h2>
         <p>
             At this moment, we only use the data given to support the functionality the Skill
-            Circuits promise, giving students an overview of what tasks they still need to
-            complete and where they left of.
+            Circuits promise, giving students an overview of what tasks they still need to complete
+            and where they left of.
         </p>
         <p>
             Data is being used on a need to know basis. Only administrators have access to the
@@ -88,22 +86,22 @@ clearLevel();
         </p>
         <p>
             Data from the Skill Circuits is is also used for research purposes. This research is
-            done to explore the possibilities of increasing educational quality and investigate
-            what type of materials are most effective to teach students about certain concepts.
+            done to explore the possibilities of increasing educational quality and investigate what
+            type of materials are most effective to teach students about certain concepts.
         </p>
         <p>For this research the following additional data will be stored:</p>
         <ul>
             <li>What links were clicked when by whom</li>
         </ul>
         <p>
-            This data will only be accessible to people doing the research and will be
-            responsibly handled in such a way that no unauthorised person or persons can get
-            access to this data.
+            This data will only be accessible to people doing the research and will be responsibly
+            handled in such a way that no unauthorised person or persons can get access to this
+            data.
         </p>
         <h2 id="how-do-we-store-your-data">How do we store your data</h2>
         <p>
-            To comply with GDPR regulations, all data is stored on site at the Delft University
-            of Technology. The data stored on our servers will be deleted after 5 years.
+            To comply with GDPR regulations, all data is stored on site at the Delft University of
+            Technology. The data stored on our servers will be deleted after 5 years.
         </p>
         <p>
             Access to data is strictly regulated with only select admins having access to the
@@ -118,14 +116,14 @@ clearLevel();
         </ul>
         <p>
             Please refer to the
-            <Link href="https://www.tudelft.nl/privacy-statement/">Privacy Statement of the TU Delft</Link>.
+            <Link href="https://www.tudelft.nl/privacy-statement/">
+                Privacy Statement of the TU Delft
+            </Link>.
         </p>
         <p>
-            If you have any questions about the privacy policy or want to make use of your
-            rights, please contact
-            <Link href="mailto:privacy-tud@tudelft.nl">
-                the following email address
-            </Link>.
+            If you have any questions about the privacy policy or want to make use of your rights,
+            please contact
+            <Link href="mailto:privacy-tud@tudelft.nl">the following email address</Link>.
         </p>
     </div>
 </PageLayout>
@@ -134,17 +132,17 @@ clearLevel();
     h1 {
         font-size: var(--font-size-700);
         font-weight: 700;
-        margin-bottom: .2em;
+        margin-bottom: 0.2em;
     }
     h2 {
         font-size: var(--font-size-500);
         font-weight: 500;
-        margin-bottom: .2em;
+        margin-bottom: 0.2em;
     }
     h3 {
         font-size: var(--font-size-400);
         font-weight: 500;
-        margin-bottom: .2em;
+        margin-bottom: 0.2em;
     }
 
     ul {
@@ -152,7 +150,7 @@ clearLevel();
     }
 
     :where(p, ul) + :where(p, ul) {
-        margin-top: .5em;
+        margin-top: 0.5em;
     }
     :where(p, ul) + :where(h1, h2, h3) {
         margin-top: 1em;

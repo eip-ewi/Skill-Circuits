@@ -1,49 +1,67 @@
 <script lang="ts">
-
-    import type {Block} from "../../../dto/circuit/block";
-    import type {SkillBlock} from "../../../dto/circuit/module/skill";
-    import {onDestroy, onMount, tick} from "svelte";
-    import type {Graph} from "../../../logic/circuit/graph";
-    import type {TaskItem} from "../../../dto/circuit/module/task";
-    import {isUnlocked} from "../../../logic/circuit/skill_state/unlock";
-    import {hasEditorRights, getAuthorisation} from "../../../logic/authorisation.svelte";
-    import {getLevel, isLevel} from "../../../logic/circuit/level.svelte";
-    import {isCompleted} from "../../../logic/circuit/skill_state/completion";
-    import {loadPage} from "../../../logic/routing.svelte";
-    import {EditionLevel, ModuleLevel} from "../../../data/level";
-    import TaskIconComponent from "../item/TaskIconComponent.svelte";
-    import TaskIconsComponent from "../item/TaskIconsComponent.svelte";
+    import type { Block } from "../../../dto/circuit/block";
+    import type { SkillBlock } from "../../../dto/circuit/module/skill";
+    import { onMount, tick } from "svelte";
+    import { isUnlocked } from "../../../logic/circuit/skill_state/unlock";
+    import { hasEditorRights } from "../../../logic/authorisation.svelte";
+    import { getLevel, isLevel } from "../../../logic/circuit/level.svelte";
+    import { isCompleted } from "../../../logic/circuit/skill_state/completion";
+    import { loadPage } from "../../../logic/routing.svelte";
+    import { ModuleLevel } from "../../../data/level";
     import BlockActionIndicationComponent from "./BlockActionIndicationComponent.svelte";
     import ExpandedViewOpenButtonComponent from "./ExpandedViewOpenButtonComponent.svelte";
     import ExpandedBlockComponent from "./ExpandedBlockComponent.svelte";
-    import {getBlock, getBlocks, getCircuit, getGraph, updateBlock} from "../../../logic/circuit/circuit.svelte";
+    import { getBlocks, updateBlock } from "../../../logic/circuit/circuit.svelte";
     import BlockControlsComponent from "./BlockControlsComponent.svelte";
-    import {type BlockAction, BlockActions} from "../../../data/block_action";
-    import {type BlockState, BlockStates} from "../../../data/block_state";
-    import BlockCreateConnectionsComponent from "./BlockManageConnectionsComponent.svelte";
+    import { type BlockAction, BlockActions } from "../../../data/block_action";
+    import { BlockStates } from "../../../data/block_state";
     import BlockManageConnectionsComponent from "./BlockManageConnectionsComponent.svelte";
     import BlockEditComponent from "./BlockEditComponent.svelte";
     import BlockContentComponent from "./BlockContentComponent.svelte";
-    import {updateBlockPosition} from "../../../logic/circuit/updates/position_updates.svelte";
     import BlockAssignPathsComponent from "./BlockAssignPathsComponent.svelte";
-    import {disableColumns, enableColumns} from "../../../dto/columns.svelte";
+    import { disableColumns, enableColumns } from "../../../dto/columns.svelte";
     import BookmarkSkillButtonComponent from "./BookmarkSkillButtonComponent.svelte";
-    import {isSkillBookmarked} from "../../../logic/bookmarks.svelte";
-    import {clearScrollTarget, getScrollTarget} from "../../../logic/circuit/scroll_target.svelte";
+    import { isSkillBookmarked } from "../../../logic/bookmarks.svelte";
+    import {
+        clearScrollTarget,
+        getScrollTarget,
+    } from "../../../logic/circuit/scroll_target.svelte";
     import { getBlurBlocks } from "../../../logic/preferences.svelte";
+    import ExpandedSubmoduleComponent from "../../expanded_submodule/ExpandedSubmoduleComponent.svelte";
+    import type { SubmoduleBlock } from "../../../dto/circuit/edition/submodule";
 
     let { block }: { block: Block } = $props();
 
     let locked: boolean = $derived(!hasEditorRights() && !isUnlocked(block));
     let completed: boolean = $derived(!hasEditorRights() && isCompleted(block));
-    let clickable: boolean = $derived((!hasEditorRights() || !isLevel(ModuleLevel)) && (block.state !== BlockStates.Editing && block.state !== BlockStates.AssigningPaths));
-    let hidden: boolean = $derived(block.state === BlockStates.Inactive && hasEditorRights() && block.blockType === "skill" && !block.external && block.hidden)
+    let clickable: boolean = $derived(
+        (!hasEditorRights() || getLevel() !== ModuleLevel) &&
+            block.state !== BlockStates.Editing &&
+            block.state !== BlockStates.AssigningPaths,
+    );
+    let hidden: boolean = $derived(
+        block.state === BlockStates.Inactive &&
+            hasEditorRights() &&
+            block.blockType === "skill" &&
+            !block.external &&
+            block.hidden,
+    );
+
+    function asSubmoduleBlock(value: Block): SubmoduleBlock {
+        return value as SubmoduleBlock;
+    }
+
+    function asSkillBlock(value: Block): SkillBlock {
+        return value as SkillBlock;
+    }
 
     let draggable: boolean = $state(false);
     let action: BlockAction | undefined = $state();
 
-    let connectable:boolean = $state(false);
-    let unfocused: boolean = $derived(block.state === BlockStates.WaitingForConnection && !connectable);
+    let connectable: boolean = $state(false);
+    let unfocused: boolean = $derived(
+        block.state === BlockStates.WaitingForConnection && !connectable,
+    );
 
     let expanded: boolean = $state(false);
 
@@ -54,7 +72,7 @@
         const rect = element.getBoundingClientRect();
         window.scrollTo({
             top: rect.top + window.scrollY - 80,
-            behavior: "smooth"
+            behavior: "smooth",
         });
     }
 
@@ -64,9 +82,11 @@
         block.row;
         block.state;
         hasEditorRights();
-        getBlocks().filter(upperBlock => upperBlock.row! < block.row!).forEach(upperBlock => {
-            upperBlock.state;
-        });
+        getBlocks()
+            .filter(upperBlock => upperBlock.row! < block.row!)
+            .forEach(upperBlock => {
+                upperBlock.state;
+            });
 
         recalculateBounds();
     });
@@ -79,17 +99,20 @@
         (async () => {
             await tick();
             element?.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
-            element.animate([
-                { transform: 'scale(1)' },
-                { transform: 'scale(1.015)', offset: 0.25 },
-                { transform: 'scale(0.985)', offset: 0.75 },
-                { transform: 'scale(1)' }
-            ], {
-                delay: 300,
-                duration: 6000,
-                easing: 'linear',
-                iterations: 1
-            });
+            element.animate(
+                [
+                    { transform: "scale(1)" },
+                    { transform: "scale(1.015)", offset: 0.25 },
+                    { transform: "scale(0.985)", offset: 0.75 },
+                    { transform: "scale(1)" },
+                ],
+                {
+                    delay: 300,
+                    duration: 6000,
+                    easing: "linear",
+                    iterations: 1,
+                },
+            );
 
             clearScrollTarget();
         })();
@@ -125,7 +148,10 @@
     function mouseEnterBlock() {
         // on every level except module level, the action is go to
         // on module level it is expand, but only in view mode
-        if ((block.blockType !== "skill" || (block.external && !hasEditorRights())) && block.state !== BlockStates.Editing) {
+        if (
+            (block.blockType !== "skill" || (block.external && !hasEditorRights())) &&
+            block.state !== BlockStates.Editing
+        ) {
             action = BlockActions.Goto;
         } else if (!hasEditorRights()) {
             action = BlockActions.Expand;
@@ -172,7 +198,7 @@
     }
 </script>
 
-<svelte:window onresize={recalculateBounds}/>
+<svelte:window onresize={recalculateBounds} />
 
 {#if block.state === BlockStates.Connecting}
     <div class="scroll-to-pulse-container">
@@ -180,7 +206,8 @@
             <button class="scroll-to-pulse-button" onclick={scrollToPulsing}>
                 <span class="icon fa-solid fa-location-dot"></span>
                 <span>
-                    Go to skill<span class="scroll-to-name">{' '}"{block.name}"</span>
+                    Go to skill
+                    <span class="scroll-to-name">{" "}"{block.name}"</span>
                 </span>
             </button>
         </div>
@@ -188,15 +215,31 @@
 {/if}
 
 <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
-<div id="block-{block.id}" class="block-wrapper" style:grid-column={block.column! + 1} style:grid-row={block.row === undefined ? undefined : block.row + 1}
-     draggable={draggable} ondragstart={dragStart} ondragend={dragEnd} data-clickable={clickable}
-     data-editing={block.state === BlockStates.Editing}
-     onmouseenter={mouseEnter} onmouseleave={mouseLeave}>
-    <div bind:this={element} class="block"
-         data-locked={locked && getBlurBlocks()} data-completed={completed} data-clickable={clickable} data-wiggle={block.state === BlockStates.Dragging}
-         data-unfocus={unfocused} data-pulse={block.state === BlockStates.Connecting}
-         data-hidden={hidden}
-         onclick={click} onmouseenter={mouseEnterBlock} onmouseleave={mouseLeaveBlock}>
+<div
+    id="block-{block.id}"
+    class="block-wrapper"
+    style:grid-column={block.column + 1}
+    style:grid-row={block.row === undefined ? undefined : block.row + 1}
+    {draggable}
+    ondragstart={dragStart}
+    ondragend={dragEnd}
+    data-clickable={clickable}
+    data-editing={block.state === BlockStates.Editing}
+    onmouseenter={mouseEnter}
+    onmouseleave={mouseLeave}>
+    <div
+        bind:this={element}
+        class="block"
+        data-locked={locked && getBlurBlocks()}
+        data-completed={completed}
+        data-clickable={clickable}
+        data-wiggle={block.state === BlockStates.Dragging}
+        data-unfocus={unfocused}
+        data-pulse={block.state === BlockStates.Connecting}
+        data-hidden={hidden}
+        onclick={click}
+        onmouseenter={mouseEnterBlock}
+        onmouseleave={mouseLeaveBlock}>
         {#if block.state === BlockStates.Editing}
             <BlockEditComponent {block}></BlockEditComponent>
         {:else if block.state === BlockStates.AssigningPaths && block.blockType === "skill"}
@@ -210,14 +253,26 @@
         {#if block.blockType === "skill" && !block.external && (block.state === BlockStates.Hovering || isSkillBookmarked(block))}
             <BookmarkSkillButtonComponent bind:action skill={block}></BookmarkSkillButtonComponent>
         {/if}
-        {#if block.state === BlockStates.Hovering && (block.blockType !== "skill" || block.external) && !hasEditorRights()}
-            <ExpandedViewOpenButtonComponent bind:action bind:open={expanded}></ExpandedViewOpenButtonComponent>
+        {#if (block.blockType !== "skill" || block.external) && !hasEditorRights()}
+            {#if block.state === BlockStates.Hovering}
+                <ExpandedViewOpenButtonComponent bind:action bind:open={expanded}
+                ></ExpandedViewOpenButtonComponent>
+            {/if}
+
+            {#if block.blockType === "submodule"}
+                <ExpandedSubmoduleComponent
+                    submoduleBlock={asSubmoduleBlock(block)}
+                    bind:open={expanded}></ExpandedSubmoduleComponent>
+            {/if}
         {/if}
         {#if hasEditorRights() && (draggable || block.state === BlockStates.Hovering || block.state === BlockStates.Connecting || block.state === BlockStates.Editing)}
             <BlockControlsComponent {block} bind:action bind:draggable></BlockControlsComponent>
         {/if}
         {#if block.state === BlockStates.WaitingForConnection}
-            <BlockManageConnectionsComponent skill={block as SkillBlock} bind:action bind:connectable></BlockManageConnectionsComponent>
+            <BlockManageConnectionsComponent
+                skill={asSkillBlock(block)}
+                bind:action
+                bind:connectable></BlockManageConnectionsComponent>
         {/if}
         {#if action !== undefined}
             <BlockActionIndicationComponent {action} {block}></BlockActionIndicationComponent>
@@ -239,14 +294,17 @@
         background-color: var(--block-colour);
         border: var(--block-border);
         border-radius: var(--block-border-radius);
-        box-shadow: .75rem 1.25rem 1.625rem 0 color-mix(in srgb, var(--shadow-colour) 8%, transparent);
+        box-shadow: 0.75rem 1.25rem 1.625rem 0
+            color-mix(in srgb, var(--shadow-colour) 8%, transparent);
         color: var(--on-block-colour);
         display: flex;
         flex-direction: column;
-        gap: .5em;
+        gap: 0.5em;
         padding: 1em;
         position: relative;
-        transition: filter ease-in-out 150ms, box-shadow ease-in-out 150ms;
+        transition:
+            filter ease-in-out 150ms,
+            box-shadow ease-in-out 150ms;
     }
 
     .block[data-wiggle="true"] {
@@ -258,15 +316,15 @@
     }
 
     .block[data-unfocus="true"] {
-        opacity: .25;
+        opacity: 0.25;
     }
 
     .block[data-hidden="true"] {
-        opacity: .5;
+        opacity: 0.5;
     }
 
     .block[data-locked="true"] {
-        filter: blur(.375em);
+        filter: blur(0.375em);
     }
     .block-wrapper:hover .block[data-locked="true"] {
         filter: none;
@@ -280,7 +338,8 @@
 
     .block-wrapper[data-clickable="true"]:hover .block:not([data-pulse="true"]) {
         transform: scale(1.05);
-        box-shadow: .75rem 1.25rem 1.8rem 0 color-mix(in srgb, var(--shadow-colour) 8%, transparent);
+        box-shadow: 0.75rem 1.25rem 1.8rem 0
+            color-mix(in srgb, var(--shadow-colour) 8%, transparent);
     }
     .block[data-clickable="true"] {
         cursor: pointer;

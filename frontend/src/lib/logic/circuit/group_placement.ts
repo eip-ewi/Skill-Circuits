@@ -1,28 +1,38 @@
-import type {Group} from "../../dto/circuit/group";
-import type {Point} from "../../data/point";
-import type {Allocation, Blob, Neighbours} from "../../data/blob";
-import type {Block} from "../../dto/circuit/block";
-import {isBlockVisible} from "./circuit.svelte";
+import type { Group } from "../../dto/circuit/group";
+import type { Point } from "../../data/point";
+import type { Allocation, Blob, Neighbours } from "../../data/blob";
+import type { Block } from "../../dto/circuit/block";
+import { isBlockVisible } from "./circuit.svelte";
 
 export function createBlobs(groups: Group[]): Blob[] {
     function visibleBlocks(group: Group): Block[] {
         return group.blocks.filter(block => isBlockVisible(block));
     }
 
-    let blobs: Blob[] =
-        groups.filter(group => visibleBlocks(group).length > 0).map(group => { return {
-            group: group,
-            min: {
-                x: Math.min(...visibleBlocks(group).map(block => block.column!)),
-                y: Math.min(...visibleBlocks(group).map(block => block.row!)),
-            },
-            max: {
-                x: Math.max(...visibleBlocks(group).map(block => block.column!)),
-                y: Math.max(...visibleBlocks(group).map(block => block.row!)),
-            },
-            allocations: visibleBlocks(group).map(block => { return { point: { x: block.column!, y: block.row! }, neighbours: emptyNeighbours(), showName: false, block: block }; }),
-        }; })
-            .toSorted((a, b) => area(a) - area(b));
+    let blobs: Blob[] = groups
+        .filter(group => visibleBlocks(group).length > 0)
+        .map(group => {
+            return {
+                group: group,
+                min: {
+                    x: Math.min(...visibleBlocks(group).map(block => block.column!)),
+                    y: Math.min(...visibleBlocks(group).map(block => block.row!)),
+                },
+                max: {
+                    x: Math.max(...visibleBlocks(group).map(block => block.column!)),
+                    y: Math.max(...visibleBlocks(group).map(block => block.row!)),
+                },
+                allocations: visibleBlocks(group).map(block => {
+                    return {
+                        point: { x: block.column!, y: block.row! },
+                        neighbours: emptyNeighbours(),
+                        showName: false,
+                        block: block,
+                    };
+                }),
+            };
+        })
+        .toSorted((a, b) => area(a) - area(b));
 
     if (!blobs.some(blob => blob.allocations.length > 0)) {
         return [];
@@ -41,35 +51,63 @@ export function createBlobs(groups: Group[]): Blob[] {
                     continue;
                 }
                 grid.occupy(p, blob.group);
-                blob.allocations.push({ point: p, neighbours: emptyNeighbours(), showName: false, block: undefined });
+                blob.allocations.push({
+                    point: p,
+                    neighbours: emptyNeighbours(),
+                    showName: false,
+                    block: undefined,
+                });
             }
         }
     }
 
     for (let blob of blobs) {
         for (let alloc of blob.allocations) {
-            if (alloc.point.y > 0 && grid.getOccupant({ x: alloc.point.x, y: alloc.point.y - 1 }) === blob.group.id) {
+            if (
+                alloc.point.y > 0 &&
+                grid.getOccupant({ x: alloc.point.x, y: alloc.point.y - 1 }) === blob.group.id
+            ) {
                 alloc.neighbours.top = true;
             }
-            if (alloc.point.x < width - 1 && grid.getOccupant({ x: alloc.point.x + 1, y: alloc.point.y }) === blob.group.id) {
+            if (
+                alloc.point.x < width - 1 &&
+                grid.getOccupant({ x: alloc.point.x + 1, y: alloc.point.y }) === blob.group.id
+            ) {
                 alloc.neighbours.right = true;
             }
             if (grid.getOccupant({ x: alloc.point.x, y: alloc.point.y + 1 }) === blob.group.id) {
                 alloc.neighbours.bottom = true;
             }
-            if (alloc.point.x > 0 && grid.getOccupant({ x: alloc.point.x - 1, y: alloc.point.y }) === blob.group.id) {
+            if (
+                alloc.point.x > 0 &&
+                grid.getOccupant({ x: alloc.point.x - 1, y: alloc.point.y }) === blob.group.id
+            ) {
                 alloc.neighbours.left = true;
             }
-            if (alloc.point.x < width - 1 && alloc.point.y > 0 && grid.getOccupant({ x: alloc.point.x + 1, y: alloc.point.y - 1 }) === blob.group.id) {
+            if (
+                alloc.point.x < width - 1 &&
+                alloc.point.y > 0 &&
+                grid.getOccupant({ x: alloc.point.x + 1, y: alloc.point.y - 1 }) === blob.group.id
+            ) {
                 alloc.neighbours.topRight = true;
             }
-            if (alloc.point.x < width - 1 && grid.getOccupant({ x: alloc.point.x + 1, y: alloc.point.y + 1 }) === blob.group.id) {
+            if (
+                alloc.point.x < width - 1 &&
+                grid.getOccupant({ x: alloc.point.x + 1, y: alloc.point.y + 1 }) === blob.group.id
+            ) {
                 alloc.neighbours.bottomRight = true;
             }
-            if (alloc.point.x > 0 && grid.getOccupant({ x: alloc.point.x - 1, y: alloc.point.y + 1 }) === blob.group.id) {
+            if (
+                alloc.point.x > 0 &&
+                grid.getOccupant({ x: alloc.point.x - 1, y: alloc.point.y + 1 }) === blob.group.id
+            ) {
                 alloc.neighbours.bottomLeft = true;
             }
-            if (alloc.point.x > 0 && alloc.point.y > 0 && grid.getOccupant({ x: alloc.point.x - 1, y: alloc.point.y - 1 }) === blob.group.id) {
+            if (
+                alloc.point.x > 0 &&
+                alloc.point.y > 0 &&
+                grid.getOccupant({ x: alloc.point.x - 1, y: alloc.point.y - 1 }) === blob.group.id
+            ) {
                 alloc.neighbours.topLeft = true;
             }
         }
@@ -84,12 +122,16 @@ export function createBlobs(groups: Group[]): Blob[] {
             topLeft.showName = true;
         });
 
-        let loose: Set<number> = new Set(separated.filter(connected => !connected.some(alloc => alloc.block !== undefined)).flat().map(alloc => grid.encode(alloc.point)));
+        let loose: Set<number> = new Set(
+            separated
+                .filter(connected => !connected.some(alloc => alloc.block !== undefined))
+                .flat()
+                .map(alloc => grid.encode(alloc.point)),
+        );
         blob.allocations = blob.allocations.filter(alloc => !loose.has(grid.encode(alloc.point)));
     });
 
     return blobs;
-
 }
 
 function separateBlobs(blob: Blob, grid: Grid): Allocation[][] {
@@ -101,7 +143,9 @@ function separateBlobs(blob: Blob, grid: Grid): Allocation[][] {
         let start = todo[0]!;
         let connected = bfs(blob, start, grid);
         result.push(connected);
-        todo = todo.filter(a => !connected.some(b => a.point.x === b.point.x && a.point.y === b.point.y));
+        todo = todo.filter(
+            a => !connected.some(b => a.point.x === b.point.x && a.point.y === b.point.y),
+        );
     }
 
     return result;
@@ -143,7 +187,7 @@ function findAllocationAt(blob: Blob, point: Point): Allocation | undefined {
     return blob.allocations.find(alloc => alloc.point.x === point.x && alloc.point.y === point.y);
 }
 
-function area(rect: { min: Point, max: Point }): number {
+function area(rect: { min: Point; max: Point }): number {
     return (rect.max.x - rect.min.x + 1) * (rect.max.y - rect.min.y + 1);
 }
 
@@ -161,7 +205,6 @@ function emptyNeighbours(): Neighbours {
 }
 
 class Grid {
-
     readonly width: number;
     private occupied: Map<number, number> = new Map();
 
@@ -185,7 +228,6 @@ class Grid {
     encode(p: Point): number {
         return p.x + p.y * this.width;
     }
-
 }
 
 /*
