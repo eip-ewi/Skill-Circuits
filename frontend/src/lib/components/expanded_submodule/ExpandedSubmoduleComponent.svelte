@@ -4,7 +4,6 @@
     import type { SubmoduleBlock } from "../../dto/circuit/edition/submodule";
     import type { SubmoduleGroup } from "../../dto/circuit/module/submodule";
     import { topologicalSort } from "../../logic/circuit/block_placement";
-    import { BlockStates } from "../../data/block_state";
     import SkillNameComponent from "./SkillNameComponent.svelte";
     import SelectedSkillComponent from "./SelectedSkillComponent.svelte";
     import StudentTrayComponent from "../side_controls/student_tray/StudentTrayComponent.svelte";
@@ -27,6 +26,34 @@
     );
 
     let visibleSkills: SkillBlock[] | undefined = $state();
+    let sortedVisibleSkills: SkillBlock[] | undefined = $derived.by(() => {
+        if (visibleSkills === undefined || moduleGroup.moduleGraph === undefined) {
+            return undefined;
+        }
+
+        // Keep topological order as the final tie-breaker.
+        let topologicalOrder = new Map(visibleSkills.map((skill, index) => [skill.id, index]));
+
+        return visibleSkills.toSorted((a, b) => {
+            let aLocked = !isUnlocked(a, moduleGroup.moduleGraph);
+            let bLocked = !isUnlocked(b, moduleGroup.moduleGraph);
+            if (aLocked !== bLocked) {
+                return Number(aLocked) - Number(bLocked);
+            }
+
+            let aCompleted = isCompleted(a, moduleGroup.moduleGraph);
+            let bCompleted = isCompleted(b, moduleGroup.moduleGraph);
+            if (aCompleted !== bCompleted) {
+                return Number(bCompleted) - Number(aCompleted);
+            }
+
+            if (a.essential !== b.essential) {
+                return Number(b.essential) - Number(a.essential);
+            }
+
+            return topologicalOrder.get(a.id)! - topologicalOrder.get(b.id)!;
+        });
+    });
     let selectedSkill: SkillBlock | undefined = $state();
 
     let element: HTMLDialogElement | undefined = $state();
@@ -68,12 +95,12 @@
         // Set it when the submodule is first opened: This makes it possible for recently revealed hidden skills
         // to be considered in the ordering
         if (
-            visibleSkills !== undefined &&
+            sortedVisibleSkills !== undefined &&
             open &&
             selectedSkill === undefined &&
-            visibleSkills.length > 0
+            sortedVisibleSkills.length > 0
         ) {
-            selectedSkill = visibleSkills[0];
+            selectedSkill = sortedVisibleSkills[0];
         }
     });
 
@@ -98,12 +125,12 @@
         <div
             class="expanded-submodule"
             transition:openExpandedBlockTransition={{ block: submoduleBlock }}>
-            {#if visibleSkills !== undefined && moduleGroup.moduleGraph !== undefined}
+            {#if sortedVisibleSkills !== undefined && moduleGroup.moduleGraph !== undefined}
                 <div class="content">
                     <h1 class="name">{submoduleBlock.name}</h1>
                     {#if selectedSkill !== undefined}
                         <div class="skill-list">
-                            {#each visibleSkills as skill}
+                            {#each sortedVisibleSkills as skill}
                                 <SkillNameComponent
                                     block={skill}
                                     moduleGraph={moduleGroup.moduleGraph}
@@ -113,14 +140,14 @@
                         <div class="selected-skill-wrapper">
                             <SelectedSkillComponent block={selectedSkill}></SelectedSkillComponent>
                         </div>
-                    {:else if visibleSkills.length === 0}
+                    {:else if sortedVisibleSkills.length === 0}
                         There are no skills in this submodule.
                     {/if}
                 </div>
             {/if}
         </div>
 
-        {#if visibleSkills !== undefined && selectedSkill !== undefined}
+        {#if sortedVisibleSkills !== undefined && selectedSkill !== undefined}
             <StudentTrayComponent block={selectedSkill}></StudentTrayComponent>
         {/if}
     </dialog>
