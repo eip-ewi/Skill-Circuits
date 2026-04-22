@@ -8,9 +8,30 @@
     import TaskIconsComponent from "../item/TaskIconsComponent.svelte";
     import { getItemsOnPath } from "../../../logic/edition/active_path.svelte";
     import { isSkillItemRevealed } from "../../../logic/circuit/unlocked_skills.svelte";
-    import { getCheckpoint, getVisibleCheckpoints } from "../../../logic/edition/edition.svelte";
 
     let { block }: { block: Block } = $props();
+
+    function getNumCompletedItems() {
+        return block.items.filter(item => {
+            if (item.itemType == "skill") {
+                return item.completed && item.column !== null && item.essential;
+            }
+            return item.completed;
+        }).length;
+    }
+
+    function getNumTotalItems() {
+        return block.items.filter(item => {
+            if (item.itemType == "skill") {
+                return (
+                    item.column !== null &&
+                    item.essential &&
+                    (!item.hidden || isSkillItemRevealed(item))
+                );
+            }
+            return true;
+        }).length;
+    }
 </script>
 
 <div class="heading">
@@ -29,13 +50,7 @@
     <span>{block.items.length} {getLevel().items}</span>
 {:else}
     <span>
-        {block.items.filter(
-            item => item.completed && (item.itemType !== "skill" || item.column !== null),
-        ).length}/{block.items.filter(
-            item =>
-                item.itemType !== "skill" ||
-                (item.column !== null && (!item.hidden || isSkillItemRevealed(item))),
-        ).length} completed
+        {getNumCompletedItems()}/{getNumTotalItems()} completed
     </span>
 {/if}
 
