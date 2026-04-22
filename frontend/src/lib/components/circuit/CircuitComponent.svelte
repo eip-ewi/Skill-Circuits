@@ -23,7 +23,7 @@
     import { getLevel, isLevel } from "../../logic/circuit/level.svelte";
     import CheckpointComponent from "./checkpoint/CheckpointComponent.svelte";
     import { fade } from "svelte/transition";
-    import {getVisibleCheckpoints} from "../../logic/edition/edition.svelte";
+    import { getVisibleCheckpoints } from "../../logic/edition/edition.svelte";
     import TaskSymbolLegendComponent from "./item/TaskSymbolLegendComponent.svelte";
 
     let { warnings = $bindable() }: { warnings: Warning[] } = $props();

@@ -1,12 +1,10 @@
 <script lang="ts">
-
-    import {TaskIcons} from "../../../dto/task_icons";
+    import { TaskIcons } from "../../../dto/task_icons";
 
     const legendItems = Object.entries(TaskIcons).map(([type, icon]) => ({
         icon,
         label: type.charAt(0) + type.slice(1).toLowerCase(),
     }));
-
 </script>
 
 <section class="task-symbol-legend" aria-label="Task symbol legend">
@@ -33,7 +31,7 @@
     .task-symbol-legend {
         position: absolute;
         left: 2em;
-        top: .5em;
+        top: 0.5em;
         z-index: 5;
     }
 
@@ -43,21 +41,21 @@
         color: var(--on-background-colour);
         cursor: help;
         font-size: 1.75em;
-        padding: .25em;
+        padding: 0.25em;
     }
 
     .content {
         background-color: var(--block-colour);
         border: 1px solid var(--block-border-colour);
-        border-radius: .5em;
+        border-radius: 0.5em;
         color: var(--on-block-colour);
         display: none;
-        gap: .5em;
+        gap: 0.5em;
         min-width: 13em;
-        padding: .75em 1em;
+        padding: 0.75em 1em;
         position: absolute;
         left: 0;
-        top: calc(100% + .25em);
+        top: calc(100% + 0.25em);
     }
 
     .task-symbol-legend:hover .content,
@@ -72,8 +70,7 @@
     .legend-item {
         align-items: center;
         display: inline-flex;
-        gap: .375em;
+        gap: 0.375em;
         white-space: nowrap;
     }
 </style>
-
