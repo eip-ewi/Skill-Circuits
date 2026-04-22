@@ -20,6 +20,7 @@
     import CheckpointComponent from "./checkpoint/CheckpointComponent.svelte";
     import { fade } from "svelte/transition";
     import {getVisibleCheckpoints} from "../../logic/edition/edition.svelte";
+    import TaskSymbolLegendComponent from "./item/TaskSymbolLegendComponent.svelte";
 
     let { warnings = $bindable() }: { warnings: Warning[] } = $props();
 
@@ -67,6 +68,9 @@
 <div transition:fade|global bind:this={element} class="circuit" style="--columns: {getCircuit().width ?? 5}">
 
     <h1>{getCircuit().name}</h1>
+    {#if isLevel(ModuleLevel)}
+        <TaskSymbolLegendComponent></TaskSymbolLegendComponent>
+    {/if}
 
     <ConnectionsComponent></ConnectionsComponent>
 
