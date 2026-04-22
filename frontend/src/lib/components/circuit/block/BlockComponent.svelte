@@ -164,7 +164,7 @@
 
     $effect(() => {
         updateBlock(block, { preview: !hasEditorRights() && block.state === BlockStates.Hovering });
-    })
+    });
 
     function click() {
         if (!clickable) {

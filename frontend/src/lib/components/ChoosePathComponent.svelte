@@ -1,10 +1,10 @@
 <script lang="ts">
-    import {getActivePath, selectPath} from "../logic/edition/active_path.svelte";
-    import {onMount} from "svelte";
-    import {hasEditorRights, getAuthorisation} from "../logic/authorisation.svelte.js";
-    import {getPaths} from "../logic/edition/edition.svelte";
-    import type {Path} from "../dto/path";
-    import {isOnCircuit} from "../logic/circuit/level.svelte";
+    import { getActivePath, selectPath } from "../logic/edition/active_path.svelte";
+    import { onMount } from "svelte";
+    import { hasEditorRights, getAuthorisation } from "../logic/authorisation.svelte.js";
+    import { getPaths } from "../logic/edition/edition.svelte";
+    import type { Path } from "../dto/path";
+    import { isOnCircuit } from "../logic/circuit/level.svelte";
     import Button from "./util/Button.svelte";
 
     function autoShow(node: HTMLDialogElement) {

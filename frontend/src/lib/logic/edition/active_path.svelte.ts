@@ -35,7 +35,6 @@ export function getActivePath(): Path | null {
     return pathState.activePath;
 }
 
-
 export function getItemsOnPath<B extends Block>(block: B): B["items"] {
     if (block.blockType !== "skill" || hasEditorRights()) {
         return block.items;

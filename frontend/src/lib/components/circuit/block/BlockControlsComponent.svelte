@@ -37,9 +37,11 @@
 
     function connect() {
         updateBlock(block, { state: BlockStates.Connecting });
-        getBlocks().filter(other => other.id !== block.id).forEach(other => {
-            updateBlock(other, { state: BlockStates.WaitingForConnection });
-        });
+        getBlocks()
+            .filter(other => other.id !== block.id)
+            .forEach(other => {
+                updateBlock(other, { state: BlockStates.WaitingForConnection });
+            });
         action = undefined;
     }
 
@@ -50,15 +52,12 @@
     }
 
     function side(): "left" | "right" {
-        const right = block.boundingRect === undefined ? 0 : block.boundingRect()?.right ?? 0;
+        const right = block.boundingRect === undefined ? 0 : (block.boundingRect()?.right ?? 0);
         return right + 128 > window.innerWidth ? "left" : "right";
     }
 </script>
 
-<div
-    class="controls"
-    data-side={side()}
-    transition:transition>
+<div class="controls" data-side={side()} transition:transition>
     {#if block.state === BlockStates.Connecting}
         <Button
             square={true}

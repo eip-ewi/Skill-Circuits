@@ -38,13 +38,19 @@ let blocks: Block[] = $derived.by(() => {
 });
 
 let graph: Graph | undefined = $derived.by(() => {
-    return circuit === undefined ? undefined : new Graph(blocks.filter(block => isBlockVisible(block)));
+    return circuit === undefined
+        ? undefined
+        : new Graph(blocks.filter(block => isBlockVisible(block)));
 });
 
 let blockToGroupMap: Map<number, Group> | undefined = $derived.by(() => {
     return circuit === undefined
         ? undefined
-        : new Map(circuit.groups.flatMap(group => group.blocks.map(block => [block.id, group] as const)));
+        : new Map(
+              circuit.groups.flatMap(group =>
+                  group.blocks.map(block => [block.id, group] as const),
+              ),
+          );
 });
 
 let itemToBlockMap: Map<number, Block> | undefined = $derived.by(() => {
