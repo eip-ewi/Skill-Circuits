@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 
 ## Fixed
-
+- [Student] When in the submodule view, the skills are now sorted. (@ogangalic)
 ## [2526.2.0]
 
 ## Added 
