@@ -33,6 +33,7 @@ import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelEditionView;
 import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelModuleView;
 import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelSkillView;
 import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelSubmoduleView;
+import nl.tudelft.skills.dto.view.circuit.module.ModuleLevelModuleView;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.repository.EditionRepository;
 import nl.tudelft.skills.repository.TaskCompletionRepository;
@@ -49,6 +50,7 @@ public class EditionCircuitService {
 
 	private final TaskCompletionRepository taskCompletionRepository;
 	private final PathService pathService;
+	private final ModuleCircuitService moduleCircuitService;
 
 	public EditionLevelEditionView getEditionCircuit(Long editionId, SCPerson person) {
 		SCEdition edition = editionRepository.getOrCreate(editionId);
@@ -89,13 +91,15 @@ public class EditionCircuitService {
 
 	private EditionLevelModuleView convertToModuleView(SCModule module, Set<Long> completedTaskIds,
 			Set<Long> revealedSkillIds, Path activePath, Set<Task> tasksAdded, Set<Task> tasksRemoved) {
+		ModuleLevelModuleView moduleCircuit = moduleCircuitService.getModuleCircuit(module, completedTaskIds);
 		return new EditionLevelModuleView(
 				module.getId(),
 				module.getName(),
 				module.getSubmodules().stream()
 						.map(submodule -> convertToSubmoduleView(submodule, completedTaskIds,
 								revealedSkillIds, activePath, tasksAdded, tasksRemoved))
-						.toList());
+						.toList(),
+				moduleCircuit);
 	}
 
 	public EditionLevelSubmoduleView convertToSubmoduleView(Submodule submodule, SCPerson person) {

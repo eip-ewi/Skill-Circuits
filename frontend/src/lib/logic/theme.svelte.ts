@@ -1,6 +1,8 @@
-import type {Theme} from "../data/theme";
+import type { Theme } from "../data/theme";
 
-let systemDefaultColorScheme: "light" | "dark" = $state(window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+let systemDefaultColorScheme: "light" | "dark" = $state(
+    window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light",
+);
 
 export function addSystemColorSchemeEventListener() {
     const darkColorScheme = window.matchMedia("(prefers-color-scheme: dark)");

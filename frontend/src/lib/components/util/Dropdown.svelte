@@ -1,8 +1,11 @@
 <script lang="ts">
+    import { onDestroy, onMount, type Snippet, tick } from "svelte";
 
-    import {onDestroy, onMount, type Snippet, tick} from "svelte";
-
-    let { open = $bindable(), children, dropdown: dropdownContent }: { open: boolean, children: Snippet, dropdown: Snippet } = $props();
+    let {
+        open = $bindable(),
+        children,
+        dropdown: dropdownContent,
+    }: { open: boolean; children: Snippet; dropdown: Snippet } = $props();
 
     let anchor: HTMLElement;
     let dropdown: HTMLElement;
@@ -11,7 +14,10 @@
         if (open) {
             if (dropdown.showPopover !== undefined) {
                 dropdown.showPopover();
-                if (anchor.getBoundingClientRect().left + dropdown.getBoundingClientRect().width < window.innerWidth) {
+                if (
+                    anchor.getBoundingClientRect().left + dropdown.getBoundingClientRect().width <
+                    window.innerWidth
+                ) {
                     dropdown.style.left = `${anchor.getBoundingClientRect().left}px`;
                 } else {
                     dropdown.style.left = `${anchor.getBoundingClientRect().right - dropdown.getBoundingClientRect().width}px`;
@@ -24,16 +30,21 @@
             dropdown.style.removeProperty("top");
         }
     });
-
 </script>
 
 <div class="wrapper">
     <div bind:this={anchor} class="anchor">
-        {@render children() }
+        {@render children()}
     </div>
-    <div bind:this={dropdown} role="menu" class="scrollable glass dropdown" popover onbeforetoggle={ event => open = event.newState === "open" } data-expanded={open}>
+    <div
+        bind:this={dropdown}
+        role="menu"
+        class="scrollable glass dropdown"
+        popover
+        onbeforetoggle={event => (open = event.newState === "open")}
+        data-expanded={open}>
         <div class="content">
-            {@render dropdownContent() }
+            {@render dropdownContent()}
         </div>
     </div>
 </div>
@@ -48,9 +59,11 @@
         display: none;
         inset: auto;
         left: 0;
-        padding: .5em .5em;
+        padding: 0.5em 0.5em;
         position: fixed;
-        transition: display 1500ms, transform 150ms ease-in-out;
+        transition:
+            display 1500ms,
+            transform 150ms ease-in-out;
         transition-behavior: allow-discrete;
         transform: scaleY(0);
         transform-origin: top;

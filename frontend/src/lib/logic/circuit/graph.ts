@@ -1,8 +1,7 @@
 import type { Block } from "../../dto/circuit/block";
-import {getBlocks} from "./circuit.svelte";
+import { getBlocks } from "./circuit.svelte";
 
 export class Graph {
-
     private nodes: Map<number, Block>;
     private parents: Map<number, Block[]>;
     private children: Map<number, Block[]>;
@@ -17,8 +16,18 @@ export class Graph {
         this.children = new Map();
 
         blocks.forEach(block => {
-            this.parents.set(block.id, block.parents.filter(parentId => this.nodes.has(parentId)).map(parentId => this.nodes.get(parentId)!));
-            this.children.set(block.id, block.children.filter(childId => this.nodes.has(childId)).map(childId => this.nodes.get(childId)!));
+            this.parents.set(
+                block.id,
+                block.parents
+                    .filter(parentId => this.nodes.has(parentId))
+                    .map(parentId => this.nodes.get(parentId)!),
+            );
+            this.children.set(
+                block.id,
+                block.children
+                    .filter(childId => this.nodes.has(childId))
+                    .map(childId => this.nodes.get(childId)!),
+            );
         });
     }
 
@@ -43,7 +52,10 @@ export class Graph {
     }
 
     isAncestor<B extends Block>(potentialAncestor: B, block: B): boolean {
-        return block.id === potentialAncestor.id || this.getParents(block).some(parent => this.isAncestor(potentialAncestor, parent));
+        return (
+            block.id === potentialAncestor.id ||
+            this.getParents(block).some(parent => this.isAncestor(potentialAncestor, parent))
+        );
     }
 
     getAncestors<B extends Block>(blocks: B[]): B[] {
@@ -72,10 +84,18 @@ export class Graph {
         let rightAncestors: Set<number> = new Set();
         ancestors(this, left.id, leftAncestors);
         ancestors(this, right.id, rightAncestors);
-        let commonAncestors: Set<number> = new Set([...leftAncestors.values()].filter(ancestor => rightAncestors.has(ancestor)));
-        [...commonAncestors.values()].filter(ancestor => this.children.get(ancestor)!.some(childOfAncestor => commonAncestors.has(childOfAncestor.id))).forEach(ancestor => {
-            commonAncestors.delete(ancestor);
-        });
+        let commonAncestors: Set<number> = new Set(
+            [...leftAncestors.values()].filter(ancestor => rightAncestors.has(ancestor)),
+        );
+        [...commonAncestors.values()]
+            .filter(ancestor =>
+                this.children
+                    .get(ancestor)!
+                    .some(childOfAncestor => commonAncestors.has(childOfAncestor.id)),
+            )
+            .forEach(ancestor => {
+                commonAncestors.delete(ancestor);
+            });
         return [...commonAncestors.values()].map(id => this.getNode(id)) as B[];
     }
 
@@ -125,21 +145,23 @@ export class Graph {
     }
 
     isDescendant<B extends Block>(potentialDescendant: B, block: B): boolean {
-        return block.id === potentialDescendant.id || this.getChildren(block).some(child => this.isDescendant(potentialDescendant, child));
+        return (
+            block.id === potentialDescendant.id ||
+            this.getChildren(block).some(child => this.isDescendant(potentialDescendant, child))
+        );
     }
 
     getNodes(): Block[] {
         return [...this.nodes.values()];
     }
 
-    getEdges(): {from: Block, to: Block}[] {
-        let edges: {from: Block, to: Block}[] = [];
+    getEdges(): { from: Block; to: Block }[] {
+        let edges: { from: Block; to: Block }[] = [];
         this.nodes.forEach(block => {
             this.getChildren(block).forEach(child => {
-                edges.push({from: block, to: child});
+                edges.push({ from: block, to: child });
             });
         });
         return edges;
     }
-
 }

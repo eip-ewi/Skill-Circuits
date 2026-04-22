@@ -11,10 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Added
+- [Everyone] A legend that shows what each task symbol means. (@ogangalic)
+## Changed
+
+## Fixed
+
+## [2526.2.0]
+
 ## Added 
 - [Student] When entering the module view it scrolls to top unfinished skill. (@ogangalic)
-
-## Changed
+- [Student] Add expanded views for submodules that can be accessed from the edition page by clicking "open here". (@ffiedrich)
 
 ## Fixed
 - [Student] The active path and the task removals/additions are taken into account for skill completion and (un)locking. (@ffiedrich)

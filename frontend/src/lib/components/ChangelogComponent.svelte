@@ -1,12 +1,16 @@
 <script lang="ts">
     import Button from "./util/Button.svelte";
-    import {getReleaseDetails, showChangelog, versionUpdate} from "../logic/release_details.svelte.js";
+    import {
+        getReleaseDetails,
+        showChangelog,
+        versionUpdate,
+    } from "../logic/release_details.svelte.js";
 
     let dialog: HTMLDialogElement | undefined = $state();
 
-    function closeChangelog(){
+    function closeChangelog() {
         versionUpdate();
-        if(dialog !== undefined){
+        if (dialog !== undefined) {
             dialog.close();
         }
     }
@@ -23,18 +27,21 @@
             dialog.focus();
         }
     });
-
-
 </script>
 
 {#if showChangelog()}
-    <dialog bind:this={dialog} oncancel={closeChangelog} onclick={checkForClose} id="changelog" class="dialog glass" >
-        <div class = content>
+    <dialog
+        bind:this={dialog}
+        oncancel={closeChangelog}
+        onclick={checkForClose}
+        id="changelog"
+        class="dialog glass">
+        <div class="content">
             <h1 id="title">What's new</h1>
             <div id="update_text">
                 {#each getReleaseDetails() as release}
-                    <h2 >{release.title}</h2>
-                    <div class="release_description"> {@html release.descriptionHtml}</div>
+                    <h2>{release.title}</h2>
+                    <div class="release_description">{@html release.descriptionHtml}</div>
                 {/each}
             </div>
         </div>
@@ -64,10 +71,10 @@
     }
 
     .dialog::backdrop {
-        backdrop-filter: blur(.15rem);
-        background-color: hsla(0deg 0% 0% / .05);
-        -ms-transform: translate3d(0,0,0);
-        transform: translate3d(0,0,0);
+        backdrop-filter: blur(0.15rem);
+        background-color: hsla(0deg 0% 0% / 0.05);
+        -ms-transform: translate3d(0, 0, 0);
+        transform: translate3d(0, 0, 0);
     }
 
     #close_changelog {
@@ -87,7 +94,7 @@
         font-weight: 700;
     }
 
-    .release_description{
+    .release_description {
         margin-bottom: 2em;
     }
 
@@ -95,10 +102,9 @@
         padding-left: 1.5em;
     }
 
-    :global(.release_description h2){
+    :global(.release_description h2) {
         padding-top: 1em;
         font-size: var(--font-size-500);
         font-weight: 700;
     }
-
 </style>

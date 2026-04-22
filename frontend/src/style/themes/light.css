@@ -1,6 +1,6 @@
 [data-theme="light"] {
     /* Buttons */
-    --surface-border-radius: .5em;
+    --surface-border-radius: 0.5em;
 
     --neutral-surface-colour: hsl(0deg 0% 100%);
     --neutral-surface-active-colour: var(--primary-surface-colour);

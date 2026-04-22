@@ -1,4 +1,4 @@
-let page: string = $state(pageFromUrl())
+let page: string = $state(pageFromUrl());
 
 function pageFromUrl(): string {
     let path = window.location.pathname;

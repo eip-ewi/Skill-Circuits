@@ -1,7 +1,7 @@
 <script lang="ts">
-    import {TaskIcons} from "../../../dto/task_icons";
+    import { TaskIcons } from "../../../dto/task_icons";
 
-    let { locked }: { locked : boolean } = $props();
+    let { locked }: { locked: boolean } = $props();
 </script>
 
 <div class="block-wrapper">
@@ -32,18 +32,21 @@
         background-color: var(--block-colour);
         border: var(--block-border);
         border-radius: var(--block-border-radius);
-        box-shadow: .75rem 1.25rem 1.625rem 0 color-mix(in srgb, var(--shadow-colour) 8%, transparent);
+        box-shadow: 0.75rem 1.25rem 1.625rem 0
+            color-mix(in srgb, var(--shadow-colour) 8%, transparent);
         color: var(--on-block-colour);
         display: flex;
         flex-direction: column;
-        gap: .5em;
+        gap: 0.5em;
         padding: 1em;
         position: relative;
-        transition: filter ease-in-out 150ms, box-shadow ease-in-out 150ms;
+        transition:
+            filter ease-in-out 150ms,
+            box-shadow ease-in-out 150ms;
     }
 
     .block[data-locked="true"] {
-        filter: blur(.375em);
+        filter: blur(0.375em);
     }
 
     .heading {
@@ -59,6 +62,6 @@
 
     .tasks {
         display: flex;
-        gap: .25em;
+        gap: 0.25em;
     }
 </style>

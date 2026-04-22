@@ -1,8 +1,7 @@
 <script lang="ts">
-
-    import {getEdition} from "../../../logic/edition/edition.svelte";
-    import type {Person} from "../../../dto/person";
-    import {addEditor, removeEditor} from "../../../logic/updates/config_updates";
+    import { getEdition } from "../../../logic/edition/edition.svelte";
+    import type { Person } from "../../../dto/person";
+    import { addEditor, removeEditor } from "../../../logic/updates/config_updates";
     import Button from "../../util/Button.svelte";
 
     let query: string = $state("");
@@ -25,7 +24,6 @@
         searchResults = [];
         await addEditor(editor);
     }
-
 </script>
 
 <div>
@@ -40,7 +38,11 @@
         {#each getEdition().editors as editor}
             <li>
                 <span>{editor.displayName}</span>
-                <Button square type="caution" aria-label="Remove {editor.displayName} as editor" onclick={ () => removeEditor(editor) }>
+                <Button
+                    square
+                    type="caution"
+                    aria-label="Remove {editor.displayName} as editor"
+                    onclick={() => removeEditor(editor)}>
                     <span class="fa-solid fa-trash"></span>
                 </Button>
             </li>
@@ -49,30 +51,35 @@
 
     <div class="add-editor" aria-expanded={query !== "" && searchResults.length > 0}>
         <label for="add-editor-search">Add an editor</label>
-        <input bind:value={query} placeholder="Search..." onkeydown={search}/>
+        <input bind:value={query} placeholder="Search..." onkeydown={search} />
         <ul class="scrollable glass results">
             {#each searchResults as result}
                 {#if !getEdition().teachers.some(editor => editor.id === result.id) && !getEdition().editors.some(editor => editor.id === result.id)}
-                    <li><button aria-label="Add {result.displayName} as editor" onclick={ () => add(result) }>{result.displayName} ({result.username})</button></li>
+                    <li>
+                        <button
+                            aria-label="Add {result.displayName} as editor"
+                            onclick={() => add(result)}>
+                            {result.displayName} ({result.username})
+                        </button>
+                    </li>
                 {/if}
             {/each}
         </ul>
     </div>
-
 </div>
 
 <style>
     h3 {
         font-size: var(--font-size-400);
         font-weight: 500;
-        margin-bottom: .5rem;
+        margin-bottom: 0.5rem;
     }
 
     .editors {
         display: grid;
         gap: 0.25rem;
         list-style: none;
-        margin-bottom: .75rem;
+        margin-bottom: 0.75rem;
     }
 
     .editors li {
@@ -99,17 +106,17 @@
     .add-editor input {
         border: none;
         border-radius: 8px;
-        padding: .5rem 1rem;
+        padding: 0.5rem 1rem;
     }
 
     .add-editor .results {
         border-radius: 8px;
         display: grid;
-        gap: .5rem;
+        gap: 0.5rem;
         min-width: 100%;
         max-height: 24rem;
         overflow-y: auto;
-        padding: .5rem .5rem;
+        padding: 0.5rem 0.5rem;
         position: absolute;
         overscroll-behavior: contain;
         top: 100%;
@@ -134,7 +141,7 @@
         display: grid;
         justify-content: start;
         padding: 0.5rem 1rem;
-        gap: .5rem;
+        gap: 0.5rem;
         white-space: nowrap;
     }
     .add-editor .results button:where(:hover, :focus-visible) {
