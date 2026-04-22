@@ -20,8 +20,11 @@ package nl.tudelft.skills.security;
 import static java.util.Objects.requireNonNull;
 import static nl.tudelft.labracore.api.dto.RoleDetailsDTO.TypeEnum.*;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -41,6 +44,8 @@ import nl.tudelft.skills.dto.id.ChoiceTaskId;
 import nl.tudelft.skills.dto.id.SCModuleId;
 import nl.tudelft.skills.dto.id.SkillId;
 import nl.tudelft.skills.dto.id.SubmoduleId;
+import nl.tudelft.skills.dto.patch.SkillPositionUpdates;
+import nl.tudelft.skills.dto.patch.SubmodulePositionUpdates;
 import nl.tudelft.skills.enums.ViewMode;
 import nl.tudelft.skills.model.*;
 import nl.tudelft.skills.model.bookmark.BookmarkList;
@@ -57,8 +62,10 @@ public class AuthorisationService {
 
 	private final RoleCacheManager roleCache;
 
+	private final AbstractSkillRepository abstractSkillRepository;
 	private final EditionRepository editionRepository;
 	private final PersonRepository personRepository;
+	private final SubmoduleRepository submoduleRepository;
 
 	private final DTOConverter dtoConverter;
 
@@ -194,6 +201,26 @@ public class AuthorisationService {
 		};
 	}
 
+	public boolean canEditSkillPositions(SkillPositionUpdates positions) {
+		Set<Long> skillIds = positions.updates().stream()
+				.map(update -> update.skill().getId())
+				.collect(Collectors.toSet());
+		Set<AbstractSkill> skills = abstractSkillRepository.findAllByIdIn(skillIds);
+		if (!foundAllIds(skills.stream().map(AbstractSkill::getId).collect(Collectors.toSet()),
+				skillIds)) {
+			return false;
+		}
+
+		List<Long> editionIds = skills.stream().map(this::getEditionId).toList();
+		if (editionIds.stream().anyMatch(Objects::isNull)) {
+			return false;
+		}
+
+		return editionIds.stream()
+				.distinct()
+				.allMatch(this::canEditEditionCircuit);
+	}
+
 	public boolean canEditBookmarkList(BookmarkList list) {
 		return withAuthenticatedPerson(person -> switch (list) {
 			case PersonalBookmarkList personalBookmarkList ->
@@ -233,9 +260,37 @@ public class AuthorisationService {
 		return false;
 	}
 
+	public boolean canEditSubmodulePositions(SubmodulePositionUpdates positions) {
+		Set<Long> submoduleIds = positions.updates().stream()
+				.map(update -> update.submodule().getId())
+				.collect(Collectors.toSet());
+		List<Submodule> submodules = submoduleRepository.findAllById(submoduleIds);
+		if (!foundAllIds(submodules.stream().map(Submodule::getId).collect(Collectors.toSet()),
+				submoduleIds)) {
+			return false;
+		}
+
+		return submodules.stream()
+				.map(submodule -> submodule.getModule().getEdition().getId())
+				.distinct()
+				.allMatch(this::canEditEditionCircuit);
+	}
+
 	/*
 	 * Helper
 	 */
+
+	private boolean foundAllIds(Set<Long> foundIds, Set<Long> requestedIds) {
+		return foundIds.equals(requestedIds);
+	}
+
+	private Long getEditionId(AbstractSkill abstractSkill) {
+		return switch (abstractSkill) {
+			case Skill skill -> skill.getSubmodule().getModule().getEdition().getId();
+			case ExternalSkill skill -> skill.getModule().getEdition().getId();
+			default -> null; // Unreachable
+		};
+	}
 
 	public boolean withAuthenticatedPerson(Predicate<Person> predicate) {
 		Person authenticatedPerson = getAuthenticatedPerson();
