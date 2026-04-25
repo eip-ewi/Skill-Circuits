@@ -34,6 +34,7 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
     class="content"
+    data-essential={block.essential}
     data-dragging={getDraggingItem()}
     ondragenter={dragItemEnter}
     ondragover={dragItemOver}
@@ -68,5 +69,9 @@
 
     .content[data-dragging="false"] .drop-indicator {
         display: none;
+    }
+
+    .content[data-essential="false"] .name {
+        font-style: italic;
     }
 </style>
