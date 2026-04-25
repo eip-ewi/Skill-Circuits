@@ -1,31 +1,33 @@
 <script lang="ts">
     import type { Block } from "../../../dto/circuit/block";
-    import type { SkillBlock } from "../../../dto/circuit/module/skill";
-    import type { TaskItem } from "../../../dto/circuit/module/task";
-    import { hasEditorRights, getAuthorisation } from "../../../logic/authorisation.svelte";
+    import { hasEditorRights } from "../../../logic/authorisation.svelte";
     import { getLevel } from "../../../logic/circuit/level.svelte";
-    import { ModuleLevel } from "../../../data/level";
     import TaskIconsComponent from "../item/TaskIconsComponent.svelte";
     import { getItemsOnPath } from "../../../logic/edition/active_path.svelte";
     import { isSkillItemRevealed } from "../../../logic/circuit/unlocked_skills.svelte";
 
     let { block }: { block: Block } = $props();
 
-    function getNumCompletedItems() {
+    function getNumCompletedItems(essential: boolean) {
         return block.items.filter(item => {
             if (item.itemType == "skill") {
-                return item.completed && item.column !== null && item.essential;
+                return (
+                    item.completed &&
+                    item.column !== null &&
+                    ((item.essential && essential) || (!item.essential && !essential)) &&
+                    (!item.hidden || isSkillItemRevealed(item))
+                );
             }
             return item.completed;
         }).length;
     }
 
-    function getNumTotalItems() {
+    function getNumTotalItems(essential: boolean) {
         return block.items.filter(item => {
             if (item.itemType == "skill") {
                 return (
                     item.column !== null &&
-                    item.essential &&
+                    ((item.essential && essential) || (!item.essential && !essential)) &&
                     (!item.hidden || isSkillItemRevealed(item))
                 );
             }
@@ -49,9 +51,23 @@
 {:else if hasEditorRights()}
     <span>{block.items.length} {getLevel().items}</span>
 {:else}
-    <span>
-        {getNumCompletedItems()}/{getNumTotalItems()} completed
-    </span>
+    {@const completed = getNumCompletedItems(true)}
+    {@const total = getNumTotalItems(true)}
+    {@const completedOpt = getNumCompletedItems(false)}
+    {@const totalOpt = getNumTotalItems(false)}
+
+    <div class="completion-counters">
+        {#if total > 0}
+            <span>
+                {completed}/{total} completed
+            </span>
+        {/if}
+        {#if block.blockType === "submodule" && totalOpt > 0}
+            <span class="optional-counter">
+                {completedOpt}/{totalOpt} optional
+            </span>
+        {/if}
+    </div>
 {/if}
 
 <style>
@@ -70,5 +86,15 @@
         font-style: italic;
         opacity: 35%;
         margin-top: -0.25em;
+    }
+
+    .completion-counters {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .optional-counter {
+        font-style: italic;
+        opacity: 35%;
     }
 </style>
