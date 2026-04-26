@@ -14,8 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Added
 
 ## Changed
+- [Student] Optional skill names are now cursive in the expanded submodule view. (@ffiedrich)
 
 ## Fixed
+- [Student] Optional skills are skipped for the completion state of submodules and checkpoints. Separate optional skill counters are displayed on the edition page. (@ffiedrich)
 
 ## [2526.2.0]
 
