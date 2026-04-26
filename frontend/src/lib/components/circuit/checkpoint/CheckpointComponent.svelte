@@ -43,9 +43,9 @@
             .filter(block => block.row! >= firstRow && block.row! <= lastRow),
     );
 
+    // TODO: Is it intentional to only check for skills that have the checkpoint set?
     let completed: boolean = $derived(
-        !hasEditorRights() &&
-            !skills.some(skill => !isCompleted(skill) && skill.essential),
+        !hasEditorRights() && !skills.some(skill => !isCompleted(skill) && skill.essential),
     );
 
     let passed: boolean = $derived(moment().isAfter(moment(checkpoint.deadline)));
