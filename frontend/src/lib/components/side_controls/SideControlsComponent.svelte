@@ -13,6 +13,7 @@
     import { EditionLevel } from "../../data/level";
     import BookmarksPanelComponent from "./bookmarks/BookmarksPanelComponent.svelte";
     import { getPaths } from "../../logic/edition/edition.svelte";
+    import LegendPanelComponent from "./legend/LegendPanelComponent.svelte";
 
     let openPanel:
         | "bookmarks"
@@ -21,6 +22,7 @@
         | "paths"
         | "modules"
         | "config"
+        | "legend"
         | undefined = $state();
 
     let bookmarksOpen: boolean = $state(false);
@@ -29,6 +31,7 @@
     let pathsOpen: boolean = $state(false);
     let modulesOpen: boolean = $state(false);
     let configOpen: boolean = $state(false);
+    let legendOpen: boolean = $state(false);
 
     $effect(() => {
         if (bookmarksOpen) {
@@ -43,6 +46,8 @@
             openPanel = "modules";
         } else if (configOpen) {
             openPanel = "config";
+        } else if (legendOpen) {
+            openPanel = "legend";
         } else {
             openPanel = undefined;
         }
@@ -69,6 +74,7 @@
         <ModulesPanelComponent bind:open={modulesOpen}></ModulesPanelComponent>
         <ConfigPanelComponent bind:open={configOpen}></ConfigPanelComponent>
     {/if}
+    <LegendPanelComponent bind:open={legendOpen}></LegendPanelComponent>
 </div>
 
 {#if openPanel === undefined}
@@ -80,6 +86,15 @@
                 aria-label="Open bookmarks panel"
                 onclick={() => (bookmarksOpen = true)}>
                 <span class="fa-solid fa-bookmark"></span>
+            </button>
+        </div>
+
+        <div class="glass surface">
+            <button
+                class="button"
+                aria-label="Open legend panel"
+                onclick={() => (legendOpen = true)}>
+                <span class="fa-solid fa-circle-info"></span>
             </button>
         </div>
 

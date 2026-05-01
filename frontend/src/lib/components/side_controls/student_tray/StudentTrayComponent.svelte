@@ -1,11 +1,10 @@
 <script lang="ts">
-    import { cubicInOut } from "svelte/easing";
     import type { Block } from "../../../dto/circuit/block";
     import StudentTrayTaskComponent from "./StudentTrayTaskComponent.svelte";
     import type { TaskItem } from "../../../dto/circuit/module/task";
     import { isTaskOnPath, removeTaskFromPath } from "../../../logic/edition/active_path.svelte";
 
-    let { block }: { block: Block } = $props();
+    let { block, open = $bindable() }: { block: Block; open: boolean } = $props();
     let itemMap: Map<number, TaskItem> = $derived(
         new Map(block.items.map(item => [item.id, item as TaskItem])),
     );
@@ -15,8 +14,6 @@
 
         return block.items.filter(task => !isTaskOnPath(task));
     });
-
-    let open: boolean = $state(false);
 
     function dragEnter(event: DragEvent) {
         if (!event.dataTransfer!.types.includes("skill-circuits/item")) {
@@ -45,31 +42,7 @@
 
         await removeTaskFromPath(item);
     }
-
-    function growHorizontal(node: HTMLElement, params: { delay?: number }) {
-        return {
-            delay: params.delay || 0,
-            duration: 150,
-            easing: cubicInOut,
-            css: (t: number) => `
-                transform: scaleX(${t});
-            `,
-        };
-    }
 </script>
-
-{#if !open}
-    <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events, a11y_mouse_events_have_key_events -->
-    <div
-        class="scrollable side glass open-button"
-        ondragenter={() => (open = true)}
-        in:growHorizontal={{ delay: 150 }}
-        out:growHorizontal={{}}>
-        <button class="button" aria-label="Open tray" onclick={() => (open = true)}>
-            <span class="fa-solid fa-inbox"></span>
-        </button>
-    </div>
-{/if}
 
 <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 <div
@@ -117,28 +90,6 @@
         right: 0;
         top: 2em;
         transform-origin: right;
-    }
-
-    .open-button {
-        border-radius: var(--panel-border-radius) 0 0 var(--panel-border-radius);
-        display: grid;
-    }
-    .open-button button {
-        background: var(--on-glass-surface-colour);
-        border: none;
-        border-radius: var(--panel-button-border-radius);
-        color: var(--on-glass-colour);
-        cursor: pointer;
-        display: grid;
-        font-size: var(--font-size-600);
-        margin: 0.5em;
-        padding: 0.5em;
-    }
-    .open-button button:where(:focus-visible, :hover) {
-        background: var(--on-glass-surface-active-colour);
-    }
-    .open-button button span {
-        text-align: center;
     }
 
     .panel {
