@@ -44,7 +44,7 @@
             let aCompleted = isCompleted(a, moduleGroup.moduleGraph);
             let bCompleted = isCompleted(b, moduleGroup.moduleGraph);
             if (aCompleted !== bCompleted) {
-                return Number(bCompleted) - Number(aCompleted);
+                return Number(aCompleted) - Number(bCompleted);
             }
 
             if (a.essential !== b.essential) {
