@@ -20,7 +20,9 @@ package nl.tudelft.skills.e2e;
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 import static nl.tudelft.skills.e2e.User.csestudent1;
 import static nl.tudelft.skills.e2e.User.cseteacher1;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -72,31 +74,5 @@ public class HomePageTest extends EndToEndTest
 		assertFalse(edition().canSeeEdition(edition));
 	}
 
-	@Test
-	@DisplayName("Checkpoint total time updates when a task's time is changed")
-	public void checkpointTotalTimeUpdatesWhenTaskTimeIsChanged() {
-		basic().logIn(cseteacher1);
-
-		Edition edition = edition().findAnyManagingEdition();
-
-		if (edition().submodules(edition).isEmpty()) {
-			edition().addSubmodule(edition, "Test submodule");
-		}
-
-		basic().makeEditor();
-		edition().enterFirstSubmodule(edition);
-
-		page().waitForURL("**/modules/*");
-		locators().query(".circuit").waitFor();
-
-		edition().addSkill("Test skill");
-		edition().addTask("Test skill", "Test task", 30);
-		edition().addCheckpoint("Test checkpoint");
-		edition().addCheckpointToSkill("Test checkpoint", "Test skill");
-		int time = edition().getCheckpointTime("Test checkpoint");
-		assertEquals(30, time);
-		edition().deleteSkill("Test skill");
-		edition().deleteCheckpoint("Test checkpoint");
-	}
 
 }

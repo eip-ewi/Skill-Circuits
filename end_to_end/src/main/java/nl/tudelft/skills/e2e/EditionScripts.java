@@ -165,6 +165,33 @@ public final class EditionScripts {
 		locators.query(".column").hover();
 		session.page().mouse().up();
 
+		LocatorLocators newlyCreated = locators.query(".block-wrapper")
+				.withChild(locators.text("New submodule"));
+		newlyCreated.hover();
+		newlyCreated.query(".controls").locator().locator("button[aria-label='Edit']").click();
+		session.page().getByLabel("Edit submodule name").fill(name);
+		locators.query(".controls").button("Stop editing").click();
+		session.page().locator(".panel")
+				.filter(new Locator.FilterOptions().setHasText("Tray"))
+				.locator("button[aria-label='Close panel']")
+				.click();
+	}
+
+	public void deleteSubmodule(Edition edition, String name) {
+		navigateTo(edition);
+		locators.query(".circuit").waitFor();
+
+		LocatorLocators submoduleWrapper = locators.query(".block-wrapper")
+				.withChild(locators.heading(name))
+				.apply(Locator::first);
+
+		submoduleWrapper.waitFor();
+		submoduleWrapper.hover();
+		submoduleWrapper.query(".controls").locator().locator("button[aria-label='Delete']").click();
+		Locator dialog = session.page().locator("dialog[open]");
+		dialog.locator("button")
+				.filter(new Locator.FilterOptions().setHasText("Delete"))
+				.click();
 	}
 
 	public void openEditing(String skill) {
@@ -224,7 +251,7 @@ public final class EditionScripts {
 		locators.button("Open checkpoints panel").click();
 		locators.button("Add checkpoint").click();
 		Locator newCheckpoint = session.page().locator(".checkpoint").first();
-		newCheckpoint.locator("input[name='name']").fill("Test checkpoint");
+		newCheckpoint.locator("input[name='name']").fill(checkpoint);
 		locators.button("Stop editing").click();
 		session.page().locator(".panel")
 				.filter(new Locator.FilterOptions().setHasText("Checkpoints"))
