@@ -28,6 +28,7 @@
 
     let visibleSkills: SkillBlock[] | undefined = $state();
     let selectedSkill: SkillBlock | undefined = $state();
+    let trayOpen: boolean = $state(false);
 
     let element: HTMLDialogElement | undefined = $state();
 
@@ -121,7 +122,7 @@
         </div>
 
         {#if visibleSkills !== undefined && selectedSkill !== undefined}
-            <StudentTrayComponent block={selectedSkill}></StudentTrayComponent>
+            <StudentTrayComponent block={selectedSkill} bind:open={trayOpen}></StudentTrayComponent>
         {/if}
     </dialog>
 {/if}

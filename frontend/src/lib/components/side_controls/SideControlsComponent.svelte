@@ -74,7 +74,9 @@
         <ModulesPanelComponent bind:open={modulesOpen}></ModulesPanelComponent>
         <ConfigPanelComponent bind:open={configOpen}></ConfigPanelComponent>
     {/if}
-    <LegendPanelComponent bind:open={legendOpen}></LegendPanelComponent>
+    {#if !isLevel(EditionLevel)}
+        <LegendPanelComponent bind:open={legendOpen}></LegendPanelComponent>
+    {/if}
 </div>
 
 {#if openPanel === undefined}
@@ -89,14 +91,16 @@
             </button>
         </div>
 
-        <div class="glass surface">
-            <button
-                class="button"
-                aria-label="Open legend panel"
-                onclick={() => (legendOpen = true)}>
-                <span class="fa-solid fa-circle-info"></span>
-            </button>
-        </div>
+        {#if !isLevel(EditionLevel)}
+            <div class="glass surface">
+                <button
+                    class="button"
+                    aria-label="Open legend panel"
+                    onclick={() => (legendOpen = true)}>
+                    <span class="fa-solid fa-circle-info"></span>
+                </button>
+            </div>
+        {/if}
 
         {#if hasEditorRights()}
             <div class="glass surface" ondragenter={() => (trayOpen = true)}>
