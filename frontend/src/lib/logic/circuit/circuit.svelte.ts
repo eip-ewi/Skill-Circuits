@@ -7,7 +7,7 @@ import { hasEditorRights } from "../authorisation.svelte";
 import { isSkillRevealed } from "./unlocked_skills.svelte";
 import { BlockStates } from "../../data/block_state";
 import type { EditionCircuit } from "../../dto/circuit/edition/edition";
-import {untrack} from "svelte";
+import { untrack } from "svelte";
 
 let circuit: Circuit | undefined = $state(undefined);
 let blocks: Block[] | undefined = $derived(
@@ -21,13 +21,13 @@ let blockToGroupMap: Map<number, Group> | undefined = $derived(
     circuit === undefined
         ? undefined
         : // @ts-ignore
-        new Map(circuit!.groups.flatMap(group => group.blocks.map(block => [block.id, group]))),
+          new Map(circuit!.groups.flatMap(group => group.blocks.map(block => [block.id, group]))),
 );
 let itemToBlockMap: Map<number, Block> | undefined = $derived(
     circuit === undefined
         ? undefined
         : // @ts-ignore
-        new Map(blocks.flatMap(block => block.items.map(item => [item.id, block]))),
+          new Map(blocks.flatMap(block => block.items.map(item => [item.id, block]))),
 );
 
 function blocksFromCircuit(circuit: Circuit): Block[] {

@@ -163,7 +163,9 @@
     }
 
     $effect(() => {
-        updateBlockNoCascade(block, { preview: !hasEditorRights() && block.state === BlockStates.Hovering });
+        updateBlockNoCascade(block, {
+            preview: !hasEditorRights() && block.state === BlockStates.Hovering,
+        });
     });
 
     function click() {

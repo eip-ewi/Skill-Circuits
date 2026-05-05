@@ -54,7 +54,7 @@ export function isTaskOnPath(task: TaskItem): boolean {
         return true;
     }
 
-    return task.paths.length === 0 || task.paths.includes(pathState.activePath.id);
+    return task.paths.includes(pathState.activePath.id);
 }
 
 export async function selectPath(path: Path) {
