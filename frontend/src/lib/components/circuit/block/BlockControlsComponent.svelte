@@ -5,7 +5,7 @@
     import { isLevel } from "../../../logic/circuit/level.svelte";
     import { ModuleLevel } from "../../../data/level";
     import type { Block } from "../../../dto/circuit/block";
-    import { getBlocks, updateBlock } from "../../../logic/circuit/circuit.svelte";
+    import { getBlocks, updateBlockNoCascade } from "../../../logic/circuit/circuit.svelte";
     import { deleteBlock } from "../../../logic/circuit/updates/block_updates";
     import Button from "../../util/Button.svelte";
     import WithConfirmationDialog from "../../util/WithConfirmationDialog.svelte";
@@ -27,27 +27,27 @@
     }
 
     function edit() {
-        updateBlock(block, { state: BlockStates.Editing });
+        updateBlockNoCascade(block, { state: BlockStates.Editing });
         action = undefined;
     }
 
     function stopEditing() {
-        updateBlock(block, { state: BlockStates.Inactive });
+        updateBlockNoCascade(block, { state: BlockStates.Inactive });
     }
 
     function connect() {
-        updateBlock(block, { state: BlockStates.Connecting });
+        updateBlockNoCascade(block, { state: BlockStates.Connecting });
         getBlocks()
             .filter(other => other.id !== block.id)
             .forEach(other => {
-                updateBlock(other, { state: BlockStates.WaitingForConnection });
+                updateBlockNoCascade(other, { state: BlockStates.WaitingForConnection });
             });
         action = undefined;
     }
 
     function stopConnecting() {
         getBlocks().forEach(b => {
-            updateBlock(b, { state: BlockStates.Inactive });
+            updateBlockNoCascade(b, { state: BlockStates.Inactive });
         });
     }
 

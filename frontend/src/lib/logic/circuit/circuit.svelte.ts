@@ -1,72 +1,44 @@
 import type { Block } from "../../dto/circuit/block";
 import type { Circuit } from "../../dto/circuit/circuit";
-import type { EditionCircuit } from "../../dto/circuit/edition/edition";
+import { Graph } from "./graph";
 import type { Group } from "../../dto/circuit/group";
 import type { Item } from "../../dto/circuit/item";
-import { BlockStates } from "../../data/block_state";
-import { untrack } from "svelte";
 import { hasEditorRights } from "../authorisation.svelte";
-import { Graph } from "./graph";
 import { isSkillRevealed } from "./unlocked_skills.svelte";
+import { BlockStates } from "../../data/block_state";
+import type { EditionCircuit } from "../../dto/circuit/edition/edition";
+import {untrack} from "svelte";
 
 let circuit: Circuit | undefined = $state(undefined);
-
-function blocksFromCircuit(current: Circuit): Block[] {
-    if (current.circuitType === "module") {
-        return [...current.groups.flatMap(group => group.blocks), ...current.externalSkills];
-    }
-    return current.groups.flatMap(group => group.blocks);
-}
-
-// Derived from circuit so add/delete inside groups is reflected without a reload.
-let blocks: Block[] = $derived.by(() => {
-    const current = circuit;
-    if (current === undefined) {
-        return [];
-    }
-
-    // Touch nested collection lengths so push/splice operations retrigger this derivation.
-    current.groups.length;
-    for (const group of current.groups) {
-        group.blocks.length;
-    }
-    if (current.circuitType === "module") {
-        current.externalSkills.length;
-    }
-
-    return blocksFromCircuit(current);
-});
-
-let graph: Graph | undefined = $derived.by(() => {
-    return circuit === undefined
+let blocks: Block[] | undefined = $derived(
+    // @ts-ignore
+    circuit === undefined ? undefined : blocksFromCircuit(circuit),
+);
+let graph: Graph | undefined = $derived(
+    circuit === undefined ? undefined : new Graph(blocks!.filter(block => isBlockVisible(block))),
+);
+let blockToGroupMap: Map<number, Group> | undefined = $derived(
+    circuit === undefined
         ? undefined
-        : new Graph(blocks.filter(block => isBlockVisible(block)));
-});
-
-let blockToGroupMap: Map<number, Group> | undefined = $derived.by(() => {
-    return circuit === undefined
+        : // @ts-ignore
+        new Map(circuit!.groups.flatMap(group => group.blocks.map(block => [block.id, group]))),
+);
+let itemToBlockMap: Map<number, Block> | undefined = $derived(
+    circuit === undefined
         ? undefined
-        : new Map(
-              circuit.groups.flatMap(group =>
-                  group.blocks.map(block => [block.id, group] as const),
-              ),
-          );
-});
+        : // @ts-ignore
+        new Map(blocks.flatMap(block => block.items.map(item => [item.id, block]))),
+);
 
-let itemToBlockMap: Map<number, Block> | undefined = $derived.by(() => {
-    return circuit === undefined
-        ? undefined
-        : new Map(blocks.flatMap(block => block.items.map(item => [item.id, block] as const)));
-});
-
-// Initialise block states on the raw JSON before it is assigned to circuit,
-// so the derived `blocks` array is never responsible for mutation on first load.
-function initBlockStates(current: Circuit): void {
-    const all =
-        current.circuitType === "module"
-            ? [...current.groups.flatMap(group => group.blocks), ...(current.externalSkills ?? [])]
-            : current.groups.flatMap(group => group.blocks);
-    all.forEach(block => (block.state = BlockStates.Inactive));
+function blocksFromCircuit(circuit: Circuit): Block[] {
+    let blocks: Block[] = [];
+    if (circuit.circuitType === "module") {
+        blocks = [...circuit.groups.flatMap(group => group.blocks), ...circuit.externalSkills];
+    } else {
+        blocks = circuit.groups.flatMap(group => group.blocks);
+    }
+    blocks.forEach(block => (block.state = BlockStates.Inactive));
+    return blocks;
 }
 
 export function circuitFetched(): boolean {
@@ -82,19 +54,19 @@ export function getGroup(id: number): Group {
 }
 
 export function getBlocks(): Block[] {
-    return blocks;
+    return blocks!;
 }
 
 export function getPlacableBlocks(): Block[] {
-    return blocks.filter(block => block.column === null);
+    return blocks!.filter(block => block.column === null);
 }
 
 export function getPlacedBlocks(): Block[] {
-    return blocks.filter(block => block.column !== null);
+    return blocks!.filter(block => block.column !== null);
 }
 
 export function getVisibleBlocks(): Block[] {
-    return blocks.filter(block => isBlockVisible(block));
+    return blocks!.filter(block => isBlockVisible(block));
 }
 
 export function isBlockVisible(block: Block) {
@@ -113,7 +85,7 @@ export function getGroupForBlock(block: Block): Group {
 }
 
 export function getBlock(id: number): Block {
-    return blocks.find(block => block.id === id)!;
+    return blocks!.find(block => block.id === id)!;
 }
 
 export function getBlockForItem(item: Item): Block {
@@ -121,22 +93,20 @@ export function getBlockForItem(item: Item): Block {
 }
 
 export function getItem(id: number): Item {
-    return blocks.flatMap(block => block.items as Item[]).find(item => item.id === id)!;
+    return blocks!.flatMap(block => block.items as Item[]).find(item => item.id === id)!;
 }
 
 export function getGraph(): Graph {
     return graph!;
 }
 
-export function updateBlock(block: Block, update: Partial<Block>): void {
-    untrack(() => Object.assign(block, update));
-}
-
 export async function fetchCircuit(url: string) {
     let response = await fetch(url);
-    let fetched: Circuit = await response.json();
-    initBlockStates(fetched);
-    circuit = fetched;
+    circuit = await response.json();
+}
+
+export function updateBlockNoCascade(block: Block, update: Partial<Block>): void {
+    untrack(() => Object.assign(block, update));
 }
 
 export function initModuleGraphs(editionCircuit: EditionCircuit) {

@@ -11,7 +11,7 @@
     import BlockActionIndicationComponent from "./BlockActionIndicationComponent.svelte";
     import ExpandedViewOpenButtonComponent from "./ExpandedViewOpenButtonComponent.svelte";
     import ExpandedBlockComponent from "./ExpandedBlockComponent.svelte";
-    import { getBlocks, updateBlock } from "../../../logic/circuit/circuit.svelte";
+    import { getBlocks, updateBlockNoCascade } from "../../../logic/circuit/circuit.svelte";
     import BlockControlsComponent from "./BlockControlsComponent.svelte";
     import { type BlockAction, BlockActions } from "../../../data/block_action";
     import { BlockStates } from "../../../data/block_state";
@@ -35,7 +35,7 @@
     let locked: boolean = $derived(!hasEditorRights() && !isUnlocked(block));
     let completed: boolean = $derived(!hasEditorRights() && isCompleted(block));
     let clickable: boolean = $derived(
-        (!hasEditorRights() || getLevel() !== ModuleLevel) &&
+        (!hasEditorRights() || !isLevel(ModuleLevel)) &&
             block.state !== BlockStates.Editing &&
             block.state !== BlockStates.AssigningPaths,
     );
@@ -119,7 +119,7 @@
     });
 
     function recalculateBounds() {
-        updateBlock(block, { boundingRect: () => element?.getBoundingClientRect?.() });
+        updateBlockNoCascade(block, { boundingRect: () => element?.getBoundingClientRect?.() });
     }
 
     onMount(async () => {
@@ -135,14 +135,14 @@
         if (block.state !== BlockStates.Inactive) {
             return;
         }
-        updateBlock(block, { state: BlockStates.Hovering });
+        updateBlockNoCascade(block, { state: BlockStates.Hovering });
     }
 
     function mouseLeave() {
         if (block.state !== BlockStates.Hovering) {
             return;
         }
-        updateBlock(block, { state: BlockStates.Inactive });
+        updateBlockNoCascade(block, { state: BlockStates.Inactive });
     }
 
     function mouseEnterBlock() {
@@ -163,7 +163,7 @@
     }
 
     $effect(() => {
-        updateBlock(block, { preview: !hasEditorRights() && block.state === BlockStates.Hovering });
+        updateBlockNoCascade(block, { preview: !hasEditorRights() && block.state === BlockStates.Hovering });
     });
 
     function click() {
@@ -182,7 +182,7 @@
         if (!(event.target as HTMLElement).classList.contains("block-wrapper")) {
             return;
         }
-        updateBlock(block, { state: BlockStates.Dragging });
+        updateBlockNoCascade(block, { state: BlockStates.Dragging });
         event.dataTransfer!.setDragImage(element, 32, 24);
         event.dataTransfer!.effectAllowed = "move";
         event.dataTransfer!.setData("skill-circuits/block", block.id.toString());
@@ -193,7 +193,7 @@
         if (!(event.target as HTMLElement).classList.contains("block-wrapper")) {
             return;
         }
-        updateBlock(block, { state: BlockStates.Inactive });
+        updateBlockNoCascade(block, { state: BlockStates.Inactive });
         disableColumns();
     }
 </script>
@@ -218,7 +218,7 @@
 <div
     id="block-{block.id}"
     class="block-wrapper"
-    style:grid-column={block.column + 1}
+    style:grid-column={block.column! + 1}
     style:grid-row={block.row === undefined ? undefined : block.row + 1}
     {draggable}
     ondragstart={dragStart}
