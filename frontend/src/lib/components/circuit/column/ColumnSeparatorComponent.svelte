@@ -85,7 +85,7 @@
 
     .button-wrapper {
         position: absolute;
-        top: -4.5rem;
+        top: -4.5em;
         left: 50%;
         display: flex;
         align-items: center;

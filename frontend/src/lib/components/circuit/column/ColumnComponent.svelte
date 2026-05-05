@@ -119,7 +119,7 @@
         align-items: center;
         justify-content: center;
         position: absolute;
-        top: -4.5rem;
+        top: -4.5em;
         left: 50%;
         pointer-events: auto;
         transform: translateX(-50%);
