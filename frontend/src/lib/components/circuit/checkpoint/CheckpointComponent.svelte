@@ -6,44 +6,45 @@
     import {getVisibleBlocks} from "../../../logic/circuit/circuit.svelte";
     import moment from "moment";
     import {isCompleted} from "../../../logic/circuit/skill_state/completion";
-    import {canEditCircuit} from "../../../logic/authorisation.svelte";
-    import {getFirstUncompletedPastCheckpoint, getNextCheckpoint, getVisibleCheckpoints} from "../../../logic/edition/edition.svelte";
+    import {hasEditorRights} from "../../../logic/authorisation.svelte";
+    import {getFirstUncompletedPastCheckpoint} from "../../../logic/edition/edition.svelte";
     import Link from "../../util/Link.svelte";
 
     let { checkpoint }: { checkpoint: Checkpoint } = $props();
 
-    let skills: SkillBlock[] = $derived(getVisibleBlocks().filter(block => block.blockType === "skill").filter(block => block.checkpoint === checkpoint.id));
+    let skillsWithCheckpointSet: SkillBlock[] = $derived(
+        getVisibleBlocks()
+            .filter(block => block.blockType === "skill")
+            .filter(block => block.checkpoint === checkpoint.id) as SkillBlock[],
+    );
+    let lastRow: number = $derived(Math.max(...skillsWithCheckpointSet.map(skill => skill.row!)));
+    let firstRow: number = $derived.by(() => {
+        const rowNumbers = getVisibleBlocks()
+            .filter(block => block.blockType === "skill")
+            .filter((skill: any) => skill.checkpoint !== null && skill.checkpoint !== checkpoint.id)
+            .map((skill: any) => skill.row!)
+            .filter((row: number) => row < lastRow);
+        if (rowNumbers.length === 0) {
+            return 0;
+        }
+        return Math.max(...rowNumbers) + 1;
+    });
+    let skills: SkillBlock[] = $derived(
+        getVisibleBlocks()
+            .filter(block => block.blockType === "skill")
+            .filter((block: any) => block.row! >= firstRow && block.row! <= lastRow) as SkillBlock[],
+    );
 
-    let completed: boolean = $derived(!canEditCircuit() && !skills.some(skill => !isCompleted(skill)));
+    let completed: boolean = $derived(!hasEditorRights() && !skills.some(skill => !isCompleted(skill) && skill.essential));
     let passed: boolean = $derived(moment().isAfter(moment(checkpoint.deadline)));
-    let focused: boolean = $derived(canEditCircuit() || passed || completed || getNextCheckpoint()?.id === checkpoint.id);
-    let warn: boolean = $derived(!canEditCircuit() && passed && !completed && getFirstUncompletedPastCheckpoint()?.id === checkpoint.id);
-
-    let row: number = $derived(Math.max(...skills.map(skill => skill.row!)));
+    let focused: boolean = $derived(hasEditorRights() || passed || completed || getFirstUncompletedPastCheckpoint()?.id === checkpoint.id);
+    let warn: boolean = $derived(!hasEditorRights() && passed && !completed && getFirstUncompletedPastCheckpoint()?.id === checkpoint.id);
 
     let openWarnDialog: boolean = $state(false);
     let element: HTMLDialogElement | undefined = $state();
 
     function totalTime(): string {
-        const allCheckpoints = getVisibleCheckpoints();
-        const currentIndex = allCheckpoints.findIndex(cp => cp.id === checkpoint.id);
-
-        const previousCheckpoint = currentIndex > 0 ? allCheckpoints[currentIndex - 1] : null;
-
-        const allSkills: SkillBlock[] = getVisibleBlocks()
-            .filter((block: any) => block.blockType === "skill") as SkillBlock[];
-
-        const relevantSkills = allSkills.filter(skill => {
-            if (skill.checkpoint === checkpoint.id) {
-                return true;
-            }
-
-            if (skill.checkpoint === null) {
-                return false;
-            }
-
-            return false;
-        }).filter(a => a.essential === true);
+        const relevantSkills = skills.filter(skill => skill.essential === true);
 
         const totalMinutes = relevantSkills.reduce((total, skill) => {
             if (!skill.items || skill.items.length === 0) {
@@ -100,12 +101,12 @@
 
 </script>
 
-<div class="checkpoint" style:grid-row={row + 1} data-completed={completed} data-focused={focused}>
+<div class="checkpoint" style:grid-row={lastRow + 1} data-completed={completed} data-focused={focused}>
     <div class="content">
         <div class="info">
             <span class="label">{checkpoint.name}</span>
             <span class="deadline">{moment(checkpoint.deadline).format("D MMMM YYYY HH:mm")}</span>
-            {#if canEditCircuit()}
+            {#if hasEditorRights()}
                 <span class="time-row">
                     <i class="fa-regular fa-clock time-icon"></i>
                     <span class="time-estimate">{totalTime()}</span>
