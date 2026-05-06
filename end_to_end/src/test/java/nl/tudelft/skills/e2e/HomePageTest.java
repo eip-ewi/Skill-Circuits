@@ -74,5 +74,4 @@ public class HomePageTest extends EndToEndTest
 		assertFalse(edition().canSeeEdition(edition));
 	}
 
-
 }
