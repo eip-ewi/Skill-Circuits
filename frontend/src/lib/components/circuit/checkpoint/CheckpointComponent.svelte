@@ -18,36 +18,15 @@
 
     let { checkpoint }: { checkpoint: Checkpoint } = $props();
 
-    let firstRow: number = $derived.by(() => {
-        let rowNumbers = getVisibleBlocks()
-            .filter(block => block.blockType === "skill")
-            .filter(skill => skill.checkpoint !== null && skill.checkpoint !== checkpoint.id)
-            .map(skill => skill.row!)
-            .filter(row => row < lastRow);
-        if (rowNumbers.length === 0) {
-            return 0;
-        }
-        return Math.max(...rowNumbers) + 1;
-    });
-
-    let skillsWithCheckpointSet: SkillBlock[] = $derived(
+    let skills: SkillBlock[] = $derived(
         getVisibleBlocks()
             .filter(block => block.blockType === "skill")
             .filter(block => block.checkpoint === checkpoint.id),
     );
-    let lastRow: number = $derived(Math.max(...skillsWithCheckpointSet.map(skill => skill.row!)));
 
-    let skills: SkillBlock[] = $derived(
-        getVisibleBlocks()
-            .filter(block => block.blockType === "skill")
-            .filter(block => block.row! >= firstRow && block.row! <= lastRow),
-    );
-
-    // TODO: Is it intentional to only check for skills that have the checkpoint set?
     let completed: boolean = $derived(
-        !hasEditorRights() && !skills.some(skill => !isCompleted(skill) && skill.essential),
+        !hasEditorRights() && !skills.some(skill => !isCompleted(skill)),
     );
-
     let passed: boolean = $derived(moment().isAfter(moment(checkpoint.deadline)));
     let focused: boolean = $derived(
         hasEditorRights() || passed || completed || getNextCheckpoint()?.id === checkpoint.id,
@@ -58,6 +37,8 @@
             !completed &&
             getFirstUncompletedPastCheckpoint()?.id === checkpoint.id,
     );
+
+    let row: number = $derived(Math.max(...skills.map(skill => skill.row!)));
 
     let openWarnDialog: boolean = $state(false);
     let element: HTMLDialogElement | undefined = $state();
@@ -82,11 +63,7 @@
     }
 </script>
 
-<div
-    class="checkpoint"
-    style:grid-row={lastRow + 1}
-    data-completed={completed}
-    data-focused={focused}>
+<div class="checkpoint" style:grid-row={row + 1} data-completed={completed} data-focused={focused}>
     <div class="content">
         <div class="info">
             <span class="label">{checkpoint.name}</span>
