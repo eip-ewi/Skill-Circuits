@@ -17,6 +17,8 @@
  */
 package nl.tudelft.skills.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
@@ -24,6 +26,7 @@ import lombok.AllArgsConstructor;
 import nl.tudelft.librador.dto.DTOConverter;
 import nl.tudelft.skills.dto.create.SubmoduleCreate;
 import nl.tudelft.skills.dto.patch.SubmodulePatch;
+import nl.tudelft.skills.dto.patch.SubmodulePositionUpdates;
 import nl.tudelft.skills.model.Submodule;
 import nl.tudelft.skills.repository.SubmoduleRepository;
 
@@ -50,6 +53,17 @@ public class SubmoduleService {
 	public void updatePosition(Submodule submodule, Integer column) {
 		submodule.setColumn(column);
 		submoduleRepository.save(submodule);
+	}
+
+	@Transactional
+	public void updatePositions(SubmodulePositionUpdates positions) {
+		List<Submodule> submodules = positions.updates().stream().map(update -> {
+			Submodule submodule = dtoConverter.apply(update.submodule());
+			submodule.setColumn(update.column());
+			return submodule;
+		}).toList();
+
+		submoduleRepository.saveAll(submodules);
 	}
 
 	@Transactional
