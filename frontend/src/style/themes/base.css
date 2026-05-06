@@ -27,12 +27,17 @@
     /* Columns */
     --column-radius: 1em;
     --column-colour: color-mix(in srgb, var(--secondary-colour) 15%, transparent);
+    --column-border-radius: 16px;
+    --column-button-border-radius: 20%;
+    --column-separator-border-radius: 1rem;
+    --column-background-color-removal: color-mix(in srgb, var(--warning-colour) 15%, transparent);
 
     /* Groups */
     --group-colour: color-mix(in oklab, var(--background-colour) 50%, white);
     --group-border-colour: transparent;
     --group-border-radius: 1.5em;
     --on-group-colour: color-mix(in oklab, var(--group-colour) 80%, black);
+    --on-group-colour-higher-contrast: color-mix(in oklab, var(--group-colour) 30%, black);
 
     /* Checkpoints */
     --checkpoint-surface-border: none;
