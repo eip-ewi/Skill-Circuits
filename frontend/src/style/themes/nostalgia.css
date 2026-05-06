@@ -32,6 +32,7 @@
     --group-border-colour: black;
     --group-border-radius: 0;
     --on-group-colour: var(--green2);
+    --on-group-colour-higher-contrast: black;
 
     /* Checkpoints */
     --checkpoint-surface-border: 1px solid black;

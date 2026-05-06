@@ -12,7 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## Added
- - [Teacher] Column management has a UI interface. @ralani
+- [Teacher] Add task table overview page for editions. (@ffiedrich)
+- [Teacher] Column management has a UI interface. (@ralani)
+
 
 ## Changed
 
