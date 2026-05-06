@@ -34,12 +34,14 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
     class="content"
-    data-essential={block.essential}
     data-dragging={getDraggingItem()}
     ondragenter={dragItemEnter}
     ondragover={dragItemOver}
     ondragleave={dragItemLeave}
     ondrop={drop}>
+    {#if !block.essential}
+        <span class="label">Optional</span>
+    {/if}
     <h2 class="name">{block.name}</h2>
     <TasksComponent tasks={getItemsOnPath(block)}></TasksComponent>
     <div class="drop-indicator"></div>
@@ -71,7 +73,8 @@
         display: none;
     }
 
-    .content[data-essential="false"] .name {
+    .label {
         font-style: italic;
+        opacity: 35%;
     }
 </style>

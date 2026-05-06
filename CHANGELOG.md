@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Teacher] Column management has a UI interface. (@ralani)
 
 ## Changed
-- [Student] Optional skill names are now cursive in the expanded submodule view. (@ffiedrich)
+- [Student] Optional skills are now marked as optional in the expanded submodule view. (@ffiedrich)
 
 ## Fixed
 - [Student] When in the submodule view, the skills are now sorted. (@ogangalic)
