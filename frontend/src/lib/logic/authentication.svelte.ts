@@ -1,4 +1,4 @@
-import type {Person} from "../dto/person";
+import type { Person } from "../dto/person";
 
 let authenticatedPerson: Person | undefined = $state();
 let authenticated: boolean = $derived(authenticatedPerson !== undefined);

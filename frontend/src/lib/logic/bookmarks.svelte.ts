@@ -1,12 +1,28 @@
-import type {BookmarkList} from "../dto/bookmark";
-import type {SkillBlock} from "../dto/circuit/module/skill";
-import type {ChoiceTaskItem, TaskInfo} from "../dto/circuit/module/task";
+import type { BookmarkList } from "../dto/bookmark";
+import type { SkillBlock } from "../dto/circuit/module/skill";
+import type { ChoiceTaskItem, TaskInfo } from "../dto/circuit/module/task";
 
 let bookmarks: BookmarkList[] = $state([]);
 
-let bookmarkedSkillIds: Set<number> = $derived(new Set((bookmarks ?? []).flatMap(list => list.skills).map(skill => skill.id)));
-let bookmarkedTaskInfoIds: Set<number> = $derived(new Set((bookmarks ?? []).flatMap(list => list.tasks).filter(task => task.taskType === "regular").map(task => task.infoId)));
-let bookmarkedChoiceTaskIds: Set<number> = $derived(new Set((bookmarks ?? []).flatMap(list => list.tasks).filter(task => task.taskType === "choice").map(task => task.id)));
+let bookmarkedSkillIds: Set<number> = $derived(
+    new Set((bookmarks ?? []).flatMap(list => list.skills).map(skill => skill.id)),
+);
+let bookmarkedTaskInfoIds: Set<number> = $derived(
+    new Set(
+        (bookmarks ?? [])
+            .flatMap(list => list.tasks)
+            .filter(task => task.taskType === "regular")
+            .map(task => task.infoId),
+    ),
+);
+let bookmarkedChoiceTaskIds: Set<number> = $derived(
+    new Set(
+        (bookmarks ?? [])
+            .flatMap(list => list.tasks)
+            .filter(task => task.taskType === "choice")
+            .map(task => task.id),
+    ),
+);
 
 export async function fetchBookmarks() {
     const response = await fetch("/api/bookmarks");

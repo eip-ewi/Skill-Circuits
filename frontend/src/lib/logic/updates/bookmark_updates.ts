@@ -1,19 +1,22 @@
-import {withCsrf} from "../csrf";
-import {getBookmarks} from "../bookmarks.svelte";
-import type {SkillBlock} from "../../dto/circuit/module/skill";
-import type {BookmarkList} from "../../dto/bookmark";
-import type {ChoiceTaskItem, TaskInfo, TaskItem} from "../../dto/circuit/module/task";
+import { withCsrf } from "../csrf";
+import { getBookmarks } from "../bookmarks.svelte";
+import type { SkillBlock } from "../../dto/circuit/module/skill";
+import type { BookmarkList } from "../../dto/bookmark";
+import type { ChoiceTaskItem, TaskInfo, TaskItem } from "../../dto/circuit/module/task";
 
 export async function addBookmarkList() {
-    let response = await fetch(`/api/bookmarks`, withCsrf({
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            name: "New list"
+    let response = await fetch(
+        `/api/bookmarks`,
+        withCsrf({
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                name: "New list",
+            }),
         }),
-    }));
+    );
 
     if (response.ok) {
         let list: BookmarkList = await response.json();
@@ -26,15 +29,18 @@ export async function editBookmarkListName(list: BookmarkList, newName: string) 
     let oldName = list.name;
     list.name = newName;
 
-    let response = await fetch(`/api/bookmarks/${list.id}`, withCsrf({
-        method: "PATCH",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            name: newName
+    let response = await fetch(
+        `/api/bookmarks/${list.id}`,
+        withCsrf({
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                name: newName,
+            }),
         }),
-    }));
+    );
 
     if (!response.ok) {
         list.name = oldName;
@@ -42,9 +48,12 @@ export async function editBookmarkListName(list: BookmarkList, newName: string) 
 }
 
 export async function removeBookmarkList(list: BookmarkList) {
-    let response = await fetch(`/api/bookmarks/${list.id}`, withCsrf({
-        method: "DELETE",
-    }));
+    let response = await fetch(
+        `/api/bookmarks/${list.id}`,
+        withCsrf({
+            method: "DELETE",
+        }),
+    );
 
     if (response.ok) {
         getBookmarks().splice(getBookmarks().findIndex(l => l.id === list.id)!, 1);
@@ -52,9 +61,12 @@ export async function removeBookmarkList(list: BookmarkList) {
 }
 
 export async function addSkillToBookmarkList(skill: SkillBlock, list: BookmarkList) {
-    let response = await fetch(`/api/bookmarks/${list.id}/skills/${skill.id}`, withCsrf({
-        method: "POST",
-    }));
+    let response = await fetch(
+        `/api/bookmarks/${list.id}/skills/${skill.id}`,
+        withCsrf({
+            method: "POST",
+        }),
+    );
 
     if (response.ok) {
         list.skills.push(await response.json());
@@ -64,9 +76,12 @@ export async function addSkillToBookmarkList(skill: SkillBlock, list: BookmarkLi
 export async function removeSkillFromBookmarkList(skill: SkillBlock, list: BookmarkList) {
     let removed = list.skills.splice(list.skills.findIndex(s => s.id === skill.id)!, 1)[0]!;
 
-    let response = await fetch(`/api/bookmarks/${list.id}/skills/${skill.id}`, withCsrf({
-        method: "DELETE",
-    }));
+    let response = await fetch(
+        `/api/bookmarks/${list.id}/skills/${skill.id}`,
+        withCsrf({
+            method: "DELETE",
+        }),
+    );
 
     if (!response.ok) {
         list.skills.push(removed);
@@ -74,9 +89,12 @@ export async function removeSkillFromBookmarkList(skill: SkillBlock, list: Bookm
 }
 
 export async function addTaskInfoToBookmarkList(task: TaskInfo, list: BookmarkList) {
-    let response = await fetch(`/api/bookmarks/${list.id}/tasks/${task.infoId}`, withCsrf({
-        method: "POST",
-    }));
+    let response = await fetch(
+        `/api/bookmarks/${list.id}/tasks/${task.infoId}`,
+        withCsrf({
+            method: "POST",
+        }),
+    );
 
     if (response.ok) {
         list.tasks.push(await response.json());
@@ -84,11 +102,17 @@ export async function addTaskInfoToBookmarkList(task: TaskInfo, list: BookmarkLi
 }
 
 export async function removeTaskInfoFromBookmarkList(task: TaskInfo, list: BookmarkList) {
-    let removed = list.tasks.splice(list.tasks.findIndex(t => t.taskType === "regular" && t.infoId === task.infoId)!, 1)[0]!;
+    let removed = list.tasks.splice(
+        list.tasks.findIndex(t => t.taskType === "regular" && t.infoId === task.infoId)!,
+        1,
+    )[0]!;
 
-    let response = await fetch(`/api/bookmarks/${list.id}/tasks/${task.infoId}`, withCsrf({
-        method: "DELETE",
-    }));
+    let response = await fetch(
+        `/api/bookmarks/${list.id}/tasks/${task.infoId}`,
+        withCsrf({
+            method: "DELETE",
+        }),
+    );
 
     if (!response.ok) {
         list.tasks.push(removed);
@@ -96,9 +120,12 @@ export async function removeTaskInfoFromBookmarkList(task: TaskInfo, list: Bookm
 }
 
 export async function addChoiceTaskToBookmarkList(task: ChoiceTaskItem, list: BookmarkList) {
-    let response = await fetch(`/api/bookmarks/${list.id}/choice-tasks/${task.id}`, withCsrf({
-        method: "POST",
-    }));
+    let response = await fetch(
+        `/api/bookmarks/${list.id}/choice-tasks/${task.id}`,
+        withCsrf({
+            method: "POST",
+        }),
+    );
 
     if (response.ok) {
         list.tasks.push(await response.json());
@@ -106,11 +133,17 @@ export async function addChoiceTaskToBookmarkList(task: ChoiceTaskItem, list: Bo
 }
 
 export async function removeChoiceTaskFromBookmarkList(task: ChoiceTaskItem, list: BookmarkList) {
-    let removed = list.tasks.splice(list.tasks.findIndex(t => t.taskType === "choice" && t.id === task.id)!, 1)[0]!;
+    let removed = list.tasks.splice(
+        list.tasks.findIndex(t => t.taskType === "choice" && t.id === task.id)!,
+        1,
+    )[0]!;
 
-    let response = await fetch(`/api/bookmarks/${list.id}/choice-tasks/${task.id}`, withCsrf({
-        method: "DELETE",
-    }));
+    let response = await fetch(
+        `/api/bookmarks/${list.id}/choice-tasks/${task.id}`,
+        withCsrf({
+            method: "DELETE",
+        }),
+    );
 
     if (!response.ok) {
         list.tasks.push(removed);

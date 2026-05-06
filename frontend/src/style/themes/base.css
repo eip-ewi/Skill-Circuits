@@ -25,6 +25,7 @@
     --glass-glint-colour: hsl(0deg 0% 100%);
 
     /* Columns */
+    --column-radius: 1em;
     --column-colour: color-mix(in srgb, var(--secondary-colour) 15%, transparent);
 
     /* Groups */
@@ -38,24 +39,36 @@
     --checkpoint-surface-border-radius: 1em;
 
     --checkpoint-line-colour: color-mix(in srgb, var(--on-background-colour) 35%, transparent);
-    --checkpoint-line-thickness: .25em;
+    --checkpoint-line-thickness: 0.25em;
     --checkpoint-line-border: none;
-    --checkpoint-line-border-radius: .25em;
+    --checkpoint-line-border-radius: 0.25em;
 
     --checkpoint-surface-colour: color-mix(in srgb, white 50%, transparent);
     --on-checkpoint-surface-colour: color-mix(in srgb, black 50%, var(--checkpoint-surface-colour));
 
-    --checkpoint-completed-line-colour: color-mix(in oklab, var(--accept-colour) 30%, var(--checkpoint-line-colour));
+    --checkpoint-completed-line-colour: color-mix(
+        in oklab,
+        var(--accept-colour) 30%,
+        var(--checkpoint-line-colour)
+    );
 
-    --checkpoint-completed-surface-colour: color-mix(in oklab, var(--accept-colour) 20%, var(--checkpoint-surface-colour));
+    --checkpoint-completed-surface-colour: color-mix(
+        in oklab,
+        var(--accept-colour) 20%,
+        var(--checkpoint-surface-colour)
+    );
     --on-checkpoint-completed-surface-colour: var(--on-checkpoint-surface-colour);
 
     /* Connections */
     --connection-colour: color-mix(in oklab, var(--background-colour) 50%, black);
     --connection-radius: 16;
-    --connection-width: .25em;
-    --connection-highlighted-colour: color-mix(in oklab, var(--connection-colour) 10%, var(--secondary-colour));
-    --connection-highlighted-width: .375em;
+    --connection-width: 0.25em;
+    --connection-highlighted-colour: color-mix(
+        in oklab,
+        var(--connection-colour) 10%,
+        var(--secondary-colour)
+    );
+    --connection-highlighted-width: 0.375em;
 
     /* Blocks */
     --block-colour: hsl(0deg 0% 100%);
@@ -78,14 +91,23 @@
     --choice-task-outline-radius: 1em;
     --task-drop-indication-colour: color-mix(in srgb, var(--secondary-colour) 15%, transparent);
     --task-drop-indication-border: none;
-    --task-drop-indication-border-radius: .5em;
+    --task-drop-indication-border-radius: 0.5em;
+
+    /* Submodule overview */
+    --submodule-overview-selection-border-radius: 0.5em;
+    --submodule-overview-skill-completed-colour: color-mix(
+        in oklab,
+        var(--accept-colour) 65%,
+        black
+    );
+    --submodule-overview-line-colour: color-mix(in oklab, var(--block-colour) 40%, black);
 
     /* Links */
     --link-colour: color-mix(in oklab, var(--primary-colour) 90%, white);
     --link-active-colour: color-mix(in oklab, var(--primary-colour) 80%, black);
 
     /* Buttons */
-    --surface-border-radius: .5em;
+    --surface-border-radius: 0.5em;
 
     --neutral-surface-colour: hsl(0deg 0% 100%);
     --neutral-surface-active-colour: var(--primary-surface-colour);
@@ -118,20 +140,24 @@
 
     /* Panels */
     --panel-border-radius: 1.5em;
-    --panel-button-border-radius: .5em;
+    --panel-button-border-radius: 0.5em;
 
     /* Checkboxes */
     --checkbox-border: 2px solid color-mix(in oklab, black 20%, white);
-    --checkbox-border-radius: .25em;
+    --checkbox-border-radius: 0.25em;
     --checkbox-checked-colour: color-mix(in oklab, var(--accept-colour) 80%, black);
     --on-checkbox-checked-colour: hsl(0deg 0% 100%);
 
     /* Dropdowns */
-    --dropdown-border-radius: .5em;
+    --dropdown-border-radius: 0.5em;
 
     /* Selects */
-    --option-border-radius: .5em;
-    --option-active-colour: color-mix(in srgb, color-mix(in oklab, var(--primary-colour) 40%, white) 25%, transparent);
+    --option-border-radius: 0.5em;
+    --option-active-colour: color-mix(
+        in srgb,
+        color-mix(in oklab, var(--primary-colour) 40%, white) 25%,
+        transparent
+    );
     --on-option-active-colour: var(--on-glass-colour);
 
     /* Info banners */

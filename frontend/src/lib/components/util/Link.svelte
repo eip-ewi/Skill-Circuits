@@ -1,6 +1,5 @@
 <script lang="ts">
-
-    import type {Snippet} from "svelte";
+    import type { Snippet } from "svelte";
 
     interface Properties {
         children: Snippet;
@@ -12,11 +11,10 @@
     }
 
     let props: Properties = $props();
-
 </script>
 
 <a href={props.href} target={props.target} onmousedown={props.onclick}>
-    {@render props.children() }
+    {@render props.children()}
 </a>
 
 <style>
@@ -26,7 +24,8 @@
         text-decoration: none;
     }
 
-    a:hover, a:focus-visible {
+    a:hover,
+    a:focus-visible {
         color: var(--link-active-colour);
     }
 </style>

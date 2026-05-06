@@ -1,7 +1,7 @@
-import type {LineSegments} from "../../data/path";
+import type { LineSegments } from "../../data/path";
 import type { Block } from "../../dto/circuit/block";
-import type {Point} from "../../data/point";
-import {getCircuit} from "./circuit.svelte";
+import type { Point } from "../../data/point";
+import { getCircuit } from "./circuit.svelte";
 
 export function createConnectionPath(from: Block, to: Block): LineSegments | undefined {
     let circuitRect = getCircuit().boundingRect!();
@@ -35,14 +35,38 @@ export function createConnectionPath(from: Block, to: Block): LineSegments | und
     let aboveChild: Point = { x: end.x, y: end.y - 64 * scale + gutterOffset };
 
     if (start.y > end.y) {
-        let gutterStepSize = 56 * scale / (getCircuit().width! - 1);
+        let gutterStepSize = (56 * scale) / (getCircuit().width! - 1);
         let horizontalDirection: "left" | "right" = end.x < start.x ? "left" : "right";
 
-        let belowParent: Point = { x: start.x, y: start.y + 64 * scale + gutterStepSize / 2 - gutterOffset };
-        let belowParentBesideChild: Point = { x: horizontalDirection == "left" ? relativeTo.x2 + 48 * scale : relativeTo.x1 - 48 * scale, y: start.y + 64 * scale + gutterStepSize / 2 - gutterOffset };
-        let aboveChildBesideChild: Point = { x: horizontalDirection == "left" ? relativeTo.x2 + 48 * scale : relativeTo.x1 - 48 * scale, y: end.y - 64 * scale + gutterOffset };
+        let belowParent: Point = {
+            x: start.x,
+            y: start.y + 64 * scale + gutterStepSize / 2 - gutterOffset,
+        };
+        let belowParentBesideChild: Point = {
+            x:
+                horizontalDirection == "left"
+                    ? relativeTo.x2 + 48 * scale
+                    : relativeTo.x1 - 48 * scale,
+            y: start.y + 64 * scale + gutterStepSize / 2 - gutterOffset,
+        };
+        let aboveChildBesideChild: Point = {
+            x:
+                horizontalDirection == "left"
+                    ? relativeTo.x2 + 48 * scale
+                    : relativeTo.x1 - 48 * scale,
+            y: end.y - 64 * scale + gutterOffset,
+        };
 
-        return { points: [start, belowParent, belowParentBesideChild, aboveChildBesideChild, aboveChild, end] };
+        return {
+            points: [
+                start,
+                belowParent,
+                belowParentBesideChild,
+                aboveChildBesideChild,
+                aboveChild,
+                end,
+            ],
+        };
     }
 
     let belowParent: Point = { x: start.x, y: end.y - 64 * scale + gutterOffset };

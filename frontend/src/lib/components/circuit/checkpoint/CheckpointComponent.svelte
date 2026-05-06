@@ -1,13 +1,19 @@
 <script lang="ts">
-
-    import type {Checkpoint} from "../../../dto/checkpoint";
-    import type {SkillBlock} from "../../../dto/circuit/module/skill";
-    import type {TaskItem} from "../../../dto/circuit/module/task";
-    import {getVisibleBlocks} from "../../../logic/circuit/circuit.svelte";
+    import type { Checkpoint } from "../../../dto/checkpoint";
+    import type { RegularSkillBlock, SkillBlock } from "../../../dto/circuit/module/skill";
+    import {
+        getBlocks,
+        getPlacedBlocks,
+        getVisibleBlocks,
+    } from "../../../logic/circuit/circuit.svelte";
     import moment from "moment";
-    import {isCompleted} from "../../../logic/circuit/skill_state/completion";
-    import {hasEditorRights} from "../../../logic/authorisation.svelte";
-    import {getFirstUncompletedPastCheckpoint} from "../../../logic/edition/edition.svelte";
+    import { isCompleted } from "../../../logic/circuit/skill_state/completion";
+    import { hasEditorRights } from "../../../logic/authorisation.svelte";
+    import {
+        getFirstUncompletedPastCheckpoint,
+        getNextCheckpoint,
+        getVisibleCheckpoints,
+    } from "../../../logic/edition/edition.svelte";
     import Link from "../../util/Link.svelte";
 
     let { checkpoint }: { checkpoint: Checkpoint } = $props();
@@ -32,13 +38,24 @@
     let skills: SkillBlock[] = $derived(
         getVisibleBlocks()
             .filter(block => block.blockType === "skill")
-            .filter((block: any) => block.row! >= firstRow && block.row! <= lastRow) as SkillBlock[],
+            .filter(
+                (block: any) => block.row! >= firstRow && block.row! <= lastRow,
+            ) as SkillBlock[],
     );
 
-    let completed: boolean = $derived(!hasEditorRights() && !skills.some(skill => !isCompleted(skill) && skill.essential));
+    let completed: boolean = $derived(
+        !hasEditorRights() && !skills.some(skill => !isCompleted(skill)),
+    );
     let passed: boolean = $derived(moment().isAfter(moment(checkpoint.deadline)));
-    let focused: boolean = $derived(hasEditorRights() || passed || completed || getFirstUncompletedPastCheckpoint()?.id === checkpoint.id);
-    let warn: boolean = $derived(!hasEditorRights() && passed && !completed && getFirstUncompletedPastCheckpoint()?.id === checkpoint.id);
+    let focused: boolean = $derived(
+        hasEditorRights() || passed || completed || getNextCheckpoint()?.id === checkpoint.id,
+    );
+    let warn: boolean = $derived(
+        !hasEditorRights() &&
+            passed &&
+            !completed &&
+            getFirstUncompletedPastCheckpoint()?.id === checkpoint.id,
+    );
 
     let openWarnDialog: boolean = $state(false);
     let element: HTMLDialogElement | undefined = $state();
@@ -74,7 +91,7 @@
         }
 
         if (hours > 0) {
-            return `${hours}h${minutes > 0 ? ` ${minutes}m` : ''}`;
+            return `${hours}h${minutes > 0 ? ` ${minutes}m` : ""}`;
         } else {
             return `${minutes}m`;
         }
@@ -98,10 +115,13 @@
             openWarnDialog = false;
         }
     }
-
 </script>
 
-<div class="checkpoint" style:grid-row={lastRow + 1} data-completed={completed} data-focused={focused}>
+<div
+    class="checkpoint"
+    style:grid-row={lastRow + 1}
+    data-completed={completed}
+    data-focused={focused}>
     <div class="content">
         <div class="info">
             <span class="label">{checkpoint.name}</span>
@@ -122,9 +142,15 @@
                 <dialog bind:this={element} onclick={checkForClose} class="dialog glass">
                     <h2>What to do if you are behind</h2>
                     <p>
-                        Missing a checkpoint is no cause for concern, but if you are very far behind, we advise you talk to a teaching assistant, academic counsellor, or lecturer.
-                        You can find more information about how to reach the academic counsellors
-                        <Link target="_blank" href="https://www.tudelft.nl/en/student/eemcs-student-portal/organisation/academic-counsellors">here</Link>.
+                        Missing a checkpoint is no cause for concern, but if you are very far
+                        behind, we advise you talk to a teaching assistant, academic counsellor, or
+                        lecturer. You can find more information about how to reach the academic
+                        counsellors
+                        <Link
+                            target="_blank"
+                            href="https://www.tudelft.nl/en/student/eemcs-student-portal/organisation/academic-counsellors">
+                            here
+                        </Link>.
                     </p>
                 </dialog>
             {/if}
@@ -164,18 +190,18 @@
         align-items: flex-start;
         display: flex;
         gap: 1em;
-        margin-top: .5em;
+        margin-top: 0.5em;
         position: absolute;
     }
 
     .info {
-        backdrop-filter: blur(.25rem);
+        backdrop-filter: blur(0.25rem);
         background-color: var(--checkpoint-surface-colour);
         border: var(--checkpoint-surface-border);
         border-radius: var(--checkpoint-surface-border-radius);
         color: var(--on-checkpoint-surface-colour);
         display: grid;
-        padding: .5em 1em;
+        padding: 0.5em 1em;
     }
 
     .checkpoint[data-completed="true"] .info {
@@ -209,14 +235,14 @@
 
     .warning {
         align-items: center;
-        backdrop-filter: blur(.25rem);
+        backdrop-filter: blur(0.25rem);
         background-color: var(--warning-banner-colour);
         border: var(--warning-banner-border);
         border-radius: var(--warning-banner-border-radius);
         color: var(--on-warning-banner-colour);
         display: flex;
         gap: 1em;
-        padding: .5em 1em;
+        padding: 0.5em 1em;
         cursor: pointer;
         transition: transform ease-in-out 150ms;
     }
@@ -237,7 +263,7 @@
     }
 
     .dialog::backdrop {
-        backdrop-filter: blur(.15rem);
+        backdrop-filter: blur(0.15rem);
     }
 
     .dialog::before {

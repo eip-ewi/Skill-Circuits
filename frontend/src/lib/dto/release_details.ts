@@ -1,4 +1,4 @@
 export interface ReleaseDetails {
-    title: string,
-    descriptionHtml: string,
+    title: string;
+    descriptionHtml: string;
 }

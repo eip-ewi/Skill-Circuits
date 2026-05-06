@@ -1,14 +1,12 @@
 <script lang="ts">
-
-    import type {Snippet} from "svelte";
+    import type { Snippet } from "svelte";
     import HeaderComponent from "../components/HeaderComponent.svelte";
     import FooterComponent from "../components/FooterComponent.svelte";
     import SessionComponent from "../components/SessionComponent.svelte";
-    import {isAuthenticated} from "../logic/authentication.svelte";
+    import { isAuthenticated } from "../logic/authentication.svelte";
     import ChangelogComponent from "../components/ChangelogComponent.svelte";
 
-    let { children, fullWidth }: { children: Snippet, fullWidth?: boolean } = $props();
-
+    let { children, fullWidth }: { children: Snippet; fullWidth?: boolean } = $props();
 </script>
 
 <div class="wrapper">
@@ -18,7 +16,7 @@
 
     <div class="main-wrapper">
         <main class:full-width={fullWidth}>
-            {@render children() }
+            {@render children()}
         </main>
     </div>
 

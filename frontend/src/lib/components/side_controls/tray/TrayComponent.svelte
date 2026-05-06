@@ -1,20 +1,25 @@
 <script lang="ts">
-
-    import {getAuthorisation} from "../../../logic/authorisation.svelte";
-    import {cubicInOut, cubicIn, cubicOut} from "svelte/easing";
+    import { getAuthorisation } from "../../../logic/authorisation.svelte";
+    import { cubicInOut, cubicIn, cubicOut } from "svelte/easing";
     import NewBlockComponent from "./NewBlockComponent.svelte";
-    import {getBlock, getBlocks, getPlacableBlocks} from "../../../logic/circuit/circuit.svelte";
+    import { getBlock, getBlocks, getPlacableBlocks } from "../../../logic/circuit/circuit.svelte";
     import PlacableBlockComponent from "./PlacableBlockComponent.svelte";
-    import {removeBlockFromCircuit, updateBlockPosition} from "../../../logic/circuit/updates/position_updates.svelte";
-    import {createBlock} from "../../../logic/circuit/updates/block_updates";
-    import {hasEditorRights} from "../../../logic/authorisation.svelte.js";
+    import {
+        removeBlockFromCircuit,
+        updateBlockPosition,
+    } from "../../../logic/circuit/updates/position_updates.svelte";
+    import { createBlock } from "../../../logic/circuit/updates/block_updates";
+    import { hasEditorRights } from "../../../logic/authorisation.svelte.js";
 
     let { open = $bindable() }: { open: boolean } = $props();
 
     let dragCounter: number = 0;
 
     function dragEnter(event: DragEvent) {
-        if (!event.dataTransfer!.types.includes("skill-circuits/block") || event.dataTransfer!.dropEffect !== "move") {
+        if (
+            !event.dataTransfer!.types.includes("skill-circuits/block") ||
+            event.dataTransfer!.dropEffect !== "move"
+        ) {
             return;
         }
         event.preventDefault();
@@ -31,14 +36,20 @@
     }
 
     function dragOver(event: DragEvent) {
-        if (!event.dataTransfer!.types.includes("skill-circuits/block") || event.dataTransfer!.dropEffect !== "move") {
+        if (
+            !event.dataTransfer!.types.includes("skill-circuits/block") ||
+            event.dataTransfer!.dropEffect !== "move"
+        ) {
             return;
         }
         event.preventDefault();
     }
 
     async function drop(event: DragEvent) {
-        if (!event.dataTransfer!.types.includes("skill-circuits/block") || event.dataTransfer!.dropEffect !== "move") {
+        if (
+            !event.dataTransfer!.types.includes("skill-circuits/block") ||
+            event.dataTransfer!.dropEffect !== "move"
+        ) {
             return;
         }
         event.preventDefault();
@@ -53,12 +64,17 @@
 
 {#if hasEditorRights()}
     <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
-    <div class="scrollable glass panel" aria-expanded={open}
-         ondragenter={dragEnter} ondragover={dragOver} ondragleave={dragLeave} ondrop={drop}>
+    <div
+        class="scrollable glass panel"
+        aria-expanded={open}
+        ondragenter={dragEnter}
+        ondragover={dragOver}
+        ondragleave={dragLeave}
+        ondrop={drop}>
         <div class="heading">
             <h2>Tray</h2>
             <div class="controls">
-                <button class="button" aria-label="Close panel" onclick={ () => open = false }>
+                <button class="button" aria-label="Close panel" onclick={() => (open = false)}>
                     <span class="fa-solid fa-arrow-right"></span>
                 </button>
             </div>
@@ -113,7 +129,7 @@
 
     .controls {
         display: flex;
-        gap: .25rem;
+        gap: 0.25rem;
     }
 
     .content {
@@ -137,7 +153,8 @@
         padding: 0.5rem;
         text-decoration: none;
     }
-    .button:focus-visible, .button:hover {
+    .button:focus-visible,
+    .button:hover {
         background: var(--on-glass-surface-active-colour);
     }
 </style>

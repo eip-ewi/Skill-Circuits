@@ -1,26 +1,25 @@
 <script lang="ts">
-
-    import {fetchBookmarks, getBookmarks} from "../../../logic/bookmarks.svelte";
-    import {onMount} from "svelte";
-    import {addBookmarkList} from "../../../logic/updates/bookmark_updates";
+    import { fetchBookmarks, getBookmarks } from "../../../logic/bookmarks.svelte";
+    import { onMount } from "svelte";
+    import { addBookmarkList } from "../../../logic/updates/bookmark_updates";
     import BookmarkListComponent from "./BookmarkListComponent.svelte";
 
     let { open = $bindable() }: { open: boolean } = $props();
 
     onMount(() => {
         fetchBookmarks().then(() => {});
-    })
+    });
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
-<div class="scrollable glass panel" aria-expanded={open} ondragleave={ () => open = false }>
+<div class="scrollable glass panel" aria-expanded={open} ondragleave={() => (open = false)}>
     <div class="heading">
         <h2>Bookmarks</h2>
         <div class="controls">
             <button class="button" aria-label="Add bookmark list" onclick={addBookmarkList}>
                 <span class="fa-solid fa-plus"></span>
             </button>
-            <button class="button" aria-label="Close panel" onclick={ () => open = false }>
+            <button class="button" aria-label="Close panel" onclick={() => (open = false)}>
                 <span class="fa-solid fa-arrow-right"></span>
             </button>
         </div>
@@ -69,7 +68,7 @@
 
     .controls {
         display: flex;
-        gap: .25em;
+        gap: 0.25em;
     }
 
     .lists {
@@ -81,7 +80,7 @@
     .button {
         background: var(--on-glass-surface-colour);
         border: none;
-        border-radius: .5em;
+        border-radius: 0.5em;
         color: var(--on-glass-colour);
         cursor: pointer;
         display: grid;
@@ -89,7 +88,8 @@
         padding: 0.5em;
         text-decoration: none;
     }
-    .button:focus-visible, .button:hover {
+    .button:focus-visible,
+    .button:hover {
         background: var(--on-glass-surface-active-colour);
     }
 </style>

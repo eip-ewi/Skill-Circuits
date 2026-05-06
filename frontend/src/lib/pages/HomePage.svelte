@@ -1,19 +1,16 @@
 <script lang="ts">
-
-    import {clearLevel} from "../logic/circuit/level.svelte";
+    import { clearLevel } from "../logic/circuit/level.svelte";
     import PageLayout from "./PageLayout.svelte";
 
     clearLevel();
 </script>
 
 <PageLayout>
-
     <div class="content">
         <h1>Welcome to Skill Circuits!</h1>
 
         <a href="/login">Click here to log in</a>
     </div>
-
 </PageLayout>
 
 <style>
@@ -35,15 +32,17 @@
         border: none;
         border-radius: 8px;
         color: var(--on-block-colour);
-        box-shadow: .75rem 1.25rem 1.625rem 0 color-mix(in srgb, var(--shadow-colour) 8%, transparent);
+        box-shadow: 0.75rem 1.25rem 1.625rem 0
+            color-mix(in srgb, var(--shadow-colour) 8%, transparent);
         cursor: pointer;
         display: grid;
         place-items: center;
-        padding: .5rem 1rem;
+        padding: 0.5rem 1rem;
         text-decoration: none;
     }
     a:where(:hover, :focus-visible) {
         transform: scale(1.05);
-        box-shadow: .75rem 1.25rem 1.8rem 0 color-mix(in srgb, var(--shadow-colour) 8%, transparent);
+        box-shadow: 0.75rem 1.25rem 1.8rem 0
+            color-mix(in srgb, var(--shadow-colour) 8%, transparent);
     }
 </style>

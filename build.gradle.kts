@@ -4,7 +4,7 @@ import nl.javadude.gradle.plugins.license.DownloadLicensesExtension
 import nl.javadude.gradle.plugins.license.LicenseExtension
 
 group = "nl.tudelft.skills"
-version = "2526.1.0"
+version = "2526.2.0"
 
 val javaVersion = JavaVersion.VERSION_21
 
@@ -123,6 +123,14 @@ configure<SpotlessExtension> {
             "arrowParens" to "avoid",
             "htmlWhitespaceSensitivity" to "ignore"))
         toggleOffOn()
+    }
+
+    format("frontend") {
+        target("frontend/src/**/*.svelte", "frontend/src/**/*.ts", "frontend/src/**/*.html", "frontend/src/**/*.css", "frontend/src/**/*.js")
+        prettier(mapOf(
+            "prettier" to "3.4.2",
+            "prettier-plugin-svelte" to "3.3.3"
+        )).configFile(file("frontend/.prettierrc"))
     }
 }
 
