@@ -86,9 +86,9 @@
                                     </Button>
                                 {:else if column.sortStatus === 0}
                                     <Button
-                                        aria-label="Sort by {column.name}"
+                                        aria-label="Sort ascendingly by {column.name}"
                                         onclick={() => {
-                                            sortByColumn(column, -1);
+                                            sortByColumn(column, 1);
                                         }}
                                         square={true}
                                         style="margin-left: 1em; font-size: var(--font-size-100)">
