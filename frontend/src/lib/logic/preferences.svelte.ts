@@ -3,7 +3,7 @@ import { lightTheme, systemTheme, type Theme } from "../data/theme";
 import { withCsrf } from "./csrf";
 import { setThemeProperties } from "./theme.svelte";
 
-let preferences: Preferences = $state({ theme: systemTheme, blurBlocks: true });
+let preferences: Preferences = $state({ theme: systemTheme, blurBlocks: true, focusModeDepth: 2 });
 
 export async function fetchPreferences() {
     let response = await fetch("/api/person/preferences");
@@ -16,6 +16,10 @@ export function getTheme(): Theme {
 
 export function getBlurBlocks(): boolean {
     return preferences.blurBlocks;
+}
+
+export function getFocusModeDepth(): number {
+    return preferences.focusModeDepth;
 }
 
 export async function setTheme(theme: Theme) {
