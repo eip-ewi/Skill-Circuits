@@ -88,6 +88,10 @@
         <span class="fa-solid fa-bookmark"></span>
         <span>Bookmark</span>
     {/if}
+    {#if action === BlockActions.FocusMode}
+        <span class="fa-solid fa-eye"></span>
+        <span>Focus mode</span>
+    {/if}
 </div>
 
 <style>

@@ -40,6 +40,7 @@
     import { getBlurBlocks } from "../../../logic/preferences.svelte";
     import ExpandedSubmoduleComponent from "../../expanded_submodule/ExpandedSubmoduleComponent.svelte";
     import type { SubmoduleBlock } from "../../../dto/circuit/edition/submodule";
+    import FocusModeButtonComponent from "./FocusModeButtonComponent.svelte";
 
     let { block }: { block: Block } = $props();
 
@@ -255,6 +256,9 @@
     <div class="controls">
         {#if block.blockType === "skill" && !block.external && (block.state === BlockStates.Hovering || isSkillBookmarked(block))}
             <BookmarkSkillButtonComponent bind:action skill={block}></BookmarkSkillButtonComponent>
+        {/if}
+        {#if block.state === BlockStates.Hovering}
+            <FocusModeButtonComponent bind:action {block}></FocusModeButtonComponent>
         {/if}
         {#if (block.blockType !== "skill" || block.external) && !hasEditorRights()}
             {#if block.state === BlockStates.Hovering}
