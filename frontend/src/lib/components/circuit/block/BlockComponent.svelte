@@ -19,6 +19,7 @@
         getBlock,
         getBlocks,
         getCircuit,
+        getFocusModeBlock,
         getGraph,
     } from "../../../logic/circuit/circuit.svelte";
     import BlockControlsComponent from "./BlockControlsComponent.svelte";
@@ -57,6 +58,9 @@
             block.blockType === "skill" &&
             !block.external &&
             block.hidden,
+    );
+    let focusModeHidden: boolean = $derived(
+        getFocusModeBlock() !== null && getFocusModeBlock() !== block,
     );
 
     let draggable: boolean = $state(false);
@@ -241,6 +245,7 @@
         data-unfocus={unfocused}
         data-pulse={block.state === BlockStates.Connecting}
         data-hidden={hidden}
+        data-focus-mode-hidden={focusModeHidden}
         onclick={click}
         onmouseenter={mouseEnterBlock}
         onmouseleave={mouseLeaveBlock}>
@@ -350,6 +355,10 @@
     }
     .block[data-clickable="true"] {
         cursor: pointer;
+    }
+
+    .block[data-focus-mode-hidden="true"] {
+        visibility: hidden;
     }
 
     .scroll-to-pulse-container {

@@ -28,6 +28,7 @@ let itemToBlockMap: Map<number, Block> | undefined = $derived(
         : // @ts-ignore
           new Map(blocks.flatMap(block => block.items.map(item => [item.id, block]))),
 );
+let focusModeBlock: Block | null = $state(null);
 
 function blocksFromCircuit(circuit: Circuit): Block[] {
     let blocks: Block[] = [];
@@ -112,4 +113,20 @@ export function initModuleGraphs(editionCircuit: EditionCircuit) {
                 blocksFromCircuit(module.moduleCircuit).filter(block => isBlockVisible(block)),
             )),
     );
+}
+
+export function setFocusMode(block: Block | null) {
+    // Validation before setting focus mode block
+    if (
+        block !== null &&
+        (graph === undefined || !graph.has(block) || graph.getNode(block.id) !== block)
+    ) {
+        return;
+    }
+
+    focusModeBlock = block;
+}
+
+export function getFocusModeBlock() {
+    return focusModeBlock;
 }
