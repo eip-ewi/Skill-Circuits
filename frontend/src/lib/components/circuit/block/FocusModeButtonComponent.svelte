@@ -4,9 +4,29 @@
     import Button from "../../util/Button.svelte";
     import { cubicInOut } from "svelte/easing";
     import { getFocusModeBlock, setFocusMode } from "../../../logic/circuit/circuit.svelte";
+    import { hasEditorRights } from "../../../logic/authorisation.svelte";
 
     let { block, action = $bindable() }: { block: Block; action: BlockAction | undefined } =
         $props();
+
+    let placement: "left" | "right" | "top" = $derived.by(() => {
+        if (hasEditorRights()) {
+            const connectionsPos =
+                (block.boundingRect === undefined ? 0 : block.boundingRect!().right) + 128 >
+                window.innerWidth
+                    ? "left"
+                    : "right";
+            const defaultPos =
+                (block.boundingRect === undefined ? 64 : block.boundingRect!().left) - 64 < 0
+                    ? "right"
+                    : "left";
+            return defaultPos === connectionsPos ? "top" : defaultPos;
+        }
+        return (block.boundingRect === undefined ? 0 : block.boundingRect!().right) + 64 >
+            window.innerWidth
+            ? "left"
+            : "right";
+    });
 
     function transition(element: Element) {
         return {
@@ -27,7 +47,7 @@
     }
 </script>
 
-<div class="focus-mode-button" transition:transition>
+<div class="focus-mode-button" transition:transition data-placement={placement}>
     <Button
         square
         aria-label="Focus mode"
@@ -45,8 +65,29 @@
 <style>
     .focus-mode-button {
         position: absolute;
-        right: 1.5em;
-        top: -0.8em;
-        transform-origin: bottom left;
+        top: 50%;
+    }
+
+    .focus-mode-button[data-placement="right"] {
+        right: 0.5em;
+        padding: 1.5em 1.5em 1.5em 1em;
+        top: 50%;
+        transform-origin: left;
+        translate: 100% -50%;
+    }
+
+    .focus-mode-button[data-placement="left"] {
+        left: 0.5em;
+        right: initial;
+        padding: 1.5em 1em 1.5em 1.5em;
+        translate: -100% -50%;
+        transform-origin: right;
+    }
+
+    .focus-mode-button[data-placement="top"] {
+        right: auto;
+        left: -0.5em;
+        top: -0.7em;
+        transform-origin: bottom right;
     }
 </style>

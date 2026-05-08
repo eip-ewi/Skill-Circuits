@@ -58,8 +58,8 @@
 <style>
     .bookmarks {
         position: absolute;
-        right: -1em;
-        top: -0.8em;
+        right: -0.5em;
+        top: -0.7em;
         transform-origin: bottom left;
     }
 </style>

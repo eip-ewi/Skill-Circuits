@@ -35,7 +35,7 @@
     .expand-button {
         position: absolute;
         right: -1em;
-        top: -0.8em;
+        top: -0.7em;
         transform-origin: bottom left;
     }
 </style>

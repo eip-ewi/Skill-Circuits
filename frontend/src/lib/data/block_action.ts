@@ -15,6 +15,7 @@ export namespace BlockActions {
     export let StopEdit: "stop edit" = "stop edit";
     export let Bookmark: "bookmark" = "bookmark";
     export let FocusMode: "focus mode" = "focus mode";
+    export let StopFocusMode: "stop focus mode" = "stop focus mode";
 }
 
 export type BlockAction =
@@ -31,4 +32,5 @@ export type BlockAction =
     | typeof BlockActions.CancelLink
     | typeof BlockActions.StopEdit
     | typeof BlockActions.Bookmark
-    | typeof BlockActions.FocusMode;
+    | typeof BlockActions.FocusMode
+    | typeof BlockActions.StopFocusMode;
