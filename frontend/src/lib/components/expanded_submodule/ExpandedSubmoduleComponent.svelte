@@ -120,7 +120,7 @@
 
 {#if open}
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
-    <dialog bind:this={element} onclick={checkForClose} onkeydown={checkForClose}>
+    <dialog bind:this={element} onclick={checkForClose} onkeydown={checkForClose} onwheel={(e) => e.stopPropagation()}>
         <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
         <div
             class="expanded-submodule"
@@ -183,6 +183,7 @@
         min-width: 40em;
         max-width: calc(100vw - 12em);
         overflow-y: auto;
+        overscroll-behavior: contain;
 
         display: grid;
         grid-template-columns: fit-content(18em) minmax(25em, auto);
@@ -207,10 +208,12 @@
         padding: 0 1em 0 0.3em;
         grid-row-start: 2;
         overflow: auto;
+        overscroll-behavior: contain;
     }
 
     .selected-skill-wrapper {
         grid-row-start: 2;
         overflow: auto;
+        overscroll-behavior: contain;
     }
 </style>
