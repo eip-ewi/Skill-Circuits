@@ -19,7 +19,6 @@
         getBlock,
         getBlocks,
         getCircuit,
-        getFocusModeBlock,
         getGraph,
     } from "../../../logic/circuit/circuit.svelte";
     import BlockControlsComponent from "./BlockControlsComponent.svelte";
@@ -58,9 +57,6 @@
             block.blockType === "skill" &&
             !block.external &&
             block.hidden,
-    );
-    let focusModeHidden: boolean = $derived(
-        getFocusModeBlock() !== null && getFocusModeBlock() !== block,
     );
 
     let draggable: boolean = $state(false);
@@ -238,14 +234,14 @@
     <div
         bind:this={element}
         class="block"
-        data-locked={locked && getBlurBlocks()}
+        data-locked={locked && getBlurBlocks() && block.state !== BlockStates.FocusMode}
         data-completed={completed}
         data-clickable={clickable}
         data-wiggle={block.state === BlockStates.Dragging}
         data-unfocus={unfocused}
-        data-pulse={block.state === BlockStates.Connecting}
+        data-pulse={block.state === BlockStates.Connecting || block.state === BlockStates.FocusMode}
         data-hidden={hidden}
-        data-focus-mode-hidden={focusModeHidden}
+        data-focus-mode-hidden={block.state === BlockStates.DisabledInFocusMode}
         onclick={click}
         onmouseenter={mouseEnterBlock}
         onmouseleave={mouseLeaveBlock}>
@@ -259,10 +255,10 @@
     </div>
 
     <div class="controls">
-        {#if block.blockType === "skill" && !block.external && (block.state === BlockStates.Hovering || isSkillBookmarked(block))}
+        {#if block.blockType === "skill" && !block.external && (block.state === BlockStates.Hovering || block.state === BlockStates.FocusMode || isSkillBookmarked(block))}
             <BookmarkSkillButtonComponent bind:action skill={block}></BookmarkSkillButtonComponent>
         {/if}
-        {#if block.state === BlockStates.Hovering}
+        {#if block.state === BlockStates.Hovering || block.state === BlockStates.FocusMode}
             <FocusModeButtonComponent bind:action {block}></FocusModeButtonComponent>
         {/if}
         {#if (block.blockType !== "skill" || block.external) && !hasEditorRights()}

@@ -8,6 +8,8 @@ export namespace BlockStates {
     export let Connecting: "connecting" = "connecting";
     export let WaitingForConnection: "waiting for connection" = "waiting for connection";
     export let AssigningPaths: "assigning paths" = "assigning paths";
+    export let FocusMode: "focus mode" = "focus mode";
+    export let DisabledInFocusMode: "disabled in focus mode" = "disabled in focus mode";
 }
 
 export type BlockState =
@@ -17,4 +19,6 @@ export type BlockState =
     | typeof BlockStates.Editing
     | typeof BlockStates.Connecting
     | typeof BlockStates.WaitingForConnection
-    | typeof BlockStates.AssigningPaths;
+    | typeof BlockStates.AssigningPaths
+    | typeof BlockStates.FocusMode
+    | typeof BlockStates.DisabledInFocusMode;

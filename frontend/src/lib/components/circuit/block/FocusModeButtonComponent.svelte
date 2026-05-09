@@ -3,8 +3,14 @@
     import type { Block } from "../../../dto/circuit/block";
     import Button from "../../util/Button.svelte";
     import { cubicInOut } from "svelte/easing";
-    import { getFocusModeBlock, setFocusMode } from "../../../logic/circuit/circuit.svelte";
+    import { getBlocks } from "../../../logic/circuit/circuit.svelte";
     import { hasEditorRights } from "../../../logic/authorisation.svelte";
+    import { BlockStates } from "../../../data/block_state";
+    import {
+        getFocusModeBlock,
+        setFocusMode,
+        visibleInFocusMode,
+    } from "../../../logic/circuit/focusMode.svelte";
 
     let { block, action = $bindable() }: { block: Block; action: BlockAction | undefined } =
         $props();
@@ -39,10 +45,36 @@
     }
 
     function toggleFocusMode() {
+        // Reset state of all blocks
+        getBlocks().forEach(other => {
+            other.state = BlockStates.Inactive;
+        });
+
+        // Reset action
+        action = undefined;
+
         if (getFocusModeBlock() !== block) {
+            // Set this block to focus mode
             setFocusMode(block);
+            block.state = BlockStates.FocusMode;
+
+            // Disable invisible blocks
+            getBlocks()
+                .filter(other => !visibleInFocusMode(other))
+                .forEach(other => {
+                    other.state = BlockStates.DisabledInFocusMode;
+                });
         } else {
+            // Stop focus mode
             setFocusMode(null);
+        }
+    }
+
+    function mouseEnter() {
+        if (block.state === BlockStates.FocusMode) {
+            action = BlockActions.StopFocusMode;
+        } else {
+            action = BlockActions.FocusMode;
         }
     }
 </script>
@@ -52,7 +84,7 @@
         square
         aria-label="Focus mode"
         onclick={toggleFocusMode}
-        onmouseenter={() => (action = BlockActions.FocusMode)}
+        onmouseenter={mouseEnter}
         onmouseleave={() => (action = undefined)}>
         <span
             class="fa-eye"

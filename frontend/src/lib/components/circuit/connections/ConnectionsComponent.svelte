@@ -3,8 +3,13 @@
     import type { Block } from "../../../dto/circuit/block";
     import { Graph } from "../../../logic/circuit/graph";
     import { onMount, tick } from "svelte";
-    import { getFocusModeBlock, getGraph } from "../../../logic/circuit/circuit.svelte";
+    import { getGraph } from "../../../logic/circuit/circuit.svelte";
     import { areColumnsEnabled } from "../../../dto/columns.svelte";
+    import {
+        getFocusModeBlock,
+        getFocusModeVisibleEdges,
+    } from "../../../logic/circuit/focusMode.svelte";
+    import { isInFocusMode } from "../../../logic/circuit/focusMode.svelte.js";
 
     let visible: boolean = $state(false);
 
@@ -16,7 +21,7 @@
 
 <svg data-interactible={!areColumnsEnabled()}>
     {#if visible}
-        {#each getGraph().getEdges(getFocusModeBlock()) as edge}
+        {#each isInFocusMode() ? getFocusModeVisibleEdges() : getGraph().getEdges() as edge}
             <ConnectionComponent from={edge.from} to={edge.to}></ConnectionComponent>
         {/each}
     {/if}

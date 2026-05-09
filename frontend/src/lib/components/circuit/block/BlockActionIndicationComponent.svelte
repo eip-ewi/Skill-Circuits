@@ -89,12 +89,12 @@
         <span>Bookmark</span>
     {/if}
     {#if action === BlockActions.FocusMode}
-        <span class="fa-regular fa-eye"></span>
-        <span>Focus mode</span>
+        <span class="fa-solid fa-eye"></span>
+        <span>Enter focus mode</span>
     {/if}
     {#if action === BlockActions.StopFocusMode}
         <span class="fa-solid fa-eye"></span>
-        <span>Stop focus mode</span>
+        <span>Exit focus mode</span>
     {/if}
 </div>
 

@@ -155,17 +155,13 @@ export class Graph {
         return [...this.nodes.values()];
     }
 
-    getEdges(focusModeBlock: Block | null): { from: Block; to: Block }[] {
-        if (focusModeBlock === null) {
-            let edges: { from: Block; to: Block }[] = [];
-            this.nodes.forEach(block => {
-                this.getChildren(block).forEach(child => {
-                    edges.push({ from: block, to: child });
-                });
+    getEdges(): { from: Block; to: Block }[] {
+        let edges: { from: Block; to: Block }[] = [];
+        this.nodes.forEach(block => {
+            this.getChildren(block).forEach(child => {
+                edges.push({ from: block, to: child });
             });
-            return edges;
-        }
-        // TODO: implement filter by depth
-        return [];
+        });
+        return edges;
     }
 }
