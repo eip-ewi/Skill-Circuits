@@ -44,12 +44,18 @@
 
     let { block }: { block: Block } = $props();
 
-    let locked: boolean = $derived(!hasEditorRights() && !isUnlocked(block));
+    let locked: boolean = $derived(
+        !hasEditorRights() &&
+            !isUnlocked(block) &&
+            block.state !== BlockStates.VisibleInFocusMode &&
+            block.state !== BlockStates.FocusMode,
+    );
     let completed: boolean = $derived(!hasEditorRights() && isCompleted(block));
     let clickable: boolean = $derived(
         (!hasEditorRights() || getLevel() !== ModuleLevel) &&
             block.state !== BlockStates.Editing &&
-            block.state !== BlockStates.AssigningPaths,
+            block.state !== BlockStates.AssigningPaths &&
+            block.state !== BlockStates.DisabledInFocusMode,
     );
     let hidden: boolean = $derived(
         block.state === BlockStates.Inactive &&
@@ -245,50 +251,55 @@
         onclick={click}
         onmouseenter={mouseEnterBlock}
         onmouseleave={mouseLeaveBlock}>
-        {#if block.state === BlockStates.Editing}
-            <BlockEditComponent {block}></BlockEditComponent>
-        {:else if block.state === BlockStates.AssigningPaths && block.blockType === "skill"}
-            <BlockAssignPathsComponent skill={block}></BlockAssignPathsComponent>
-        {:else}
-            <BlockContentComponent {block}></BlockContentComponent>
-        {/if}
+        <div style={block.state === BlockStates.DisabledInFocusMode ? "visibility: hidden" : ""}>
+            {#if block.state === BlockStates.Editing}
+                <BlockEditComponent {block}></BlockEditComponent>
+            {:else if block.state === BlockStates.AssigningPaths && block.blockType === "skill"}
+                <BlockAssignPathsComponent skill={block}></BlockAssignPathsComponent>
+            {:else}
+                <BlockContentComponent {block}></BlockContentComponent>
+            {/if}
+        </div>
     </div>
 
-    <div class="controls">
-        {#if block.blockType === "skill" && !block.external && (block.state === BlockStates.Hovering || block.state === BlockStates.FocusMode || isSkillBookmarked(block))}
-            <BookmarkSkillButtonComponent bind:action skill={block}></BookmarkSkillButtonComponent>
-        {/if}
-        {#if block.state === BlockStates.Hovering || block.state === BlockStates.FocusMode}
-            <FocusModeButtonComponent bind:action {block}></FocusModeButtonComponent>
-        {/if}
-        {#if (block.blockType !== "skill" || block.external) && !hasEditorRights()}
-            {#if block.state === BlockStates.Hovering}
-                <ExpandedViewOpenButtonComponent bind:action bind:open={expanded}
-                ></ExpandedViewOpenButtonComponent>
+    {#if block.state !== BlockStates.DisabledInFocusMode}
+        <div class="controls">
+            {#if block.blockType === "skill" && !block.external && (block.state === BlockStates.Hovering || block.state === BlockStates.FocusMode || isSkillBookmarked(block))}
+                <BookmarkSkillButtonComponent bind:action skill={block}
+                ></BookmarkSkillButtonComponent>
             {/if}
-
-            {#if block.blockType === "submodule"}
-                <ExpandedSubmoduleComponent
-                    submoduleBlock={block as SubmoduleBlock}
-                    bind:open={expanded}></ExpandedSubmoduleComponent>
+            {#if block.state === BlockStates.Hovering || block.state === BlockStates.FocusMode}
+                <FocusModeButtonComponent bind:action {block}></FocusModeButtonComponent>
             {/if}
-        {/if}
-        {#if hasEditorRights() && (draggable || block.state === BlockStates.Hovering || block.state === BlockStates.Connecting || block.state === BlockStates.Editing)}
-            <BlockControlsComponent {block} bind:action bind:draggable></BlockControlsComponent>
-        {/if}
-        {#if block.state === BlockStates.WaitingForConnection}
-            <BlockManageConnectionsComponent
-                skill={block as SkillBlock}
-                bind:action
-                bind:connectable></BlockManageConnectionsComponent>
-        {/if}
-        {#if action !== undefined}
-            <BlockActionIndicationComponent {action} {block}></BlockActionIndicationComponent>
-        {/if}
-    </div>
+            {#if (block.blockType !== "skill" || block.external) && !hasEditorRights()}
+                {#if block.state === BlockStates.Hovering}
+                    <ExpandedViewOpenButtonComponent bind:action bind:open={expanded}
+                    ></ExpandedViewOpenButtonComponent>
+                {/if}
 
-    {#if isLevel(ModuleLevel) && !hasEditorRights()}
-        <ExpandedBlockComponent {block} bind:open={expanded}></ExpandedBlockComponent>
+                {#if block.blockType === "submodule"}
+                    <ExpandedSubmoduleComponent
+                        submoduleBlock={block as SubmoduleBlock}
+                        bind:open={expanded}></ExpandedSubmoduleComponent>
+                {/if}
+            {/if}
+            {#if hasEditorRights() && (draggable || block.state === BlockStates.Hovering || block.state === BlockStates.Connecting || block.state === BlockStates.Editing)}
+                <BlockControlsComponent {block} bind:action bind:draggable></BlockControlsComponent>
+            {/if}
+            {#if block.state === BlockStates.WaitingForConnection}
+                <BlockManageConnectionsComponent
+                    skill={block as SkillBlock}
+                    bind:action
+                    bind:connectable></BlockManageConnectionsComponent>
+            {/if}
+            {#if action !== undefined}
+                <BlockActionIndicationComponent {action} {block}></BlockActionIndicationComponent>
+            {/if}
+        </div>
+
+        {#if isLevel(ModuleLevel) && !hasEditorRights()}
+            <ExpandedBlockComponent {block} bind:open={expanded}></ExpandedBlockComponent>
+        {/if}
     {/if}
 </div>
 
@@ -354,7 +365,7 @@
     }
 
     .block[data-focus-mode-hidden="true"] {
-        visibility: hidden;
+        opacity: 0.3;
     }
 
     .scroll-to-pulse-container {

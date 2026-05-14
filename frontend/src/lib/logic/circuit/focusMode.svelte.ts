@@ -4,19 +4,22 @@ import type { Graph } from "./graph";
 import { getFocusModeDepth } from "../preferences.svelte";
 
 let focusModeBlock: Block | null = $state(null);
-let focusModeVisibleEdges: { from: Block; to: Block }[] = $derived.by(() => {
+let focusModeEdges: { from: Block; to: Block; visible: boolean }[] = $derived.by(() => {
     const graph: Graph = getGraph();
+    const edges: { from: Block; to: Block; visible: boolean }[] = graph
+        .getEdges()
+        .map(edge => ({ from: edge.from, to: edge.to, visible: false }));
 
     // Safety checks
     if (focusModeBlock === null) {
-        return graph.getEdges();
+        edges.forEach(edge => (edge.visible = true));
+        return edges;
     }
     if (getFocusModeDepth() <= 0) {
-        return [];
+        return edges;
     }
 
     // Initialize edges, visited blocks and block queue
-    let edges: { from: Block; to: Block }[] = [];
     let visited: Set<number> = new Set();
     let queue: { block: Block; depth: number; ascend: boolean }[] = [
         { block: focusModeBlock!, depth: 0, ascend: true },
@@ -26,11 +29,15 @@ let focusModeVisibleEdges: { from: Block; to: Block }[] = $derived.by(() => {
     // Add first level from initial block
     graph.getParents(focusModeBlock!).forEach(parent => {
         queue.push({ block: parent, depth: 1, ascend: true });
-        edges.push({ from: parent, to: focusModeBlock! });
+        edges
+            .filter(edge => edge.from.id === parent.id && edge.to.id === focusModeBlock!.id)
+            .forEach(edge => (edge.visible = true));
     });
     graph.getChildren(focusModeBlock!).forEach(child => {
         queue.push({ block: child, depth: 1, ascend: false });
-        edges.push({ from: focusModeBlock!, to: child });
+        edges
+            .filter(edge => edge.from.id === focusModeBlock!.id && edge.to.id === child.id)
+            .forEach(edge => (edge.visible = true));
     });
     visited.add(focusModeBlock!.id);
 
@@ -47,13 +54,17 @@ let focusModeVisibleEdges: { from: Block; to: Block }[] = $derived.by(() => {
             // Get parents if ascending
             graph.getParents(current.block).forEach(parent => {
                 queue.push({ block: parent, depth: current.depth + 1, ascend: true });
-                edges.push({ from: parent, to: current.block });
+                edges
+                    .filter(edge => edge.from.id === parent.id && edge.to.id === current.block.id)
+                    .forEach(edge => (edge.visible = true));
             });
         } else {
             // Get children if descending
             graph.getChildren(current.block).forEach(child => {
                 queue.push({ block: child, depth: current.depth + 1, ascend: false });
-                edges.push({ from: current.block, to: child });
+                edges
+                    .filter(edge => edge.from.id === current.block.id && edge.to.id === child.id)
+                    .forEach(edge => (edge.visible = true));
             });
         }
 
@@ -63,11 +74,13 @@ let focusModeVisibleEdges: { from: Block; to: Block }[] = $derived.by(() => {
     return edges;
 });
 let focusModeVisibleBlocks: Set<number> = $derived(
-    new Set(focusModeVisibleEdges.flatMap(edge => [edge.from.id, edge.to.id])),
+    new Set(
+        focusModeEdges.filter(edge => edge.visible).flatMap(edge => [edge.from.id, edge.to.id]),
+    ),
 );
 
-export function getFocusModeVisibleEdges(): { from: Block; to: Block }[] {
-    return focusModeVisibleEdges;
+export function getFocusModeEdges(): { from: Block; to: Block; visible: boolean }[] {
+    return focusModeEdges;
 }
 
 export function setFocusMode(block: Block | null) {

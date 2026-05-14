@@ -7,8 +7,10 @@
     import { isUnlocked } from "../../../logic/circuit/skill_state/unlock";
     import { isCompleted } from "../../../logic/circuit/skill_state/completion";
     import { getCircuit } from "../../../logic/circuit/circuit.svelte";
-    import { onMount, tick } from "svelte";
+    import { onMount, tick, untrack } from "svelte";
     import { getBlurBlocks } from "../../../logic/preferences.svelte";
+    import { BlockStates } from "../../../data/block_state";
+    import {getFocusModeEdges, isInFocusMode} from "../../../logic/circuit/focusMode.svelte";
 
     let { from, to }: { from: Block; to: Block } = $props();
 
@@ -18,6 +20,13 @@
                 isCompleted(from) ||
                 (isUnlocked(from) && from.blockType === "skill" && !from.essential)
             ),
+    );
+    let visibleIfInFocusMode: boolean = $derived(
+        (from.state === BlockStates.FocusMode || from.state === BlockStates.VisibleInFocusMode) &&
+            (to.state === BlockStates.FocusMode || to.state === BlockStates.VisibleInFocusMode),
+    );
+    let disabledAndInFocusMode: boolean = $derived(
+        !locked && isInFocusMode() && !visibleIfInFocusMode,
     );
     let animated: boolean = $state(false);
 
@@ -71,7 +80,8 @@
             xmlns="http://www.w3.org/2000/svg"
             class="line"
             d={generatePathString(path, radius)}
-            data-locked={locked && getBlurBlocks()}
+            data-locked={locked && getBlurBlocks() && !(isInFocusMode() && visibleIfInFocusMode)}
+            data-disabled-in-focus-mode={disabledAndInFocusMode}
             data-preview={to.preview === true && locked}
             bind:this={element}
             data-animate={animated} />
@@ -90,7 +100,7 @@
         z-index: 10;
     }
 
-    path:hover {
+    path[data-disabled-in-focus-mode="false"]:hover {
         stroke: var(--connection-highlighted-colour);
         stroke-width: var(--connection-highlighted-width);
     }
@@ -108,6 +118,10 @@
 
     path[data-preview="true"] {
         opacity: 0.3;
+    }
+
+    path[data-disabled-in-focus-mode="true"] {
+        opacity: 0.2;
     }
 
     @keyframes draw {

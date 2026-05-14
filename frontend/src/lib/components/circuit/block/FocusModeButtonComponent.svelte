@@ -45,11 +45,6 @@
     }
 
     function toggleFocusMode() {
-        // Reset state of all blocks
-        getBlocks().forEach(other => {
-            other.state = BlockStates.Inactive;
-        });
-
         // Reset action
         action = undefined;
 
@@ -59,14 +54,23 @@
             block.state = BlockStates.FocusMode;
 
             // Disable invisible blocks
-            getBlocks()
-                .filter(other => !visibleInFocusMode(other))
-                .forEach(other => {
+            getBlocks().forEach(other => {
+                if (other.id === block.id) return;
+
+                if (visibleInFocusMode(other)) {
+                    other.state = BlockStates.VisibleInFocusMode;
+                } else {
                     other.state = BlockStates.DisabledInFocusMode;
-                });
+                }
+            });
         } else {
             // Stop focus mode
             setFocusMode(null);
+
+            // Reset state of all blocks
+            getBlocks().forEach(other => {
+                other.state = BlockStates.Inactive;
+            });
         }
     }
 
