@@ -5,31 +5,31 @@
     import TaskIconsComponent from "../item/TaskIconsComponent.svelte";
     import { getItemsOnPath } from "../../../logic/edition/active_path.svelte";
     import { isSkillItemRevealed } from "../../../logic/circuit/unlocked_skills.svelte";
+    import type { SkillItem } from "../../../dto/circuit/edition/skill";
 
     let { block }: { block: Block } = $props();
 
-    function getNumCompletedItems(essential: boolean) {
+    function isSkillItemVisible(item: SkillItem) {
+        return item.column !== null && (!item.hidden || isSkillItemRevealed(item));
+    }
+
+    function getNumCompletedItems(skillType: "essential" | "optional") {
         return block.items.filter(item => {
-            if (item.itemType == "skill") {
+            if (item.itemType === "skill") {
                 return (
                     item.completed &&
-                    item.column !== null &&
-                    ((item.essential && essential) || (!item.essential && !essential)) &&
-                    (!item.hidden || isSkillItemRevealed(item))
+                    item.essential === (skillType === "essential") &&
+                    isSkillItemVisible(item)
                 );
             }
             return item.completed;
         }).length;
     }
 
-    function getNumTotalItems(essential: boolean) {
+    function getNumTotalItems(skillType: "essential" | "optional") {
         return block.items.filter(item => {
-            if (item.itemType == "skill") {
-                return (
-                    item.column !== null &&
-                    ((item.essential && essential) || (!item.essential && !essential)) &&
-                    (!item.hidden || isSkillItemRevealed(item))
-                );
+            if (item.itemType === "skill") {
+                return item.essential === (skillType === "essential") && isSkillItemVisible(item);
             }
             return true;
         }).length;
@@ -51,10 +51,10 @@
 {:else if hasEditorRights()}
     <span>{block.items.length} {getLevel().items}</span>
 {:else}
-    {@const completed = getNumCompletedItems(true)}
-    {@const total = getNumTotalItems(true)}
-    {@const completedOpt = getNumCompletedItems(false)}
-    {@const totalOpt = getNumTotalItems(false)}
+    {@const completed = getNumCompletedItems("essential")}
+    {@const total = getNumTotalItems("essential")}
+    {@const completedOpt = getNumCompletedItems("optional")}
+    {@const totalOpt = getNumTotalItems("optional")}
 
     <div class="completion-counters">
         {#if total > 0}
