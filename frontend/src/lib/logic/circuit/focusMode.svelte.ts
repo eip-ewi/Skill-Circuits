@@ -1,9 +1,9 @@
 import type { Block } from "../../dto/circuit/block";
-import { getGraph } from "./circuit.svelte";
+import { getBlocks, getCircuit, getGraph } from "./circuit.svelte";
 import type { Graph } from "./graph";
-import { getFocusModeDepth } from "../preferences.svelte";
 
 let focusModeBlock: Block | null = $state(null);
+let focusModeDepth: number = $state(2);
 let focusModeEdges: { from: Block; to: Block; visible: boolean }[] = $derived.by(() => {
     const graph: Graph = getGraph();
     const edges: { from: Block; to: Block; visible: boolean }[] = graph
@@ -15,7 +15,7 @@ let focusModeEdges: { from: Block; to: Block; visible: boolean }[] = $derived.by
         edges.forEach(edge => (edge.visible = true));
         return edges;
     }
-    if (getFocusModeDepth() <= 0) {
+    if (focusModeDepth <= 0) {
         return edges;
     }
 
@@ -46,7 +46,7 @@ let focusModeEdges: { from: Block; to: Block; visible: boolean }[] = $derived.by
         let current: { block: Block; depth: number; ascend: boolean } = queue.shift()!;
 
         // Stop if visited or above max depth
-        if (current.depth + 1 > getFocusModeDepth() || visited.has(current.block.id)) {
+        if (current.depth + 1 > focusModeDepth || visited.has(current.block.id)) {
             continue;
         }
 
@@ -107,4 +107,12 @@ export function isInFocusMode(): boolean {
 
 export function visibleInFocusMode(block: Block): boolean {
     return focusModeVisibleBlocks.has(block.id);
+}
+
+export function setFocusModeDepth(depth: number) {
+    focusModeDepth = depth;
+}
+
+export function getFocusModeDepth(): number {
+    return focusModeDepth;
 }

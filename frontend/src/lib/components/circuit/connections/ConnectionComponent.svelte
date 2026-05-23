@@ -1,5 +1,4 @@
 <script lang="ts">
-    import type { LineSegments } from "../../../data/path";
     import { generatePathString } from "../../../logic/line_segments";
     import type { Block } from "../../../dto/circuit/block";
     import { createConnectionPath } from "../../../logic/circuit/connection.svelte";
@@ -10,7 +9,7 @@
     import { onMount, tick, untrack } from "svelte";
     import { getBlurBlocks } from "../../../logic/preferences.svelte";
     import { BlockStates } from "../../../data/block_state";
-    import {getFocusModeEdges, isInFocusMode} from "../../../logic/circuit/focusMode.svelte";
+    import { isInFocusMode } from "../../../logic/circuit/focusMode.svelte";
 
     let { from, to }: { from: Block; to: Block } = $props();
 

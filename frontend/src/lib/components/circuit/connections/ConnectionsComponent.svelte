@@ -5,8 +5,6 @@
     import { onMount, tick } from "svelte";
     import { getGraph } from "../../../logic/circuit/circuit.svelte";
     import { areColumnsEnabled } from "../../../dto/columns.svelte";
-    import { getFocusModeEdges } from "../../../logic/circuit/focusMode.svelte";
-    import { isInFocusMode } from "../../../logic/circuit/focusMode.svelte.js";
 
     let visible: boolean = $state(false);
 

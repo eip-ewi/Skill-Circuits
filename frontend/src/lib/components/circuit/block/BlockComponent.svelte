@@ -40,7 +40,13 @@
     import { getBlurBlocks } from "../../../logic/preferences.svelte";
     import ExpandedSubmoduleComponent from "../../expanded_submodule/ExpandedSubmoduleComponent.svelte";
     import type { SubmoduleBlock } from "../../../dto/circuit/edition/submodule";
-    import FocusModeButtonComponent from "./FocusModeButtonComponent.svelte";
+    import FocusModeButtonsComponent from "./FocusModeButtonsComponent.svelte";
+    import {
+        getFocusModeBlock,
+        isInFocusMode,
+        setFocusMode,
+        visibleInFocusMode,
+    } from "../../../logic/circuit/focusMode.svelte";
 
     let { block }: { block: Block } = $props();
 
@@ -126,6 +132,18 @@
 
             clearScrollTarget();
         })();
+    });
+
+    $effect(() => {
+        if (isInFocusMode()) {
+            if (getFocusModeBlock() === block) {
+                block.state = BlockStates.FocusMode;
+            } else if (visibleInFocusMode(block)) {
+                block.state = BlockStates.VisibleInFocusMode;
+            } else {
+                block.state = BlockStates.DisabledInFocusMode;
+            }
+        }
     });
 
     function recalculateBounds() {
@@ -269,7 +287,7 @@
                 ></BookmarkSkillButtonComponent>
             {/if}
             {#if block.state === BlockStates.Hovering || block.state === BlockStates.FocusMode}
-                <FocusModeButtonComponent bind:action {block}></FocusModeButtonComponent>
+                <FocusModeButtonsComponent bind:action {block}></FocusModeButtonsComponent>
             {/if}
             {#if (block.blockType !== "skill" || block.external) && !hasEditorRights()}
                 {#if block.state === BlockStates.Hovering}
