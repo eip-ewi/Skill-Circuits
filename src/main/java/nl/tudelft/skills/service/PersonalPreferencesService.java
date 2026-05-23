@@ -69,8 +69,7 @@ public class PersonalPreferencesService {
 	public PersonalPreferencesView convertToPreferencesView(PersonalPreferences preferences) {
 		ThemeView themeView = new ThemeView(preferences.getTheme().getName(),
 				preferences.getTheme().getColourScheme(), preferences.getTheme().getDisplayName());
-		return new PersonalPreferencesView(themeView, preferences.isBlurBlocks(),
-				preferences.getFocusModeDepth());
+		return new PersonalPreferencesView(themeView, preferences.isBlurBlocks());
 	}
 
 }

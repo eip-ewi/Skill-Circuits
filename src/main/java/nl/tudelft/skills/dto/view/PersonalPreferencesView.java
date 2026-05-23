@@ -19,6 +19,5 @@ package nl.tudelft.skills.dto.view;
 
 public record PersonalPreferencesView(
 		ThemeView theme,
-		boolean blurBlocks,
-		int focusModeDepth) {
+		boolean blurBlocks) {
 }

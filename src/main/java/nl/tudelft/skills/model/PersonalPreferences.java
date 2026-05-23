@@ -36,8 +36,4 @@ public class PersonalPreferences {
 	@NotNull
 	@Builder.Default
 	private boolean blurBlocks = true;
-
-	@NotNull
-	@Builder.Default
-	private int focusModeDepth = 2;
 }
