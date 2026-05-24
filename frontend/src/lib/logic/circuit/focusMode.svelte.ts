@@ -1,25 +1,29 @@
 import type { Block } from "../../dto/circuit/block";
-import { getBlocks, getCircuit, getGraph } from "./circuit.svelte";
+import { getBlocks, getGraph } from "./circuit.svelte";
 import type { Graph } from "./graph";
+import { BlockStates } from "../../data/block_state";
 
 let focusModeBlock: Block | null = $state(null);
-let focusModeDepth: number = $state(2);
-let focusModeEdges: { from: Block; to: Block; visible: boolean }[] = $derived.by(() => {
+let maxDepth: number | null = $derived.by(() => {
+    if (focusModeBlock === null) return null;
+    // Calculate max depth in up and down directions
+    const maxRowInCircuit = Math.max(0, ...getBlocks().map(block => block.row ?? 0));
+    return Math.max(maxRowInCircuit - (focusModeBlock.row ?? 0), focusModeBlock.row ?? 0);
+});
+let focusModeDepth: number = $state(defaultDepth());
+let focusModeVisibleEdges: { from: Block; to: Block }[] = $derived.by(() => {
     const graph: Graph = getGraph();
-    const edges: { from: Block; to: Block; visible: boolean }[] = graph
-        .getEdges()
-        .map(edge => ({ from: edge.from, to: edge.to, visible: false }));
 
     // Safety checks
     if (focusModeBlock === null) {
-        edges.forEach(edge => (edge.visible = true));
-        return edges;
+        return graph.getEdges();
     }
     if (focusModeDepth <= 0) {
-        return edges;
+        return [];
     }
 
     // Initialize edges, visited blocks and block queue
+    let edges: { from: Block; to: Block }[] = [];
     let visited: Set<number> = new Set();
     let queue: { block: Block; depth: number; ascend: boolean }[] = [
         { block: focusModeBlock!, depth: 0, ascend: true },
@@ -29,15 +33,11 @@ let focusModeEdges: { from: Block; to: Block; visible: boolean }[] = $derived.by
     // Add first level from initial block
     graph.getParents(focusModeBlock!).forEach(parent => {
         queue.push({ block: parent, depth: 1, ascend: true });
-        edges
-            .filter(edge => edge.from.id === parent.id && edge.to.id === focusModeBlock!.id)
-            .forEach(edge => (edge.visible = true));
+        edges.push({ from: parent, to: focusModeBlock! });
     });
     graph.getChildren(focusModeBlock!).forEach(child => {
         queue.push({ block: child, depth: 1, ascend: false });
-        edges
-            .filter(edge => edge.from.id === focusModeBlock!.id && edge.to.id === child.id)
-            .forEach(edge => (edge.visible = true));
+        edges.push({ from: focusModeBlock!, to: child });
     });
     visited.add(focusModeBlock!.id);
 
@@ -54,17 +54,13 @@ let focusModeEdges: { from: Block; to: Block; visible: boolean }[] = $derived.by
             // Get parents if ascending
             graph.getParents(current.block).forEach(parent => {
                 queue.push({ block: parent, depth: current.depth + 1, ascend: true });
-                edges
-                    .filter(edge => edge.from.id === parent.id && edge.to.id === current.block.id)
-                    .forEach(edge => (edge.visible = true));
+                edges.push({ from: parent, to: current.block });
             });
         } else {
             // Get children if descending
             graph.getChildren(current.block).forEach(child => {
                 queue.push({ block: child, depth: current.depth + 1, ascend: false });
-                edges
-                    .filter(edge => edge.from.id === current.block.id && edge.to.id === child.id)
-                    .forEach(edge => (edge.visible = true));
+                edges.push({ from: current.block, to: child });
             });
         }
 
@@ -74,13 +70,11 @@ let focusModeEdges: { from: Block; to: Block; visible: boolean }[] = $derived.by
     return edges;
 });
 let focusModeVisibleBlocks: Set<number> = $derived(
-    new Set(
-        focusModeEdges.filter(edge => edge.visible).flatMap(edge => [edge.from.id, edge.to.id]),
-    ),
+    new Set(focusModeVisibleEdges.flatMap(edge => [edge.from.id, edge.to.id])),
 );
 
-export function getFocusModeEdges(): { from: Block; to: Block; visible: boolean }[] {
-    return focusModeEdges;
+function defaultDepth() {
+    return maxDepth !== null && maxDepth <= 2 ? maxDepth : 2;
 }
 
 export function setFocusMode(block: Block | null) {
@@ -97,6 +91,30 @@ export function setFocusMode(block: Block | null) {
     focusModeBlock = block;
 }
 
+export function resetFocusMode() {
+    focusModeBlock = null;
+    safelyUpdateFocusModeDepth(defaultDepth());
+}
+
+export function toggleFocusMode(clickedBlock: Block) {
+    // Reset depth
+    safelyUpdateFocusModeDepth(defaultDepth());
+
+    if (getFocusModeBlock() !== clickedBlock) {
+        // Set this block to focus mode
+        // States of all blocks are updated within the block component
+        focusModeBlock = clickedBlock;
+    } else {
+        // Stop focus mode
+        focusModeBlock = null;
+
+        // Reset state of all blocks
+        getBlocks().forEach(other => {
+            other.state = BlockStates.Inactive;
+        });
+    }
+}
+
 export function getFocusModeBlock() {
     return focusModeBlock;
 }
@@ -109,10 +127,15 @@ export function visibleInFocusMode(block: Block): boolean {
     return focusModeVisibleBlocks.has(block.id);
 }
 
-export function setFocusModeDepth(depth: number) {
+export function safelyUpdateFocusModeDepth(depth: number) {
+    if (depth <= 0 || (maxDepth !== null && depth > maxDepth)) return;
     focusModeDepth = depth;
 }
 
 export function getFocusModeDepth(): number {
     return focusModeDepth;
+}
+
+export function getMaxDepth(): number {
+    return maxDepth!;
 }

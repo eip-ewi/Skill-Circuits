@@ -3,31 +3,28 @@
     import type { Block } from "../../../dto/circuit/block";
     import Button from "../../util/Button.svelte";
     import { cubicInOut } from "svelte/easing";
-    import { getBlocks } from "../../../logic/circuit/circuit.svelte";
-    import { fetchAuthorisation, hasEditorRights } from "../../../logic/authorisation.svelte";
+    import { hasEditorRights } from "../../../logic/authorisation.svelte";
     import { BlockStates } from "../../../data/block_state";
     import {
         getFocusModeBlock,
         getFocusModeDepth,
+        getMaxDepth,
         isInFocusMode,
-        setFocusMode,
-        setFocusModeDepth,
-        visibleInFocusMode,
+        resetFocusMode,
+        safelyUpdateFocusModeDepth,
+        toggleFocusMode,
     } from "../../../logic/circuit/focusMode.svelte";
+    import { onDestroy, onMount } from "svelte";
+    import { getBlocks } from "../../../logic/circuit/circuit.svelte";
 
     let { block, action = $bindable() }: { block: Block; action: BlockAction | undefined } =
         $props();
     let hovering: boolean = $state(false);
-    let maxDepth: number = $derived.by(() => {
-        const maxRowInCircuit = Math.max(0, ...getBlocks().map(block => block.row ?? 0));
-        // Calculate max depth in up and down directions
-        return Math.max(maxRowInCircuit - (block.row ?? 0), block.row ?? 0) + 1;
-    });
 
     let placement: "left" | "right" | "top" = $derived.by(() => {
         const widthConst = 256;
         if (hasEditorRights()) {
-            const connectionsPos =
+            const controlsPos =
                 (block.boundingRect === undefined ? 0 : block.boundingRect!().right) + 128 >
                 window.innerWidth
                     ? "left"
@@ -38,7 +35,7 @@
                 0
                     ? "right"
                     : "left";
-            return defaultPos === connectionsPos ? "top" : defaultPos;
+            return defaultPos === controlsPos ? "top" : defaultPos;
         }
         return (block.boundingRect === undefined ? 0 : block.boundingRect!().right) + widthConst >
             window.innerWidth
@@ -56,25 +53,27 @@
         };
     }
 
-    function toggleFocusMode() {
+    onDestroy(async () => {
+        resetFocusMode();
+
+        // Reset block states
+        getBlocks().forEach(other => {
+            if (
+                other.state === BlockStates.FocusMode ||
+                other.state === BlockStates.VisibleInFocusMode ||
+                other.state === BlockStates.DisabledInFocusMode
+            ) {
+                other.state = BlockStates.Inactive;
+            }
+        });
+    });
+
+    function clickFocusModeButton() {
         // Reset action
         action = undefined;
 
-        // Reset depth
-        setFocusModeDepth(2);
-
-        if (getFocusModeBlock() !== block) {
-            // Set this block to focus mode
-            setFocusMode(block);
-        } else {
-            // Stop focus mode
-            setFocusMode(null);
-
-            // Reset state of all blocks
-            getBlocks().forEach(other => {
-                other.state = BlockStates.Inactive;
-            });
-        }
+        // Toggle focus mode
+        toggleFocusMode(block);
     }
 
     function mouseEnter() {
@@ -83,11 +82,6 @@
         } else {
             action = BlockActions.FocusMode;
         }
-    }
-
-    function safelyUpdateFocusModeDepth(depth: number) {
-        if (depth <= 0 || depth >= maxDepth) return;
-        setFocusModeDepth(depth);
     }
 </script>
 
@@ -103,7 +97,7 @@
         square
         style="height: min-content;"
         aria-label="Focus mode"
-        onclick={toggleFocusMode}
+        onclick={clickFocusModeButton}
         onmouseenter={mouseEnter}
         onmouseleave={() => (action = undefined)}>
         <span
@@ -113,7 +107,7 @@
         </span>
     </Button>
 
-    {#if isInFocusMode() && hovering}
+    {#if isInFocusMode() && hovering && getMaxDepth() > 1}
         <div class="depth-controls" transition:transition>
             Depth
             <div class="depth-buttons">
@@ -178,10 +172,10 @@
         align-items: center;
         padding: 0.5em;
 
+        border: var(--neutral-surface-border);
         border-radius: var(--surface-border-radius);
-        background-color: var(--block-colour);
-        border: var(--block-border);
-        color: var(--on-block-colour);
+        background-color: var(--neutral-surface-colour);
+        color: var(--on-neutral-surface-colour);
     }
 
     .depth-buttons {

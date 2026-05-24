@@ -258,7 +258,7 @@
     <div
         bind:this={element}
         class="block"
-        data-locked={locked && getBlurBlocks() && block.state !== BlockStates.FocusMode}
+        data-locked={locked && getBlurBlocks()}
         data-completed={completed}
         data-clickable={clickable}
         data-wiggle={block.state === BlockStates.Dragging}
