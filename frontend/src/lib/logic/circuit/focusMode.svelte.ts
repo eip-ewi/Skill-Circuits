@@ -11,33 +11,31 @@ let maxDepth: number | null = $derived.by(() => {
     return Math.max(maxRowInCircuit - (focusModeBlock.row ?? 0), focusModeBlock.row ?? 0);
 });
 let focusModeDepth: number = $state(defaultDepth());
-let focusModeVisibleEdges: { from: Block; to: Block }[] = $derived.by(() => {
+let focusModeVisibleBlocks: Set<number> = $derived.by(() => {
     const graph: Graph = getGraph();
+    let blocks: Set<number> = new Set();
 
     // Safety checks
-    if (focusModeBlock === null) {
-        return graph.getEdges();
-    }
-    if (focusModeDepth <= 0) {
-        return [];
+    if (focusModeBlock === null || focusModeDepth <= 0) {
+        return blocks;
     }
 
-    // Initialize edges, visited blocks and block queue
-    let edges: { from: Block; to: Block }[] = [];
+    // Initialize visited blocks and block queue
     let visited: Set<number> = new Set();
     let queue: { block: Block; depth: number; ascend: boolean }[] = [
         { block: focusModeBlock!, depth: 0, ascend: true },
         { block: focusModeBlock!, depth: 0, ascend: false },
     ];
+    blocks.add(focusModeBlock.id);
 
     // Add first level from initial block
     graph.getParents(focusModeBlock!).forEach(parent => {
         queue.push({ block: parent, depth: 1, ascend: true });
-        edges.push({ from: parent, to: focusModeBlock! });
+        blocks.add(parent.id);
     });
     graph.getChildren(focusModeBlock!).forEach(child => {
         queue.push({ block: child, depth: 1, ascend: false });
-        edges.push({ from: focusModeBlock!, to: child });
+        blocks.add(child.id);
     });
     visited.add(focusModeBlock!.id);
 
@@ -54,24 +52,21 @@ let focusModeVisibleEdges: { from: Block; to: Block }[] = $derived.by(() => {
             // Get parents if ascending
             graph.getParents(current.block).forEach(parent => {
                 queue.push({ block: parent, depth: current.depth + 1, ascend: true });
-                edges.push({ from: parent, to: current.block });
+                blocks.add(parent.id);
             });
         } else {
             // Get children if descending
             graph.getChildren(current.block).forEach(child => {
                 queue.push({ block: child, depth: current.depth + 1, ascend: false });
-                edges.push({ from: current.block, to: child });
+                blocks.add(child.id);
             });
         }
 
         visited.add(current.block.id);
     }
 
-    return edges;
+    return blocks;
 });
-let focusModeVisibleBlocks: Set<number> = $derived(
-    new Set(focusModeVisibleEdges.flatMap(edge => [edge.from.id, edge.to.id])),
-);
 
 function defaultDepth() {
     return maxDepth !== null && maxDepth <= 2 ? maxDepth : 2;
