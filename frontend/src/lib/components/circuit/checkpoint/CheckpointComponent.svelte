@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { Checkpoint } from "../../../dto/checkpoint";
     import type { RegularSkillBlock, SkillBlock } from "../../../dto/circuit/module/skill";
+    import type { TaskItem } from "../../../dto/circuit/module/task";
     import {
         getBlocks,
         getPlacedBlocks,
