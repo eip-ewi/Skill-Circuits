@@ -160,10 +160,13 @@
     }
 
     .focus-mode-buttons[data-placement="top"] {
-        right: 50%;
-        transform: translate(50%, -100%);
-        top: -0.5em;
+        translate: -50% -100%;
         flex-direction: column-reverse;
+        top: 0;
+        left: 50%;
+        padding: 0.5em 1em;
+        position: absolute;
+        transform-origin: bottom;
     }
 
     .depth-controls {
