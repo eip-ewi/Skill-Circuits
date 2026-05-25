@@ -65,8 +65,8 @@ repositories {
 }
 
 dependencies {
-    implementation("com.microsoft.playwright:playwright:1.55.0")
-    implementation("com.microsoft.playwright:driver-bundle:1.55.0")
+    implementation("com.microsoft.playwright:playwright:1.56.0")
+    implementation("com.microsoft.playwright:driver-bundle:1.56.0")
 
     implementation("org.jetbrains:annotations:26.0.2")
 
