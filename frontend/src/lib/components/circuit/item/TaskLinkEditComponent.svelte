@@ -16,7 +16,12 @@
 </script>
 
 <Dropdown bind:open>
-    <Button square primary aria-label="Edit link" aria-pressed={open} onclick={() => (open = !open)}>
+    <Button
+        square
+        primary
+        aria-label="Edit link"
+        aria-pressed={open}
+        onclick={() => (open = !open)}>
         <span
             class="fa-solid"
             class:fa-link={taskInfo.link !== null}

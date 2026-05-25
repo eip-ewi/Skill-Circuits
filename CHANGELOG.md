@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Added
 - [Teacher] Add task table overview page for editions. (@ffiedrich)
 - [Teacher] Column management has a UI interface. (@ralani)
+- [Editor] When editing a link you can use ESC and outside clicks for closing the pop-up. (@ogangalic)
 
 
 ## Changed
