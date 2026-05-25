@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Fixed
 - [Student] When in the submodule view, the skills are now sorted. (@ogangalic)
+- [Everyone] When scrolling on the extended view of the block the circuit page doesn't scroll (@ogangalic)
+
 ## [2526.2.0]
 
 ## Added 
