@@ -182,7 +182,7 @@ public final class EditionScripts {
 		locators.query(".circuit").waitFor();
 
 		LocatorLocators submoduleWrapper = locators.query(".block-wrapper")
-				.withChild(locators.heading(name))
+				.withChild(locators.query(".name").text(name))
 				.apply(Locator::first);
 
 		submoduleWrapper.waitFor();
@@ -203,6 +203,11 @@ public final class EditionScripts {
 
 	public void addSkill(String skill) {
 		locators.button("Open tray").click();
+
+		// Force a paint cycle so Svelte commits trayOpen=true and the panel's
+		// aria-expanded flips before the locator below polls visibility.
+		session.page().evaluate(
+				"() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))");
 
 		LocatorLocators newSkillBlock = locators.query(".panel")
 				.withChild(locators.heading("Tray"))
