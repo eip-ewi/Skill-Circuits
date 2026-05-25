@@ -7,7 +7,7 @@
     import { BlockStates } from "../../data/block_state";
     import SkillNameComponent from "./SkillNameComponent.svelte";
     import SelectedSkillComponent from "./SelectedSkillComponent.svelte";
-    import StudentTrayComponent from "../side_controls/student_tray/StudentTrayComponent.svelte";
+    import ExpandedSideControlsComponent from "../side_controls/ExpandedSideControlsComponent.svelte";
     import { openExpandedBlockTransition } from "../../logic/transitions";
     import type { ModuleGroup } from "../../dto/circuit/edition/module";
     import type { Item } from "../../dto/circuit/item";
@@ -28,7 +28,6 @@
 
     let visibleSkills: SkillBlock[] | undefined = $state();
     let selectedSkill: SkillBlock | undefined = $state();
-    let trayOpen: boolean = $state(false);
 
     let element: HTMLDialogElement | undefined = $state();
 
@@ -122,7 +121,7 @@
         </div>
 
         {#if visibleSkills !== undefined && selectedSkill !== undefined}
-            <StudentTrayComponent block={selectedSkill} bind:open={trayOpen}></StudentTrayComponent>
+            <ExpandedSideControlsComponent block={selectedSkill}></ExpandedSideControlsComponent>
         {/if}
     </dialog>
 {/if}
