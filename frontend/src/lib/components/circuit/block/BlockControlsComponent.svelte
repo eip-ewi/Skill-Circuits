@@ -1,11 +1,11 @@
 <script lang="ts">
     import { cubicInOut } from "svelte/easing";
     import { type BlockAction, BlockActions } from "../../../data/block_action";
-    import { type BlockState, BlockStates } from "../../../data/block_state";
-    import { getLevel, isLevel } from "../../../logic/circuit/level.svelte";
+    import { BlockStates } from "../../../data/block_state";
+    import { isLevel } from "../../../logic/circuit/level.svelte";
     import { ModuleLevel } from "../../../data/level";
     import type { Block } from "../../../dto/circuit/block";
-    import { getBlocks, getCircuit } from "../../../logic/circuit/circuit.svelte";
+    import { getBlocks, updateBlockNoCascade } from "../../../logic/circuit/circuit.svelte";
     import { deleteBlock } from "../../../logic/circuit/updates/block_updates";
     import Button from "../../util/Button.svelte";
     import WithConfirmationDialog from "../../util/WithConfirmationDialog.svelte";
@@ -16,7 +16,7 @@
         draggable = $bindable(),
     }: { block: Block; action: BlockAction | undefined; draggable: boolean } = $props();
 
-    function transition(element: HTMLElement) {
+    function transition(_element: HTMLElement) {
         return {
             duration: 100,
             easing: cubicInOut,
@@ -27,42 +27,37 @@
     }
 
     function edit() {
-        block.state = BlockStates.Editing;
+        updateBlockNoCascade(block, { state: BlockStates.Editing });
         action = undefined;
     }
 
     function stopEditing() {
-        block.state = BlockStates.Inactive;
+        updateBlockNoCascade(block, { state: BlockStates.Inactive });
     }
 
     function connect() {
-        block.state = BlockStates.Connecting;
+        updateBlockNoCascade(block, { state: BlockStates.Connecting });
         getBlocks()
             .filter(other => other.id !== block.id)
             .forEach(other => {
-                other.state = BlockStates.WaitingForConnection;
+                updateBlockNoCascade(other, { state: BlockStates.WaitingForConnection });
             });
         action = undefined;
     }
 
     function stopConnecting() {
-        getBlocks().forEach(block => {
-            block.state = BlockStates.Inactive;
+        getBlocks().forEach(b => {
+            updateBlockNoCascade(b, { state: BlockStates.Inactive });
         });
     }
 
-    async function remove() {
-        await deleteBlock(block);
+    function side(): "left" | "right" {
+        const right = block.boundingRect === undefined ? 0 : (block.boundingRect()?.right ?? 0);
+        return right + 128 > window.innerWidth ? "left" : "right";
     }
 </script>
 
-<div
-    class="controls"
-    data-side={(block.boundingRect === undefined ? 0 : block.boundingRect!().right) + 128 >
-    window.innerWidth
-        ? "left"
-        : "right"}
-    transition:transition>
+<div class="controls" data-side={side()} transition:transition>
     {#if block.state === BlockStates.Connecting}
         <Button
             square={true}
@@ -119,7 +114,7 @@
             onconfirm={() => deleteBlock(block)}
             icon="fa-solid fa-trash"
             action="Delete">
-            {#snippet button(showDialog: () => void)}
+            {#snippet button(showDialog)}
                 <Button
                     square={true}
                     type="caution"

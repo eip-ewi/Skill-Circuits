@@ -43,7 +43,7 @@ public class SkillCircuitsSecurityConfig extends LabradorSecurityConfig {
 	protected void configure(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/skill-circuits-frontend.*", "/webjars/**", "/font/**", "/img/**",
-						"/favicon.ico")
+						"/favicon.ico", "/.well-known/appspecific/com.chrome.devtools.json")
 				.permitAll()
 				.requestMatchers("/", "/api/auth").permitAll()
 				.anyRequest().authenticated());

@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Fixed
 - [Student] When in the submodule view, the skills are now sorted. (@ogangalic)
+- [Developers] The devtools error when logging in and the state mutation warning. (@ogangalic)
 - [Student] Optional skills are skipped for the completion state of submodules and checkpoints. Separate optional skill counters are displayed on the edition page. (@ffiedrich)
 
 ## [2526.2.0]

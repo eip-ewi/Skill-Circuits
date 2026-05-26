@@ -147,7 +147,6 @@ public final class EditionScripts {
 		navigateTo(edition);
 
 		locators.button("Open tray").click();
-
 		LocatorLocators newSubmodule = locators.query(".panel").withChild(locators.heading("Tray"))
 				.query(".block").heading("New submodule");
 		newSubmodule.hover();
