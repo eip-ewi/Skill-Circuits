@@ -49,11 +49,6 @@ public class ErrorController {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 	}
 
-	@GetMapping("/.well-known/appspecific/com.chrome.devtools.json")
-	public ResponseEntity<Void> chromeDevTools() {
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-	}
-
 	@ExceptionHandler(ResponseStatusException.class)
 	public ResponseEntity<Void> handleResponseStatusException(ResponseStatusException e) {
 		return ResponseEntity.status(e.getStatusCode()).build();
