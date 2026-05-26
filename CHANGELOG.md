@@ -17,6 +17,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Fixed
 
+## [2526.2.1]
+
+## Added
+
+## Changed
+
+## Fixed
+- [Student] Page redirects from external skills or bookmarked skills work as intended. (@ralani)
+
 ## [2526.2.0]
 
 ## Added 
