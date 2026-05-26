@@ -23,12 +23,14 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import nl.tudelft.librador.resolver.annotations.PathEntity;
 import nl.tudelft.skills.annotation.AuthenticatedSCPerson;
 import nl.tudelft.skills.dto.create.ExternalSkillCreate;
 import nl.tudelft.skills.dto.create.SkillCreate;
 import nl.tudelft.skills.dto.patch.SkillPatch;
+import nl.tudelft.skills.dto.patch.SkillPositionUpdates;
 import nl.tudelft.skills.dto.view.circuit.module.ModuleLevelSkillView;
 import nl.tudelft.skills.model.AbstractSkill;
 import nl.tudelft.skills.model.SCPerson;
@@ -98,6 +100,12 @@ public class SkillController {
 	@PreAuthorize("@authorisationService.canEditSkill(#skill)")
 	public void removeSkillFromCircuit(@PathEntity AbstractSkill skill) {
 		skillService.updatePosition(skill, null);
+	}
+
+	@PostMapping("positions")
+	@PreAuthorize("@authorisationService.canEditSkillPositions(#positions)")
+	public void updatePositions(@Valid @RequestBody SkillPositionUpdates positions) {
+		skillService.updatePositions(positions);
 	}
 
 	@PostMapping("connections/{from}/{to}")

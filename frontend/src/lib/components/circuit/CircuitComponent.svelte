@@ -24,6 +24,7 @@
     import CheckpointComponent from "./checkpoint/CheckpointComponent.svelte";
     import { fade } from "svelte/transition";
     import { getVisibleCheckpoints } from "../../logic/edition/edition.svelte";
+    import ColumnSeparatorComponent from "./column/ColumnSeparatorComponent.svelte";
 
     let { warnings = $bindable() }: { warnings: Warning[] } = $props();
 
@@ -68,6 +69,10 @@
     function recalculateBounds() {
         getCircuit().boundingRect = () => element.getBoundingClientRect();
     }
+
+    let height = $derived(Math.max(0, ...getBlocks().map(block => block.row ?? 0)) + 1);
+    let width = $derived(getCircuit().width ?? 5);
+    let columnTemplate = $derived(`repeat(${width}, minmax(max-content, 1fr))`);
 </script>
 
 <svelte:window onresize={recalculateBounds} />
@@ -80,39 +85,37 @@
     <h1>{getCircuit().name}</h1>
     <ConnectionsComponent></ConnectionsComponent>
 
-    <div class="grid">
-        <GroupsComponent groups={getCircuit().groups}></GroupsComponent>
+    <div class="grid-shell">
+        <div class="grid" style:grid-template-columns={columnTemplate}>
+            <GroupsComponent groups={getCircuit().groups}></GroupsComponent>
 
-        {#if isLevel(ModuleLevel)}
-            {#each getVisibleCheckpoints() as checkpoint}
-                <CheckpointComponent {checkpoint}></CheckpointComponent>
+            {#if isLevel(ModuleLevel)}
+                {#each getVisibleCheckpoints() as checkpoint}
+                    <CheckpointComponent {checkpoint}></CheckpointComponent>
+                {/each}
+            {/if}
+
+            {#each { length: width } as _, column}
+                <ColumnComponent {column} {height}></ColumnComponent>
             {/each}
-        {/if}
 
-        {#each { length: getCircuit().width ?? 5 } as _, column}
-            {@const height = Math.max(0, ...getBlocks().map(block => block.row ?? 0)) + 1}
-            <ColumnComponent {column} {height}></ColumnComponent>
-        {/each}
+            {#each getVisibleBlocks() as block}
+                <BlockComponent {block}></BlockComponent>
+            {/each}
 
-        {#each getVisibleBlocks() as block}
-            <BlockComponent {block}></BlockComponent>
-        {/each}
+            {#if hasEditorRights()}
+                {#each { length: width + 1 } as _, column}
+                    <ColumnSeparatorComponent {column} columns={width} {height} />
+                {/each}
+            {/if}
+        </div>
     </div>
 </div>
 
-{#if hasEditorRights()}
-    <div>
-        <button onclick={() => (getCircuit().width = (getCircuit().width ?? 0) + 1)}>
-            +Column
-        </button>
-        <button onclick={() => (getCircuit().width = (getCircuit().width ?? 0) - 1)}>
-            -Column
-        </button>
-    </div>
-{/if}
-
 <style>
     .circuit {
+        --circuit-column-gap: 6em;
+        --circuit-column-half-gap: calc(var(--circuit-column-gap) / 2);
         font-size: clamp(0.2rem, calc(16 / 1732 * 100vw), 1rem);
 
         align-items: start;
@@ -134,8 +137,11 @@
     .grid {
         align-items: start;
         display: grid;
-        column-gap: 6em;
-        grid-template-columns: repeat(var(--columns, 5), 1fr);
+        column-gap: var(--circuit-column-gap);
         row-gap: 8em;
+    }
+
+    .grid-shell {
+        position: relative;
     }
 </style>

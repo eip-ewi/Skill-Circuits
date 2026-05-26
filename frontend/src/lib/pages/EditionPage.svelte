@@ -9,15 +9,16 @@
         fetchAuthorisation,
         getAuthorisation,
         toggleViewMode,
+        canEditCircuit,
     } from "../logic/authorisation.svelte";
     import { fetchDevMode } from "../logic/dev_mode.svelte";
-    import HeaderComponent from "../components/HeaderComponent.svelte";
-    import TrayComponent from "../components/side_controls/tray/TrayComponent.svelte";
     import SideControlsComponent from "../components/side_controls/SideControlsComponent.svelte";
     import ChoosePathComponent from "../components/ChoosePathComponent.svelte";
     import { fetchActivePath, fetchPathCustomisation } from "../logic/edition/active_path.svelte";
     import { fetchEdition, getEdition } from "../logic/edition/edition.svelte";
     import PageLayout from "./PageLayout.svelte";
+    import PageTabs from "../components/util/PageTabs.svelte";
+    import Tab from "../components/util/Tab.svelte";
     import { getDevMode } from "../logic/dev_mode.svelte.js";
     import { fetchRevealedSkills } from "../logic/circuit/unlocked_skills.svelte";
 
@@ -64,6 +65,13 @@
 
 <PageLayout fullWidth>
     {#await load() then _}
+        {#if canEditCircuit()}
+            <PageTabs>
+                <Tab page={`/editions/${editionId}`}>Circuit</Tab>
+                <Tab page={`/editions/tasks/${editionId}`}>Task list</Tab>
+            </PageTabs>
+        {/if}
+
         <WarningsComponent {warnings}></WarningsComponent>
         {#key getCircuit()}
             <CircuitComponent bind:warnings></CircuitComponent>
