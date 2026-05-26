@@ -12,9 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## Added
+- [Everyone] A legend that shows what each task symbol means. (@ogangalic)
 - [Teacher] Add task table overview page for editions. (@ffiedrich)
 - [Teacher] Column management has a UI interface. (@ralani)
-
 
 ## Changed
 

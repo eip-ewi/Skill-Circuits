@@ -77,13 +77,12 @@
 
 <svelte:window onresize={recalculateBounds} />
 
-<div transition:fade|global bind:this={element} class="circuit">
-    {#if hasEditorRights()}
-        <h1 style="padding-bottom: 2rem;">{getCircuit().name}</h1>
-    {:else}
-        <h1>{getCircuit().name}</h1>
-    {/if}
-
+<div
+    transition:fade|global
+    bind:this={element}
+    class="circuit"
+    style="--columns: {getCircuit().width ?? 5}">
+    <h1>{getCircuit().name}</h1>
     <ConnectionsComponent></ConnectionsComponent>
 
     <div class="grid-shell">
