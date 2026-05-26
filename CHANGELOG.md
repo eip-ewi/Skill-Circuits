@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 
 ## Fixed
+-[Evryone] The devtools error when logging in and the state mutation warning. (@ogangalic)
 
 ## [2526.2.0]
 
