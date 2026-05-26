@@ -1,4 +1,14 @@
 <script lang="ts">
+    /*
+    The circuit level is route context managed by our custom router.
+    Because route changes can be batched, navigation through a redirect page
+    must not rely on the previous circuit page being destroyed and recreated.
+    Circuit pages should set the level when loading, redirect pages should not clear it.
+
+    For the same reason, any page that has rective information should
+    await on a load function whose state depends on the id of the page.
+    This function should fetch all required information.
+ */
     import {
         extractPathVariable,
         getPage,
