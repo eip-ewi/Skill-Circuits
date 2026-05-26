@@ -14,6 +14,7 @@
     .tabs-wrapper {
         display: grid;
         place-items: center;
+        margin-bottom: 2em;
     }
 
     nav {

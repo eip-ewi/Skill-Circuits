@@ -20,11 +20,13 @@ package nl.tudelft.skills.controller;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import nl.tudelft.librador.resolver.annotations.PathEntity;
 import nl.tudelft.skills.annotation.AuthenticatedSCPerson;
 import nl.tudelft.skills.dto.create.SubmoduleCreate;
 import nl.tudelft.skills.dto.patch.SubmodulePatch;
+import nl.tudelft.skills.dto.patch.SubmodulePositionUpdates;
 import nl.tudelft.skills.dto.view.SubmoduleView;
 import nl.tudelft.skills.dto.view.circuit.edition.EditionLevelSubmoduleView;
 import nl.tudelft.skills.model.*;
@@ -68,6 +70,12 @@ public class SubmoduleController {
 	@PreAuthorize("@authorisationService.canEditModuleCircuit(#submodule.module)")
 	public void removeSubmoduleFromCircuit(@PathEntity Submodule submodule) {
 		submoduleService.updatePosition(submodule, null);
+	}
+
+	@PostMapping("positions")
+	@PreAuthorize("@authorisationService.canEditSubmodulePositions(#positions)")
+	public void updatePositions(@Valid @RequestBody SubmodulePositionUpdates positions) {
+		submoduleService.updatePositions(positions);
 	}
 
 	@DeleteMapping("{submodule}")

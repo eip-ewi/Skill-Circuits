@@ -17,6 +17,8 @@
  */
 package nl.tudelft.skills.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
@@ -25,6 +27,7 @@ import nl.tudelft.librador.dto.DTOConverter;
 import nl.tudelft.skills.dto.create.ExternalSkillCreate;
 import nl.tudelft.skills.dto.create.SkillCreate;
 import nl.tudelft.skills.dto.patch.SkillPatch;
+import nl.tudelft.skills.dto.patch.SkillPositionUpdates;
 import nl.tudelft.skills.model.AbstractSkill;
 import nl.tudelft.skills.model.ExternalSkill;
 import nl.tudelft.skills.model.Skill;
@@ -82,6 +85,17 @@ public class SkillService {
 	public void updatePosition(AbstractSkill skill, Integer column) {
 		skill.setColumn(column);
 		abstractSkillRepository.save(skill);
+	}
+
+	@Transactional
+	public void updatePositions(SkillPositionUpdates positions) {
+		List<AbstractSkill> skills = positions.updates().stream().map(update -> {
+			AbstractSkill skill = dtoConverter.apply(update.skill());
+			skill.setColumn(update.column());
+			return skill;
+		}).toList();
+
+		abstractSkillRepository.saveAll(skills);
 	}
 
 	@Transactional

@@ -12,10 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## Added
+- [Teacher] Add task table overview page for editions. (@ffiedrich)
+- [Teacher] Column management has a UI interface. (@ralani)
+
 
 ## Changed
 
 ## Fixed
+- [Student] When in the submodule view, the skills are now sorted. (@ogangalic)
 -[Evryone] The devtools error when logging in and the state mutation warning. (@ogangalic)
 
 ## [2526.2.0]
