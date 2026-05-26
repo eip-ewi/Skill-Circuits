@@ -159,11 +159,10 @@ public final class EditionScripts {
 
 		LocatorLocators newSubmodule = locators.query(".panel").withChild(locators.heading("Tray"))
 				.query(".block").heading("New submodule");
-		newSubmodule.hover();
-		session.page().mouse().down();
-		locators.query(".header").hover();
-		locators.query(".column").hover();
-		session.page().mouse().up();
+
+		Locator targetColumn = locators.query(".column").apply(Locator::first).locator();
+		newSubmodule.locator().dragTo(targetColumn,
+				new com.microsoft.playwright.Locator.DragToOptions().setForce(true));
 
 		LocatorLocators newlyCreated = locators.query(".block-wrapper")
 				.withChild(locators.text("New submodule"));
