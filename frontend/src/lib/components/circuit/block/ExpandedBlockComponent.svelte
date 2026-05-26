@@ -3,7 +3,7 @@
     import TasksComponent from "../item/TasksComponent.svelte";
     import { isCompleted } from "../../../logic/circuit/skill_state/completion";
     import { addTaskToPath, getItemsOnPath } from "../../../logic/edition/active_path.svelte";
-    import StudentTrayComponent from "../../side_controls/student_tray/StudentTrayComponent.svelte";
+    import ExpandedSideControlsComponent from "../../side_controls/ExpandedSideControlsComponent.svelte";
     import {
         getDraggingItem,
         dragItemEnter,
@@ -89,7 +89,7 @@
                 <div class="drop-indicator"></div>
             </div>
         </div>
-        <StudentTrayComponent {block}></StudentTrayComponent>
+        <ExpandedSideControlsComponent {block}></ExpandedSideControlsComponent>
     </dialog>
 {/if}
 

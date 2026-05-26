@@ -12,14 +12,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## Added
+- [Everyone] A legend that shows what each task symbol means. (@ogangalic)
 - [Teacher] Add task table overview page for editions. (@ffiedrich)
 - [Teacher] Column management has a UI interface. (@ralani)
 - [Everyone] Tasks can have deadlines. (@ralani)
 
 ## Changed
+- [Student] Optional skills are now marked as optional in the expanded submodule view. (@ffiedrich)
 
 ## Fixed
 - [Student] When in the submodule view, the skills are now sorted. (@ogangalic)
+- [Student] Optional skills are skipped for the completion state of submodules and checkpoints. Separate optional skill counters are displayed on the edition page. (@ffiedrich)
+
 ## [2526.2.0]
 
 ## Added 
