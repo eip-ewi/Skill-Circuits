@@ -1,22 +1,14 @@
 import type { Block } from "../../dto/circuit/block";
-import { getBlocks, getGraph } from "./circuit.svelte";
+import { getGraph } from "./circuit.svelte";
 import type { Graph } from "./graph";
-import { BlockStates } from "../../data/block_state";
 
 let focusModeBlock: Block | null = $state(null);
-let maxDepth: number | null = $derived.by(() => {
-    if (focusModeBlock === null) return null;
-    // Calculate max depth in up and down directions
-    const maxRowInCircuit = Math.max(0, ...getBlocks().map(block => block.row ?? 0));
-    return Math.max(maxRowInCircuit - (focusModeBlock.row ?? 0), focusModeBlock.row ?? 0);
-});
-let focusModeDepth: number = $state(defaultDepth());
 let focusModeVisibleBlocks: Set<number> = $derived.by(() => {
     const graph: Graph = getGraph();
     let blocks: Set<number> = new Set();
 
-    // Safety checks
-    if (focusModeBlock === null || focusModeDepth <= 0) {
+    // Safety check
+    if (focusModeBlock === null) {
         return blocks;
     }
 
@@ -44,7 +36,7 @@ let focusModeVisibleBlocks: Set<number> = $derived.by(() => {
         let current: { block: Block; depth: number; ascend: boolean } = queue.shift()!;
 
         // Stop if visited or above max depth
-        if (current.depth + 1 > focusModeDepth || visited.has(current.block.id)) {
+        if (stopTraversal(current) || visited.has(current.block.id)) {
             continue;
         }
 
@@ -68,8 +60,9 @@ let focusModeVisibleBlocks: Set<number> = $derived.by(() => {
     return blocks;
 });
 
-function defaultDepth() {
-    return maxDepth !== null && maxDepth <= 2 ? maxDepth : 2;
+function stopTraversal(current: { block: Block; depth: number; ascend: boolean }) {
+    // Only include one level of descendants
+    return !current.ascend && current.depth >= 1;
 }
 
 export function setFocusMode(block: Block | null) {
@@ -88,25 +81,17 @@ export function setFocusMode(block: Block | null) {
 
 export function resetFocusMode() {
     focusModeBlock = null;
-    safelyUpdateFocusModeDepth(defaultDepth());
 }
 
 export function toggleFocusMode(clickedBlock: Block) {
-    // Reset depth
-    safelyUpdateFocusModeDepth(defaultDepth());
+    // States of all blocks are updated within the block component
 
     if (getFocusModeBlock() !== clickedBlock) {
         // Set this block to focus mode
-        // States of all blocks are updated within the block component
         focusModeBlock = clickedBlock;
     } else {
         // Stop focus mode
         focusModeBlock = null;
-
-        // Reset state of all blocks
-        getBlocks().forEach(other => {
-            other.state = BlockStates.Inactive;
-        });
     }
 }
 
@@ -120,17 +105,4 @@ export function isInFocusMode(): boolean {
 
 export function visibleInFocusMode(block: Block): boolean {
     return focusModeVisibleBlocks.has(block.id);
-}
-
-export function safelyUpdateFocusModeDepth(depth: number) {
-    if (depth <= 0 || (maxDepth !== null && depth > maxDepth)) return;
-    focusModeDepth = depth;
-}
-
-export function getFocusModeDepth(): number {
-    return focusModeDepth;
-}
-
-export function getMaxDepth(): number {
-    return maxDepth!;
 }

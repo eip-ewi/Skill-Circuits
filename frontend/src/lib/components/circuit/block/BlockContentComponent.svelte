@@ -9,35 +9,42 @@
     import { getItemsOnPath } from "../../../logic/edition/active_path.svelte";
     import { isSkillItemRevealed } from "../../../logic/circuit/unlocked_skills.svelte";
     import { getCheckpoint, getVisibleCheckpoints } from "../../../logic/edition/edition.svelte";
+    import { BlockStates } from "../../../data/block_state";
+    import { FocusModeBlockStates } from "../../../data/focus_mode_block_state";
 
     let { block }: { block: Block } = $props();
 </script>
 
 <div class="heading">
-    {#if block.blockType === "skill" && block.external}
+    {#if block.blockType === "skill" && block.external && block.focusModeState !== FocusModeBlockStates.DisabledInFocusMode}
         <span class="label">External</span>
     {/if}
-    {#if block.blockType === "skill" && !block.essential}
+    {#if block.blockType === "skill" && !block.essential && block.focusModeState !== FocusModeBlockStates.DisabledInFocusMode}
         <span class="label">Optional</span>
     {/if}
     <span class="name">{block.name}</span>
 </div>
 
-{#if block.blockType === "skill"}
-    <TaskIconsComponent tasks={getItemsOnPath(block)}></TaskIconsComponent>
-{:else if hasEditorRights()}
-    <span>{block.items.length} {getLevel().items}</span>
-{:else}
-    <span>
-        {block.items.filter(
-            item => item.completed && (item.itemType !== "skill" || item.column !== null),
-        ).length}/{block.items.filter(
-            item =>
-                item.itemType !== "skill" ||
-                (item.column !== null && (!item.hidden || isSkillItemRevealed(item))),
-        ).length} completed
-    </span>
-{/if}
+<div
+    style={block.focusModeState === FocusModeBlockStates.DisabledInFocusMode
+        ? "visibility: hidden"
+        : ""}>
+    {#if block.blockType === "skill"}
+        <TaskIconsComponent tasks={getItemsOnPath(block)}></TaskIconsComponent>
+    {:else if hasEditorRights()}
+        <span>{block.items.length} {getLevel().items}</span>
+    {:else}
+        <span>
+            {block.items.filter(
+                item => item.completed && (item.itemType !== "skill" || item.column !== null),
+            ).length}/{block.items.filter(
+                item =>
+                    item.itemType !== "skill" ||
+                    (item.column !== null && (!item.hidden || isSkillItemRevealed(item))),
+            ).length} completed
+        </span>
+    {/if}
+</div>
 
 <style>
     .heading {

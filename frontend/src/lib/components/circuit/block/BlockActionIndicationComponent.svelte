@@ -90,10 +90,10 @@
     {/if}
     {#if action === BlockActions.FocusMode}
         <span class="fa-solid fa-eye"></span>
-        <span>Enter focus mode</span>
+        <span>Focus on skill</span>
     {/if}
     {#if action === BlockActions.StopFocusMode}
-        <span class="fa-solid fa-eye"></span>
+        <i class="fa-solid fa-eye-slash"></i>
         <span>Exit focus mode</span>
     {/if}
 </div>

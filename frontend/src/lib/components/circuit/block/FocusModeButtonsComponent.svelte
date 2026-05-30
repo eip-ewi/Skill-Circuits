@@ -4,22 +4,14 @@
     import Button from "../../util/Button.svelte";
     import { cubicInOut } from "svelte/easing";
     import { hasEditorRights } from "../../../logic/authorisation.svelte";
-    import { BlockStates } from "../../../data/block_state";
+    import { getFocusModeBlock, toggleFocusMode } from "../../../logic/circuit/focusMode.svelte";
     import {
-        getFocusModeBlock,
-        getFocusModeDepth,
-        getMaxDepth,
-        isInFocusMode,
-        resetFocusMode,
-        safelyUpdateFocusModeDepth,
-        toggleFocusMode,
-    } from "../../../logic/circuit/focusMode.svelte";
-    import { onDestroy, onMount } from "svelte";
-    import { getBlocks } from "../../../logic/circuit/circuit.svelte";
+        FocusModeBlockStates,
+        isVisibleAndInFocusMode,
+    } from "../../../data/focus_mode_block_state";
 
     let { block, action = $bindable() }: { block: Block; action: BlockAction | undefined } =
         $props();
-    let hovering: boolean = $state(false);
 
     let placement: "left" | "right" | "top" = $derived.by(() => {
         const widthConst = 256;
@@ -53,31 +45,20 @@
         };
     }
 
-    onDestroy(async () => {
-        resetFocusMode();
-
-        // Reset block states
-        getBlocks().forEach(other => {
-            if (
-                other.state === BlockStates.FocusMode ||
-                other.state === BlockStates.VisibleInFocusMode ||
-                other.state === BlockStates.DisabledInFocusMode
-            ) {
-                other.state = BlockStates.Inactive;
-            }
-        });
-    });
-
     function clickFocusModeButton() {
-        // Reset action
-        action = undefined;
-
         // Toggle focus mode
         toggleFocusMode(block);
+
+        // Set action
+        if (getFocusModeBlock() === block) {
+            action = BlockActions.StopFocusMode;
+        } else {
+            action = BlockActions.FocusMode;
+        }
     }
 
     function mouseEnter() {
-        if (block.state === BlockStates.FocusMode) {
+        if (block.focusModeState === FocusModeBlockStates.FocusOnBlock) {
             action = BlockActions.StopFocusMode;
         } else {
             action = BlockActions.FocusMode;
@@ -90,9 +71,7 @@
     transition:transition
     data-placement={placement}
     role="button"
-    tabindex="0"
-    onmouseenter={() => (hovering = true)}
-    onmouseleave={() => (hovering = false)}>
+    tabindex="0">
     <Button
         square
         style="height: min-content;"
@@ -101,34 +80,11 @@
         onmouseenter={mouseEnter}
         onmouseleave={() => (action = undefined)}>
         <span
-            class="fa-eye"
-            class:fa-regular={getFocusModeBlock() !== block}
-            class:fa-solid={getFocusModeBlock() === block}>
+            class="fa-solid"
+            class:fa-eye={getFocusModeBlock() !== block}
+            class:fa-eye-slash={getFocusModeBlock() === block}>
         </span>
     </Button>
-
-    {#if isInFocusMode() && hovering && getMaxDepth() > 1}
-        <div class="depth-controls" transition:transition>
-            Depth
-            <div class="depth-buttons">
-                <Button
-                    primary
-                    square
-                    aria-label="Decrease depth"
-                    onclick={() => safelyUpdateFocusModeDepth(getFocusModeDepth() - 1)}>
-                    <span class="fa-solid fa-minus"></span>
-                </Button>
-                {getFocusModeDepth()}
-                <Button
-                    primary
-                    square
-                    aria-label="Increase depth"
-                    onclick={() => safelyUpdateFocusModeDepth(getFocusModeDepth() + 1)}>
-                    <span class="fa-solid fa-plus"></span>
-                </Button>
-            </div>
-        </div>
-    {/if}
 </div>
 
 <style>
@@ -167,24 +123,5 @@
         padding: 0.5em 1em;
         position: absolute;
         transform-origin: bottom;
-    }
-
-    .depth-controls {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 0.5em;
-
-        border: var(--neutral-surface-border);
-        border-radius: var(--surface-border-radius);
-        background-color: var(--neutral-surface-colour);
-        color: var(--on-neutral-surface-colour);
-    }
-
-    .depth-buttons {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 0.6em;
     }
 </style>

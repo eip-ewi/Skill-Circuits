@@ -10,6 +10,10 @@
     import { getBlurBlocks } from "../../../logic/preferences.svelte";
     import { BlockStates } from "../../../data/block_state";
     import { isInFocusMode } from "../../../logic/circuit/focusMode.svelte";
+    import {
+        FocusModeBlockStates,
+        isVisibleAndInFocusMode,
+    } from "../../../data/focus_mode_block_state";
 
     let { from, to }: { from: Block; to: Block } = $props();
 
@@ -20,12 +24,11 @@
                 (isUnlocked(from) && from.blockType === "skill" && !from.essential)
             ),
     );
-    let visibleIfInFocusMode: boolean = $derived(
-        (from.state === BlockStates.FocusMode || from.state === BlockStates.VisibleInFocusMode) &&
-            (to.state === BlockStates.FocusMode || to.state === BlockStates.VisibleInFocusMode),
+    let visibleAndInFocusMode: boolean = $derived(
+        isVisibleAndInFocusMode(from.focusModeState) && isVisibleAndInFocusMode(to.focusModeState),
     );
     let disabledAndInFocusMode: boolean = $derived(
-        !locked && isInFocusMode() && !visibleIfInFocusMode,
+        !locked && isInFocusMode() && !visibleAndInFocusMode,
     );
     let animated: boolean = $state(false);
 
@@ -79,9 +82,9 @@
             xmlns="http://www.w3.org/2000/svg"
             class="line"
             d={generatePathString(path, radius)}
-            data-locked={locked && getBlurBlocks() && !(isInFocusMode() && visibleIfInFocusMode)}
+            data-locked={locked && getBlurBlocks() && !visibleAndInFocusMode}
             data-disabled-in-focus-mode={disabledAndInFocusMode}
-            data-preview={to.preview === true && locked}
+            data-preview={to.preview === true && locked && !visibleAndInFocusMode}
             bind:this={element}
             data-animate={animated} />
     {/if}

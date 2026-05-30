@@ -47,21 +47,21 @@
         setFocusMode,
         visibleInFocusMode,
     } from "../../../logic/circuit/focusMode.svelte";
+    import {
+        FocusModeBlockStates,
+        isVisibleAndInFocusMode,
+    } from "../../../data/focus_mode_block_state";
 
     let { block }: { block: Block } = $props();
 
     let locked: boolean = $derived(
-        !hasEditorRights() &&
-            !isUnlocked(block) &&
-            block.state !== BlockStates.VisibleInFocusMode &&
-            block.state !== BlockStates.FocusMode,
+        !hasEditorRights() && !isUnlocked(block) && !isVisibleAndInFocusMode(block.focusModeState),
     );
     let completed: boolean = $derived(!hasEditorRights() && isCompleted(block));
     let clickable: boolean = $derived(
         (!hasEditorRights() || getLevel() !== ModuleLevel) &&
             block.state !== BlockStates.Editing &&
-            block.state !== BlockStates.AssigningPaths &&
-            block.state !== BlockStates.DisabledInFocusMode,
+            block.state !== BlockStates.AssigningPaths,
     );
     let hidden: boolean = $derived(
         block.state === BlockStates.Inactive &&
@@ -137,12 +137,14 @@
     $effect(() => {
         if (isInFocusMode()) {
             if (getFocusModeBlock() === block) {
-                block.state = BlockStates.FocusMode;
+                block.focusModeState = FocusModeBlockStates.FocusOnBlock;
             } else if (visibleInFocusMode(block)) {
-                block.state = BlockStates.VisibleInFocusMode;
+                block.focusModeState = FocusModeBlockStates.VisibleInFocusMode;
             } else {
-                block.state = BlockStates.DisabledInFocusMode;
+                block.focusModeState = FocusModeBlockStates.DisabledInFocusMode;
             }
+        } else {
+            block.focusModeState = FocusModeBlockStates.NotInFocusMode;
         }
     });
 
@@ -263,61 +265,57 @@
         data-clickable={clickable}
         data-wiggle={block.state === BlockStates.Dragging}
         data-unfocus={unfocused}
-        data-pulse={block.state === BlockStates.Connecting || block.state === BlockStates.FocusMode}
+        data-pulse={block.state === BlockStates.Connecting ||
+            block.focusModeState === FocusModeBlockStates.FocusOnBlock}
         data-hidden={hidden}
-        data-focus-mode-hidden={block.state === BlockStates.DisabledInFocusMode}
+        data-focus-mode-hidden={block.focusModeState === FocusModeBlockStates.DisabledInFocusMode}
         onclick={click}
         onmouseenter={mouseEnterBlock}
         onmouseleave={mouseLeaveBlock}>
-        <div style={block.state === BlockStates.DisabledInFocusMode ? "visibility: hidden" : ""}>
-            {#if block.state === BlockStates.Editing}
-                <BlockEditComponent {block}></BlockEditComponent>
-            {:else if block.state === BlockStates.AssigningPaths && block.blockType === "skill"}
-                <BlockAssignPathsComponent skill={block}></BlockAssignPathsComponent>
-            {:else}
-                <BlockContentComponent {block}></BlockContentComponent>
-            {/if}
-        </div>
+        {#if block.state === BlockStates.Editing}
+            <BlockEditComponent {block}></BlockEditComponent>
+        {:else if block.state === BlockStates.AssigningPaths && block.blockType === "skill"}
+            <BlockAssignPathsComponent skill={block}></BlockAssignPathsComponent>
+        {:else}
+            <BlockContentComponent {block}></BlockContentComponent>
+        {/if}
     </div>
 
-    {#if block.state !== BlockStates.DisabledInFocusMode}
-        <div class="controls">
-            {#if block.blockType === "skill" && !block.external && (block.state === BlockStates.Hovering || block.state === BlockStates.FocusMode || isSkillBookmarked(block))}
-                <BookmarkSkillButtonComponent bind:action skill={block}
-                ></BookmarkSkillButtonComponent>
-            {/if}
-            {#if block.state === BlockStates.Hovering || block.state === BlockStates.FocusMode}
-                <FocusModeButtonsComponent bind:action {block}></FocusModeButtonsComponent>
-            {/if}
-            {#if (block.blockType !== "skill" || block.external) && !hasEditorRights()}
-                {#if block.state === BlockStates.Hovering}
-                    <ExpandedViewOpenButtonComponent bind:action bind:open={expanded}
-                    ></ExpandedViewOpenButtonComponent>
-                {/if}
-
-                {#if block.blockType === "submodule"}
-                    <ExpandedSubmoduleComponent
-                        submoduleBlock={block as SubmoduleBlock}
-                        bind:open={expanded}></ExpandedSubmoduleComponent>
-                {/if}
-            {/if}
-            {#if hasEditorRights() && (draggable || block.state === BlockStates.Hovering || block.state === BlockStates.Connecting || block.state === BlockStates.Editing)}
-                <BlockControlsComponent {block} bind:action bind:draggable></BlockControlsComponent>
-            {/if}
-            {#if block.state === BlockStates.WaitingForConnection}
-                <BlockManageConnectionsComponent
-                    skill={block as SkillBlock}
-                    bind:action
-                    bind:connectable></BlockManageConnectionsComponent>
-            {/if}
-            {#if action !== undefined}
-                <BlockActionIndicationComponent {action} {block}></BlockActionIndicationComponent>
-            {/if}
-        </div>
-
-        {#if isLevel(ModuleLevel) && !hasEditorRights()}
-            <ExpandedBlockComponent {block} bind:open={expanded}></ExpandedBlockComponent>
+    <div class="controls">
+        {#if block.blockType === "skill" && !block.external && (block.state === BlockStates.Hovering || isSkillBookmarked(block))}
+            <BookmarkSkillButtonComponent bind:action skill={block}></BookmarkSkillButtonComponent>
         {/if}
+        {#if block.blockType === "skill" && (block.state === BlockStates.Hovering || block.focusModeState === FocusModeBlockStates.FocusOnBlock) && !hasEditorRights()}
+            <FocusModeButtonsComponent bind:action {block}></FocusModeButtonsComponent>
+        {/if}
+        {#if (block.blockType !== "skill" || block.external) && !hasEditorRights()}
+            {#if block.state === BlockStates.Hovering}
+                <ExpandedViewOpenButtonComponent bind:action bind:open={expanded}
+                ></ExpandedViewOpenButtonComponent>
+            {/if}
+
+            {#if block.blockType === "submodule"}
+                <ExpandedSubmoduleComponent
+                    submoduleBlock={block as SubmoduleBlock}
+                    bind:open={expanded}></ExpandedSubmoduleComponent>
+            {/if}
+        {/if}
+        {#if hasEditorRights() && (draggable || block.state === BlockStates.Hovering || block.state === BlockStates.Connecting || block.state === BlockStates.Editing)}
+            <BlockControlsComponent {block} bind:action bind:draggable></BlockControlsComponent>
+        {/if}
+        {#if block.state === BlockStates.WaitingForConnection}
+            <BlockManageConnectionsComponent
+                skill={block as SkillBlock}
+                bind:action
+                bind:connectable></BlockManageConnectionsComponent>
+        {/if}
+        {#if action !== undefined}
+            <BlockActionIndicationComponent {action} {block}></BlockActionIndicationComponent>
+        {/if}
+    </div>
+
+    {#if isLevel(ModuleLevel) && !hasEditorRights()}
+        <ExpandedBlockComponent {block} bind:open={expanded}></ExpandedBlockComponent>
     {/if}
 </div>
 
