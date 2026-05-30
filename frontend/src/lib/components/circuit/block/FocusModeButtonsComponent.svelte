@@ -3,36 +3,37 @@
     import type { Block } from "../../../dto/circuit/block";
     import Button from "../../util/Button.svelte";
     import { cubicInOut } from "svelte/easing";
-    import { hasEditorRights } from "../../../logic/authorisation.svelte";
-    import { getFocusModeBlock, toggleFocusMode } from "../../../logic/circuit/focusMode.svelte";
+    import {
+        getFocusModeBlock,
+        resetFocusMode,
+        toggleFocusMode
+    } from "../../../logic/circuit/focusMode.svelte";
     import {
         FocusModeBlockStates,
-        isVisibleAndInFocusMode,
     } from "../../../data/focus_mode_block_state";
+    import {onDestroy} from "svelte";
+    import {getBlocks} from "../../../logic/circuit/circuit.svelte";
 
     let { block, action = $bindable() }: { block: Block; action: BlockAction | undefined } =
         $props();
 
-    let placement: "left" | "right" | "top" = $derived.by(() => {
-        const widthConst = 256;
-        if (hasEditorRights()) {
-            const controlsPos =
-                (block.boundingRect === undefined ? 0 : block.boundingRect!().right) + 128 >
-                window.innerWidth
-                    ? "left"
-                    : "right";
-            const defaultPos =
-                (block.boundingRect === undefined ? widthConst : block.boundingRect!().left) -
-                    widthConst <
-                0
-                    ? "right"
-                    : "left";
-            return defaultPos === controlsPos ? "top" : defaultPos;
-        }
-        return (block.boundingRect === undefined ? 0 : block.boundingRect!().right) + widthConst >
+    let placement: "left" | "right" = $derived.by(() => {
+        return (block.boundingRect === undefined ? 0 : block.boundingRect!().right) + 64 >
             window.innerWidth
             ? "left"
             : "right";
+    });
+
+    onDestroy(async () => {
+        // This means that the page changed or the user switched to editor mode
+        if (getFocusModeBlock() === block) {
+            resetFocusMode();
+
+            // Reset focus mode block states
+            getBlocks().forEach(other => {
+                other.focusModeState = FocusModeBlockStates.NotInFocusMode;
+            });
+        }
     });
 
     function transition(element: Element) {
