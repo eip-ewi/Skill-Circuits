@@ -10,7 +10,7 @@
     } from "../../../logic/circuit/focusMode.svelte";
     import { FocusModeBlockStates } from "../../../data/focus_mode_block_state";
     import { onDestroy } from "svelte";
-    import { getBlocks } from "../../../logic/circuit/circuit.svelte";
+    import {getBlocks, updateBlockNoCascade} from "../../../logic/circuit/circuit.svelte";
 
     let { block, action = $bindable() }: { block: Block; action: BlockAction | undefined } =
         $props();
@@ -26,11 +26,6 @@
         // This means that the page changed or the user switched to editor mode
         if (getFocusModeBlock() === block) {
             resetFocusMode();
-
-            // Reset focus mode block states
-            getBlocks().forEach(other => {
-                other.focusModeState = FocusModeBlockStates.NotInFocusMode;
-            });
         }
     });
 

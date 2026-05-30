@@ -134,14 +134,14 @@
     $effect(() => {
         if (isInFocusMode()) {
             if (getFocusModeBlock() === block) {
-                block.focusModeState = FocusModeBlockStates.FocusOnBlock;
+                updateBlockNoCascade(block, { focusModeState: FocusModeBlockStates.FocusOnBlock });
             } else if (visibleInFocusMode(block)) {
-                block.focusModeState = FocusModeBlockStates.VisibleInFocusMode;
+                updateBlockNoCascade(block, { focusModeState: FocusModeBlockStates.VisibleInFocusMode });
             } else {
-                block.focusModeState = FocusModeBlockStates.DisabledInFocusMode;
+                updateBlockNoCascade(block, { focusModeState: FocusModeBlockStates.DisabledInFocusMode });
             }
         } else {
-            block.focusModeState = FocusModeBlockStates.NotInFocusMode;
+            updateBlockNoCascade(block, { focusModeState: FocusModeBlockStates.NotInFocusMode });
         }
     });
 
