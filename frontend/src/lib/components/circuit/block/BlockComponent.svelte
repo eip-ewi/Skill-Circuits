@@ -1,34 +1,23 @@
 <script lang="ts">
     import type { Block } from "../../../dto/circuit/block";
     import type { SkillBlock } from "../../../dto/circuit/module/skill";
-    import { onDestroy, onMount, tick } from "svelte";
-    import type { Graph } from "../../../logic/circuit/graph";
-    import type { TaskItem } from "../../../dto/circuit/module/task";
+    import { onMount, tick } from "svelte";
     import { isUnlocked } from "../../../logic/circuit/skill_state/unlock";
-    import { hasEditorRights, getAuthorisation } from "../../../logic/authorisation.svelte";
+    import { hasEditorRights } from "../../../logic/authorisation.svelte";
     import { getLevel, isLevel } from "../../../logic/circuit/level.svelte";
     import { isCompleted } from "../../../logic/circuit/skill_state/completion";
     import { loadPage } from "../../../logic/routing.svelte";
-    import { EditionLevel, ModuleLevel } from "../../../data/level";
-    import TaskIconComponent from "../item/TaskIconComponent.svelte";
-    import TaskIconsComponent from "../item/TaskIconsComponent.svelte";
+    import { ModuleLevel } from "../../../data/level";
     import BlockActionIndicationComponent from "./BlockActionIndicationComponent.svelte";
     import ExpandedViewOpenButtonComponent from "./ExpandedViewOpenButtonComponent.svelte";
     import ExpandedBlockComponent from "./ExpandedBlockComponent.svelte";
-    import {
-        getBlock,
-        getBlocks,
-        getCircuit,
-        getGraph,
-    } from "../../../logic/circuit/circuit.svelte";
+    import { getBlocks, updateBlockNoCascade } from "../../../logic/circuit/circuit.svelte";
     import BlockControlsComponent from "./BlockControlsComponent.svelte";
     import { type BlockAction, BlockActions } from "../../../data/block_action";
-    import { type BlockState, BlockStates } from "../../../data/block_state";
-    import BlockCreateConnectionsComponent from "./BlockManageConnectionsComponent.svelte";
+    import { BlockStates } from "../../../data/block_state";
     import BlockManageConnectionsComponent from "./BlockManageConnectionsComponent.svelte";
     import BlockEditComponent from "./BlockEditComponent.svelte";
     import BlockContentComponent from "./BlockContentComponent.svelte";
-    import { updateBlockPosition } from "../../../logic/circuit/updates/position_updates.svelte";
     import BlockAssignPathsComponent from "./BlockAssignPathsComponent.svelte";
     import { disableColumns, enableColumns } from "../../../dto/columns.svelte";
     import BookmarkSkillButtonComponent from "./BookmarkSkillButtonComponent.svelte";
@@ -59,7 +48,7 @@
     );
     let completed: boolean = $derived(!hasEditorRights() && isCompleted(block));
     let clickable: boolean = $derived(
-        (!hasEditorRights() || getLevel() !== ModuleLevel) &&
+        (!hasEditorRights() || !isLevel(ModuleLevel)) &&
             block.state !== BlockStates.Editing &&
             block.state !== BlockStates.AssigningPaths,
     );
@@ -70,6 +59,14 @@
             !block.external &&
             block.hidden,
     );
+
+    function asSubmoduleBlock(value: Block): SubmoduleBlock {
+        return value as SubmoduleBlock;
+    }
+
+    function asSkillBlock(value: Block): SkillBlock {
+        return value as SkillBlock;
+    }
 
     let draggable: boolean = $state(false);
     let action: BlockAction | undefined = $state();
@@ -149,7 +146,7 @@
     });
 
     function recalculateBounds() {
-        block.boundingRect = () => element?.getBoundingClientRect?.();
+        updateBlockNoCascade(block, { boundingRect: () => element?.getBoundingClientRect?.() });
     }
 
     onMount(async () => {
@@ -165,14 +162,14 @@
         if (block.state !== BlockStates.Inactive) {
             return;
         }
-        block.state = BlockStates.Hovering;
+        updateBlockNoCascade(block, { state: BlockStates.Hovering });
     }
 
     function mouseLeave() {
         if (block.state !== BlockStates.Hovering) {
             return;
         }
-        block.state = BlockStates.Inactive;
+        updateBlockNoCascade(block, { state: BlockStates.Inactive });
     }
 
     function mouseEnterBlock() {
@@ -193,7 +190,9 @@
     }
 
     $effect(() => {
-        block.preview = !hasEditorRights() && block.state === BlockStates.Hovering;
+        updateBlockNoCascade(block, {
+            preview: !hasEditorRights() && block.state === BlockStates.Hovering,
+        });
     });
 
     function click() {
@@ -212,7 +211,7 @@
         if (!(event.target as HTMLElement).classList.contains("block-wrapper")) {
             return;
         }
-        block.state = BlockStates.Dragging;
+        updateBlockNoCascade(block, { state: BlockStates.Dragging });
         event.dataTransfer!.setDragImage(element, 32, 24);
         event.dataTransfer!.effectAllowed = "move";
         event.dataTransfer!.setData("skill-circuits/block", block.id.toString());
@@ -223,7 +222,7 @@
         if (!(event.target as HTMLElement).classList.contains("block-wrapper")) {
             return;
         }
-        block.state = BlockStates.Inactive;
+        updateBlockNoCascade(block, { state: BlockStates.Inactive });
         disableColumns();
     }
 </script>
@@ -296,7 +295,7 @@
 
             {#if block.blockType === "submodule"}
                 <ExpandedSubmoduleComponent
-                    submoduleBlock={block as SubmoduleBlock}
+                    submoduleBlock={asSubmoduleBlock(block)}
                     bind:open={expanded}></ExpandedSubmoduleComponent>
             {/if}
         {/if}
@@ -305,7 +304,7 @@
         {/if}
         {#if block.state === BlockStates.WaitingForConnection}
             <BlockManageConnectionsComponent
-                skill={block as SkillBlock}
+                skill={asSkillBlock(block)}
                 bind:action
                 bind:connectable></BlockManageConnectionsComponent>
         {/if}

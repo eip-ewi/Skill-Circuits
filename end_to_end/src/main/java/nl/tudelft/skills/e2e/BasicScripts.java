@@ -39,7 +39,10 @@ public final class BasicScripts {
 	public void logIn(User user) {
 		session.navigate("/");
 
-		locators.link("Click here to log in").click();
+		// Wait for checkAuthentication() in App.svelte to resolve and render
+		LocatorLocators loginLink = locators.link("Click here to log in");
+		loginLink.waitFor();
+		loginLink.click();
 
 		locators.label("Username").fill(user.username());
 		locators.label("Password").fill(user.password());

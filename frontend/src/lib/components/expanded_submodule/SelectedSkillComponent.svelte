@@ -39,6 +39,9 @@
     ondragover={dragItemOver}
     ondragleave={dragItemLeave}
     ondrop={drop}>
+    {#if !block.essential}
+        <span class="label">Optional</span>
+    {/if}
     <h2 class="name">{block.name}</h2>
     <TasksComponent tasks={getItemsOnPath(block)}></TasksComponent>
     <div class="drop-indicator"></div>
@@ -68,5 +71,10 @@
 
     .content[data-dragging="false"] .drop-indicator {
         display: none;
+    }
+
+    .label {
+        font-style: italic;
+        opacity: 35%;
     }
 </style>

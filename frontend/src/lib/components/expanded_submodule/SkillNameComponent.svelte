@@ -17,6 +17,7 @@
 <button
     class="skill-name"
     data-locked={locked && getBlurBlocks()}
+    data-essential={block.essential}
     data-completed={completed}
     data-selected={selectedSkill === block}
     onclick={() => {
@@ -65,5 +66,13 @@
     .skill-name[data-selected="true"][data-locked="true"] {
         /* If the skill is locked and hovered over/selected, do not blur */
         filter: none;
+    }
+
+    .skill-name[data-essential="false"] {
+        font-style: italic;
+    }
+
+    .skill-name[data-essential="false"] .icon {
+        font-style: italic;
     }
 </style>
