@@ -10,7 +10,6 @@
     } from "../../../logic/circuit/focusMode.svelte";
     import { FocusModeBlockStates } from "../../../data/focus_mode_block_state";
     import { onDestroy } from "svelte";
-    import {getBlocks, updateBlockNoCascade} from "../../../logic/circuit/circuit.svelte";
 
     let { block, action = $bindable() }: { block: Block; action: BlockAction | undefined } =
         $props();

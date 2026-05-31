@@ -136,9 +136,13 @@
             if (getFocusModeBlock() === block) {
                 updateBlockNoCascade(block, { focusModeState: FocusModeBlockStates.FocusOnBlock });
             } else if (visibleInFocusMode(block)) {
-                updateBlockNoCascade(block, { focusModeState: FocusModeBlockStates.VisibleInFocusMode });
+                updateBlockNoCascade(block, {
+                    focusModeState: FocusModeBlockStates.VisibleInFocusMode,
+                });
             } else {
-                updateBlockNoCascade(block, { focusModeState: FocusModeBlockStates.DisabledInFocusMode });
+                updateBlockNoCascade(block, {
+                    focusModeState: FocusModeBlockStates.DisabledInFocusMode,
+                });
             }
         } else {
             updateBlockNoCascade(block, { focusModeState: FocusModeBlockStates.NotInFocusMode });
