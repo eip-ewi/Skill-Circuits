@@ -18,7 +18,9 @@
 package nl.tudelft.skills.e2e;
 
 import java.util.List;
+import java.util.Map;
 
+import com.microsoft.playwright.JSHandle;
 import com.microsoft.playwright.Locator;
 
 public final class EditionScripts {
@@ -155,14 +157,13 @@ public final class EditionScripts {
 
 		navigateTo(edition);
 
-		locators.button("Open tray").click();
-
 		LocatorLocators newSubmodule = locators.query(".panel").withChild(locators.heading("Tray"))
 				.query(".block").heading("New submodule");
 
+		openTray(newSubmodule.locator());
+
 		Locator targetColumn = locators.query(".column").apply(Locator::first).locator();
-		newSubmodule.locator().dragTo(targetColumn,
-				new com.microsoft.playwright.Locator.DragToOptions().setForce(true));
+		htmlDragAndDrop(newSubmodule.locator(), targetColumn);
 
 		LocatorLocators newlyCreated = locators.query(".block-wrapper")
 				.withChild(locators.text("New submodule"));
@@ -201,23 +202,15 @@ public final class EditionScripts {
 	}
 
 	public void addSkill(String skill) {
-		locators.button("Open tray").click();
-
-		// Force a paint cycle so Svelte commits trayOpen=true and the panel's
-		// aria-expanded flips before the locator below polls visibility.
-		session.page().evaluate(
-				"() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))");
-
 		LocatorLocators newSkillBlock = locators.query(".panel")
 				.withChild(locators.heading("Tray"))
 				.query(".block").heading("New skill");
 
-		newSkillBlock.waitFor();
+		openTray(newSkillBlock.locator());
 
 		Locator targetColumn = locators.query(".column").apply(Locator::first).locator();
 
-		newSkillBlock.locator().dragTo(targetColumn,
-				new com.microsoft.playwright.Locator.DragToOptions().setForce(true));
+		htmlDragAndDrop(newSkillBlock.locator(), targetColumn);
 
 		LocatorLocators newlyCreated = locators.query(".block-wrapper").withChild(locators.text("New skill"));
 		newlyCreated.hover();
@@ -345,5 +338,51 @@ public final class EditionScripts {
 				.filter(new Locator.FilterOptions().setHasText("Checkpoints"))
 				.locator("button[aria-label='Close panel']")
 				.click();
+	}
+
+	/**
+	 * Performs a native HTML5 drag-and-drop by dispatching the DOM drag events with a shared
+	 * {@code DataTransfer}. The circuit uses native HTML5 drag-and-drop (draggable + ondragstart / ondrop
+	 * reading dataTransfer), which Playwright's mouse-based {@code dragTo()} neither fires nor tolerates when
+	 * the elements are outside the viewport ("Element is outside of the viewport"). Dispatching the events
+	 * runs the handlers directly on the elements, so this is viewport-independent and exercises the exact
+	 * code path the app listens for.
+	 */
+	private void htmlDragAndDrop(Locator source, Locator target) {
+		source.scrollIntoViewIfNeeded();
+
+		// effectAllowed must be a writable own property: assigning it (as the tray block's
+		// dragstart handler does) is silently ignored on a synthetic DataTransfer, so we
+		// predefine it as "copy" — the value both the "New submodule" and "New skill" tray
+		// blocks use, which the column's drop handler checks before creating the block.
+		JSHandle dataTransfer = session.page().evaluateHandle("() => {"
+				+ "  const dt = new DataTransfer();"
+				+ "  Object.defineProperty(dt, 'effectAllowed', {value: 'copy', writable: true, configurable: true});"
+				+ "  dt.setData('skill-circuits/block', 'new');"
+				+ "  return dt;"
+				+ "}");
+		Map<String, Object> init = Map.of("dataTransfer", dataTransfer);
+
+		source.dispatchEvent("dragstart", init);
+		target.dispatchEvent("dragenter", init);
+		target.dispatchEvent("dragover", init);
+		target.dispatchEvent("drop", init);
+		source.dispatchEvent("dragend", init);
+	}
+
+	/**
+	 * Opens the tray panel and waits for the given placeable block to become visible. Right after navigation
+	 * the circuit's async data load can re-render the side controls and drop the first click, so the "Open
+	 * tray" click is retried until the tray is actually open.
+	 */
+	private void openTray(Locator placeableBlock) {
+		Locator openTrayButton = session.page().locator("button[aria-label='Open tray']");
+		for (int attempt = 0; attempt < 12 && !placeableBlock.isVisible(); attempt++) {
+			if (openTrayButton.isVisible()) {
+				openTrayButton.click();
+			}
+			session.page().waitForTimeout(500);
+		}
+		placeableBlock.waitFor();
 	}
 }
