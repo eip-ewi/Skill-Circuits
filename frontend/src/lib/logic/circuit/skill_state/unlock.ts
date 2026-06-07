@@ -47,6 +47,7 @@ export function isUnlocked(
         return false;
     }
 
+    // The graph only contains visible blocks (hidden blocks are skipped here)
     let allParentsUnlocked =
         graph.has(block) &&
         !graph.getParents(block).some(parent => !isUnlocked(parent, graph, recursionCheck - 1));

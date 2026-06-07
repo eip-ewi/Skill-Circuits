@@ -69,7 +69,10 @@ public class SkillStateService {
 			return false;
 		}
 
+		// Skip skills that are hidden and not revealed
 		return abstractSkill.getParents().stream()
+				.filter(parent -> !((parent instanceof Skill) && ((Skill) parent).isHidden()
+						&& !revealedSkillIds.contains(parent.getId())))
 				.allMatch(parent -> isSkillUnlocked(parent, completedTaskIds, revealedSkillIds, activePath,
 						tasksAdded, tasksRemoved));
 	}

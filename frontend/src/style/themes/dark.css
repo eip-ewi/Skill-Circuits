@@ -21,6 +21,7 @@
     /* Groups */
     --group-colour: color-mix(in oklab, var(--background-colour) 80%, white);
     --on-group-colour: color-mix(in oklab, var(--group-colour) 60%, white);
+    --on-group-colour-higher-contrast: color-mix(in oklab, var(--group-colour) 30%, white);
 
     /* Checkpoints */
     --checkpoint-line-colour: color-mix(in srgb, var(--on-background-colour) 75%, transparent);

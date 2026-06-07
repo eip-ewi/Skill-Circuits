@@ -2,10 +2,7 @@ import { getEdition } from "./edition.svelte";
 import type { Path } from "../../dto/path";
 import { withCsrf } from "../csrf";
 import type { Block } from "../../dto/circuit/block";
-import type { Item } from "../../dto/circuit/item";
-import { getLevel } from "../circuit/level.svelte";
-import { ModuleLevel } from "../../data/level";
-import { hasEditorRights, getAuthorisation } from "../authorisation.svelte";
+import { hasEditorRights } from "../authorisation.svelte";
 import type { TaskItem } from "../../dto/circuit/module/task";
 
 export const pathState: { activePath: Path | null; tasksAdded: number[]; tasksRemoved: number[] } =
@@ -46,13 +43,18 @@ export function getItemsOnPath<B extends Block>(block: B): B["items"] {
 }
 
 export function isTaskOnPath(task: TaskItem): boolean {
-    if (pathState.activePath === null) {
-        return !pathState.tasksRemoved.includes(task.id);
+    if (pathState.tasksRemoved.includes(task.id)) {
+        return false;
     }
-    return (
-        !pathState.tasksRemoved.includes(task.id) &&
-        (task.paths.includes(pathState.activePath!.id) || pathState.tasksAdded.includes(task.id))
-    );
+    if (pathState.tasksAdded.includes(task.id)) {
+        return true;
+    }
+
+    if (pathState.activePath === null) {
+        return true;
+    }
+
+    return task.paths.includes(pathState.activePath.id);
 }
 
 export async function selectPath(path: Path) {

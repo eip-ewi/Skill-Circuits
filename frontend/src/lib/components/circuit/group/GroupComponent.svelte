@@ -57,7 +57,8 @@
         height: calc(100% + 4em);
         margin: -2em -2em;
         position: relative;
-        z-index: -30;
+        /*Justification: non iteractable should be lower than the SVG lines*/
+        z-index: -1;
     }
 
     .name {

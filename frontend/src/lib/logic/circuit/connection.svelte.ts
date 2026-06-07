@@ -30,12 +30,19 @@ export function createConnectionPath(from: Block, to: Block): LineSegments | und
     let start: Point = { x: relativeFrom.x1 + fromRect.width / 2, y: relativeFrom.y2 };
     let end: Point = { x: relativeTo.x1 + toRect.width / 2, y: relativeTo.y1 };
 
-    let gutterOffset = (to.column! / (getCircuit().width! - 1) - 0.5) * 56 * scale;
+    let circuitWidth = getCircuit().width ?? 1;
+    let gutterOffset = 0;
+    if (circuitWidth > 1) {
+        gutterOffset = (to.column! / (circuitWidth - 1) - 0.5) * 56 * scale;
+    }
 
     let aboveChild: Point = { x: end.x, y: end.y - 64 * scale + gutterOffset };
 
     if (start.y > end.y) {
-        let gutterStepSize = (56 * scale) / (getCircuit().width! - 1);
+        let gutterStepSize = 0;
+        if (circuitWidth > 1) {
+            gutterStepSize = (56 * scale) / (circuitWidth - 1);
+        }
         let horizontalDirection: "left" | "right" = end.x < start.x ? "left" : "right";
 
         let belowParent: Point = {

@@ -19,6 +19,7 @@ package nl.tudelft.skills.dto.id;
 
 import org.springframework.data.repository.CrudRepository;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -35,6 +36,12 @@ public class AbstractSkillId extends IdDTO<AbstractSkill, Long> {
 
 	public AbstractSkillId(Long id) {
 		super(id);
+	}
+
+	@Override
+	@NotNull
+	public Long getId() {
+		return super.getId();
 	}
 
 	@Override

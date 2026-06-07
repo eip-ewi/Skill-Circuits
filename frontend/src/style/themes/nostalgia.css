@@ -22,14 +22,17 @@
     --glass-glint-colour: transparent;
 
     /* Columns */
-    --column-radius: 0;
-    --column-colour: color-mix(in srgb, var(--green) 15%, transparent);
+    --column-colour: color-mix(in srgb, var(--secondary-colour) 15%, transparent);
+    --column-border-radius: 0;
+    --column-button-border-radius: 0;
+    --column-separator-border-radius: 0;
 
     /* Groups */
     --group-colour: white;
     --group-border-colour: black;
     --group-border-radius: 0;
     --on-group-colour: var(--green2);
+    --on-group-colour-higher-contrast: black;
 
     /* Checkpoints */
     --checkpoint-surface-border: 1px solid black;

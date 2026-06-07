@@ -7,6 +7,7 @@ import { hasEditorRights } from "../authorisation.svelte";
 import { isSkillRevealed } from "./unlocked_skills.svelte";
 import { BlockStates } from "../../data/block_state";
 import type { EditionCircuit } from "../../dto/circuit/edition/edition";
+import { untrack } from "svelte";
 
 let circuit: Circuit | undefined = $state(undefined);
 let blocks: Block[] | undefined = $derived(
@@ -102,6 +103,10 @@ export function getGraph(): Graph {
 export async function fetchCircuit(url: string) {
     let response = await fetch(url);
     circuit = await response.json();
+}
+
+export function updateBlockNoCascade(block: Block, update: Partial<Block>): void {
+    untrack(() => Object.assign(block, update));
 }
 
 export function initModuleGraphs(editionCircuit: EditionCircuit) {
