@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onDestroy, onMount, type Snippet, tick } from "svelte";
+    import type { Snippet } from "svelte";
 
     let {
         open = $bindable(),
@@ -10,25 +10,57 @@
     let anchor: HTMLElement;
     let dropdown: HTMLElement;
 
+    let rafId: number | undefined;
+
+    // Keep the (top-layer, position: fixed) dropdown aligned to its anchor. Positions are in
+    // viewport coordinates, so they must be recomputed whenever the surrounding content scrolls
+    // or the window resizes — otherwise the dropdown stays where it was first opened.
+    function reposition() {
+        if (dropdown?.showPopover === undefined) {
+            return;
+        }
+        const a = anchor.getBoundingClientRect();
+        dropdown.style.left =
+            a.left + dropdown.getBoundingClientRect().width < window.innerWidth
+                ? `${a.left}px`
+                : `${a.right - dropdown.getBoundingClientRect().width}px`;
+        dropdown.style.top = `${a.bottom}px`;
+    }
+
+    // Coalesce bursts of scroll/resize events into one reposition per frame.
+    function scheduleReposition() {
+        if (rafId !== undefined) {
+            return;
+        }
+        rafId = requestAnimationFrame(() => {
+            rafId = undefined;
+            reposition();
+        });
+    }
+
     $effect(() => {
-        if (open) {
-            if (dropdown.showPopover !== undefined) {
-                dropdown.showPopover();
-                if (
-                    anchor.getBoundingClientRect().left + dropdown.getBoundingClientRect().width <
-                    window.innerWidth
-                ) {
-                    dropdown.style.left = `${anchor.getBoundingClientRect().left}px`;
-                } else {
-                    dropdown.style.left = `${anchor.getBoundingClientRect().right - dropdown.getBoundingClientRect().width}px`;
-                }
-                dropdown.style.top = `${anchor.getBoundingClientRect().bottom}px`;
-            }
-        } else {
+        if (!open) {
             dropdown.hidePopover?.();
             dropdown.style.removeProperty("left");
             dropdown.style.removeProperty("top");
+            return;
         }
+        if (dropdown.showPopover === undefined) {
+            return;
+        }
+        dropdown.showPopover();
+        reposition();
+        // Capture phase so scrolling inside nested scroll containers is caught (scroll doesn't bubble).
+        window.addEventListener("scroll", scheduleReposition, true);
+        window.addEventListener("resize", scheduleReposition);
+        return () => {
+            window.removeEventListener("scroll", scheduleReposition, true);
+            window.removeEventListener("resize", scheduleReposition);
+            if (rafId !== undefined) {
+                cancelAnimationFrame(rafId);
+            }
+            rafId = undefined;
+        };
     });
 </script>
 
