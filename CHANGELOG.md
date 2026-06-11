@@ -24,6 +24,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Developers] The devtools error when logging in and the state mutation warning. (@ogangalic)
 - [Student] Optional skills are skipped for the completion state of submodules and checkpoints. Separate optional skill counters are displayed on the edition page. (@ffiedrich)
 
+## [2526.2.1]
+
+## Added
+
+## Changed
+
+## Fixed
+- [Student] Page redirects from external skills or bookmarked skills work as intended. (@ralani)
+
 ## [2526.2.0]
 
 ## Added 

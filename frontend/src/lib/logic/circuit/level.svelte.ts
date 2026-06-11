@@ -3,7 +3,8 @@ import type { Level } from "../../data/level";
 let level: Level | undefined = $state();
 
 export function getLevel(): Level {
-    return level!;
+    if (level === undefined) throw new Error("The level of the circuit is not known!");
+    return level;
 }
 
 export function isOnCircuit(): boolean {
