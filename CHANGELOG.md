@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Everyone] A legend that shows what each task symbol means. (@ogangalic)
 - [Teacher] Add task table overview page for editions. (@ffiedrich)
 - [Teacher] Column management has a UI interface. (@ralani)
+- [Everyone] Tasks can have deadlines. (@ralani)
 
 ## Changed
 - [Student] Optional skills are now marked as optional in the expanded submodule view. (@ffiedrich)
