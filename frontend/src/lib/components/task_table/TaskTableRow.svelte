@@ -3,9 +3,14 @@
     import { TaskIcons } from "../../dto/task_icons";
     import Link from "../util/Link.svelte";
     import TaskPathEditComponent from "../circuit/item/TaskPathEditComponent.svelte";
-    import TaskTableLink from "./TaskTableLink.svelte";
+    import { editTaskLink } from "../../logic/circuit/updates/task_updates";
 
     let { task }: { task: TaskInTaskList } = $props();
+
+    async function editLink(event: Event) {
+        const newLink = (event.target as HTMLInputElement).value;
+        await editTaskLink(task.taskInfo, newLink);
+    }
 </script>
 
 {#if task.taskInfo !== undefined}
@@ -30,7 +35,12 @@
         <th style="max-width: 12em">{task.submoduleName}</th>
         <th style="max-width: 12em">{task.moduleName}</th>
         <th class="link_column">
-            <TaskTableLink taskInfo={task.taskInfo}></TaskTableLink>
+            <input
+                name="link"
+                type="text"
+                placeholder="Task link"
+                onchange={editLink}
+                value={task.taskInfo.link ?? ""} />
         </th>
     </tr>
 {/if}
@@ -50,5 +60,15 @@
 
     th:not(:first-child) {
         border-left: 0.18em solid var(--on-group-colour);
+    }
+
+    input {
+        background-color: var(--neutral-surface-colour);
+        border: 1px solid var(--on-block-divider-colour);
+        border-radius: 0.5em;
+        color: var(--on-neutral-surface-colour);
+        padding: 0.4em 0.5em;
+        width: 100%;
+        font-size: 80%;
     }
 </style>
