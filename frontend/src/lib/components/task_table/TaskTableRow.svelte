@@ -3,6 +3,7 @@
     import { TaskIcons } from "../../dto/task_icons";
     import Link from "../util/Link.svelte";
     import TaskPathEditComponent from "../circuit/item/TaskPathEditComponent.svelte";
+    import TaskTableLink from "./TaskTableLink.svelte";
 
     let { task }: { task: TaskInTaskList } = $props();
 </script>
@@ -29,26 +30,20 @@
         <th style="max-width: 12em">{task.submoduleName}</th>
         <th style="max-width: 12em">{task.moduleName}</th>
         <th class="link_column">
-            {#if task.taskInfo.link === null}
-                -
-            {:else}
-                <Link href={task.taskInfo.link} target="_blank">
-                    <span>{task.taskInfo.link}</span>
-                </Link>
-            {/if}
+            <TaskTableLink taskInfo={task.taskInfo}></TaskTableLink>
         </th>
     </tr>
 {/if}
 
 <style>
     th {
-        padding: 0 1em;
+        padding: 0 0.5em;
         height: 3.2em;
         overflow: auto;
     }
 
     .link_column {
-        max-width: 17em;
+        min-width: 25em;
         overflow: hidden;
         text-overflow: ellipsis;
     }
