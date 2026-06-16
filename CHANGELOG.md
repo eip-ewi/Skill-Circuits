@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Teacher] Add task table overview page for editions. (@ffiedrich)
 - [Teacher] Column management has a UI interface. (@ralani)
 - [Everyone] Tasks can have deadlines. (@ralani)
+- [Teacher] Links are editable in the edition task list. (@ffiedrich)
+- [Teacher] Tasks can be filtered by links and other properties the edition task list. (@ffiedrich)
 
 ## Changed
 - [Student] Optional skills are now marked as optional in the expanded submodule view. (@ffiedrich)
