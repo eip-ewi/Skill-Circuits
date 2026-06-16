@@ -16,7 +16,7 @@
 {#if task.taskInfo !== undefined}
     <tr>
         <th style="max-width: 12em">{task.taskInfo.name}</th>
-        <th class="path_column" style="max-width: 5em; overflow: visible;">
+        <th class="path_column" style="overflow: visible; padding: 0 1em;">
             {#if task.taskItem.taskType === "regular"}
                 <TaskPathEditComponent task={task.taskItem}></TaskPathEditComponent>
             {:else}
