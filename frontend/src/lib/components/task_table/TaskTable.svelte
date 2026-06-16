@@ -75,6 +75,9 @@
     );
     let searchString: string = $state("");
 
+    let showTasksWithLinks: boolean = $state(true);
+    let showTasksWithoutLinks: boolean = $state(true);
+
     function sortByColumn(column: SortableTaskTableColumn, order: -1 | 1) {
         tasks.sort((a: TaskInTaskList, b: TaskInTaskList) => column.sortAsc(a, b) * order);
 
@@ -90,16 +93,29 @@
     }
 
     function isRowVisible(task: TaskInTaskList) {
+        const linkFilter =
+            ((task.taskInfo.link === null || task.taskInfo.link === "") && showTasksWithoutLinks) ||
+            (task.taskInfo.link !== null && task.taskInfo.link !== "" && showTasksWithLinks);
         if (searchColumn === undefined || searchString === "") {
-            return true;
+            return linkFilter;
         }
-        // In the future, other filters may be implemented and added here
-        return searchColumn.getAttr(task).toLowerCase().includes(searchString.toLowerCase());
+        return (
+            linkFilter &&
+            searchColumn.getAttr(task).toLowerCase().includes(searchString.toLowerCase())
+        );
     }
 
     function updateSearchColumn(event: Event) {
         const newCol = (event.target as HTMLInputElement).value;
         searchColumn = columns.find(c => c.name === newCol) as SearchableTaskTableColumn;
+    }
+
+    function updateLinkFilter(event: Event) {
+        let newFilters = Array.from((event.target as HTMLSelectElement).selectedOptions).map(
+            option => option.value,
+        );
+        showTasksWithLinks = newFilters.includes("with links");
+        showTasksWithoutLinks = newFilters.includes("without links");
     }
 </script>
 
@@ -133,41 +149,71 @@
                 <tr>
                     {#each columns as column}
                         <th>
-                            <div class="cell-wrapper">
+                            <div class="cell">
                                 {column.name}
-                                {#if column.sortable}
-                                    {#if column.sortStatus === -1}
-                                        <Button
-                                            aria-label="Sort ascendingly by {column.name}"
-                                            onclick={() => {
-                                                sortByColumn(column, 1);
-                                            }}
-                                            square={true}
-                                            style="margin-left: 1em; font-size: var(--font-size-100)">
-                                            <i class="fa-solid fa-caret-down"></i>
-                                        </Button>
-                                    {:else if column.sortStatus === 0}
-                                        <Button
-                                            aria-label="Sort ascendingly by {column.name}"
-                                            onclick={() => {
-                                                sortByColumn(column, 1);
-                                            }}
-                                            square={true}
-                                            style="margin-left: 1em; font-size: var(--font-size-100)">
-                                            <i class="fa-solid fa-sort"></i>
-                                        </Button>
-                                    {:else if column.sortStatus === 1}
-                                        <Button
-                                            aria-label="Sort descendingly by {column.name}"
-                                            onclick={() => {
-                                                sortByColumn(column, -1);
-                                            }}
-                                            square={true}
-                                            style="margin-left: 1em; font-size: var(--font-size-100)">
-                                            <i class="fa-solid fa-caret-up"></i>
-                                        </Button>
+                                <div class="buttons">
+                                    {#if column.name === "Link"}
+                                        <Select onchange={updateLinkFilter} multiple>
+                                            {#snippet button(
+                                                click: (event: MouseEvent) => void,
+                                                focus: () => void,
+                                                blur: () => void,
+                                            )}
+                                                <div class="button">
+                                                    <Button
+                                                        square
+                                                        aria-label="Edit link filter"
+                                                        onmousedown={click}
+                                                        onfocus={focus}
+                                                        onblur={blur}>
+                                                        <span class="fa-solid fa-filter"></span>
+                                                    </Button>
+                                                </div>
+                                            {/snippet}
+                                            <Option
+                                                value="without links"
+                                                selected={showTasksWithoutLinks}>
+                                                <span class="fa-solid fa-link-slash"></span>
+                                            </Option>
+                                            <Option
+                                                value="with links"
+                                                selected={showTasksWithLinks}>
+                                                <span class="fa-solid fa-link"></span>
+                                            </Option>
+                                        </Select>
                                     {/if}
-                                {/if}
+
+                                    {#if column.sortable}
+                                        {#if column.sortStatus === -1}
+                                            <Button
+                                                aria-label="Sort ascendingly by {column.name}"
+                                                onclick={() => {
+                                                    sortByColumn(column, 1);
+                                                }}
+                                                square={true}>
+                                                <i class="fa-solid fa-caret-down"></i>
+                                            </Button>
+                                        {:else if column.sortStatus === 0}
+                                            <Button
+                                                aria-label="Sort ascendingly by {column.name}"
+                                                onclick={() => {
+                                                    sortByColumn(column, 1);
+                                                }}
+                                                square={true}>
+                                                <i class="fa-solid fa-sort"></i>
+                                            </Button>
+                                        {:else if column.sortStatus === 1}
+                                            <Button
+                                                aria-label="Sort descendingly by {column.name}"
+                                                onclick={() => {
+                                                    sortByColumn(column, -1);
+                                                }}
+                                                square={true}>
+                                                <i class="fa-solid fa-caret-up"></i>
+                                            </Button>
+                                        {/if}
+                                    {/if}
+                                </div>
                             </div>
                         </th>
                     {/each}
@@ -217,6 +263,7 @@
         align-self: start;
         gap: 0.5em;
         margin-bottom: 1.5em;
+        margin-left: 0.5em;
     }
 
     .search_description {
@@ -229,9 +276,8 @@
         border: 1px solid var(--on-block-divider-colour);
         border-radius: 0.5em;
         color: var(--on-neutral-surface-colour);
-        padding: 0.4em 0.5em;
+        padding: 0.5em 0.7em;
         min-width: 23em;
-        height: 100%;
     }
 
     .task_table {
@@ -254,7 +300,14 @@
         border-left: 0.18em solid var(--on-group-colour);
     }
 
-    .cell-wrapper {
+    .buttons {
+        display: flex;
+        margin-left: 1em;
+        font-size: var(--font-size-100);
+        gap: 0.5em;
+    }
+
+    .cell {
         display: flex;
         justify-content: space-between;
     }
