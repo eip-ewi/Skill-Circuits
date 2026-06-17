@@ -114,7 +114,11 @@
     );
     --submodule-overview-line-colour: color-mix(in oklab, var(--block-colour) 40%, black);
     --submodule-overview-selected-background-color: var(--column-colour);
-    --submodule-overview-hover-background-color: color-mix(in srgb, var(--column-colour) 50%, transparent);
+    --submodule-overview-hover-background-color: color-mix(
+        in srgb,
+        var(--column-colour) 50%,
+        transparent
+    );
     --submodule-overview-selection-border: none;
 
     /* Links */

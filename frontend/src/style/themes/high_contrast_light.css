@@ -86,8 +86,16 @@
         black
     );
     --submodule-overview-line-colour: color-mix(in oklab, var(--block-colour) 20%, black);
-    --submodule-overview-selected-background-color: color-mix(in oklab, var(--primary-colour) 5%, var(--block-colour));
-    --submodule-overview-hover-background-color: color-mix(in oklab, var(--primary-colour) 5%, var(--block-colour));
+    --submodule-overview-selected-background-color: color-mix(
+        in oklab,
+        var(--primary-colour) 5%,
+        var(--block-colour)
+    );
+    --submodule-overview-hover-background-color: color-mix(
+        in oklab,
+        var(--primary-colour) 5%,
+        var(--block-colour)
+    );
     --submodule-overview-selection-border-color: var(--border-color);
 
     /* Links */
