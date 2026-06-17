@@ -9,7 +9,11 @@ import {
 import { withCsrf } from "./csrf";
 import { setThemeProperties } from "./theme.svelte";
 
-let preferences: Preferences = $state({ theme: systemTheme, blurBlocks: true });
+let preferences: Preferences = $state({
+    theme: systemTheme,
+    blurBlocks: true,
+    additionalIcons: false,
+});
 
 export async function fetchPreferences() {
     let response = await fetch("/api/person/preferences");
@@ -22,6 +26,10 @@ export function getTheme(): Theme {
 
 export function getBlurBlocks(): boolean {
     return preferences.blurBlocks;
+}
+
+export function getAdditionalIcons(): boolean {
+    return preferences.additionalIcons;
 }
 
 export async function setTheme(theme: Theme) {
@@ -38,6 +46,16 @@ export async function setTheme(theme: Theme) {
 export async function setBlurBlocks(blurBlocksSetting: boolean) {
     let response = await fetch(
         `/api/person/preferences/blur?blurBlocks=${blurBlocksSetting}`,
+        withCsrf({
+            method: "PATCH",
+        }),
+    );
+    preferences = await response.json();
+}
+
+export async function setAdditionalIcons(additionalIconsSetting: boolean) {
+    let response = await fetch(
+        `/api/person/preferences/additional-icons?additionalIcons=${additionalIconsSetting}`,
         withCsrf({
             method: "PATCH",
         }),

@@ -1,15 +1,26 @@
 <script lang="ts">
     import PageLayout from "./PageLayout.svelte";
     import ThemeSelectComponent from "../components/ThemeSelectComponent.svelte";
-    import { getBlurBlocks, getTheme, setBlurBlocks } from "../logic/preferences.svelte";
-    import ExampleSkillComponent from "../components/circuit/block/ExampleSkillComponent.svelte";
+    import {
+        getAdditionalIcons,
+        getBlurBlocks,
+        getTheme,
+        setAdditionalIcons,
+        setBlurBlocks,
+    } from "../logic/preferences.svelte";
+    import ExampleBlurredSkillComponent from "../components/circuit/block/examples/ExampleBlurredSkillComponent.svelte";
     import { clearLevel, setLevel } from "../logic/circuit/level.svelte";
     import { ModuleLevel } from "../data/level";
+    import ExampleCompletionIconsSkillComponent from "../components/circuit/block/examples/ExampleCompletionIconsSkillComponent.svelte";
 
     clearLevel();
 
     async function updateBlurBlocks(event: Event) {
         await setBlurBlocks((event.target as HTMLInputElement).checked);
+    }
+
+    async function updateAdditionalIcons(event: Event) {
+        await setAdditionalIcons((event.target as HTMLInputElement).checked);
     }
 </script>
 
@@ -25,6 +36,20 @@
         </p>
         <ThemeSelectComponent></ThemeSelectComponent>
 
+        <h2>Additional icons</h2>
+        <p>Configure whether icons indicating the completion of content should be displayed.</p>
+        <div>
+            <input
+                type="checkbox"
+                checked={getAdditionalIcons()}
+                onchange={e => updateAdditionalIcons(e)} />
+
+            Enable completion icons (see example below)
+        </div>
+
+        <ExampleCompletionIconsSkillComponent displayIcons={getAdditionalIcons()}
+        ></ExampleCompletionIconsSkillComponent>
+
         <h2>Unreached content</h2>
         <p>
             Configure whether blocks (e.g., skills and submodules) you have not yet reached should
@@ -36,7 +61,7 @@
             Enable block blurring (see example below)
         </div>
 
-        <ExampleSkillComponent locked={getBlurBlocks()}></ExampleSkillComponent>
+        <ExampleBlurredSkillComponent locked={getBlurBlocks()}></ExampleBlurredSkillComponent>
     </div>
 </PageLayout>
 
