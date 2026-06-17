@@ -12,6 +12,9 @@
     --warning-colour: hsl(30deg 100% 50%);
     --shadow-colour: hsl(0deg 0% 0%);
 
+    /* Additional settings */
+    --reduced-opacity: 35%;
+
     /* Background */
     --background-colour: color-mix(in oklab, var(--primary-colour) 15%, white);
     --on-background-colour: color-mix(in oklab, var(--background-colour) 80%, black);
@@ -21,6 +24,7 @@
     --on-glass-colour: color-mix(in oklab, var(--primary-colour) 40%, black);
     --on-glass-surface-colour: transparent;
     --on-glass-surface-active-colour: color-mix(in srgb, var(--primary-colour) 10%, transparent);
+    --on-glass-surface-button-active-border-color: transparent;
     --glass-border: none;
     --glass-glint-colour: hsl(0deg 0% 100%);
 
@@ -36,6 +40,7 @@
     --group-colour: color-mix(in oklab, var(--background-colour) 50%, white);
     --group-border-colour: transparent;
     --group-border-radius: 1.5em;
+    --group-border-thickness: 1px;
     --on-group-colour: color-mix(in oklab, var(--group-colour) 80%, black);
     --on-group-colour-higher-contrast: color-mix(in oklab, var(--group-colour) 30%, black);
 
@@ -97,6 +102,8 @@
     --task-drop-indication-colour: color-mix(in srgb, var(--secondary-colour) 15%, transparent);
     --task-drop-indication-border: none;
     --task-drop-indication-border-radius: 0.5em;
+    --drag-icon-color: color-mix(in srgb, var(--on-block-colour) 50%, transparent);
+    --time-icon-opacity: 0.25;
 
     /* Submodule overview */
     --submodule-overview-selection-border-radius: 0.5em;
@@ -106,6 +113,9 @@
         black
     );
     --submodule-overview-line-colour: color-mix(in oklab, var(--block-colour) 40%, black);
+    --submodule-overview-selected-background-color: var(--column-colour);
+    --submodule-overview-hover-background-color: color-mix(in srgb, var(--column-colour) 50%, transparent);
+    --submodule-overview-selection-border: none;
 
     /* Links */
     --link-colour: color-mix(in oklab, var(--primary-colour) 90%, white);
@@ -164,6 +174,7 @@
         transparent
     );
     --on-option-active-colour: var(--on-glass-colour);
+    --option-active-border-color: transparent;
 
     /* Info banners */
     --info-banner-colour: color-mix(in srgb, var(--secondary-colour) 25%, transparent);

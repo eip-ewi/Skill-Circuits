@@ -164,6 +164,6 @@
     .grip {
         cursor: grab;
         margin-right: 0.25em;
-        opacity: 0.5;
+        color: var(--drag-icon-color);
     }
 </style>

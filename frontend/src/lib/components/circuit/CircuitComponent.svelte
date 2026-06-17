@@ -120,7 +120,7 @@
 
         align-items: start;
         display: grid;
-        gap: 4em;
+        gap: 4.5em;
         justify-content: center;
         padding-bottom: 12em;
         padding-inline: 2em;

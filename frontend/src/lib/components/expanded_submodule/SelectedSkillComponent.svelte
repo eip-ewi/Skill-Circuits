@@ -75,6 +75,6 @@
 
     .label {
         font-style: italic;
-        opacity: 35%;
+        opacity: var(--reduced-opacity);
     }
 </style>

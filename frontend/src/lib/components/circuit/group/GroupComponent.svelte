@@ -52,7 +52,7 @@
 
     .group {
         background-color: var(--group-colour);
-        border: 1px solid var(--group-border-colour);
+        border: var(--group-border-thickness) solid var(--group-border-colour);
         width: calc(100% + 4em);
         height: calc(100% + 4em);
         margin: -2em -2em;
@@ -100,7 +100,7 @@
 
     .connector {
         background: var(--group-colour);
-        border: 1px solid var(--group-border-colour);
+        border: var(--group-border-thickness) solid var(--group-border-colour);
         display: none;
         position: absolute;
     }

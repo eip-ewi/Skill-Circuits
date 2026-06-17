@@ -1,4 +1,4 @@
-[data-theme="nostalgia"] {
+[data-theme="high_contrast_dark"] {
     --green: #2e8a00;
     --green2: #8fbc8f;
     --blue: #0000ff;
@@ -137,13 +137,6 @@
     --option-border-radius: 0;
     --option-active-colour: var(--green);
     --on-option-active-colour: white;
-
-    /* Info banners */
-    /* TODO */
-    --info-banner-colour: color-mix(in srgb, var(--secondary-colour) 10%, transparent);
-    --on-info-banner-colour: color-mix(in oklab, var(--primary-colour) 40%, black);
-    --info-banner-border: 1px solid var(--border-color);
-    --info-banner-border-radius: 1em;
 
     /* Warning banners */
     --warning-banner-colour: var(--orange);

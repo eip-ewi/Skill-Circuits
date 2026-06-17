@@ -84,7 +84,7 @@
 
     .label {
         font-style: italic;
-        opacity: 35%;
+        opacity: var(--reduced-opacity);
         margin-top: -0.25em;
     }
 
@@ -95,6 +95,6 @@
 
     .optional-counter {
         font-style: italic;
-        opacity: 35%;
+        opacity: var(--reduced-opacity);
     }
 </style>

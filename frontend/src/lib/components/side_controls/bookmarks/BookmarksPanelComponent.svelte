@@ -79,7 +79,7 @@
 
     .button {
         background: var(--on-glass-surface-colour);
-        border: none;
+        border: 1px solid transparent;
         border-radius: 0.5em;
         color: var(--on-glass-colour);
         cursor: pointer;
@@ -91,5 +91,6 @@
     .button:focus-visible,
     .button:hover {
         background: var(--on-glass-surface-active-colour);
+        border: 1px solid var(--on-glass-surface-button-active-border-color);
     }
 </style>

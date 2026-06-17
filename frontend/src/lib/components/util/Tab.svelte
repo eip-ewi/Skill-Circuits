@@ -11,7 +11,7 @@
 
 <style>
     button {
-        border: none;
+        border: 1px solid transparent;
         background: none;
         border-radius: 100vw;
         cursor: pointer;
@@ -20,5 +20,6 @@
 
     button:where([aria-selected="true"], :hover, :focus-visible) {
         background-color: var(--on-glass-surface-active-colour);
+        border: 1px solid var(--on-glass-surface-button-active-border-color);
     }
 </style>

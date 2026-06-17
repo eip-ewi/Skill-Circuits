@@ -1,5 +1,11 @@
 import type { Preferences } from "../dto/preferences";
-import { lightTheme, systemTheme, type Theme } from "../data/theme";
+import {
+    darkHighContrastTheme,
+    lightHighContrastTheme,
+    lightTheme,
+    systemTheme,
+    type Theme,
+} from "../data/theme";
 import { withCsrf } from "./csrf";
 import { setThemeProperties } from "./theme.svelte";
 
@@ -37,4 +43,11 @@ export async function setBlurBlocks(blurBlocksSetting: boolean) {
         }),
     );
     preferences = await response.json();
+}
+
+export function isHighContrastThemeSet(): boolean {
+    return (
+        getTheme().name === lightHighContrastTheme.name ||
+        getTheme().name === darkHighContrastTheme.name
+    );
 }

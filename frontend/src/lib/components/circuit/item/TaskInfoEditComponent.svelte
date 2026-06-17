@@ -100,7 +100,7 @@
 
     .grip {
         cursor: grab;
-        opacity: 0.5;
+        color: var(--drag-icon-color);
     }
 
     .name {
