@@ -8,10 +8,10 @@
         setAdditionalIcons,
         setBlurBlocks,
     } from "../logic/preferences.svelte";
-    import ExampleBlurredSkillComponent from "../components/circuit/block/examples/ExampleBlurredSkillComponent.svelte";
+    import ExampleBlurredSkillComponent from "../components/settings_examples/ExampleBlurredSkillComponent.svelte";
     import { clearLevel, setLevel } from "../logic/circuit/level.svelte";
     import { ModuleLevel } from "../data/level";
-    import ExampleCompletionIconsSkillComponent from "../components/circuit/block/examples/ExampleCompletionIconsSkillComponent.svelte";
+    import ExampleCompletionIcons from "../components/settings_examples/ExampleCompletionIcons.svelte";
 
     clearLevel();
 
@@ -47,8 +47,7 @@
             Enable completion icons (see example below)
         </div>
 
-        <ExampleCompletionIconsSkillComponent displayIcons={getAdditionalIcons()}
-        ></ExampleCompletionIconsSkillComponent>
+        <ExampleCompletionIcons></ExampleCompletionIcons>
 
         <h2>Unreached content</h2>
         <p>
@@ -61,7 +60,7 @@
             Enable block blurring (see example below)
         </div>
 
-        <ExampleBlurredSkillComponent locked={getBlurBlocks()}></ExampleBlurredSkillComponent>
+        <ExampleBlurredSkillComponent></ExampleBlurredSkillComponent>
     </div>
 </PageLayout>
 

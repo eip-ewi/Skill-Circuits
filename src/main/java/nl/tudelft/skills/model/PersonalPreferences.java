@@ -39,5 +39,5 @@ public class PersonalPreferences {
 
 	@NotNull
 	@Builder.Default
-	private boolean additionalIcons = true;
+	private boolean additionalIcons = false;
 }

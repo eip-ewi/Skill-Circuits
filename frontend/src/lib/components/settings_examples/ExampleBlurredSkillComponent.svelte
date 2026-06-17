@@ -1,13 +1,10 @@
 <script lang="ts">
-    import { TaskIcons } from "../../../../dto/task_icons";
-
-    let { displayIcons }: { displayIcons: boolean } = $props();
-
-    // TODO: add icons here
+    import { TaskIcons } from "../../dto/task_icons";
+    import { getBlurBlocks } from "../../logic/preferences.svelte.js";
 </script>
 
 <div class="block-wrapper">
-    <div class="block">
+    <div class="block" data-locked={getBlurBlocks()}>
         <div class="heading">
             <span class="name">Example Skill</span>
         </div>
@@ -45,6 +42,10 @@
         transition:
             filter ease-in-out 150ms,
             box-shadow ease-in-out 150ms;
+    }
+
+    .block[data-locked="true"] {
+        filter: blur(0.375em);
     }
 
     .heading {
