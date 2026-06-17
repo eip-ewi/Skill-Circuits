@@ -2,7 +2,7 @@
     import type { TaskItem } from "../../../dto/circuit/module/task";
     import { hasEditorRights } from "../../../logic/authorisation.svelte";
     import { TaskIcons } from "../../../dto/task_icons.js";
-    import { isHighContrastThemeSet } from "../../../logic/preferences.svelte";
+    import { getAdditionalIcons, isHighContrastThemeSet } from "../../../logic/preferences.svelte";
     import { isTaskCompleted } from "../../../logic/circuit/skill_state/completion";
 
     let { task }: { task: TaskItem } = $props();
@@ -12,16 +12,23 @@
             ? task.completed && !hasEditorRights()
             : isTaskCompleted(task) && !hasEditorRights(),
     );
+
+    let showCheckmark = $derived(taskCompleted && !hasEditorRights() && getAdditionalIcons());
 </script>
 
 <div class="task_container" data-completed={taskCompleted}>
-    {#if taskCompleted && !hasEditorRights() && isHighContrastThemeSet()}
-        <span class="checkmark fa-solid fa-check"></span>
-    {/if}
     {#if task.taskType === "regular"}
-        <span class="task fa-solid fa-{TaskIcons[task.type]}"></span>
+        <span class="task fa-solid fa-{TaskIcons[task.type]}">
+            {#if showCheckmark}
+                <span class="checkmark fa-solid fa-check"></span>
+            {/if}
+        </span>
     {:else}
-        <span class="task fa-solid fa-shapes"></span>
+        <span class="task fa-solid fa-shapes">
+            {#if showCheckmark}
+                <span class="checkmark fa-solid fa-check"></span>
+            {/if}
+        </span>
     {/if}
 </div>
 
@@ -39,5 +46,9 @@
 
     .checkmark {
         font-size: 70%;
+        position: relative;
+        float: right;
+        margin-left: 0.2em;
+        margin-top: -0.4em;
     }
 </style>

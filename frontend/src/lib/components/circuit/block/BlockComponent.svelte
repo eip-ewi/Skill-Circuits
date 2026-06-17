@@ -26,7 +26,7 @@
         clearScrollTarget,
         getScrollTarget,
     } from "../../../logic/circuit/scroll_target.svelte";
-    import { getBlurBlocks } from "../../../logic/preferences.svelte";
+    import { getAdditionalIcons, getBlurBlocks } from "../../../logic/preferences.svelte";
     import ExpandedSubmoduleComponent from "../../expanded_submodule/ExpandedSubmoduleComponent.svelte";
     import type { SubmoduleBlock } from "../../../dto/circuit/edition/submodule";
 
@@ -247,7 +247,7 @@
         {:else if block.state === BlockStates.AssigningPaths && block.blockType === "skill"}
             <BlockAssignPathsComponent skill={block}></BlockAssignPathsComponent>
         {:else}
-            <BlockContentComponent {block}></BlockContentComponent>
+            <BlockContentComponent {block} {completed}></BlockContentComponent>
         {/if}
     </div>
 

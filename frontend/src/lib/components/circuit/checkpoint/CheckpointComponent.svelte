@@ -16,6 +16,7 @@
         getVisibleCheckpoints,
     } from "../../../logic/edition/edition.svelte";
     import Link from "../../util/Link.svelte";
+    import { getAdditionalIcons } from "../../../logic/preferences.svelte";
 
     let { checkpoint }: { checkpoint: Checkpoint } = $props();
 
@@ -127,6 +128,9 @@
         <div class="info">
             <span class="label">{checkpoint.name}</span>
             <span class="deadline">{moment(checkpoint.deadline).format("D MMMM YYYY HH:mm")}</span>
+            {#if completed && getAdditionalIcons()}
+                <span class="checkmark fa-solid fa-check"></span>
+            {/if}
             {#if hasEditorRights()}
                 <span class="time-row">
                     <i class="fa-regular fa-clock time-icon"></i>
@@ -214,11 +218,19 @@
 
     .label {
         white-space: nowrap;
+        grid-column: 1;
     }
 
     .deadline {
         font-size: var(--font-size-200);
         white-space: nowrap;
+        grid-column: 1;
+    }
+
+    .checkmark {
+        grid-column: 2;
+        margin-left: 1em;
+        align-self: end;
     }
 
     .time-estimate {
