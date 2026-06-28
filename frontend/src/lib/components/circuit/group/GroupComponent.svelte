@@ -52,7 +52,7 @@
 
     .group {
         background-color: var(--group-colour);
-        border: var(--group-border-thickness) solid var(--group-border-colour);
+        border: 1px solid var(--group-border-colour);
         width: calc(100% + 4em);
         height: calc(100% + 4em);
         margin: -2em -2em;
@@ -100,7 +100,7 @@
 
     .connector {
         background: var(--group-colour);
-        border: var(--group-border-thickness) solid var(--group-border-colour);
+        border: 1px solid var(--group-border-colour);
         display: none;
         position: absolute;
     }
@@ -180,43 +180,51 @@
     }
 
     .outer-corner {
-        background-image: radial-gradient(
-            circle at 100% 100%,
-            transparent var(--group-border-radius),
-            var(--group-colour) calc(var(--group-border-radius) + 1px)
-        );
         display: none;
-        height: var(--group-border-radius);
         position: absolute;
+        height: var(--group-border-radius);
         width: var(--group-border-radius);
+        background-color: var(--group-colour);
+    }
+
+    .outer-corner::after {
+        position: absolute;
+        content: "";
+        height: var(--group-border-radius);
+        width: var(--group-border-radius);
+        border-top-left-radius: var(--group-border-radius);
+        background-color: var(--background-colour);
+        border: 1px solid var(--border-color);
+        border-right: none;
+        border-bottom: none;
     }
 
     .group[data-connect-top="true"][data-connect-right="true"][data-connect-top-right="false"]
         .outer-corner[data-connect="top-right"] {
         display: initial;
-        right: calc(-1 * var(--group-border-radius));
-        top: calc(-1 * var(--group-border-radius));
+        right: calc(-1 * var(--group-border-radius) + 1px);
+        top: calc(-1 * var(--group-border-radius) + 1px);
         transform: rotate(270deg);
     }
     .group[data-connect-bottom="true"][data-connect-right="true"][data-connect-bottom-right="false"]
         .outer-corner[data-connect="bottom-right"] {
-        bottom: calc(-1 * var(--group-border-radius));
+        bottom: calc(-1 * var(--group-border-radius) + 1px);
         display: initial;
-        right: calc(-1 * var(--group-border-radius));
+        right: calc(-1 * var(--group-border-radius) + 1px);
         transform: rotate(0);
     }
     .group[data-connect-bottom="true"][data-connect-left="true"][data-connect-bottom-left="false"]
         .outer-corner[data-connect="bottom-left"] {
-        bottom: calc(-1 * var(--group-border-radius));
+        bottom: calc(-1 * var(--group-border-radius) + 1px);
         display: initial;
-        left: calc(-1 * var(--group-border-radius));
+        left: calc(-1 * var(--group-border-radius) + 1px);
         transform: rotate(90deg);
     }
     .group[data-connect-top="true"][data-connect-left="true"][data-connect-top-left="false"]
         .outer-corner[data-connect="top-left"] {
         display: initial;
-        left: calc(-1 * var(--group-border-radius));
-        top: calc(-1 * var(--group-border-radius));
+        left: calc(-1 * var(--group-border-radius) + 1px);
+        top: calc(-1 * var(--group-border-radius) + 1px);
         transform: rotate(180deg);
     }
 </style>

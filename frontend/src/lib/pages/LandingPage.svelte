@@ -102,7 +102,7 @@
 
     .editions {
         background-color: var(--group-colour);
-        border: var(--group-border-thickness) solid var(--group-border-colour);
+        border: 1px solid var(--group-border-colour);
         border-radius: var(--group-border-radius);
         display: grid;
         gap: 1rem;

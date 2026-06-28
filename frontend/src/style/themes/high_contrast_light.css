@@ -22,7 +22,6 @@
     --group-colour: white;
     --on-group-colour: color-mix(in oklab, var(--group-colour) 30%, black);
     --group-border-colour: var(--border-color);
-    --group-border-thickness: 1px;
 
     /* Checkpoints */
     --checkpoint-surface-border: 1px solid var(--border-color);

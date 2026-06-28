@@ -40,7 +40,6 @@
     --group-colour: color-mix(in oklab, var(--background-colour) 50%, white);
     --group-border-colour: transparent;
     --group-border-radius: 1.5em;
-    --group-border-thickness: 1px;
     --on-group-colour: color-mix(in oklab, var(--group-colour) 80%, black);
     --on-group-colour-higher-contrast: color-mix(in oklab, var(--group-colour) 30%, black);
 
