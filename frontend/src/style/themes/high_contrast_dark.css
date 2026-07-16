@@ -1,152 +1,149 @@
 [data-theme="high_contrast_dark"] {
-    --green: #2e8a00;
-    --green2: #8fbc8f;
-    --blue: #0000ff;
-    --red: #cc0000;
-    --orange: #cc6600;
-    --grey-500: #b3b3b3;
-    --grey-700: #d9d9d9;
-
+    /* Base colours */
     --shadow-colour: transparent;
 
+    /* Additional settings */
+    --default-border-color: color-mix(in oklab, var(--primary-colour) 40%, black);
+    --reduced-opacity: 70%;
+
     /* Background */
-    --background-colour: #f7f7f7;
-    --on-background-colour: black;
+    --background-colour: color-mix(in oklab, var(--primary-colour) 5%, white);
+    --on-background-colour: color-mix(in oklab, var(--primary-colour) 40%, black);
 
     /* Glassy surfaces */
-    --glass-colour: white;
-    --on-glass-colour: black;
-    --on-glass-surface-colour: transparent;
-    --on-glass-surface-active-colour: var(--green);
-    --glass-border: 1px solid black;
+    --glass-colour: color-mix(in oklab, var(--background-colour) 20%, white);
+    --on-glass-colour: color-mix(in oklab, var(--primary-colour) 40%, black);
+    --on-glass-surface-active-colour: color-mix(in srgb, var(--primary-colour) 5%, transparent);
+    --glass-border: 1px solid var(--default-border-color);
     --glass-glint-colour: transparent;
 
     /* Columns */
     --column-colour: color-mix(in srgb, var(--secondary-colour) 15%, transparent);
-    --column-border-radius: 0;
-    --column-button-border-radius: 0;
-    --column-separator-border-radius: 0;
+    --column-background-color-removal: color-mix(in srgb, var(--warning-colour) 30%, transparent);
+    --column-removal-border: 1px solid color-mix(in oklab, var(--warning-colour) 30%, black);
 
     /* Groups */
     --group-colour: white;
-    --group-border-colour: black;
-    --group-border-radius: 0;
-    --on-group-colour: var(--green2);
-    --on-group-colour-higher-contrast: black;
+    --on-group-colour: color-mix(in oklab, var(--group-colour) 30%, black);
+    --group-border-colour: var(--default-border-color);
 
     /* Checkpoints */
-    --checkpoint-surface-border: 1px solid black;
-    --checkpoint-surface-border-radius: 0;
+    --checkpoint-surface-border: 1px solid var(--default-border-color);
+    --checkpoint-surface-border-radius: 1em;
 
-    --checkpoint-line-colour: transparent;
-    --checkpoint-line-thickness: 1px;
-    --checkpoint-line-border: 1px dashed black;
-    --checkpoint-line-border-radius: 0;
+    --checkpoint-line-colour: color-mix(
+            in oklab,
+            var(--primary-colour) 40%,
+            color-mix(in oklab, black 80%, white)
+    );
+    --checkpoint-line-thickness: 0.18em;
 
-    --checkpoint-surface-colour: white;
-    --on-checkpoint-surface-colour: black;
+    --checkpoint-surface-colour: color-mix(in srgb, white 90%, transparent);
+    --on-checkpoint-surface-colour: color-mix(in srgb, black 90%, var(--checkpoint-surface-colour));
 
-    --checkpoint-completed-line-colour: var(--green);
+    --checkpoint-completed-line-colour: color-mix(in oklab, var(--accept-colour) 60%, black);
 
-    --checkpoint-completed-surface-colour: var(--green);
-    --on-checkpoint-completed-surface-colour: white;
+    --checkpoint-completed-surface-colour: color-mix(
+            in oklab,
+            var(--accept-colour) 10%,
+            var(--checkpoint-surface-colour)
+    );
+    --on-checkpoint-completed-surface-colour: color-mix(in oklab, var(--primary-colour) 30%, black);
 
     /* Connections */
-    --connection-colour: var(--grey-500);
-    --connection-radius: 0;
-    --connection-width: 0.125em;
-    --connection-highlighted-colour: var(--blue);
-    --connection-highlighted-width: 0.125em;
+    --connection-colour: color-mix(in oklab, var(--primary-colour) 30%, black);
+    --connection-radius: 16;
+    --connection-width: 0.18em;
+    --connection-highlighted-colour: color-mix(
+            in oklab,
+            var(--connection-colour) 10%,
+            var(--secondary-colour)
+    );
+    --connection-highlighted-width: 0.375em;
 
     /* Blocks */
-    --block-colour: white;
-    --block-completed-colour: white;
-    --on-block-colour: black;
-    --on-block-divider-colour: var(--grey-700);
-    --on-block-completed-colour: black;
-    --block-border: 1px solid black;
-    --block-border-radius: 0;
-    --block-completed-border: 2px solid var(--green);
-    --expanded-block-border: 0;
-    --expanded-block-border-radius: 0;
+    --block-colour: hsl(0deg 0% 100%);
+    --block-completed-colour: color-mix(in oklab, var(--accept-colour) 10%, white);
+    --on-block-colour: hsl(0deg 0% 0%);
+    --on-block-divider-colour: color-mix(in oklab, var(--on-block-colour) 70%, var(--block-colour));
+    --on-block-completed-colour: color-mix(in oklab, var(--primary-colour) 30%, black);
+    --block-border: 1px solid var(--default-border-color);
+    --block-completed-border: 1px solid color-mix(in oklab, var(--accept-colour) 60%, black);
+    --expanded-block-border: 2px solid var(--default-border-color);
+    --expanded-block-border-radius: 1em;
     --expanded-block-background-blur: 0.5rem;
-    --expanded-block-background-colour: rgba(0 0 0 / 0.5);
+    --expanded-block-background-colour: transparent;
 
     /* Items */
-    --on-block-task-completed-colour: var(--green);
+    --on-block-task-completed-colour: color-mix(in oklab, var(--accept-colour) 60%, black);
     --choice-task-outline-colour: var(--on-block-divider-colour);
-    --choice-task-completed-outline-colour: var(--green);
-    --choice-task-outline-radius: 0;
-    --task-drop-indication-colour: rgba(1 1 1 / 0.1);
-    --task-drop-indication-border: 1px dotted rgba(0 0 0 / 0.1);
-    --task-drop-indication-border-radius: 0;
+    --choice-task-completed-outline-colour: color-mix(in oklab, var(--accept-colour) 60%, black);
+    --task-drop-indication-colour: color-mix(in srgb, var(--secondary-colour) 15%, transparent);
+    --drag-icon-color: color-mix(in srgb, var(--on-block-colour) 70%, var(--block-colour));
+    --time-icon-opacity: 0.7;
 
     /* Submodule overview */
-    --submodule-overview-selection-border-radius: 0em;
+    --submodule-overview-skill-completed-colour: color-mix(
+            in oklab,
+            var(--accept-colour) 45%,
+            black
+    );
+    --submodule-overview-line-colour: color-mix(in oklab, var(--block-colour) 20%, black);
+    --submodule-overview-selected-background-color: color-mix(
+            in oklab,
+            var(--primary-colour) 5%,
+            var(--block-colour)
+    );
+    --submodule-overview-hover-background-color: color-mix(
+            in oklab,
+            var(--primary-colour) 5%,
+            var(--block-colour)
+    );
+    --submodule-overview-selection-border-color: var(--default-border-color);
 
     /* Links */
-    --link-colour: color-mix(in oklab, var(--primary-colour) 90%, white);
-    --link-active-colour: color-mix(in oklab, var(--primary-colour) 80%, black);
+    --link-colour: var(--primary-colour);
+    --link-active-colour: color-mix(in oklab, var(--primary-colour) 40%, black);
 
     /* Buttons */
-    --surface-border-radius: 0;
-
-    --neutral-surface-colour: white;
-    --neutral-surface-active-colour: var(--green);
-    --on-neutral-surface-colour: black;
-    --on-neutral-surface-active-colour: white;
+    --neutral-surface-colour: hsl(0deg 0% 100%);
+    --neutral-surface-active-colour: var(--primary-surface-colour);
+    --on-neutral-surface-colour: hsl(0deg 0% 0%);
+    --on-neutral-surface-active-colour: var(--on-primary-surface-colour);
     --neutral-surface-border: var(--primary-surface-border);
-    --neutral-surface-active-border-colour: var(--primary-surface-active-border-colour);
+    --neutral-surface-active-border-colour: var(--primary-surface-active-border);
 
-    --primary-surface-colour: white;
-    --primary-surface-active-colour: var(--green);
-    --on-primary-surface-colour: black;
-    --on-primary-surface-active-colour: white;
-    --primary-surface-border: 1px solid black;
-    --primary-surface-active-border-colour: black;
+    --primary-surface-colour: color-mix(in oklab, var(--primary-colour) 5%, white);
+    --primary-surface-active-colour: color-mix(in oklab, var(--primary-colour) 15%, white);
+    --on-primary-surface-colour: color-mix(in oklab, var(--primary-colour) 20%, black);
+    --on-primary-surface-active-colour: var(--on-primary-surface-colour);
+    --primary-surface-border: 1px solid var(--default-border-color);
+    --primary-surface-active-border: 2px solid var(--default-border-color);
 
-    --error-surface-colour: white;
-    --error-surface-active-colour: var(--red);
-    --on-error-surface-colour: black;
-    --on-error-surface-active-colour: white;
-    --error-surface-border: 1px solid black;
-    --error-surface-active-border-colour: black;
-
-    /* Header */
-    --header-border-radius: 0;
+    --error-surface-colour: color-mix(in oklab, var(--error-colour) 10%, white);
+    --error-surface-active-colour: color-mix(in oklab, var(--error-colour) 20%, white);
+    --on-error-surface-colour: color-mix(in oklab, var(--error-colour) 30%, black);
+    --on-error-surface-active-colour: var(--on-error-surface-colour);
+    --error-surface-border: 1px solid color-mix(in oklab, var(--error-colour) 30%, black);
+    --error-surface-active-border: 2px solid color-mix(in oklab, var(--error-colour) 30%, black);
 
     /* Footer */
     --footer-colour: white;
     --on-footer-colour: black;
-    --footer-border-top: 1px solid black;
-
-    /* Panels */
-    --panel-border-radius: 0;
-    --panel-button-border-radius: 0;
+    --footer-border-top: 1px solid var(--default-border-color);
 
     /* Checkboxes */
-    --checkbox-border: 1px solid black;
-    --checkbox-border-radius: 0;
-    --checkbox-checked-colour: var(--green);
-    --on-checkbox-checked-colour: white;
+    --checkbox-border: 2px solid color-mix(in oklab, black 60%, white);
+    --checkbox-checked-colour: color-mix(in oklab, var(--accept-colour) 50%, black);
 
-    /* Dropdowns */
-    --dropdown-border-radius: 0;
-
-    /* Selects */
-    --option-border-radius: 0;
-    --option-active-colour: var(--green);
-    --on-option-active-colour: white;
+    /* Info banners */
+    --info-banner-colour: color-mix(in srgb, var(--secondary-colour) 10%, transparent);
+    --on-info-banner-colour: color-mix(in oklab, var(--primary-colour) 40%, black);
+    --info-banner-border: 1px solid var(--default-border-color);
 
     /* Warning banners */
-    --warning-banner-colour: var(--orange);
-    --on-warning-banner-colour: white;
-    --warning-banner-border: none;
-    --warning-banner-border-radius: 0;
-
-    /* Dialogs */
-    --dialog-border-radius: 0;
-
-    /* Font */
-    --main-font-family: noto sans, system-ui, sans-serif;
+    --warning-banner-colour: color-mix(in oklab, var(--warning-colour) 15%, white);
+    --on-warning-banner-colour: color-mix(in oklab, var(--warning-colour) 20%, black);
+    --warning-banner-border: 1px solid color-mix(in oklab, var(--warning-colour) 30%, black);
+    --warning-banner-border-radius: 1em;
 }
