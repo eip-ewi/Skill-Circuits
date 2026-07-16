@@ -111,21 +111,21 @@
     --on-neutral-surface-colour: hsl(0deg 0% 0%);
     --on-neutral-surface-active-colour: var(--on-primary-surface-colour);
     --neutral-surface-border: var(--primary-surface-border);
-    --neutral-surface-active-border-colour: var(--primary-surface-active-border-colour);
+    --neutral-surface-active-border-colour: var(--primary-surface-active-border);
 
     --primary-surface-colour: color-mix(in oklab, var(--primary-colour) 5%, white);
     --primary-surface-active-colour: color-mix(in oklab, var(--primary-colour) 15%, white);
     --on-primary-surface-colour: color-mix(in oklab, var(--primary-colour) 20%, black);
     --on-primary-surface-active-colour: var(--on-primary-surface-colour);
     --primary-surface-border: 1px solid var(--default-border-color);
-    --primary-surface-active-border-colour: var(--default-border-color);
+    --primary-surface-active-border: 2px solid var(--default-border-color);
 
     --error-surface-colour: color-mix(in oklab, var(--error-colour) 10%, white);
     --error-surface-active-colour: color-mix(in oklab, var(--error-colour) 20%, white);
     --on-error-surface-colour: color-mix(in oklab, var(--error-colour) 30%, black);
     --on-error-surface-active-colour: var(--on-error-surface-colour);
     --error-surface-border: 1px solid color-mix(in oklab, var(--error-colour) 30%, black);
-    --error-surface-active-border-colour: color-mix(in oklab, var(--error-colour) 30%, black);
+    --error-surface-active-border: 2px solid color-mix(in oklab, var(--error-colour) 30%, black);
 
     /* Footer */
     --footer-colour: white;

@@ -133,21 +133,21 @@
     --on-neutral-surface-colour: hsl(0deg 0% 0%);
     --on-neutral-surface-active-colour: var(--on-primary-surface-colour);
     --neutral-surface-border: var(--primary-surface-border);
-    --neutral-surface-active-border-colour: var(--primary-surface-active-border-colour);
+    --neutral-surface-active-border: var(--primary-surface-active-border);
 
     --primary-surface-colour: color-mix(in oklab, var(--primary-colour) 10%, white);
     --primary-surface-active-colour: color-mix(in oklab, var(--primary-colour) 20%, white);
     --on-primary-surface-colour: color-mix(in oklab, var(--primary-colour) 50%, black);
     --on-primary-surface-active-colour: var(--on-primary-surface-colour);
     --primary-surface-border: none;
-    --primary-surface-active-border-colour: transparent;
+    --primary-surface-active-border: none;
 
     --error-surface-colour: color-mix(in oklab, var(--error-colour) 10%, white);
     --error-surface-active-colour: color-mix(in oklab, var(--error-colour) 20%, white);
     --on-error-surface-colour: color-mix(in oklab, var(--error-colour) 50%, black);
     --on-error-surface-active-colour: var(--on-error-surface-colour);
     --error-surface-border: none;
-    --error-surface-active-border-colour: transparent;
+    --error-surface-active-border: none;
 
     /* Header */
     --header-border-radius: 100vh;
