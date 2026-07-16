@@ -3,7 +3,7 @@
     --shadow-colour: transparent;
 
     /* Additional settings */
-    --border-color: color-mix(in oklab, var(--primary-colour) 40%, black);
+    --default-border-color: color-mix(in oklab, var(--primary-colour) 40%, black);
     --reduced-opacity: 70%;
 
     /* Background */
@@ -14,17 +14,21 @@
     --glass-colour: color-mix(in oklab, var(--background-colour) 20%, white);
     --on-glass-colour: color-mix(in oklab, var(--primary-colour) 40%, black);
     --on-glass-surface-active-colour: color-mix(in srgb, var(--primary-colour) 5%, transparent);
-    --glass-border: 1px solid var(--border-color);
-    --on-glass-surface-button-active-border-color: var(--border-color);
+    --glass-border: 1px solid var(--default-border-color);
     --glass-glint-colour: transparent;
+
+    /* Columns */
+    --column-colour: color-mix(in srgb, var(--secondary-colour) 15%, transparent);
+    --column-background-color-removal: color-mix(in srgb, var(--warning-colour) 30%, transparent);
+    --column-removal-border: 1px solid color-mix(in oklab, var(--warning-colour) 30%, black);
 
     /* Groups */
     --group-colour: white;
     --on-group-colour: color-mix(in oklab, var(--group-colour) 30%, black);
-    --group-border-colour: var(--border-color);
+    --group-border-colour: var(--default-border-color);
 
     /* Checkpoints */
-    --checkpoint-surface-border: 1px solid var(--border-color);
+    --checkpoint-surface-border: 1px solid var(--default-border-color);
     --checkpoint-surface-border-radius: 1em;
 
     --checkpoint-line-colour: color-mix(
@@ -63,9 +67,9 @@
     --on-block-colour: hsl(0deg 0% 0%);
     --on-block-divider-colour: color-mix(in oklab, var(--on-block-colour) 70%, var(--block-colour));
     --on-block-completed-colour: color-mix(in oklab, var(--primary-colour) 30%, black);
-    --block-border: 1px solid var(--border-color);
+    --block-border: 1px solid var(--default-border-color);
     --block-completed-border: 1px solid color-mix(in oklab, var(--accept-colour) 60%, black);
-    --expanded-block-border: 2px solid var(--border-color);
+    --expanded-block-border: 2px solid var(--default-border-color);
     --expanded-block-border-radius: 1em;
     --expanded-block-background-blur: 0.5rem;
     --expanded-block-background-colour: transparent;
@@ -95,7 +99,7 @@
         var(--primary-colour) 5%,
         var(--block-colour)
     );
-    --submodule-overview-selection-border-color: var(--border-color);
+    --submodule-overview-selection-border-color: var(--default-border-color);
 
     /* Links */
     --link-colour: var(--primary-colour);
@@ -113,8 +117,8 @@
     --primary-surface-active-colour: color-mix(in oklab, var(--primary-colour) 15%, white);
     --on-primary-surface-colour: color-mix(in oklab, var(--primary-colour) 20%, black);
     --on-primary-surface-active-colour: var(--on-primary-surface-colour);
-    --primary-surface-border: 1px solid var(--border-color);
-    --primary-surface-active-border-colour: var(--border-color);
+    --primary-surface-border: 1px solid var(--default-border-color);
+    --primary-surface-active-border-colour: var(--default-border-color);
 
     --error-surface-colour: color-mix(in oklab, var(--error-colour) 10%, white);
     --error-surface-active-colour: color-mix(in oklab, var(--error-colour) 20%, white);
@@ -126,19 +130,16 @@
     /* Footer */
     --footer-colour: white;
     --on-footer-colour: black;
-    --footer-border-top: 1px solid var(--border-color);
+    --footer-border-top: 1px solid var(--default-border-color);
 
     /* Checkboxes */
     --checkbox-border: 2px solid color-mix(in oklab, black 60%, white);
     --checkbox-checked-colour: color-mix(in oklab, var(--accept-colour) 50%, black);
 
-    /* Selects */
-    --option-active-border-color: var(--border-color);
-
     /* Info banners */
     --info-banner-colour: color-mix(in srgb, var(--secondary-colour) 10%, transparent);
     --on-info-banner-colour: color-mix(in oklab, var(--primary-colour) 40%, black);
-    --info-banner-border: 1px solid var(--border-color);
+    --info-banner-border: 1px solid var(--default-border-color);
 
     /* Warning banners */
     --warning-banner-colour: color-mix(in oklab, var(--warning-colour) 15%, white);

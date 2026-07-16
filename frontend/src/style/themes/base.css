@@ -13,6 +13,7 @@
     --shadow-colour: hsl(0deg 0% 0%);
 
     /* Additional settings */
+    --default-border-color: transparent;
     --reduced-opacity: 35%;
 
     /* Background */
@@ -24,7 +25,6 @@
     --on-glass-colour: color-mix(in oklab, var(--primary-colour) 40%, black);
     --on-glass-surface-colour: transparent;
     --on-glass-surface-active-colour: color-mix(in srgb, var(--primary-colour) 10%, transparent);
-    --on-glass-surface-button-active-border-color: transparent;
     --glass-border: none;
     --glass-glint-colour: hsl(0deg 0% 100%);
 
@@ -35,6 +35,7 @@
     --column-button-border-radius: 20%;
     --column-separator-border-radius: 1rem;
     --column-background-color-removal: color-mix(in srgb, var(--warning-colour) 15%, transparent);
+    --column-removal-border: none;
 
     /* Groups */
     --group-colour: color-mix(in oklab, var(--background-colour) 50%, white);
@@ -177,7 +178,6 @@
         transparent
     );
     --on-option-active-colour: var(--on-glass-colour);
-    --option-active-border-color: transparent;
 
     /* Info banners */
     --info-banner-colour: color-mix(in srgb, var(--secondary-colour) 25%, transparent);

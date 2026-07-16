@@ -194,7 +194,7 @@
         width: var(--group-border-radius);
         border-top-left-radius: var(--group-border-radius);
         background-color: var(--background-colour);
-        border: 1px solid var(--border-color);
+        border: 1px solid var(--default-border-color);
         border-right: none;
         border-bottom: none;
     }

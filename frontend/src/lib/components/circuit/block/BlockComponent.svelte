@@ -369,14 +369,14 @@
         background: var(--on-glass-surface-colour);
         border-radius: var(--header-border-radius);
         color: var(--on-glass-colour);
-        border: 1px solid transparent;
+        border: none;
         cursor: pointer;
         padding: 1em;
     }
 
     .scroll-to-pulse-button:where(:focus-visible, :hover) {
         background: var(--on-glass-surface-active-colour);
-        border: 1px solid var(--primary-surface-active-border-colour);
+        outline: 1px solid var(--primary-surface-active-border-colour);
     }
 
     .scroll-to-pulse-button .icon {

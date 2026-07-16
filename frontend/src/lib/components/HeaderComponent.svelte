@@ -277,7 +277,7 @@
 
     .button {
         background: var(--on-glass-surface-colour);
-        border: 1px solid transparent;
+        border: none;
         border-radius: var(--header-border-radius);
         color: var(--on-glass-colour);
         cursor: pointer;
@@ -290,7 +290,7 @@
     .button:focus-visible,
     .button:hover {
         background: var(--on-glass-surface-active-colour);
-        border: 1px solid var(--on-glass-surface-button-active-border-color);
+        outline: 1px solid var(--default-border-color);
     }
 
     .icon {

@@ -54,15 +54,15 @@
 {:else if hasEditorRights()}
     <span>{block.items.length} {getLevel().items}</span>
 {:else}
-    {@const completed = getNumCompletedItems("essential")}
-    {@const total = getNumTotalItems("essential")}
+    {@const nrCompleted = getNumCompletedItems("essential")}
+    {@const nrTotal = getNumTotalItems("essential")}
     {@const completedOpt = getNumCompletedItems("optional")}
     {@const totalOpt = getNumTotalItems("optional")}
 
     <div class="completion-counters">
-        {#if total > 0}
+        {#if nrTotal > 0}
             <span>
-                {completed}/{total} completed
+                {nrCompleted}/{nrTotal} completed
             </span>
         {/if}
         {#if block.blockType === "submodule" && totalOpt > 0}

@@ -21,7 +21,7 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 <div class="block" draggable="true" ondragstart={dragStart} ondragend={dragEnd}>
-    <BlockContentComponent {block}></BlockContentComponent>
+    <BlockContentComponent {block} completed={false}></BlockContentComponent>
     <p class="description">
         Drag this {getLevel().block} onto the circuit to place it.
     </p>

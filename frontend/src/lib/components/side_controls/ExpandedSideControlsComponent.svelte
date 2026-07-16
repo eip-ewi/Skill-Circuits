@@ -57,7 +57,7 @@
 
     .dialog-controls .button {
         background: var(--on-glass-surface-colour);
-        border: 1px solid transparent;
+        border: none;
         border-radius: var(--panel-button-border-radius);
         color: var(--on-glass-colour);
         cursor: pointer;
@@ -70,7 +70,7 @@
     .dialog-controls .button:focus-visible,
     .dialog-controls .button:hover {
         background: var(--on-glass-surface-active-colour);
-        border: 1px solid var(--on-glass-surface-button-active-border-color);
+        outline: 1px solid var(--default-border-color);
     }
 
     .dialog-controls .button span {

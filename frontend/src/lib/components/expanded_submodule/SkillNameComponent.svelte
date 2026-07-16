@@ -34,7 +34,7 @@
     .skill-name {
         position: relative;
         background: none;
-        border: 1px solid transparent;
+        border: none;
         padding: 0.3em 0.5em;
         margin-top: 0.3em;
         border-radius: var(--submodule-overview-selection-border-radius);
@@ -53,12 +53,12 @@
 
     .skill-name:hover {
         background-color: var(--submodule-overview-hover-background-color);
-        border: 1px solid var(--submodule-overview-selection-border-color);
+        outline: 1px solid var(--submodule-overview-selection-border-color);
     }
 
     .skill-name[data-selected="true"] {
         background-color: var(--submodule-overview-selected-background-color);
-        border: 1px solid var(--submodule-overview-selection-border-color);
+        outline: 1px solid var(--submodule-overview-selection-border-color);
     }
 
     .skill-name[data-locked="true"] {

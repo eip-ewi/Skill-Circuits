@@ -128,7 +128,7 @@
         grid-column: 1 / 5;
     }
 
-    .task[data-completed="true"] {
+    .task[data-completed="true"]::before {
         outline: 2px solid var(--choice-task-completed-outline-colour);
     }
 

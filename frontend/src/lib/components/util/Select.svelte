@@ -257,7 +257,7 @@
     .option {
         align-items: center;
         background: none;
-        border: 1px solid transparent;
+        border: none;
         border-radius: var(--option-border-radius);
         color: var(--on-glass-colour);
         cursor: pointer;
@@ -271,7 +271,7 @@
     .option:focus-visible {
         background-color: var(--option-active-colour);
         color: var(--on-option-active-colour);
-        border: 1px solid var(--option-active-border-color);
+        outline: 1px solid var(--default-border-color);
     }
 
     .option[aria-selected="false"] .check {
