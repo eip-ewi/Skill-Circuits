@@ -123,6 +123,7 @@
 
     /* Links */
     --link-colour: color-mix(in oklab, var(--primary-colour) 90%, white);
+    --link-text-decoration: none;
     --link-active-colour: color-mix(in oklab, var(--primary-colour) 80%, black);
 
     /* Buttons */

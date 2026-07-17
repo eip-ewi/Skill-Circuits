@@ -3,147 +3,168 @@
     --shadow-colour: transparent;
 
     /* Additional settings */
-    --default-border-color: color-mix(in oklab, var(--primary-colour) 40%, black);
+    --default-border-color: color-mix(
+        in oklab,
+        var(--primary-colour) 15%,
+        color-mix(in oklab, black 10%, white)
+    );
     --reduced-opacity: 70%;
 
     /* Background */
-    --background-colour: color-mix(in oklab, var(--primary-colour) 5%, white);
-    --on-background-colour: color-mix(in oklab, var(--primary-colour) 40%, black);
+    --background-colour: color-mix(in oklab, var(--primary-colour) 25%, black);
+    --on-background-colour: color-mix(in oklab, var(--primary-colour) 20%, white);
 
     /* Glassy surfaces */
-    --glass-colour: color-mix(in oklab, var(--background-colour) 20%, white);
-    --on-glass-colour: color-mix(in oklab, var(--primary-colour) 40%, black);
-    --on-glass-surface-active-colour: color-mix(in srgb, var(--primary-colour) 5%, transparent);
+    --glass-colour: color-mix(in oklab, var(--background-colour) 90%, white);
+    --on-glass-colour: color-mix(in oklab, var(--primary-colour) 20%, white);
+    --on-glass-surface-active-colour: color-mix(in srgb, white 5%, transparent);
     --glass-border: 1px solid var(--default-border-color);
     --glass-glint-colour: transparent;
 
     /* Columns */
-    --column-colour: color-mix(in srgb, var(--secondary-colour) 15%, transparent);
+    --column-colour: color-mix(in srgb, var(--secondary-colour) 35%, transparent);
     --column-background-color-removal: color-mix(in srgb, var(--warning-colour) 30%, transparent);
-    --column-removal-border: 1px solid color-mix(in oklab, var(--warning-colour) 30%, black);
+    --column-removal-border: 1px solid color-mix(in oklab, var(--warning-colour) 30%, white);
 
     /* Groups */
-    --group-colour: white;
-    --on-group-colour: color-mix(in oklab, var(--group-colour) 30%, black);
+    --group-colour: color-mix(in oklab, var(--background-colour) 80%, white);
+    --on-group-colour: color-mix(in oklab, var(--group-colour) 25%, white);
+    --on-group-colour-higher-contrast: color-mix(in oklab, var(--group-colour) 30%, white);
     --group-border-colour: var(--default-border-color);
 
     /* Checkpoints */
-    --checkpoint-surface-border: 1px solid var(--default-border-color);
+    --checkpoint-surface-border: 1px solid color-mix(in srgb, white 90%, var(--background-colour));
     --checkpoint-surface-border-radius: 1em;
 
-    --checkpoint-line-colour: color-mix(
-            in oklab,
-            var(--primary-colour) 40%,
-            color-mix(in oklab, black 80%, white)
-    );
+    --checkpoint-line-colour: color-mix(in srgb, white 90%, var(--background-colour));
     --checkpoint-line-thickness: 0.18em;
 
-    --checkpoint-surface-colour: color-mix(in srgb, white 90%, transparent);
-    --on-checkpoint-surface-colour: color-mix(in srgb, black 90%, var(--checkpoint-surface-colour));
+    --checkpoint-surface-colour: color-mix(in srgb, white 20%, var(--background-colour));
+    --on-checkpoint-surface-colour: color-mix(
+        in oklab,
+        var(--checkpoint-surface-colour) 10%,
+        white
+    );
 
-    --checkpoint-completed-line-colour: color-mix(in oklab, var(--accept-colour) 60%, black);
+    --checkpoint-completed-line-colour: color-mix(
+        in oklab,
+        var(--accept-colour) 50%,
+        color-mix(in oklab, black 60%, white)
+    );
 
     --checkpoint-completed-surface-colour: color-mix(
-            in oklab,
-            var(--accept-colour) 10%,
-            var(--checkpoint-surface-colour)
+        in oklab,
+        var(--accept-colour) 20%,
+        color-mix(in oklab, black 80%, white)
     );
-    --on-checkpoint-completed-surface-colour: color-mix(in oklab, var(--primary-colour) 30%, black);
+    --on-checkpoint-completed-surface-colour: 1px solid
+        color-mix(in srgb, white 90%, var(--background-colour));
 
     /* Connections */
-    --connection-colour: color-mix(in oklab, var(--primary-colour) 30%, black);
-    --connection-radius: 16;
-    --connection-width: 0.18em;
-    --connection-highlighted-colour: color-mix(
-            in oklab,
-            var(--connection-colour) 10%,
-            var(--secondary-colour)
-    );
-    --connection-highlighted-width: 0.375em;
+    --connection-colour: white;
+    --connection-width: 0.2em;
 
     /* Blocks */
-    --block-colour: hsl(0deg 0% 100%);
-    --block-completed-colour: color-mix(in oklab, var(--accept-colour) 10%, white);
-    --on-block-colour: hsl(0deg 0% 0%);
+    --block-colour: var(--background-colour);
+    --block-completed-colour: color-mix(
+        in oklab,
+        var(--accept-colour) 30%,
+        color-mix(in oklab, black 80%, white)
+    );
+    --on-block-colour: color-mix(in oklab, var(--background-colour) 10%, white);
     --on-block-divider-colour: color-mix(in oklab, var(--on-block-colour) 70%, var(--block-colour));
-    --on-block-completed-colour: color-mix(in oklab, var(--primary-colour) 30%, black);
+    --on-block-completed-colour: white;
     --block-border: 1px solid var(--default-border-color);
-    --block-completed-border: 1px solid color-mix(in oklab, var(--accept-colour) 60%, black);
+    --block-completed-border: 1px solid color-mix(in oklab, var(--accept-colour) 50%, white);
     --expanded-block-border: 2px solid var(--default-border-color);
-    --expanded-block-border-radius: 1em;
-    --expanded-block-background-blur: 0.5rem;
-    --expanded-block-background-colour: transparent;
 
     /* Items */
-    --on-block-task-completed-colour: color-mix(in oklab, var(--accept-colour) 60%, black);
+    --on-block-task-completed-colour: color-mix(in oklab, var(--accept-colour) 90%, white);
     --choice-task-outline-colour: var(--on-block-divider-colour);
-    --choice-task-completed-outline-colour: color-mix(in oklab, var(--accept-colour) 60%, black);
+    --choice-task-completed-outline-colour: color-mix(in oklab, var(--accept-colour) 90%, black);
     --task-drop-indication-colour: color-mix(in srgb, var(--secondary-colour) 15%, transparent);
     --drag-icon-color: color-mix(in srgb, var(--on-block-colour) 70%, var(--block-colour));
-    --time-icon-opacity: 0.7;
+    --time-icon-opacity: 0.9;
 
     /* Submodule overview */
     --submodule-overview-skill-completed-colour: color-mix(
-            in oklab,
-            var(--accept-colour) 45%,
-            black
+        in oklab,
+        var(--accept-colour) 80%,
+        white
     );
-    --submodule-overview-line-colour: color-mix(in oklab, var(--block-colour) 20%, black);
+    --submodule-overview-line-colour: color-mix(in oklab, var(--block-colour) 20%, white);
     --submodule-overview-selected-background-color: color-mix(
-            in oklab,
-            var(--primary-colour) 5%,
-            var(--block-colour)
+        in oklab,
+        var(--primary-colour) 5%,
+        var(--block-colour)
     );
     --submodule-overview-hover-background-color: color-mix(
-            in oklab,
-            var(--primary-colour) 5%,
-            var(--block-colour)
+        in oklab,
+        var(--primary-colour) 5%,
+        var(--block-colour)
     );
     --submodule-overview-selection-border-color: var(--default-border-color);
 
     /* Links */
-    --link-colour: var(--primary-colour);
-    --link-active-colour: color-mix(in oklab, var(--primary-colour) 40%, black);
+    --link-colour: color-mix(in oklab, var(--secondary-colour) 60%, white);
+    --link-text-decoration: underline;
+    --link-active-colour: color-mix(in oklab, var(--primary-colour) 70%, white);
 
     /* Buttons */
-    --neutral-surface-colour: hsl(0deg 0% 100%);
+    --surface-border-radius: 0.5em;
+    --neutral-surface-colour: color-mix(
+        in oklab,
+        color-mix(in oklab, var(--primary-colour) 70%, white) 30%,
+        black
+    );
     --neutral-surface-active-colour: var(--primary-surface-colour);
-    --on-neutral-surface-colour: hsl(0deg 0% 0%);
+    --on-neutral-surface-colour: hsl(0deg 0% 100%);
     --on-neutral-surface-active-colour: var(--on-primary-surface-colour);
     --neutral-surface-border: var(--primary-surface-border);
     --neutral-surface-active-border-colour: var(--primary-surface-active-border);
 
-    --primary-surface-colour: color-mix(in oklab, var(--primary-colour) 5%, white);
-    --primary-surface-active-colour: color-mix(in oklab, var(--primary-colour) 15%, white);
-    --on-primary-surface-colour: color-mix(in oklab, var(--primary-colour) 20%, black);
+    --primary-surface-colour: color-mix(in oklab, var(--primary-colour) 20%, black);
+    --primary-surface-active-colour: color-mix(in oklab, var(--primary-colour) 40%, black);
+    --on-primary-surface-colour: color-mix(in oklab, var(--primary-colour) 20%, white);
     --on-primary-surface-active-colour: var(--on-primary-surface-colour);
     --primary-surface-border: 1px solid var(--default-border-color);
     --primary-surface-active-border: 2px solid var(--default-border-color);
 
-    --error-surface-colour: color-mix(in oklab, var(--error-colour) 10%, white);
-    --error-surface-active-colour: color-mix(in oklab, var(--error-colour) 20%, white);
-    --on-error-surface-colour: color-mix(in oklab, var(--error-colour) 30%, black);
-    --on-error-surface-active-colour: var(--on-error-surface-colour);
-    --error-surface-border: 1px solid color-mix(in oklab, var(--error-colour) 30%, black);
-    --error-surface-active-border: 2px solid color-mix(in oklab, var(--error-colour) 30%, black);
+    --error-surface-colour: color-mix(in oklab, var(--error-colour) 50%, black);
+    --error-surface-active-colour: color-mix(in oklab, var(--error-colour) 70%, black);
+    --on-error-surface-colour: color-mix(in oklab, var(--error-colour) 10%, white);
+    --on-error-surface-active-colour: color-mix(in oklab, var(--error-colour) 10%, white);
+    --error-surface-border: 1px solid var(--on-error-surface-colour);
+    --error-surface-active-border: 2px solid var(--on-error-surface-colour);
 
     /* Footer */
-    --footer-colour: white;
-    --on-footer-colour: black;
+    --footer-colour: color-mix(in oklab, var(--background-colour) 80%, white);
+    --on-footer-colour: white;
     --footer-border-top: 1px solid var(--default-border-color);
 
     /* Checkboxes */
-    --checkbox-border: 2px solid color-mix(in oklab, black 60%, white);
-    --checkbox-checked-colour: color-mix(in oklab, var(--accept-colour) 50%, black);
+    --checkbox-border: 2px solid color-mix(in oklab, black 40%, white);
+    --checkbox-checked-colour: color-mix(in oklab, var(--accept-colour) 90%, white);
+    --on-checkbox-checked-colour: var(--background-colour);
+
+    /* Selects */
+    --option-active-colour: color-mix(
+        in srgb,
+        color-mix(in oklab, var(--primary-colour) 40%, white) 5%,
+        transparent
+    );
 
     /* Info banners */
     --info-banner-colour: color-mix(in srgb, var(--secondary-colour) 10%, transparent);
-    --on-info-banner-colour: color-mix(in oklab, var(--primary-colour) 40%, black);
+    --on-info-banner-colour: color-mix(in oklab, var(--primary-colour) 10%, white);
     --info-banner-border: 1px solid var(--default-border-color);
 
     /* Warning banners */
-    --warning-banner-colour: color-mix(in oklab, var(--warning-colour) 15%, white);
-    --on-warning-banner-colour: color-mix(in oklab, var(--warning-colour) 20%, black);
-    --warning-banner-border: 1px solid color-mix(in oklab, var(--warning-colour) 30%, black);
-    --warning-banner-border-radius: 1em;
+    --warning-banner-colour: color-mix(
+        in srgb,
+        var(--warning-colour) 60%,
+        var(--background-colour)
+    );
+    --on-warning-banner-colour: white;
+    --warning-banner-border: 1px solid var(--default-border-color);
 }
