@@ -139,11 +139,10 @@
     --on-option-active-colour: white;
 
     /* Info banners */
-    /* TODO */
-    --info-banner-colour: color-mix(in srgb, var(--secondary-colour) 10%, transparent);
-    --on-info-banner-colour: color-mix(in oklab, var(--primary-colour) 40%, black);
-    --info-banner-border: 1px solid var(--default-border-color);
-    --info-banner-border-radius: 1em;
+    --info-banner-colour: var(--green);
+    --on-info-banner-colour: white;
+    --info-banner-border: none;
+    --info-banner-border-radius: 0;
 
     /* Warning banners */
     --warning-banner-colour: var(--orange);
