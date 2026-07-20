@@ -35,15 +35,15 @@
             <div class="connector" data-connect="top-left"></div>
         </div>
         <div
-                class="outer-corners"
-                data-connect-top={alloc.neighbours.top}
-                data-connect-right={alloc.neighbours.right}
-                data-connect-bottom={alloc.neighbours.bottom}
-                data-connect-left={alloc.neighbours.left}
-                data-connect-top-right={alloc.neighbours.topRight}
-                data-connect-bottom-right={alloc.neighbours.bottomRight}
-                data-connect-bottom-left={alloc.neighbours.bottomLeft}
-                data-connect-top-left={alloc.neighbours.topLeft}>
+            class="outer-corners"
+            data-connect-top={alloc.neighbours.top}
+            data-connect-right={alloc.neighbours.right}
+            data-connect-bottom={alloc.neighbours.bottom}
+            data-connect-left={alloc.neighbours.left}
+            data-connect-top-right={alloc.neighbours.topRight}
+            data-connect-bottom-right={alloc.neighbours.bottomRight}
+            data-connect-bottom-left={alloc.neighbours.bottomLeft}
+            data-connect-top-left={alloc.neighbours.topLeft}>
             <div class="outer-corner" data-connect="top-right"></div>
             <div class="outer-corner" data-connect="bottom-right"></div>
             <div class="outer-corner" data-connect="bottom-left"></div>
