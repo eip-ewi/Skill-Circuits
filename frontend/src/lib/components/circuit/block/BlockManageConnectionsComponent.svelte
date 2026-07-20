@@ -171,5 +171,7 @@
         top: 50%;
         transform-origin: center;
         translate: -50% -50%;
+        /* Must be above blocks */
+        z-index: 3;
     }
 </style>

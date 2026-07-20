@@ -101,6 +101,8 @@
         transform-origin: top;
         translate: -50% 0;
         white-space: nowrap;
+        /* Must be above blocks */
+        z-index: 3;
     }
 
     .rotated {

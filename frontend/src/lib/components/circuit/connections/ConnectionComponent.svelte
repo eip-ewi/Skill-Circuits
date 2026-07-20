@@ -87,7 +87,6 @@
         transition:
             filter ease-in-out 150ms,
             opacity ease-in-out 150ms;
-        z-index: 10;
     }
 
     path:hover {
@@ -104,6 +103,8 @@
     path[data-locked="true"] {
         opacity: 0;
         filter: blur(0.2em);
+        /* Should not interfere with interactable lines */
+        pointer-events: none;
     }
 
     path[data-preview="true"] {

@@ -31,6 +31,8 @@
         position: absolute;
         overflow: visible;
         width: 100%;
+        /* Must be >= 1 for lines to be interactable */
+        z-index: 1;
     }
 
     svg[data-interactible="false"] {

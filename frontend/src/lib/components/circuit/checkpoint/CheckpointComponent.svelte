@@ -101,6 +101,8 @@
         grid-column: 1 / -1;
         position: relative;
         transform: translateY(calc(100% + 1em));
+        /* Must be above SVG lines */
+        z-index: 2;
     }
 
     .checkpoint[data-focused="false"] {
