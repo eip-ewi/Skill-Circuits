@@ -31,20 +31,17 @@
     import type { SubmoduleBlock } from "../../../dto/circuit/edition/submodule";
     import FocusModeButtonsComponent from "./FocusModeButtonsComponent.svelte";
     import {
-        getFocusModeBlock,
-        isInFocusMode,
-        setFocusMode,
-        visibleInFocusMode,
-    } from "../../../logic/circuit/focusMode.svelte";
-    import {
+        type FocusModeBlockState,
         FocusModeBlockStates,
         isVisibleAndInFocusMode,
     } from "../../../data/focus_mode_block_state";
+    import { getFocusModeState } from "../../../logic/circuit/focusMode.svelte";
 
     let { block }: { block: Block } = $props();
 
+    let focusModeState: FocusModeBlockState = $derived(getFocusModeState(block.id));
     let locked: boolean = $derived(
-        !hasEditorRights() && !isUnlocked(block) && !isVisibleAndInFocusMode(block.focusModeState),
+        !hasEditorRights() && !isUnlocked(block) && !isVisibleAndInFocusMode(focusModeState),
     );
     let completed: boolean = $derived(!hasEditorRights() && isCompleted(block));
     let clickable: boolean = $derived(
@@ -129,24 +126,6 @@
 
             clearScrollTarget();
         })();
-    });
-
-    $effect(() => {
-        if (isInFocusMode()) {
-            if (getFocusModeBlock() === block) {
-                updateBlockNoCascade(block, { focusModeState: FocusModeBlockStates.FocusOnBlock });
-            } else if (visibleInFocusMode(block)) {
-                updateBlockNoCascade(block, {
-                    focusModeState: FocusModeBlockStates.VisibleInFocusMode,
-                });
-            } else {
-                updateBlockNoCascade(block, {
-                    focusModeState: FocusModeBlockStates.DisabledInFocusMode,
-                });
-            }
-        } else {
-            updateBlockNoCascade(block, { focusModeState: FocusModeBlockStates.NotInFocusMode });
-        }
     });
 
     function recalculateBounds() {
@@ -269,9 +248,9 @@
         data-wiggle={block.state === BlockStates.Dragging}
         data-unfocus={unfocused}
         data-pulse={block.state === BlockStates.Connecting ||
-            block.focusModeState === FocusModeBlockStates.FocusOnBlock}
+            focusModeState === FocusModeBlockStates.FocusOnBlock}
         data-hidden={hidden}
-        data-focus-mode-hidden={block.focusModeState === FocusModeBlockStates.DisabledInFocusMode}
+        data-focus-mode-hidden={focusModeState === FocusModeBlockStates.DisabledInFocusMode}
         onclick={click}
         onmouseenter={mouseEnterBlock}
         onmouseleave={mouseLeaveBlock}>
@@ -288,7 +267,7 @@
         {#if block.blockType === "skill" && !block.external && (block.state === BlockStates.Hovering || isSkillBookmarked(block))}
             <BookmarkSkillButtonComponent bind:action skill={block}></BookmarkSkillButtonComponent>
         {/if}
-        {#if block.blockType === "skill" && (block.state === BlockStates.Hovering || block.focusModeState === FocusModeBlockStates.FocusOnBlock) && !hasEditorRights()}
+        {#if block.blockType === "skill" && (block.state === BlockStates.Hovering || focusModeState === FocusModeBlockStates.FocusOnBlock) && !hasEditorRights()}
             <FocusModeButtonsComponent bind:action {block}></FocusModeButtonsComponent>
         {/if}
         {#if (block.blockType !== "skill" || block.external) && !hasEditorRights()}

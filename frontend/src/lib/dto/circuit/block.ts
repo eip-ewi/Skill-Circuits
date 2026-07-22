@@ -17,7 +17,6 @@ export interface IBlock {
     preview: boolean | undefined;
     boundingRect: (() => DOMRect) | undefined;
     state: BlockState | undefined;
-    focusModeState: FocusModeBlockState | undefined;
 }
 
 export type Block = SubmoduleBlock | SkillBlock;

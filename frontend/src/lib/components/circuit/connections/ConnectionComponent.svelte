@@ -9,7 +9,7 @@
     import { onMount, tick, untrack } from "svelte";
     import { getBlurBlocks } from "../../../logic/preferences.svelte";
     import { BlockStates } from "../../../data/block_state";
-    import { isInFocusMode } from "../../../logic/circuit/focusMode.svelte";
+    import { getFocusModeState, isInFocusMode } from "../../../logic/circuit/focusMode.svelte";
     import {
         FocusModeBlockStates,
         isVisibleAndInFocusMode,
@@ -25,7 +25,8 @@
             ),
     );
     let visibleAndInFocusMode: boolean = $derived(
-        isVisibleAndInFocusMode(from.focusModeState) && isVisibleAndInFocusMode(to.focusModeState),
+        isVisibleAndInFocusMode(getFocusModeState(from.id)) &&
+            isVisibleAndInFocusMode(getFocusModeState(to.id)),
     );
     let disabledAndInFocusMode: boolean = $derived(
         !locked && isInFocusMode() && !visibleAndInFocusMode,

@@ -8,9 +8,15 @@
     import type { SkillItem } from "../../../dto/circuit/edition/skill";
     import { getCheckpoint, getVisibleCheckpoints } from "../../../logic/edition/edition.svelte";
     import { BlockStates } from "../../../data/block_state";
-    import { FocusModeBlockStates } from "../../../data/focus_mode_block_state";
+    import {
+        type FocusModeBlockState,
+        FocusModeBlockStates,
+    } from "../../../data/focus_mode_block_state";
+    import { getFocusModeState } from "../../../logic/circuit/focusMode.svelte";
 
     let { block }: { block: Block } = $props();
+
+    let focusModeState: FocusModeBlockState = $derived(getFocusModeState(block.id));
 
     function isSkillItemVisible(item: SkillItem) {
         return item.column !== null && (!item.hidden || isSkillItemRevealed(item));
@@ -40,19 +46,17 @@
 </script>
 
 <div class="heading">
-    {#if block.blockType === "skill" && block.external && block.focusModeState !== FocusModeBlockStates.DisabledInFocusMode}
+    {#if block.blockType === "skill" && block.external && focusModeState !== FocusModeBlockStates.DisabledInFocusMode}
         <span class="label">External</span>
     {/if}
-    {#if block.blockType === "skill" && !block.essential && block.focusModeState !== FocusModeBlockStates.DisabledInFocusMode}
+    {#if block.blockType === "skill" && !block.essential && focusModeState !== FocusModeBlockStates.DisabledInFocusMode}
         <span class="label">Optional</span>
     {/if}
     <span class="name">{block.name}</span>
 </div>
 
 <div
-    style={block.focusModeState === FocusModeBlockStates.DisabledInFocusMode
-        ? "visibility: hidden"
-        : ""}>
+    style={focusModeState === FocusModeBlockStates.DisabledInFocusMode ? "visibility: hidden" : ""}>
     {#if block.blockType === "skill"}
         <TaskIconsComponent tasks={getItemsOnPath(block)}></TaskIconsComponent>
     {:else if hasEditorRights()}

@@ -1,6 +1,7 @@
 import type { Block } from "../../dto/circuit/block";
-import { getGraph } from "./circuit.svelte";
+import { getGraph, updateBlockNoCascade } from "./circuit.svelte";
 import type { Graph } from "./graph";
+import { type FocusModeBlockState, FocusModeBlockStates } from "../../data/focus_mode_block_state";
 
 let focusModeBlock: Block | null = $state(null);
 let focusModeVisibleBlocks: Set<number> = $derived.by(() => {
@@ -103,6 +104,20 @@ export function isInFocusMode(): boolean {
     return focusModeBlock !== null;
 }
 
-export function visibleInFocusMode(block: Block): boolean {
-    return focusModeVisibleBlocks.has(block.id);
+export function getFocusModeState(id: number): FocusModeBlockState {
+    if (isInFocusMode()) {
+        if (getFocusModeBlock()!.id === id) {
+            return FocusModeBlockStates.FocusOnBlock;
+        } else if (visibleInFocusMode(id)) {
+            return FocusModeBlockStates.VisibleInFocusMode;
+        } else {
+            return FocusModeBlockStates.DisabledInFocusMode;
+        }
+    } else {
+        return FocusModeBlockStates.NotInFocusMode;
+    }
+}
+
+export function visibleInFocusMode(id: number): boolean {
+    return focusModeVisibleBlocks.has(id);
 }

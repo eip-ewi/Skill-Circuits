@@ -5,15 +5,20 @@
     import { cubicInOut } from "svelte/easing";
     import {
         getFocusModeBlock,
+        getFocusModeState,
         resetFocusMode,
         toggleFocusMode,
     } from "../../../logic/circuit/focusMode.svelte";
-    import { FocusModeBlockStates } from "../../../data/focus_mode_block_state";
+    import {
+        type FocusModeBlockState,
+        FocusModeBlockStates,
+    } from "../../../data/focus_mode_block_state";
     import { onDestroy } from "svelte";
 
     let { block, action = $bindable() }: { block: Block; action: BlockAction | undefined } =
         $props();
 
+    let focusModeState: FocusModeBlockState = $derived(getFocusModeState(block.id));
     let placement: "left" | "right" = $derived.by(() => {
         return (block.boundingRect === undefined ? 0 : block.boundingRect!().right) + 64 >
             window.innerWidth
@@ -51,7 +56,7 @@
     }
 
     function mouseEnter() {
-        if (block.focusModeState === FocusModeBlockStates.FocusOnBlock) {
+        if (focusModeState === FocusModeBlockStates.FocusOnBlock) {
             action = BlockActions.StopFocusMode;
         } else {
             action = BlockActions.FocusMode;
