@@ -13,6 +13,7 @@ export interface ITaskInfo {
     type: string;
     time: number;
     link: string | null;
+    deadline: string | null;
 }
 
 export interface RegularTaskItem extends ITaskItem, ITaskInfo {

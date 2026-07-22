@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Everyone] A legend that shows what each task symbol means. (@ogangalic)
 - [Teacher] Add task table overview page for editions. (@ffiedrich)
 - [Teacher] Column management has a UI interface. (@ralani)
+- [Everyone] Tasks can have deadlines. (@ralani)
 - [Everyone] Add a "focus mode" for blocks that displays requirements and dependencies of a block up until a certain depth. (@ffiedrich)
 
 ## Changed
@@ -24,6 +25,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Student] When in the submodule view, the skills are now sorted. (@ogangalic)
 - [Developers] The devtools error when logging in and the state mutation warning. (@ogangalic)
 - [Student] Optional skills are skipped for the completion state of submodules and checkpoints. Separate optional skill counters are displayed on the edition page. (@ffiedrich)
+
+## [2526.2.1]
+
+## Added
+
+## Changed
+
+## Fixed
+- [Student] Page redirects from external skills or bookmarked skills work as intended. (@ralani)
 
 ## [2526.2.0]
 
