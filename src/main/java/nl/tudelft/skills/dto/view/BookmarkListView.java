@@ -61,6 +61,7 @@ public record BookmarkListView(
 			String name,
 			TaskType type,
 			int time,
+			@Nullable LocalDateTime deadline,
 			@Nullable String link,
 			boolean completed,
 			String qualifiedName) implements BookmarkListTaskView {
@@ -87,6 +88,7 @@ public record BookmarkListView(
 			String name,
 			TaskType type,
 			int time,
+			@Nullable LocalDateTime deadline,
 			@Nullable String link,
 			boolean completed) {
 	}

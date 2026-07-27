@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Everyone] A legend that shows what each task symbol means. (@ogangalic)
 - [Teacher] Add task table overview page for editions. (@ffiedrich)
 - [Teacher] Column management has a UI interface. (@ralani)
+- [Everyone] Tasks can have deadlines. (@ralani)
 
 ## Changed
 - [Student] Optional skills are now marked as optional in the expanded submodule view. (@ffiedrich)
@@ -23,7 +24,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Teacher] Task edit components are now fixed in place when scrolling. (@ogangalic)
 - [Student] When in the submodule view, the skills are now sorted. (@ogangalic)
 - [Developers] The devtools error when logging in and the state mutation warning. (@ogangalic)
-- [Student] Optional skills are skipped for the completion state of submodules and checkpoints. Separate optional skill counters are displayed on the edition page. (@ffiedrich)
+-[Student] Optional skills are skipped for the completion state of submodules and checkpoints. Separate optional skill counters are displayed on the edition page. (@ffiedrich)
+- [Everyone] When scrolling on the extended view of the block the circuit page doesn't scroll (@ogangalic)
+
+## [2526.2.1]
+
+## Added
+
+## Changed
+
+## Fixed
+- [Student] Page redirects from external skills or bookmarked skills work as intended. (@ralani)
 
 ## [2526.2.0]
 
