@@ -11,6 +11,7 @@
     let dropdown: HTMLElement;
 
     let rafId: number | undefined;
+    let viewport: VisualViewport | undefined;
 
     // Keep the (top-layer, position: fixed) dropdown aligned to its anchor. Positions are in
     // viewport coordinates, so they must be recomputed whenever the surrounding content scrolls
@@ -50,12 +51,20 @@
         }
         dropdown.showPopover();
         reposition();
+        viewport = window.visualViewport;
         // Capture phase so scrolling inside nested scroll containers is caught (scroll doesn't bubble).
         window.addEventListener("scroll", scheduleReposition, true);
+        document.addEventListener("scroll", scheduleReposition, true);
         window.addEventListener("resize", scheduleReposition);
+        viewport?.addEventListener("scroll", scheduleReposition);
+        viewport?.addEventListener("resize", scheduleReposition);
         return () => {
             window.removeEventListener("scroll", scheduleReposition, true);
+            document.removeEventListener("scroll", scheduleReposition, true);
             window.removeEventListener("resize", scheduleReposition);
+            viewport?.removeEventListener("scroll", scheduleReposition);
+            viewport?.removeEventListener("resize", scheduleReposition);
+            viewport = undefined;
             if (rafId !== undefined) {
                 cancelAnimationFrame(rafId);
             }
