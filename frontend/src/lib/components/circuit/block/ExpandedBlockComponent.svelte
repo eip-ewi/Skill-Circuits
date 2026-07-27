@@ -71,11 +71,7 @@
 
 {#if open}
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
-    <dialog
-        bind:this={element}
-        onclick={checkForClose}
-        onkeydown={checkForClose}
-        onwheel={e => e.stopPropagation()}>
+    <dialog bind:this={element} onclick={checkForClose} onkeydown={checkForClose}>
         <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
         <div
             class="expanded-block"
@@ -98,6 +94,19 @@
 {/if}
 
 <style>
+    dialog {
+        /* Cover the whole viewport as a scroll container that is always at its
+           scroll boundary, so wheel events cannot chain to the page behind. */
+        background: transparent;
+        border: none;
+        height: 100vh;
+        max-height: 100vh;
+        max-width: 100vw;
+        overflow: hidden;
+        overscroll-behavior: contain;
+        width: 100vw;
+    }
+
     .expanded-block {
         font-size: clamp(0.75rem, calc(16 / 1732 * 100vw), 1rem);
 
