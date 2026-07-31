@@ -11,7 +11,7 @@
     let dropdown: HTMLElement;
 
     let rafId: number | undefined;
-    let viewport: VisualViewport | undefined;
+    let viewport: VisualViewport | null | undefined;
 
     // Keep the (top-layer, position: fixed) dropdown aligned to its anchor. Positions are in
     // viewport coordinates, so they must be recomputed whenever the surrounding content scrolls
