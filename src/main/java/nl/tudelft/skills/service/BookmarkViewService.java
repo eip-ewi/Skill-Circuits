@@ -110,6 +110,7 @@ public class BookmarkViewService {
 				taskInfo.getName(),
 				taskInfo.getType(),
 				taskInfo.getTime(),
+				taskInfo.getDeadline(),
 				taskInfo.getLink(),
 				completedTaskIds.contains(taskInfo.getId()),
 				getQualifiedName(getSkill(taskInfo)) + " > " + taskInfo.getName());
@@ -139,6 +140,7 @@ public class BookmarkViewService {
 				taskInfo.getName(),
 				taskInfo.getType(),
 				taskInfo.getTime(),
+				taskInfo.getDeadline(),
 				taskInfo.getLink(),
 				completedTaskIds.contains(taskInfo.getId()));
 	}

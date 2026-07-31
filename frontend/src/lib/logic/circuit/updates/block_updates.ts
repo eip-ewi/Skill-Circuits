@@ -33,7 +33,7 @@ export async function createBlock(column: number) {
         let block: Block = await response.json();
         // @ts-ignore
         block.blockType = getLevel().block;
-        block.state = BlockStates.Editing;
+        block.state = BlockStates.Inactive;
         (firstGroup.blocks as Block[]).push(block);
         setScrollTarget({ kind: "block", id: block.id });
     }

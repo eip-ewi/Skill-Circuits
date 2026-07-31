@@ -25,13 +25,15 @@ export function isCompleted(
         return false;
     }
 
-    let allItemsUnlocked = !items.some(item => item.locked);
+    let allEssentialItemsUnlocked = !items.some(
+        item => item.locked && (item.itemType !== "skill" || item.essential),
+    );
 
-    if (!allItemsUnlocked) {
+    if (!allEssentialItemsUnlocked) {
         return false;
     }
 
-    let isEmpty = items.length === 0;
+    let isEmpty = items.filter(item => item.itemType !== "skill" || item.essential).length === 0;
 
     if (isEmpty) {
         return isUnlocked(block, graph, recursionCheck);

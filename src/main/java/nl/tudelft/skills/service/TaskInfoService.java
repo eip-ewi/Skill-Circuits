@@ -17,6 +17,8 @@
  */
 package nl.tudelft.skills.service;
 
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,6 +48,18 @@ public class TaskInfoService {
 	@Transactional
 	public void patchTaskInfo(TaskInfo taskInfo, TaskInfoPatch patch) {
 		patch.apply(taskInfo, dtoConverter);
+		taskInfoRepository.save(taskInfo);
+	}
+
+	@Transactional
+	public void setTaskDeadline(TaskInfo taskInfo, LocalDateTime deadline) {
+		taskInfo.setDeadline(deadline);
+		taskInfoRepository.save(taskInfo);
+	}
+
+	@Transactional
+	public void clearTaskDeadline(TaskInfo taskInfo) {
+		taskInfo.setDeadline(null);
 		taskInfoRepository.save(taskInfo);
 	}
 

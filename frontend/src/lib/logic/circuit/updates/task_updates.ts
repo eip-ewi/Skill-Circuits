@@ -138,6 +138,36 @@ export async function editTaskTime(task: TaskInfo, newTime: number) {
     }
 }
 
+export async function editTaskDeadline(task: TaskInfo, newDeadline: string | null) {
+    let oldDeadline = task.deadline;
+    task.deadline = newDeadline;
+
+    let response =
+        newDeadline === null
+            ? await fetch(
+                  `/api/task-info/${task.infoId}/deadline`,
+                  withCsrf({
+                      method: "DELETE",
+                  }),
+              )
+            : await fetch(
+                  `/api/task-info/${task.infoId}/deadline`,
+                  withCsrf({
+                      method: "PATCH",
+                      headers: {
+                          "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({
+                          deadline: newDeadline,
+                      }),
+                  }),
+              );
+
+    if (!response.ok) {
+        task.deadline = oldDeadline;
+    }
+}
+
 export async function editTaskLink(task: TaskInfo, newLink: string) {
     let oldLink = task.link;
     task.link = newLink === "" ? null : newLink;

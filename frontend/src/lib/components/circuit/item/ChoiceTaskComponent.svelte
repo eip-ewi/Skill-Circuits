@@ -23,7 +23,13 @@
         task,
         hideBookmark,
         hidePathCustomisation,
-    }: { task: ChoiceTaskItem; hideBookmark?: boolean; hidePathCustomisation?: boolean } = $props();
+        reserveDeadlineSpace = false,
+    }: {
+        task: ChoiceTaskItem;
+        hideBookmark?: boolean | undefined;
+        hidePathCustomisation?: boolean | undefined;
+        reserveDeadlineSpace?: boolean | undefined;
+    } = $props();
 
     let bookmarksOpen: boolean = $state(false);
     let draggable: boolean = $state(false);
@@ -57,8 +63,12 @@
                 </BookmarkMenuComponent>
             {/if}
 
-            <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
-            <div class="interrupt-border" {draggable} ondragstart={dragStart} ondragend={dragEnd}>
+            <div
+                role="group"
+                class="interrupt-border"
+                {draggable}
+                ondragstart={dragStart}
+                ondragend={dragEnd}>
                 {#if !hidePathCustomisation}
                     <div
                         role="button"
@@ -82,21 +92,35 @@
         </div>
     </div>
     <div class="tasks" class:with-bookmark={!hideBookmark}>
-        {#each task.tasks as subtask}
-            <TaskComponent task={subtask} {hideBookmark} hidePathCustomisation={true}
-            ></TaskComponent>
+        {#each task.tasks as subtask (subtask.infoId)}
+            <TaskComponent
+                task={subtask}
+                {hideBookmark}
+                hidePathCustomisation={true}
+                {reserveDeadlineSpace}></TaskComponent>
         {/each}
     </div>
 </div>
 
 <style>
-    .task {
-        outline: 1px solid var(--choice-task-outline-colour);
+    .task::before {
+        content: "";
+        position: absolute;
+        inset: 0 -0.5rem;
         border-radius: var(--choice-task-outline-radius);
+        outline: 1px solid var(--choice-task-outline-colour);
+        pointer-events: none;
+    }
+
+    .task {
+        align-items: center;
+        display: grid;
+        grid-template-columns: subgrid;
+        row-gap: 0.25rem;
         grid-column: 1 / 4;
         margin-top: 1rem;
         margin-bottom: 0.5rem;
-        padding: 1.25rem 1rem 1rem 1rem;
+        padding-block: 1.25rem 1rem;
         position: relative;
         min-width: 21em;
     }
@@ -134,15 +158,7 @@
     }
 
     .tasks {
-        align-items: center;
-        column-gap: 0.75rem;
-        display: grid;
-        grid-template-columns: auto 1fr auto;
-        justify-content: start;
-        row-gap: 0.25rem;
-    }
-    .with-bookmark {
-        grid-template-columns: auto 1fr auto auto;
+        display: contents;
     }
 
     .grip {

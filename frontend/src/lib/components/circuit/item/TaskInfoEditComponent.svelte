@@ -4,6 +4,7 @@
     import TaskTypeEditComponent from "./TaskTypeEditComponent.svelte";
     import TaskTimeEditComponent from "./TaskTimeEditComponent.svelte";
     import TaskLinkEditComponent from "./TaskLinkEditComponent.svelte";
+    import TaskDeadlineEditComponent from "./TaskDeadlineEditComponent.svelte";
     import TaskPathEditComponent from "./TaskPathEditComponent.svelte";
     import type { Snippet } from "svelte";
     import type { ChoiceTaskChoice, TaskInfo } from "../../../dto/circuit/module/task";
@@ -55,6 +56,7 @@
     <TaskTypeEditComponent {taskInfo}></TaskTypeEditComponent>
     <input class="name" name="item-name" value={taskInfo.name} onchange={editName} />
     <TaskTimeEditComponent {taskInfo}></TaskTimeEditComponent>
+    <TaskDeadlineEditComponent {taskInfo}></TaskDeadlineEditComponent>
     <BookmarkMenuComponent
         bind:open={bookmarksOpen}
         onLists={getBookmarks().filter(list =>

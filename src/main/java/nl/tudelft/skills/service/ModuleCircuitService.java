@@ -127,6 +127,7 @@ public class ModuleCircuitService {
 				task.getName(),
 				task.getType(),
 				task.getTime(),
+				task.getTaskInfo().getDeadline(),
 				task.getLink(),
 				completedTaskIds.contains(task.getTaskInfo().getId()),
 				task.getPaths().stream().map(Path::getId).toList());
@@ -152,6 +153,7 @@ public class ModuleCircuitService {
 				info.getName(),
 				info.getType(),
 				info.getTime(),
+				info.getDeadline(),
 				info.getLink(),
 				completedTaskIds.contains(info.getId()));
 	}

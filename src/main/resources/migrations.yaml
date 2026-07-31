@@ -2727,3 +2727,17 @@ databaseChangeLog:
                   type: ENUM('DARK', 'LIGHT', 'NOSTALGIA', 'SYSTEM')
                   defaultValue: SYSTEM
             tableName: scperson
+
+  #
+  # Add deadlines to tasks
+  #
+  - changeSet:
+      id: add-task-deadlines
+      author: rafael
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: deadline
+                  type: TIMESTAMP
+            tableName: task_info

@@ -37,7 +37,7 @@ export async function createExternalSkill(originalSkillId: number, column: numbe
         let externalSkill: ExternalSkillBlock = await response.json();
         // @ts-ignore
         externalSkill.blockType = "skill";
-        externalSkill.state = BlockStates.Editing;
+        externalSkill.state = BlockStates.Inactive;
         (getCircuit() as ModuleCircuit).externalSkills.push(externalSkill);
         setScrollTarget({ kind: "block", id: externalSkill.id });
     }

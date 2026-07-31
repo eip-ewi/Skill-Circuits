@@ -22,11 +22,13 @@ import java.util.Collections;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import nl.tudelft.librador.resolver.annotations.PathEntity;
 import nl.tudelft.skills.annotation.AuthenticatedSCPerson;
 import nl.tudelft.skills.dto.AfterTaskCompletionCircuitUpdate;
 import nl.tudelft.skills.dto.patch.SubtaskMove;
+import nl.tudelft.skills.dto.patch.TaskDeadlinePatch;
 import nl.tudelft.skills.dto.patch.TaskInfoPatch;
 import nl.tudelft.skills.dto.patch.TaskMove;
 import nl.tudelft.skills.dto.view.circuit.module.ModuleLevelTaskView;
@@ -53,6 +55,18 @@ public class TaskInfoController {
 	@PreAuthorize("@authorisationService.canEditTaskInfo(#taskInfo)")
 	public void patchTaskInfo(@PathEntity TaskInfo taskInfo, @RequestBody TaskInfoPatch patch) {
 		taskInfoService.patchTaskInfo(taskInfo, patch);
+	}
+
+	@PatchMapping("{taskInfo}/deadline")
+	@PreAuthorize("@authorisationService.canEditTaskInfo(#taskInfo)")
+	public void setTaskDeadline(@PathEntity TaskInfo taskInfo, @Valid @RequestBody TaskDeadlinePatch patch) {
+		taskInfoService.setTaskDeadline(taskInfo, patch.deadline());
+	}
+
+	@DeleteMapping("{taskInfo}/deadline")
+	@PreAuthorize("@authorisationService.canEditTaskInfo(#taskInfo)")
+	public void clearTaskDeadline(@PathEntity TaskInfo taskInfo) {
+		taskInfoService.clearTaskDeadline(taskInfo);
 	}
 
 	@PatchMapping("{subtask}/task")

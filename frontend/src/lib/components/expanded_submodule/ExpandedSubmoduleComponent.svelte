@@ -6,7 +6,7 @@
     import { topologicalSort } from "../../logic/circuit/block_placement";
     import SkillNameComponent from "./SkillNameComponent.svelte";
     import SelectedSkillComponent from "./SelectedSkillComponent.svelte";
-    import StudentTrayComponent from "../side_controls/student_tray/StudentTrayComponent.svelte";
+    import ExpandedSideControlsComponent from "../side_controls/ExpandedSideControlsComponent.svelte";
     import { openExpandedBlockTransition } from "../../logic/transitions";
     import type { ModuleGroup } from "../../dto/circuit/edition/module";
     import type { Item } from "../../dto/circuit/item";
@@ -148,7 +148,7 @@
         </div>
 
         {#if sortedVisibleSkills !== undefined && selectedSkill !== undefined}
-            <StudentTrayComponent block={selectedSkill}></StudentTrayComponent>
+            <ExpandedSideControlsComponent block={selectedSkill}></ExpandedSideControlsComponent>
         {/if}
     </dialog>
 {/if}

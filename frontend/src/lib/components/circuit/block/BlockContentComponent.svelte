@@ -1,16 +1,39 @@
 <script lang="ts">
     import type { Block } from "../../../dto/circuit/block";
-    import type { SkillBlock } from "../../../dto/circuit/module/skill";
-    import type { TaskItem } from "../../../dto/circuit/module/task";
-    import { hasEditorRights, getAuthorisation } from "../../../logic/authorisation.svelte";
+    import { hasEditorRights } from "../../../logic/authorisation.svelte";
     import { getLevel } from "../../../logic/circuit/level.svelte";
-    import { ModuleLevel } from "../../../data/level";
     import TaskIconsComponent from "../item/TaskIconsComponent.svelte";
     import { getItemsOnPath } from "../../../logic/edition/active_path.svelte";
     import { isSkillItemRevealed } from "../../../logic/circuit/unlocked_skills.svelte";
-    import { getCheckpoint, getVisibleCheckpoints } from "../../../logic/edition/edition.svelte";
+    import type { SkillItem } from "../../../dto/circuit/edition/skill";
 
     let { block }: { block: Block } = $props();
+
+    function isSkillItemVisible(item: SkillItem) {
+        return item.column !== null && (!item.hidden || isSkillItemRevealed(item));
+    }
+
+    function getNumCompletedItems(skillType: "essential" | "optional") {
+        return block.items.filter(item => {
+            if (item.itemType === "skill") {
+                return (
+                    item.completed &&
+                    item.essential === (skillType === "essential") &&
+                    isSkillItemVisible(item)
+                );
+            }
+            return item.completed;
+        }).length;
+    }
+
+    function getNumTotalItems(skillType: "essential" | "optional") {
+        return block.items.filter(item => {
+            if (item.itemType === "skill") {
+                return item.essential === (skillType === "essential") && isSkillItemVisible(item);
+            }
+            return true;
+        }).length;
+    }
 </script>
 
 <div class="heading">
@@ -28,15 +51,23 @@
 {:else if hasEditorRights()}
     <span>{block.items.length} {getLevel().items}</span>
 {:else}
-    <span>
-        {block.items.filter(
-            item => item.completed && (item.itemType !== "skill" || item.column !== null),
-        ).length}/{block.items.filter(
-            item =>
-                item.itemType !== "skill" ||
-                (item.column !== null && (!item.hidden || isSkillItemRevealed(item))),
-        ).length} completed
-    </span>
+    {@const completed = getNumCompletedItems("essential")}
+    {@const total = getNumTotalItems("essential")}
+    {@const completedOpt = getNumCompletedItems("optional")}
+    {@const totalOpt = getNumTotalItems("optional")}
+
+    <div class="completion-counters">
+        {#if total > 0}
+            <span>
+                {completed}/{total} completed
+            </span>
+        {/if}
+        {#if block.blockType === "submodule" && totalOpt > 0}
+            <span class="optional-counter">
+                {completedOpt}/{totalOpt} optional
+            </span>
+        {/if}
+    </div>
 {/if}
 
 <style>
@@ -55,5 +86,15 @@
         font-style: italic;
         opacity: 35%;
         margin-top: -0.25em;
+    }
+
+    .completion-counters {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .optional-counter {
+        font-style: italic;
+        opacity: 35%;
     }
 </style>
