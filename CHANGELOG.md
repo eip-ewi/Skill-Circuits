@@ -33,12 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 
 ## Fixed
-<<<<<<< CHANGELOG.md
-- [Student] When in the submodule view, the skills are now sorted. (@ogangalic)
-- [Everyone] When scrolling on the extended view of the block the circuit page doesn't scroll (@ogangalic)
-=======
 - [Student] Page redirects from external skills or bookmarked skills work as intended. (@ralani)
->>>>>>> CHANGELOG.md
 
 ## [2526.2.0]
 
