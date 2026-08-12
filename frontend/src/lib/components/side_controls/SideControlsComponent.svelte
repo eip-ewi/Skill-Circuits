@@ -12,6 +12,8 @@
     import { EditionLevel } from "../../data/level";
     import BookmarksPanelComponent from "./bookmarks/BookmarksPanelComponent.svelte";
     import LegendPanelComponent from "./legend/LegendPanelComponent.svelte";
+    import ResearchPanelComponent from "./research/ResearchPanelComponent.svelte";
+    import { getResearchInfo } from "../../logic/research.svelte";
 
     let openPanel:
         | "bookmarks"
@@ -21,6 +23,7 @@
         | "modules"
         | "config"
         | "legend"
+        | "research"
         | undefined = $state();
 
     let bookmarksOpen: boolean = $state(false);
@@ -30,6 +33,7 @@
     let modulesOpen: boolean = $state(false);
     let configOpen: boolean = $state(false);
     let legendOpen: boolean = $state(false);
+    let researchOpen: boolean = $state(false);
 
     $effect(() => {
         if (bookmarksOpen) {
@@ -46,6 +50,8 @@
             openPanel = "config";
         } else if (legendOpen) {
             openPanel = "legend";
+        } else if (researchOpen) {
+            openPanel = "research";
         } else {
             openPanel = undefined;
         }
@@ -75,6 +81,7 @@
     {#if !isLevel(EditionLevel)}
         <LegendPanelComponent bind:open={legendOpen}></LegendPanelComponent>
     {/if}
+    <ResearchPanelComponent bind:open={researchOpen}></ResearchPanelComponent>
 </div>
 
 {#if openPanel === undefined}
@@ -149,6 +156,17 @@
                     </button>
                 </div>
             {/if}
+        {/if}
+
+        {#if hasEditorRights() || getResearchInfo().active}
+            <div class="glass surface">
+                <button
+                    class="button"
+                    aria-label="Open research panel"
+                    onclick={() => (researchOpen = true)}>
+                    <span class="fa-solid fa-flask"></span>
+                </button>
+            </div>
         {/if}
     </div>
 {/if}

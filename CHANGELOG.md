@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Editor] Can now see the total time needed for the completion of checkpoints. (@ogangalic)
 - [Everyone] Add dark and light high-contrast themes. (@ffiedrich)
 - [Student] Add setting for extra completion icons. (@ffiedrich)
+- [Teacher] A research consent form can be configured per course edition. This is useful for teachers and researchers wish to use Skill Circuits usage data for their research. (@rwbackx)
 
 ## Changed
 - [Student] Optional skills are now marked as optional in the expanded submodule view. (@ffiedrich)
