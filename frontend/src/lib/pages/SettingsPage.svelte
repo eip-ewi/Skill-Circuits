@@ -38,14 +38,15 @@
 
         <h2>Additional icons</h2>
         <p>Configure whether icons indicating the completion of content should be displayed.</p>
-        <div>
+        <label for="completion-icons">
             <input
+                id="completion-icons"
                 type="checkbox"
                 checked={getAdditionalIcons()}
                 onchange={e => updateAdditionalIcons(e)} />
 
             Enable completion icons (see example below)
-        </div>
+        </label>
 
         <ExampleCompletionIcons></ExampleCompletionIcons>
 
@@ -54,11 +55,15 @@
             Configure whether blocks (e.g., skills and submodules) you have not yet reached should
             be blurred, unless hovered over.
         </p>
-        <div>
-            <input type="checkbox" checked={getBlurBlocks()} onchange={e => updateBlurBlocks(e)} />
+        <label for="block-blurring">
+            <input
+                id="block-blurring"
+                type="checkbox"
+                checked={getBlurBlocks()}
+                onchange={e => updateBlurBlocks(e)} />
 
             Enable block blurring (see example below)
-        </div>
+        </label>
 
         <ExampleBlurredSkillComponent></ExampleBlurredSkillComponent>
     </div>

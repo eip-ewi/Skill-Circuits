@@ -57,8 +57,11 @@
         var(--accept-colour) 20%,
         color-mix(in oklab, black 80%, white)
     );
-    --on-checkpoint-completed-surface-colour: 1px solid
-        color-mix(in srgb, white 90%, var(--background-colour));
+    --on-checkpoint-completed-surface-colour: color-mix(
+        in srgb,
+        white 90%,
+        var(--background-colour)
+    );
 
     /* Connections */
     --connection-colour: white;

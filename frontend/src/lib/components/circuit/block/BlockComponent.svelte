@@ -376,7 +376,7 @@
 
     .scroll-to-pulse-button:where(:focus-visible, :hover) {
         background: var(--on-glass-surface-active-colour);
-        outline: 1px solid var(--primary-surface-active-border-colour);
+        outline: 1px solid var(--default-border-color);
     }
 
     .scroll-to-pulse-button .icon {
