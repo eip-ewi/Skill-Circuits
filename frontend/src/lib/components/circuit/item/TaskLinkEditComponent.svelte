@@ -36,6 +36,7 @@
                 type="text"
                 placeholder="Task link..."
                 onchange={editLink}
+                onblur={editLink}
                 value={taskInfo.link ?? ""}
                 autofocus />
         </div>
