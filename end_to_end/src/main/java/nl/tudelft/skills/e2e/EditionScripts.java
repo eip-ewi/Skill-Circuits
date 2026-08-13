@@ -22,6 +22,7 @@ import java.util.Map;
 
 import com.microsoft.playwright.JSHandle;
 import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.options.BoundingBox;
 
 public final class EditionScripts {
 
@@ -355,19 +356,12 @@ public final class EditionScripts {
 		// dragstart handler does) is silently ignored on a synthetic DataTransfer, so we
 		// predefine it as "copy" — the value both the "New submodule" and "New skill" tray
 		// blocks use, which the column's drop handler checks before creating the block.
-		JSHandle dataTransfer = session.page().evaluateHandle("() => {"
-				+ "  const dt = new DataTransfer();"
-				+ "  Object.defineProperty(dt, 'effectAllowed', {value: 'copy', writable: true, configurable: true});"
-				+ "  dt.setData('skill-circuits/block', 'new');"
-				+ "  return dt;"
-				+ "}");
-		Map<String, Object> init = Map.of("dataTransfer", dataTransfer);
-
-		source.dispatchEvent("dragstart", init);
-		target.dispatchEvent("dragenter", init);
-		target.dispatchEvent("dragover", init);
-		target.dispatchEvent("drop", init);
-		source.dispatchEvent("dragend", init);
+		source.hover();
+		session.page().mouse().down();
+		BoundingBox box = target.boundingBox();
+		session.page().mouse().move(box.x + box.width / 2, box.y + box.height / 2);
+		target.hover();
+		session.page().mouse().up();
 	}
 
 	/**
