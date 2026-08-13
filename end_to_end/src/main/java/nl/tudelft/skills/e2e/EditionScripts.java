@@ -18,9 +18,7 @@
 package nl.tudelft.skills.e2e;
 
 import java.util.List;
-import java.util.Map;
 
-import com.microsoft.playwright.JSHandle;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.options.BoundingBox;
 
