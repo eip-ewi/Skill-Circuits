@@ -2,7 +2,7 @@
     import type { TaskItem } from "../../../dto/circuit/module/task";
     import { hasEditorRights } from "../../../logic/authorisation.svelte";
     import { TaskIcons } from "../../../dto/task_icons.js";
-    import { getAdditionalIcons, isHighContrastThemeSet } from "../../../logic/preferences.svelte";
+    import { getAdditionalIcons } from "../../../logic/preferences.svelte";
     import { isTaskCompleted } from "../../../logic/circuit/skill_state/completion";
 
     let { task }: { task: TaskItem } = $props();

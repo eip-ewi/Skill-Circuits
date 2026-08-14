@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onDestroy, onMount, type Snippet, tick } from "svelte";
+    import { type Snippet } from "svelte";
 
     let {
         open = $bindable(),

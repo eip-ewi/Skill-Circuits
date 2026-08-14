@@ -9,7 +9,7 @@ export function createBlobs(groups: Group[]): Blob[] {
         return group.blocks.filter(block => isBlockVisible(block));
     }
 
-    let blobs: Blob[] = groups
+    const blobs: Blob[] = groups
         .filter(group => visibleBlocks(group).length > 0)
         .map(group => {
             return {
@@ -38,15 +38,16 @@ export function createBlobs(groups: Group[]): Blob[] {
         return [];
     }
 
-    let width = Math.max(...groups.flatMap(group => group.blocks.map(block => block.column!))) + 1;
-    let grid = new Grid(width);
+    const width =
+        Math.max(...groups.flatMap(group => group.blocks.map(block => block.column!))) + 1;
+    const grid = new Grid(width);
 
     blobs.forEach(blob => blob.allocations.forEach(alloc => grid.occupy(alloc.point, blob.group)));
 
-    for (let blob of blobs) {
+    for (const blob of blobs) {
         for (let x = blob.min.x; x <= blob.max.x; x++) {
             for (let y = blob.min.y; y <= blob.max.y; y++) {
-                let p: Point = { x, y };
+                const p: Point = { x, y };
                 if (grid.isOccupied(p)) {
                     continue;
                 }
@@ -61,8 +62,8 @@ export function createBlobs(groups: Group[]): Blob[] {
         }
     }
 
-    for (let blob of blobs) {
-        for (let alloc of blob.allocations) {
+    for (const blob of blobs) {
+        for (const alloc of blob.allocations) {
             if (
                 alloc.point.y > 0 &&
                 grid.getOccupant({ x: alloc.point.x, y: alloc.point.y - 1 }) === blob.group.id
@@ -114,15 +115,15 @@ export function createBlobs(groups: Group[]): Blob[] {
     }
 
     blobs.forEach(blob => {
-        let separated = separateBlobs(blob, grid);
+        const separated = separateBlobs(blob, grid);
         separated.forEach(connected => {
-            let minY = Math.min(...connected.map(alloc => alloc.point.y));
-            let top = connected.filter(alloc => alloc.point.y === minY);
-            let topLeft = top.toSorted((a, b) => a.point.x - b.point.x)[0]!;
+            const minY = Math.min(...connected.map(alloc => alloc.point.y));
+            const top = connected.filter(alloc => alloc.point.y === minY);
+            const topLeft = top.toSorted((a, b) => a.point.x - b.point.x)[0]!;
             topLeft.showName = true;
         });
 
-        let loose: Set<number> = new Set(
+        const loose: Set<number> = new Set(
             separated
                 .filter(connected => !connected.some(alloc => alloc.block !== undefined))
                 .flat()
@@ -135,13 +136,13 @@ export function createBlobs(groups: Group[]): Blob[] {
 }
 
 function separateBlobs(blob: Blob, grid: Grid): Allocation[][] {
-    let result: Allocation[][] = [];
+    const result: Allocation[][] = [];
 
     let todo = blob.allocations;
 
     while (todo.length > 0) {
-        let start = todo[0]!;
-        let connected = bfs(blob, start, grid);
+        const start = todo[0]!;
+        const connected = bfs(blob, start, grid);
         result.push(connected);
         todo = todo.filter(
             a => !connected.some(b => a.point.x === b.point.x && a.point.y === b.point.y),
@@ -152,12 +153,12 @@ function separateBlobs(blob: Blob, grid: Grid): Allocation[][] {
 }
 
 function bfs(blob: Blob, start: Allocation, grid: Grid): Allocation[] {
-    let queue: Allocation[] = [start];
-    let visited: Set<number> = new Set();
-    let result: Allocation[] = [];
+    const queue: Allocation[] = [start];
+    const visited: Set<number> = new Set();
+    const result: Allocation[] = [];
 
     while (queue.length > 0) {
-        let current = queue.shift()!;
+        const current = queue.shift()!;
 
         if (visited.has(grid.encode(current.point))) {
             continue;
@@ -166,14 +167,14 @@ function bfs(blob: Blob, start: Allocation, grid: Grid): Allocation[] {
         visited.add(grid.encode(current.point));
         result.push(current);
 
-        let neighbours: Point[] = [
+        const neighbours: Point[] = [
             { x: current.point.x, y: current.point.y - 1 },
             { x: current.point.x + 1, y: current.point.y },
             { x: current.point.x, y: current.point.y + 1 },
             { x: current.point.x - 1, y: current.point.y },
         ].filter(p => p.x >= 0 && p.y >= 0 && p.x < grid.width);
 
-        for (let neighbour of neighbours) {
+        for (const neighbour of neighbours) {
             if (grid.getOccupant(neighbour) === blob.group.id) {
                 queue.push(findAllocationAt(blob, neighbour)!);
             }

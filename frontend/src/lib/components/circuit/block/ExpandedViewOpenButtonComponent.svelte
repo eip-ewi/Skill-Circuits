@@ -1,7 +1,6 @@
 <script lang="ts">
     import { cubicInOut } from "svelte/easing";
     import { type BlockAction, BlockActions } from "../../../data/block_action";
-    import type { Block } from "../../../dto/circuit/block";
     import Button from "../../util/Button.svelte";
 
     let {
@@ -9,7 +8,7 @@
         open = $bindable(),
     }: { action: BlockAction | undefined; open: boolean } = $props();
 
-    function transition(element: Element) {
+    function transition(_element: Element) {
         return {
             duration: 100,
             easing: cubicInOut,

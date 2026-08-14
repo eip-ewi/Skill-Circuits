@@ -1,5 +1,4 @@
 import type { ReleaseDetails } from "../dto/release_details";
-import { getLevel } from "./circuit/level.svelte";
 import { withCsrf } from "./csrf";
 
 let releaseDetails: ReleaseDetails[] = $state([]);
@@ -9,7 +8,7 @@ export function getReleaseDetails(): ReleaseDetails[] {
 }
 
 export async function fetchReleaseDetails() {
-    let response = await fetch("/api/user-version/release-info");
+    const response = await fetch("/api/user-version/release-info");
     releaseDetails = await response.json();
 }
 

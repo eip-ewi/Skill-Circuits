@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { hasEditorRights, getAuthorisation } from "../../../logic/authorisation.svelte";
+    import { hasEditorRights } from "../../../logic/authorisation.svelte";
     import CheckpointListItemComponent from "./CheckpointListItemComponent.svelte";
     import { createCheckpoint } from "../../../logic/updates/checkpoint_updates";
     import { getSortedCheckpoints } from "../../../logic/edition/edition.svelte";
@@ -15,7 +15,6 @@
 </script>
 
 {#if hasEditorRights()}
-    <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
     <div class="scrollable glass panel" aria-expanded={open}>
         <div class="heading">
             <h2>Checkpoints</h2>
@@ -29,7 +28,7 @@
             </div>
         </div>
         <div class="checkpoints">
-            {#each getSortedCheckpoints() as checkpoint}
+            {#each getSortedCheckpoints() as checkpoint (checkpoint.id)}
                 <CheckpointListItemComponent {checkpoint}></CheckpointListItemComponent>
             {/each}
         </div>

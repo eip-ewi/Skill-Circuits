@@ -191,6 +191,25 @@ svelte check:
     # Run on merge requests to development
     - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "development"
 
+# Run ESLint
+eslint check:
+  extends: .cached
+  interruptible: true
+  stage: static analysis
+  needs: []
+  script:
+    - cd frontend
+    - npm install
+    - npm run lint
+  rules:
+    # Don't run on main
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: never
+    # Run on branches
+    - if: $CI_COMMIT_BRANCH
+    # Run on merge requests to development
+    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "development"
+
 # Run spotless
 spotless check:
   interruptible: true
@@ -708,4 +727,3 @@ deploy to production:
     - if: $CI_PROJECT_ID != "7331"
       when: never
     - if: $CI_COMMIT_BRANCH == "main"
-

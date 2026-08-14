@@ -126,7 +126,7 @@
         <div class="search">
             <span class="search_description">Filter tasks by</span>
             <Select onchange={updateSearchColumn}>
-                {#each columns.filter(c => c.searchable) as column}
+                {#each columns.filter(c => c.searchable) as column (column.name)}
                     <Option
                         value={column.name}
                         selected={searchColumn !== undefined && searchColumn.name === column.name}>
@@ -147,7 +147,7 @@
         <table class="task_table">
             <thead class="table_header">
                 <tr>
-                    {#each columns as column}
+                    {#each columns as column (column.name)}
                         <th>
                             <div class="cell">
                                 {column.name}
@@ -220,7 +220,7 @@
                 </tr>
             </thead>
             <tbody>
-                {#each tasks.filter(t => isRowVisible(t)) as task}
+                {#each tasks.filter(t => isRowVisible(t)) as task (task.taskInfo.infoId)}
                     <TaskTableRow {task}></TaskTableRow>
                 {/each}
             </tbody>

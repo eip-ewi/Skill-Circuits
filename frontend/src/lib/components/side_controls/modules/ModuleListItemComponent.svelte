@@ -1,11 +1,4 @@
 <script lang="ts">
-    import moment from "moment";
-    import type { Checkpoint } from "../../../dto/checkpoint";
-    import {
-        deleteCheckpoint,
-        editCheckpointDeadline,
-        editCheckpointName,
-    } from "../../../logic/updates/checkpoint_updates";
     import type { Module } from "../../../dto/module";
     import { deleteModule, editModuleName } from "../../../logic/updates/module_updates";
     import Button from "../../util/Button.svelte";

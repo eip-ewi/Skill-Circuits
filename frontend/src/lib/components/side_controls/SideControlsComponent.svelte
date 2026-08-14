@@ -2,7 +2,6 @@
     import TrayComponent from "./tray/TrayComponent.svelte";
     import { cubicInOut } from "svelte/easing";
     import CheckpointsPanelComponent from "./checkpoints/CheckpointsPanelComponent.svelte";
-    import { getAuthorisation } from "../../logic/authorisation.svelte";
     import PathsPanelComponent from "./paths/PathsPanelComponent.svelte";
     import ModulesPanelComponent from "./modules/ModulesPanelComponent.svelte";
     import { hasEditorRights } from "../../logic/authorisation.svelte.js";
@@ -12,7 +11,6 @@
     import { isLevel } from "../../logic/circuit/level.svelte";
     import { EditionLevel } from "../../data/level";
     import BookmarksPanelComponent from "./bookmarks/BookmarksPanelComponent.svelte";
-    import { getPaths } from "../../logic/edition/edition.svelte";
     import LegendPanelComponent from "./legend/LegendPanelComponent.svelte";
 
     let openPanel:
@@ -53,7 +51,7 @@
         }
     });
 
-    function growHorizontal(node: HTMLElement, params: { delay?: number }) {
+    function growHorizontal(_node: HTMLElement, params: { delay?: number }) {
         return {
             delay: params.delay || 0,
             duration: 150,
@@ -80,7 +78,7 @@
 </div>
 
 {#if openPanel === undefined}
-    <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events, a11y_mouse_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div class="controls" in:growHorizontal={{ delay: 150 }} out:growHorizontal={{}}>
         <div class="glass surface">
             <button

@@ -1,6 +1,5 @@
 <script lang="ts">
     import type { Snippet } from "svelte";
-    import type { HTMLStyleAttributes } from "svelte/elements";
 
     interface Properties {
         children: Snippet;

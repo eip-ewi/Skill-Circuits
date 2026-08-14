@@ -1,8 +1,7 @@
 <script lang="ts">
-    import { hasEditorRights, getAuthorisation } from "../../../logic/authorisation.svelte";
+    import { hasEditorRights } from "../../../logic/authorisation.svelte";
     import ModuleListItemComponent from "./ModuleListItemComponent.svelte";
-    import { createCheckpoint } from "../../../logic/updates/checkpoint_updates";
-    import { getModules, getSortedCheckpoints } from "../../../logic/edition/edition.svelte";
+    import { getModules } from "../../../logic/edition/edition.svelte";
     import { createModule } from "../../../logic/updates/module_updates";
 
     let { open = $bindable() }: { open: boolean } = $props();
@@ -16,7 +15,6 @@
 </script>
 
 {#if hasEditorRights()}
-    <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
     <div class="scrollable glass panel" aria-expanded={open}>
         <div class="heading">
             <h2>Modules</h2>
@@ -30,7 +28,7 @@
             </div>
         </div>
         <div class="modules">
-            {#each getModules() as module}
+            {#each getModules() as module (module.id)}
                 <ModuleListItemComponent {module}></ModuleListItemComponent>
             {/each}
         </div>

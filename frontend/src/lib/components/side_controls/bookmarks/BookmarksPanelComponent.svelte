@@ -11,7 +11,7 @@
     });
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="scrollable glass panel" aria-expanded={open} ondragleave={() => (open = false)}>
     <div class="heading">
         <h2>Bookmarks</h2>
@@ -25,7 +25,7 @@
         </div>
     </div>
     <div class="lists">
-        {#each getBookmarks() as list}
+        {#each getBookmarks() as list (list.id)}
             <BookmarkListComponent {list}></BookmarkListComponent>
         {/each}
     </div>

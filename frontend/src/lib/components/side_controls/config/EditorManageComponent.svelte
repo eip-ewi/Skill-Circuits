@@ -30,12 +30,12 @@
     <h3>Editors</h3>
 
     <ul class="editors">
-        {#each getEdition().teachers as teacher}
+        {#each getEdition().teachers as teacher (teacher.id)}
             <li>
                 {teacher.displayName} (Teacher)
             </li>
         {/each}
-        {#each getEdition().editors as editor}
+        {#each getEdition().editors as editor (editor.id)}
             <li>
                 <span>{editor.displayName}</span>
                 <Button
@@ -53,7 +53,7 @@
         <label for="add-editor-search">Add an editor</label>
         <input bind:value={query} placeholder="Search..." onkeydown={search} />
         <ul class="scrollable glass results">
-            {#each searchResults as result}
+            {#each searchResults as result (result.id)}
                 {#if !getEdition().teachers.some(editor => editor.id === result.id) && !getEdition().editors.some(editor => editor.id === result.id)}
                     <li>
                         <button

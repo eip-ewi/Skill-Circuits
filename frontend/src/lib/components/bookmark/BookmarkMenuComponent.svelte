@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { getBookmarks, isTaskInfoBookmarked } from "../../logic/bookmarks.svelte";
+    import { getBookmarks } from "../../logic/bookmarks.svelte";
     import Dropdown from "../util/Dropdown.svelte";
     import type { Snippet } from "svelte";
     import type { BookmarkList } from "../../dto/bookmark";
@@ -24,7 +24,7 @@
 
     {#snippet dropdown()}
         <div class="lists">
-            {#each getBookmarks() as list}
+            {#each getBookmarks() as list (list.id)}
                 {@const included = onLists.some(l => l.id === list.id)}
                 <button
                     class="bookmark"

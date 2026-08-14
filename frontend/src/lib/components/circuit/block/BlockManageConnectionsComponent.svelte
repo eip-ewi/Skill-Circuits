@@ -1,11 +1,8 @@
 <script lang="ts">
     import { cubicInOut } from "svelte/easing";
     import { type BlockAction, BlockActions } from "../../../data/block_action";
-    import { type BlockState, BlockStates } from "../../../data/block_state";
-    import { getLevel } from "../../../logic/circuit/level.svelte";
-    import { ModuleLevel } from "../../../data/level";
-    import type { Block } from "../../../dto/circuit/block";
-    import { getBlock, getBlocks, getGraph } from "../../../logic/circuit/circuit.svelte";
+    import { BlockStates } from "../../../data/block_state";
+    import { getBlocks, getGraph } from "../../../logic/circuit/circuit.svelte";
     import {
         connectSkills,
         disconnectSkills,
@@ -103,7 +100,7 @@
         disconnectSkills(skill, disconnectingFrom);
     }
 
-    function transition(element: HTMLElement) {
+    function transition(_element: HTMLElement) {
         return {
             duration: 100,
             easing: cubicInOut,

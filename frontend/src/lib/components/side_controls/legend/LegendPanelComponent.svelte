@@ -19,7 +19,7 @@
         </div>
     </div>
     <div class="legend">
-        {#each legendItems as item}
+        {#each legendItems as item (item.label)}
             <div class="legend-item">
                 <span class="fa-solid fa-{item.icon}" aria-hidden="true"></span>
                 <span>{item.label}</span>

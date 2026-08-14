@@ -1,7 +1,6 @@
 <script lang="ts">
     import type { TaskInTaskList } from "../../dto/task_in_task_list";
     import { TaskIcons } from "../../dto/task_icons";
-    import Link from "../util/Link.svelte";
     import TaskPathEditComponent from "../circuit/item/TaskPathEditComponent.svelte";
     import { editTaskLink } from "../../logic/circuit/updates/task_updates";
 
@@ -37,7 +36,7 @@
         <th style="max-width: 7em">
             <span class="icon fa-solid fa-{TaskIcons[task.taskInfo.type]}"></span>
             {#if task.taskItem.taskType === "choice"}
-                {" "}in
+                &#32;in
                 <span class="icon fa-solid fa-shapes"></span>
             {/if}
         </th>

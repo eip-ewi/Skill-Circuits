@@ -1,14 +1,8 @@
 <script lang="ts">
-    import { getAuthorisation } from "../../../logic/authorisation.svelte";
-    import { cubicInOut, cubicIn, cubicOut } from "svelte/easing";
     import NewBlockComponent from "./NewBlockComponent.svelte";
-    import { getBlock, getBlocks, getPlacableBlocks } from "../../../logic/circuit/circuit.svelte";
+    import { getBlock, getPlacableBlocks } from "../../../logic/circuit/circuit.svelte";
     import PlacableBlockComponent from "./PlacableBlockComponent.svelte";
-    import {
-        removeBlockFromCircuit,
-        updateBlockPosition,
-    } from "../../../logic/circuit/updates/position_updates.svelte";
-    import { createBlock } from "../../../logic/circuit/updates/block_updates";
+    import { removeBlockFromCircuit } from "../../../logic/circuit/updates/position_updates.svelte";
     import { hasEditorRights } from "../../../logic/authorisation.svelte.js";
 
     let { open = $bindable() }: { open: boolean } = $props();
@@ -63,7 +57,7 @@
 </script>
 
 {#if hasEditorRights()}
-    <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div
         class="scrollable glass panel"
         aria-expanded={open}
@@ -82,7 +76,7 @@
         <div class="content">
             <NewBlockComponent></NewBlockComponent>
             <div class="blocks">
-                {#each getPlacableBlocks() as block}
+                {#each getPlacableBlocks() as block (block.id)}
                     <PlacableBlockComponent {block}></PlacableBlockComponent>
                 {/each}
             </div>

@@ -21,7 +21,7 @@ export interface EditionCard {
     name: string;
     course: {
         id: number;
-        name: String;
+        name: string;
     };
 }
 

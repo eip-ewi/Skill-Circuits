@@ -2,7 +2,6 @@ import type { Preferences } from "../dto/preferences";
 import {
     darkHighContrastTheme,
     lightHighContrastTheme,
-    lightTheme,
     systemTheme,
     type Theme,
 } from "../data/theme";
@@ -16,7 +15,7 @@ let preferences: Preferences = $state({
 });
 
 export async function fetchPreferences() {
-    let response = await fetch("/api/person/preferences");
+    const response = await fetch("/api/person/preferences");
     preferences = await response.json();
 }
 
@@ -33,7 +32,7 @@ export function getAdditionalIcons(): boolean {
 }
 
 export async function setTheme(theme: Theme) {
-    let response = await fetch(
+    const response = await fetch(
         `/api/person/preferences/theme?theme=${theme.name.toUpperCase()}`,
         withCsrf({
             method: "PATCH",
@@ -44,7 +43,7 @@ export async function setTheme(theme: Theme) {
 }
 
 export async function setBlurBlocks(blurBlocksSetting: boolean) {
-    let response = await fetch(
+    const response = await fetch(
         `/api/person/preferences/blur?blurBlocks=${blurBlocksSetting}`,
         withCsrf({
             method: "PATCH",
@@ -54,7 +53,7 @@ export async function setBlurBlocks(blurBlocksSetting: boolean) {
 }
 
 export async function setAdditionalIcons(additionalIconsSetting: boolean) {
-    let response = await fetch(
+    const response = await fetch(
         `/api/person/preferences/additional-icons?additionalIcons=${additionalIconsSetting}`,
         withCsrf({
             method: "PATCH",

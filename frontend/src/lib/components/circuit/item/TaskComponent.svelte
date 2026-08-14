@@ -1,7 +1,6 @@
 <script lang="ts">
     import moment from "moment";
-    import type { TaskInfo, TaskItem } from "../../../dto/circuit/module/task";
-    import { withCsrf } from "../../../logic/csrf";
+    import type { TaskInfo } from "../../../dto/circuit/module/task";
     import { TaskIcons } from "../../../dto/task_icons";
     import {
         reportClickedLink,
@@ -12,7 +11,6 @@
         addTaskInfoToBookmarkList,
         removeTaskInfoFromBookmarkList,
     } from "../../../logic/updates/bookmark_updates";
-    import Dropdown from "../../util/Dropdown.svelte";
     import BookmarkMenuComponent from "../../bookmark/BookmarkMenuComponent.svelte";
     import Button from "../../util/Button.svelte";
     import Link from "../../util/Link.svelte";
@@ -44,7 +42,7 @@
         }
     }
 
-    function dragEnd(event: DragEvent) {}
+    function dragEnd(_event: DragEvent) {}
 
     function isPastDeadline(deadline: string): boolean {
         return moment().isAfter(moment(deadline));
@@ -63,9 +61,9 @@
     aria-label="Complete task"
     aria-pressed={task.completed}
     onclick={toggleComplete}>
-    <span>{"\u2713"}</span>
+    <span>✓</span>
 </button>
-<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
     class="description"
     data-overdue={overdueInViewer}

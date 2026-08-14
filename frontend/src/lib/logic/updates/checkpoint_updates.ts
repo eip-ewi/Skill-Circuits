@@ -4,12 +4,12 @@ import moment from "moment";
 import { getCheckpoints, getEdition, getSortedCheckpoints } from "../edition/edition.svelte";
 
 export async function createCheckpoint(): Promise<Checkpoint | undefined> {
-    let deadline =
+    const deadline =
         getCheckpoints().length === 0
             ? moment()
             : moment(getSortedCheckpoints()[0]!.deadline).subtract(1, "second");
 
-    let response = await fetch(
+    const response = await fetch(
         `/api/checkpoints`,
         withCsrf({
             method: "POST",
@@ -27,7 +27,7 @@ export async function createCheckpoint(): Promise<Checkpoint | undefined> {
     );
 
     if (response.ok) {
-        let checkpoint = await response.json();
+        const checkpoint = await response.json();
         getCheckpoints().push(checkpoint);
         return getCheckpoints().at(-1)!;
     }
@@ -35,10 +35,10 @@ export async function createCheckpoint(): Promise<Checkpoint | undefined> {
 }
 
 export async function editCheckpointName(checkpoint: Checkpoint, newName: string) {
-    let oldName = checkpoint.name;
+    const oldName = checkpoint.name;
     checkpoint.name = newName;
 
-    let response = await fetch(
+    const response = await fetch(
         `/api/checkpoints/${checkpoint.id}`,
         withCsrf({
             method: "PATCH",
@@ -60,7 +60,7 @@ export async function editCheckpointDeadline(
     checkpoint: Checkpoint,
     newDeadline: moment.Moment,
 ): Promise<string> {
-    let response = await fetch(
+    const response = await fetch(
         `/api/checkpoints/${checkpoint.id}`,
         withCsrf({
             method: "PATCH",
@@ -80,7 +80,7 @@ export async function editCheckpointDeadline(
 }
 
 export async function deleteCheckpoint(checkpoint: Checkpoint) {
-    let response = await fetch(
+    const response = await fetch(
         `/api/checkpoints/${checkpoint.id}`,
         withCsrf({
             method: "DELETE",

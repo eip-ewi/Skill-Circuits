@@ -1,11 +1,10 @@
 <script lang="ts">
-    import type { Group } from "../../../dto/circuit/group";
     import type { Blob } from "../../../data/blob";
 
     let { blob }: { blob: Blob } = $props();
 </script>
 
-{#each blob.allocations as alloc}
+{#each blob.allocations as alloc (`${alloc.point.x}:${alloc.point.y}`)}
     <div
         class="group-wrapper"
         style:grid-column={alloc.point.x + 1}

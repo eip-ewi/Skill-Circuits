@@ -9,7 +9,7 @@
     let trayOpen: boolean = $state(false);
     let legendOpen: boolean = $state(false);
 
-    function growHorizontal(node: HTMLElement, params: { delay?: number }) {
+    function growHorizontal(_node: HTMLElement, params: { delay?: number }) {
         return {
             delay: params.delay || 0,
             duration: 150,
@@ -22,7 +22,7 @@
 <StudentTrayComponent {block} bind:open={trayOpen}></StudentTrayComponent>
 <LegendPanelComponent bind:open={legendOpen}></LegendPanelComponent>
 {#if block.blockType === "skill" && !trayOpen && !legendOpen}
-    <!-- svelte-ignore a11y_no_static_element_interactions, a11y_mouse_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div class="dialog-controls" in:growHorizontal={{ delay: 150 }} out:growHorizontal={{}}>
         <div class="glass surface" ondragenter={() => (trayOpen = true)}>
             <button class="button" aria-label="Open tray" onclick={() => (trayOpen = true)}>
