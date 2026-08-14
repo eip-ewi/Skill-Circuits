@@ -88,7 +88,7 @@
         color: var(--link-colour);
         font-size: var(--font-size-400);
         font-weight: 500;
-        text-decoration: none;
+        text-decoration-line: var(--link-text-decoration);
     }
 
     .module .info :first-child:where(:hover, :focus-visible) {

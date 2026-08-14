@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Teacher] Tasks can be filtered by links and other properties the edition task list. (@ffiedrich)
 
 - [Editor] Can now see the total time needed for the completion of checkpoints. (@ogangalic)
+- [Everyone] Add dark and light high-contrast themes. (@ffiedrich)
+- [Student] Add setting for extra completion icons. (@ffiedrich)
 
 ## Changed
 - [Student] Optional skills are now marked as optional in the expanded submodule view. (@ffiedrich)

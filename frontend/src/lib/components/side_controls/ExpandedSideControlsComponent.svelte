@@ -70,6 +70,7 @@
     .dialog-controls .button:focus-visible,
     .dialog-controls .button:hover {
         background: var(--on-glass-surface-active-colour);
+        outline: 1px solid var(--default-border-color);
     }
 
     .dialog-controls .button span {

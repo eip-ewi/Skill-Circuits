@@ -79,6 +79,7 @@
 
     .content {
         max-height: 24em;
+        padding: 1px;
         overflow-y: auto;
         overscroll-behavior: contain;
     }

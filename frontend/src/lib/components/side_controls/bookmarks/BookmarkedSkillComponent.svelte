@@ -59,7 +59,8 @@
         data-clickable={!hasEditorRights()}
         onclick={click}
         data-completed={!hasEditorRights() && isCompleted(skill)}>
-        <BlockContentComponent block={skill}></BlockContentComponent>
+        <BlockContentComponent block={skill} completed={!hasEditorRights() && isCompleted(skill)}
+        ></BlockContentComponent>
     </div>
     {#if hovering && !hasEditorRights()}
         <ExpandedViewOpenButtonComponent action={undefined} bind:open={expanded}

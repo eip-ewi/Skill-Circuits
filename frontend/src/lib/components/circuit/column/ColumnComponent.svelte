@@ -129,6 +129,7 @@
         transform: translateX(-50%) scale(1.2);
     }
     .background {
+        border-color: transparent;
         border-radius: inherit;
         height: calc(100% + 4rem);
         top: 2rem;
@@ -140,11 +141,13 @@
         z-index: 99;
         transition:
             opacity 0.5s ease-in-out,
-            background-color 0.5s ease-in-out;
+            background-color 0.5s ease-in-out,
+            border-color 0.5s ease-in-out;
     }
 
     .button-wrapper:hover ~ .background {
         background-color: var(--column-background-color-removal);
+        border: var(--column-removal-border);
         opacity: 1;
     }
 

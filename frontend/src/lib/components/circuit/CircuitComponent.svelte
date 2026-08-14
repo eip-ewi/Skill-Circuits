@@ -81,7 +81,7 @@
     transition:fade|global
     bind:this={element}
     class="circuit"
-    style="--columns: {getCircuit().width ?? 5}">
+    style="--columns: {getCircuit().width ?? 5}; gap: {hasEditorRights() ? '5em' : '4em'}">
     <h1>{getCircuit().name}</h1>
     <ConnectionsComponent></ConnectionsComponent>
 
@@ -120,7 +120,6 @@
 
         align-items: start;
         display: grid;
-        gap: 4em;
         justify-content: center;
         padding-bottom: 12em;
         padding-inline: 2em;

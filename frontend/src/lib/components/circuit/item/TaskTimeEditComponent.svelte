@@ -28,7 +28,7 @@
 
     .icon {
         left: 0.5em;
-        opacity: 0.25;
+        opacity: var(--time-icon-opacity);
         position: absolute;
     }
 

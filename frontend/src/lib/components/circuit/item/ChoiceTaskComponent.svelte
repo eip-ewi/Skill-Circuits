@@ -128,7 +128,7 @@
         grid-column: 1 / 5;
     }
 
-    .task[data-completed="true"] {
+    .task[data-completed="true"]::before {
         outline: 2px solid var(--choice-task-completed-outline-colour);
     }
 
@@ -164,6 +164,6 @@
     .grip {
         cursor: grab;
         margin-right: 0.25em;
-        opacity: 0.5;
+        color: var(--drag-icon-color);
     }
 </style>

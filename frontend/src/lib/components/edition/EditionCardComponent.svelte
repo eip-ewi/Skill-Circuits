@@ -51,7 +51,7 @@
 
     .role {
         font-style: italic;
-        opacity: 35%;
+        opacity: var(--reduced-opacity);
         margin-top: -0.25em;
     }
 </style>
