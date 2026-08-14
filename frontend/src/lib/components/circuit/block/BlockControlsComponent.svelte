@@ -143,6 +143,8 @@
         top: 50%;
         transform-origin: left;
         translate: 100% -50%;
+        /* Must be above blocks */
+        z-index: 3;
     }
 
     .controls[data-side="left"] {

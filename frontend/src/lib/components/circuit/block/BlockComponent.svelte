@@ -307,6 +307,8 @@
         transition:
             filter ease-in-out 150ms,
             box-shadow ease-in-out 150ms;
+        /* Must be above SVG lines */
+        z-index: 2;
     }
 
     .block[data-wiggle="true"] {
