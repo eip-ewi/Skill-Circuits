@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Teacher] Column management has a UI interface. (@ralani)
 - [Everyone] Tasks can have deadlines. (@ralani)
 
+- [Editor] Can now see the total time needed for the completion of checkpoints. (@ogangalic)
+
 ## Changed
 - [Student] Optional skills are now marked as optional in the expanded submodule view. (@ffiedrich)
 

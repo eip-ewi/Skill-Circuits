@@ -177,6 +177,9 @@ public class EditionService {
 		Set<Long> editionIds = editionRepository.findAllOpen().stream().map(SCEdition::getId)
 				.collect(Collectors.toSet());
 		editionIds.removeAll(getVisibleEnrolledEditionIds(person));
+		if (editionIds.isEmpty()) {
+			return Collections.emptyList();
+		}
 		return requireNonNull(editionApi.getEditionsById(new ArrayList<>(editionIds))
 				.filter(edition -> !edition.getIsArchived())
 				.filter(edition -> edition.getEndDate().isAfter(LocalDateTime.now()))

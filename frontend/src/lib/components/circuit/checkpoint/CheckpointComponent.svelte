@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { Checkpoint } from "../../../dto/checkpoint";
     import type { RegularSkillBlock, SkillBlock } from "../../../dto/circuit/module/skill";
+    import type { TaskItem } from "../../../dto/circuit/module/task";
     import {
         getBlocks,
         getPlacedBlocks,
@@ -18,10 +19,29 @@
 
     let { checkpoint }: { checkpoint: Checkpoint } = $props();
 
+    let skillsWithCheckpointSet: SkillBlock[] = $derived(
+        getVisibleBlocks()
+            .filter(block => block.blockType === "skill")
+            .filter(block => block.checkpoint === checkpoint.id) as SkillBlock[],
+    );
+    let lastRow: number = $derived(Math.max(...skillsWithCheckpointSet.map(skill => skill.row!)));
+    let firstRow: number = $derived.by(() => {
+        const rowNumbers = getVisibleBlocks()
+            .filter(block => block.blockType === "skill")
+            .filter((skill: any) => skill.checkpoint !== null && skill.checkpoint !== checkpoint.id)
+            .map((skill: any) => skill.row!)
+            .filter((row: number) => row < lastRow);
+        if (rowNumbers.length === 0) {
+            return 0;
+        }
+        return Math.max(...rowNumbers) + 1;
+    });
     let skills: SkillBlock[] = $derived(
         getVisibleBlocks()
             .filter(block => block.blockType === "skill")
-            .filter(block => block.checkpoint === checkpoint.id),
+            .filter(
+                (block: any) => block.row! >= firstRow && block.row! <= lastRow,
+            ) as SkillBlock[],
     );
 
     let completed: boolean = $derived(
@@ -38,10 +58,45 @@
             getFirstUncompletedPastCheckpoint()?.id === checkpoint.id,
     );
 
-    let row: number = $derived(Math.max(...skills.map(skill => skill.row!)));
-
     let openWarnDialog: boolean = $state(false);
     let element: HTMLDialogElement | undefined = $state();
+
+    function totalTime(): string {
+        const relevantSkills = skills.filter(skill => skill.essential === true);
+
+        const totalMinutes = relevantSkills.reduce((total, skill) => {
+            if (!skill.items || skill.items.length === 0) {
+                return total;
+            }
+
+            const skillTime = skill.items.reduce((taskTotal: number, task: TaskItem) => {
+                if (task.taskType === "regular") {
+                    return taskTotal + task.time;
+                } else if (task.taskType === "choice" && task.tasks) {
+                    const sortedTimes = task.tasks
+                        .map(choiceTask => choiceTask.time)
+                        .sort((a, b) => b - a);
+                    const topTimes = sortedTimes.slice(0, task.minTasks);
+                    return taskTotal + topTimes.reduce((sum, t) => sum + t, 0);
+                }
+                return taskTotal;
+            }, 0);
+            return total + skillTime;
+        }, 0);
+
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+
+        if (totalMinutes === 0) {
+            return "0m";
+        }
+
+        if (hours > 0) {
+            return `${hours}h${minutes > 0 ? ` ${minutes}m` : ""}`;
+        } else {
+            return `${minutes}m`;
+        }
+    }
 
     $effect(() => {
         if (element === undefined) {
@@ -63,11 +118,21 @@
     }
 </script>
 
-<div class="checkpoint" style:grid-row={row + 1} data-completed={completed} data-focused={focused}>
+<div
+    class="checkpoint"
+    style:grid-row={lastRow + 1}
+    data-completed={completed}
+    data-focused={focused}>
     <div class="content">
         <div class="info">
             <span class="label">{checkpoint.name}</span>
             <span class="deadline">{moment(checkpoint.deadline).format("D MMMM YYYY HH:mm")}</span>
+            {#if hasEditorRights()}
+                <span class="time-row">
+                    <i class="fa-regular fa-clock time-icon"></i>
+                    <span class="time-estimate">{totalTime()}</span>
+                </span>
+            {/if}
         </div>
         {#if warn}
             <button class="warning" onclick={showWarnDialog}>
@@ -154,6 +219,21 @@
     .deadline {
         font-size: var(--font-size-200);
         white-space: nowrap;
+    }
+
+    .time-estimate {
+        font-size: var(--font-size-200);
+        white-space: nowrap;
+    }
+
+    .time-row {
+        display: flex;
+        align-items: center;
+        gap: 0.3em;
+    }
+
+    .time-icon {
+        font-size: var(--font-size-100, 0.75em);
     }
 
     .warning {
