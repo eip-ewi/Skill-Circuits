@@ -287,7 +287,9 @@ cross check migrations / MySQL:
   script:
     - sleep 60 # Ensure mysql started
     - echo "Switching to main"
-    - git fetch && git switch main && git pull --ff-only
+    - git fetch --all
+    - git switch main && git branch --set-upstream-to=origin/main
+    - git pull --ff-only
     - mv src/test/resources/application-mysql.properties src/test/resources/application-test.properties
     - gradle :test --build-cache --tests nl.tudelft.skills.SmokeTest
     - echo "Switching back to $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME"
