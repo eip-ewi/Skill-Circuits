@@ -8,7 +8,18 @@
     let { task }: { task: TaskInTaskList } = $props();
 
     async function editLink(event: Event) {
-        const newLink = (event.target as HTMLInputElement).value;
+        const element = event.target as HTMLInputElement;
+
+        // Remove all whitespace
+        const newLink = element.value.replace(/\s/g, "");
+
+        if (task.taskInfo.link == null && newLink == "") {
+            // Removes any remaining whitespace
+            // Return early since no update is needed
+            element.value = "";
+            return;
+        }
+
         await editTaskLink(task.taskInfo, newLink);
     }
 </script>
@@ -40,7 +51,7 @@
                 type="text"
                 placeholder="Task link"
                 onchange={editLink}
-                value={task.taskInfo.link ?? ""} />
+                value={task.taskInfo.link == null ? "" : task.taskInfo.link} />
         </th>
     </tr>
 {/if}
