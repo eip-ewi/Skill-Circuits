@@ -9,7 +9,18 @@
     let open: boolean = $state(false);
 
     async function editLink(event: Event) {
-        const newLink = (event.target as HTMLInputElement).value;
+        const element = event.target as HTMLInputElement;
+
+        // Remove all whitespace
+        const newLink = element.value.replace(/\s/g, "");
+
+        if (taskInfo.link == null && newLink == "") {
+            // Removes any remaining whitespace
+            // Return early since no update is needed
+            element.value = "";
+            return;
+        }
+
         await editTaskLink(taskInfo, newLink);
         open = false;
     }

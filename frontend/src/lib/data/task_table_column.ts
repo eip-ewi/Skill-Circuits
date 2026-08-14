@@ -1,4 +1,5 @@
 import type { TaskInTaskList } from "../dto/task_in_task_list";
+import { sortAscByString } from "../logic/task_table.svelte";
 
 export interface ITaskTableColumn {
     name: string;
@@ -14,4 +15,14 @@ export interface UnsortableTaskTableColumn extends ITaskTableColumn {
     sortable: false;
 }
 
-export type TaskTableColumn = SortableTaskTableColumn | UnsortableTaskTableColumn;
+export interface SearchableTaskTableColumn extends ITaskTableColumn {
+    searchable: true;
+    getAttr: (t: TaskInTaskList) => string;
+}
+
+export interface UnsearchableTaskTableColumn extends ITaskTableColumn {
+    searchable: false;
+}
+
+export type TaskTableColumn = (SortableTaskTableColumn | UnsortableTaskTableColumn) &
+    (SearchableTaskTableColumn | UnsearchableTaskTableColumn);

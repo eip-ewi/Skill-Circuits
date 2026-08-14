@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Teacher] Column management has a UI interface. (@ralani)
 - [Editor] When editing a link you can use ESC and outside clicks for closing the pop-up. (@ogangalic)
 - [Everyone] Tasks can have deadlines. (@ralani)
+- [Teacher] Links are editable in the edition task list. (@ffiedrich)
+- [Teacher] Tasks can be filtered by links and other properties the edition task list. (@ffiedrich)
 
 - [Editor] Can now see the total time needed for the completion of checkpoints. (@ogangalic)
 
