@@ -1,7 +1,6 @@
 import type { Block } from "../../../dto/circuit/block";
 import { isUnlocked } from "./unlock";
 import { getItemsOnPath } from "../../edition/active_path.svelte";
-import type { SkillBlock } from "../../../dto/circuit/module/skill";
 import type { TaskItem } from "../../../dto/circuit/module/task";
 import type { Graph } from "../graph";
 import { getGraph } from "../circuit.svelte";
@@ -15,9 +14,9 @@ export function isCompleted(
         return false;
     }
 
-    let items = getItemsOnPath(block);
+    const items = getItemsOnPath(block);
 
-    let allEssentialItemsCompleted = !items
+    const allEssentialItemsCompleted = !items
         .filter(item => item.itemType !== "skill" || item.essential)
         .some(item => (item.itemType === "task" ? !isTaskCompleted(item) : !item.completed));
 
@@ -25,13 +24,15 @@ export function isCompleted(
         return false;
     }
 
-    let allItemsUnlocked = !items.some(item => item.locked);
+    const allEssentialItemsUnlocked = !items.some(
+        item => item.locked && (item.itemType !== "skill" || item.essential),
+    );
 
-    if (!allItemsUnlocked) {
+    if (!allEssentialItemsUnlocked) {
         return false;
     }
 
-    let isEmpty = items.length === 0;
+    const isEmpty = items.filter(item => item.itemType !== "skill" || item.essential).length === 0;
 
     if (isEmpty) {
         return isUnlocked(block, graph, recursionCheck);

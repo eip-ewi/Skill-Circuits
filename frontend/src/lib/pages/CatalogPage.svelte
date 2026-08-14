@@ -1,9 +1,5 @@
 <script lang="ts">
-    import type { Editions } from "../dto/editions";
-    import EditionCardComponent from "../components/edition/EditionCardComponent.svelte";
-    import HeaderComponent from "../components/HeaderComponent.svelte";
     import { clearLevel } from "../logic/circuit/level.svelte";
-    import { getAuthorisation } from "../logic/authorisation.svelte";
     import PageTabs from "../components/util/PageTabs.svelte";
     import Tab from "../components/util/Tab.svelte";
     import type { EditionCard } from "../dto/edition";
@@ -50,7 +46,7 @@
                 <p>There are currently no courses for you.</p>
             {:else}
                 <div class="editions">
-                    {#each editions as edition}
+                    {#each editions as edition (edition.id)}
                         <div class="edition">
                             <h2>
                                 <span>{edition.course.name}</span>

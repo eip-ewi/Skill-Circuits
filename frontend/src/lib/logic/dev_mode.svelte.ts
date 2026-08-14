@@ -5,6 +5,6 @@ export function getDevMode() {
 }
 
 export async function fetchDevMode() {
-    let response = await fetch("/dev-mode");
+    const response = await fetch("/dev-mode");
     devMode = (await response.text()) === "true";
 }

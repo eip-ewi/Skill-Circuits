@@ -2,7 +2,6 @@ import type { Block } from "../../../dto/circuit/block";
 import { isCompleted } from "./completion";
 import { getGraph } from "../circuit.svelte";
 import { getItemsOnPath } from "../../edition/active_path.svelte";
-import { getBlurBlocks } from "../../preferences.svelte";
 import type { Graph } from "../graph";
 
 export function isUnlocked(
@@ -14,7 +13,7 @@ export function isUnlocked(
         return false;
     }
 
-    let items = getItemsOnPath(block);
+    const items = getItemsOnPath(block);
 
     if (block.blockType !== "skill") {
         // any item unlocked
@@ -25,7 +24,7 @@ export function isUnlocked(
         return false;
     }
 
-    let anyTaskCompleted = items.some(item => {
+    const anyTaskCompleted = items.some(item => {
         if (item.itemType !== "task" || item.taskType !== "choice") {
             return item.completed;
         }
@@ -36,7 +35,7 @@ export function isUnlocked(
         return true;
     }
 
-    let allEssentialParentsCompleted =
+    const allEssentialParentsCompleted =
         graph.has(block) &&
         !graph
             .getParents(block)
@@ -47,7 +46,8 @@ export function isUnlocked(
         return false;
     }
 
-    let allParentsUnlocked =
+    // The graph only contains visible blocks (hidden blocks are skipped here)
+    const allParentsUnlocked =
         graph.has(block) &&
         !graph.getParents(block).some(parent => !isUnlocked(parent, graph, recursionCheck - 1));
 

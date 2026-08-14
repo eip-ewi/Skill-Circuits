@@ -39,8 +39,10 @@
         <div class="content">
             <h1 id="title">What's new</h1>
             <div id="update_text">
-                {#each getReleaseDetails() as release}
+                {#each getReleaseDetails() as release (release.title)}
                     <h2>{release.title}</h2>
+                    <!-- Release descriptions are intentionally supplied as rendered HTML. -->
+                    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                     <div class="release_description">{@html release.descriptionHtml}</div>
                 {/each}
             </div>

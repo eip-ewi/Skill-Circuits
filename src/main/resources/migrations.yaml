@@ -2727,3 +2727,36 @@ databaseChangeLog:
                   type: ENUM('DARK', 'LIGHT', 'NOSTALGIA', 'SYSTEM')
                   defaultValue: SYSTEM
             tableName: scperson
+
+  #
+  # Add deadlines to tasks
+  #
+  - changeSet:
+      id: add-task-deadlines
+      author: rafael
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: deadline
+                  type: TIMESTAMP
+            tableName: task_info
+
+  #
+  # Add high contrast themes and "extra icons" setting
+  #
+  - changeSet:
+      id: 1784117903385-2
+      author: fanni
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: additional_icons
+                  type: BIT
+                  defaultValueBoolean: false
+            tableName: scperson
+        - modifyDataType:
+            columnName: theme
+            newDataType: ENUM('DARK','HIGH_CONTRAST_DARK','HIGH_CONTRAST_LIGHT','LIGHT','NOSTALGIA','SYSTEM')
+            tableName: scperson

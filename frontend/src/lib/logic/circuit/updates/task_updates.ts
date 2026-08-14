@@ -7,16 +7,13 @@ import type {
     TaskItem,
 } from "../../../dto/circuit/module/task";
 import type { SkillBlock } from "../../../dto/circuit/module/skill";
-import type { Block } from "../../../dto/circuit/block";
-import { getLevel } from "../level.svelte";
-import type { Item } from "../../../dto/circuit/item";
 import { getBlockForItem, getBlocks } from "../circuit.svelte";
 import { getBookmarks } from "../../bookmarks.svelte";
 import { addRevealedSkills } from "../unlocked_skills.svelte";
 
 export async function toggleTaskCompletion(task: TaskInfo) {
     task.completed = !task.completed;
-    let response = await fetch(
+    const response = await fetch(
         `/api/task-info/${task.infoId}/complete?completed=${task.completed}`,
         withCsrf({
             method: "POST",
@@ -34,7 +31,7 @@ export async function toggleTaskCompletion(task: TaskInfo) {
             .flatMap(t => (t.taskType === "choice" ? t.tasks : [t as TaskInfo]))
             .filter(t => t.infoId === task.infoId)
             .forEach(i => (i.completed = task.completed));
-        let body: { revealedSkills: number[] } = await response.json();
+        const body: { revealedSkills: number[] } = await response.json();
         addRevealedSkills(body.revealedSkills);
     } else {
         task.completed = !task.completed;
@@ -51,7 +48,7 @@ export async function reportClickedLink(task: TaskInfo) {
 }
 
 export async function createChoiceTask(skill: SkillBlock) {
-    let response = await fetch(
+    const response = await fetch(
         `/api/tasks/choice`,
         withCsrf({
             method: "POST",
@@ -67,16 +64,16 @@ export async function createChoiceTask(skill: SkillBlock) {
     );
 
     if (response.ok) {
-        let newTask: ChoiceTaskItem = await response.json();
+        const newTask: ChoiceTaskItem = await response.json();
         skill.items.push(newTask);
     }
 }
 
 export async function editTaskInfoName(task: TaskInfo, newName: string) {
-    let oldName = task.name;
+    const oldName = task.name;
     task.name = newName;
 
-    let response = await fetch(
+    const response = await fetch(
         `/api/task-info/${task.infoId}`,
         withCsrf({
             method: "PATCH",
@@ -95,10 +92,10 @@ export async function editTaskInfoName(task: TaskInfo, newName: string) {
 }
 
 export async function editTaskType(task: TaskInfo, newType: string) {
-    let oldType = task.type;
+    const oldType = task.type;
     task.type = newType;
 
-    let response = await fetch(
+    const response = await fetch(
         `/api/task-info/${task.infoId}`,
         withCsrf({
             method: "PATCH",
@@ -117,10 +114,10 @@ export async function editTaskType(task: TaskInfo, newType: string) {
 }
 
 export async function editTaskTime(task: TaskInfo, newTime: number) {
-    let oldTime = task.time;
+    const oldTime = task.time;
     task.time = newTime;
 
-    let response = await fetch(
+    const response = await fetch(
         `/api/task-info/${task.infoId}`,
         withCsrf({
             method: "PATCH",
@@ -138,11 +135,41 @@ export async function editTaskTime(task: TaskInfo, newTime: number) {
     }
 }
 
+export async function editTaskDeadline(task: TaskInfo, newDeadline: string | null) {
+    const oldDeadline = task.deadline;
+    task.deadline = newDeadline;
+
+    const response =
+        newDeadline === null
+            ? await fetch(
+                  `/api/task-info/${task.infoId}/deadline`,
+                  withCsrf({
+                      method: "DELETE",
+                  }),
+              )
+            : await fetch(
+                  `/api/task-info/${task.infoId}/deadline`,
+                  withCsrf({
+                      method: "PATCH",
+                      headers: {
+                          "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({
+                          deadline: newDeadline,
+                      }),
+                  }),
+              );
+
+    if (!response.ok) {
+        task.deadline = oldDeadline;
+    }
+}
+
 export async function editTaskLink(task: TaskInfo, newLink: string) {
-    let oldLink = task.link;
+    const oldLink = task.link;
     task.link = newLink === "" ? null : newLink;
 
-    let response = await fetch(
+    const response = await fetch(
         `/api/task-info/${task.infoId}`,
         withCsrf({
             method: "PATCH",
@@ -161,10 +188,10 @@ export async function editTaskLink(task: TaskInfo, newLink: string) {
 }
 
 export async function editTaskPaths(task: TaskItem, newPaths: number[]) {
-    let oldPaths = task.paths;
+    const oldPaths = task.paths;
     task.paths = newPaths;
 
-    let response = await fetch(
+    const response = await fetch(
         `/api/tasks/${task.id}`,
         withCsrf({
             method: "PATCH",
@@ -187,11 +214,11 @@ export async function editTaskPaths(task: TaskItem, newPaths: number[]) {
 }
 
 export async function editTaskIndex(task: TaskItem, newIndex: number, tasks: TaskItem[]) {
-    let oldIndex = tasks.findIndex(t => t.id === task.id)!;
+    const oldIndex = tasks.findIndex(t => t.id === task.id)!;
     tasks.splice(oldIndex, 1);
     tasks.splice(newIndex, 0, task);
 
-    let response = await fetch(
+    const response = await fetch(
         `/api/tasks/${task.id}/index?index=${newIndex}`,
         withCsrf({
             method: "PATCH",
@@ -210,11 +237,11 @@ export async function moveTask(
     newIndex: number,
     oldSkill: SkillBlock,
 ) {
-    let oldIndex = oldSkill.items.findIndex(t => t.id === task.id)!;
+    const oldIndex = oldSkill.items.findIndex(t => t.id === task.id)!;
     oldSkill.items.splice(oldIndex, 1);
     newSkill.items.splice(newIndex, 0, task);
 
-    let response = await fetch(
+    const response = await fetch(
         `/api/tasks/${task.id}/skill`,
         withCsrf({
             method: "PATCH",
@@ -237,10 +264,10 @@ export async function moveTask(
 }
 
 export async function editChoiceTaskMinTasks(task: ChoiceTaskItem, newMinTasks: number) {
-    let oldMinTasks = task.minTasks;
+    const oldMinTasks = task.minTasks;
     task.minTasks = newMinTasks;
 
-    let response = await fetch(
+    const response = await fetch(
         `/api/tasks/choice/${task.id}`,
         withCsrf({
             method: "PATCH",
@@ -262,11 +289,11 @@ export async function moveTaskInsideOfChoiceTask(
     choiceTask: ChoiceTaskItem,
     subtask: RegularTaskItem,
 ) {
-    let oldSkill = getBlockForItem(subtask) as SkillBlock;
-    let oldIndex = oldSkill.items.findIndex(t => t.id === subtask.id)!;
+    const oldSkill = getBlockForItem(subtask) as SkillBlock;
+    const oldIndex = oldSkill.items.findIndex(t => t.id === subtask.id)!;
     oldSkill.items.splice(oldIndex, 1);
 
-    let response = await fetch(
+    const response = await fetch(
         `/api/tasks/${choiceTask.id}/add-subtask/${subtask.id}`,
         withCsrf({
             method: "POST",
@@ -286,7 +313,7 @@ export async function moveTaskOutsideOfChoiceTask(
     newIndex: number,
     newSkill: SkillBlock,
 ) {
-    let response = await fetch(
+    const response = await fetch(
         `/api/task-info/${subtask.infoId}/skill`,
         withCsrf({
             method: "PATCH",
@@ -304,11 +331,11 @@ export async function moveTaskOutsideOfChoiceTask(
 
     if (response.ok) {
         // Remove from old choice task
-        let oldIndex = choiceTask.tasks.findIndex(t => t.infoId === subtask.infoId)!;
+        const oldIndex = choiceTask.tasks.findIndex(t => t.infoId === subtask.infoId)!;
         choiceTask.tasks.splice(oldIndex, 1);
 
         // Add to new skill
-        let newTask: RegularTaskItem = await response.json();
+        const newTask: RegularTaskItem = await response.json();
         newSkill.items.splice(newIndex, 0, newTask);
     }
 }
@@ -321,7 +348,7 @@ export async function moveSubtask(
     oldChoiceTask.tasks.splice(oldChoiceTask.tasks.findIndex(t => t.infoId === subtask.infoId)!, 1);
     newChoiceTask.tasks.push(subtask);
 
-    let response = await fetch(
+    const response = await fetch(
         `/api/task-info/${subtask.infoId}/task`,
         withCsrf({
             method: "PATCH",
@@ -343,7 +370,7 @@ export async function moveSubtask(
 }
 
 export async function deleteSubtask(subtask: ChoiceTaskChoice) {
-    let response = await fetch(
+    const response = await fetch(
         `/api/task-info/${subtask.infoId}`,
         withCsrf({
             method: "DELETE",
@@ -351,7 +378,7 @@ export async function deleteSubtask(subtask: ChoiceTaskChoice) {
     );
 
     if (response.ok) {
-        let choiceTask = getBlocks()
+        const choiceTask = getBlocks()
             .flatMap(block =>
                 block.items.filter(item => item.itemType === "task" && item.taskType === "choice"),
             )

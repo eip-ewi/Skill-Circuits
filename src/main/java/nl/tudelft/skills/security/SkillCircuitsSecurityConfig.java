@@ -19,9 +19,13 @@ package nl.tudelft.skills.security;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import nl.tudelft.labracore.lib.security.LabradorSecurityConfig;
 
@@ -30,6 +34,9 @@ import nl.tudelft.labracore.lib.security.LabradorSecurityConfig;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SkillCircuitsSecurityConfig extends LabradorSecurityConfig {
+
+	private static final RequestMatcher API_REQUESTS = request -> request.getServletPath()
+			.startsWith("/api/");
 
 	/**
 	 * Configures which endpoints need authentication and which don't.
@@ -43,10 +50,19 @@ public class SkillCircuitsSecurityConfig extends LabradorSecurityConfig {
 	protected void configure(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/skill-circuits-frontend.*", "/webjars/**", "/font/**", "/img/**",
-						"/favicon.ico")
+						"/favicon.ico", "/.well-known/appspecific/com.chrome.devtools.json")
 				.permitAll()
 				.requestMatchers("/", "/api/auth").permitAll()
 				.anyRequest().authenticated());
+		http.exceptionHandling(exceptions -> exceptions.defaultAuthenticationEntryPointFor(
+				new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), API_REQUESTS));
 
+		// By default all calls are cached
+		// Our 401 would send the user to a bare API response instead of the page they came from
+		// Only page requests are worth returning to
+		HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
+		requestCache.setRequestMatcher(request -> "GET".equals(request.getMethod())
+				&& !API_REQUESTS.matches(request));
+		http.requestCache(cache -> cache.requestCache(requestCache));
 	}
 }

@@ -2,7 +2,6 @@
     import TrayComponent from "./tray/TrayComponent.svelte";
     import { cubicInOut } from "svelte/easing";
     import CheckpointsPanelComponent from "./checkpoints/CheckpointsPanelComponent.svelte";
-    import { getAuthorisation } from "../../logic/authorisation.svelte";
     import PathsPanelComponent from "./paths/PathsPanelComponent.svelte";
     import ModulesPanelComponent from "./modules/ModulesPanelComponent.svelte";
     import { hasEditorRights } from "../../logic/authorisation.svelte.js";
@@ -12,7 +11,7 @@
     import { isLevel } from "../../logic/circuit/level.svelte";
     import { EditionLevel } from "../../data/level";
     import BookmarksPanelComponent from "./bookmarks/BookmarksPanelComponent.svelte";
-    import { getPaths } from "../../logic/edition/edition.svelte";
+    import LegendPanelComponent from "./legend/LegendPanelComponent.svelte";
 
     let openPanel:
         | "bookmarks"
@@ -21,6 +20,7 @@
         | "paths"
         | "modules"
         | "config"
+        | "legend"
         | undefined = $state();
 
     let bookmarksOpen: boolean = $state(false);
@@ -29,6 +29,7 @@
     let pathsOpen: boolean = $state(false);
     let modulesOpen: boolean = $state(false);
     let configOpen: boolean = $state(false);
+    let legendOpen: boolean = $state(false);
 
     $effect(() => {
         if (bookmarksOpen) {
@@ -43,12 +44,14 @@
             openPanel = "modules";
         } else if (configOpen) {
             openPanel = "config";
+        } else if (legendOpen) {
+            openPanel = "legend";
         } else {
             openPanel = undefined;
         }
     });
 
-    function growHorizontal(node: HTMLElement, params: { delay?: number }) {
+    function growHorizontal(_node: HTMLElement, params: { delay?: number }) {
         return {
             delay: params.delay || 0,
             duration: 150,
@@ -69,10 +72,13 @@
         <ModulesPanelComponent bind:open={modulesOpen}></ModulesPanelComponent>
         <ConfigPanelComponent bind:open={configOpen}></ConfigPanelComponent>
     {/if}
+    {#if !isLevel(EditionLevel)}
+        <LegendPanelComponent bind:open={legendOpen}></LegendPanelComponent>
+    {/if}
 </div>
 
 {#if openPanel === undefined}
-    <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events, a11y_mouse_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div class="controls" in:growHorizontal={{ delay: 150 }} out:growHorizontal={{}}>
         <div class="glass surface">
             <button
@@ -82,6 +88,17 @@
                 <span class="fa-solid fa-bookmark"></span>
             </button>
         </div>
+
+        {#if !isLevel(EditionLevel)}
+            <div class="glass surface">
+                <button
+                    class="button"
+                    aria-label="Open legend panel"
+                    onclick={() => (legendOpen = true)}>
+                    <span class="fa-solid fa-circle-info"></span>
+                </button>
+            </div>
+        {/if}
 
         {#if hasEditorRights()}
             <div class="glass surface" ondragenter={() => (trayOpen = true)}>
@@ -172,6 +189,7 @@
     .button:focus-visible,
     .button:hover {
         background: var(--on-glass-surface-active-colour);
+        outline: 1px solid var(--default-border-color);
     }
 
     .button span {

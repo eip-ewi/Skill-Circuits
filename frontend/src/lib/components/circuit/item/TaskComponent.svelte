@@ -1,6 +1,6 @@
 <script lang="ts">
-    import type { TaskInfo, TaskItem } from "../../../dto/circuit/module/task";
-    import { withCsrf } from "../../../logic/csrf";
+    import moment from "moment";
+    import type { TaskInfo } from "../../../dto/circuit/module/task";
     import { TaskIcons } from "../../../dto/task_icons";
     import {
         reportClickedLink,
@@ -11,17 +11,22 @@
         addTaskInfoToBookmarkList,
         removeTaskInfoFromBookmarkList,
     } from "../../../logic/updates/bookmark_updates";
-    import Dropdown from "../../util/Dropdown.svelte";
     import BookmarkMenuComponent from "../../bookmark/BookmarkMenuComponent.svelte";
     import Button from "../../util/Button.svelte";
     import Link from "../../util/Link.svelte";
+    import { canEditCircuit } from "../../../logic/authorisation.svelte";
 
     let {
         task,
         hideBookmark,
         hidePathCustomisation,
-    }: { task: TaskInfo; hideBookmark?: boolean | undefined; hidePathCustomisation?: boolean } =
-        $props();
+        reserveDeadlineSpace = false,
+    }: {
+        task: TaskInfo;
+        hideBookmark?: boolean | undefined;
+        hidePathCustomisation?: boolean;
+        reserveDeadlineSpace?: boolean;
+    } = $props();
 
     let draggable: boolean = $state(false);
     let bookmarksOpen: boolean = $state(false);
@@ -37,7 +42,18 @@
         }
     }
 
-    function dragEnd(event: DragEvent) {}
+    function dragEnd(_event: DragEvent) {}
+
+    function isPastDeadline(deadline: string): boolean {
+        return moment().isAfter(moment(deadline));
+    }
+
+    let overdueInViewer: boolean = $derived(
+        !canEditCircuit() &&
+            !task.completed &&
+            task.deadline !== null &&
+            isPastDeadline(task.deadline),
+    );
 </script>
 
 <button
@@ -45,10 +61,15 @@
     aria-label="Complete task"
     aria-pressed={task.completed}
     onclick={toggleComplete}>
-    <span>{"\u2713"}</span>
+    <span>✓</span>
 </button>
-<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
-<div class="description" {draggable} ondragstart={dragStart} ondragend={dragEnd}>
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div
+    class="description"
+    data-overdue={overdueInViewer}
+    {draggable}
+    ondragstart={dragStart}
+    ondragend={dragEnd}>
     {#if !hidePathCustomisation && task.taskType === "regular"}
         <div
             role="button"
@@ -85,10 +106,24 @@
         </Button>
     </BookmarkMenuComponent>
 {/if}
-<span class="time">
-    <span class="fa-solid fa-clock"></span>
-    <span>{task.time}</span>
-</span>
+<div class="task-info" data-overdue={overdueInViewer}>
+    <span class="time">
+        <span class="fa-solid fa-clock"></span>
+        <span>{task.time}</span>
+    </span>
+
+    {#if task.deadline}
+        <span class="deadline">
+            <span class="fa-solid fa-calendar"></span>
+            <span>{moment(task.deadline).format("DD/MM HH:mm")}</span>
+        </span>
+    {:else if reserveDeadlineSpace}
+        <span class="deadline deadline-placeholder" aria-hidden="true">
+            <span class="fa-solid fa-calendar"></span>
+            <span>00/00 00:00</span>
+        </span>
+    {/if}
+</div>
 
 <style>
     .checkbox {
@@ -132,8 +167,38 @@
         gap: 0.25em;
     }
 
+    .deadline {
+        align-items: center;
+        display: flex;
+        font-variant-numeric: tabular-nums;
+        gap: 0.5em;
+        margin-right: 1em;
+    }
+
+    .deadline span:last-child {
+        inline-size: 11ch;
+        white-space: nowrap;
+    }
+
+    .deadline-placeholder {
+        visibility: hidden;
+    }
+
     .grip {
         cursor: grab;
-        opacity: 0.5;
+        color: var(--drag-icon-color);
+    }
+
+    .task-info {
+        display: flex;
+        gap: 0.5em;
+    }
+
+    /*The global(a) is necessary for tasks that use links*/
+    .description[data-overdue="true"] .name,
+    .description[data-overdue="true"] :global(a),
+    .task-info[data-overdue="true"] .time span:last-child,
+    .task-info[data-overdue="true"] .deadline span:last-child {
+        text-decoration: line-through;
     }
 </style>

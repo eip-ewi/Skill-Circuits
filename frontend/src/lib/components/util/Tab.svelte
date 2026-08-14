@@ -20,5 +20,6 @@
 
     button:where([aria-selected="true"], :hover, :focus-visible) {
         background-color: var(--on-glass-surface-active-colour);
+        outline: 1px solid var(--default-border-color);
     }
 </style>

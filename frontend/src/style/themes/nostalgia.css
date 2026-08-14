@@ -22,14 +22,17 @@
     --glass-glint-colour: transparent;
 
     /* Columns */
-    --column-radius: 0;
-    --column-colour: color-mix(in srgb, var(--green) 15%, transparent);
+    --column-colour: color-mix(in srgb, var(--secondary-colour) 15%, transparent);
+    --column-border-radius: 0;
+    --column-button-border-radius: 0;
+    --column-separator-border-radius: 0;
 
     /* Groups */
     --group-colour: white;
     --group-border-colour: black;
     --group-border-radius: 0;
     --on-group-colour: var(--green2);
+    --on-group-colour-higher-contrast: black;
 
     /* Checkpoints */
     --checkpoint-surface-border: 1px solid black;
@@ -93,21 +96,21 @@
     --on-neutral-surface-colour: black;
     --on-neutral-surface-active-colour: white;
     --neutral-surface-border: var(--primary-surface-border);
-    --neutral-surface-active-border-colour: var(--primary-surface-active-border-colour);
+    --neutral-surface-active-border-colour: var(--primary-surface-active-border);
 
     --primary-surface-colour: white;
     --primary-surface-active-colour: var(--green);
     --on-primary-surface-colour: black;
     --on-primary-surface-active-colour: white;
     --primary-surface-border: 1px solid black;
-    --primary-surface-active-border-colour: black;
+    --primary-surface-active-border: 1px solid black;
 
     --error-surface-colour: white;
     --error-surface-active-colour: var(--red);
     --on-error-surface-colour: black;
     --on-error-surface-active-colour: white;
     --error-surface-border: 1px solid black;
-    --error-surface-active-border-colour: black;
+    --error-surface-active-border: 1px solid black;
 
     /* Header */
     --header-border-radius: 0;
@@ -134,6 +137,12 @@
     --option-border-radius: 0;
     --option-active-colour: var(--green);
     --on-option-active-colour: white;
+
+    /* Info banners */
+    --info-banner-colour: var(--green);
+    --on-info-banner-colour: white;
+    --info-banner-border: none;
+    --info-banner-border-radius: 0;
 
     /* Warning banners */
     --warning-banner-colour: var(--orange);

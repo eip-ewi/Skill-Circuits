@@ -1,9 +1,8 @@
 <script lang="ts">
-    import type { LineSegments } from "../../../data/path";
     import { generatePathString } from "../../../logic/line_segments";
     import type { Block } from "../../../dto/circuit/block";
     import { createConnectionPath } from "../../../logic/circuit/connection.svelte";
-    import { hasEditorRights, getAuthorisation } from "../../../logic/authorisation.svelte";
+    import { hasEditorRights } from "../../../logic/authorisation.svelte";
     import { isUnlocked } from "../../../logic/circuit/skill_state/unlock";
     import { isCompleted } from "../../../logic/circuit/skill_state/completion";
     import { getCircuit } from "../../../logic/circuit/circuit.svelte";
@@ -87,7 +86,6 @@
         transition:
             filter ease-in-out 150ms,
             opacity ease-in-out 150ms;
-        z-index: 10;
     }
 
     path:hover {
@@ -104,6 +102,8 @@
     path[data-locked="true"] {
         opacity: 0;
         filter: blur(0.2em);
+        /* Should not interfere with interactable lines */
+        pointer-events: none;
     }
 
     path[data-preview="true"] {

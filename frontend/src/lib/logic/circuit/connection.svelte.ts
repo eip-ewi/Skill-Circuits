@@ -4,52 +4,59 @@ import type { Point } from "../../data/point";
 import { getCircuit } from "./circuit.svelte";
 
 export function createConnectionPath(from: Block, to: Block): LineSegments | undefined {
-    let circuitRect = getCircuit().boundingRect!();
-    let fromRect = from.boundingRect?.();
-    let toRect = to.boundingRect?.();
+    const circuitRect = getCircuit().boundingRect!();
+    const fromRect = from.boundingRect?.();
+    const toRect = to.boundingRect?.();
 
     if (fromRect === undefined || toRect === undefined) {
         return undefined;
     }
 
-    let scale = parseFloat(getComputedStyle(document.querySelector(".circuit")!).fontSize) / 16.0;
+    const scale = parseFloat(getComputedStyle(document.querySelector(".circuit")!).fontSize) / 16.0;
 
-    let relativeFrom = {
+    const relativeFrom = {
         x1: fromRect.left - circuitRect.left,
         y1: fromRect.top - circuitRect.top,
         x2: fromRect.right - circuitRect.left,
         y2: fromRect.bottom - circuitRect.top,
     };
-    let relativeTo = {
+    const relativeTo = {
         x1: toRect.left - circuitRect.left,
         y1: toRect.top - circuitRect.top,
         x2: toRect.right - circuitRect.left,
         y2: toRect.bottom - circuitRect.top,
     };
 
-    let start: Point = { x: relativeFrom.x1 + fromRect.width / 2, y: relativeFrom.y2 };
-    let end: Point = { x: relativeTo.x1 + toRect.width / 2, y: relativeTo.y1 };
+    const start: Point = { x: relativeFrom.x1 + fromRect.width / 2, y: relativeFrom.y2 };
+    const end: Point = { x: relativeTo.x1 + toRect.width / 2, y: relativeTo.y1 };
 
-    let gutterOffset = (to.column! / (getCircuit().width! - 1) - 0.5) * 56 * scale;
+    const circuitWidth = getCircuit().width ?? 1;
+    let gutterOffset = 0;
+    if (circuitWidth > 1) {
+        gutterOffset = (to.column! / (circuitWidth - 1) - 0.5) * 56 * scale;
+    }
 
-    let aboveChild: Point = { x: end.x, y: end.y - 64 * scale + gutterOffset };
+    const aboveChild: Point = { x: end.x, y: end.y - 64 * scale + gutterOffset };
 
     if (start.y > end.y) {
-        let gutterStepSize = (56 * scale) / (getCircuit().width! - 1);
-        let horizontalDirection: "left" | "right" = end.x < start.x ? "left" : "right";
+        let gutterStepSize = 0;
+        if (circuitWidth > 1) {
+            gutterStepSize = (56 * scale) / (circuitWidth - 1);
+        }
+        const horizontalDirection: "left" | "right" = end.x < start.x ? "left" : "right";
 
-        let belowParent: Point = {
+        const belowParent: Point = {
             x: start.x,
             y: start.y + 64 * scale + gutterStepSize / 2 - gutterOffset,
         };
-        let belowParentBesideChild: Point = {
+        const belowParentBesideChild: Point = {
             x:
                 horizontalDirection == "left"
                     ? relativeTo.x2 + 48 * scale
                     : relativeTo.x1 - 48 * scale,
             y: start.y + 64 * scale + gutterStepSize / 2 - gutterOffset,
         };
-        let aboveChildBesideChild: Point = {
+        const aboveChildBesideChild: Point = {
             x:
                 horizontalDirection == "left"
                     ? relativeTo.x2 + 48 * scale
@@ -69,7 +76,7 @@ export function createConnectionPath(from: Block, to: Block): LineSegments | und
         };
     }
 
-    let belowParent: Point = { x: start.x, y: end.y - 64 * scale + gutterOffset };
+    const belowParent: Point = { x: start.x, y: end.y - 64 * scale + gutterOffset };
 
     return { points: [start, belowParent, aboveChild, end] };
 }

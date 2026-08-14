@@ -7,30 +7,30 @@ import { hasEditorRights } from "../authorisation.svelte";
 import { isSkillRevealed } from "./unlocked_skills.svelte";
 import { BlockStates } from "../../data/block_state";
 import type { EditionCircuit } from "../../dto/circuit/edition/edition";
+import { untrack } from "svelte";
 
 let circuit: Circuit | undefined = $state(undefined);
-let blocks: Block[] | undefined = $derived(
-    // @ts-ignore
+const blocks: Block[] | undefined = $derived(
     circuit === undefined ? undefined : blocksFromCircuit(circuit),
 );
-let graph: Graph | undefined = $derived(
+const graph: Graph | undefined = $derived(
     circuit === undefined ? undefined : new Graph(blocks!.filter(block => isBlockVisible(block))),
 );
-let blockToGroupMap: Map<number, Group> | undefined = $derived(
+const blockToGroupMap: Map<number, Group> | undefined = $derived(
     circuit === undefined
         ? undefined
-        : // @ts-ignore
+        : // @ts-expect-error -- flatMap inference does not preserve the Map entry tuple.
           new Map(circuit!.groups.flatMap(group => group.blocks.map(block => [block.id, group]))),
 );
-let itemToBlockMap: Map<number, Block> | undefined = $derived(
+const itemToBlockMap: Map<number, Block> | undefined = $derived(
     circuit === undefined
         ? undefined
-        : // @ts-ignore
+        : // @ts-expect-error -- flatMap inference does not preserve the Map entry tuple.
           new Map(blocks.flatMap(block => block.items.map(item => [item.id, block]))),
 );
 
 function blocksFromCircuit(circuit: Circuit): Block[] {
-    let blocks: Block[] = [];
+    let blocks: Block[];
     if (circuit.circuitType === "module") {
         blocks = [...circuit.groups.flatMap(group => group.blocks), ...circuit.externalSkills];
     } else {
@@ -100,8 +100,12 @@ export function getGraph(): Graph {
 }
 
 export async function fetchCircuit(url: string) {
-    let response = await fetch(url);
+    const response = await fetch(url);
     circuit = await response.json();
+}
+
+export function updateBlockNoCascade(block: Block, update: Partial<Block>): void {
+    untrack(() => Object.assign(block, update));
 }
 
 export function initModuleGraphs(editionCircuit: EditionCircuit) {

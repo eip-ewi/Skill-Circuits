@@ -1,3 +1,6 @@
+# Use both changes for changelog changes (should reduce conflicts)
+/CHANGELOG.md merge=union
+
 * text eol=lf
 
 # Denote all files that are truly binary and should not be modified.

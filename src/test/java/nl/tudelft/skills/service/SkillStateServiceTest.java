@@ -94,6 +94,21 @@ public class SkillStateServiceTest {
 	}
 
 	@Test
+	@DisplayName("Non-revealed hidden skills are skipped as parents")
+	public void nonRevealedHiddenSkillsAreSkippedAsParents() {
+		Skill unrevealedParent = Skill.builder().id(10L).hidden(true).essential(false)
+				.tasks(List.of(regularTask(10L))).column(1).build();
+		Skill visibleEmptyParent = Skill.builder().id(20L).column(1).build();
+		Skill skill = Skill.builder().id(30L).column(1).build();
+		skill.setParents(Set.of(unrevealedParent, visibleEmptyParent));
+
+		assertThat(skillStateService.isSkillUnlocked(skill, Set.of(), Set.of(), null, Set.of(), Set.of()))
+				.isTrue();
+		assertThat(skillStateService.isSkillCompleted(skill, Set.of(), Set.of(), null, Set.of(), Set.of()))
+				.isTrue();
+	}
+
+	@Test
 	@DisplayName("Skills with one parent locked are locked")
 	public void someParentsNotUnlockedIsNotUnlocked() {
 		Skill skill = Skill.builder().column(1).build();
@@ -113,6 +128,115 @@ public class SkillStateServiceTest {
 				Skill.builder().id(20L).essential(false).column(1).build()));
 		assertThat(skillStateService.isSkillUnlocked(skill, Set.of(), Set.of(), null, Set.of(), Set.of()))
 				.isTrue();
+	}
+
+	@Test
+	@DisplayName("Grandparent: Empty and unlocked -> Parent: uncompleted and optional -> Skill: empty, completed, and unlocked")
+	public void parentUncompletedOptionalAndGrandparentEmptyAndUnlocked() {
+		// Grandparent is empty and unlocked
+		Skill grandParent = Skill.builder().column(1).build();
+
+		// Parent is optional and uncompleted
+		// Bottom skill should be completed and unlocked
+		Skill skill = buildSkillDependencies(grandParent, 10L);
+		assertThat(skillStateService.isSkillUnlocked(skill, Set.of(), Set.of(), null, Set.of(), Set.of()))
+				.isTrue();
+		assertThat(skillStateService.isSkillCompleted(skill, Set.of(), Set.of(), null, Set.of(), Set.of()))
+				.isTrue();
+	}
+
+	@Test
+	@DisplayName("Grandparent: Uncompleted and unlocked -> Parent: uncompleted and optional -> Skill: empty, uncompleted, and locked")
+	public void parentUncompletedOptionalAndGrandparentUncompletedAndUnlocked() {
+		// Grandparent is uncompleted and unlocked
+		Skill grandParent = Skill.builder().column(1).tasks(List.of(regularTask(10L))).build();
+
+		// Parent is optional and uncompleted
+		// Bottom skill should be uncompleted and locked
+		Skill skill = buildSkillDependencies(grandParent, 20L);
+		assertThat(skillStateService.isSkillUnlocked(skill, Set.of(), Set.of(), null, Set.of(), Set.of()))
+				.isFalse();
+		assertThat(skillStateService.isSkillCompleted(skill, Set.of(), Set.of(), null, Set.of(), Set.of()))
+				.isFalse();
+	}
+
+	@Test
+	@DisplayName("Grandparent: Completed and unlocked -> Parent: uncompleted and optional -> Skill: empty, completed, and unlocked")
+	public void parentUncompletedOptionalAndGrandparentCompletedAndUnlocked() {
+		// Grandparent is completed and unlocked
+		Skill grandParent = Skill.builder().column(1).tasks(List.of(regularTask(10L))).build();
+
+		// Parent is optional and uncompleted
+		// Bottom skill should be completed and unlocked
+		Skill skill = buildSkillDependencies(grandParent, 20L);
+		assertThat(skillStateService.isSkillUnlocked(skill, Set.of(10L), Set.of(), null, Set.of(), Set.of()))
+				.isTrue();
+		assertThat(skillStateService.isSkillCompleted(skill, Set.of(10L), Set.of(), null, Set.of(), Set.of()))
+				.isTrue();
+	}
+
+	@Test
+	@DisplayName("Grandparent: Partially completed and unlocked -> Parent: uncompleted and optional -> Skill: empty, completed, and unlocked")
+	public void parentUncompletedOptionalAndGrandparentPartiallyCompletedAndUnlocked() {
+		// Grandparent is completed and unlocked
+		Skill grandParent = Skill.builder().column(1).tasks(List.of(regularTask(10L), regularTask(20L)))
+				.build();
+
+		// Parent is optional and uncompleted
+		// Bottom skill should be uncompleted and locked
+		Skill skill = buildSkillDependencies(grandParent, 30L);
+		assertThat(skillStateService.isSkillUnlocked(skill, Set.of(10L), Set.of(), null, Set.of(), Set.of()))
+				.isFalse();
+		assertThat(skillStateService.isSkillCompleted(skill, Set.of(10L), Set.of(), null, Set.of(), Set.of()))
+				.isFalse();
+	}
+
+	@Test
+	@DisplayName("Grandparent: Empty and locked -> Parent: uncompleted and optional -> Skill: empty, uncompleted, and locked")
+	public void parentUncompletedOptionalAndGrandparentEmptyAndLocked() {
+		Skill upperMostSkill = Skill.builder().column(1).tasks(List.of(regularTask(10L))).build();
+
+		// Grandparent is empty and locked
+		Skill grandParent = Skill.builder().column(1).tasks(List.of()).build();
+		grandParent.setParents(Set.of(upperMostSkill));
+
+		// Parent is optional and uncompleted
+		Skill skill = buildSkillDependencies(grandParent, 20L);
+
+		// Check that grandparent is locked
+		assertThat(
+				skillStateService.isSkillUnlocked(grandParent, Set.of(), Set.of(), null, Set.of(), Set.of()))
+				.isFalse();
+
+		// Bottom skill should be uncompleted and locked
+		assertThat(skillStateService.isSkillUnlocked(skill, Set.of(), Set.of(), null, Set.of(), Set.of()))
+				.isFalse();
+		assertThat(skillStateService.isSkillCompleted(skill, Set.of(), Set.of(), null, Set.of(), Set.of()))
+				.isFalse();
+	}
+
+	@Test
+	@DisplayName("Grandparent: Uncompleted and locked -> Parent: uncompleted and optional -> Skill: empty, uncompleted, and locked")
+	public void parentUncompletedOptionalAndGrandparentUncompletedAndLocked() {
+		Skill upperMostSkill = Skill.builder().column(1).tasks(List.of(regularTask(10L))).build();
+
+		// Grandparent is uncompleted and locked
+		Skill grandParent = Skill.builder().column(1).tasks(List.of(regularTask(20L))).build();
+		grandParent.setParents(Set.of(upperMostSkill));
+
+		// Parent is optional and uncompleted
+		Skill skill = buildSkillDependencies(grandParent, 30L);
+
+		// Check that grandparent is locked
+		assertThat(
+				skillStateService.isSkillUnlocked(grandParent, Set.of(), Set.of(), null, Set.of(), Set.of()))
+				.isFalse();
+
+		// Bottom skill should be uncompleted and locked
+		assertThat(skillStateService.isSkillUnlocked(skill, Set.of(), Set.of(), null, Set.of(), Set.of()))
+				.isFalse();
+		assertThat(skillStateService.isSkillCompleted(skill, Set.of(), Set.of(), null, Set.of(), Set.of()))
+				.isFalse();
 	}
 
 	@Test
@@ -262,4 +386,14 @@ public class SkillStateServiceTest {
 				.build();
 	}
 
+	private static Skill buildSkillDependencies(Skill grandParent, long taskInfoId) {
+		Skill uncompletedOptional = Skill.builder().essential(false).tasks(List.of(regularTask(taskInfoId)))
+				.column(1).build();
+		uncompletedOptional.setParents(Set.of(grandParent));
+
+		Skill empty = Skill.builder().column(1).build();
+		empty.setParents(Set.of(uncompletedOptional));
+
+		return empty;
+	}
 }

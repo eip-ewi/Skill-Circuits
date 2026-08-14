@@ -17,6 +17,7 @@
  */
 package nl.tudelft.skills.model;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -52,6 +53,9 @@ public class TaskInfo {
 	private Integer time = 0;
 
 	private String link;
+
+	@Nullable
+	private LocalDateTime deadline;
 
 	@Nullable
 	@ToString.Exclude

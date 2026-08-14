@@ -17,6 +17,7 @@
 <button
     class="skill-name"
     data-locked={locked && getBlurBlocks()}
+    data-essential={block.essential}
     data-completed={completed}
     data-selected={selectedSkill === block}
     onclick={() => {
@@ -41,7 +42,8 @@
         cursor: pointer;
         transition:
             filter ease-in-out 150ms,
-            background-color ease-in-out 150ms;
+            background-color ease-in-out 150ms,
+            border ease-in-out 150ms;
         white-space: nowrap;
     }
 
@@ -50,11 +52,13 @@
     }
 
     .skill-name:hover {
-        background-color: color-mix(in srgb, var(--column-colour) 50%, transparent);
+        background-color: var(--submodule-overview-hover-background-color);
+        outline: 1px solid var(--submodule-overview-selection-border-color);
     }
 
     .skill-name[data-selected="true"] {
-        background-color: var(--column-colour);
+        background-color: var(--submodule-overview-selected-background-color);
+        outline: 1px solid var(--submodule-overview-selection-border-color);
     }
 
     .skill-name[data-locked="true"] {
@@ -65,5 +69,13 @@
     .skill-name[data-selected="true"][data-locked="true"] {
         /* If the skill is locked and hovered over/selected, do not blur */
         filter: none;
+    }
+
+    .skill-name[data-essential="false"] {
+        font-style: italic;
+    }
+
+    .skill-name[data-essential="false"] .icon {
+        font-style: italic;
     }
 </style>

@@ -1,6 +1,5 @@
 <script lang="ts">
     import type { Snippet } from "svelte";
-    import type { HTMLStyleAttributes } from "svelte/elements";
 
     interface Properties {
         children: Snippet;
@@ -66,7 +65,8 @@
     .button {
         align-items: center;
         background-color: var(--inactive-colour);
-        border: var(--inactive-border);
+        border: none;
+        outline: var(--inactive-border);
         border-radius: var(--surface-border-radius);
         cursor: pointer;
         color: var(--on-inactive-colour);
@@ -78,7 +78,7 @@
     .button:hover,
     .button:focus-visible {
         background-color: var(--active-colour);
-        border-color: var(--active-border-colour);
+        outline: var(--active-border-colour);
         color: var(--on-active-colour);
     }
 
@@ -98,12 +98,12 @@
     .button[data-type="regular"] {
         --active-colour: var(--neutral-surface-active-colour);
         --on-active-colour: var(--on-neutral-surface-active-colour);
-        --active-border-colour: var(--neutral-surface-active-border-colour);
+        --active-border-colour: var(--neutral-surface-active-border);
     }
     .button[data-type="caution"] {
         --active-colour: var(--error-surface-active-colour);
         --on-active-colour: var(--on-error-surface-active-colour);
-        --active-border-colour: var(--error-surface-active-border-colour);
+        --active-border-colour: var(--error-surface-active-border);
     }
 
     .button[data-type="regular"][data-primary="true"] {
@@ -112,7 +112,7 @@
         --inactive-border: var(--primary-surface-border);
         --active-colour: var(--primary-surface-active-colour);
         --on-active-colour: var(--on-primary-surface-active-colour);
-        --active-border-colour: var(--primary-surface-active-border-colour);
+        --active-border-colour: var(--primary-surface-active-border);
     }
     .button[data-type="caution"][data-primary="true"] {
         --inactive-colour: var(--error-surface-colour);
@@ -120,6 +120,6 @@
         --inactive-border: var(--error-surface-border);
         --active-colour: var(--error-surface-active-colour);
         --on-active-colour: var(--on-error-surface-active-colour);
-        --active-border-colour: var(--error-surface-active-border-colour);
+        --active-border-colour: var(--error-surface-active-border);
     }
 </style>
