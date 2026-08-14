@@ -40,6 +40,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Fixed
 - [Student] Page redirects from external skills or bookmarked skills work as intended. (@ralani)
 
+- [Student] When in the submodule view, the skills are now sorted. (@ogangalic)
+- [Student] Session credentials expiration is tracked correctly. (@ralani)
 ## [2526.2.0]
 
 ## Added 
