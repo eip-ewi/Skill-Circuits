@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Everyone] A legend that shows what each task symbol means. (@ogangalic)
 - [Teacher] Add task table overview page for editions. (@ffiedrich)
 - [Teacher] Column management has a UI interface. (@ralani)
+- [Editor] When editing a link you can use ESC and outside clicks for closing the pop-up. (@ogangalic)
 - [Everyone] Tasks can have deadlines. (@ralani)
 
 - [Editor] Can now see the total time needed for the completion of checkpoints. (@ogangalic)
