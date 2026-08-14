@@ -12,7 +12,7 @@
         event.dataTransfer!.setData("skill-circuits/item", task.id.toString());
     }
 
-    function dragEnd(event: DragEvent) {}
+    function dragEnd(_event: DragEvent) {}
 
     function isPastDeadline(deadline: string): boolean {
         return moment().isAfter(moment(deadline));
@@ -28,7 +28,7 @@
     );
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="task" {draggable} ondragstart={dragStart} ondragend={dragEnd}>
     <div style="display: flex; gap: 1rem; flex: 1;">
         <div

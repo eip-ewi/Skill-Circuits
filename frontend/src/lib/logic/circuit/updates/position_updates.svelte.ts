@@ -6,9 +6,9 @@ import { getBlocks, getCircuit } from "../circuit.svelte";
 import { setScrollTarget } from "../scroll_target.svelte";
 
 export async function updateBlockPosition(block: Block, newColumn: number) {
-    let oldColumn = block.column;
+    const oldColumn = block.column;
     block.column = newColumn;
-    let response = await fetch(
+    const response = await fetch(
         `/api/${getLevel().blocks}/${block.id}/position?column=${newColumn}`,
         withCsrf({
             method: "PATCH",
@@ -23,9 +23,9 @@ export async function updateBlockPosition(block: Block, newColumn: number) {
 }
 
 export async function removeBlockFromCircuit(block: Block) {
-    let oldColumn = block.column;
+    const oldColumn = block.column;
     block.column = null;
-    let response = await fetch(
+    const response = await fetch(
         `/api/${getLevel().blocks}/${block.id}/position`,
         withCsrf({
             method: "DELETE",
@@ -40,7 +40,7 @@ export async function removeBlockFromCircuit(block: Block) {
 export async function insertColumn(afterIndex: number) {
     getCircuit().width = (getCircuit().width ?? 5) + 1;
 
-    let blocksToShift = getBlocks().filter(block => block.column! > afterIndex);
+    const blocksToShift = getBlocks().filter(block => block.column! > afterIndex);
     const moveToRight: (block: Block) => number = block => block.column! + 1;
 
     if (!(await updateColumnPositions(blocksToShift, moveToRight)))
@@ -53,7 +53,7 @@ export async function removeColumn(afterIndex: number) {
     // moving 0th column to the right is the same as moving column 1 to the left
     if (afterIndex == 0) afterIndex++;
 
-    let blocksToShift = getBlocks().filter(block => block.column! >= afterIndex);
+    const blocksToShift = getBlocks().filter(block => block.column! >= afterIndex);
     const moveToLeft: (block: Block) => number = block => block.column! - 1;
 
     if (!(await updateColumnPositions(blocksToShift, moveToLeft))) getCircuit().width = oldWidth;
@@ -70,7 +70,7 @@ async function updateColumnPositions(blocks: Block[], getNewColumn: (block: Bloc
         [blockIdProperty]: { id: block.id },
         column: block.column,
     }));
-    let response = await fetch(
+    const response = await fetch(
         `/api/${getLevel().blocks}/positions`,
         withCsrf({
             method: "POST",

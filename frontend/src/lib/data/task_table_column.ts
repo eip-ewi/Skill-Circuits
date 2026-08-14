@@ -1,5 +1,4 @@
 import type { TaskInTaskList } from "../dto/task_in_task_list";
-import { sortAscByString } from "../logic/task_table.svelte";
 
 export interface ITaskTableColumn {
     name: string;

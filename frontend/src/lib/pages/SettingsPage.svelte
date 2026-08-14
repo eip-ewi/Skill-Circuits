@@ -9,8 +9,7 @@
         setBlurBlocks,
     } from "../logic/preferences.svelte";
     import ExampleBlurredSkillComponent from "../components/settings_examples/ExampleBlurredSkillComponent.svelte";
-    import { clearLevel, setLevel } from "../logic/circuit/level.svelte";
-    import { ModuleLevel } from "../data/level";
+    import { clearLevel } from "../logic/circuit/level.svelte";
     import ExampleCompletionIcons from "../components/settings_examples/ExampleCompletionIcons.svelte";
 
     clearLevel();

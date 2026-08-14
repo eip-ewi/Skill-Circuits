@@ -119,9 +119,7 @@
 </script>
 
 {#if open}
-    <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
     <dialog bind:this={element} onclick={checkForClose} onkeydown={checkForClose}>
-        <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
         <div
             class="expanded-submodule"
             transition:openExpandedBlockTransition={{ block: submoduleBlock }}>
@@ -130,7 +128,7 @@
                     <h1 class="name">{submoduleBlock.name}</h1>
                     {#if selectedSkill !== undefined}
                         <div class="skill-list">
-                            {#each sortedVisibleSkills as skill}
+                            {#each sortedVisibleSkills as skill (skill.id)}
                                 <SkillNameComponent
                                     block={skill}
                                     moduleGraph={moduleGroup.moduleGraph}

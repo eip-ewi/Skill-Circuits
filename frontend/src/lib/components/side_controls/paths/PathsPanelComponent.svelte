@@ -1,9 +1,9 @@
 <script lang="ts">
-    import { hasEditorRights, getAuthorisation } from "../../../logic/authorisation.svelte";
+    import { hasEditorRights } from "../../../logic/authorisation.svelte";
     import PathListItemComponent from "./PathListItemComponent.svelte";
     import { createPath } from "../../../logic/updates/path_updates";
     import { getPaths } from "../../../logic/edition/edition.svelte";
-    import { getLevel, isLevel } from "../../../logic/circuit/level.svelte";
+    import { isLevel } from "../../../logic/circuit/level.svelte";
     import { ModuleLevel } from "../../../data/level";
     import { getBlocks } from "../../../logic/circuit/circuit.svelte";
     import { BlockStates } from "../../../data/block_state";
@@ -34,7 +34,6 @@
 </script>
 
 {#if hasEditorRights()}
-    <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
     <div class="scrollable glass panel" aria-expanded={open}>
         <div class="heading">
             <h2>Paths</h2>
@@ -61,7 +60,7 @@
             </div>
         {/if}
         <div class="paths">
-            {#each getPaths() as path}
+            {#each getPaths() as path (path.id)}
                 <PathListItemComponent {path}></PathListItemComponent>
             {/each}
         </div>

@@ -7,7 +7,7 @@
 
 <div class="content">
     <div class="themes">
-        {#each availableThemes as theme}
+        {#each availableThemes as theme (theme.name)}
             <div
                 class="theme"
                 data-theme={getThemeName(theme)}

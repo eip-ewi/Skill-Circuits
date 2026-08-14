@@ -1,9 +1,6 @@
 <script lang="ts">
-    import type { TaskInfo, TaskItem } from "../../../dto/circuit/module/task";
-    import { editTaskTime, editTaskType } from "../../../logic/circuit/updates/task_updates";
-    import Select from "../../util/Select.svelte";
-    import Option from "../../util/Option.svelte";
-    import { TaskIcons } from "../../../dto/task_icons";
+    import type { TaskInfo } from "../../../dto/circuit/module/task";
+    import { editTaskTime } from "../../../logic/circuit/updates/task_updates";
 
     let { taskInfo }: { taskInfo: TaskInfo } = $props();
 

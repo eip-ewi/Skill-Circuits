@@ -1,11 +1,10 @@
 import type { SkillBlock } from "../../dto/circuit/module/skill";
 import type { SkillItem } from "../../dto/circuit/edition/skill";
-import { getBlocks, getVisibleBlocks } from "./circuit.svelte";
+import { getVisibleBlocks } from "./circuit.svelte";
 import { isCompleted } from "./skill_state/completion";
-import type { Block } from "../../dto/circuit/block";
 
 let unlockedSkills: number[] = $state([]);
-let unlockedSkillSet: Set<number> = $derived(new Set(unlockedSkills));
+const unlockedSkillSet: Set<number> = $derived(new Set(unlockedSkills));
 
 export function isSkillRevealed(skill: SkillBlock): boolean {
     return unlockedSkillSet.has(skill.id);
@@ -20,7 +19,7 @@ export function addRevealedSkills(skillIds: number[]) {
 }
 
 export async function fetchRevealedSkills() {
-    let response = await fetch(`/api/skills/unlocked`);
+    const response = await fetch(`/api/skills/unlocked`);
     if (response.ok) {
         unlockedSkills = await response.json();
     }

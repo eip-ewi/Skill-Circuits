@@ -26,7 +26,7 @@
         clearScrollTarget,
         getScrollTarget,
     } from "../../../logic/circuit/scroll_target.svelte";
-    import { getAdditionalIcons, getBlurBlocks } from "../../../logic/preferences.svelte";
+    import { getBlurBlocks } from "../../../logic/preferences.svelte";
     import ExpandedSubmoduleComponent from "../../expanded_submodule/ExpandedSubmoduleComponent.svelte";
     import type { SubmoduleBlock } from "../../../dto/circuit/edition/submodule";
 
@@ -78,14 +78,14 @@
 
     $effect(() => {
         // Recalculate when any of the following change
-        block.column;
-        block.row;
-        block.state;
+        void block.column;
+        void block.row;
+        void block.state;
         hasEditorRights();
         getBlocks()
             .filter(upperBlock => upperBlock.row! < block.row!)
             .forEach(upperBlock => {
-                upperBlock.state;
+                void upperBlock.state;
             });
 
         recalculateBounds();
@@ -209,7 +209,7 @@
                 <span class="icon fa-solid fa-location-dot"></span>
                 <span>
                     Go to skill
-                    <span class="scroll-to-name">{" "}"{block.name}"</span>
+                    <span class="scroll-to-name">"{block.name}"</span>
                 </span>
             </button>
         </div>

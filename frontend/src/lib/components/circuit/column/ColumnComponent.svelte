@@ -1,12 +1,11 @@
 <script lang="ts">
-    import { getBlock, getBlocks } from "../../../logic/circuit/circuit.svelte";
+    import { getBlock } from "../../../logic/circuit/circuit.svelte";
     import {
         removeColumn,
         updateBlockPosition,
     } from "../../../logic/circuit/updates/position_updates.svelte.js";
-    import { BlockStates } from "../../../data/block_state";
     import { createBlock } from "../../../logic/circuit/updates/block_updates";
-    import { hasEditorRights, getAuthorisation } from "../../../logic/authorisation.svelte";
+    import { hasEditorRights } from "../../../logic/authorisation.svelte";
     import { areColumnsEnabled } from "../../../dto/columns.svelte";
     import { createExternalSkill } from "../../../logic/circuit/updates/skill_updates";
     import { getCircuit } from "../../../logic/circuit/circuit.svelte";

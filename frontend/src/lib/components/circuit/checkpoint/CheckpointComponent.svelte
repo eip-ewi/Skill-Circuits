@@ -1,19 +1,14 @@
 <script lang="ts">
     import type { Checkpoint } from "../../../dto/checkpoint";
-    import type { RegularSkillBlock, SkillBlock } from "../../../dto/circuit/module/skill";
+    import type { SkillBlock } from "../../../dto/circuit/module/skill";
     import type { TaskItem } from "../../../dto/circuit/module/task";
-    import {
-        getBlocks,
-        getPlacedBlocks,
-        getVisibleBlocks,
-    } from "../../../logic/circuit/circuit.svelte";
+    import { getVisibleBlocks } from "../../../logic/circuit/circuit.svelte";
     import moment from "moment";
     import { isCompleted } from "../../../logic/circuit/skill_state/completion";
     import { hasEditorRights } from "../../../logic/authorisation.svelte";
     import {
         getFirstUncompletedPastCheckpoint,
         getNextCheckpoint,
-        getVisibleCheckpoints,
     } from "../../../logic/edition/edition.svelte";
     import Link from "../../util/Link.svelte";
     import { getAdditionalIcons } from "../../../logic/preferences.svelte";
@@ -29,8 +24,8 @@
     let firstRow: number = $derived.by(() => {
         const rowNumbers = getVisibleBlocks()
             .filter(block => block.blockType === "skill")
-            .filter((skill: any) => skill.checkpoint !== null && skill.checkpoint !== checkpoint.id)
-            .map((skill: any) => skill.row!)
+            .filter(skill => skill.checkpoint !== null && skill.checkpoint !== checkpoint.id)
+            .map(skill => skill.row!)
             .filter((row: number) => row < lastRow);
         if (rowNumbers.length === 0) {
             return 0;
@@ -40,9 +35,7 @@
     let skills: SkillBlock[] = $derived(
         getVisibleBlocks()
             .filter(block => block.blockType === "skill")
-            .filter(
-                (block: any) => block.row! >= firstRow && block.row! <= lastRow,
-            ) as SkillBlock[],
+            .filter(block => block.row! >= firstRow && block.row! <= lastRow) as SkillBlock[],
     );
 
     let completed: boolean = $derived(

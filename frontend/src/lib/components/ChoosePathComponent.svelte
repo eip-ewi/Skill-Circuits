@@ -1,10 +1,7 @@
 <script lang="ts">
     import { getActivePath, selectPath } from "../logic/edition/active_path.svelte";
-    import { onMount } from "svelte";
-    import { hasEditorRights, getAuthorisation } from "../logic/authorisation.svelte.js";
+    import { hasEditorRights } from "../logic/authorisation.svelte.js";
     import { getPaths } from "../logic/edition/edition.svelte";
-    import type { Path } from "../dto/path";
-    import { isOnCircuit } from "../logic/circuit/level.svelte";
     import Button from "./util/Button.svelte";
 
     function autoShow(node: HTMLDialogElement) {
@@ -17,7 +14,7 @@
         <div class="content">
             <h2 class="title">Which of these best describes you?</h2>
             <div class="paths">
-                {#each getPaths() as path}
+                {#each getPaths() as path (path.id)}
                     <div class="path">
                         <h3 class="path-name">{path.name}</h3>
                         <p class="path-description">{path.description}</p>

@@ -1,19 +1,11 @@
 <script lang="ts">
     import { cubicInOut } from "svelte/easing";
     import { type BlockAction, BlockActions } from "../../../data/block_action";
-    import type { Block } from "../../../dto/circuit/block";
     import type { SkillBlock } from "../../../dto/circuit/module/skill";
-    import {
-        getBookmarks,
-        isSkillBookmarked,
-        isTaskInfoBookmarked,
-    } from "../../../logic/bookmarks.svelte";
-    import type { BookmarkList } from "../../../dto/bookmark";
+    import { getBookmarks, isSkillBookmarked } from "../../../logic/bookmarks.svelte";
     import {
         addSkillToBookmarkList,
-        addTaskInfoToBookmarkList,
         removeSkillFromBookmarkList,
-        removeTaskInfoFromBookmarkList,
     } from "../../../logic/updates/bookmark_updates";
     import BookmarkMenuComponent from "../../bookmark/BookmarkMenuComponent.svelte";
     import Button from "../../util/Button.svelte";
@@ -23,7 +15,7 @@
 
     let open: boolean = $state(false);
 
-    function transition(element: Element) {
+    function transition(_element: Element) {
         return {
             duration: 100,
             easing: cubicInOut,

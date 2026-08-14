@@ -1,34 +1,17 @@
 <script lang="ts">
-    import type { Item } from "../../../dto/circuit/item";
-    import { deleteItem, editItemName } from "../../../logic/circuit/updates/item_updates";
-    import TaskTypeEditComponent from "./TaskTypeEditComponent.svelte";
-    import TaskTimeEditComponent from "./TaskTimeEditComponent.svelte";
-    import TaskLinkEditComponent from "./TaskLinkEditComponent.svelte";
+    import { deleteItem } from "../../../logic/circuit/updates/item_updates";
     import TaskPathEditComponent from "./TaskPathEditComponent.svelte";
     import type { TaskItem } from "../../../dto/circuit/module/task";
-    import ItemEditComponent from "./ItemEditComponent.svelte";
     import ChoiceTaskEditComponent from "./ChoiceTaskEditComponent.svelte";
-    import { editTaskInfoName } from "../../../logic/circuit/updates/task_updates";
     import TaskInfoEditComponent from "./TaskInfoEditComponent.svelte";
     import Button from "../../util/Button.svelte";
     import WithConfirmationDialog from "../../util/WithConfirmationDialog.svelte";
-    import {
-        getBookmarks,
-        isChoiceTaskBookmarked,
-        isSkillBookmarked,
-        isTaskInfoBookmarked,
-    } from "../../../logic/bookmarks.svelte";
+    import { getBookmarks, isChoiceTaskBookmarked } from "../../../logic/bookmarks.svelte";
     import {
         addChoiceTaskToBookmarkList,
-        addSkillToBookmarkList,
-        addTaskInfoToBookmarkList,
         removeChoiceTaskFromBookmarkList,
-        removeSkillFromBookmarkList,
-        removeTaskInfoFromBookmarkList,
     } from "../../../logic/updates/bookmark_updates";
-    import { BlockActions } from "../../../data/block_action";
     import BookmarkMenuComponent from "../../bookmark/BookmarkMenuComponent.svelte";
-    import { getPaths } from "../../../logic/edition/edition.svelte";
 
     let { task }: { task: TaskItem } = $props();
 
@@ -54,7 +37,7 @@
     function dragEnd() {}
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="task" draggable={draggable === true} ondragstart={dragStart} ondragend={dragEnd}>
     <div
         role="button"

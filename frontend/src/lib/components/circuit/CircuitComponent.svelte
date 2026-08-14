@@ -1,11 +1,8 @@
 <script lang="ts">
-    import type { Circuit } from "../../dto/circuit/circuit.js";
     import BlockComponent from "./block/BlockComponent.svelte";
     import ConnectionsComponent from "./connections/ConnectionsComponent.svelte";
-    import type { Block } from "../../dto/circuit/block";
     import { onMount, tick } from "svelte";
     import { placeBlocks, placeBlocksWithCheckpoints } from "../../logic/circuit/block_placement";
-    import { Graph } from "../../logic/circuit/graph";
     import type { Warning } from "../../data/warning";
     import { hasCycle } from "../../logic/diagnostics/detect_cycles";
     import {
@@ -14,13 +11,12 @@
         getGraph,
         getVisibleBlocks,
     } from "../../logic/circuit/circuit.svelte";
-    import GroupComponent from "./group/GroupComponent.svelte";
     import GroupsComponent from "./group/GroupsComponent.svelte";
-    import { hasEditorRights, getAuthorisation } from "../../logic/authorisation.svelte";
+    import { hasEditorRights } from "../../logic/authorisation.svelte";
     import ColumnComponent from "./column/ColumnComponent.svelte";
     import { getPlacedBlocks } from "../../logic/circuit/circuit.svelte.js";
     import { ModuleLevel } from "../../data/level";
-    import { getLevel, isLevel } from "../../logic/circuit/level.svelte";
+    import { isLevel } from "../../logic/circuit/level.svelte";
     import CheckpointComponent from "./checkpoint/CheckpointComponent.svelte";
     import { fade } from "svelte/transition";
     import { getVisibleCheckpoints } from "../../logic/edition/edition.svelte";
@@ -59,7 +55,7 @@
 
     $effect(() => {
         hasEditorRights();
-        getCircuit().width;
+        void getCircuit().width;
         getPlacedBlocks().forEach(
             block => (block.column = Math.min(getCircuit().width! - 1, block.column!)),
         );
@@ -90,21 +86,21 @@
             <GroupsComponent groups={getCircuit().groups}></GroupsComponent>
 
             {#if isLevel(ModuleLevel)}
-                {#each getVisibleCheckpoints() as checkpoint}
+                {#each getVisibleCheckpoints() as checkpoint (checkpoint.id)}
                     <CheckpointComponent {checkpoint}></CheckpointComponent>
                 {/each}
             {/if}
 
-            {#each { length: width } as _, column}
+            {#each { length: width } as _, column (column)}
                 <ColumnComponent {column} {height}></ColumnComponent>
             {/each}
 
-            {#each getVisibleBlocks() as block}
+            {#each getVisibleBlocks() as block (block.id)}
                 <BlockComponent {block}></BlockComponent>
             {/each}
 
             {#if hasEditorRights()}
-                {#each { length: width + 1 } as _, column}
+                {#each { length: width + 1 } as _, column (column)}
                     <ColumnSeparatorComponent {column} columns={width} {height} />
                 {/each}
             {/if}

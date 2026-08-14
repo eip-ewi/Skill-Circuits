@@ -4,10 +4,10 @@ import type { ChoiceTaskItem, TaskInfo } from "../dto/circuit/module/task";
 
 let bookmarks: BookmarkList[] = $state([]);
 
-let bookmarkedSkillIds: Set<number> = $derived(
+const bookmarkedSkillIds: Set<number> = $derived(
     new Set((bookmarks ?? []).flatMap(list => list.skills).map(skill => skill.id)),
 );
-let bookmarkedTaskInfoIds: Set<number> = $derived(
+const bookmarkedTaskInfoIds: Set<number> = $derived(
     new Set(
         (bookmarks ?? [])
             .flatMap(list => list.tasks)
@@ -15,7 +15,7 @@ let bookmarkedTaskInfoIds: Set<number> = $derived(
             .map(task => task.infoId),
     ),
 );
-let bookmarkedChoiceTaskIds: Set<number> = $derived(
+const bookmarkedChoiceTaskIds: Set<number> = $derived(
     new Set(
         (bookmarks ?? [])
             .flatMap(list => list.tasks)

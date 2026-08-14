@@ -19,9 +19,6 @@
     import EditionPage from "./pages/EditionPage.svelte";
     import SubmodulePage from "./pages/SubmodulePage.svelte";
     import ModulePage from "./pages/ModulePage.svelte";
-    import { getAuthorisation } from "./logic/authorisation.svelte";
-    import { onMount } from "svelte";
-    import LoginPage from "./pages/LoginPage.svelte";
     import SkillPage from "./pages/SkillPage.svelte";
     import ErrorPage from "./pages/ErrorPage.svelte";
     import CatalogPage from "./pages/CatalogPage.svelte";

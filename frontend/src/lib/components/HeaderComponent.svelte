@@ -7,18 +7,14 @@
         hasEditorRights,
         getAuthorisation,
         isEditorForAny,
-        isViewModeAuthorisedToEdit,
         setViewMode,
         toggleViewMode,
-        isEditorForCircuit,
     } from "../logic/authorisation.svelte";
     import Csrf from "./Csrf.svelte";
     import { loadHomePage, loadPage, pageMatches } from "../logic/routing.svelte";
     import { getEdition } from "../logic/edition/edition.svelte";
-    import ThemeSelectComponent from "./ThemeSelectComponent.svelte";
     import WithConfirmationDialog from "./util/WithConfirmationDialog.svelte";
     import { resetProgress } from "../logic/updates/edition_updates";
-    import { editingBlocks } from "../logic/circuit/updates/block_updates";
 
     let userMenuOpen: boolean = $state(false);
 
@@ -29,7 +25,7 @@
         }
     }
 
-    function shrinkLeftMargin(node: HTMLElement, params: { delay?: number }) {
+    function shrinkLeftMargin(_node: HTMLElement, params: { delay?: number }) {
         return {
             delay: params.delay || 0,
             duration: 200,
@@ -40,7 +36,7 @@
         };
     }
 
-    function growLeftMargin(node: HTMLElement, params: { delay?: number }) {
+    function growLeftMargin(_node: HTMLElement, params: { delay?: number }) {
         return {
             delay: params.delay || 0,
             duration: 200,
@@ -52,7 +48,7 @@
         };
     }
 
-    function moveRight(node: HTMLElement, params: { delay?: number }) {
+    function moveRight(_node: HTMLElement, params: { delay?: number }) {
         return {
             delay: params.delay || 0,
             duration: 200,
@@ -63,7 +59,7 @@
         };
     }
 
-    function becomeSurface(node: HTMLElement, params: { delay?: number }) {
+    function becomeSurface(_node: HTMLElement, params: { delay?: number }) {
         return {
             delay: params.delay || 0,
             duration: 200,
@@ -79,7 +75,7 @@
         };
     }
 
-    function growVertical(node: HTMLElement, params: { delay?: number }) {
+    function growVertical(_node: HTMLElement, params: { delay?: number }) {
         return {
             delay: params.delay || 0,
             duration: 200,

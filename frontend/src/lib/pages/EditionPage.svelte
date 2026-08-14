@@ -5,12 +5,7 @@
     import { setLevel } from "../logic/circuit/level.svelte";
     import { EditionLevel } from "../data/level";
     import { fetchCircuit, getCircuit, initModuleGraphs } from "../logic/circuit/circuit.svelte";
-    import {
-        fetchAuthorisation,
-        getAuthorisation,
-        toggleViewMode,
-        canEditCircuit,
-    } from "../logic/authorisation.svelte";
+    import { toggleViewMode, canEditCircuit } from "../logic/authorisation.svelte";
     import { fetchDevMode } from "../logic/dev_mode.svelte";
     import SideControlsComponent from "../components/side_controls/SideControlsComponent.svelte";
     import ChoosePathComponent from "../components/ChoosePathComponent.svelte";

@@ -1,6 +1,5 @@
 <script lang="ts">
-    import moment from "moment";
-    import type { BookmarkList, BookmarkListSkill } from "../../../dto/bookmark";
+    import type { BookmarkList } from "../../../dto/bookmark";
     import TaskComponent from "../../circuit/item/TaskComponent.svelte";
     import {
         editBookmarkListName,
@@ -14,7 +13,6 @@
     import { groupBookmarkListItems } from "../../../logic/bookmark_list.js";
     import ChoiceTaskComponent from "../../circuit/item/ChoiceTaskComponent.svelte";
     import Button from "../../util/Button.svelte";
-    import { editCheckpointName } from "../../../logic/updates/checkpoint_updates";
     import BookmarkedSkillComponent from "./BookmarkedSkillComponent.svelte";
     import { cubicInOut } from "svelte/easing";
     import WithConfirmationDialog from "../../util/WithConfirmationDialog.svelte";
@@ -39,7 +37,7 @@
         list.editing = false;
     }
 
-    function expand(element: Element) {
+    function expand(_element: Element) {
         return {
             duration: 150,
             easing: cubicInOut,
@@ -120,9 +118,9 @@
             {/if}
             {#if list.skills.length > 0}
                 <div class="skills">
-                    {#each groupBookmarkListItems(list.skills) as group}
+                    {#each groupBookmarkListItems(list.skills) as group (group.title)}
                         <span class="group-name">{group.title}</span>
-                        {#each group.items as skill}
+                        {#each group.items as skill (skill.id)}
                             <div>
                                 <BookmarkedSkillComponent {skill}></BookmarkedSkillComponent>
                             </div>
@@ -141,9 +139,9 @@
             {/if}
             {#if list.tasks.length > 0}
                 <div class="tasks">
-                    {#each groupBookmarkListItems(list.tasks) as group}
+                    {#each groupBookmarkListItems(list.tasks) as group (group.title)}
                         <span class="group-name">{group.title}</span>
-                        {#each group.items as task}
+                        {#each group.items as task (task.id)}
                             {#if task.taskType === "regular"}
                                 <TaskComponent
                                     {task}
