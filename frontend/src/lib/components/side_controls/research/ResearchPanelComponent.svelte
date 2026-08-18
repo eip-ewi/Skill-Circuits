@@ -1,12 +1,5 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import {
-        hasEditorRights,
-        getAuthorisation,
-        isTeacherForCircuit,
-        canEditCircuit,
-    } from "../../../logic/authorisation.svelte";
-    import { getEdition } from "../../../logic/edition/edition.svelte";
+    import { hasEditorRights } from "../../../logic/authorisation.svelte";
     import {
         disableResearch,
         getResearchConsent,
@@ -29,7 +22,6 @@
 </script>
 
 {#if hasEditorRights() || getResearchInfo().active}
-    <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
     <div class="scrollable glass panel" aria-expanded={open}>
         <div class="heading">
             <h2>Research</h2>
@@ -67,6 +59,7 @@
                     <details>
                         <summary>View preview</summary>
                         <div class="markdown">
+                            <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                             {@html consentMarkdown}
                         </div>
                     </details>
@@ -127,6 +120,7 @@
                     {#if getResearchConsent() === true}
                         <p>You have given consent to the following consent form.</p>
                         <div class="markdown">
+                            <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                             {@html parseMarkdown(getResearchInfo().consentText ?? "")}
                         </div>
                         <p>If you wish to retract your consent, click the button below.</p>
@@ -142,6 +136,7 @@
                             given consent to the following consent form.
                         </p>
                         <div class="markdown">
+                            <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                             {@html parseMarkdown(getResearchInfo().consentText ?? "")}
                         </div>
                         <p>If you still wish to participate, you can click the button below.</p>

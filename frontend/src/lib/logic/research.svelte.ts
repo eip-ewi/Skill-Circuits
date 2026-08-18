@@ -29,7 +29,7 @@ export async function updateResearchConsentText(consentText: string) {
         return;
     }
 
-    let response = await fetch(
+    const response = await fetch(
         `/api/research?edition=${getEdition().id}`,
         withCsrf({
             method: "PUT",
@@ -47,7 +47,7 @@ export async function updateResearchConsentText(consentText: string) {
 }
 
 export async function disableResearch() {
-    let response = await fetch(
+    const response = await fetch(
         `/api/research?edition=${getEdition().id}`,
         withCsrf({
             method: "DELETE",
@@ -70,7 +70,7 @@ export async function fetchResearchConsent() {
 }
 
 export async function updateResearchConsent(consent: boolean) {
-    let response = await fetch(
+    const response = await fetch(
         `/api/research/consent?edition=${getEdition().id}&consent=${consent}`,
         withCsrf({
             method: "PUT",

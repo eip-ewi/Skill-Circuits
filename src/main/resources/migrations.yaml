@@ -2787,7 +2787,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
                   name: consent_info
-                  type: VARCHAR(255)
+                  type: TEXT
             tableName: research_info
         - addUniqueConstraint:
             columnNames: edition_id

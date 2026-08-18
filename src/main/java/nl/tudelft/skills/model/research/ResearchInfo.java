@@ -26,6 +26,7 @@ import org.hibernate.annotations.CascadeType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import nl.tudelft.skills.model.SCEdition;
 
@@ -44,7 +45,10 @@ public class ResearchInfo {
 	@OneToOne
 	private SCEdition edition;
 
+	@Lob
 	@NotBlank
+	@Size(max = 8096)
+	@Column(columnDefinition = "TEXT")
 	private String consentInfo;
 
 	@NotNull

@@ -22,6 +22,7 @@
         <div class="content">
             <h2 class="title">Research</h2>
             <div class="markdown">
+                <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                 {@html parseMarkdown(getResearchInfo().consentText ?? "")}
             </div>
             <p>

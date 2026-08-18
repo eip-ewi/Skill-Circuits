@@ -28,7 +28,7 @@ public interface ResearchConsentRepository
 		extends JpaRepository<ResearchConsent, ResearchConsent.ResearchConsentId> {
 
 	@Modifying
-	@Query("delete from ResearchConsent reseachConsent where reseachConsent.id.researchInfoId = :#{#researchInfoId}")
+	@Query("delete from ResearchConsent researchConsent where researchConsent.id.researchInfoId = :#{#researchInfoId}")
 	void deleteAllByResearchInfoId(@Param("researchInfoId") Long researchInfoId);
 
 }
