@@ -2760,3 +2760,116 @@ databaseChangeLog:
             columnName: theme
             newDataType: ENUM('DARK','HIGH_CONTRAST_DARK','HIGH_CONTRAST_LIGHT','LIGHT','NOSTALGIA','SYSTEM')
             tableName: scperson
+
+  #
+  # Research and consent
+  #
+  - changeSet:
+      id: 1786546195875-1
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: edition_id
+                  type: BIGINT
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_1F4
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: consent_info
+                  type: TEXT
+            tableName: research_info
+        - addUniqueConstraint:
+            columnNames: edition_id
+            constraintName: CONSTRAINT_1F
+            tableName: research_info
+        - createIndex:
+            associatedWith: ''
+            columns:
+              - column:
+                  name: edition_id
+            indexName: FKixjw48a920sbhlt4vfkuleu2o_INDEX_2
+            tableName: research_info
+        - addForeignKeyConstraint:
+            baseColumnNames: edition_id
+            baseTableName: research_info
+            constraintName: FKixjw48a920sbhlt4vfkuleu2o
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: scedition
+            validate: true
+  - changeSet:
+      id: 1786546195875-2
+      author: ruben (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: consent_given
+                  type: BIT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_28
+                  name: person_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: CONSTRAINT_28
+                  name: research_info_id
+                  type: BIGINT
+            tableName: research_consent
+        - createIndex:
+            associatedWith: ''
+            columns:
+              - column:
+                  name: person_id
+            indexName: FK1d0wxjx8j8wy1bm1o2caixm98_INDEX_2
+            tableName: research_consent
+        - createIndex:
+            associatedWith: ''
+            columns:
+              - column:
+                  name: research_info_id
+            indexName: FKfkcp2r7oqmnaxj6tiiwt5gale_INDEX_2
+            tableName: research_consent
+        - addForeignKeyConstraint:
+            baseColumnNames: person_id
+            baseTableName: research_consent
+            constraintName: FK1d0wxjx8j8wy1bm1o2caixm98
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: scperson
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: research_info_id
+            baseTableName: research_consent
+            constraintName: FKfkcp2r7oqmnaxj6tiiwt5gale
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: research_info
+            validate: true

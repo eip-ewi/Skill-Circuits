@@ -16,6 +16,8 @@
     import Tab from "../components/util/Tab.svelte";
     import { getDevMode } from "../logic/dev_mode.svelte.js";
     import { fetchRevealedSkills } from "../logic/circuit/unlocked_skills.svelte";
+    import ResearchConsentComponent from "../components/research/ResearchConsentComponent.svelte";
+    import { fetchResearchConsent, fetchResearchInfo } from "../logic/research.svelte";
 
     let { editionId }: { editionId: number } = $props();
 
@@ -30,6 +32,8 @@
         await fetchActivePath();
         await fetchPathCustomisation();
         await fetchRevealedSkills();
+        await fetchResearchInfo();
+        await fetchResearchConsent();
         await fetchDevMode();
 
         finishedLoad = true;
@@ -73,5 +77,6 @@
         {/key}
         <SideControlsComponent></SideControlsComponent>
         <ChoosePathComponent></ChoosePathComponent>
+        <ResearchConsentComponent></ResearchConsentComponent>
     {/await}
 </PageLayout>
