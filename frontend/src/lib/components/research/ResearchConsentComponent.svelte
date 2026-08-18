@@ -17,7 +17,7 @@
     }
 </script>
 
-{#if getResearchConsent() == null && getResearchInfo().active && !hasEditorRights()}
+{#if getResearchConsent().consentGiven == null && getResearchInfo().active && !hasEditorRights()}
     <dialog use:autoShow class="dialog">
         <div class="content">
             <h2 class="title">Research</h2>

@@ -70,8 +70,9 @@ public class ResearchService {
 		return researchInfoRepository.findByEditionId(edition.getId())
 				.flatMap(researchInfo -> researchConsentRepository
 						.findById(new ResearchConsent.ResearchConsentId(researchInfo.getId(), person.getId()))
-						.map(consent -> new ResearchConsentView(consent.getConsentGiven())))
-				.orElseGet(() -> new ResearchConsentView(null));
+						.map(consent -> new ResearchConsentView(consent.getConsentGiven(),
+								consent.getParticipantId())))
+				.orElseGet(() -> new ResearchConsentView(null, null));
 	}
 
 	@Transactional

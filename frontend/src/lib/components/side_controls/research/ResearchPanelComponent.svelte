@@ -117,7 +117,12 @@
                 {/if}
             {:else}
                 <div class="section">
-                    {#if getResearchConsent() === true}
+                    {#if getResearchConsent().consentGiven === true}
+                        <p>
+                            Your participant ID: <span class="participant-id">
+                                {getResearchConsent().participantId}
+                            </span>
+                        </p>
                         <p>You have given consent to the following consent form.</p>
                         <div class="markdown">
                             <!-- eslint-disable-next-line svelte/no-at-html-tags -->
@@ -233,5 +238,9 @@
 
     .bold {
         font-weight: 500;
+    }
+
+    .participant-id {
+        font-weight: 900;
     }
 </style>

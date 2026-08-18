@@ -62,4 +62,9 @@ public class ResearchConsent {
 		this.consentGiven = consentGiven;
 	}
 
+	@Transient
+	public @NotNull String getParticipantId() {
+		return String.format("%08x", this.id.hashCode());
+	}
+
 }
