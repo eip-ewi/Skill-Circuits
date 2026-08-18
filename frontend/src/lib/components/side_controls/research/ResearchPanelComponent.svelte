@@ -34,6 +34,17 @@
 
         <div class="content">
             {#if hasEditorRights()}
+                {#if getResearchInfo().active}
+                    <div class="section">
+                        <h3>Research information</h3>
+                        <p>
+                            Number of consenting participants: <span>
+                                {getResearchInfo().numberOfParticipants}
+                            </span>
+                        </p>
+                    </div>
+                {/if}
+
                 <div class="section">
                     <h3>Consent information</h3>
                     {#if getResearchInfo().active}
