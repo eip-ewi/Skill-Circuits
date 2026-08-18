@@ -34,6 +34,17 @@
 
         <div class="content">
             {#if hasEditorRights()}
+                {#if getResearchInfo().active}
+                    <div class="section">
+                        <h3>Research information</h3>
+                        <p>
+                            Number of consenting participants: <span>
+                                {getResearchInfo().numberOfParticipants}
+                            </span>
+                        </p>
+                    </div>
+                {/if}
+
                 <div class="section">
                     <h3>Consent information</h3>
                     {#if getResearchInfo().active}
@@ -117,7 +128,12 @@
                 {/if}
             {:else}
                 <div class="section">
-                    {#if getResearchConsent() === true}
+                    {#if getResearchConsent().consentGiven === true}
+                        <p>
+                            Your participant ID: <span class="participant-id">
+                                {getResearchConsent().participantId}
+                            </span>
+                        </p>
                         <p>You have given consent to the following consent form.</p>
                         <div class="markdown">
                             <!-- eslint-disable-next-line svelte/no-at-html-tags -->
@@ -233,5 +249,9 @@
 
     .bold {
         font-weight: 500;
+    }
+
+    .participant-id {
+        font-weight: 900;
     }
 </style>

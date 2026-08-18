@@ -41,9 +41,10 @@ public class ResearchService {
 	public ResearchInfoView getResearchInfo(SCEdition edition) {
 		ResearchInfo researchInfo = edition.getResearchInfo();
 		if (researchInfo == null) {
-			return new ResearchInfoView(false, null);
+			return new ResearchInfoView(false, null, 0);
 		} else {
-			return new ResearchInfoView(true, researchInfo.getConsentInfo());
+			return new ResearchInfoView(true, researchInfo.getConsentInfo(),
+					researchConsentRepository.countParticipants(researchInfo.getId()));
 		}
 	}
 
@@ -70,8 +71,9 @@ public class ResearchService {
 		return researchInfoRepository.findByEditionId(edition.getId())
 				.flatMap(researchInfo -> researchConsentRepository
 						.findById(new ResearchConsent.ResearchConsentId(researchInfo.getId(), person.getId()))
-						.map(consent -> new ResearchConsentView(consent.getConsentGiven())))
-				.orElseGet(() -> new ResearchConsentView(null));
+						.map(consent -> new ResearchConsentView(consent.getConsentGiven(),
+								consent.getParticipantId())))
+				.orElseGet(() -> new ResearchConsentView(null, null));
 	}
 
 	@Transactional

@@ -31,4 +31,7 @@ public interface ResearchConsentRepository
 	@Query("delete from ResearchConsent researchConsent where researchConsent.id.researchInfoId = :#{#researchInfoId}")
 	void deleteAllByResearchInfoId(@Param("researchInfoId") Long researchInfoId);
 
+	@Query("select count(*) from ResearchConsent researchConsent where researchConsent.id.researchInfoId = :#{#researchInfoId} and researchConsent.consentGiven = true")
+	int countParticipants(@Param("researchInfoId") Long researchInfoId);
+
 }

@@ -28,13 +28,15 @@
 
     async function load() {
         await fetchEdition(editionId);
-        await fetchCircuit(`/api/editions/${editionId}/circuit`);
-        await fetchActivePath();
-        await fetchPathCustomisation();
-        await fetchRevealedSkills();
-        await fetchResearchInfo();
-        await fetchResearchConsent();
-        await fetchDevMode();
+        await Promise.all([
+            fetchCircuit(`/api/editions/${editionId}/circuit`),
+            fetchActivePath(),
+            fetchPathCustomisation(),
+            fetchRevealedSkills(),
+            fetchResearchInfo(),
+            fetchResearchConsent(),
+            fetchDevMode(),
+        ]);
 
         finishedLoad = true;
     }
