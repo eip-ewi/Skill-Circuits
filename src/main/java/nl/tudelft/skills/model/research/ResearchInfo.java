@@ -15,70 +15,48 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package nl.tudelft.skills.model;
+package nl.tudelft.skills.model.research;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
-import nl.tudelft.skills.model.research.ResearchInfo;
+import nl.tudelft.skills.model.SCEdition;
 
 @Data
 @Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SCEdition {
+public class ResearchInfo {
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@NotNull
-	@Builder.Default
-	private boolean isVisible = false;
+	@OneToOne
+	private SCEdition edition;
+
+	@Lob
+	@NotBlank
+	@Size(max = 8096)
+	@Column(columnDefinition = "TEXT")
+	private String consentInfo;
 
 	@NotNull
 	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@OneToMany(mappedBy = "edition")
-	private Set<SCModule> modules = new HashSet<>();
-
-	@NotNull
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@OneToMany(mappedBy = "edition")
-	private Set<Checkpoint> checkpoints = new HashSet<>();
-
-	@NotNull
-	@OrderBy("idx")
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	@OneToMany(mappedBy = "edition")
-	private List<Path> paths = new ArrayList<>();
-
-	@NotNull
-	@ManyToMany
-	@Builder.Default
-	@ToString.Exclude
-	@EqualsAndHashCode.Exclude
-	private Set<SCPerson> editors = new HashSet<>();
-
-	@Nullable
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@Cascade(CascadeType.REMOVE)
-	@OneToOne(mappedBy = "edition")
-	private ResearchInfo researchInfo;
+	@OneToMany(mappedBy = "researchInfo")
+	private Set<ResearchConsent> researchConsent = new HashSet<>();
 
 }

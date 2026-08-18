@@ -29,6 +29,7 @@
     "vite": "^6.3.4"
   },
   "dependencies": {
+    "marked": "^18.0.9",
     "moment": "^2.30.1"
   }
 }
