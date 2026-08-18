@@ -329,15 +329,6 @@ cross check migrations / MySQL:
         - src/main/resources/table-setup.yaml
         - src/main/resources/migrations.yaml
         - src/test/resources/application-mysql.properties
-    # Run on development for non-merge commits
-    - if: $CI_COMMIT_BRANCH == "development" && $CI_COMMIT_TITLE !~ "/^Merge branch/"
-      changes:
-        compare_to: "refs/heads/main"
-        paths:
-          - src/main/resources/changelog-master.yaml
-          - src/main/resources/table-setup.yaml
-          - src/main/resources/migrations.yaml
-          - src/test/resources/application-mysql.properties
 
 ########
 # Test #
