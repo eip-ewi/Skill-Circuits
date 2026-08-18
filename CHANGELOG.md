@@ -12,27 +12,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## Added
-- [Everyone] A legend that shows what each task symbol means. (@ogangalic)
-- [Teacher] Add task table overview page for editions. (@ffiedrich)
-- [Teacher] Column management has a UI interface. (@ralani)
-- [Editor] When editing a link you can use ESC and outside clicks for closing the pop-up. (@ogangalic)
-- [Everyone] Tasks can have deadlines. (@ralani)
-- [Teacher] Links are editable in the edition task list. (@ffiedrich)
-- [Teacher] Tasks can be filtered by links and other properties the edition task list. (@ffiedrich)
 
-- [Editor] Can now see the total time needed for the completion of checkpoints. (@ogangalic)
-- [Everyone] Add dark and light high-contrast themes. (@ffiedrich)
-- [Student] Add setting for extra completion icons. (@ffiedrich)
+## Changed
+
+## Fixed
+
+## [2627.0.0]
+
+## Added
+- [Everyone] A legend was added to circuit pages showing what each symbol on the page means. (@ogangalic)
+- [Teacher] A new tab was added with an overview of all tasks in an edition, including their links, which can be edited directly from this page. (@ffiedrich)
+- [Teacher] Columns can now be deleted and added anywhere. (@ralani)
+- [Editor] When editing a link, the user can press 'escape' and and click outside to stop editing. (@ogangalic)
+- [Everyone] Tasks can now have deadlines. 
+  This gives editors more fine-grained control to manage their courses. 
+  For example, rather than a skill having a deadline because it must be done before a lecture, the lecture can be modeled as a task with a deadline with all dependencies as actual dependencies. (@ralani)
+- [Teacher] Tasks can be filtered by links and other properties the edition task list. (@ffiedrich)
+- [Editor] Editors can now see the total time needed for the completion of checkpoints.
+  This gives editors more insight into how much time they are expecting students to put into their course. (@ogangalic)
+- [Everyone] Dark and light high-contrast themes have been added. (@ffiedrich)
+- [Student] A setting has been added that adds additional icons to signify completion, in addition to the colour change. (@ffiedrich)
 - [Teacher] A research consent form can be configured per course edition. This is useful for teachers and researchers wish to use Skill Circuits usage data for their research. (@rwbackx)
 
 ## Changed
 - [Student] Optional skills are now marked as optional in the expanded submodule view. (@ffiedrich)
 
 ## Fixed
-- [Student] When in the submodule view, the skills are now sorted. (@ogangalic)
-- [Developers] The devtools error when logging in and the state mutation warning. (@ogangalic)
-- [Student] Optional skills are skipped for the completion state of submodules and checkpoints. Separate optional skill counters are displayed on the edition page. (@ffiedrich)
-- [Everyone] Links between blocks are hoverable again. (@ffiedrich)
+- [Student] When in the submodule view, the skills appeared in a random order. (@ogangalic)
+- [Developers] Several errors in the development console. (@ogangalic)
+- [Student] Optional skills were required to complete submodules and checkpoints. (@ffiedrich) 
+- [Student] Optional skills were included in the completed counts on the edition page. This counter has been separated into a 'required' and an 'optional' count. (@ffiedrich)
+- [Everyone] Connections between submodules and skills were not highlighted on hover. (@ffiedrich)
 
 ## [2526.2.1]
 
