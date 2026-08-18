@@ -19,5 +19,5 @@ package nl.tudelft.skills.dto.view.research;
 
 import jakarta.annotation.Nullable;
 
-public record ResearchConsentView(@Nullable Boolean consentGiven) {
+public record ResearchConsentView(@Nullable Boolean consentGiven, @Nullable String participantId) {
 }

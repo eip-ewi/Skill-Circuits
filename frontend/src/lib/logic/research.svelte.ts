@@ -1,21 +1,21 @@
-import type { ResearchInfo } from "../dto/research";
+import type { ResearchConsent, ResearchInfo } from "../dto/research";
 import { withCsrf } from "./csrf";
 import { getEdition } from "./edition/edition.svelte";
 
 export const researchState: {
     researchInfo: ResearchInfo | undefined;
-    consentGiven: boolean | null;
+    consent: ResearchConsent | undefined;
 } = $state({
     researchInfo: undefined,
-    consentGiven: null,
+    consent: undefined,
 });
 
 export function getResearchInfo(): ResearchInfo {
     return researchState.researchInfo!;
 }
 
-export function getResearchConsent(): boolean | null {
-    return researchState.consentGiven;
+export function getResearchConsent(): ResearchConsent {
+    return researchState.consent!;
 }
 
 export async function fetchResearchInfo() {
@@ -65,8 +65,8 @@ export async function disableResearch() {
 
 export async function fetchResearchConsent() {
     const response = await fetch(`/api/research/consent?edition=${getEdition().id}`);
-    const consent: { consentGiven: boolean | null } = await response.json();
-    researchState.consentGiven = consent.consentGiven;
+    const consent: ResearchConsent = await response.json();
+    researchState.consent = consent;
 }
 
 export async function updateResearchConsent(consent: boolean) {
@@ -81,6 +81,8 @@ export async function updateResearchConsent(consent: boolean) {
     );
 
     if (response.ok) {
-        researchState.consentGiven = consent;
+        researchState.consent!.consentGiven = consent;
     }
+
+    await fetchResearchConsent();
 }
