@@ -12,7 +12,7 @@
         getVisibleBlocks,
     } from "../../logic/circuit/circuit.svelte";
     import GroupsComponent from "./group/GroupsComponent.svelte";
-    import {hasEditorRights, isViewModeAuthorisedToEdit} from "../../logic/authorisation.svelte";
+    import { hasEditorRights, isViewModeAuthorisedToEdit } from "../../logic/authorisation.svelte";
     import ColumnComponent from "./column/ColumnComponent.svelte";
     import { getPlacedBlocks } from "../../logic/circuit/circuit.svelte.js";
     import { ModuleLevel } from "../../data/level";
