@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 
 ## Fixed
+- [Student] The button to expand submodules is above the block again. (@ffiedrich)
 
 ## [2627.0.0]
 
