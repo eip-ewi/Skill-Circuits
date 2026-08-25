@@ -68,7 +68,7 @@
 
     let height = $derived(Math.max(0, ...getBlocks().map(block => block.row ?? 0)) + 1);
     let width = $derived(getCircuit().width ?? 5);
-    let columnTemplate = $derived(`repeat(${width}, minmax(max-content, 1fr))`);
+    let columnTemplate = $derived(`repeat(${width}, 1fr)`);
 </script>
 
 <svelte:window onresize={recalculateBounds} />
