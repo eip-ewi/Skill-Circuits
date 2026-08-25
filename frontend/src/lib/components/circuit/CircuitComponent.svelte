@@ -12,7 +12,7 @@
         getVisibleBlocks,
     } from "../../logic/circuit/circuit.svelte";
     import GroupsComponent from "./group/GroupsComponent.svelte";
-    import { hasEditorRights } from "../../logic/authorisation.svelte";
+    import {hasEditorRights, isViewModeAuthorisedToEdit} from "../../logic/authorisation.svelte";
     import ColumnComponent from "./column/ColumnComponent.svelte";
     import { getPlacedBlocks } from "../../logic/circuit/circuit.svelte.js";
     import { ModuleLevel } from "../../data/level";
@@ -81,7 +81,7 @@
     <h1>{getCircuit().name}</h1>
     <ConnectionsComponent></ConnectionsComponent>
 
-    <div class="grid-shell">
+    <div class="grid-shell" style:margin={isViewModeAuthorisedToEdit() ? "0 5em 0 2em" : "auto"}>
         <div class="grid" style:grid-template-columns={columnTemplate}>
             <GroupsComponent groups={getCircuit().groups}></GroupsComponent>
 
