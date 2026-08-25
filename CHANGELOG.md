@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 
 ## Fixed
+- [Everyone] The width of columns is changed to avoid that the circuit extends over the screen width. (@ffiedrich)
 
 ## [2627.0.0]
 
