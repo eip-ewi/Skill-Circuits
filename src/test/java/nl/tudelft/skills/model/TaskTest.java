@@ -29,6 +29,8 @@ public class TaskTest {
 		SCPerson person = new SCPerson();
 		person.getTasksAdded().add(task);
 		person.getTasksRemoved().add(task);
+		task.getPersonsThatAddedTask().add(person);
+		task.getPersonsThatRemovedTask().add(person);
 
 		task.removeFromCustomPaths();
 
