@@ -12,7 +12,7 @@
         getVisibleBlocks,
     } from "../../logic/circuit/circuit.svelte";
     import GroupsComponent from "./group/GroupsComponent.svelte";
-    import { hasEditorRights } from "../../logic/authorisation.svelte";
+    import { hasEditorRights, isViewModeAuthorisedToEdit } from "../../logic/authorisation.svelte";
     import ColumnComponent from "./column/ColumnComponent.svelte";
     import { getPlacedBlocks } from "../../logic/circuit/circuit.svelte.js";
     import { ModuleLevel } from "../../data/level";
@@ -68,7 +68,7 @@
 
     let height = $derived(Math.max(0, ...getBlocks().map(block => block.row ?? 0)) + 1);
     let width = $derived(getCircuit().width ?? 5);
-    let columnTemplate = $derived(`repeat(${width}, minmax(max-content, 1fr))`);
+    let columnTemplate = $derived(`repeat(${width}, 1fr)`);
 </script>
 
 <svelte:window onresize={recalculateBounds} />
@@ -81,7 +81,7 @@
     <h1>{getCircuit().name}</h1>
     <ConnectionsComponent></ConnectionsComponent>
 
-    <div class="grid-shell">
+    <div class="grid-shell" style:margin={isViewModeAuthorisedToEdit() ? "0 5em 0 2em" : "auto"}>
         <div class="grid" style:grid-template-columns={columnTemplate}>
             <GroupsComponent groups={getCircuit().groups}></GroupsComponent>
 
