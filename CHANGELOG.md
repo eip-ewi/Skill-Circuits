@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Fixed
 
+## [2627.0.1]
+
+## Fixed
+- [Student] The button to expand submodules is above the block again. (@ffiedrich)
+- [Everyone] The width of columns is changed to avoid that the circuit extends over the screen width. (@ffiedrich)
+
 ## [2627.0.0]
 
 ## Added

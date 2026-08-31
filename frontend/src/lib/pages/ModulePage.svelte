@@ -17,6 +17,7 @@
         scrollToFirstIncomplete,
     } from "../logic/circuit/unlocked_skills.svelte";
     import PageLayout from "./PageLayout.svelte";
+    import { fetchResearchConsent, fetchResearchInfo } from "../logic/research.svelte";
 
     let { moduleId }: { moduleId: number } = $props();
 
@@ -30,6 +31,8 @@
         await fetchActivePath();
         await fetchPathCustomisation();
         await fetchRevealedSkills();
+        await fetchResearchInfo();
+        await fetchResearchConsent();
         await fetchDevMode();
         if (!canEditCircuit()) {
             setTimeout(() => scrollToFirstIncomplete(), 500);

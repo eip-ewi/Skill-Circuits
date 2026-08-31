@@ -36,5 +36,7 @@
         right: -0.5em;
         top: -0.5em;
         transform-origin: bottom left;
+        /* Must be above blocks */
+        z-index: 3;
     }
 </style>
