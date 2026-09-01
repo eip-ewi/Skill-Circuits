@@ -90,6 +90,6 @@
     .deadline-action:where(:hover, :focus-visible) {
         background-color: var(--option-active-colour);
         color: var(--on-option-active-colour);
-        outline: none;
+        outline: 1px solid var(--default-border-color);
     }
 </style>

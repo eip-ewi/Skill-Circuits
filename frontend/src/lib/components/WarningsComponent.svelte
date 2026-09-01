@@ -5,7 +5,7 @@
     let { warnings }: { warnings: Warning[] } = $props();
 </script>
 
-{#each warnings as warning}
+{#each warnings as warning (warning.type)}
     {#if warning.viewModes.includes(getAuthorisation().viewMode)}
         <div class="warning">
             <span class="fa-solid fa-triangle-exclamation"></span>

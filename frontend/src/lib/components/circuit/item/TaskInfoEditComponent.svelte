@@ -1,18 +1,11 @@
 <script lang="ts">
-    import type { Item } from "../../../dto/circuit/item";
-    import { deleteItem, editItemName } from "../../../logic/circuit/updates/item_updates";
     import TaskTypeEditComponent from "./TaskTypeEditComponent.svelte";
     import TaskTimeEditComponent from "./TaskTimeEditComponent.svelte";
     import TaskLinkEditComponent from "./TaskLinkEditComponent.svelte";
     import TaskDeadlineEditComponent from "./TaskDeadlineEditComponent.svelte";
-    import TaskPathEditComponent from "./TaskPathEditComponent.svelte";
     import type { Snippet } from "svelte";
-    import type { ChoiceTaskChoice, TaskInfo } from "../../../dto/circuit/module/task";
-    import {
-        deleteSubtask,
-        editTaskInfoName,
-        editTaskLink,
-    } from "../../../logic/circuit/updates/task_updates";
+    import type { TaskInfo } from "../../../dto/circuit/module/task";
+    import { deleteSubtask, editTaskInfoName } from "../../../logic/circuit/updates/task_updates";
     import Button from "../../util/Button.svelte";
     import WithConfirmationDialog from "../../util/WithConfirmationDialog.svelte";
     import { getBookmarks, isTaskInfoBookmarked } from "../../../logic/bookmarks.svelte";
@@ -41,7 +34,7 @@
     function dragEnd() {}
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="item" {draggable} ondragstart={dragStart} ondragend={dragEnd}>
     {#if taskInfo.taskType === "choice"}
         <div
@@ -100,7 +93,7 @@
 
     .grip {
         cursor: grab;
-        opacity: 0.5;
+        color: var(--drag-icon-color);
     }
 
     .name {

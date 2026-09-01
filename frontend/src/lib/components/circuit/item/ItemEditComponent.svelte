@@ -1,11 +1,6 @@
 <script lang="ts">
     import type { Item } from "../../../dto/circuit/item";
     import { deleteItem, editItemName } from "../../../logic/circuit/updates/item_updates";
-    import TaskTypeEditComponent from "./TaskTypeEditComponent.svelte";
-    import TaskTimeEditComponent from "./TaskTimeEditComponent.svelte";
-    import TaskLinkEditComponent from "./TaskLinkEditComponent.svelte";
-    import TaskPathEditComponent from "./TaskPathEditComponent.svelte";
-    import type { Snippet } from "svelte";
     import Button from "../../util/Button.svelte";
     import WithConfirmationDialog from "../../util/WithConfirmationDialog.svelte";
 

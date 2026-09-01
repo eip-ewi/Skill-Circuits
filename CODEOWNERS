@@ -4,19 +4,19 @@
 [Experienced developers] @eip/labrador/groups/experienced-developers @mrhug @ffiedrich
 *
 
-[Data model] @eip-core-team @mrhug
+[Data model] @eip-core-team @mrhug @rwbackx
 src/main/java/model/
 src/main/resources/migrations.yaml
 
-[Licences] @eip-core-team @mrhug
+[Licences] @eip-core-team @mrhug @rwbackx
 LICENSE
 LICENSE.header
 LICENSE.header.java
 
-[Configuration] @eip-core-team @mrhug
+[Configuration] @eip-core-team @mrhug @rwbackx
 settings.gradle.kts
 build.gradle.kts
 .gitlab-ci.yml
 
-[Code owners] @eip-core-team @mrhug
+[Code owners] @eip-core-team @mrhug @rwbackx
 CODEOWNERS

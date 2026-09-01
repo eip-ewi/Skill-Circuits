@@ -1,20 +1,12 @@
-import type { Checkpoint } from "../../dto/checkpoint";
 import { withCsrf } from "../csrf";
-import moment from "moment";
-import {
-    getCheckpoints,
-    getEdition,
-    getModule,
-    getModules,
-    getSortedCheckpoints,
-} from "../edition/edition.svelte";
+import { getEdition, getModules } from "../edition/edition.svelte";
 import type { Module } from "../../dto/module";
 import { getCircuit } from "../circuit/circuit.svelte";
 import { isLevel } from "../circuit/level.svelte";
 import { EditionLevel } from "../../data/level";
 
 export async function createModule(): Promise<Module | undefined> {
-    let response = await fetch(
+    const response = await fetch(
         `/api/modules`,
         withCsrf({
             method: "POST",
@@ -31,7 +23,7 @@ export async function createModule(): Promise<Module | undefined> {
     );
 
     if (response.ok) {
-        let module = await response.json();
+        const module = await response.json();
         if (isLevel(EditionLevel)) {
             getCircuit().groups.push(module);
         }
@@ -42,13 +34,13 @@ export async function createModule(): Promise<Module | undefined> {
 }
 
 export async function editModuleName(module: Module, newName: string) {
-    let oldName = module.name;
+    const oldName = module.name;
     module.name = newName;
     if (isLevel(EditionLevel)) {
         getCircuit().groups.find(g => g.id === module.id)!.name = newName;
     }
 
-    let response = await fetch(
+    const response = await fetch(
         `/api/modules/${module.id}`,
         withCsrf({
             method: "PATCH",
@@ -70,7 +62,7 @@ export async function editModuleName(module: Module, newName: string) {
 }
 
 export async function deleteModule(module: Module) {
-    let response = await fetch(
+    const response = await fetch(
         `/api/modules/${module.id}`,
         withCsrf({
             method: "DELETE",

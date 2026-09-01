@@ -1,19 +1,13 @@
 <script lang="ts">
-    import type { EditionCircuit } from "../dto/circuit/edition/edition";
     import CircuitComponent from "../components/circuit/CircuitComponent.svelte";
     import WarningsComponent from "../components/WarningsComponent.svelte";
     import type { Warning } from "../data/warning";
     import { setLevel } from "../logic/circuit/level.svelte";
-    import { EditionLevel, ModuleLevel } from "../data/level";
+    import { ModuleLevel } from "../data/level";
     import { canEditCircuit, toggleViewMode } from "../logic/authorisation.svelte";
     import type { ModuleCircuit } from "../dto/circuit/module/module";
     import { fetchDevMode, getDevMode } from "../logic/dev_mode.svelte";
-    import {
-        circuitFetched,
-        fetchCircuit,
-        getBlocks,
-        getCircuit,
-    } from "../logic/circuit/circuit.svelte";
+    import { circuitFetched, fetchCircuit, getCircuit } from "../logic/circuit/circuit.svelte";
     import SideControlsComponent from "../components/side_controls/SideControlsComponent.svelte";
     import ChoosePathComponent from "../components/ChoosePathComponent.svelte";
     import { fetchActivePath, fetchPathCustomisation } from "../logic/edition/active_path.svelte";
@@ -23,6 +17,7 @@
         scrollToFirstIncomplete,
     } from "../logic/circuit/unlocked_skills.svelte";
     import PageLayout from "./PageLayout.svelte";
+    import { fetchResearchConsent, fetchResearchInfo } from "../logic/research.svelte";
 
     let { moduleId }: { moduleId: number } = $props();
 
@@ -36,6 +31,8 @@
         await fetchActivePath();
         await fetchPathCustomisation();
         await fetchRevealedSkills();
+        await fetchResearchInfo();
+        await fetchResearchConsent();
         await fetchDevMode();
         if (!canEditCircuit()) {
             setTimeout(() => scrollToFirstIncomplete(), 500);

@@ -5,12 +5,7 @@
     import { setLevel } from "../logic/circuit/level.svelte";
     import { EditionLevel } from "../data/level";
     import { fetchCircuit, getCircuit, initModuleGraphs } from "../logic/circuit/circuit.svelte";
-    import {
-        fetchAuthorisation,
-        getAuthorisation,
-        toggleViewMode,
-        canEditCircuit,
-    } from "../logic/authorisation.svelte";
+    import { toggleViewMode, canEditCircuit } from "../logic/authorisation.svelte";
     import { fetchDevMode } from "../logic/dev_mode.svelte";
     import SideControlsComponent from "../components/side_controls/SideControlsComponent.svelte";
     import ChoosePathComponent from "../components/ChoosePathComponent.svelte";
@@ -21,6 +16,8 @@
     import Tab from "../components/util/Tab.svelte";
     import { getDevMode } from "../logic/dev_mode.svelte.js";
     import { fetchRevealedSkills } from "../logic/circuit/unlocked_skills.svelte";
+    import ResearchConsentComponent from "../components/research/ResearchConsentComponent.svelte";
+    import { fetchResearchConsent, fetchResearchInfo } from "../logic/research.svelte";
 
     let { editionId }: { editionId: number } = $props();
 
@@ -31,11 +28,15 @@
 
     async function load() {
         await fetchEdition(editionId);
-        await fetchCircuit(`/api/editions/${editionId}/circuit`);
-        await fetchActivePath();
-        await fetchPathCustomisation();
-        await fetchRevealedSkills();
-        await fetchDevMode();
+        await Promise.all([
+            fetchCircuit(`/api/editions/${editionId}/circuit`),
+            fetchActivePath(),
+            fetchPathCustomisation(),
+            fetchRevealedSkills(),
+            fetchResearchInfo(),
+            fetchResearchConsent(),
+            fetchDevMode(),
+        ]);
 
         finishedLoad = true;
     }
@@ -78,5 +79,6 @@
         {/key}
         <SideControlsComponent></SideControlsComponent>
         <ChoosePathComponent></ChoosePathComponent>
+        <ResearchConsentComponent></ResearchConsentComponent>
     {/await}
 </PageLayout>

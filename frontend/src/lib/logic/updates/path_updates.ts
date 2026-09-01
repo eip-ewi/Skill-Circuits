@@ -4,7 +4,7 @@ import type { Path } from "../../dto/path";
 import { getEdition, getPaths } from "../edition/edition.svelte";
 
 export async function createPath(): Promise<Path | undefined> {
-    let response = await fetch(
+    const response = await fetch(
         `/api/paths`,
         withCsrf({
             method: "POST",
@@ -22,11 +22,11 @@ export async function createPath(): Promise<Path | undefined> {
     );
 
     if (response.ok) {
-        let path = await response.json();
+        const path = await response.json();
 
         getPaths().push(path);
 
-        let circuit = getCircuit();
+        const circuit = getCircuit();
         if (circuit.circuitType === "module") {
             circuit.groups.forEach(group =>
                 group.blocks.forEach(block =>
@@ -41,10 +41,10 @@ export async function createPath(): Promise<Path | undefined> {
 }
 
 export async function editPathName(path: Path, newName: string) {
-    let oldName = path.name;
+    const oldName = path.name;
     path.name = newName;
 
-    let response = await fetch(
+    const response = await fetch(
         `/api/paths/${path.id}`,
         withCsrf({
             method: "PATCH",
@@ -63,10 +63,10 @@ export async function editPathName(path: Path, newName: string) {
 }
 
 export async function editPathDescription(path: Path, newDescription: string) {
-    let oldDescription = path.description;
+    const oldDescription = path.description;
     path.description = newDescription;
 
-    let response = await fetch(
+    const response = await fetch(
         `/api/paths/${path.id}`,
         withCsrf({
             method: "PATCH",
@@ -85,7 +85,7 @@ export async function editPathDescription(path: Path, newDescription: string) {
 }
 
 export async function deletePath(path: Path) {
-    let response = await fetch(
+    const response = await fetch(
         `/api/paths/${path.id}`,
         withCsrf({
             method: "DELETE",
@@ -95,7 +95,7 @@ export async function deletePath(path: Path) {
     if (response.ok) {
         getPaths().splice(getPaths().findIndex(p => p.id === path.id)!, 1);
 
-        let circuit = getCircuit();
+        const circuit = getCircuit();
         if (circuit.circuitType === "module") {
             circuit.groups.forEach(group =>
                 group.blocks.forEach(block =>

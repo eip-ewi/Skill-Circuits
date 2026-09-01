@@ -16,7 +16,7 @@
 </script>
 
 <div class="tasks" style="--columns: {hideBookmark === true ? 3 : 4}">
-    {#each tasks as task}
+    {#each tasks as task (task.id)}
         {#if task.taskType === "regular"}
             <TaskComponent {task} {hideBookmark} {reserveDeadlineSpace}></TaskComponent>
         {:else}

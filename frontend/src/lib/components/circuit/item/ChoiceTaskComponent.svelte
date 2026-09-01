@@ -1,19 +1,10 @@
 <script lang="ts">
-    import type { ChoiceTaskItem, TaskInfo, TaskItem } from "../../../dto/circuit/module/task";
-    import { withCsrf } from "../../../logic/csrf";
-    import { TaskIcons } from "../../../dto/task_icons";
-    import { toggleTaskCompletion } from "../../../logic/circuit/updates/task_updates";
+    import type { ChoiceTaskItem } from "../../../dto/circuit/module/task";
     import TaskComponent from "./TaskComponent.svelte";
-    import {
-        getBookmarks,
-        isChoiceTaskBookmarked,
-        isTaskInfoBookmarked,
-    } from "../../../logic/bookmarks.svelte";
+    import { getBookmarks, isChoiceTaskBookmarked } from "../../../logic/bookmarks.svelte";
     import {
         addChoiceTaskToBookmarkList,
-        addTaskInfoToBookmarkList,
         removeChoiceTaskFromBookmarkList,
-        removeTaskInfoFromBookmarkList,
     } from "../../../logic/updates/bookmark_updates";
     import BookmarkMenuComponent from "../../bookmark/BookmarkMenuComponent.svelte";
     import Button from "../../util/Button.svelte";
@@ -39,7 +30,7 @@
         event.dataTransfer!.setData("skill-circuits/item", task.id.toString());
     }
 
-    function dragEnd(event: DragEvent) {}
+    function dragEnd(_event: DragEvent) {}
 </script>
 
 <div class="task" class:with-bookmark={!hideBookmark} data-completed={isTaskCompleted(task)}>
@@ -128,7 +119,7 @@
         grid-column: 1 / 5;
     }
 
-    .task[data-completed="true"] {
+    .task[data-completed="true"]::before {
         outline: 2px solid var(--choice-task-completed-outline-colour);
     }
 
@@ -164,6 +155,6 @@
     .grip {
         cursor: grab;
         margin-right: 0.25em;
-        opacity: 0.5;
+        color: var(--drag-icon-color);
     }
 </style>

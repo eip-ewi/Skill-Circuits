@@ -88,14 +88,14 @@
 
     $effect(() => {
         // Recalculate when any of the following change
-        block.column;
-        block.row;
-        block.state;
+        void block.column;
+        void block.row;
+        void block.state;
         hasEditorRights();
         getBlocks()
             .filter(upperBlock => upperBlock.row! < block.row!)
             .forEach(upperBlock => {
-                upperBlock.state;
+                void upperBlock.state;
             });
 
         recalculateBounds();
@@ -219,7 +219,7 @@
                 <span class="icon fa-solid fa-location-dot"></span>
                 <span>
                     Go to skill
-                    <span class="scroll-to-name">{" "}"{block.name}"</span>
+                    <span class="scroll-to-name">"{block.name}"</span>
                 </span>
             </button>
         </div>
@@ -259,7 +259,7 @@
         {:else if block.state === BlockStates.AssigningPaths && block.blockType === "skill"}
             <BlockAssignPathsComponent skill={block}></BlockAssignPathsComponent>
         {:else}
-            <BlockContentComponent {block}></BlockContentComponent>
+            <BlockContentComponent {block} {completed}></BlockContentComponent>
         {/if}
     </div>
 
@@ -322,6 +322,8 @@
         transition:
             filter ease-in-out 150ms,
             box-shadow ease-in-out 150ms;
+        /* Must be above SVG lines */
+        z-index: 2;
     }
 
     .block[data-wiggle="true"] {
@@ -393,6 +395,7 @@
 
     .scroll-to-pulse-button:where(:focus-visible, :hover) {
         background: var(--on-glass-surface-active-colour);
+        outline: 1px solid var(--default-border-color);
     }
 
     .scroll-to-pulse-button .icon {

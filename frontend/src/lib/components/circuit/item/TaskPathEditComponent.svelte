@@ -33,7 +33,7 @@
                 </Button>
             </div>
         {/snippet}
-        {#each getPaths() as path}
+        {#each getPaths() as path (path.id)}
             <option value={path.id} selected={task.paths.includes(path.id)}>{path.name}</option>
         {/each}
     </Select>

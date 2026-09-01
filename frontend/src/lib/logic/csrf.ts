@@ -1,13 +1,10 @@
 export function withCsrf(request: RequestInit): RequestInit {
-    let csrfHeader = document.querySelector("meta[name='csrf-header']")!.getAttribute("value")!;
-    let csrfToken = document.querySelector("meta[name='csrf-token']")!.getAttribute("value")!;
+    const csrfHeader = document.querySelector("meta[name='csrf-header']")!.getAttribute("value")!;
+    const csrfToken = document.querySelector("meta[name='csrf-token']")!.getAttribute("value")!;
 
-    if (!("headers" in request)) {
-        request.headers = {};
-    }
-
-    // @ts-ignore
-    request.headers[csrfHeader] = csrfToken;
+    const headers = new Headers(request.headers);
+    headers.set(csrfHeader, csrfToken);
+    request.headers = headers;
 
     return request;
 }

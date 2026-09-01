@@ -1,7 +1,7 @@
 import type { Person } from "../dto/person";
 
 let authenticatedPerson: Person | undefined = $state();
-let authenticated: boolean = $derived(authenticatedPerson !== undefined);
+const authenticated: boolean = $derived(authenticatedPerson !== undefined);
 
 export function isAuthenticated() {
     return authenticated;
