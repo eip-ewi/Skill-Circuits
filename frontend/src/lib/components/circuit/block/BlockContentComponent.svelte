@@ -59,7 +59,7 @@
 </div>
 
 <div
-        style={focusModeState === FocusModeBlockStates.DisabledInFocusMode ? "visibility: hidden" : ""}>
+    style={focusModeState === FocusModeBlockStates.DisabledInFocusMode ? "visibility: hidden" : ""}>
     {#if block.blockType === "skill"}
         <TaskIconsComponent tasks={getItemsOnPath(block)}></TaskIconsComponent>
     {:else if hasEditorRights()}
