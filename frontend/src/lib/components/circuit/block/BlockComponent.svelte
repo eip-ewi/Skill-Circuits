@@ -29,10 +29,20 @@
     import { getBlurBlocks } from "../../../logic/preferences.svelte";
     import ExpandedSubmoduleComponent from "../../expanded_submodule/ExpandedSubmoduleComponent.svelte";
     import type { SubmoduleBlock } from "../../../dto/circuit/edition/submodule";
+    import FocusModeButtonsComponent from "./FocusModeButtonsComponent.svelte";
+    import {
+        type FocusModeBlockState,
+        FocusModeBlockStates,
+        isVisibleAndInFocusMode,
+    } from "../../../data/focus_mode_block_state";
+    import { getFocusModeState } from "../../../logic/circuit/focusMode.svelte";
 
     let { block }: { block: Block } = $props();
 
-    let locked: boolean = $derived(!hasEditorRights() && !isUnlocked(block));
+    let focusModeState: FocusModeBlockState = $derived(getFocusModeState(block.id));
+    let locked: boolean = $derived(
+        !hasEditorRights() && !isUnlocked(block) && !isVisibleAndInFocusMode(focusModeState),
+    );
     let completed: boolean = $derived(!hasEditorRights() && isCompleted(block));
     let clickable: boolean = $derived(
         (!hasEditorRights() || !isLevel(ModuleLevel)) &&
@@ -237,8 +247,10 @@
         data-clickable={clickable}
         data-wiggle={block.state === BlockStates.Dragging}
         data-unfocus={unfocused}
-        data-pulse={block.state === BlockStates.Connecting}
+        data-pulse={block.state === BlockStates.Connecting ||
+            focusModeState === FocusModeBlockStates.FocusOnBlock}
         data-hidden={hidden}
+        data-focus-mode-hidden={focusModeState === FocusModeBlockStates.DisabledInFocusMode}
         onclick={click}
         onmouseenter={mouseEnterBlock}
         onmouseleave={mouseLeaveBlock}>
@@ -254,6 +266,9 @@
     <div class="controls">
         {#if block.blockType === "skill" && !block.external && (block.state === BlockStates.Hovering || isSkillBookmarked(block))}
             <BookmarkSkillButtonComponent bind:action skill={block}></BookmarkSkillButtonComponent>
+        {/if}
+        {#if block.blockType === "skill" && (block.state === BlockStates.Hovering || focusModeState === FocusModeBlockStates.FocusOnBlock) && !hasEditorRights()}
+            <FocusModeButtonsComponent bind:action {block}></FocusModeButtonsComponent>
         {/if}
         {#if (block.blockType !== "skill" || block.external) && !hasEditorRights()}
             {#if block.state === BlockStates.Hovering}
@@ -347,6 +362,10 @@
     }
     .block[data-clickable="true"] {
         cursor: pointer;
+    }
+
+    .block[data-focus-mode-hidden="true"] {
+        opacity: 0.3;
     }
 
     .scroll-to-pulse-container {

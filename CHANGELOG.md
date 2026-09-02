@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## Added
+- [Everyone] Add a "focus mode" for blocks that displays requirements and dependencies of a block up until a certain depth. (@ffiedrich)
 
 ## Changed
 

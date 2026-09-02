@@ -87,6 +87,14 @@
         <span class="fa-solid fa-bookmark"></span>
         <span>Bookmark</span>
     {/if}
+    {#if action === BlockActions.FocusMode}
+        <span class="fa-solid fa-eye"></span>
+        <span>Focus on skill</span>
+    {/if}
+    {#if action === BlockActions.StopFocusMode}
+        <i class="fa-solid fa-eye-slash"></i>
+        <span>Exit focus mode</span>
+    {/if}
 </div>
 
 <style>

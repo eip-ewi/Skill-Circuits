@@ -8,6 +8,8 @@
     import { getCircuit } from "../../../logic/circuit/circuit.svelte";
     import { onMount, tick } from "svelte";
     import { getBlurBlocks } from "../../../logic/preferences.svelte";
+    import { getFocusModeState, isInFocusMode } from "../../../logic/circuit/focusMode.svelte";
+    import { isVisibleAndInFocusMode } from "../../../data/focus_mode_block_state";
 
     let { from, to }: { from: Block; to: Block } = $props();
 
@@ -17,6 +19,13 @@
                 isCompleted(from) ||
                 (isUnlocked(from) && from.blockType === "skill" && !from.essential)
             ),
+    );
+    let visibleAndInFocusMode: boolean = $derived(
+        isVisibleAndInFocusMode(getFocusModeState(from.id)) &&
+            isVisibleAndInFocusMode(getFocusModeState(to.id)),
+    );
+    let disabledAndInFocusMode: boolean = $derived(
+        !locked && isInFocusMode() && !visibleAndInFocusMode,
     );
     let animated: boolean = $state(false);
 
@@ -70,8 +79,9 @@
             xmlns="http://www.w3.org/2000/svg"
             class="line"
             d={generatePathString(path, radius)}
-            data-locked={locked && getBlurBlocks()}
-            data-preview={to.preview === true && locked}
+            data-locked={locked && getBlurBlocks() && !visibleAndInFocusMode}
+            data-disabled-in-focus-mode={disabledAndInFocusMode}
+            data-preview={to.preview === true && locked && !visibleAndInFocusMode}
             bind:this={element}
             data-animate={animated} />
     {/if}
@@ -88,7 +98,7 @@
             opacity ease-in-out 150ms;
     }
 
-    path:hover {
+    path[data-disabled-in-focus-mode="false"]:hover {
         stroke: var(--connection-highlighted-colour);
         stroke-width: var(--connection-highlighted-width);
     }
@@ -108,6 +118,10 @@
 
     path[data-preview="true"] {
         opacity: 0.3;
+    }
+
+    path[data-disabled-in-focus-mode="true"] {
+        opacity: 0.2;
     }
 
     @keyframes draw {

@@ -12,6 +12,8 @@ export const BlockActions = {
     CancelLink: "cancel link",
     StopEdit: "stop edit",
     Bookmark: "bookmark",
+    FocusMode: "focus mode",
+    StopFocusMode: "stop focus mode",
 } as const;
 
 export type BlockAction = (typeof BlockActions)[keyof typeof BlockActions];
