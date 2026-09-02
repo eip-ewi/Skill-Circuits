@@ -13,10 +13,7 @@
     let rafId: number | undefined;
     let viewport: VisualViewport | null | undefined;
 
-    // Keep the (top-layer, position: fixed) dropdown aligned to its anchor. Positions are in
-    // viewport coordinates, so they must be recomputed whenever the surrounding content scrolls
-    // or the window resizes — otherwise the dropdown stays where it was first opened.
-    function reposition() {
+    function alignDropdownToAchor() {
         if (dropdown?.showPopover === undefined) {
             return;
         }
@@ -41,12 +38,7 @@
 
     $effect(() => {
         if (!open) {
-            dropdown.hidePopover?.();
-            dropdown.style.removeProperty("left");
-            dropdown.style.removeProperty("top");
-            return;
-        }
-        if (dropdown.showPopover === undefined) {
+            dropdown.hidePopover.();
             return;
         }
         dropdown.showPopover();
