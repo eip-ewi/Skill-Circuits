@@ -25,7 +25,7 @@
         dropdown.style.top = `${a.bottom}px`;
     }
 
-    // Coalesce bursts of scroll/resize events into one reposition per frame.
+    // Batch bursts of scroll/resize events into one reposition per frame.
     function scheduleReposition() {
         if (rafId !== undefined) {
             return;
@@ -46,13 +46,11 @@
         viewport = window.visualViewport;
         // Capture phase so scrolling inside nested scroll containers is caught (scroll doesn't bubble).
         window.addEventListener("scroll", scheduleReposition, true);
-        document.addEventListener("scroll", scheduleReposition, true);
         window.addEventListener("resize", scheduleReposition);
         viewport?.addEventListener("scroll", scheduleReposition);
         viewport?.addEventListener("resize", scheduleReposition);
         return () => {
             window.removeEventListener("scroll", scheduleReposition, true);
-            document.removeEventListener("scroll", scheduleReposition, true);
             window.removeEventListener("resize", scheduleReposition);
             viewport?.removeEventListener("scroll", scheduleReposition);
             viewport?.removeEventListener("resize", scheduleReposition);
