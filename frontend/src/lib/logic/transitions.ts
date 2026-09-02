@@ -2,17 +2,17 @@ import { cubicInOut, linear } from "svelte/easing";
 import type { Point } from "../data/point";
 import type { Block } from "../dto/circuit/block";
 
-export function openExpandedBlockTransition(element: Element, params: { block: Block }) {
+export function openExpandedBlockTransition(_element: Element, params: { block: Block }) {
     return {
         duration: 300,
         easing: linear,
         css: (t: number) => {
-            let t3 = cubicInOut(t);
-            let start: Point = {
+            const t3 = cubicInOut(t);
+            const start: Point = {
                 x: params.block.boundingRect!().left + params.block.boundingRect!().width / 2,
                 y: params.block.boundingRect!().top + params.block.boundingRect!().height / 2,
             };
-            let position = {
+            const position = {
                 x: `calc(${start.x * (1 - t3)}px + ${50 * t3}vw - ${50 * t3}%)`,
                 y: `calc(${start.y * (1 - t3)}px + ${50 * t3}vh - ${50 * t3}%)`,
             };

@@ -137,17 +137,19 @@
         display: grid;
         gap: 0.5em;
         grid-template-columns: 1fr 1fr;
-        right: 0.5em;
+        right: 0.35em;
         padding: 1.5em 1.5em 1.5em 1em;
         position: absolute;
         top: 50%;
         transform-origin: left;
         translate: 100% -50%;
+        /* Must be above blocks */
+        z-index: 3;
     }
 
     .controls[data-side="left"] {
         direction: rtl;
-        left: 0.5em;
+        left: 0.35em;
         right: initial;
         padding: 1.5em 1em 1.5em 1.5em;
         translate: -100% -50%;

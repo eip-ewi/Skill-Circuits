@@ -12,20 +12,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## Added
-- [Everyone] A legend that shows what each task symbol means. (@ogangalic)
-- [Teacher] Add task table overview page for editions. (@ffiedrich)
-- [Teacher] Column management has a UI interface. (@ralani)
-- [Everyone] Tasks can have deadlines. (@ralani)
+- [Everyone] Add a "focus mode" for blocks that displays requirements and dependencies of a block up until a certain depth. (@ffiedrich)
 
 ## Changed
-- [Student] Optional skills are now marked as optional in the expanded submodule view. (@ffiedrich)
 
 ## Fixed
 - [Teacher] Task edit components are now fixed in place when scrolling. (@ogangalic)
-- [Student] When in the submodule view, the skills are now sorted. (@ogangalic)
-- [Developers] The devtools error when logging in and the state mutation warning. (@ogangalic)
--[Student] Optional skills are skipped for the completion state of submodules and checkpoints. Separate optional skill counters are displayed on the edition page. (@ffiedrich)
-- [Everyone] When scrolling on the extended view of the block the circuit page doesn't scroll (@ogangalic)
+
+## [2627.0.1]
+
+## Fixed
+- [Student] The button to expand submodules is above the block again. (@ffiedrich)
+- [Everyone] The width of columns is changed to avoid that the circuit extends over the screen width. (@ffiedrich)
+
+## [2627.0.0]
+
+## Added
+- [Everyone] A legend was added to circuit pages showing what each symbol on the page means. (@ogangalic)
+- [Teacher] A new tab was added with an overview of all tasks in an edition, including their links, which can be edited directly from this page. (@ffiedrich)
+- [Teacher] Columns can now be deleted and added anywhere. (@ralani)
+- [Editor] When editing a link, the user can press 'escape' and and click outside to stop editing. (@ogangalic)
+- [Everyone] Tasks can now have deadlines. 
+  This gives editors more fine-grained control to manage their courses. 
+  For example, rather than a skill having a deadline because it must be done before a lecture, the lecture can be modeled as a task with a deadline with all dependencies as actual dependencies. (@ralani)
+- [Teacher] Tasks can be filtered by links and other properties the edition task list. (@ffiedrich)
+- [Editor] Editors can now see the total time needed for the completion of checkpoints.
+  This gives editors more insight into how much time they are expecting students to put into their course. (@ogangalic)
+- [Everyone] Dark and light high-contrast themes have been added. (@ffiedrich)
+- [Student] A setting has been added that adds additional icons to signify completion, in addition to the colour change. (@ffiedrich)
+- [Teacher] A research consent form can be configured per course edition. This is useful for teachers and researchers wish to use Skill Circuits usage data for their research. (@rwbackx)
+
+## Changed
+- [Everyone] Logging in again after a session expired happens in a separate window that closes itself, updated all opened tabs without a refresh. (@ralani)
+- [Student] Optional skills are now marked as optional in the expanded submodule view. (@ffiedrich)
+
+## Fixed
+- [Student] When in the submodule view, the skills appeared in a random order. (@ogangalic)
+- [Developers] Several errors in the development console. (@ogangalic)
+- [Student] Optional skills were required to complete submodules and checkpoints. (@ffiedrich) 
+- [Student] Optional skills were included in the completed counts on the edition page. This counter has been separated into a 'required' and an 'optional' count. (@ffiedrich)
+- [Student] Session credentials expiration is tracked correctly. (@ralani)
+- [Everyone] Connections between submodules and skills were not highlighted on hover. (@ffiedrich)
 
 ## [2526.2.1]
 
@@ -36,6 +63,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Fixed
 - [Student] Page redirects from external skills or bookmarked skills work as intended. (@ralani)
 
+- [Student] When in the submodule view, the skills are now sorted. (@ogangalic)
+- [Student] Session credentials expiration is tracked correctly. (@ralani)
 ## [2526.2.0]
 
 ## Added 

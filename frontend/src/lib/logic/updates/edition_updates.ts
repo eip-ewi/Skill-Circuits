@@ -1,17 +1,5 @@
-import type { Checkpoint } from "../../dto/checkpoint";
 import { withCsrf } from "../csrf";
-import moment from "moment";
-import {
-    getCheckpoints,
-    getEdition,
-    getModule,
-    getModules,
-    getSortedCheckpoints,
-} from "../edition/edition.svelte";
-import type { Module } from "../../dto/module";
-import { getCircuit } from "../circuit/circuit.svelte";
-import { isLevel } from "../circuit/level.svelte";
-import { EditionLevel } from "../../data/level";
+import { getEdition } from "../edition/edition.svelte";
 import { loadPage } from "../routing.svelte";
 
 export async function setEditionVisibility(newVisibility: boolean) {
@@ -21,7 +9,7 @@ export async function setEditionVisibility(newVisibility: boolean) {
 
     getEdition().published = newVisibility;
 
-    let response = await fetch(
+    const response = await fetch(
         `/api/editions/${getEdition().id}`,
         withCsrf({
             method: "PATCH",
@@ -40,7 +28,7 @@ export async function setEditionVisibility(newVisibility: boolean) {
 }
 
 export async function resetProgress() {
-    let response = await fetch(
+    const response = await fetch(
         `/api/editions/${getEdition().id}/reset-progress`,
         withCsrf({
             method: "POST",
@@ -53,7 +41,7 @@ export async function resetProgress() {
 }
 
 export async function copyEdition(toEdition: number) {
-    let response = await fetch(
+    const response = await fetch(
         `/api/editions/${getEdition().id}/copy-to/${toEdition}`,
         withCsrf({
             method: "POST",

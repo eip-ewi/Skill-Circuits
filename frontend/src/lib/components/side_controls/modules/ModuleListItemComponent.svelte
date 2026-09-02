@@ -1,11 +1,4 @@
 <script lang="ts">
-    import moment from "moment";
-    import type { Checkpoint } from "../../../dto/checkpoint";
-    import {
-        deleteCheckpoint,
-        editCheckpointDeadline,
-        editCheckpointName,
-    } from "../../../logic/updates/checkpoint_updates";
     import type { Module } from "../../../dto/module";
     import { deleteModule, editModuleName } from "../../../logic/updates/module_updates";
     import Button from "../../util/Button.svelte";
@@ -88,7 +81,7 @@
         color: var(--link-colour);
         font-size: var(--font-size-400);
         font-weight: 500;
-        text-decoration: none;
+        text-decoration-line: var(--link-text-decoration);
     }
 
     .module .info :first-child:where(:hover, :focus-visible) {

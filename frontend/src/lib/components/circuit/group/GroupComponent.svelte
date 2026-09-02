@@ -1,11 +1,10 @@
 <script lang="ts">
-    import type { Group } from "../../../dto/circuit/group";
     import type { Blob } from "../../../data/blob";
 
     let { blob }: { blob: Blob } = $props();
 </script>
 
-{#each blob.allocations as alloc}
+{#each blob.allocations as alloc (`${alloc.point.x}:${alloc.point.y}`)}
     <div
         class="group-wrapper"
         style:grid-column={alloc.point.x + 1}
@@ -33,7 +32,17 @@
             <div class="connector" data-connect="bottom-right"></div>
             <div class="connector" data-connect="bottom-left"></div>
             <div class="connector" data-connect="top-left"></div>
-
+        </div>
+        <div
+            class="outer-corners"
+            data-connect-top={alloc.neighbours.top}
+            data-connect-right={alloc.neighbours.right}
+            data-connect-bottom={alloc.neighbours.bottom}
+            data-connect-left={alloc.neighbours.left}
+            data-connect-top-right={alloc.neighbours.topRight}
+            data-connect-bottom-right={alloc.neighbours.bottomRight}
+            data-connect-bottom-left={alloc.neighbours.bottomLeft}
+            data-connect-top-left={alloc.neighbours.topLeft}>
             <div class="outer-corner" data-connect="top-right"></div>
             <div class="outer-corner" data-connect="bottom-right"></div>
             <div class="outer-corner" data-connect="bottom-left"></div>
@@ -53,10 +62,20 @@
     .group {
         background-color: var(--group-colour);
         border: 1px solid var(--group-border-colour);
-        width: calc(100% + 4em);
-        height: calc(100% + 4em);
+        width: calc(100% + 4em + 2px);
+        height: calc(100% + 4em + 2px);
         margin: -2em -2em;
         position: relative;
+        /*Justification: non iteractable should be lower than the SVG lines*/
+        z-index: -2;
+    }
+
+    .outer-corners {
+        width: calc(100% + 4em + 2px);
+        height: calc(100% + 4em + 2px);
+        position: relative;
+        top: calc(-1 * 100% - 2px - 2em);
+        left: calc(-2em);
         /*Justification: non iteractable should be lower than the SVG lines*/
         z-index: -1;
     }
@@ -86,137 +105,144 @@
     }
 
     .group[data-connect-top="true"] {
-        border-top: none;
+        border-top-color: var(--group-colour);
     }
     .group[data-connect-right="true"] {
-        border-right: none;
+        border-right-color: var(--group-colour);
     }
     .group[data-connect-bottom="true"] {
-        border-bottom: none;
+        border-bottom-color: var(--group-colour);
     }
     .group[data-connect-left="true"] {
-        border-left: none;
+        border-left-color: var(--group-colour);
     }
 
     .connector {
         background: var(--group-colour);
-        border: 1px solid var(--group-border-colour);
+        border: 1px solid var(--group-colour);
         display: none;
         position: absolute;
     }
 
     .group[data-connect-top="true"] .connector[data-connect="top"] {
-        border-bottom: none;
-        border-top: none;
+        border-left-color: var(--group-border-colour);
+        border-right-color: var(--group-border-colour);
         display: initial;
         left: -1px;
-        height: 2em;
-        top: -2em;
         width: calc(100% + 2px);
+        height: calc(2em + 2px);
+        top: calc(-2em - 1px);
     }
     .group[data-connect-right="true"] .connector[data-connect="right"] {
-        border-left: none;
-        border-right: none;
+        border-bottom-color: var(--group-border-colour);
+        border-top-color: var(--group-border-colour);
         display: initial;
         height: calc(100% + 2px);
-        right: -1em;
+        right: calc(-1em - 1px);
         top: -1px;
-        width: 1em;
+        width: calc(1em + 2px);
     }
     .group[data-connect-bottom="true"] .connector[data-connect="bottom"] {
-        border-bottom: none;
-        border-top: none;
+        border-left-color: var(--group-border-colour);
+        border-right-color: var(--group-border-colour);
         display: initial;
         left: -1px;
-        height: 2em;
-        bottom: -2em;
+        height: calc(2em + 2px);
+        bottom: calc(-2em - 1px);
         width: calc(100% + 2px);
     }
     .group[data-connect-left="true"] .connector[data-connect="left"] {
-        border-left: none;
-        border-right: none;
+        border-bottom-color: var(--group-border-colour);
+        border-top-color: var(--group-border-colour);
         display: initial;
         height: calc(100% + 2px);
-        left: -1em;
+        left: calc(-1em - 1px);
         top: -1px;
-        width: 1em;
+        width: calc(1em + 2px);
     }
 
     .group[data-connect-top="true"][data-connect-right="true"][data-connect-top-right="true"]
         .connector[data-connect="top-right"] {
-        border: none;
         display: initial;
-        height: 2em;
-        right: -1em;
-        top: -2em;
-        width: 1em;
+        height: calc(2em + 2px);
+        right: calc(-1em - 1px);
+        top: calc(-2em - 1px);
+        width: calc(1em + 2px);
     }
     .group[data-connect-bottom="true"][data-connect-right="true"][data-connect-bottom-right="true"]
         .connector[data-connect="bottom-right"] {
-        border: none;
-        bottom: -2em;
+        bottom: calc(-2em - 1px);
         display: initial;
-        height: 2em;
-        right: -1em;
-        width: 1em;
+        height: calc(2em + 2px);
+        right: calc(-1em - 1px);
+        width: calc(1em + 2px);
     }
     .group[data-connect-bottom="true"][data-connect-left="true"][data-connect-bottom-left="true"]
         .connector[data-connect="bottom-left"] {
-        border: none;
-        bottom: -2em;
+        bottom: calc(-2em - 1px);
         display: initial;
-        height: 2em;
-        left: -1em;
-        width: 1em;
+        height: calc(2em + 2px);
+        left: calc(-1em - 1px);
+        width: calc(1em + 2px);
     }
     .group[data-connect-top="true"][data-connect-left="true"][data-connect-top-left="true"]
         .connector[data-connect="top-left"] {
-        border: none;
         display: initial;
-        height: 2em;
-        left: -1em;
-        top: -2em;
-        width: 1em;
+        height: calc(2em + 2px);
+        left: calc(-1em - 1px);
+        top: calc(-2em - 1px);
+        width: calc(1em + 2px);
     }
 
     .outer-corner {
-        background-image: radial-gradient(
-            circle at 100% 100%,
-            transparent var(--group-border-radius),
-            var(--group-colour) calc(var(--group-border-radius) + 1px)
-        );
         display: none;
-        height: var(--group-border-radius);
         position: absolute;
-        width: var(--group-border-radius);
+        height: calc(var(--group-border-radius));
+        width: calc(var(--group-border-radius));
+        background-color: var(--group-colour);
+        border-bottom-right-radius: calc(var(--group-border-radius));
+        border-top: 2px solid var(--group-colour);
+        border-left: 2px solid var(--group-colour);
     }
 
-    .group[data-connect-top="true"][data-connect-right="true"][data-connect-top-right="false"]
+    .outer-corner::after {
+        position: absolute;
+        content: "";
+        height: calc(var(--group-border-radius));
+        width: calc(var(--group-border-radius));
+        border-top-left-radius: calc(var(--group-border-radius));
+        background-color: var(--background-colour);
+        border: 1px solid var(--default-border-color);
+        border-right: none;
+        border-bottom: none;
+    }
+
+    .outer-corners[data-connect-top="true"][data-connect-right="true"][data-connect-top-right="false"]
         .outer-corner[data-connect="top-right"] {
         display: initial;
-        right: calc(-1 * var(--group-border-radius));
-        top: calc(-1 * var(--group-border-radius));
+        right: calc(-1 * var(--group-border-radius) + 2px);
+        top: calc(-1 * var(--group-border-radius) + 2px);
         transform: rotate(270deg);
     }
-    .group[data-connect-bottom="true"][data-connect-right="true"][data-connect-bottom-right="false"]
+    .outer-corners[data-connect-bottom="true"][data-connect-right="true"][data-connect-bottom-right="false"]
         .outer-corner[data-connect="bottom-right"] {
-        bottom: calc(-1 * var(--group-border-radius));
+        bottom: calc(-1 * var(--group-border-radius) + 2px);
         display: initial;
-        right: calc(-1 * var(--group-border-radius));
+        right: calc(-1 * var(--group-border-radius) + 2px);
         transform: rotate(0);
     }
-    .group[data-connect-bottom="true"][data-connect-left="true"][data-connect-bottom-left="false"]
+    .outer-corners[data-connect-bottom="true"][data-connect-left="true"][data-connect-bottom-left="false"]
         .outer-corner[data-connect="bottom-left"] {
-        bottom: calc(-1 * var(--group-border-radius));
+        bottom: calc(-1 * var(--group-border-radius) + 2px);
         display: initial;
-        left: calc(-1 * var(--group-border-radius));
+        left: calc(-1 * var(--group-border-radius) + 2px);
         transform: rotate(90deg);
     }
-    .group[data-connect-top="true"][data-connect-left="true"][data-connect-top-left="false"]
+    .outer-corners[data-connect-top="true"][data-connect-left="true"][data-connect-top-left="false"]
         .outer-corner[data-connect="top-left"] {
         display: initial;
-        left: calc(-1 * var(--group-border-radius));
-        top: calc(-1 * var(--group-border-radius));
+        left: calc(-1 * var(--group-border-radius) + 2px);
+        top: calc(-1 * var(--group-border-radius) + 2px);
         transform: rotate(180deg);
     }
 </style>

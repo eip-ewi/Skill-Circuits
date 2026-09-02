@@ -1,13 +1,11 @@
-import type { Checkpoint } from "../../dto/checkpoint";
 import { withCsrf } from "../csrf";
-import moment from "moment";
-import { getCheckpoints, getEdition, getSortedCheckpoints } from "../edition/edition.svelte";
+import { getEdition } from "../edition/edition.svelte";
 import type { Person } from "../../dto/person";
 
 export async function addEditor(editor: Person) {
     getEdition().editors.push(editor);
 
-    let response = await fetch(
+    const response = await fetch(
         `/api/editions/${getEdition().id}/editors/${editor.id}`,
         withCsrf({
             method: "POST",
@@ -25,7 +23,7 @@ export async function removeEditor(editor: Person) {
         1,
     );
 
-    let response = await fetch(
+    const response = await fetch(
         `/api/editions/${getEdition().id}/editors/${editor.id}`,
         withCsrf({
             method: "DELETE",

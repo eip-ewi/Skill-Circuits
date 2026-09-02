@@ -55,12 +55,14 @@ public class ErrorController {
 	}
 
 	@ExceptionHandler(Exception.class)
-	public String defaultErrorHandler(HttpServletRequest request, Exception e, HttpServletResponse response)
-			throws Exception {
-		logger.error("A Request ({}) raised an exception", request.getRequestURI(), e);
+	public String defaultErrorHandler(HttpServletRequest request, Exception e, HttpServletResponse response) {
+		logger.error("A Request ({} {}) raised an exception", request.getMethod(), request.getRequestURI(),
+				e);
 
 		ResponseStatus statusAnnotation = AnnotationUtils.findAnnotation(e.getClass(), ResponseStatus.class);
-		if (statusAnnotation != null) {
+		if (statusAnnotation == null) {
+			response.setStatus(500);
+		} else {
 			response.setStatus(statusAnnotation.code().value());
 		}
 

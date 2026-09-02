@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { Snippet } from "svelte";
+    import { type Snippet } from "svelte";
 
     let {
         open = $bindable(),
@@ -107,6 +107,7 @@
 
     .content {
         max-height: 24em;
+        padding: 1px;
         overflow-y: auto;
         overscroll-behavior: contain;
     }

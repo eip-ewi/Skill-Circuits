@@ -1,18 +1,10 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import {
-        checkAuthentication,
-        getAuthenticatedPerson,
-        isAuthenticated,
-    } from "./lib/logic/authentication.svelte";
+    import { checkAuthentication, isAuthenticated } from "./lib/logic/authentication.svelte";
     import LoginPage from "./lib/pages/LoginPage.svelte";
-    import Csrf from "./lib/components/Csrf.svelte";
     import HomePage from "./lib/pages/HomePage.svelte";
     import Router from "./lib/Router.svelte";
-    import SessionComponent from "./lib/components/SessionComponent.svelte";
-    import HeaderComponent from "./lib/components/HeaderComponent.svelte";
     import { fetchAuthorisation } from "./lib/logic/authorisation.svelte";
-    import FooterComponent from "./lib/components/FooterComponent.svelte";
     import { fetchReleaseDetails } from "./lib/logic/release_details.svelte";
     import { fetchPreferences, getTheme } from "./lib/logic/preferences.svelte";
     import { systemTheme } from "./lib/data/theme";

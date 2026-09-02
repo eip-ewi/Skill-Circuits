@@ -1,6 +1,5 @@
 <script lang="ts">
-    import { onMount, type Snippet } from "svelte";
-    import type { ClassValue } from "svelte/elements";
+    import { type Snippet } from "svelte";
 
     let { value, selected, children }: { value: string; selected?: boolean; children: Snippet } =
         $props();

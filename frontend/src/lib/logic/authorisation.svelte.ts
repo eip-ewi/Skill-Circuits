@@ -1,6 +1,4 @@
-import type { SimpleAuth } from "../dto/auth/simple";
-import { getLevel, isLevel, isOnCircuit } from "./circuit/level.svelte";
-import { getCircuit } from "./circuit/circuit.svelte";
+import { isLevel, isOnCircuit } from "./circuit/level.svelte";
 import type { Authorisation } from "../dto/auth/authorisation";
 import { withCsrf } from "./csrf";
 import { getEdition } from "./edition/edition.svelte";
@@ -20,7 +18,7 @@ export function getAuthorisation(): Authorisation {
 }
 
 export async function fetchAuthorisation() {
-    let response = await fetch("/api/auth/authorisation");
+    const response = await fetch("/api/auth/authorisation");
     authorisation = await response.json();
 }
 

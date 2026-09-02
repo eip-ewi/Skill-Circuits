@@ -61,6 +61,19 @@ public class PersonalPreferencesService {
 	}
 
 	/**
+	 * Sets the "additional icons" setting of a person.
+	 *
+	 * @param  scPerson        The person.
+	 * @param  additionalIcons The setting.
+	 * @return                 The updated preferences of the person.
+	 */
+	@Transactional
+	public PersonalPreferences setAdditionalIcons(SCPerson scPerson, boolean additionalIcons) {
+		scPerson.getPreferences().setAdditionalIcons(additionalIcons);
+		return personRepository.save(scPerson).getPreferences();
+	}
+
+	/**
 	 * Get the view of the personal preferences.
 	 *
 	 * @param  preferences The personal preferences.
@@ -69,7 +82,8 @@ public class PersonalPreferencesService {
 	public PersonalPreferencesView convertToPreferencesView(PersonalPreferences preferences) {
 		ThemeView themeView = new ThemeView(preferences.getTheme().getName(),
 				preferences.getTheme().getColourScheme(), preferences.getTheme().getDisplayName());
-		return new PersonalPreferencesView(themeView, preferences.isBlurBlocks());
+		return new PersonalPreferencesView(themeView, preferences.isBlurBlocks(),
+				preferences.isAdditionalIcons());
 	}
 
 }

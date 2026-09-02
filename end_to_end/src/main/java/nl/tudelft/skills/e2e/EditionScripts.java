@@ -20,6 +20,7 @@ package nl.tudelft.skills.e2e;
 import java.util.List;
 
 import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.options.BoundingBox;
 
 public final class EditionScripts {
 
@@ -139,6 +140,15 @@ public final class EditionScripts {
 				.map(submodule -> submodule.query(".heading").text().trim()).toList();
 	}
 
+	public void enterFirstSubmodule(Edition edition) {
+		navigateTo(edition);
+		locators.query(".circuit").waitFor();
+
+		LocatorLocators firstSubmodule = locators.query(".block-wrapper").apply(Locator::first);
+		firstSubmodule.waitFor();
+		firstSubmodule.click();
+	}
+
 	public void addSubmodule(Edition edition, String name) {
 		if (modules(edition).isEmpty()) {
 			addModule(edition, "Test module");
@@ -146,21 +156,225 @@ public final class EditionScripts {
 
 		navigateTo(edition);
 
-		locators.button("Open tray").click();
 		LocatorLocators newSubmodule = locators.query(".panel").withChild(locators.heading("Tray"))
 				.query(".block").heading("New submodule");
-		newSubmodule.hover();
-		session.page().mouse().down();
-		locators.query(".header").hover();
-		locators.query(".column").hover();
-		session.page().mouse().up();
 
-		LocatorLocators created = locators.query(".block-wrapper").withChild(locators.text("New submodule"));
-		created.hover();
-		created.hover(1, 1);
-		created.query(".controls").button("Edit").click();
-		locators.label("Edit submodule name").fill(name);
+		openTray(newSubmodule.locator());
+
+		Locator targetColumn = locators.query(".column").apply(Locator::first).locator();
+		htmlDragAndDrop(newSubmodule.locator(), targetColumn);
+
+		LocatorLocators newlyCreated = locators.query(".block-wrapper")
+				.withChild(locators.text("New submodule"));
+		newlyCreated.hover();
+		newlyCreated.query(".controls").locator().locator("button[aria-label='Edit']").click();
+		session.page().getByLabel("Edit submodule name").fill(name);
+		locators.query(".controls").button("Stop editing").click();
+		session.page().locator(".panel")
+				.filter(new Locator.FilterOptions().setHasText("Tray"))
+				.locator("button[aria-label='Close panel']")
+				.click();
+	}
+
+	public void deleteSubmodule(Edition edition, String name) {
+		navigateTo(edition);
+		locators.query(".circuit").waitFor();
+
+		LocatorLocators submoduleWrapper = locators.query(".block-wrapper")
+				.withChild(locators.query(".name").text(name))
+				.apply(Locator::first);
+
+		submoduleWrapper.waitFor();
+		submoduleWrapper.hover();
+		submoduleWrapper.query(".controls").locator().locator("button[aria-label='Delete']").click();
+		Locator dialog = session.page().locator("dialog[open]");
+		dialog.locator("button")
+				.filter(new Locator.FilterOptions().setHasText("Delete"))
+				.click();
+	}
+
+	public void openEditing(String skill) {
+		LocatorLocators wrapper = locators.query(".block-wrapper")
+				.withChild(locators.heading(skill));
+		wrapper.hover();
+		wrapper.query(".controls").button("Edit").click();
+	}
+
+	public void addSkill(String skill) {
+		LocatorLocators newSkillBlock = locators.query(".panel")
+				.withChild(locators.heading("Tray"))
+				.query(".block").heading("New skill");
+
+		openTray(newSkillBlock.locator());
+
+		Locator targetColumn = locators.query(".column").apply(Locator::first).locator();
+
+		htmlDragAndDrop(newSkillBlock.locator(), targetColumn);
+
+		LocatorLocators newlyCreated = locators.query(".block-wrapper").withChild(locators.text("New skill"));
+		newlyCreated.hover();
+		newlyCreated.query(".controls").locator().locator("button[aria-label='Edit']").click();
+		session.page().getByLabel("Edit skill name").fill(skill);
+		locators.query(".controls").button("Stop editing").click();
+		session.page().locator(".panel")
+				.filter(new Locator.FilterOptions().setHasText("Tray"))
+				.locator("button[aria-label='Close panel']")
+				.click();
+	}
+
+	public void addTask(String skill, String task, int duration) {
+		LocatorLocators skillWrapper = locators.query(".circuit .block-wrapper")
+				.withChild(locators.query(".name").text(skill))
+				.apply(Locator::first);
+
+		skillWrapper.waitFor();
+		skillWrapper.hover();
+		skillWrapper.query(".controls").locator().locator("button[aria-label='Edit']").click();
+
+		session.page().locator("button:has-text('Create a new task')")
+				.click(new com.microsoft.playwright.Locator.ClickOptions().setForce(true));
+
+		Locator newTaskWrapper = session.page().locator(".item-wrapper").last();
+
+		newTaskWrapper.locator("input[name='item-name']").fill(task);
+		newTaskWrapper.locator("input[name='time']").fill(String.valueOf(duration));
+
+		newTaskWrapper.locator("input[name='time']").press("Enter");
 		locators.query(".controls").button("Stop editing").click();
 	}
 
+	public void addCheckpoint(String checkpoint) {
+		locators.button("Open checkpoints panel").click();
+		locators.button("Add checkpoint").click();
+		Locator newCheckpoint = session.page().locator(".checkpoint").first();
+		newCheckpoint.locator("input[name='name']").fill(checkpoint);
+		locators.button("Stop editing").click();
+		session.page().locator(".panel")
+				.filter(new Locator.FilterOptions().setHasText("Checkpoints"))
+				.locator("button[aria-label='Close panel']")
+				.click();
+	}
+
+	public void addCheckpointToSkill(String checkpoint, String skill) {
+		LocatorLocators skillWrapper = locators.query(".circuit .block-wrapper")
+				.withChild(locators.query(".name").text(skill))
+				.apply(Locator::first);
+
+		skillWrapper.waitFor();
+		skillWrapper.hover();
+		skillWrapper.query(".controls").locator().locator("button[aria-label='Edit']").click();
+		Locator editingBlock = session.page().locator(".circuit .block-wrapper[data-editing='true']").first();
+
+		Locator checkpointDropdown = editingBlock.locator(".heading div[role='listbox']").nth(1);
+
+		checkpointDropdown.locator("button.button")
+				.click(new com.microsoft.playwright.Locator.ClickOptions().setForce(true));
+
+		Locator targetOption = checkpointDropdown.locator(".options button[role='option']")
+				.filter(new Locator.FilterOptions().setHasText(checkpoint));
+
+		targetOption.evaluate("node => node.click()");
+
+		locators.query(".controls").button("Stop editing").click();
+	}
+
+	public int getCheckpointTime(String checkpoint) {
+		Locator lectureInfoBlock = session.page().locator(".info")
+				.filter(new Locator.FilterOptions().setHasText(checkpoint))
+				.locator(".time-estimate");
+		lectureInfoBlock.waitFor();
+		String time = lectureInfoBlock.textContent().trim();
+
+		int totalMinutes = 0;
+		String[] parts = time.split(" ");
+		for (String part : parts) {
+			if (part.endsWith("h")) {
+				int hours = Integer.parseInt(part.substring(0, part.length() - 1));
+				totalMinutes += hours * 60;
+			} else if (part.endsWith("m")) {
+				int minutes = Integer.parseInt(part.substring(0, part.length() - 1));
+				totalMinutes += minutes;
+			}
+		}
+
+		return totalMinutes;
+	}
+
+	public void deleteSkill(String skill) {
+		LocatorLocators skillWrapper = locators.query(".circuit .block-wrapper")
+				.withChild(locators.query(".name").text(skill))
+				.apply(Locator::first);
+
+		skillWrapper.waitFor();
+		skillWrapper.hover();
+		skillWrapper.query(".controls").locator().locator("button[aria-label='Delete']").click();
+		Locator dialog = session.page().locator("dialog[open]");
+
+		// 4. Click the final "Delete" button to confirm
+		dialog.locator("button")
+				.filter(new Locator.FilterOptions().setHasText("Delete"))
+				.click();
+	}
+
+	public void deleteCheckpoint(String checkpoint) {
+		locators.button("Open checkpoints panel").click();
+		Locator checkpointRow = session.page().locator(".checkpoint")
+				.filter(new Locator.FilterOptions().setHasText(checkpoint))
+				.first();
+
+		// 2. Click the initial "Delete checkpoint" trash icon
+		checkpointRow.locator("button[aria-label='Delete checkpoint']").click();
+
+		// 3. Locate the confirmation dialog that appears inside that specific row
+		Locator dialog = session.page().locator("dialog[open]");
+
+		// 4. Click the final "Delete" button to confirm
+		dialog.locator("button")
+				.filter(new Locator.FilterOptions().setHasText("Delete"))
+				.click();
+
+		session.page().locator(".panel")
+				.filter(new Locator.FilterOptions().setHasText("Checkpoints"))
+				.locator("button[aria-label='Close panel']")
+				.click();
+	}
+
+	/**
+	 * Performs a native HTML5 drag-and-drop by dispatching the DOM drag events with a shared
+	 * {@code DataTransfer}. The circuit uses native HTML5 drag-and-drop (draggable + ondragstart / ondrop
+	 * reading dataTransfer), which Playwright's mouse-based {@code dragTo()} neither fires nor tolerates when
+	 * the elements are outside the viewport ("Element is outside of the viewport"). Dispatching the events
+	 * runs the handlers directly on the elements, so this is viewport-independent and exercises the exact
+	 * code path the app listens for.
+	 */
+	private void htmlDragAndDrop(Locator source, Locator target) {
+		source.scrollIntoViewIfNeeded();
+
+		// effectAllowed must be a writable own property: assigning it (as the tray block's
+		// dragstart handler does) is silently ignored on a synthetic DataTransfer, so we
+		// predefine it as "copy" — the value both the "New submodule" and "New skill" tray
+		// blocks use, which the column's drop handler checks before creating the block.
+		source.hover();
+		session.page().mouse().down();
+		BoundingBox box = target.boundingBox();
+		session.page().mouse().move(box.x + box.width / 2, box.y + box.height / 2);
+		target.hover();
+		session.page().mouse().up();
+	}
+
+	/**
+	 * Opens the tray panel and waits for the given placeable block to become visible. Right after navigation
+	 * the circuit's async data load can re-render the side controls and drop the first click, so the "Open
+	 * tray" click is retried until the tray is actually open.
+	 */
+	private void openTray(Locator placeableBlock) {
+		Locator openTrayButton = session.page().locator("button[aria-label='Open tray']");
+		for (int attempt = 0; attempt < 12 && !placeableBlock.isVisible(); attempt++) {
+			if (openTrayButton.isVisible()) {
+				openTrayButton.click();
+			}
+			session.page().waitForTimeout(500);
+		}
+		placeableBlock.waitFor();
+	}
 }

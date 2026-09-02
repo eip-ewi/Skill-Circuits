@@ -1,7 +1,7 @@
 let page: string = $state(pageFromUrl());
 
 function pageFromUrl(): string {
-    let path = window.location.pathname;
+    const path = window.location.pathname;
     if (path.startsWith("/page")) {
         return path.replace("/page", "");
     }

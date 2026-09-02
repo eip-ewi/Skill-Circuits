@@ -1,15 +1,12 @@
 <script lang="ts">
-    import { getLevel, isLevel } from "../../../logic/circuit/level.svelte";
+    import { isLevel } from "../../../logic/circuit/level.svelte";
     import BlockContentComponent from "../../circuit/block/BlockContentComponent.svelte";
-    import type { Block } from "../../../dto/circuit/block";
-    import { BlockStates } from "../../../data/block_state";
     import { disableColumns, enableColumns } from "../../../dto/columns.svelte";
     import type { SkillBlock } from "../../../dto/circuit/module/skill";
     import { hasEditorRights } from "../../../logic/authorisation.svelte";
     import ExpandedViewOpenButtonComponent from "../../circuit/block/ExpandedViewOpenButtonComponent.svelte";
     import { ModuleLevel } from "../../../data/level";
     import ExpandedBlockComponent from "../../circuit/block/ExpandedBlockComponent.svelte";
-    import { onMount } from "svelte";
     import { loadPage } from "../../../logic/routing.svelte";
     import { isCompleted } from "../../../logic/circuit/skill_state/completion";
     import { getBlocks } from "../../../logic/circuit/circuit.svelte";
@@ -38,7 +35,7 @@
         enableColumns();
     }
 
-    function dragEnd(event: DragEvent) {
+    function dragEnd(_event: DragEvent) {
         disableColumns();
     }
 </script>
@@ -59,7 +56,8 @@
         data-clickable={!hasEditorRights()}
         onclick={click}
         data-completed={!hasEditorRights() && isCompleted(skill)}>
-        <BlockContentComponent block={skill}></BlockContentComponent>
+        <BlockContentComponent block={skill} completed={!hasEditorRights() && isCompleted(skill)}
+        ></BlockContentComponent>
     </div>
     {#if hovering && !hasEditorRights()}
         <ExpandedViewOpenButtonComponent action={undefined} bind:open={expanded}

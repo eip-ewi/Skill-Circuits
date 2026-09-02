@@ -44,7 +44,7 @@
             {#await fetchEditions() then _}
                 <span>Copy to course edition</span>
                 <Select onchange={selectEdition}>
-                    {#each editions as edition}
+                    {#each editions as edition (edition.id)}
                         {#if getEdition().id !== edition.id}
                             <option value={edition.id}>
                                 {edition.course.name} - {edition.name}

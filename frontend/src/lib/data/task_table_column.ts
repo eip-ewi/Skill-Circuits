@@ -14,4 +14,14 @@ export interface UnsortableTaskTableColumn extends ITaskTableColumn {
     sortable: false;
 }
 
-export type TaskTableColumn = SortableTaskTableColumn | UnsortableTaskTableColumn;
+export interface SearchableTaskTableColumn extends ITaskTableColumn {
+    searchable: true;
+    getAttr: (t: TaskInTaskList) => string;
+}
+
+export interface UnsearchableTaskTableColumn extends ITaskTableColumn {
+    searchable: false;
+}
+
+export type TaskTableColumn = (SortableTaskTableColumn | UnsortableTaskTableColumn) &
+    (SearchableTaskTableColumn | UnsearchableTaskTableColumn);
