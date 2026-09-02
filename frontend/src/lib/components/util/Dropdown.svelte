@@ -13,7 +13,7 @@
     let rafId: number | undefined;
     let viewport: VisualViewport | null | undefined;
 
-    function alignDropdownToAchor() {
+    function alignDropdownToAnchor() {
         if (dropdown?.showPopover === undefined) {
             return;
         }
@@ -32,17 +32,17 @@
         }
         rafId = requestAnimationFrame(() => {
             rafId = undefined;
-            reposition();
+            alignDropdownToAnchor();
         });
     }
 
     $effect(() => {
         if (!open) {
-            dropdown.hidePopover.();
+            dropdown.hidePopover();
             return;
         }
         dropdown.showPopover();
-        reposition();
+        alignDropdownToAnchor();
         viewport = window.visualViewport;
         // Capture phase so scrolling inside nested scroll containers is caught (scroll doesn't bubble).
         window.addEventListener("scroll", scheduleReposition, true);
