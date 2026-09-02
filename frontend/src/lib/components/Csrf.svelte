@@ -1,10 +1,11 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    import { getCsrfToken } from "../logic/csrf";
 
     let csrfToken: string = $state("");
 
     onMount(async () => {
-        csrfToken = document.querySelector("meta[name='csrf-token']")!.getAttribute("value")!;
+        csrfToken = getCsrfToken().token;
     });
 </script>
 
