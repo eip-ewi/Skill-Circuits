@@ -37,6 +37,9 @@ public class SkillCircuitsSecurityConfig extends LabradorSecurityConfig {
 
 	private static final RequestMatcher API_REQUESTS = request -> request.getServletPath()
 			.startsWith("/api/");
+	private static final RequestMatcher PAGE_REQUESTS = request -> "GET".equals(request.getMethod())
+			&& ("/".equals(request.getServletPath())
+					|| request.getServletPath().startsWith("/page/"));
 
 	/**
 	 * Configures which endpoints need authentication and which don't.
@@ -57,12 +60,10 @@ public class SkillCircuitsSecurityConfig extends LabradorSecurityConfig {
 		http.exceptionHandling(exceptions -> exceptions.defaultAuthenticationEntryPointFor(
 				new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), API_REQUESTS));
 
-		// By default all calls are cached
-		// Our 401 would send the user to a bare API response instead of the page they came from
-		// Only page requests are worth returning to
+		// Only remember navigable pages so a successful login cannot redirect to an API or
+		// another auxiliary resource.
 		HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
-		requestCache.setRequestMatcher(request -> "GET".equals(request.getMethod())
-				&& !API_REQUESTS.matches(request));
+		requestCache.setRequestMatcher(PAGE_REQUESTS);
 		http.requestCache(cache -> cache.requestCache(requestCache));
 	}
 }

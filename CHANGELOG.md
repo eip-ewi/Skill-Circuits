@@ -42,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Teacher] A research consent form can be configured per course edition. This is useful for teachers and researchers wish to use Skill Circuits usage data for their research. (@rwbackx)
 
 ## Changed
+- [Everyone] Logging in again after a session expired happens in a separate window that closes itself, updated all opened tabs without a refresh. (@ralani)
 - [Student] Optional skills are now marked as optional in the expanded submodule view. (@ffiedrich)
 
 ## Fixed
@@ -49,6 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Developers] Several errors in the development console. (@ogangalic)
 - [Student] Optional skills were required to complete submodules and checkpoints. (@ffiedrich) 
 - [Student] Optional skills were included in the completed counts on the edition page. This counter has been separated into a 'required' and an 'optional' count. (@ffiedrich)
+- [Student] Session credentials expiration is tracked correctly. (@ralani)
 - [Everyone] Connections between submodules and skills were not highlighted on hover. (@ffiedrich)
 
 ## [2526.2.1]
