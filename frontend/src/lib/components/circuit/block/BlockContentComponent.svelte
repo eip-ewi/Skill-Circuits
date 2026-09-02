@@ -7,8 +7,6 @@
     import { isSkillItemRevealed } from "../../../logic/circuit/unlocked_skills.svelte";
     import type { SkillItem } from "../../../dto/circuit/edition/skill";
     import { getAdditionalIcons } from "../../../logic/preferences.svelte";
-    import { getCheckpoint, getVisibleCheckpoints } from "../../../logic/edition/edition.svelte";
-    import { BlockStates } from "../../../data/block_state";
     import {
         type FocusModeBlockState,
         FocusModeBlockStates,

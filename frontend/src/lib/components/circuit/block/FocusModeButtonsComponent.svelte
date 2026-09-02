@@ -33,7 +33,7 @@
         }
     });
 
-    function transition(element: Element) {
+    function transition(_: Element) {
         return {
             duration: 100,
             easing: cubicInOut,

@@ -6,14 +6,10 @@
     import { isUnlocked } from "../../../logic/circuit/skill_state/unlock";
     import { isCompleted } from "../../../logic/circuit/skill_state/completion";
     import { getCircuit } from "../../../logic/circuit/circuit.svelte";
-    import { onMount, tick, untrack } from "svelte";
+    import { onMount, tick } from "svelte";
     import { getBlurBlocks } from "../../../logic/preferences.svelte";
-    import { BlockStates } from "../../../data/block_state";
     import { getFocusModeState, isInFocusMode } from "../../../logic/circuit/focusMode.svelte";
-    import {
-        FocusModeBlockStates,
-        isVisibleAndInFocusMode,
-    } from "../../../data/focus_mode_block_state";
+    import { isVisibleAndInFocusMode } from "../../../data/focus_mode_block_state";
 
     let { from, to }: { from: Block; to: Block } = $props();
 

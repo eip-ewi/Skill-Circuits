@@ -1,15 +1,11 @@
-export namespace FocusModeBlockStates {
-    export let NotInFocusMode: "not in focus mode" = "not in focus mode";
-    export let FocusOnBlock: "focus on block" = "focus on block";
-    export let VisibleInFocusMode: "visible in focus mode" = "visible in focus mode";
-    export let DisabledInFocusMode: "disabled in focus mode" = "disabled in focus mode";
-}
+export const FocusModeBlockStates = {
+    NotInFocusMode: "not in focus mode",
+    FocusOnBlock: "focus on block",
+    VisibleInFocusMode: "visible in focus mode",
+    DisabledInFocusMode: "disabled in focus mode",
+} as const;
 
-export type FocusModeBlockState =
-    | typeof FocusModeBlockStates.NotInFocusMode
-    | typeof FocusModeBlockStates.FocusOnBlock
-    | typeof FocusModeBlockStates.VisibleInFocusMode
-    | typeof FocusModeBlockStates.DisabledInFocusMode;
+export type FocusModeBlockState = (typeof FocusModeBlockStates)[keyof typeof FocusModeBlockStates];
 
 export function isVisibleAndInFocusMode(state: FocusModeBlockState | undefined) {
     return (

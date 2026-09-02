@@ -1,12 +1,13 @@
 import type { Block } from "../../dto/circuit/block";
-import { getGraph, updateBlockNoCascade } from "./circuit.svelte";
+import { getGraph } from "./circuit.svelte";
 import type { Graph } from "./graph";
 import { type FocusModeBlockState, FocusModeBlockStates } from "../../data/focus_mode_block_state";
+import { SvelteSet } from "svelte/reactivity";
 
 let focusModeBlock: Block | null = $state(null);
-let focusModeVisibleBlocks: Set<number> = $derived.by(() => {
+const focusModeVisibleBlocks: Set<number> = $derived.by(() => {
     const graph: Graph = getGraph();
-    let blocks: Set<number> = new Set();
+    const blocks: SvelteSet<number> = new SvelteSet();
 
     // Safety check
     if (focusModeBlock === null) {
@@ -14,8 +15,8 @@ let focusModeVisibleBlocks: Set<number> = $derived.by(() => {
     }
 
     // Initialize visited blocks and block queue
-    let visited: Set<number> = new Set();
-    let queue: { block: Block; depth: number; ascend: boolean }[] = [
+    const visited: SvelteSet<number> = new SvelteSet();
+    const queue: { block: Block; depth: number; ascend: boolean }[] = [
         { block: focusModeBlock!, depth: 0, ascend: true },
         { block: focusModeBlock!, depth: 0, ascend: false },
     ];
@@ -34,7 +35,7 @@ let focusModeVisibleBlocks: Set<number> = $derived.by(() => {
 
     // Traverse the graph, ascending and descending depending on direction
     while (queue.length > 0) {
-        let current: { block: Block; depth: number; ascend: boolean } = queue.shift()!;
+        const current: { block: Block; depth: number; ascend: boolean } = queue.shift()!;
 
         // Stop if visited or above max depth
         if (stopTraversal(current) || visited.has(current.block.id)) {

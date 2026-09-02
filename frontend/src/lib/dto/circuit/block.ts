@@ -2,7 +2,6 @@ import type { Item } from "./item";
 import type { BlockState } from "../../data/block_state";
 import type { SubmoduleBlock } from "./edition/submodule";
 import type { SkillBlock } from "./module/skill";
-import { type FocusModeBlockState } from "../../data/focus_mode_block_state";
 
 export interface IBlock {
     id: number;
