@@ -10,9 +10,6 @@
     let anchor: HTMLElement;
     let dropdown: HTMLElement;
 
-    let rafId: number | undefined;
-    let viewport: VisualViewport | null | undefined;
-
     function alignDropdownToAnchor() {
         if (dropdown?.showPopover === undefined) {
             return;
@@ -25,17 +22,6 @@
         dropdown.style.top = `${a.bottom}px`;
     }
 
-    // Batch bursts of scroll/resize events into one reposition per frame.
-    function scheduleReposition() {
-        if (rafId !== undefined) {
-            return;
-        }
-        rafId = requestAnimationFrame(() => {
-            rafId = undefined;
-            alignDropdownToAnchor();
-        });
-    }
-
     $effect(() => {
         if (!open) {
             dropdown.hidePopover();
@@ -43,7 +29,20 @@
         }
         dropdown.showPopover();
         alignDropdownToAnchor();
-        viewport = window.visualViewport;
+
+        const viewport = window.visualViewport;
+        // Batch bursts of scroll/resize events into one reposition per frame.
+        let rafId: number | undefined;
+        const scheduleReposition = () => {
+            if (rafId !== undefined) {
+                return;
+            }
+            rafId = requestAnimationFrame(() => {
+                rafId = undefined;
+                alignDropdownToAnchor();
+            });
+        };
+
         // Capture phase so scrolling inside nested scroll containers is caught (scroll doesn't bubble).
         window.addEventListener("scroll", scheduleReposition, true);
         window.addEventListener("resize", scheduleReposition);
@@ -54,11 +53,9 @@
             window.removeEventListener("resize", scheduleReposition);
             viewport?.removeEventListener("scroll", scheduleReposition);
             viewport?.removeEventListener("resize", scheduleReposition);
-            viewport = undefined;
             if (rafId !== undefined) {
                 cancelAnimationFrame(rafId);
             }
-            rafId = undefined;
         };
     });
 </script>
