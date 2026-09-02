@@ -10,25 +10,53 @@
     let anchor: HTMLElement;
     let dropdown: HTMLElement;
 
-    $effect(() => {
-        if (open) {
-            if (dropdown.showPopover !== undefined) {
-                dropdown.showPopover();
-                if (
-                    anchor.getBoundingClientRect().left + dropdown.getBoundingClientRect().width <
-                    window.innerWidth
-                ) {
-                    dropdown.style.left = `${anchor.getBoundingClientRect().left}px`;
-                } else {
-                    dropdown.style.left = `${anchor.getBoundingClientRect().right - dropdown.getBoundingClientRect().width}px`;
-                }
-                dropdown.style.top = `${anchor.getBoundingClientRect().bottom}px`;
-            }
-        } else {
-            dropdown.hidePopover?.();
-            dropdown.style.removeProperty("left");
-            dropdown.style.removeProperty("top");
+    function alignDropdownToAnchor() {
+        if (dropdown?.showPopover === undefined) {
+            return;
         }
+        const a = anchor.getBoundingClientRect();
+        dropdown.style.left =
+            a.left + dropdown.getBoundingClientRect().width < window.innerWidth
+                ? `${a.left}px`
+                : `${a.right - dropdown.getBoundingClientRect().width}px`;
+        dropdown.style.top = `${a.bottom}px`;
+    }
+
+    $effect(() => {
+        if (!open) {
+            dropdown.hidePopover();
+            return;
+        }
+        dropdown.showPopover();
+        alignDropdownToAnchor();
+
+        const viewport = window.visualViewport;
+        // Batch bursts of scroll/resize events into one reposition per frame.
+        let rafId: number | undefined;
+        const scheduleReposition = () => {
+            if (rafId !== undefined) {
+                return;
+            }
+            rafId = requestAnimationFrame(() => {
+                rafId = undefined;
+                alignDropdownToAnchor();
+            });
+        };
+
+        // Capture phase so scrolling inside nested scroll containers is caught (scroll doesn't bubble).
+        window.addEventListener("scroll", scheduleReposition, true);
+        window.addEventListener("resize", scheduleReposition);
+        viewport?.addEventListener("scroll", scheduleReposition);
+        viewport?.addEventListener("resize", scheduleReposition);
+        return () => {
+            window.removeEventListener("scroll", scheduleReposition, true);
+            window.removeEventListener("resize", scheduleReposition);
+            viewport?.removeEventListener("scroll", scheduleReposition);
+            viewport?.removeEventListener("resize", scheduleReposition);
+            if (rafId !== undefined) {
+                cancelAnimationFrame(rafId);
+            }
+        };
     });
 </script>
 
