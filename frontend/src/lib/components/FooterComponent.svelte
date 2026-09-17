@@ -20,7 +20,7 @@
         </div>
         <div class="links">
             <Link
-                href="https://gitlab.ewi.tudelft.nl/skill-circuits/skill-circuits/-/releases"
+                href="https://gitlab.ewi.tudelft.nl/eip/labrador/skill-circuits/-/releases"
                 target="_blank">
                 Releases
             </Link>
