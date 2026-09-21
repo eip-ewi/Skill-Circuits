@@ -95,16 +95,10 @@
 
 <style>
     dialog {
-        /* Cover the whole viewport as a scroll container that is always at its
-           scroll boundary, so wheel events cannot chain to the page behind. */
         background: transparent;
         border: none;
-        height: 100vh;
-        max-height: 100vh;
-        max-width: 100vw;
-        overflow: hidden;
+        outline: none;
         overscroll-behavior: contain;
-        width: 100vw;
     }
 
     .expanded-block {
@@ -124,6 +118,8 @@
     dialog::backdrop {
         background-color: var(--expanded-block-background-colour);
         backdrop-filter: blur(var(--expanded-block-background-blur));
+        overflow: hidden;
+        overscroll-behavior: contain;
     }
 
     .content {
