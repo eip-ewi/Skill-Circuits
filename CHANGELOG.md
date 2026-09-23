@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Fixed
 - [Teacher] Task edit components are now fixed in place when scrolling. (@ogangalic)
+- [Everyone] When scrolling in an expanded block or submodule, the circuit page behind it no longer scrolls. (@ogangalic)
 
 ## [2627.0.1]
 

@@ -93,6 +93,13 @@
 {/if}
 
 <style>
+    dialog {
+        background: transparent;
+        border: none;
+        outline: none;
+        overscroll-behavior: contain;
+    }
+
     .expanded-block {
         font-size: clamp(0.75rem, calc(16 / 1732 * 100vw), 1rem);
 
@@ -110,6 +117,8 @@
     dialog::backdrop {
         background-color: var(--expanded-block-background-colour);
         backdrop-filter: blur(var(--expanded-block-background-blur));
+        overflow: hidden;
+        overscroll-behavior: contain;
     }
 
     .content {
@@ -121,6 +130,7 @@
         gap: 1em;
         max-height: calc(100vh - 12em);
         overflow-y: auto;
+        overscroll-behavior: contain;
         padding: 2em;
         place-items: center;
         font-size: var(--font-size-500);

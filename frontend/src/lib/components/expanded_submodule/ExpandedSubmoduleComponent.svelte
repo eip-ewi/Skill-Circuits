@@ -152,6 +152,13 @@
 {/if}
 
 <style>
+    dialog {
+        background: transparent;
+        border: none;
+        outline: none;
+        overscroll-behavior: contain;
+    }
+
     .expanded-submodule {
         border: var(--expanded-block-border);
         border-radius: var(--expanded-block-border-radius);
@@ -167,6 +174,8 @@
     dialog::backdrop {
         background-color: var(--expanded-block-background-colour);
         backdrop-filter: blur(var(--expanded-block-background-blur));
+        overflow: hidden;
+        overscroll-behavior: contain;
     }
 
     .content {
@@ -181,6 +190,7 @@
         min-width: 40em;
         max-width: calc(100vw - 12em);
         overflow-y: auto;
+        overscroll-behavior: contain;
 
         display: grid;
         grid-template-columns: fit-content(18em) minmax(25em, auto);
