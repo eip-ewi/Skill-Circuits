@@ -217,12 +217,10 @@
         padding: 0 1em 0 0.3em;
         grid-row-start: 2;
         overflow: auto;
-        overscroll-behavior: contain;
     }
 
     .selected-skill-wrapper {
         grid-row-start: 2;
         overflow: auto;
-        overscroll-behavior: contain;
     }
 </style>
