@@ -23,7 +23,7 @@ export async function createItem(block: Block) {
 
     if (response.ok) {
         const newTask: Item = await response.json();
-        // @ts-expect-error -- The response DTO omits this client-only discriminant.
+        // @ts-expect-error getLevel().item is typed as string rather than the allowed item types.
         newTask.itemType = getLevel().item;
         (block.items as Item[]).push(newTask);
     }

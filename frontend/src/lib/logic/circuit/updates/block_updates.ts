@@ -29,7 +29,7 @@ export async function createBlock(column: number) {
 
     if (response.ok) {
         const block: Block = await response.json();
-        // @ts-expect-error -- The response DTO omits this client-only discriminant.
+        // @ts-expect-error getLevel().block is typed as string rather than the allowed block types.
         block.blockType = getLevel().block;
         block.state = BlockStates.Inactive;
         (firstGroup.blocks as Block[]).push(block);

@@ -1,6 +1,7 @@
 import type { Group } from "./group";
 import type { EditionCircuit } from "./edition/edition";
 import type { ModuleCircuit } from "./module/module";
+import type { TrackCircuit } from "./track";
 
 export interface ICircuit {
     id: number;
@@ -11,4 +12,4 @@ export interface ICircuit {
     boundingRect: (() => DOMRect) | undefined;
 }
 
-export type Circuit = EditionCircuit | ModuleCircuit;
+export type Circuit = EditionCircuit | ModuleCircuit | TrackCircuit;

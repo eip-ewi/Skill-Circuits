@@ -12,7 +12,7 @@
     } from "../logic/authorisation.svelte";
     import Csrf from "./Csrf.svelte";
     import { loadHomePage, loadPage, pageMatches } from "../logic/routing.svelte";
-    import { getEdition } from "../logic/edition/edition.svelte";
+    import { editionFetched, getEdition } from "../logic/edition/edition.svelte";
     import WithConfirmationDialog from "./util/WithConfirmationDialog.svelte";
     import { resetProgress } from "../logic/updates/edition_updates";
 
@@ -96,13 +96,19 @@
                     <span>Continue</span>
                 </button>
             {/if}
-            {#if isLevel(ModuleLevel)}
+            {#if isLevel(ModuleLevel) && editionFetched()}
                 <button class="button" onclick={() => loadPage(`/editions/${getEdition().id}`)}>
                     <span class="icon fa-solid fa-arrow-up"></span>
                     <span>Go to course</span>
                 </button>
             {/if}
             {#if isLevel(EditionLevel)}
+                {#if editionFetched() && getAuthorisation().isAdmin}
+                    <button class="button" onclick={() => loadPage(`/tracks/${getEdition().id}`)}>
+                        <span class="icon fa-solid fa-arrow-up"></span>
+                        <span>Go to track</span>
+                    </button>
+                {/if}
                 <button class="button" onclick={returnToLastLeftOf}>
                     <span class="icon fa-solid fa-play"></span>
                     <span>Continue</span>
@@ -163,7 +169,7 @@
                         <span class="icon fa-solid fa-gear"></span>
                         <span>Settings</span>
                     </button>
-                    {#if !hasEditorRights() && isLevel(EditionLevel)}
+                    {#if editionFetched() && !hasEditorRights() && isLevel(EditionLevel)}
                         <WithConfirmationDialog
                             icon="fa-solid fa-repeat"
                             action="Reset progress"

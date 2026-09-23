@@ -2,6 +2,7 @@
     import BlockComponent from "./block/BlockComponent.svelte";
     import ConnectionsComponent from "./connections/ConnectionsComponent.svelte";
     import { onMount, tick } from "svelte";
+    import { fade } from "svelte/transition";
     import { placeBlocks, placeBlocksWithCheckpoints } from "../../logic/circuit/block_placement";
     import type { Warning } from "../../data/warning";
     import { hasCycle } from "../../logic/diagnostics/detect_cycles";
@@ -15,10 +16,9 @@
     import { hasEditorRights, isViewModeAuthorisedToEdit } from "../../logic/authorisation.svelte";
     import ColumnComponent from "./column/ColumnComponent.svelte";
     import { getPlacedBlocks } from "../../logic/circuit/circuit.svelte.js";
-    import { ModuleLevel } from "../../data/level";
+    import { ModuleLevel, TrackLevel } from "../../data/level";
     import { isLevel } from "../../logic/circuit/level.svelte";
     import CheckpointComponent from "./checkpoint/CheckpointComponent.svelte";
-    import { fade } from "svelte/transition";
     import { getVisibleCheckpoints } from "../../logic/edition/edition.svelte";
     import ColumnSeparatorComponent from "./column/ColumnSeparatorComponent.svelte";
 
@@ -99,7 +99,7 @@
                 <BlockComponent {block}></BlockComponent>
             {/each}
 
-            {#if hasEditorRights()}
+            {#if !isLevel(TrackLevel) && hasEditorRights()}
                 {#each { length: width + 1 } as _, column (column)}
                     <ColumnSeparatorComponent {column} columns={width} {height} />
                 {/each}

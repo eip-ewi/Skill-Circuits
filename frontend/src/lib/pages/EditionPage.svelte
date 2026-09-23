@@ -4,13 +4,18 @@
     import type { Warning } from "../data/warning";
     import { setLevel } from "../logic/circuit/level.svelte";
     import { EditionLevel } from "../data/level";
-    import { fetchCircuit, getCircuit, initModuleGraphs } from "../logic/circuit/circuit.svelte";
+    import {
+        circuitFetched,
+        fetchCircuit,
+        getCircuit,
+        initModuleGraphs,
+    } from "../logic/circuit/circuit.svelte";
     import { toggleViewMode, canEditCircuit } from "../logic/authorisation.svelte";
     import { fetchDevMode } from "../logic/dev_mode.svelte";
     import SideControlsComponent from "../components/side_controls/SideControlsComponent.svelte";
     import ChoosePathComponent from "../components/ChoosePathComponent.svelte";
     import { fetchActivePath, fetchPathCustomisation } from "../logic/edition/active_path.svelte";
-    import { fetchEdition, getEdition } from "../logic/edition/edition.svelte";
+    import { editionFetched, fetchEdition, getEdition } from "../logic/edition/edition.svelte";
     import PageLayout from "./PageLayout.svelte";
     import PageTabs from "../components/util/PageTabs.svelte";
     import Tab from "../components/util/Tab.svelte";
@@ -42,9 +47,9 @@
     }
 
     $effect(() => {
-        if (getCircuit() !== undefined && finishedLoad) {
+        if (circuitFetched() && finishedLoad) {
             // Update the module graphs when (1) The page is first loaded and (2) Block visibilities change
-            initModuleGraphs(getCircuit());
+            initModuleGraphs(getCircuit("edition"));
         }
     });
 </script>
@@ -57,10 +62,10 @@
     }} />
 
 <svelte:head>
-    {#if getCircuit() === undefined}
-        <title>Skill Circuits</title>
-    {:else}
+    {#if editionFetched()}
         <title>{getEdition().course.name} - {getEdition().name} - Skill Circuits</title>
+    {:else}
+        <title>Skill Circuits</title>
     {/if}
 </svelte:head>
 

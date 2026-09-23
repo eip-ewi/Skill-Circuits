@@ -19,13 +19,13 @@ const graph: Graph | undefined = $derived(
 const blockToGroupMap: Map<number, Group> | undefined = $derived(
     circuit === undefined
         ? undefined
-        : // @ts-expect-error -- flatMap inference does not preserve the Map entry tuple.
+        : // @ts-expect-error: TypeScript misses reactive circuit updates
           new Map(circuit!.groups.flatMap(group => group.blocks.map(block => [block.id, group]))),
 );
 const itemToBlockMap: Map<number, Block> | undefined = $derived(
     circuit === undefined
         ? undefined
-        : // @ts-expect-error -- flatMap inference does not preserve the Map entry tuple.
+        : // @ts-expect-error: A loaded circuit guarantees blocks exist
           new Map(blocks.flatMap(block => block.items.map(item => [item.id, block]))),
 );
 
@@ -34,7 +34,7 @@ function blocksFromCircuit(circuit: Circuit): Block[] {
     if (circuit.circuitType === "module") {
         blocks = [...circuit.groups.flatMap(group => group.blocks), ...circuit.externalSkills];
     } else {
-        blocks = circuit.groups.flatMap(group => group.blocks);
+        blocks = circuit.groups.flatMap<Block>(group => group.blocks);
     }
     blocks.forEach(block => (block.state = BlockStates.Inactive));
     return blocks;
@@ -44,8 +44,20 @@ export function circuitFetched(): boolean {
     return circuit !== undefined;
 }
 
-export function getCircuit<T extends Circuit["circuitType"]>(): Circuit & { circuitType: T } {
-    return circuit! as Circuit & { circuitType: T };
+export function getCircuit(): Circuit;
+export function getCircuit<T extends Circuit["circuitType"]>(
+    circuitType: T,
+): Extract<Circuit, { circuitType: T }>;
+export function getCircuit(circuitType?: Circuit["circuitType"]): Circuit {
+    if (circuit === undefined) {
+        throw new Error("Circuit has not been fetched");
+    }
+    // Navigation can leave a previous page's circuit in shared state until the next fetch completes
+    // This was tested with Google Chrome throttling set at 3G, fix if actual students report this
+    if (circuitType !== undefined && circuit.circuitType !== circuitType) {
+        throw new Error(`Expected a ${circuitType} circuit, received ${circuit.circuitType}`);
+    }
+    return circuit;
 }
 
 export function getGroup(id: number): Group {

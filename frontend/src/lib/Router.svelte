@@ -25,6 +25,7 @@
     import PrivacyPage from "./pages/PrivacyPage.svelte";
     import SettingsPage from "./pages/SettingsPage.svelte";
     import EditionTasksPage from "./pages/EditionTasksPage.svelte";
+    import TrackPage from "./pages/TrackPage.svelte";
 </script>
 
 <svelte:window onpopstate={reloadPageFromUrl} />
@@ -40,6 +41,8 @@
     ></EditionTasksPage>
 {:else if pageMatches(/\/modules\/(\d+)/)}
     <ModulePage moduleId={parseInt(extractPathVariable(/\/modules\/(\d+)/))}></ModulePage>
+{:else if pageMatches(/\/tracks\/(\d+)/)}
+    <TrackPage editionId={parseInt(extractPathVariable(/\/tracks\/(\d+)/))}></TrackPage>
 {:else if pageMatches(/\/submodules\/(\d+)/)}
     <SubmodulePage submoduleId={parseInt(extractPathVariable(/\/submodules\/(\d+)/))}
     ></SubmodulePage>

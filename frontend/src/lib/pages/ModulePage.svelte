@@ -5,7 +5,6 @@
     import { setLevel } from "../logic/circuit/level.svelte";
     import { ModuleLevel } from "../data/level";
     import { canEditCircuit, toggleViewMode } from "../logic/authorisation.svelte";
-    import type { ModuleCircuit } from "../dto/circuit/module/module";
     import { fetchDevMode, getDevMode } from "../logic/dev_mode.svelte";
     import { circuitFetched, fetchCircuit, getCircuit } from "../logic/circuit/circuit.svelte";
     import SideControlsComponent from "../components/side_controls/SideControlsComponent.svelte";
@@ -27,7 +26,7 @@
 
     async function load() {
         await fetchCircuit(`/api/modules/${moduleId}/circuit`);
-        await fetchEdition((getCircuit() as ModuleCircuit).editionId);
+        await fetchEdition(getCircuit("module").editionId);
         await fetchActivePath();
         await fetchPathCustomisation();
         await fetchRevealedSkills();

@@ -1,7 +1,7 @@
 <script lang="ts">
     import { setLevel } from "../logic/circuit/level.svelte";
     import { EditionLevel } from "../data/level";
-    import { fetchCircuit, getCircuit } from "../logic/circuit/circuit.svelte";
+    import { circuitFetched, fetchCircuit } from "../logic/circuit/circuit.svelte";
     import { canEditCircuit, toggleViewMode } from "../logic/authorisation.svelte";
     import { fetchDevMode } from "../logic/dev_mode.svelte";
     import { fetchActivePath, fetchPathCustomisation } from "../logic/edition/active_path.svelte";
@@ -30,7 +30,7 @@
     }
 
     $effect(() => {
-        if (getCircuit() !== undefined && !canEditCircuit()) {
+        if (circuitFetched() && !canEditCircuit()) {
             loadPage(`/editions/${editionId}`, true);
         }
     });
@@ -49,7 +49,7 @@
     }} />
 
 <svelte:head>
-    {#if getCircuit() === undefined}
+    {#if !circuitFetched()}
         <title>Skill Circuits</title>
     {:else}
         <title>{getEdition().course.name} - {getEdition().name} - Skill Circuits</title>
