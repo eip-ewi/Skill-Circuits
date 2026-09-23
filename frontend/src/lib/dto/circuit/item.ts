@@ -1,5 +1,6 @@
 import type { SkillItem } from "./edition/skill";
 import type { TaskItem } from "./module/task";
+import type { TrackSubmoduleItem } from "./track";
 
 export interface IItem {
     id: number;
@@ -8,4 +9,4 @@ export interface IItem {
     locked: boolean;
 }
 
-export type Item = SkillItem | TaskItem;
+export type Item = SkillItem | TaskItem | TrackSubmoduleItem;

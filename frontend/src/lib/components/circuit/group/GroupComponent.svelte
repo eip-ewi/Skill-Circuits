@@ -1,11 +1,36 @@
 <script lang="ts">
     import type { Blob } from "../../../data/blob";
+    import { tick } from "svelte";
+    import {
+        clearScrollTarget,
+        getScrollTarget,
+    } from "../../../logic/circuit/scroll_target.svelte";
 
     let { blob }: { blob: Blob } = $props();
+
+    let topLeftAllocation = $derived(
+        blob.allocations.toSorted((a, b) => a.point.y - b.point.y || a.point.x - b.point.x)[0],
+    );
+
+    //scroll to the specific group
+    $effect(() => {
+        const target = getScrollTarget();
+        if (target?.kind !== "group" || target.id !== blob.group.id) {
+            return;
+        }
+        (async () => {
+            await tick();
+            document
+                .getElementById(`group-${blob.group.id}`)
+                ?.scrollIntoView({ behavior: "auto", block: "center", inline: "center" });
+            clearScrollTarget();
+        })();
+    });
 </script>
 
 {#each blob.allocations as alloc (`${alloc.point.x}:${alloc.point.y}`)}
     <div
+        id={alloc === topLeftAllocation ? `group-${blob.group.id}` : undefined}
         class="group-wrapper"
         style:grid-column={alloc.point.x + 1}
         style:grid-row={alloc.point.y + 1}>

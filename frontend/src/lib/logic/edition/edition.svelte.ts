@@ -14,6 +14,10 @@ export async function fetchEdition(editionId: number) {
     edition = await response.json();
 }
 
+export function editionFetched(): boolean {
+    return edition !== undefined;
+}
+
 export function getEdition(): Edition {
     return edition!;
 }

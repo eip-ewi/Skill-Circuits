@@ -9,6 +9,8 @@
     import { areColumnsEnabled } from "../../../dto/columns.svelte";
     import { createExternalSkill } from "../../../logic/circuit/updates/skill_updates";
     import { getCircuit } from "../../../logic/circuit/circuit.svelte";
+    import { TrackLevel } from "../../../data/level";
+    import { isLevel } from "../../../logic/circuit/level.svelte";
     import WithConfirmationDialog from "../../util/WithConfirmationDialog.svelte";
 
     let { column, height }: { column: number; height: number } = $props();
@@ -59,7 +61,7 @@
     }
 </script>
 
-{#if hasEditorRights()}
+{#if !isLevel(TrackLevel) && hasEditorRights()}
     <div
         class="column-wrapper"
         style:grid-column={column + 1}

@@ -1,8 +1,8 @@
 import { isLevel, isOnCircuit } from "./circuit/level.svelte";
 import type { Authorisation } from "../dto/auth/authorisation";
 import { withCsrf } from "./csrf";
-import { getEdition } from "./edition/edition.svelte";
-import { EditionLevel, ModuleLevel } from "../data/level";
+import { editionFetched, getEdition } from "./edition/edition.svelte";
+import { EditionLevel, ModuleLevel, TrackLevel } from "../data/level";
 import { getAuthenticatedPerson } from "./authentication.svelte";
 import { makeBlocksInactive } from "./circuit/updates/block_updates";
 
@@ -67,10 +67,13 @@ export function isViewModeAuthorisedToEdit(): boolean {
 }
 
 export function isEditorForCircuit() {
-    if (isLevel(ModuleLevel) || isLevel(EditionLevel)) {
-        return authorisation.managedEditions.includes(getEdition().id);
+    if (
+        !editionFetched() ||
+        (!isLevel(ModuleLevel) && !isLevel(EditionLevel) && !isLevel(TrackLevel))
+    ) {
+        return false;
     }
-    return false;
+    return authorisation.managedEditions.includes(getEdition().id);
 }
 
 export function isTeacherForCircuit() {

@@ -153,6 +153,10 @@ public class AuthorisationService {
 		return isAdmin() || isEditor(editionId);
 	}
 
+	public boolean canViewTrack(Long editionId) {
+		return hasAdminRole();
+	}
+
 	public boolean canViewEdition(Long editionId) {
 		return isAdmin() || hasEditorRole(editionId) || editionRepository.getOrCreate(editionId).isVisible();
 	}

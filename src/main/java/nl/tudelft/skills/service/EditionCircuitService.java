@@ -113,6 +113,22 @@ public class EditionCircuitService {
 				tasksRemoved);
 	}
 
+	public Map<Long, EditionLevelSubmoduleView> convertToSubmoduleViews(SCEdition edition,
+			SCPerson person) {
+		Set<Long> completedTaskIds = taskCompletionRepository.findAllCompletedTaskIdsForPerson(person);
+		Set<Long> revealedSkillIds = person.getSkillsRevealed().stream().map(AbstractSkill::getId)
+				.collect(Collectors.toSet());
+		Path activePath = pathService.getActivePath(person, edition);
+		Set<Task> tasksAdded = person.getTasksAdded();
+		Set<Task> tasksRemoved = person.getTasksRemoved();
+
+		return edition.getModules().stream()
+				.flatMap(module -> module.getSubmodules().stream())
+				.map(submodule -> convertToSubmoduleView(submodule, completedTaskIds, revealedSkillIds,
+						activePath, tasksAdded, tasksRemoved))
+				.collect(Collectors.toMap(EditionLevelSubmoduleView::id, view -> view));
+	}
+
 	private EditionLevelSubmoduleView convertToSubmoduleView(Submodule submodule,
 			Set<Long> completedTaskIds, Set<Long> revealedSkillIds, Path activePath, Set<Task> tasksAdded,
 			Set<Task> tasksRemoved) {

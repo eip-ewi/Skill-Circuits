@@ -7,11 +7,15 @@
     import { getLevel, isLevel } from "../../../logic/circuit/level.svelte";
     import { isCompleted } from "../../../logic/circuit/skill_state/completion";
     import { loadPage } from "../../../logic/routing.svelte";
-    import { ModuleLevel } from "../../../data/level";
+    import { ModuleLevel, TrackLevel } from "../../../data/level";
     import BlockActionIndicationComponent from "./BlockActionIndicationComponent.svelte";
     import ExpandedViewOpenButtonComponent from "./ExpandedViewOpenButtonComponent.svelte";
     import ExpandedBlockComponent from "./ExpandedBlockComponent.svelte";
-    import { getBlocks, updateBlockNoCascade } from "../../../logic/circuit/circuit.svelte";
+    import {
+        getBlocks,
+        getGroupForBlock,
+        updateBlockNoCascade,
+    } from "../../../logic/circuit/circuit.svelte";
     import BlockControlsComponent from "./BlockControlsComponent.svelte";
     import { type BlockAction, BlockActions } from "../../../data/block_action";
     import { BlockStates } from "../../../data/block_state";
@@ -25,6 +29,7 @@
     import {
         clearScrollTarget,
         getScrollTarget,
+        setScrollTarget,
     } from "../../../logic/circuit/scroll_target.svelte";
     import { getBlurBlocks } from "../../../logic/preferences.svelte";
     import ExpandedSubmoduleComponent from "../../expanded_submodule/ExpandedSubmoduleComponent.svelte";
@@ -186,7 +191,8 @@
         if (block.blockType === "skill" && !block.external) {
             expanded = true;
         } else {
-            loadPage(`/${getLevel().blocks}/${block.id}`);
+            setScrollTarget({ kind: "group", id: block.id });
+            loadPage(`/${getLevel().groups}/${getGroupForBlock(block).id}`);
         }
     }
 
@@ -267,7 +273,7 @@
         {#if block.blockType === "skill" && !block.external && (block.state === BlockStates.Hovering || isSkillBookmarked(block))}
             <BookmarkSkillButtonComponent bind:action skill={block}></BookmarkSkillButtonComponent>
         {/if}
-        {#if block.blockType === "skill" && (block.state === BlockStates.Hovering || focusModeState === FocusModeBlockStates.FocusOnBlock) && !hasEditorRights()}
+        {#if block.blockType === "skill" && (block.state === BlockStates.Hovering || focusModeState === FocusModeBlockStates.FocusOnBlock) && !hasEditorRights() && !isLevel(TrackLevel)}
             <FocusModeButtonsComponent bind:action {block}></FocusModeButtonsComponent>
         {/if}
         {#if (block.blockType !== "skill" || block.external) && !hasEditorRights()}
@@ -282,7 +288,7 @@
                     bind:open={expanded}></ExpandedSubmoduleComponent>
             {/if}
         {/if}
-        {#if hasEditorRights() && (draggable || block.state === BlockStates.Hovering || block.state === BlockStates.Connecting || block.state === BlockStates.Editing)}
+        {#if !isLevel(TrackLevel) && hasEditorRights() && (draggable || block.state === BlockStates.Hovering || block.state === BlockStates.Connecting || block.state === BlockStates.Editing)}
             <BlockControlsComponent {block} bind:action bind:draggable></BlockControlsComponent>
         {/if}
         {#if block.state === BlockStates.WaitingForConnection}
