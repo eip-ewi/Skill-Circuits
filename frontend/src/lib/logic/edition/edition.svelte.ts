@@ -1,7 +1,5 @@
-import { Graph } from "../circuit/graph";
-import { getLevel } from "../circuit/level.svelte";
 import type { Checkpoint } from "../../dto/checkpoint";
-import { getCircuit, getPlacedBlocks, getVisibleBlocks } from "../circuit/circuit.svelte";
+import { getPlacedBlocks, getVisibleBlocks } from "../circuit/circuit.svelte";
 import type { Edition } from "../../dto/edition";
 import moment from "moment";
 import type { Module } from "../../dto/module";
@@ -35,7 +33,9 @@ export function getSortedCheckpoints(): Checkpoint[] {
 }
 
 export function getVisibleCheckpoints(): Checkpoint[] {
-    let usedCheckpoints: Set<number> = new Set(
+    // This is a local lookup collection; no reactive consumer observes its mutations.
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity
+    const usedCheckpoints: Set<number> = new Set(
         getPlacedBlocks()
             .filter(block => block.blockType === "skill")
             .filter(block => block.checkpoint != null)
@@ -45,7 +45,9 @@ export function getVisibleCheckpoints(): Checkpoint[] {
 }
 
 export function getNextCheckpoint(): Checkpoint | undefined {
-    let uncompleted: Set<number> = new Set(
+    // This is a local lookup collection; no reactive consumer observes its mutations.
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity
+    const uncompleted: Set<number> = new Set(
         getVisibleBlocks()
             .filter(block => block.blockType === "skill" && block.checkpoint !== null)
             .filter(block => !isCompleted(block))
@@ -57,7 +59,9 @@ export function getNextCheckpoint(): Checkpoint | undefined {
 }
 
 export function getFirstUncompletedPastCheckpoint(): Checkpoint | undefined {
-    let uncompleted: Set<number> = new Set(
+    // This is a local lookup collection; no reactive consumer observes its mutations.
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity
+    const uncompleted: Set<number> = new Set(
         getVisibleBlocks()
             .filter(
                 block =>

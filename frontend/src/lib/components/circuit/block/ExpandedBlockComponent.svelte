@@ -70,9 +70,8 @@
 </script>
 
 {#if open}
-    <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
     <dialog bind:this={element} onclick={checkForClose} onkeydown={checkForClose}>
-        <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div
             class="expanded-block"
             transition:openExpandedBlockTransition={{ block: block }}

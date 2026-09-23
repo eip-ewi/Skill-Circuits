@@ -1,16 +1,6 @@
 <script lang="ts">
-    import type { Item } from "../../../dto/circuit/item";
-    import { deleteItem, editItemName } from "../../../logic/circuit/updates/item_updates";
-    import TaskTypeEditComponent from "./TaskTypeEditComponent.svelte";
-    import TaskTimeEditComponent from "./TaskTimeEditComponent.svelte";
-    import TaskLinkEditComponent from "./TaskLinkEditComponent.svelte";
-    import TaskPathEditComponent from "./TaskPathEditComponent.svelte";
-    import type { Snippet } from "svelte";
-    import type {
-        ChoiceTaskItem,
-        RegularTaskItem,
-        TaskItem,
-    } from "../../../dto/circuit/module/task";
+    import { editItemName } from "../../../logic/circuit/updates/item_updates";
+    import type { ChoiceTaskItem, RegularTaskItem } from "../../../dto/circuit/module/task";
     import TaskInfoEditComponent from "./TaskInfoEditComponent.svelte";
     import { getBlocks, getItem } from "../../../logic/circuit/circuit.svelte";
     import {
@@ -106,7 +96,7 @@
     }
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
     class="task"
     ondragenter={dragEnter}
@@ -133,7 +123,7 @@
                 onchange={editMinTasks} />
         </div>
     </div>
-    {#each task.tasks as subtask}
+    {#each task.tasks as subtask (subtask.infoId)}
         <TaskInfoEditComponent taskInfo={subtask}></TaskInfoEditComponent>
     {/each}
     <div class="drop-indicator"></div>

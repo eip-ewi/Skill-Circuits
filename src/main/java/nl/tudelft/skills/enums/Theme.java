@@ -35,6 +35,12 @@ public enum Theme {
 	),
 	NOSTALGIA(
 		"nostalgia", "light", "Nostalgia"
+	),
+	HIGH_CONTRAST_LIGHT(
+		"high_contrast_light", "light", "High-contrast (light)"
+	),
+	HIGH_CONTRAST_DARK(
+		"high_contrast_dark", "dark", "High-contrast (dark)"
 	);
 
 	private final String name;

@@ -2,7 +2,6 @@
     import type { Block } from "../../../dto/circuit/block";
     import { getLevel } from "../../../logic/circuit/level.svelte";
     import { getCircuit, getGroup, getGroupForBlock } from "../../../logic/circuit/circuit.svelte";
-    import ItemEditComponent from "../item/ItemEditComponent.svelte";
     import Select from "../../util/Select.svelte";
     import { editBlockGroup, editBlockName } from "../../../logic/circuit/updates/block_updates";
     import { createItem } from "../../../logic/circuit/updates/item_updates";
@@ -65,7 +64,7 @@
                 value={block.name}
                 onchange={editName} />
             <Select onchange={editGroup}>
-                {#each getCircuit().groups as group}
+                {#each getCircuit().groups as group (group.id)}
                     {@const currentGroup = getGroupForBlock(block)}
                     <option selected={group.id === currentGroup.id} value={group.id}>
                         {group.name}
@@ -75,7 +74,7 @@
             {#if block.blockType === "skill"}
                 <Select onchange={editCheckpoint}>
                     <option selected={block.checkpoint === null} value="">No checkpoint</option>
-                    {#each getSortedCheckpoints() as checkpoint}
+                    {#each getSortedCheckpoints() as checkpoint (checkpoint.id)}
                         {@const currentCheckpoint =
                             block.checkpoint === null ? null : getCheckpoint(block.checkpoint)}
                         <option

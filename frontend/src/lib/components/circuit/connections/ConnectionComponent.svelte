@@ -1,14 +1,15 @@
 <script lang="ts">
-    import type { LineSegments } from "../../../data/path";
     import { generatePathString } from "../../../logic/line_segments";
     import type { Block } from "../../../dto/circuit/block";
     import { createConnectionPath } from "../../../logic/circuit/connection.svelte";
-    import { hasEditorRights, getAuthorisation } from "../../../logic/authorisation.svelte";
+    import { hasEditorRights } from "../../../logic/authorisation.svelte";
     import { isUnlocked } from "../../../logic/circuit/skill_state/unlock";
     import { isCompleted } from "../../../logic/circuit/skill_state/completion";
     import { getCircuit } from "../../../logic/circuit/circuit.svelte";
     import { onMount, tick } from "svelte";
     import { getBlurBlocks } from "../../../logic/preferences.svelte";
+    import { getFocusModeState, isInFocusMode } from "../../../logic/circuit/focusMode.svelte";
+    import { isVisibleAndInFocusMode } from "../../../data/focus_mode_block_state";
 
     let { from, to }: { from: Block; to: Block } = $props();
 
@@ -18,6 +19,13 @@
                 isCompleted(from) ||
                 (isUnlocked(from) && from.blockType === "skill" && !from.essential)
             ),
+    );
+    let visibleAndInFocusMode: boolean = $derived(
+        isVisibleAndInFocusMode(getFocusModeState(from.id)) &&
+            isVisibleAndInFocusMode(getFocusModeState(to.id)),
+    );
+    let disabledAndInFocusMode: boolean = $derived(
+        !locked && isInFocusMode() && !visibleAndInFocusMode,
     );
     let animated: boolean = $state(false);
 
@@ -71,8 +79,9 @@
             xmlns="http://www.w3.org/2000/svg"
             class="line"
             d={generatePathString(path, radius)}
-            data-locked={locked && getBlurBlocks()}
-            data-preview={to.preview === true && locked}
+            data-locked={locked && getBlurBlocks() && !visibleAndInFocusMode}
+            data-disabled-in-focus-mode={disabledAndInFocusMode}
+            data-preview={to.preview === true && locked && !visibleAndInFocusMode}
             bind:this={element}
             data-animate={animated} />
     {/if}
@@ -87,10 +96,9 @@
         transition:
             filter ease-in-out 150ms,
             opacity ease-in-out 150ms;
-        z-index: 10;
     }
 
-    path:hover {
+    path[data-disabled-in-focus-mode="false"]:hover {
         stroke: var(--connection-highlighted-colour);
         stroke-width: var(--connection-highlighted-width);
     }
@@ -104,10 +112,16 @@
     path[data-locked="true"] {
         opacity: 0;
         filter: blur(0.2em);
+        /* Should not interfere with interactable lines */
+        pointer-events: none;
     }
 
     path[data-preview="true"] {
         opacity: 0.3;
+    }
+
+    path[data-disabled-in-focus-mode="true"] {
+        opacity: 0.2;
     }
 
     @keyframes draw {

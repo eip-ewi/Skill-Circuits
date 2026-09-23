@@ -21,7 +21,7 @@
     a {
         color: var(--link-colour);
         cursor: pointer;
-        text-decoration: none;
+        text-decoration-line: var(--link-text-decoration);
     }
 
     a:hover,

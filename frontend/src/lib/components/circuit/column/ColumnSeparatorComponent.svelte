@@ -51,6 +51,8 @@
         position: relative;
         pointer-events: none;
         width: 0;
+        /* Must be above the SVG lines */
+        z-index: 2;
     }
 
     .separator-anchor[data-edge="start"] {

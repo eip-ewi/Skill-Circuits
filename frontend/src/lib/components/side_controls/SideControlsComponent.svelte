@@ -2,7 +2,6 @@
     import TrayComponent from "./tray/TrayComponent.svelte";
     import { cubicInOut } from "svelte/easing";
     import CheckpointsPanelComponent from "./checkpoints/CheckpointsPanelComponent.svelte";
-    import { getAuthorisation } from "../../logic/authorisation.svelte";
     import PathsPanelComponent from "./paths/PathsPanelComponent.svelte";
     import ModulesPanelComponent from "./modules/ModulesPanelComponent.svelte";
     import { hasEditorRights } from "../../logic/authorisation.svelte.js";
@@ -12,8 +11,9 @@
     import { isLevel } from "../../logic/circuit/level.svelte";
     import { EditionLevel } from "../../data/level";
     import BookmarksPanelComponent from "./bookmarks/BookmarksPanelComponent.svelte";
-    import { getPaths } from "../../logic/edition/edition.svelte";
     import LegendPanelComponent from "./legend/LegendPanelComponent.svelte";
+    import ResearchPanelComponent from "./research/ResearchPanelComponent.svelte";
+    import { getResearchInfo } from "../../logic/research.svelte";
 
     let openPanel:
         | "bookmarks"
@@ -23,6 +23,7 @@
         | "modules"
         | "config"
         | "legend"
+        | "research"
         | undefined = $state();
 
     let bookmarksOpen: boolean = $state(false);
@@ -32,6 +33,7 @@
     let modulesOpen: boolean = $state(false);
     let configOpen: boolean = $state(false);
     let legendOpen: boolean = $state(false);
+    let researchOpen: boolean = $state(false);
 
     $effect(() => {
         if (bookmarksOpen) {
@@ -48,12 +50,14 @@
             openPanel = "config";
         } else if (legendOpen) {
             openPanel = "legend";
+        } else if (researchOpen) {
+            openPanel = "research";
         } else {
             openPanel = undefined;
         }
     });
 
-    function growHorizontal(node: HTMLElement, params: { delay?: number }) {
+    function growHorizontal(_node: HTMLElement, params: { delay?: number }) {
         return {
             delay: params.delay || 0,
             duration: 150,
@@ -77,10 +81,11 @@
     {#if !isLevel(EditionLevel)}
         <LegendPanelComponent bind:open={legendOpen}></LegendPanelComponent>
     {/if}
+    <ResearchPanelComponent bind:open={researchOpen}></ResearchPanelComponent>
 </div>
 
 {#if openPanel === undefined}
-    <!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events, a11y_mouse_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div class="controls" in:growHorizontal={{ delay: 150 }} out:growHorizontal={{}}>
         <div class="glass surface">
             <button
@@ -152,6 +157,17 @@
                 </div>
             {/if}
         {/if}
+
+        {#if hasEditorRights() || getResearchInfo().active}
+            <div class="glass surface">
+                <button
+                    class="button"
+                    aria-label="Open research panel"
+                    onclick={() => (researchOpen = true)}>
+                    <span class="fa-solid fa-flask"></span>
+                </button>
+            </div>
+        {/if}
     </div>
 {/if}
 
@@ -191,6 +207,7 @@
     .button:focus-visible,
     .button:hover {
         background: var(--on-glass-surface-active-colour);
+        outline: 1px solid var(--default-border-color);
     }
 
     .button span {

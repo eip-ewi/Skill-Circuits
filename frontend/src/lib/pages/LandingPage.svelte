@@ -1,9 +1,7 @@
 <script lang="ts">
     import type { Editions } from "../dto/editions";
     import EditionCardComponent from "../components/edition/EditionCardComponent.svelte";
-    import HeaderComponent from "../components/HeaderComponent.svelte";
     import { clearLevel } from "../logic/circuit/level.svelte";
-    import { getAuthorisation } from "../logic/authorisation.svelte";
     import PageTabs from "../components/util/PageTabs.svelte";
     import Tab from "../components/util/Tab.svelte";
     import PageLayout from "./PageLayout.svelte";
@@ -47,7 +45,7 @@
                 {#if editions.currentEditions.length > 0}
                     <div class="editions">
                         <h2>Current editions</h2>
-                        {#each editions.currentEditions as editionView}
+                        {#each editions.currentEditions as editionView (editionView.id)}
                             <EditionCardComponent edition={editionView}></EditionCardComponent>
                         {/each}
                     </div>
@@ -56,7 +54,7 @@
                 {#if editions.upcomingEditions.length > 0}
                     <div class="editions">
                         <h2>Upcoming editions</h2>
-                        {#each editions.upcomingEditions as editionView}
+                        {#each editions.upcomingEditions as editionView (editionView.id)}
                             <EditionCardComponent edition={editionView}></EditionCardComponent>
                         {/each}
                     </div>
@@ -65,7 +63,7 @@
                 {#if editions.finishedEditions.length > 0}
                     <div class="editions">
                         <h2>Finished editions</h2>
-                        {#each editions.finishedEditions as editionView}
+                        {#each editions.finishedEditions as editionView (editionView.id)}
                             <EditionCardComponent edition={editionView}></EditionCardComponent>
                         {/each}
                     </div>
@@ -74,7 +72,7 @@
                 {#if editions.archivedEditions.length > 0}
                     <div class="editions">
                         <h2>Archived editions</h2>
-                        {#each editions.archivedEditions as editionView}
+                        {#each editions.archivedEditions as editionView (editionView.id)}
                             <EditionCardComponent edition={editionView}></EditionCardComponent>
                         {/each}
                     </div>

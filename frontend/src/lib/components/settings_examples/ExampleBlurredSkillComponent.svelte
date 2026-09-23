@@ -1,11 +1,10 @@
 <script lang="ts">
-    import { TaskIcons } from "../../../dto/task_icons";
-
-    let { locked }: { locked: boolean } = $props();
+    import { TaskIcons } from "../../dto/task_icons";
+    import { getBlurBlocks } from "../../logic/preferences.svelte.js";
 </script>
 
 <div class="block-wrapper">
-    <div class="block" data-locked={locked}>
+    <div class="block" data-locked={getBlurBlocks()}>
         <div class="heading">
             <span class="name">Example Skill</span>
         </div>

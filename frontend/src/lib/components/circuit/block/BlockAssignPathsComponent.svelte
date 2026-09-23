@@ -1,15 +1,10 @@
 <script lang="ts">
     import type { SkillBlock } from "../../../dto/circuit/module/skill";
-    import {
-        getCheckpoint,
-        getPaths,
-        getSortedCheckpoints,
-    } from "../../../logic/edition/edition.svelte";
+    import { getPaths } from "../../../logic/edition/edition.svelte";
     import { TaskIcons } from "../../../dto/task_icons";
     import type { TaskItem } from "../../../dto/circuit/module/task";
     import type { Path } from "../../../dto/path";
     import { editTaskPaths } from "../../../logic/circuit/updates/task_updates";
-    import { hasEditorRights } from "../../../logic/authorisation.svelte";
 
     let { skill }: { skill: SkillBlock } = $props();
 
@@ -33,13 +28,13 @@
         <thead>
             <tr>
                 <th></th>
-                {#each getPaths() as path}
+                {#each getPaths() as path (path.id)}
                     <th style="width: 1%;">{path.name}</th>
                 {/each}
             </tr>
         </thead>
         <tbody>
-            {#each skill.items as task}
+            {#each skill.items as task (task.id)}
                 <tr>
                     <td>
                         {#if task.taskType === "regular"}
@@ -49,7 +44,7 @@
                         {/if}
                         <span>{task.name}</span>
                     </td>
-                    {#each getPaths() as path}
+                    {#each getPaths() as path (path.id)}
                         <td>
                             <div class="cell">
                                 <input

@@ -7,7 +7,7 @@
 
 <div class="content">
     <div class="themes">
-        {#each availableThemes as theme}
+        {#each availableThemes as theme (theme.name)}
             <div
                 class="theme"
                 data-theme={getThemeName(theme)}
@@ -34,8 +34,9 @@
         display: grid;
         gap: 1em;
         font-size: var(--font-size-400);
-        grid-auto-flow: column;
-        grid-template-columns: 10em 10em 10em 10em;
+        grid-auto-flow: row;
+        grid-template-rows: repeat(2, 1fr);
+        grid-template-columns: repeat(4, 12em);
         background-color: var(--block-colour);
         border: var(--block-border);
         border-radius: var(--surface-border-radius);

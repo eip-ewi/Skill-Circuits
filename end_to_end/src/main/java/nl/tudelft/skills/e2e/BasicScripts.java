@@ -73,4 +73,17 @@ public final class BasicScripts {
 		locators.button("Log out").click();
 	}
 
+	public void makeEditor() {
+		locators.query(".header > .button:last-child").click();
+
+		LocatorLocators editorViewButton = locators.button("Editor view");
+		editorViewButton.tryWaitFor();
+
+		if (editorViewButton.isVisible()) {
+			editorViewButton.click();
+		}
+
+		locators.button("Close menu").click();
+	}
+
 }

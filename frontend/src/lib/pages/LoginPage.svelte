@@ -1,6 +1,5 @@
 <script lang="ts">
     import Csrf from "../components/Csrf.svelte";
-    import { onMount } from "svelte";
     import PageLayout from "./PageLayout.svelte";
 </script>
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { TaskInfo, TaskItem } from "../../../dto/circuit/module/task";
+    import type { TaskInfo } from "../../../dto/circuit/module/task";
     import { editTaskType } from "../../../logic/circuit/updates/task_updates";
     import Select from "../../util/Select.svelte";
     import Option from "../../util/Option.svelte";
@@ -15,7 +15,7 @@
 
 {#key taskInfo}
     <Select style="min-width: 3.8em; padding: 0.25em 0.5em;" onchange={editType}>
-        {#each Object.keys(TaskIcons) as type}
+        {#each Object.keys(TaskIcons) as type (type)}
             <Option value={type} selected={taskInfo.type === type}>
                 <span class="fa-solid fa-{TaskIcons[type]}"></span>
             </Option>

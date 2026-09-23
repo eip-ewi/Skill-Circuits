@@ -58,7 +58,7 @@ export function isTaskOnPath(task: TaskItem): boolean {
 }
 
 export async function selectPath(path: Path) {
-    let response = await fetch(
+    const response = await fetch(
         `/api/paths/active?edition=${getEdition().id}&path=${path.id}`,
         withCsrf({
             method: "PUT",
@@ -74,8 +74,8 @@ export async function selectPath(path: Path) {
 }
 
 export async function fetchActivePath() {
-    let response = await fetch(`/api/paths/active?edition=${getEdition().id}`);
-    let body = await response.text();
+    const response = await fetch(`/api/paths/active?edition=${getEdition().id}`);
+    const body = await response.text();
     if (body === "") {
         pathState.activePath = null;
     } else {
@@ -84,8 +84,8 @@ export async function fetchActivePath() {
 }
 
 export async function fetchPathCustomisation() {
-    let response = await fetch(`/api/paths/customisation?edition=${getEdition().id}`);
-    let customisation: { tasksAdded: number[]; tasksRemoved: number[] } = await response.json();
+    const response = await fetch(`/api/paths/customisation?edition=${getEdition().id}`);
+    const customisation: { tasksAdded: number[]; tasksRemoved: number[] } = await response.json();
     pathState.tasksAdded = customisation.tasksAdded;
     pathState.tasksRemoved = customisation.tasksRemoved;
 }
@@ -93,7 +93,7 @@ export async function fetchPathCustomisation() {
 export async function addTaskToPath(task: TaskItem) {
     if (isTaskOnPath(task)) return;
 
-    let response = await fetch(
+    const response = await fetch(
         `/api/paths/tasks/${task.id}`,
         withCsrf({
             method: "POST",
@@ -115,7 +115,7 @@ export async function addTaskToPath(task: TaskItem) {
 export async function removeTaskFromPath(task: TaskItem) {
     if (!isTaskOnPath(task)) return;
 
-    let response = await fetch(
+    const response = await fetch(
         `/api/paths/tasks/${task.id}`,
         withCsrf({
             method: "DELETE",

@@ -45,6 +45,7 @@ public class TaskInfoPatch extends Patch<TaskInfo> {
 		updateNonNull(type, data::setType);
 		updateNonNull(time, data::setTime);
 		if (link != null) {
+			link = link.replaceAll("\\s", "");
 			data.setLink(link.isBlank() ? null : link);
 		}
 	}

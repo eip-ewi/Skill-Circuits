@@ -42,7 +42,8 @@
         cursor: pointer;
         transition:
             filter ease-in-out 150ms,
-            background-color ease-in-out 150ms;
+            background-color ease-in-out 150ms,
+            border ease-in-out 150ms;
         white-space: nowrap;
     }
 
@@ -51,11 +52,13 @@
     }
 
     .skill-name:hover {
-        background-color: color-mix(in srgb, var(--column-colour) 50%, transparent);
+        background-color: var(--submodule-overview-hover-background-color);
+        outline: 1px solid var(--submodule-overview-selection-border-color);
     }
 
     .skill-name[data-selected="true"] {
-        background-color: var(--column-colour);
+        background-color: var(--submodule-overview-selected-background-color);
+        outline: 1px solid var(--submodule-overview-selection-border-color);
     }
 
     .skill-name[data-locked="true"] {

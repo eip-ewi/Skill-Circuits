@@ -22,9 +22,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
+
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import nl.tudelft.skills.model.research.ResearchInfo;
 
 @Data
 @Entity
@@ -68,5 +73,12 @@ public class SCEdition {
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	private Set<SCPerson> editors = new HashSet<>();
+
+	@Nullable
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@Cascade(CascadeType.REMOVE)
+	@OneToOne(mappedBy = "edition")
+	private ResearchInfo researchInfo;
 
 }

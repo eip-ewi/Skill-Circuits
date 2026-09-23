@@ -1,27 +1,25 @@
 import type { Block } from "../../dto/circuit/block";
 import { Graph } from "./graph";
-import type { Warning } from "../../data/warning";
 import type { Checkpoint } from "../../dto/checkpoint";
 import moment from "moment";
-import { getBlocks } from "./circuit.svelte";
 import type { SkillBlock } from "../../dto/circuit/module/skill";
 
 export function placeBlocks(graph: Graph) {
-    let placement = new Placement();
+    const placement = new Placement();
 
-    let sortedBlocks = topologicalSort(graph, graph.getNodes());
+    const sortedBlocks = topologicalSort(graph, graph.getNodes());
 
-    let rows: Map<number, number> = new Map();
+    const rows: Map<number, number> = new Map();
     graph.getNodes().forEach(block => {
         rows.set(block.id, 0);
     });
 
     sortedBlocks.forEach(block => {
-        let minRow = Math.max(
+        const minRow = Math.max(
             0,
             ...graph.getParents(block).map(parent => rows.get(parent.id)! + 1),
         );
-        let freeRow = placement.firstFreeSpotInColumnFromRow(block.column!, minRow);
+        const freeRow = placement.firstFreeSpotInColumnFromRow(block.column!, minRow);
         block.row = freeRow;
         rows.set(block.id, freeRow);
         placement.place(block);
@@ -29,29 +27,29 @@ export function placeBlocks(graph: Graph) {
 }
 
 export function placeBlocksWithCheckpoints(graph: Graph, checkpoints: Checkpoint[]) {
-    let placement = new Placement();
+    const placement = new Placement();
 
-    let skills = graph.getNodes() as SkillBlock[];
+    const skills = graph.getNodes() as SkillBlock[];
 
-    let rows: Map<number, number> = new Map();
+    const rows: Map<number, number> = new Map();
     skills.forEach(skill => {
         rows.set(skill.id, 0);
     });
 
-    let placed: Set<number> = new Set();
+    const placed: Set<number> = new Set();
 
     function placeSkills(skills: SkillBlock[], minHeight: number) {
-        let sortedSkills = topologicalSort(graph, skills);
+        const sortedSkills = topologicalSort(graph, skills);
 
         sortedSkills.forEach(skill => {
-            let minRow = Math.max(
+            const minRow = Math.max(
                 minHeight,
                 ...graph
                     .getParents(skill)
                     .filter(parent => rows.has(parent.id))
                     .map(parent => rows.get(parent.id)! + 1),
             );
-            let freeRow = placement.firstFreeSpotInColumnFromRow(skill.column!, minRow);
+            const freeRow = placement.firstFreeSpotInColumnFromRow(skill.column!, minRow);
             skill.row = freeRow;
             rows.set(skill.id, freeRow);
             placement.place(skill);
@@ -59,14 +57,14 @@ export function placeBlocksWithCheckpoints(graph: Graph, checkpoints: Checkpoint
         });
     }
 
-    let sortedCheckpoints: Checkpoint[] = checkpoints.toSorted(
+    const sortedCheckpoints: Checkpoint[] = checkpoints.toSorted(
         (a, b) => moment(a.deadline).unix() - moment(b.deadline).unix(),
     );
 
     let minHeight = 0;
-    for (let checkpoint of sortedCheckpoints) {
-        let skillsInCheckpoint = skills.filter(skill => checkpoint.id === skill.checkpoint);
-        let skillsToPlace = graph
+    for (const checkpoint of sortedCheckpoints) {
+        const skillsInCheckpoint = skills.filter(skill => checkpoint.id === skill.checkpoint);
+        const skillsToPlace = graph
             .getAncestors(skillsInCheckpoint)
             .filter(skill => !placed.has(skill.id));
         placeSkills(skillsToPlace, minHeight);
@@ -80,11 +78,11 @@ export function placeBlocksWithCheckpoints(graph: Graph, checkpoints: Checkpoint
 }
 
 export function topologicalSort<B extends Block>(graph: Graph, blocks: B[]): B[] {
-    let result: B[] = [];
+    const result: B[] = [];
 
-    let toInclude: Set<number> = new Set(blocks.map(block => block.id));
+    const toInclude: Set<number> = new Set(blocks.map(block => block.id));
 
-    let noDependencies: Set<number> = new Set();
+    const noDependencies: Set<number> = new Set();
     blocks
         .filter(
             block =>
@@ -94,7 +92,7 @@ export function topologicalSort<B extends Block>(graph: Graph, blocks: B[]): B[]
             noDependencies.add(block.id);
         });
 
-    let removed: Set<number> = new Set();
+    const removed: Set<number> = new Set();
 
     function nonRemovedParents(block: B): B[] {
         return graph
@@ -105,14 +103,14 @@ export function topologicalSort<B extends Block>(graph: Graph, blocks: B[]): B[]
     while (removed.size < blocks.length) {
         if (noDependencies.size === 0) {
             // Cycle
-            let blockWithFewestParents = blocks
+            const blockWithFewestParents = blocks
                 .filter(block => !removed.has(block.id))
                 .toSorted((a, b) => nonRemovedParents(a).length - nonRemovedParents(b).length)[0]!;
             noDependencies.add(blockWithFewestParents.id);
         }
 
         while (noDependencies.size > 0) {
-            let current = graph.getNode(noDependencies.keys().next().value!) as B;
+            const current = graph.getNode(noDependencies.keys().next().value!) as B;
             noDependencies.delete(current.id);
 
             result.push(current);

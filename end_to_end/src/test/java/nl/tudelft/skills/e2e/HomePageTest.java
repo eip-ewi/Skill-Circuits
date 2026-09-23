@@ -20,7 +20,9 @@ package nl.tudelft.skills.e2e;
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 import static nl.tudelft.skills.e2e.User.csestudent1;
 import static nl.tudelft.skills.e2e.User.cseteacher1;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

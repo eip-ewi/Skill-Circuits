@@ -1,5 +1,5 @@
-import type { ChoiceTaskItem, TaskItem } from "./circuit/module/task";
-import type { RegularSkillBlock, SkillBlock } from "./circuit/module/skill";
+import type { TaskItem } from "./circuit/module/task";
+import type { RegularSkillBlock } from "./circuit/module/skill";
 
 export interface IBookmarkList {
     id: number;

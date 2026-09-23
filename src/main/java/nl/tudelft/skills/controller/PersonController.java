@@ -63,4 +63,12 @@ public class PersonController {
 		return personalPreferencesService
 				.convertToPreferencesView(personalPreferencesService.setTheme(scPerson, theme));
 	}
+
+	@PatchMapping("preferences/additional-icons")
+	public PersonalPreferencesView setAdditionalIcons(@AuthenticatedSCPerson SCPerson scPerson,
+			@RequestParam boolean additionalIcons) {
+		return personalPreferencesService
+				.convertToPreferencesView(
+						personalPreferencesService.setAdditionalIcons(scPerson, additionalIcons));
+	}
 }

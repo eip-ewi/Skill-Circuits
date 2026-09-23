@@ -1,4 +1,4 @@
-export const TaskIcons: any = {
+const taskIcons = {
     READING: "book",
     VIDEO: "play",
     QUIZ: "clipboard-question",
@@ -7,4 +7,6 @@ export const TaskIcons: any = {
     COLLABORATION: "people-carry",
     EXPERIMENT: "flask",
     CLASSROOM: "person-chalkboard",
-};
+} as const;
+
+export const TaskIcons: Record<string, string> & typeof taskIcons = taskIcons;

@@ -29,10 +29,20 @@
     import { getBlurBlocks } from "../../../logic/preferences.svelte";
     import ExpandedSubmoduleComponent from "../../expanded_submodule/ExpandedSubmoduleComponent.svelte";
     import type { SubmoduleBlock } from "../../../dto/circuit/edition/submodule";
+    import FocusModeButtonsComponent from "./FocusModeButtonsComponent.svelte";
+    import {
+        type FocusModeBlockState,
+        FocusModeBlockStates,
+        isVisibleAndInFocusMode,
+    } from "../../../data/focus_mode_block_state";
+    import { getFocusModeState } from "../../../logic/circuit/focusMode.svelte";
 
     let { block }: { block: Block } = $props();
 
-    let locked: boolean = $derived(!hasEditorRights() && !isUnlocked(block));
+    let focusModeState: FocusModeBlockState = $derived(getFocusModeState(block.id));
+    let locked: boolean = $derived(
+        !hasEditorRights() && !isUnlocked(block) && !isVisibleAndInFocusMode(focusModeState),
+    );
     let completed: boolean = $derived(!hasEditorRights() && isCompleted(block));
     let clickable: boolean = $derived(
         (!hasEditorRights() || !isLevel(ModuleLevel)) &&
@@ -78,14 +88,14 @@
 
     $effect(() => {
         // Recalculate when any of the following change
-        block.column;
-        block.row;
-        block.state;
+        void block.column;
+        void block.row;
+        void block.state;
         hasEditorRights();
         getBlocks()
             .filter(upperBlock => upperBlock.row! < block.row!)
             .forEach(upperBlock => {
-                upperBlock.state;
+                void upperBlock.state;
             });
 
         recalculateBounds();
@@ -209,7 +219,7 @@
                 <span class="icon fa-solid fa-location-dot"></span>
                 <span>
                     Go to skill
-                    <span class="scroll-to-name">{" "}"{block.name}"</span>
+                    <span class="scroll-to-name">"{block.name}"</span>
                 </span>
             </button>
         </div>
@@ -237,8 +247,10 @@
         data-clickable={clickable}
         data-wiggle={block.state === BlockStates.Dragging}
         data-unfocus={unfocused}
-        data-pulse={block.state === BlockStates.Connecting}
+        data-pulse={block.state === BlockStates.Connecting ||
+            focusModeState === FocusModeBlockStates.FocusOnBlock}
         data-hidden={hidden}
+        data-focus-mode-hidden={focusModeState === FocusModeBlockStates.DisabledInFocusMode}
         onclick={click}
         onmouseenter={mouseEnterBlock}
         onmouseleave={mouseLeaveBlock}>
@@ -247,13 +259,16 @@
         {:else if block.state === BlockStates.AssigningPaths && block.blockType === "skill"}
             <BlockAssignPathsComponent skill={block}></BlockAssignPathsComponent>
         {:else}
-            <BlockContentComponent {block}></BlockContentComponent>
+            <BlockContentComponent {block} {completed}></BlockContentComponent>
         {/if}
     </div>
 
     <div class="controls">
         {#if block.blockType === "skill" && !block.external && (block.state === BlockStates.Hovering || isSkillBookmarked(block))}
             <BookmarkSkillButtonComponent bind:action skill={block}></BookmarkSkillButtonComponent>
+        {/if}
+        {#if block.blockType === "skill" && (block.state === BlockStates.Hovering || focusModeState === FocusModeBlockStates.FocusOnBlock) && !hasEditorRights()}
+            <FocusModeButtonsComponent bind:action {block}></FocusModeButtonsComponent>
         {/if}
         {#if (block.blockType !== "skill" || block.external) && !hasEditorRights()}
             {#if block.state === BlockStates.Hovering}
@@ -307,6 +322,8 @@
         transition:
             filter ease-in-out 150ms,
             box-shadow ease-in-out 150ms;
+        /* Must be above SVG lines */
+        z-index: 2;
     }
 
     .block[data-wiggle="true"] {
@@ -347,6 +364,10 @@
         cursor: pointer;
     }
 
+    .block[data-focus-mode-hidden="true"] {
+        opacity: 0.3;
+    }
+
     .scroll-to-pulse-container {
         position: fixed;
         bottom: 2rem;
@@ -374,6 +395,7 @@
 
     .scroll-to-pulse-button:where(:focus-visible, :hover) {
         background: var(--on-glass-surface-active-colour);
+        outline: 1px solid var(--default-border-color);
     }
 
     .scroll-to-pulse-button .icon {

@@ -1,6 +1,5 @@
 <script lang="ts">
     import { onMount, type Snippet } from "svelte";
-    import type { ClassValue } from "svelte/elements";
 
     interface Properties {
         children: Snippet;
@@ -183,7 +182,9 @@
             {#if selected.length === 0}
                 <span class="placeholder">Select...</span>
             {:else}
-                {#each selected as index}
+                {#each selected as index (index)}
+                    <!-- Option labels intentionally support formatted HTML. -->
+                    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                     <span>{@html options[index]?.html}</span>
                 {/each}
             {/if}
@@ -194,7 +195,7 @@
     {/if}
 
     <div class="scrollable glass options" tabindex="-1">
-        {#each options as option, i}
+        {#each options as option, i (i)}
             <button
                 tabindex="-1"
                 class="option"
@@ -203,8 +204,10 @@
                 value={option.value}
                 onclick={() => selectOption(i)}
                 onblur={blurOption}>
+                <!-- Option labels intentionally support formatted HTML. -->
+                <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                 <span>{@html option.html}</span>
-                <span class="check">{"\u2713"}</span>
+                <span class="check">✓</span>
             </button>
         {/each}
     </div>
@@ -271,6 +274,7 @@
     .option:focus-visible {
         background-color: var(--option-active-colour);
         color: var(--on-option-active-colour);
+        outline: 1px solid var(--default-border-color);
     }
 
     .option[aria-selected="false"] .check {

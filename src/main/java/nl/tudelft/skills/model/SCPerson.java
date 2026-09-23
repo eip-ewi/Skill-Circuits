@@ -20,11 +20,14 @@ package nl.tudelft.skills.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hibernate.annotations.Cascade;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import nl.tudelft.skills.enums.ViewMode;
 import nl.tudelft.skills.model.bookmark.PersonalBookmarkList;
+import nl.tudelft.skills.model.research.ResearchConsent;
 
 @Data
 @Entity
@@ -93,5 +96,13 @@ public class SCPerson {
 	@EqualsAndHashCode.Exclude
 	@OneToMany(mappedBy = "person", cascade = CascadeType.ALL)
 	private Set<PersonalBookmarkList> bookmarkLists = new HashSet<>();
+
+	@NotNull
+	@Builder.Default
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@OneToMany(mappedBy = "person")
+	@Cascade(org.hibernate.annotations.CascadeType.REMOVE)
+	private Set<ResearchConsent> researchConsent = new HashSet<>();
 
 }

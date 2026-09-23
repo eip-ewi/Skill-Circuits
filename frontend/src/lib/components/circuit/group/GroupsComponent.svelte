@@ -1,6 +1,5 @@
 <script lang="ts">
     import type { Group } from "../../../dto/circuit/group";
-    import { onMount } from "svelte";
     import { createBlobs } from "../../../logic/circuit/group_placement";
     import type { Blob } from "../../../data/blob";
     import GroupComponent from "./GroupComponent.svelte";
@@ -22,7 +21,7 @@
     });
 </script>
 
-{#each blobs as blob}
+{#each blobs as blob (blob.group.id)}
     <GroupComponent {blob}></GroupComponent>
 {/each}
 

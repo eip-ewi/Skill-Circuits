@@ -1,25 +1,16 @@
 import type { Block } from "../../../dto/circuit/block";
 import { getLevel } from "../level.svelte";
 import { withCsrf } from "../../csrf";
-import type { SkillBlock } from "../../../dto/circuit/module/skill";
-import type { Group } from "../../../dto/circuit/group";
-import {
-    getBlockForItem,
-    getBlocks,
-    getCircuit,
-    getGroup,
-    getGroupForBlock,
-} from "../circuit.svelte";
-import { BlockStates } from "../../../data/block_state";
+import { getBlockForItem } from "../circuit.svelte";
 import type { Item } from "../../../dto/circuit/item";
 
 export async function createItem(block: Block) {
-    let create: any = {
+    const create: Record<string, unknown> = {
         name: `New ${getLevel().item}`,
     };
     create[getLevel().block] = { id: block.id };
 
-    let response = await fetch(
+    const response = await fetch(
         `/api/${getLevel().items}`,
         withCsrf({
             method: "POST",
@@ -31,18 +22,18 @@ export async function createItem(block: Block) {
     );
 
     if (response.ok) {
-        let newTask: Item = await response.json();
-        // @ts-ignore
+        const newTask: Item = await response.json();
+        // @ts-expect-error -- The response DTO omits this client-only discriminant.
         newTask.itemType = getLevel().item;
         (block.items as Item[]).push(newTask);
     }
 }
 
 export async function editItemName(item: Item, newName: string) {
-    let oldName = item.name;
+    const oldName = item.name;
     item.name = newName;
 
-    let response = await fetch(
+    const response = await fetch(
         `/api/${getLevel().items}/${item.id}`,
         withCsrf({
             method: "PATCH",
@@ -61,7 +52,7 @@ export async function editItemName(item: Item, newName: string) {
 }
 
 export async function deleteItem(item: Item) {
-    let response = await fetch(
+    const response = await fetch(
         `/api/${getLevel().items}/${item.id}`,
         withCsrf({
             method: "DELETE",
@@ -69,7 +60,7 @@ export async function deleteItem(item: Item) {
     );
 
     if (response.ok) {
-        let block = getBlockForItem(item);
+        const block = getBlockForItem(item);
         block.items.splice(
             block.items.findIndex(i => i.id === item.id),
             1,

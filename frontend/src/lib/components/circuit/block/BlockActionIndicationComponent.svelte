@@ -1,14 +1,13 @@
 <script lang="ts">
     import { cubicInOut } from "svelte/easing";
     import { EditionLevel, ModuleLevel, ProgrammeLevel, TrackLevel } from "../../../data/level";
-    import { getLevel, isLevel } from "../../../logic/circuit/level.svelte";
-    import type { Action } from "svelte/action";
+    import { isLevel } from "../../../logic/circuit/level.svelte";
     import { type BlockAction, BlockActions } from "../../../data/block_action";
     import type { Block } from "../../../dto/circuit/block";
 
     let { action, block }: { action: BlockAction | undefined; block: Block } = $props();
 
-    function transition(element: Element) {
+    function transition(_element: Element) {
         return {
             duration: 100,
             easing: cubicInOut,
@@ -88,6 +87,14 @@
         <span class="fa-solid fa-bookmark"></span>
         <span>Bookmark</span>
     {/if}
+    {#if action === BlockActions.FocusMode}
+        <span class="fa-solid fa-eye"></span>
+        <span>Focus on skill</span>
+    {/if}
+    {#if action === BlockActions.StopFocusMode}
+        <i class="fa-solid fa-eye-slash"></i>
+        <span>Exit focus mode</span>
+    {/if}
 </div>
 
 <style>
@@ -101,6 +108,8 @@
         transform-origin: top;
         translate: -50% 0;
         white-space: nowrap;
+        /* Must be above blocks */
+        z-index: 3;
     }
 
     .rotated {

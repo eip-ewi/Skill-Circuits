@@ -1,13 +1,27 @@
+export interface CsrfToken {
+    headerName: string;
+    token: string;
+}
+
+let csrf: CsrfToken | undefined;
+
+export function getCsrfToken(): CsrfToken {
+    return (csrf ??= {
+        headerName: document.querySelector("meta[name='csrf-header']")!.getAttribute("value")!,
+        token: document.querySelector("meta[name='csrf-token']")!.getAttribute("value")!,
+    });
+}
+
+export function setCsrfToken(newCsrf: CsrfToken) {
+    csrf = newCsrf;
+}
+
 export function withCsrf(request: RequestInit): RequestInit {
-    let csrfHeader = document.querySelector("meta[name='csrf-header']")!.getAttribute("value")!;
-    let csrfToken = document.querySelector("meta[name='csrf-token']")!.getAttribute("value")!;
+    const { headerName, token } = getCsrfToken();
+    const headers = new Headers(request.headers);
 
-    if (!("headers" in request)) {
-        request.headers = {};
-    }
-
-    // @ts-ignore
-    request.headers[csrfHeader] = csrfToken;
+    headers.set(headerName, token);
+    request.headers = headers;
 
     return request;
 }

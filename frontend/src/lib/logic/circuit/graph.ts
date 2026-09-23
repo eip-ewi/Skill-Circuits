@@ -1,5 +1,4 @@
 import type { Block } from "../../dto/circuit/block";
-import { getBlocks } from "./circuit.svelte";
 
 export class Graph {
     private nodes: Map<number, Block>;
@@ -59,10 +58,10 @@ export class Graph {
     }
 
     getAncestors<B extends Block>(blocks: B[]): B[] {
-        let visited: Set<number> = new Set();
-        let queue: B[] = [...blocks];
+        const visited: Set<number> = new Set();
+        const queue: B[] = [...blocks];
         while (queue.length > 0) {
-            let current: B = queue.shift()!;
+            const current: B = queue.shift()!;
             if (visited.has(current.id)) {
                 continue;
             }
@@ -80,11 +79,11 @@ export class Graph {
             visited.add(current);
             graph.parents.get(current)!.forEach(parent => ancestors(graph, parent.id, visited));
         }
-        let leftAncestors: Set<number> = new Set();
-        let rightAncestors: Set<number> = new Set();
+        const leftAncestors: Set<number> = new Set();
+        const rightAncestors: Set<number> = new Set();
         ancestors(this, left.id, leftAncestors);
         ancestors(this, right.id, rightAncestors);
-        let commonAncestors: Set<number> = new Set(
+        const commonAncestors: Set<number> = new Set(
             [...leftAncestors.values()].filter(ancestor => rightAncestors.has(ancestor)),
         );
         [...commonAncestors.values()]
@@ -100,12 +99,12 @@ export class Graph {
     }
 
     getShortestPathToAncestor<B extends Block>(descendant: B, ancestor: B): B[] | undefined {
-        let queue: B[] = [descendant];
-        let prev: Map<number, number> = new Map();
-        let visited: Set<number> = new Set();
+        const queue: B[] = [descendant];
+        const prev: Map<number, number> = new Map();
+        const visited: Set<number> = new Set();
 
         while (queue.length > 0) {
-            let current = queue.shift()!;
+            const current = queue.shift()!;
 
             if (visited.has(current.id)) {
                 continue;
@@ -117,7 +116,7 @@ export class Graph {
                 break;
             }
 
-            for (let parent of this.getParents(current)) {
+            for (const parent of this.getParents(current)) {
                 if (!prev.has(parent.id)) {
                     prev.set(parent.id, current.id);
                 }
@@ -129,7 +128,7 @@ export class Graph {
             return undefined;
         }
 
-        let path: B[] = [];
+        const path: B[] = [];
         let current = ancestor;
         while (current.id !== descendant.id) {
             path.push(current);
@@ -156,7 +155,7 @@ export class Graph {
     }
 
     getEdges(): { from: Block; to: Block }[] {
-        let edges: { from: Block; to: Block }[] = [];
+        const edges: { from: Block; to: Block }[] = [];
         this.nodes.forEach(block => {
             this.getChildren(block).forEach(child => {
                 edges.push({ from: block, to: child });

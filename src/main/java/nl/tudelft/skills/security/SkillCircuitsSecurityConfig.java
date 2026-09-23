@@ -19,9 +19,13 @@ package nl.tudelft.skills.security;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import nl.tudelft.labracore.lib.security.LabradorSecurityConfig;
 
@@ -30,6 +34,12 @@ import nl.tudelft.labracore.lib.security.LabradorSecurityConfig;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SkillCircuitsSecurityConfig extends LabradorSecurityConfig {
+
+	private static final RequestMatcher API_REQUESTS = request -> request.getServletPath()
+			.startsWith("/api/");
+	private static final RequestMatcher PAGE_REQUESTS = request -> "GET".equals(request.getMethod())
+			&& ("/".equals(request.getServletPath())
+					|| request.getServletPath().startsWith("/page/"));
 
 	/**
 	 * Configures which endpoints need authentication and which don't.
@@ -47,6 +57,13 @@ public class SkillCircuitsSecurityConfig extends LabradorSecurityConfig {
 				.permitAll()
 				.requestMatchers("/", "/api/auth").permitAll()
 				.anyRequest().authenticated());
+		http.exceptionHandling(exceptions -> exceptions.defaultAuthenticationEntryPointFor(
+				new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), API_REQUESTS));
 
+		// Only remember navigable pages so a successful login cannot redirect to an API or
+		// another auxiliary resource.
+		HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
+		requestCache.setRequestMatcher(PAGE_REQUESTS);
+		http.requestCache(cache -> cache.requestCache(requestCache));
 	}
 }

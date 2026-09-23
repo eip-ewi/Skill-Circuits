@@ -1,16 +1,6 @@
 <script lang="ts">
     import ItemEditComponent from "./ItemEditComponent.svelte";
-    import type { Item } from "../../../dto/circuit/item";
-    import {
-        getBlock,
-        getBlockForItem,
-        getBlocks,
-        getItem,
-    } from "../../../logic/circuit/circuit.svelte";
-    import { updateBlockPosition } from "../../../logic/circuit/updates/position_updates.svelte";
-    import { createBlock } from "../../../logic/circuit/updates/block_updates";
-    import { getLevel } from "../../../logic/circuit/level.svelte";
-    import { ModuleLevel } from "../../../data/level";
+    import { getBlockForItem, getBlocks, getItem } from "../../../logic/circuit/circuit.svelte";
     import {
         editTaskIndex,
         moveTask,
@@ -151,7 +141,7 @@
     ondragover={dragOver}
     ondragleave={dragLeave}
     ondrop={drop}>
-    {#each block.items as item, index}
+    {#each block.items as item, index (item.id)}
         <div
             class="item-wrapper"
             data-index={index}

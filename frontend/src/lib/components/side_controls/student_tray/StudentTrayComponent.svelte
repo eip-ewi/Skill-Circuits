@@ -44,7 +44,7 @@
     }
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
     class="scrollable glass side panel"
     aria-expanded={open}
@@ -74,7 +74,7 @@
                 {#if availableTasks.length === 0}
                     <p>There are no available tasks.</p>
                 {/if}
-                {#each availableTasks as task}
+                {#each availableTasks as task (task.id)}
                     <StudentTrayTaskComponent {task}></StudentTrayTaskComponent>
                 {/each}
             {/if}
@@ -148,6 +148,7 @@
     .button:focus-visible,
     .button:hover {
         background: var(--on-glass-surface-active-colour);
+        outline: 1px solid var(--default-border-color);
     }
 
     .tasks {

@@ -6,7 +6,7 @@
 </script>
 
 <div class="tasks">
-    {#each tasks as task}
+    {#each tasks as task (task.id)}
         <TaskIconComponent {task}></TaskIconComponent>
     {/each}
 </div>
