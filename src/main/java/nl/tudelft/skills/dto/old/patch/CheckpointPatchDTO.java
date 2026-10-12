@@ -17,9 +17,7 @@
  */
 package nl.tudelft.skills.dto.old.patch;
 
-import java.time.LocalDateTime;
-
-import org.springframework.format.annotation.DateTimeFormat;
+import java.time.ZonedDateTime;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -42,8 +40,7 @@ public class CheckpointPatchDTO extends Patch<Checkpoint> {
 	private String name;
 
 	@NotNull
-	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-	private LocalDateTime deadline;
+	private ZonedDateTime deadline;
 
 	@Override
 	protected void applyOneToOne() {

@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { TaskInfo } from "../../../dto/circuit/module/task";
     import { editTaskDeadline } from "../../../logic/circuit/updates/task_updates";
+    import { toUniversityInputValue } from "../../../logic/deadlines";
     import Button from "../../util/Button.svelte";
     import Dropdown from "../../util/Dropdown.svelte";
 
@@ -42,7 +43,7 @@
                 class="deadline-input"
                 name="deadline"
                 type="datetime-local"
-                value={taskInfo.deadline ?? ""}
+                value={taskInfo.deadline === null ? "" : toUniversityInputValue(taskInfo.deadline)}
                 onchange={editDeadline}
                 aria-label="Task deadline" />
             <button

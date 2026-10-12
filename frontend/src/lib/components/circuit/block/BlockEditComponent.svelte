@@ -5,7 +5,6 @@
     import Select from "../../util/Select.svelte";
     import { editBlockGroup, editBlockName } from "../../../logic/circuit/updates/block_updates";
     import { createItem } from "../../../logic/circuit/updates/item_updates";
-    import moment from "moment";
     import type { RegularSkillBlock, SkillBlock } from "../../../dto/circuit/module/skill";
     import { getCheckpoint, getSortedCheckpoints } from "../../../logic/edition/edition.svelte";
     import ItemsEditComponent from "../item/ItemsEditComponent.svelte";
@@ -16,6 +15,7 @@
         editSkillEssential,
         editSkillHidden,
     } from "../../../logic/circuit/updates/skill_updates";
+    import { formatUniversityDeadline } from "../../../logic/deadlines";
 
     let { block }: { block: Block } = $props();
 
@@ -80,8 +80,9 @@
                         <option
                             selected={checkpoint.id === currentCheckpoint?.id}
                             value={checkpoint.id}>
-                            {checkpoint.name} ({moment(checkpoint.deadline).format(
-                                "D MMMM YYYY HH:mm",
+                            {checkpoint.name} ({formatUniversityDeadline(
+                                checkpoint.deadline,
+                                "long",
                             )})
                         </option>
                     {/each}

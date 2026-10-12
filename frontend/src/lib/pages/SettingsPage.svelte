@@ -2,6 +2,8 @@
     import PageLayout from "./PageLayout.svelte";
     import ThemeSelectComponent from "../components/ThemeSelectComponent.svelte";
     import {
+        getDeadlineDisplay,
+        setDeadlineDisplay,
         getAdditionalIcons,
         getBlurBlocks,
         getTheme,
@@ -11,11 +13,16 @@
     import ExampleBlurredSkillComponent from "../components/settings_examples/ExampleBlurredSkillComponent.svelte";
     import { clearLevel } from "../logic/circuit/level.svelte";
     import ExampleCompletionIcons from "../components/settings_examples/ExampleCompletionIcons.svelte";
+    import { deadlineDisplayOptions, type DeadlineDisplay } from "../data/deadline_display";
 
     clearLevel();
 
     async function updateBlurBlocks(event: Event) {
         await setBlurBlocks((event.target as HTMLInputElement).checked);
+    }
+
+    async function updateDeadlineDisplay(event: Event) {
+        await setDeadlineDisplay((event.target as HTMLInputElement).value as DeadlineDisplay);
     }
 
     async function updateAdditionalIcons(event: Event) {
@@ -34,6 +41,26 @@
             {getTheme().displayName}
         </p>
         <ThemeSelectComponent></ThemeSelectComponent>
+
+        <h2>Deadline timezone</h2>
+        <p>Choose which time should be shown by default for checkpoints and task deadlines.</p>
+        <fieldset class="deadline-display">
+            <legend>Displayed deadline time</legend>
+            {#each deadlineDisplayOptions as option (option.value)}
+                <label>
+                    <input
+                        type="radio"
+                        name="deadline-display"
+                        value={option.value}
+                        checked={getDeadlineDisplay() === option.value}
+                        onchange={updateDeadlineDisplay} />
+                    <span>
+                        <b>{option.label}</b>
+                        <small>{option.description}</small>
+                    </span>
+                </label>
+            {/each}
+        </fieldset>
 
         <h2>Additional icons</h2>
         <p>Configure whether icons indicating the completion of content should be displayed.</p>
@@ -90,5 +117,33 @@
     }
     .content {
         margin-bottom: 7em;
+    }
+    .deadline-display {
+        border: 0;
+        display: grid;
+        gap: 0.5em;
+        margin: 0;
+        padding: 0;
+    }
+    .deadline-display legend {
+        height: 0;
+        overflow: hidden;
+        position: absolute;
+        width: 0;
+    }
+    .deadline-display label {
+        align-items: flex-start;
+        cursor: pointer;
+        display: flex;
+        gap: 0.5em;
+    }
+    .deadline-display span {
+        display: grid;
+    }
+    .deadline-display b {
+        font-weight: 500;
+    }
+    .deadline-display small {
+        opacity: 0.75;
     }
 </style>

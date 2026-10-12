@@ -17,7 +17,7 @@
  */
 package nl.tudelft.skills.dto.old.view.checkpoint;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +41,7 @@ public class CheckpointViewDTO extends View<Checkpoint> {
 
 	private ModuleLevelEditionViewDTO edition;
 
-	private LocalDateTime deadline;
+	private ZonedDateTime deadline;
 	@NotNull
 	private List<Long> skillIds;
 

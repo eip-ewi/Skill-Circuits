@@ -17,8 +17,11 @@
  */
 package nl.tudelft.skills.dto.view;
 
+import nl.tudelft.skills.enums.DeadlineDisplay;
+
 public record PersonalPreferencesView(
 		ThemeView theme,
 		boolean blurBlocks,
-		boolean additionalIcons) {
+		boolean additionalIcons,
+		DeadlineDisplay deadlineDisplay) {
 }

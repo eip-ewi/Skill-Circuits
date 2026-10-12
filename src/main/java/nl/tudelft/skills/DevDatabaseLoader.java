@@ -20,6 +20,7 @@ package nl.tudelft.skills;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -324,13 +325,15 @@ public class DevDatabaseLoader {
 		checkpointLectureOne = checkpointRepository.save(Checkpoint.builder()
 				.name("Lecture 1")
 				.edition(scEditionOOP)
-				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 42), LocalTime.MIDNIGHT))
+				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2022, 42), LocalTime.MIDNIGHT)
+						.atZone(ZoneId.of("Europe/Amsterdam")))
 				.build());
 
 		checkpointLectureTwo = checkpointRepository.save(Checkpoint.builder()
 				.name("Lecture 2")
 				.edition(scEditionOOP)
-				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2078, 49), LocalTime.MIDNIGHT))
+				.deadline(LocalDateTime.of(LocalDate.ofYearDay(2078, 49), LocalTime.MIDNIGHT)
+						.atZone(ZoneId.of("Europe/Amsterdam")))
 				.build());
 	}
 

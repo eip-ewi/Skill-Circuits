@@ -1,13 +1,17 @@
 import type { Checkpoint } from "../../dto/checkpoint";
 import { withCsrf } from "../csrf";
-import moment from "moment";
 import { getCheckpoints, getEdition, getSortedCheckpoints } from "../edition/edition.svelte";
+import {
+    checkpointDeadlineBefore,
+    defaultCheckpointDeadline,
+    universityInputValueToZonedDateTime,
+} from "../deadlines";
 
 export async function createCheckpoint(): Promise<Checkpoint | undefined> {
     const deadline =
         getCheckpoints().length === 0
-            ? moment()
-            : moment(getSortedCheckpoints()[0]!.deadline).subtract(1, "second");
+            ? defaultCheckpointDeadline()
+            : checkpointDeadlineBefore(getSortedCheckpoints()[0]!.deadline);
 
     const response = await fetch(
         `/api/checkpoints`,
@@ -18,7 +22,7 @@ export async function createCheckpoint(): Promise<Checkpoint | undefined> {
             },
             body: JSON.stringify({
                 name: "New checkpoint",
-                deadline: deadline.format("YYYY-MM-DDTHH:mm"),
+                deadline,
                 edition: {
                     id: getEdition().id,
                 },
@@ -58,8 +62,10 @@ export async function editCheckpointName(checkpoint: Checkpoint, newName: string
 
 export async function editCheckpointDeadline(
     checkpoint: Checkpoint,
-    newDeadline: moment.Moment,
+    newDeadline: string,
 ): Promise<string> {
+    const savedDeadline = universityInputValueToZonedDateTime(newDeadline);
+
     const response = await fetch(
         `/api/checkpoints/${checkpoint.id}`,
         withCsrf({
@@ -68,13 +74,13 @@ export async function editCheckpointDeadline(
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                deadline: newDeadline.format("YYYY-MM-DDTHH:mm"),
+                deadline: savedDeadline,
             }),
         }),
     );
 
     if (response.ok) {
-        return newDeadline.format("YYYY-MM-DDTHH:mm");
+        return savedDeadline;
     }
     return checkpoint.deadline;
 }

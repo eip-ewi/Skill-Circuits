@@ -1,3 +1,4 @@
+import type { DeadlineDisplay } from "../data/deadline_display";
 import type { Preferences } from "../dto/preferences";
 import {
     darkHighContrastTheme,
@@ -12,6 +13,7 @@ let preferences: Preferences = $state({
     theme: systemTheme,
     blurBlocks: true,
     additionalIcons: false,
+    deadlineDisplay: "LOCAL",
 });
 
 export async function fetchPreferences() {
@@ -67,4 +69,18 @@ export function isHighContrastThemeSet(): boolean {
         getTheme().name === lightHighContrastTheme.name ||
         getTheme().name === darkHighContrastTheme.name
     );
+}
+
+export function getDeadlineDisplay(): DeadlineDisplay {
+    return preferences.deadlineDisplay;
+}
+
+export async function setDeadlineDisplay(deadlineDisplay: DeadlineDisplay) {
+    const response = await fetch(
+        `/api/person/preferences/deadline-display?deadlineDisplay=${deadlineDisplay}`,
+        withCsrf({
+            method: "PATCH",
+        }),
+    );
+    preferences = await response.json();
 }

@@ -17,10 +17,10 @@
  */
 package nl.tudelft.skills.dto.view;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 public record CheckpointView(
 		Long id,
 		String name,
-		LocalDateTime deadline) {
+		ZonedDateTime deadline) {
 }

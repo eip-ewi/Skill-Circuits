@@ -1,11 +1,11 @@
 import type { Checkpoint } from "../../dto/checkpoint";
 import { getPlacedBlocks, getVisibleBlocks } from "../circuit/circuit.svelte";
 import type { Edition } from "../../dto/edition";
-import moment from "moment";
 import type { Module } from "../../dto/module";
 import type { Path } from "../../dto/path";
 import { isCompleted } from "../circuit/skill_state/completion";
 import type { SkillBlock } from "../../dto/circuit/module/skill";
+import { compareDeadlines, isPastDeadline } from "../deadlines";
 
 let edition: Edition | undefined = $state();
 
@@ -31,9 +31,7 @@ export function getCheckpoints(): Checkpoint[] {
 }
 
 export function getSortedCheckpoints(): Checkpoint[] {
-    return getCheckpoints().toSorted(
-        (a, b) => moment(a.deadline).unix() - moment(b.deadline).unix(),
-    );
+    return getCheckpoints().toSorted((a, b) => compareDeadlines(a.deadline, b.deadline));
 }
 
 export function getVisibleCheckpoints(): Checkpoint[] {
@@ -58,7 +56,7 @@ export function getNextCheckpoint(): Checkpoint | undefined {
             .map(block => (block as SkillBlock).checkpoint!),
     );
     return getVisibleCheckpoints()
-        .filter(c => moment(c.deadline).isAfter(moment()))
+        .filter(c => !isPastDeadline(c.deadline))
         .find(c => uncompleted.has(c.id));
 }
 
@@ -75,7 +73,7 @@ export function getFirstUncompletedPastCheckpoint(): Checkpoint | undefined {
             .map(block => (block as SkillBlock).checkpoint!),
     );
     return getVisibleCheckpoints()
-        .filter(c => moment().isAfter(moment(c.deadline)))
+        .filter(c => isPastDeadline(c.deadline))
         .find(c => uncompleted.has(c.id));
 }
 

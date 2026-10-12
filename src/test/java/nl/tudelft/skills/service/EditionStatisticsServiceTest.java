@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Set;
 
@@ -42,6 +43,7 @@ import reactor.core.publisher.Flux;
 @Transactional
 @SpringBootTest()
 public class EditionStatisticsServiceTest {
+	private static final ZoneId UNIVERSITY_TIME_ZONE = ZoneId.of("Europe/Amsterdam");
 
 	private final EditionStatisticsService editionStatisticsService;
 	private final TaskRepository taskRepository;
@@ -93,7 +95,9 @@ public class EditionStatisticsServiceTest {
 	}
 
 	private Skill skillWithCheckpointBuilder(String checkpointName, LocalDateTime deadline) {
-		Checkpoint checkpoint = Checkpoint.builder().name(checkpointName).deadline(deadline).build();
+		Checkpoint checkpoint = Checkpoint.builder().name(checkpointName)
+				.deadline(deadline.atZone(UNIVERSITY_TIME_ZONE))
+				.build();
 		Skill skill = skillBuilder();
 		skill.setCheckpoint(checkpoint);
 		return skill;

@@ -23,6 +23,7 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import nl.tudelft.skills.dto.view.PersonalPreferencesView;
 import nl.tudelft.skills.dto.view.ThemeView;
+import nl.tudelft.skills.enums.DeadlineDisplay;
 import nl.tudelft.skills.enums.Theme;
 import nl.tudelft.skills.model.PersonalPreferences;
 import nl.tudelft.skills.model.SCPerson;
@@ -61,6 +62,19 @@ public class PersonalPreferencesService {
 	}
 
 	/**
+	 * Sets which timezone a person prefers for the primary deadline display.
+	 *
+	 * @param  scPerson        The person.
+	 * @param  deadlineDisplay The deadline display preference.
+	 * @return                 The updated preferences of the person.
+	 */
+	@Transactional
+	public PersonalPreferences setDeadlineDisplay(SCPerson scPerson, DeadlineDisplay deadlineDisplay) {
+		scPerson.getPreferences().setDeadlineDisplay(deadlineDisplay);
+		return personRepository.save(scPerson).getPreferences();
+	}
+
+	/**
 	 * Sets the "additional icons" setting of a person.
 	 *
 	 * @param  scPerson        The person.
@@ -83,7 +97,7 @@ public class PersonalPreferencesService {
 		ThemeView themeView = new ThemeView(preferences.getTheme().getName(),
 				preferences.getTheme().getColourScheme(), preferences.getTheme().getDisplayName());
 		return new PersonalPreferencesView(themeView, preferences.isBlurBlocks(),
-				preferences.isAdditionalIcons());
+				preferences.isAdditionalIcons(), preferences.getDeadlineDisplay());
 	}
 
 }

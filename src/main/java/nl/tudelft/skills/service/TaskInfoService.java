@@ -17,7 +17,7 @@
  */
 package nl.tudelft.skills.service;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,7 +52,7 @@ public class TaskInfoService {
 	}
 
 	@Transactional
-	public void setTaskDeadline(TaskInfo taskInfo, LocalDateTime deadline) {
+	public void setTaskDeadline(TaskInfo taskInfo, ZonedDateTime deadline) {
 		taskInfo.setDeadline(deadline);
 		taskInfoRepository.save(taskInfo);
 	}

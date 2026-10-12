@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Added
 - [Everyone] Add a "focus mode" for blocks that displays requirements and dependencies of a block up until a certain depth. (@ffiedrich)
 - [Admin] Circuit overview at the track level. (@ralani)
+- [Student] Both task and checkpoint deadlines can have their display timezone customised. (@ralani)
 
 ## Changed
 

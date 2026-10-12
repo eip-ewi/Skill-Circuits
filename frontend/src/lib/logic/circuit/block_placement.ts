@@ -1,8 +1,8 @@
 import type { Block } from "../../dto/circuit/block";
 import { Graph } from "./graph";
 import type { Checkpoint } from "../../dto/checkpoint";
-import moment from "moment";
 import type { SkillBlock } from "../../dto/circuit/module/skill";
+import { compareDeadlines } from "../deadlines";
 
 export function placeBlocks(graph: Graph) {
     const placement = new Placement();
@@ -57,8 +57,8 @@ export function placeBlocksWithCheckpoints(graph: Graph, checkpoints: Checkpoint
         });
     }
 
-    const sortedCheckpoints: Checkpoint[] = checkpoints.toSorted(
-        (a, b) => moment(a.deadline).unix() - moment(b.deadline).unix(),
+    const sortedCheckpoints: Checkpoint[] = checkpoints.toSorted((a, b) =>
+        compareDeadlines(a.deadline, b.deadline),
     );
 
     let minHeight = 0;
