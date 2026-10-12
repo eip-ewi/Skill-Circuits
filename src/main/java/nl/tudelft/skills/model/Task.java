@@ -75,6 +75,7 @@ public abstract class Task {
 	@PreRemove
 	public void removeFromCustomPaths() {
 		personsThatAddedTask.forEach(person -> person.getTasksAdded().remove(this));
+		personsThatRemovedTask.forEach(person -> person.getTasksRemoved().remove(this));
 	}
 
 }
