@@ -17,7 +17,7 @@
  */
 package nl.tudelft.skills.model;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -41,7 +41,7 @@ public class Checkpoint {
 	private String name;
 
 	@NotNull
-	private LocalDateTime deadline;
+	private ZonedDateTime deadline;
 
 	@NotNull
 	@ManyToOne

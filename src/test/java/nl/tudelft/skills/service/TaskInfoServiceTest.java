@@ -20,7 +20,7 @@ package nl.tudelft.skills.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +43,7 @@ public class TaskInfoServiceTest {
 	@Test
 	public void setTaskDeadlineUpdatesAndSavesDeadline() {
 		TaskInfo taskInfo = TaskInfo.builder().name("Task").build();
-		LocalDateTime deadline = LocalDateTime.of(2026, 4, 13, 10, 30);
+		ZonedDateTime deadline = ZonedDateTime.parse("2026-04-13T10:30:00+02:00[Europe/Amsterdam]");
 
 		taskInfoService.setTaskDeadline(taskInfo, deadline);
 
@@ -53,7 +53,8 @@ public class TaskInfoServiceTest {
 
 	@Test
 	public void clearTaskDeadlineClearsAndSavesDeadline() {
-		TaskInfo taskInfo = TaskInfo.builder().name("Task").deadline(LocalDateTime.of(2026, 4, 13, 10, 30))
+		TaskInfo taskInfo = TaskInfo.builder().name("Task")
+				.deadline(ZonedDateTime.parse("2026-04-13T10:30:00+02:00[Europe/Amsterdam]"))
 				.build();
 
 		taskInfoService.clearTaskDeadline(taskInfo);

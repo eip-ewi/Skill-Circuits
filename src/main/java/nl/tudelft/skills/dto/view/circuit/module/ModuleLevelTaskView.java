@@ -17,7 +17,7 @@
  */
 package nl.tudelft.skills.dto.view.circuit.module;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import jakarta.annotation.Nullable;
@@ -32,7 +32,7 @@ public sealed interface ModuleLevelTaskView extends ItemView {
 			String name,
 			TaskType type,
 			int time,
-			@Nullable LocalDateTime deadline,
+			@Nullable ZonedDateTime deadline,
 			String link,
 			boolean completed,
 			List<Long> paths) implements ModuleLevelTaskView {
@@ -68,7 +68,7 @@ public sealed interface ModuleLevelTaskView extends ItemView {
 			String name,
 			TaskType type,
 			int time,
-			@Nullable LocalDateTime deadline,
+			@Nullable ZonedDateTime deadline,
 			String link,
 			boolean completed) {
 		public String getTaskType() {

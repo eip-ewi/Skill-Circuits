@@ -17,9 +17,9 @@
  */
 package nl.tudelft.skills.dto.patch;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import jakarta.validation.constraints.NotNull;
 
-public record TaskDeadlinePatch(@NotNull LocalDateTime deadline) {
+public record TaskDeadlinePatch(@NotNull ZonedDateTime deadline) {
 }

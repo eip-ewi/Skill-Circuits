@@ -26,6 +26,7 @@ import lombok.AllArgsConstructor;
 import nl.tudelft.labracore.api.dto.PersonSummaryDTO;
 import nl.tudelft.skills.annotation.AuthenticatedSCPerson;
 import nl.tudelft.skills.dto.view.PersonalPreferencesView;
+import nl.tudelft.skills.enums.DeadlineDisplay;
 import nl.tudelft.skills.enums.Theme;
 import nl.tudelft.skills.model.SCPerson;
 import nl.tudelft.skills.service.PersonService;
@@ -62,6 +63,13 @@ public class PersonController {
 			@RequestParam Theme theme) {
 		return personalPreferencesService
 				.convertToPreferencesView(personalPreferencesService.setTheme(scPerson, theme));
+	}
+
+	@PatchMapping("preferences/deadline-display")
+	public PersonalPreferencesView setDeadlineDisplay(@AuthenticatedSCPerson SCPerson scPerson,
+			@RequestParam DeadlineDisplay deadlineDisplay) {
+		return personalPreferencesService.convertToPreferencesView(
+				personalPreferencesService.setDeadlineDisplay(scPerson, deadlineDisplay));
 	}
 
 	@PatchMapping("preferences/additional-icons")

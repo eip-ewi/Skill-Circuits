@@ -1,21 +1,21 @@
 <script lang="ts">
-    import moment from "moment";
     import type { Checkpoint } from "../../../dto/checkpoint";
     import {
         deleteCheckpoint,
         editCheckpointDeadline,
         editCheckpointName,
     } from "../../../logic/updates/checkpoint_updates";
+    import {
+        formatUniversityDeadline,
+        toUniversityInputValue,
+        UNIVERSITY_TIME_ZONE_LABEL,
+    } from "../../../logic/deadlines";
     import Button from "../../util/Button.svelte";
     import WithConfirmationDialog from "../../util/WithConfirmationDialog.svelte";
 
     let { checkpoint }: { checkpoint: Checkpoint } = $props();
 
-    let deadlineToSet: string = checkpoint.deadline;
-
-    $effect(() => {
-        deadlineToSet = checkpoint.deadline;
-    });
+    let deadlineToSet: string = $derived(checkpoint.deadline);
 
     async function editName(event: Event) {
         const newName = (event.target as HTMLInputElement).value;
@@ -24,10 +24,7 @@
 
     async function editDeadline(event: Event) {
         const newDeadline = (event.target as HTMLInputElement).value;
-        deadlineToSet = await editCheckpointDeadline(
-            checkpoint,
-            moment(newDeadline, "YYYY-MM-DDTHH:mm"),
-        );
+        deadlineToSet = await editCheckpointDeadline(checkpoint, newDeadline);
     }
 
     async function stopEditing() {
@@ -49,13 +46,18 @@
                 aria-label="Deadline"
                 type="datetime-local"
                 name="deadline"
-                value={checkpoint.deadline}
+                value={toUniversityInputValue(deadlineToSet)}
                 onchange={editDeadline} />
         </div>
     {:else}
         <div class="info">
             <span>{checkpoint.name}</span>
-            <span>{moment(checkpoint.deadline).format("D MMMM yyyy HH:mm")}</span>
+            <span>
+                {UNIVERSITY_TIME_ZONE_LABEL}: {formatUniversityDeadline(
+                    checkpoint.deadline,
+                    "long",
+                )}
+            </span>
         </div>
     {/if}
     <div class="controls">

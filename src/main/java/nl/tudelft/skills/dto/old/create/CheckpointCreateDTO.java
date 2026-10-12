@@ -17,11 +17,10 @@
  */
 package nl.tudelft.skills.dto.old.create;
 
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.springframework.format.annotation.DateTimeFormat;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -42,9 +41,8 @@ public class CheckpointCreateDTO extends Create<Checkpoint> {
 	@NotNull
 	private SCEditionId edition;
 	@NotNull
-	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
 	@Builder.Default
-	private LocalDateTime deadline = LocalDateTime.now();
+	private ZonedDateTime deadline = ZonedDateTime.now(ZoneId.of("Europe/Amsterdam"));
 
 	@NotNull
 	@Builder.Default

@@ -1,7 +1,8 @@
 <script lang="ts">
-    import moment from "moment";
     import type { TaskItem } from "../../../dto/circuit/module/task";
     import { canEditCircuit } from "../../../logic/authorisation.svelte";
+    import { isPastDeadline } from "../../../logic/deadlines";
+    import TaskDeadlineViewComponent from "../../circuit/item/TaskDeadlineViewComponent.svelte";
 
     let { task }: { task: TaskItem } = $props();
 
@@ -13,10 +14,6 @@
     }
 
     function dragEnd(_event: DragEvent) {}
-
-    function isPastDeadline(deadline: string): boolean {
-        return moment().isAfter(moment(deadline));
-    }
 
     // Choice tasks do not display TaskItems in the Tray view
     let overdueInViewer: boolean = $derived(
@@ -50,17 +47,7 @@
                 <span class="fa-solid fa-clock"></span>
                 <span>{task.time}</span>
             </div>
-            {#if task.deadline}
-                <div class="deadline">
-                    <span class="fa-solid fa-calendar"></span>
-                    <span>{moment(task.deadline).format("DD/MM HH:mm")}</span>
-                </div>
-            {:else}
-                <div class="deadline deadline-placeholder" aria-hidden="true">
-                    <span class="fa-solid fa-calendar"></span>
-                    <span>00/00 00:00</span>
-                </div>
-            {/if}
+            <TaskDeadlineViewComponent deadline={task.deadline} reserveSpace />
         </div>
     {/if}
 </div>
@@ -87,24 +74,6 @@
         gap: 1em;
     }
 
-    .deadline {
-        align-items: center;
-        display: flex;
-        font-variant-numeric: tabular-nums;
-        gap: 0.5em;
-
-        text-align: right;
-    }
-
-    .deadline span:last-child {
-        inline-size: 11ch;
-        white-space: nowrap;
-    }
-
-    .deadline-placeholder {
-        visibility: hidden;
-    }
-
     .time {
         align-items: center;
         display: flex;
@@ -118,7 +87,7 @@
 
     .name[data-overdue="true"],
     .task-info[data-overdue="true"] .time span:last-child,
-    .task-info[data-overdue="true"] .deadline span:last-child {
+    .task-info[data-overdue="true"] :global(.deadline .value) {
         text-decoration: line-through;
     }
 </style>

@@ -20,6 +20,7 @@ package nl.tudelft.skills.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import nl.tudelft.skills.enums.DeadlineDisplay;
 import nl.tudelft.skills.enums.Theme;
 
 @Data
@@ -40,4 +41,9 @@ public class PersonalPreferences {
 	@NotNull
 	@Builder.Default
 	private boolean additionalIcons = false;
+
+	@NotNull
+	@Builder.Default
+	@Enumerated(EnumType.STRING)
+	private DeadlineDisplay deadlineDisplay = DeadlineDisplay.LOCAL;
 }

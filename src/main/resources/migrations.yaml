@@ -2873,3 +2873,78 @@ databaseChangeLog:
             referencedColumnNames: id
             referencedTableName: research_info
             validate: true
+
+  #
+  # Convert existing task deadlines from university times to zoned date times
+  # H2 stores timestamps with an explicit offset
+  #
+  - changeSet:
+      id: migrate-task-deadlines-to-zoned-date-times
+      author: rafael
+      dbms: mysql,h2
+      changes:
+        - sql:
+            dbms: mysql
+            sql: >-
+              UPDATE task_info
+              SET deadline = CONVERT_TZ(
+                CAST(deadline AT TIME ZONE INTERVAL '+00:00' AS DATETIME(6)),
+                'Europe/Amsterdam',
+                '+00:00'
+              );
+        - sql:
+            dbms: mysql
+            sql: ALTER TABLE task_info MODIFY COLUMN deadline DATETIME(6);
+        - sql:
+            dbms: h2
+            sql: >-
+              ALTER TABLE task_info ALTER COLUMN deadline TIMESTAMP WITH TIME ZONE
+              USING CAST(deadline || ' Europe/Amsterdam' AS TIMESTAMP WITH TIME ZONE);
+
+  #
+  # Store the personal preference for the timezone deadlines are displayed in
+  #
+  - changeSet:
+      id: add-deadline-display-preference
+      author: rafael
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: deadline_display
+                  type: ENUM('EARLIEST', 'DELFT', 'LOCAL')
+                  defaultValue: LOCAL
+            tableName: scperson
+
+  #
+  # Deadlines become zoned date times. Existing values were saved as university (Europe/Amsterdam)
+  # wall-clock times, so on MySQL they are converted to UTC times Hibernate expects
+  # for ZonedDateTime columns. DATETIME is used instead of TIMESTAMP as MySQL's TIMESTAMP cannot
+  # store dates after 2038 and converts values using the session timezone.
+  #
+  # CAST ... AT TIME ZONE renders the old TIMESTAMP as UTC
+  #
+  - changeSet:
+      id: migrate-university-deadlines-to-zoned-date-times-mysql
+      author: rafael
+      dbms: mysql
+      changes:
+        - sql:
+            sql: >-
+              UPDATE checkpoint
+              SET deadline = CONVERT_TZ(
+                CAST(deadline AT TIME ZONE INTERVAL '+00:00' AS DATETIME(6)),
+                'Europe/Amsterdam',
+                '+00:00'
+              );
+        - sql:
+            sql: ALTER TABLE checkpoint MODIFY COLUMN deadline DATETIME(6) NOT NULL;
+  - changeSet:
+      id: migrate-university-deadlines-to-zoned-date-times-h2
+      author: rafael
+      dbms: h2
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE checkpoint ALTER COLUMN deadline TIMESTAMP WITH TIME ZONE
+              USING CAST(deadline || ' Europe/Amsterdam' AS TIMESTAMP WITH TIME ZONE);

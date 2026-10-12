@@ -17,9 +17,7 @@
  */
 package nl.tudelft.skills.dto.patch;
 
-import java.time.LocalDateTime;
-
-import org.springframework.format.annotation.DateTimeFormat;
+import java.time.ZonedDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,8 +34,7 @@ public class CheckpointPatch extends Patch<Checkpoint> {
 
 	private String name;
 
-	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-	private LocalDateTime deadline;
+	private ZonedDateTime deadline;
 
 	@Override
 	protected void applyOneToOne() {

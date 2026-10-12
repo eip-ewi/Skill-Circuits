@@ -3,13 +3,14 @@
     import type { SkillBlock } from "../../../dto/circuit/module/skill";
     import type { TaskItem } from "../../../dto/circuit/module/task";
     import { getVisibleBlocks } from "../../../logic/circuit/circuit.svelte";
-    import moment from "moment";
     import { isCompleted } from "../../../logic/circuit/skill_state/completion";
     import { hasEditorRights } from "../../../logic/authorisation.svelte";
     import {
         getFirstUncompletedPastCheckpoint,
         getNextCheckpoint,
     } from "../../../logic/edition/edition.svelte";
+    import { formatPreferredDeadline, isPastDeadline } from "../../../logic/deadlines";
+    import DeadlineTimeZoneRowsComponent from "../../util/DeadlineTimeZoneRowsComponent.svelte";
     import Link from "../../util/Link.svelte";
     import { getAdditionalIcons } from "../../../logic/preferences.svelte";
 
@@ -41,7 +42,7 @@
     let completed: boolean = $derived(
         !hasEditorRights() && !skills.some(skill => !isCompleted(skill)),
     );
-    let passed: boolean = $derived(moment().isAfter(moment(checkpoint.deadline)));
+    let passed: boolean = $derived(isPastDeadline(checkpoint.deadline));
     let focused: boolean = $derived(
         hasEditorRights() || passed || completed || getNextCheckpoint()?.id === checkpoint.id,
     );
@@ -120,7 +121,10 @@
     <div class="content">
         <div class="info">
             <span class="label">{checkpoint.name}</span>
-            <span class="deadline">{moment(checkpoint.deadline).format("D MMMM YYYY HH:mm")}</span>
+            <span class="deadline">
+                <span>{formatPreferredDeadline(checkpoint.deadline, "readable")}</span>
+                <DeadlineTimeZoneRowsComponent deadline={checkpoint.deadline} />
+            </span>
             {#if completed && getAdditionalIcons()}
                 <span class="checkmark fa-solid fa-check"></span>
             {/if}
@@ -215,7 +219,10 @@
     }
 
     .deadline {
+        align-items: flex-start;
+        display: flex;
         font-size: var(--font-size-200);
+        gap: 0.25rem;
         white-space: nowrap;
         grid-column: 1;
     }

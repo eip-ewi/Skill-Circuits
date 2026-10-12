@@ -17,7 +17,7 @@
  */
 package nl.tudelft.skills.model;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,6 +36,7 @@ import nl.tudelft.skills.model.bookmark.BookmarkList;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TaskInfo {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -55,7 +56,7 @@ public class TaskInfo {
 	private String link;
 
 	@Nullable
-	private LocalDateTime deadline;
+	private ZonedDateTime deadline;
 
 	@Nullable
 	@ToString.Exclude

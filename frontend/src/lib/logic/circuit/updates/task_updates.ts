@@ -10,6 +10,7 @@ import type { SkillBlock } from "../../../dto/circuit/module/skill";
 import { getBlockForItem, getBlocks } from "../circuit.svelte";
 import { getBookmarks } from "../../bookmarks.svelte";
 import { addRevealedSkills } from "../unlocked_skills.svelte";
+import { universityInputValueToZonedDateTime } from "../../deadlines";
 
 export async function toggleTaskCompletion(task: TaskInfo) {
     task.completed = !task.completed;
@@ -137,7 +138,9 @@ export async function editTaskTime(task: TaskInfo, newTime: number) {
 
 export async function editTaskDeadline(task: TaskInfo, newDeadline: string | null) {
     const oldDeadline = task.deadline;
-    task.deadline = newDeadline;
+    const savedDeadline =
+        newDeadline === null ? null : universityInputValueToZonedDateTime(newDeadline);
+    task.deadline = savedDeadline;
 
     const response =
         newDeadline === null
@@ -155,7 +158,7 @@ export async function editTaskDeadline(task: TaskInfo, newDeadline: string | nul
                           "Content-Type": "application/json",
                       },
                       body: JSON.stringify({
-                          deadline: newDeadline,
+                          deadline: savedDeadline,
                       }),
                   }),
               );
